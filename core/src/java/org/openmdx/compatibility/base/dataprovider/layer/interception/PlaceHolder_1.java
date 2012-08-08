@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PlaceHolder_1.java,v 1.6 2008/02/29 15:23:26 hburger Exp $
+ * Name:        $Id: PlaceHolder_1.java,v 1.10 2009/03/01 01:55:58 wfro Exp $
  * Description: Standard Transport Layer Plug-In
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 15:23:26 $
+ * Date:        $Date: 2009/03/01 01:55:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,14 +55,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.spi.BeforeImageCachingLayer_1;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.spi.BeforeImageCachingLayer_1;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 /**
  * The standard implementation of the Transport layer's plug-in.
@@ -99,7 +99,7 @@ public class PlaceHolder_1
         short id,
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception {
+    ) throws ServiceException {
         super.activate(id,configuration,delegation);
         this.placeholders = configuration.isOn("propagatePlaceholder") ?
             null :
@@ -208,14 +208,7 @@ public class PlaceHolder_1
     private boolean isPlaceholder(
         Path path
     ){
-        for(
-            int i = 0;
-            i < path.size();
-            i++
-        ) if (
-            path.getComponent(i).isPlaceHolder()
-        ) return true;
-        return false;
+        return path.isPlaceHolder();
     }
 
     /**

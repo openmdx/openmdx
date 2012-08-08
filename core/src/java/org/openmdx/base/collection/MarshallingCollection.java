@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingCollection.java,v 1.11 2008/10/02 17:32:13 hburger Exp $
+ * Name:        $Id: MarshallingCollection.java,v 1.14 2009/01/11 21:28:59 wfro Exp $
  * Description: Marshalling Collection
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/02 17:32:13 $
+ * Date:        $Date: 2009/01/11 21:28:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,9 +55,11 @@ import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.openmdx.base.persistence.spi.Marshaller;
-import org.openmdx.compatibility.base.marshalling.CollectionMarshallerAdapter;
-import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.marshalling.ExceptionListenerMarshaller;
+import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.ReluctantUnmarshalling;
 
 /**
  * Marshalling Collection
@@ -96,24 +98,7 @@ public class MarshallingCollection<E>
         Collection<?> collection
     ) {
         this(
-            marshaller,
-            collection,
-            Unmarshalling.EAGER
-        );
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param marshaller
-     * @param collection
-     */
-    public MarshallingCollection(
-        org.openmdx.compatibility.base.marshalling.Marshaller marshaller,
-        Collection<?> collection
-    ) {
-        this(
-            new CollectionMarshallerAdapter(marshaller), 
+            new ExceptionListenerMarshaller(marshaller), 
             collection, 
             marshaller instanceof ReluctantUnmarshalling ? Unmarshalling.RELUCTANT : Unmarshalling.EAGER
         );
@@ -176,26 +161,40 @@ public class MarshallingCollection<E>
     /* (non-Javadoc)
      * @see java.util.Collection#add(java.lang.Object)
      */
-    public boolean add(E element) {
-        return getDelegate().add(
-            marshaller.unmarshal(element)
-        );
+    public boolean add(
+        E element
+    ) {
+        try {
+            return getDelegate().add(
+                marshaller.unmarshal(element)
+            );
+        }
+        catch(ServiceException e) {
+            throw new RuntimeServiceException(e);
+        }        
     }
 
     /* (non-Javadoc)
      * @see java.util.Collection#contains(java.lang.Object)
      */
-    public boolean contains(Object element) {
-        switch(this.unmarshalling) {
-            case RELUCTANT: 
-                return super.contains(
-                    element
-                );
-            case EAGER: default: 
-                return getDelegate().contains(
-                    marshaller.unmarshal(element)
-                );  
+    public boolean contains(
+        Object element
+    ) {
+        try {
+            switch(this.unmarshalling) {
+                case RELUCTANT: 
+                    return super.contains(
+                        element
+                    );
+                case EAGER: default: 
+                    return getDelegate().contains(
+                        marshaller.unmarshal(element)
+                    );  
+            }
         }
+        catch(ServiceException e) {
+            throw new RuntimeServiceException(e);
+        }        
     }
 
     /* (non-Javadoc)
@@ -215,17 +214,24 @@ public class MarshallingCollection<E>
     /* (non-Javadoc)
      * @see java.util.Collection#remove(java.lang.Object)
      */
-    public boolean remove(Object element) {
-        switch(this.unmarshalling) {
-            case RELUCTANT: 
-                return super.remove(
-                    element
-                );
-            case EAGER: default: 
-                return getDelegate().remove(
-                    marshaller.unmarshal(element)
-                 );
+    public boolean remove(
+        Object element
+    ) {
+        try {
+            switch(this.unmarshalling) {
+                case RELUCTANT: 
+                    return super.remove(
+                        element
+                    );
+                case EAGER: default: 
+                    return getDelegate().remove(
+                        marshaller.unmarshal(element)
+                     );
+            }
         }
+        catch(ServiceException e) {
+            throw new RuntimeServiceException(e);
+        }        
     }
 
     public int size(
@@ -273,9 +279,14 @@ public class MarshallingCollection<E>
          */
         public E next(
         ) {
-            return (E) marshaller.marshal(
-                iterator.next()
-            );
+            try {
+                return (E) marshaller.marshal(
+                    iterator.next()
+                );
+            }
+            catch(ServiceException e) {
+                throw new RuntimeServiceException(e);
+            }            
         }
 
         /**

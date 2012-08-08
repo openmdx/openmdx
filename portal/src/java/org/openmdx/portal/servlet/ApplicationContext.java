@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ApplicationContext.java,v 1.77 2008/12/08 15:30:23 wfro Exp $
+ * Name:        $Id: ApplicationContext.java,v 1.84 2009/03/08 18:03:19 wfro Exp $
  * Description: ApplicationContext
- * Revision:    $Revision: 1.77 $
+ * Revision:    $Revision: 1.84 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/08 15:30:23 $
+ * Date:        $Date: 2009/03/08 18:03:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -83,9 +83,9 @@ import javax.jmi.reflect.RefObject;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.control.Control;
 import org.openmdx.portal.servlet.control.ControlFactory;
@@ -156,7 +156,6 @@ public final class ApplicationContext
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.AUTHORIZATION_FAILURE, 
-                null,
                 "Login principal is null. Can not create application context"
             );          
         }
@@ -171,7 +170,6 @@ public final class ApplicationContext
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.AUTHORIZATION_FAILURE, 
-                null,
                 "Can not initialize connection to dataproviders"
             );
         }
@@ -186,21 +184,17 @@ public final class ApplicationContext
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.INITIALIZATION_FAILURE, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("realm", loginRealmIdentity)
-                    },
-                    "Unable to login. Can not access login realm"
+                    "Unable to login. Can not access login realm",
+                    new BasicException.Parameter("realm", loginRealmIdentity)
                 );
             }
             if(roleMapper.checkPrincipal(loginRealm, this.loginPrincipal, this.pmData) == null) {
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.AUTHORIZATION_FAILURE, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("realm", loginRealmIdentity),                          
-                        new BasicException.Parameter("principal", this.loginPrincipal)
-                    },
-                    "Unable to login. Principal is not registered or disabled"
+                    "Unable to login. Principal is not registered or disabled",
+                    new BasicException.Parameter("realm", loginRealmIdentity),                          
+                    new BasicException.Parameter("principal", this.loginPrincipal)
                 );
             }
             try {
@@ -215,11 +209,9 @@ public final class ApplicationContext
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.PROCESSING_FAILURE, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("realm", loginRealmIdentity),                          
-                        new BasicException.Parameter("principal", this.loginPrincipal)
-                    },
-                    "Unable to login. Can not get roles of principal"
+                    "Unable to login. Can not get roles of principal",
+                    new BasicException.Parameter("realm", loginRealmIdentity),                          
+                    new BasicException.Parameter("principal", this.loginPrincipal)
                 );
             }
             // Check whether userRole exists and is a qualified name
@@ -238,11 +230,9 @@ public final class ApplicationContext
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.AUTHORIZATION_FAILURE, 
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("realm", loginRealmIdentity),                          
-                        new BasicException.Parameter("principal", this.loginPrincipal)
-                    },
-                    "Unable to login. Principal does not have any assigned roles"
+                    "Unable to login. Principal does not have any assigned roles",
+                    new BasicException.Parameter("realm", loginRealmIdentity),                          
+                    new BasicException.Parameter("principal", this.loginPrincipal)
                 );
             }
         }
@@ -255,11 +245,9 @@ public final class ApplicationContext
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.PROCESSING_FAILURE, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("realm", loginRealmIdentity),                          
-                    new BasicException.Parameter("principal", this.loginPrincipal)
-                },
-                "Can not refresh application context"
+                "Can not refresh application context",
+                new BasicException.Parameter("realm", loginRealmIdentity),                          
+                new BasicException.Parameter("principal", this.loginPrincipal)
             );
         }      
         // Update login date for current principal
@@ -282,7 +270,8 @@ public final class ApplicationContext
             catch(Exception e) {
                 try {
                     this.pmData.currentTransaction().rollback();
-                } catch(Exception e0) {}
+                } 
+                catch(Exception e0) {}
                 new ServiceException(e).log();
             }
         }      
@@ -484,13 +473,34 @@ public final class ApplicationContext
                             Number actionType = null;
                             String actionName = null;
                             List<String> actionParams = null;
-                            try {target = (RefObject_1_0)quickAccessor.refGetValue("reference");} catch(Exception e) {}
-                            try {name = (String)quickAccessor.refGetValue("name");} catch(Exception e) {}
-                            try {description = (String)quickAccessor.refGetValue("description");} catch(Exception e) {}
-                            try {iconKey = (String)quickAccessor.refGetValue("iconKey");} catch(Exception e) {}
-                            try {actionType = (Number)quickAccessor.refGetValue("actionType");} catch(Exception e) {}
-                            try {actionName = (String)quickAccessor.refGetValue("actionName");} catch(Exception e) {}
-                            try {actionParams = (List<String>) quickAccessor.refGetValue("actionParam");} catch(Exception e) {}
+                            try {
+                            	target = (RefObject_1_0)quickAccessor.refGetValue("reference");
+                            } 
+                            catch(Exception e) {}
+                            try {
+                            	name = (String)quickAccessor.refGetValue("name");
+                            } 
+                            catch(Exception e) {}
+                            try {
+                            	description = (String)quickAccessor.refGetValue("description");
+                            } 
+                            catch(Exception e) {}
+                            try {
+                            	iconKey = (String)quickAccessor.refGetValue("iconKey");
+                            } 
+                            catch(Exception e) {}
+                            try {
+                            	actionType = (Number)quickAccessor.refGetValue("actionType");                            
+                            } 
+                            catch(Exception e) {}
+                            try {
+                            	actionName = (String)quickAccessor.refGetValue("actionName");
+                            } 
+                            catch(Exception e) {}
+                            try {
+                            	actionParams = (List<String>) quickAccessor.refGetValue("actionParam");
+                            } 
+                            catch(Exception e) {}
                             if(name == null) {
                                 name = new ObjectReference(target, this).getTitle();
                             }           
@@ -588,7 +598,8 @@ public final class ApplicationContext
                 AppLog.warning("Can not store user settings. Skipping", e.getMessage());    
                 try {
                     this.pmControl.currentTransaction().rollback();
-                } catch(Exception e0) {}
+                } 
+                catch(Exception e0) {}
             }
         }
     }
@@ -648,7 +659,8 @@ public final class ApplicationContext
                     String label = "-";
                     try {
                         label = this.getLabel(rootObjectClass);
-                    } catch(Exception e) {}
+                    } 
+                    catch(Exception e) {}
                     boolean isEnabled = label != null;
                     String iconKey = WebKeys.ICON_MISSING;
                     try {
@@ -956,7 +968,8 @@ public final class ApplicationContext
                 short index = new Short(message.substring(i+2, i+3)).shortValue();
                 try {
                     preparedMessage += parameters[index];
-                } catch(Exception e) {}
+                } 
+                catch(Exception e) {}
                 i += 4;
             }
             else {
@@ -1036,7 +1049,8 @@ public final class ApplicationContext
         this.pmData.evictAll();
         try {
             this.pmData.currentTransaction().rollback();
-        } catch(Exception e) {}
+        } 
+        catch(Exception e) {}
         this.pmDataReloadedAt = new Date();
     }
 
@@ -1100,13 +1114,15 @@ public final class ApplicationContext
         if(this.pmData != null) {
             try {
                 this.pmData.close();
-            } catch(Exception e) {}
+            } 
+            catch(Exception e) {}
         }
         this.pmData = null;
         if(this.pmControl != null) {
             try {
                 this.pmControl.close();
-            } catch(Exception e) {}
+            } 
+            catch(Exception e) {}
         }
         this.pmControl = null;      
     }
@@ -1331,7 +1347,7 @@ public final class ApplicationContext
     public AttributeValue createAttributeValue(
         org.openmdx.ui1.jmi1.ValuedField customizedField,
         Object object        
-    ) {
+    ) throws ServiceException {
         return this.controlFactory.getAttributeValueFactory().getAttributeValue(
             customizedField,
             object,

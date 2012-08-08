@@ -1,0 +1,8 @@
+Welcome to openMDX Tomcat+EJB
+-----------------------------
+
+This installer has created an instance of Apache Tomcat 6.0 extended by
+Apache OpenEJB 3.1. In addition the lib directory of Tomcat contains the
+openMDX libraries and is therefore ready to run openMDX based applications.
+
+----

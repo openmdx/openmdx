@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LogConfiguration_1.java,v 1.1 2008/03/21 18:21:53 hburger Exp $
+ * Name:        $Id: LogConfiguration_1.java,v 1.2 2009/01/09 13:52:33 wfro Exp $
  * Description: LogConfiguration_1 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:21:53 $
+ * Date:        $Date: 2009/01/09 13:52:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,7 @@
  */
 package org.openmdx.compatibility.base.log;
 
-import org.openmdx.compatibility.base.application.control.LogConfiguration_1_0;
+import org.openmdx.application.control.LogConfiguration_1_0;
 import org.openmdx.compatibility.kernel.log.LogLevel;
 import org.openmdx.compatibility.kernel.log.SysLog;
 

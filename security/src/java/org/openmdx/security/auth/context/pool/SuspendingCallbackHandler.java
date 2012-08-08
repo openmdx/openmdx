@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: SuspendingCallbackHandler.java,v 1.12 2008/09/11 10:47:30 hburger Exp $
+ * Name:        $Id: SuspendingCallbackHandler.java,v 1.15 2009/03/08 18:52:19 wfro Exp $
  * Description: Suspending Callback Handler
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/11 10:47:30 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,7 +63,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 
-import org.openmdx.base.concurrent.locks.StateTransitions;
+import org.openmdx.base.concurrent.StateTransitions;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -157,24 +157,26 @@ final class SuspendingCallbackHandler implements CallbackHandler {
 			this.exception = null;
 			this.status.transition(Status.PASSIVE, this.suspend, Status.ACTIVE);
 			if(
-					!this.status.awaitState(PASSIVE, this.resume, this.callbackTimeout)
-			) setCallbackException(
+					!this.status.awaitState(SuspendingCallbackHandler.PASSIVE, this.resume, this.callbackTimeout)
+			) this.setCallbackException(
 					new InterruptedIOException(
 							"Callback handling timed out after " + this.callbackTimeout + " ms"
 					)
 			);
-		} catch (InterruptedException exception) {
-			setCallbackException(
+		} 
+		catch (InterruptedException exception) {
+			this.setCallbackException(
 					(IOException) new InterruptedIOException(
 							"A thread suspended for callback handling has been interrupted"
 					).initCause(
 							exception
 					)
 			);
-		} finally {
+		} 
+		finally {
 			this.lock.unlock();
 		}
-		propagateCallbackException();
+		this.propagateCallbackException();
 	}
 
 	/**
@@ -190,21 +192,23 @@ final class SuspendingCallbackHandler implements CallbackHandler {
 		this.lock.lock();
 		try{
 			this.status.awaitState(
-					ACTIVE_OR_COMPLETED,
+					SuspendingCallbackHandler.ACTIVE_OR_COMPLETED,
 					this.suspend,
 					this.maximumWait
 			);
 			boolean completed = this.status.stateMatches(Status.COMPLETED);
 			if(completed) this.status.setState(Status.PASSIVE);
-			propagateLoginException();
+			this.propagateLoginException();
 			return completed;
-		} catch (InterruptedException exception) {
+		} 
+		catch (InterruptedException exception) {
 			throw (InterruptedIOException) new InterruptedIOException(
 					"Maximum wait of " + this.maximumWait + " ms exceeded"
 			).initCause(
 					exception
 			);
-		} finally {
+		} 
+		finally {
 			this.lock.unlock();
 		}
 	}
@@ -222,7 +226,8 @@ final class SuspendingCallbackHandler implements CallbackHandler {
 		this.lock.lock();
 		try {
 			return this.status.stateMatches(Status.ACTIVE) ? this.callbacks : null;
-		} finally {
+		} 
+		finally {
 			this.lock.unlock();
 		}
 	}
@@ -250,9 +255,11 @@ final class SuspendingCallbackHandler implements CallbackHandler {
 	) throws IOException, UnsupportedCallbackException{
 		if(this.exception instanceof IOException) {
 			throw (IOException) this.exception;
-		} else if(this.exception instanceof UnsupportedCallbackException) {
+		} 
+		else if(this.exception instanceof UnsupportedCallbackException) {
 			throw (UnsupportedCallbackException) this.exception;
-		} else if(this.exception != null) {
+		} 
+		else if(this.exception != null) {
 			throw new UndeclaredThrowableException(
 					this.exception,
 					"Assertion failure: " + this.exception.getClass().getName() +
@@ -270,7 +277,8 @@ final class SuspendingCallbackHandler implements CallbackHandler {
 	) throws LoginException{
 		if(this.exception instanceof LoginException) {
 			throw (LoginException) this.exception;
-		} else if(this.exception != null) {
+		} 
+		else if(this.exception != null) {
 			throw new UndeclaredThrowableException(
 					this.exception,
 					"Assertion failure: " + this.exception.getClass().getName() +
@@ -291,7 +299,8 @@ final class SuspendingCallbackHandler implements CallbackHandler {
 		try {
 			this.exception = callbackException;
 			this.status.transition(Status.ACTIVE, this.resume, Status.PASSIVE);
-		} finally {
+		} 
+		finally {
 			this.lock.unlock();
 		}
 	}
@@ -312,7 +321,8 @@ final class SuspendingCallbackHandler implements CallbackHandler {
 					this.suspend,
 					Status.COMPLETED
 			);
-		} catch (IllegalStateException stateException) {
+		} 
+		catch (IllegalStateException stateException) {
 			ServiceException exception = new ServiceException(
 					stateException,
 					BasicException.Code.DEFAULT_DOMAIN,
@@ -320,11 +330,13 @@ final class SuspendingCallbackHandler implements CallbackHandler {
 					"Unexpected state during completion, force to COMPLETED",
 					new BasicException.Parameter("status", this.status)
 			);
-			(
-					loginException == null ? exception : exception.appendCause(loginException)
-			).log();
+			if(loginException != null) {
+				exception.getCause(null).initCause(loginException);
+			}
+			exception.log();
 			this.status.setState(this.suspend, Status.COMPLETED);
-		} finally {
+		} 
+		finally {
 			this.lock.unlock();
 		}
 	}

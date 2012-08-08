@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Preferences_1.java,v 1.4 2007/08/20 09:37:19 hburger Exp $
+ * Name:        $Id: Preferences_1.java,v 1.5 2009/01/06 13:13:37 wfro Exp $
  * Description: Preferences_1 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/20 09:37:19 $
+ * Date:        $Date: 2009/01/06 13:13:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,15 +61,15 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.security.ExecutionContext;
 import org.openmdx.kernel.security.resource.ConnectionFactory;

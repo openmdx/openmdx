@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.46 2008/08/05 14:12:04 wfro Exp $
+= Name:        $Id: build.xml,v 1.50 2009/03/09 14:25:26 wfro Exp $
 = Description: ant build for openMDX/Portal
-= Revision:    $Revision: 1.46 $
-= Date:        $Date: 2008/08/05 14:12:04 $
+= Revision:    $Revision: 1.50 $
+= Date:        $Date: 2009/03/09 14:25:26 $
 = Copyright:   (c) 2004-2006 OMEX AG
 =======================================================================
  *
@@ -71,8 +71,6 @@
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath"/>
-		<path refid="oracle.jdbc.lib"/>		
-		<path refid="microsoft.sql-server.lib"/>		
 		<pathelement location="${build.dir}/bin"/>
 		<pathelement location="${build.dir}/src/resource"/>
 		<pathelement location="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip"/>
@@ -80,6 +78,8 @@
 	<patternset id="openmdx-portal.jar.content">
 		<include name="org/openmdx/portal/**"/>
 		<include name="org/openmdx/ui1/**"/>
+		<include name="META-INF/orm.xml"/>
+		<include name="META-INF/openmdxmof.properties"/>
 	</patternset>
 
 	<!-- ******************************************************************* -->
@@ -88,7 +88,7 @@
 	<target name="-compress-and-append-">
 		<java 
 			classname="com.yahoo.platform.yui.compressor.YUICompressor" 
-			classpath="etc/yuicompressor/yuicompressor.jar"
+			classpath="${basedir}/etc/yuicompressor/yuicompressor.jar"
 	  >
 	    <arg line="--line-break 1000 -o ${build.dir}/src/js/${file.name} ${in.dir.name}/${file.name}"/>		
 		</java>
@@ -113,59 +113,59 @@
 		<mkdir dir="${build.dir}/src/js"/>
 		<echo message="" file="${build.dir}/src/js/portal-all.js"/>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/org/prototypejs"/>
+			<param name="in.dir.name" value="${basedir}/src/js/org/prototypejs"/>
 			<param name="file.name" value="prototype.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/us/scriptaculo"/>
+			<param name="in.dir.name" value="${basedir}/src/js/us/scriptaculo"/>
 			<param name="file.name" value="scriptaculous.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/us/scriptaculo"/>
+			<param name="in.dir.name" value="${basedir}/src/js/us/scriptaculo"/>
 			<param name="file.name" value="builder.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/us/scriptaculo"/>
+			<param name="in.dir.name" value="${basedir}/src/js/us/scriptaculo"/>
 			<param name="file.name" value="effects.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/us/scriptaculo"/>
+			<param name="in.dir.name" value="${basedir}/src/js/us/scriptaculo"/>
 			<param name="file.name" value="controls.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/us/scriptaculo"/>
+			<param name="in.dir.name" value="${basedir}/src/js/us/scriptaculo"/>
 			<param name="file.name" value="dragdrop.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/us/scriptaculo"/>
+			<param name="in.dir.name" value="${basedir}/src/js/us/scriptaculo"/>
 			<param name="file.name" value="slider.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/org/openmdx/portal"/>
+			<param name="in.dir.name" value="${basedir}/src/js/org/openmdx/portal"/>
 			<param name="file.name" value="ssf.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/com/yahoo/yui"/>
+			<param name="in.dir.name" value="${basedir}/src/js/com/yahoo/yui"/>
 			<param name="file.name" value="utilities.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/com/yahoo/yui"/>
+			<param name="in.dir.name" value="${basedir}/src/js/com/yahoo/yui"/>
 			<param name="file.name" value="container.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/com/dynarch/calendar"/>
+			<param name="in.dir.name" value="${basedir}/src/js/com/dynarch/calendar"/>
 			<param name="file.name" value="calendar.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/com/dynarch/calendar"/>
+			<param name="in.dir.name" value="${basedir}/src/js/com/dynarch/calendar"/>
 			<param name="file.name" value="calendar-setup.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/org/openmdx/portal"/>
+			<param name="in.dir.name" value="${basedir}/src/js/org/openmdx/portal"/>
 			<param name="file.name" value="findobject.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/org/openmdx/portal"/>
+			<param name="in.dir.name" value="${basedir}/src/js/org/openmdx/portal"/>
 			<param name="file.name" value="guicontrol.js"/>
 		</antcall>
 		<copy file="${build.dir}/src/js/portal-all.js" todir="src/war/openmdx-inspector.war/javascript"/>
@@ -236,6 +236,7 @@
 				<include name="RELEASE-NOTES"/>
 				<include name="project.properties"/>
 				<include name=".cvsignore"/>
+				<include name="*.checkstyle"/>				
 				<include name="etc/**"/>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset 
@@ -282,6 +283,7 @@
 		<openmdx:archive
 			destfile="${deliver.dir}/lib/openmdx-portal.jar"
 			format="jar"
+			duplicate="preserve"
 		>
 			<openmdx:archivemanifest refid="project.manifest"/>
 			<manifest>

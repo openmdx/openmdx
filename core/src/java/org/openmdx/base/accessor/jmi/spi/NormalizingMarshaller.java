@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: NormalizingMarshaller.java,v 1.1 2008/09/25 23:38:24 hburger Exp $
+ * Name:        $Id: NormalizingMarshaller.java,v 1.2 2009/01/04 21:17:19 wfro Exp $
  * Description: NormalizingMarshaller 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/25 23:38:24 $
+ * Date:        $Date: 2009/01/04 21:17:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,8 +51,8 @@
 package org.openmdx.base.accessor.jmi.spi;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
+import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.ReluctantUnmarshalling;
 import org.openmdx.kernel.exception.BasicException;
 
 /**

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefException_1.java,v 1.5 2008/10/06 17:34:52 hburger Exp $
+ * Name:        $Id: RefException_1.java,v 1.8 2009/03/05 13:53:30 hburger Exp $
  * Description: RefException_1 class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/06 17:34:52 $
+ * Date:        $Date: 2009/03/05 13:53:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,14 +62,13 @@ import javax.jmi.reflect.RefException;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
 
 /**
  * RefException extension 
  */
 public class RefException_1
   extends RefException
-  implements BasicException.Wrapper
+  implements BasicException.Holder
 {
 
   /**
@@ -142,18 +141,16 @@ public class RefException_1
   }
 
   //-------------------------------------------------------------------------
-    public RefException_1 log()
-    {
-    SysLog.warning(this);
-    return this;
+  public RefException_1 log(
+  ) {
+     return BasicException.log(this);
   }
 
   //-------------------------------------------------------------------------
   public java.lang.Object refGetValue(
     String propertyName
   ) {
-      BasicException exceptionStack = getCause();
-      return exceptionStack == null ? null : exceptionStack.getParameter(propertyName);
+      return getCause().getParameter(propertyName);
   }
 
   //-------------------------------------------------------------------------
@@ -182,26 +179,24 @@ public class RefException_1
   //-------------------------------------------------------------------------
   public ServiceException refGetServiceException(
   ) {
-      BasicException exceptionStack = getCause();
-    return exceptionStack == null ?
-      null :
-      new ServiceException(exceptionStack);
+      return new ServiceException(getCause());
   }
 
-  //------------------------------------------------------------------------
-  // Implements BasicException.Wrapper
-  //------------------------------------------------------------------------
-
   /**
-   * Return a BasicException, this exception object's cause.
-   * 
-   * @return the BasicException wrapped by this object.
-     * 
-     * @deprecated use getCause()
+   * Returns the cause of an exception. The cause actually is the wrapped exception.
+   *
+   * @return Throwable  The exception cause.
    */
-  public BasicException getExceptionStack (
-  ) {
-    return getCause();
+  public final BasicException getCause(
+  ){
+      return (BasicException) super.getCause();
+  }
+
+  /* (non-Javadoc)
+   * @see org.openmdx.kernel.exception.BasicException.Holder#getCause(java.lang.String)
+   */
+  public BasicException getCause(String exceptionDomain) {
+      return getCause().getCause(exceptionDomain);
   }
 
   /**
@@ -209,12 +204,9 @@ public class RefException_1
    *
    * @return the exception domain
    */
-  public String getExceptionDomain()
-  {
-      BasicException exceptionStack = getCause();
-    return exceptionStack == null ?
-      null :
-      exceptionStack.getExceptionDomain();
+  public String getExceptionDomain(
+  ){
+      return getCause().getExceptionDomain();
   }
 
   /**
@@ -222,100 +214,25 @@ public class RefException_1
    *
    * @return the exception code
    */
-  public int getExceptionCode()
-  {
-      BasicException exceptionStack = getCause();
-    return exceptionStack == null ?
-      BasicException.Code.GENERIC :
-      exceptionStack.getExceptionCode();
-  }
-
-  /**
-   * Returns the cause belonging to a specific exception domain.
-   * 
-   * @param   exceptionDomain
-   * 		  the desired exception domain,
-   *          or <code>null</code> to retrieve the initial cause.
-   *
-   * @return  Either the cause belonging to a specific exception domain
-   *          or the initial cause if <code>exceptionDomain</code> is
-   * 		  <code>null</code>.  
-   */
-  public BasicException getCause(
-    String exceptionDomain
+  public int getExceptionCode(
   ){
-      BasicException exceptionStack = getCause();
-    return exceptionStack == null ?
-        null :
-        exceptionStack.getCause(exceptionDomain);
-  }
-
-
-  //------------------------------------------------------------------------
-  // Extends Throwable
-  //------------------------------------------------------------------------
-
-  /**
-   * Returns the detail message string of this RuntimeServiceException.  
-   */
-  public String getMessage(
-  ){
-      BasicException exceptionStack = getCause();
-    return exceptionStack == null ?
-      super.getMessage() :
-      exceptionStack.getMessage() + ": " +
-      exceptionStack.getDescription();
-  }
-
-  /**
-   * A String consisting of the class of this exception, the exception 
-   * domain, the exception code, the exception description and the exception
-   * stack.
-   * 
-   * @return a multiline representation of this exception.
-   */
-  public String toString(){
-      BasicException exceptionStack = getCause();
-    return
-      exceptionStack == null ?
-      super.toString() :
-      super.toString() + '\n' + exceptionStack;
-  }
-
-
-  /**
-   * Returns the cause of an exception. The cause actually is the wrapped
-   * exception.
-   *
-   * @return Throwable  The exception cause.
-   */
-  public BasicException getCause(
-  ){
-    return (BasicException) super.getCause();
+      return getCause().getExceptionCode();
   }
 
   /* (non-Javadoc)
    * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
    */
+  @Override
   public void printStackTrace(PrintStream s) {
-      BasicException exceptionStack = getCause();
-    if(exceptionStack == null){
-      super.printStackTrace(s);
-    } else {
-      exceptionStack.printStack(this, s, true);
-    }
+      getCause().printStackTrace(s);
   }
 
   /* (non-Javadoc)
    * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
    */
+  @Override
   public void printStackTrace(PrintWriter s) {
-      BasicException exceptionStack = getCause();
-    if(exceptionStack == null){
-      super.printStackTrace(s);
-    } else {
-      exceptionStack.printStack(this, s, true);
-    }
+      getCause().printStackTrace(s);
   }
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectView.java,v 1.16 2008/11/10 17:10:16 wfro Exp $
+ * Name:        $Id: ObjectView.java,v 1.18 2009/03/08 18:03:23 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 17:10:16 $
+ * Date:        $Date: 2009/03/08 18:03:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,7 @@ import java.util.Map;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -284,7 +284,8 @@ public abstract class ObjectView
                           null
                       );
                   }
-              } catch(Exception e) {}          
+              } 
+              catch(Exception e) {}          
           }
       }
       try {

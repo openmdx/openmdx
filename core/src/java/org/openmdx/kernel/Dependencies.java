@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dependencies.java,v 1.7 2007/10/10 16:06:04 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Dependencies.java,v 1.8 2009/02/19 17:44:36 hburger Exp $
  * Description: Compliance
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:04 $
+ * Date:        $Date: 2009/02/19 17:44:36 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,16 +45,17 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes or is based on software developed by other
+ * organizations as listed in the NOTICE file.
  */
 package org.openmdx.kernel;
 
+import javax.management.RuntimeErrorException;
+
 import org.openmdx.kernel.environment.cci.VersionNumber;
-import org.openmdx.kernel.exception.VersionMismatchException;
 
 /**
- * Used to check the depdendencies
+ * Used to check the dependencies
  */
 public class Dependencies {
 
@@ -90,16 +90,19 @@ public class Dependencies {
         String expectedVersion
     ){
         checkDependencies();
-        if(! actualVersion.isCompliantWith(new VersionNumber(expectedVersion))) throw new VersionMismatchException(
-        	Dependencies.class.getClass().getName(), 
-			expectedVersion, 
-			actualVersion.toString()
-        );
+        if(! actualVersion.isCompliantWith(new VersionNumber(expectedVersion))) {
+            throw new RuntimeErrorException(
+                new AssertionError(
+                    Dependencies.class.getClass().getName() + ' ' + expectedVersion + " is not compliant with " + actualVersion.toString()
+                ),
+                "Library version mismatch"
+            );
+        }
     }
 
     /**
      * The version number is set as soon as the dependencies are checked.
      */
     private static VersionNumber actualVersion = null;
-        
+
 }

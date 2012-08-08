@@ -40,12 +40,11 @@ import java.util.Arrays;
  * </pre>
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:17 $
+ * @version $Revision: 1.5 $ $Date: 2009/01/12 16:55:31 $
  * 
  * @author Howard Lewis Ship
  * @author Stephen Colebourne
  */
-@SuppressWarnings("unchecked")
 public class MultiKey implements Serializable {
     // This class could implement List, but that would confuse it's purpose
 

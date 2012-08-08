@@ -53,9 +53,7 @@ public class XRefAuthority
     */ /**
     *
     */
-    XRefAuthority() {
-       // Constructor()  
-    } 
+    XRefAuthority() {} // Constructor()
 
     /*
     ****************************************************************************

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SimpleTypePredicate_1.java,v 1.5 2008/03/19 17:22:02 hburger Exp $
+ * Name:        $Id: SimpleTypePredicate_1.java,v 1.8 2009/01/13 02:10:32 wfro Exp $
  * Description: Any Type Predicate implementation
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:22:02 $
+ * Date:        $Date: 2009/01/13 02:10:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,8 +56,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.FilterOperators;
 import org.w3c.cci2.AnyTypePredicate;
 
 /**

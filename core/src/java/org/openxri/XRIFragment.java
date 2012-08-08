@@ -39,9 +39,7 @@ public class XRIFragment
     */ /**
     *
     */
-    XRIFragment() {
-     // Constructor()
-    } 
+    XRIFragment() {} // Constructor()
 
     /*
     ****************************************************************************

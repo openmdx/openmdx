@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XmlExporter.java,v 1.21 2008/10/06 17:34:52 hburger Exp $
+ * Name:        $Id: XmlExporter.java,v 1.27 2009/02/24 15:48:54 hburger Exp $
  * Description: XML Exporter
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/06 17:34:52 $
+ * Date:        $Date: 2009/02/24 15:48:54 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,14 +56,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
+import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.query.Filter;
-import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterProperty;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 
 
 //---------------------------------------------------------------------------
@@ -173,7 +173,7 @@ public class XmlExporter {
     public void export(
         List<Path> startPoints,
         Set<String> referenceFilter,
-        Map<String,Filter> attributeFilter,
+        Map<String,FilterProperty[]> attributeFilter,
         String schemaString
     ) throws ServiceException {        
         this.startPoints = startPoints;
@@ -219,7 +219,10 @@ public class XmlExporter {
             if (finalException instanceof ServiceException) {
                 ServiceException fException = (ServiceException) finalException;
                 ServiceException cException = ((KeepCauseErrorHandler)errorHandler).getCauseException();
-                throw isIncluded(fException, cException) ? fException : fException.appendCause(cException);
+                if(!isIncluded(fException, cException)) {
+                    fException.getCause(null).initCause(cException);
+                }
+                throw fException;
             }
             else {
                 throw ((KeepCauseErrorHandler)errorHandler).getCauseException();
@@ -239,11 +242,12 @@ public class XmlExporter {
         ServiceException finalException,
         ServiceException causeException
     ){
-        List finalExceptionStack = finalException.getCause().getExceptionStack(); 
-        BasicException causeExceptionStack = causeException.getCause();
-        return 
-        finalExceptionStack.contains(causeExceptionStack) || 
-        finalExceptionStack.contains(causeExceptionStack.getCause());
+//        List finalExceptionStack = finalException.getCause().getExceptionStack(); 
+//        BasicException causeExceptionStack = causeException.getCause();
+//        return 
+//        finalExceptionStack.contains(causeExceptionStack) || 
+//        finalExceptionStack.contains(causeExceptionStack.getCause());
+        return false; // TODO
     }
 
 
@@ -342,7 +346,7 @@ public class XmlExporter {
 
     // objects are retrieved matching the specified filter
     protected Set<String> referenceFilter = null;
-    protected Map<String,Filter> attributeFilter = null;
+    protected Map<String,FilterProperty[]> attributeFilter = null;
 
     protected final ServiceHeader header;
     protected final RequestCollection reader;

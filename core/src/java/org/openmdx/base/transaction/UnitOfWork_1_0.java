@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork_1_0.java,v 1.4 2008/09/10 08:55:31 hburger Exp $
+ * Name:        $Id: UnitOfWork_1_0.java,v 1.7 2009/01/11 18:24:48 wfro Exp $
  * Description: SPICE UnitOfWork_1_0 interface
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/10 08:55:31 $
+ * Date:        $Date: 2009/01/11 18:24:48 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,65 +61,12 @@ import org.openmdx.base.exception.ServiceException;
  *       <li>If all before completion callbacks succed then the unit of work 
  *           is committed and afterCompletion(true) is invoked. 
  *       <li>If any of the before completion callbacks fails then the unit
- *           of work is either rolled back or aborted depnding on the 
+ *           of work is either rolled back or aborted depending on the 
  *           isTransactional() flag.
  *   <li>    
  * </ul>
  */
-public interface UnitOfWork_1_0 extends Synchronization_1_0 {
-
-    //------------------------------------------------------------------------
-    // Control
-    //------------------------------------------------------------------------
-
-    /** 
-     * Begin a unit of work.  The type of unit of work is determined by the
-     * setting of the Optimistic flag.
-     * @throws ServiceException if transactions are managed by a container
-     * in the managed environment, or if the unit of work is already active.
-     */
-    void begin(
-    ) throws ServiceException;
-
-    /** 
-     * Commit the current unit of work.
-     * @throws ServiceException if transactions are managed by a container
-     * in the managed environment, or if the unit of work is already active.
-     */
-    void commit(
-    ) throws ServiceException;
-
-    /**
-     * Roll back the current unit of work.
-     * @throws ServiceException if transactions are managed by a container
-     * in the managed environment, or if the unit of work is not active.
-     */
-    void rollback(
-    ) throws ServiceException;
-
-    /**
-     * Verify the content of the current unit of work.
-     * <p>
-     * The state of the objects remains unchanged.
-     *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if no unit of work is in progress
-     * @exception   ServiceException 
-     *              if verification fails
-     */    
-    void verify(
-    ) throws ServiceException;
-
-
-    //------------------------------------------------------------------------
-    // State
-    //------------------------------------------------------------------------
-
-    /** 
-     * Tells whether there is a unit of work currently active.
-     * @return <code>true</code> if the unit of work is active.
-     */
-    boolean isActive();
+public interface UnitOfWork_1_0 extends javax.jdo.Transaction {
 
     /**
      * Transactional units of work are executed atomically, i.e. they are 
@@ -132,11 +79,11 @@ public interface UnitOfWork_1_0 extends Synchronization_1_0 {
     );
 
     /**
-     * Optimistic units of work do not hold data store locks until commit time.
-     *
-     * @return the value of the Optimistic property.
+     * Synchronization.begin() and commit() are managed by container.
+     *  
+     * @return true if unit of work is managed by container.
      */
-    boolean isOptimistic(
-    );
-
+    boolean isContainerManaged(
+    ) throws ServiceException;
+    
 }

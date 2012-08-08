@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FieldGroupControl.java,v 1.43 2008/12/09 13:45:36 wfro Exp $
+ * Name:        $Id: FieldGroupControl.java,v 1.44 2009/03/08 18:03:25 wfro Exp $
  * Description: FieldGroupControl
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.44 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/09 13:45:36 $
+ * Date:        $Date: 2009/03/08 18:03:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -94,7 +94,7 @@ public class FieldGroupControl
             localeAsIndex
         );
         this.labels = fieldGroup.getLabel();
-        this.fields = getFields(fieldGroup);
+        this.fields = FieldGroupControl.getFields(fieldGroup);
         this.columnBreakAtElements = fieldGroup.getColumnBreakAtElement();
     }
   
@@ -113,7 +113,7 @@ public class FieldGroupControl
         );
         this.labels = formFieldGroup.getLabel();
         this.columnBreakAtElements = formFieldGroup.getColumnBreakAtElement();
-        this.fields = getFields(
+        this.fields = FieldGroupControl.getFields(
             uiContext, 
             formFieldGroup
         );
@@ -188,17 +188,17 @@ public class FieldGroupControl
     }    
     
     //-------------------------------------------------------------------------
-    protected static List<Field> getFields(
+    protected static List<FieldGroupControl.Field> getFields(
         UiContext uiContext,        
         org.openmdx.ui1.jmi1.FormFieldGroupDefinition formFieldGroup
     ) {        
-        List<Field> fields = new ArrayList<Field>();
+        List<FieldGroupControl.Field> fields = new ArrayList<FieldGroupControl.Field>();
         org.openmdx.ui1.cci2.FormFieldDefinitionQuery query = 
             (org.openmdx.ui1.cci2.FormFieldDefinitionQuery)JDOHelper.getPersistenceManager(formFieldGroup).newQuery(org.openmdx.ui1.jmi1.FormFieldDefinition.class);
         query.orderByOrder().ascending();
         List<org.openmdx.ui1.jmi1.FormFieldDefinition> fieldDefinitions = formFieldGroup.getFormFieldDefinition(query);
         for(org.openmdx.ui1.jmi1.FormFieldDefinition fieldDefinition: fieldDefinitions) {
-            org.openmdx.ui1.jmi1.ValuedField field = findField(
+            org.openmdx.ui1.jmi1.ValuedField field = FieldGroupControl.findField(
                 uiContext,
                 fieldDefinition.getForClass(), 
                 fieldDefinition.getFeatureName()
@@ -217,10 +217,10 @@ public class FieldGroupControl
     }
     
     //-------------------------------------------------------------------------
-    protected static List<Field> getFields(
+    protected static List<FieldGroupControl.Field> getFields(
         org.openmdx.ui1.jmi1.FieldGroup fieldGroup
     ) {        
-        List<Field> fields = new ArrayList<Field>();
+        List<FieldGroupControl.Field> fields = new ArrayList<FieldGroupControl.Field>();
         List<org.openmdx.ui1.jmi1.ValuedField> members = fieldGroup.getMember();
         for(org.openmdx.ui1.jmi1.ValuedField member: members) {
             fields.add(
@@ -456,7 +456,7 @@ public class FieldGroupControl
     }
   
     //-------------------------------------------------------------------------
-    public List<Field> getFields(
+    public List<FieldGroupControl.Field> getFields(
     ) {
         return this.fields;
     }
@@ -467,7 +467,7 @@ public class FieldGroupControl
     private static final long serialVersionUID = 3257845493685302835L;
   
     protected final List<String> labels;
-    protected final List<Field> fields;    
+    protected final List<FieldGroupControl.Field> fields;    
     protected final List<Integer> columnBreakAtElements;
     
 }

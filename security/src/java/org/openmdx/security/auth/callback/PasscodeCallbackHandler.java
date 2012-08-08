@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: PasscodeCallbackHandler.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: PasscodeCallbackHandler.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
  * Description: Passcode Callback Handler
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,8 +67,7 @@ import javax.security.auth.callback.UnsupportedCallbackException;
  */
 public class PasscodeCallbackHandler 
 	extends AbstractCallbackHandler
-	implements Serializable
-{
+	implements Serializable {
 
 	/**
      * Implements <code>Serializable</code>
@@ -162,7 +161,7 @@ public class PasscodeCallbackHandler
     	this(
     		username,
     		password,
-    		toPasscode(pin, tokencode),
+    		PasscodeCallbackHandler.toPasscode(pin, tokencode),
     		context,
     		tokencode == null ? 
     			ZERO : 
@@ -234,29 +233,32 @@ public class PasscodeCallbackHandler
 	protected void handle(
 		NameCallback callback
 	) throws IOException, UnsupportedCallbackException {
-    	if(matches(callback.getPrompt(),StandardCallbackPrompts.USERNAME)) {
+    	if(PasscodeCallbackHandler.matches(callback.getPrompt(),StandardCallbackPrompts.USERNAME)) {
 	        callback.setName(this.username);
-    	} else {
-    		unsupported(callback, callback.getPrompt());
+    	} 
+    	else {
+    		this.unsupported(callback, callback.getPrompt());
     	}
 	}
 
 	protected void handle(
 		PasswordCallback callback
 	) throws IOException, UnsupportedCallbackException {
-    	if(matches(callback.getPrompt(),StandardCallbackPrompts.PASSWORD)) {
+    	if(PasscodeCallbackHandler.matches(callback.getPrompt(),StandardCallbackPrompts.PASSWORD)) {
 	        callback.setPassword(this.password);
-    	} else if(
+    	} 
+    	else if(
     		this.tokencodeLength!= null &&
-    		matches(callback.getPrompt(),StandardCallbackPrompts.PIN)
+    		PasscodeCallbackHandler.matches(callback.getPrompt(),StandardCallbackPrompts.PIN)
     	) {
 	        callback.setPassword(
 	        	this.passcode == null || this.passcode.length() == this.tokencodeLength.intValue() ?
 	        		null :
         			this.passcode.substring(0, this.passcode.length() - this.tokencodeLength.intValue()).toCharArray()
 	        );
-		} else {
-    		unsupported(callback, callback.getPrompt());
+		} 
+    	else {
+    		this.unsupported(callback, callback.getPrompt());
 		}
 	}
 
@@ -265,7 +267,8 @@ public class PasscodeCallbackHandler
 	) throws IOException, UnsupportedCallbackException {
         if(StandardCallbackPrompts.PASSCODE.equals(callback.getPrompt())){
             callback.setText(this.passcode);
-        } else if(
+        } 
+        else if(
         	this.tokencodeLength != null &&
         	StandardCallbackPrompts.TOKENCODE.equals(callback.getPrompt())
         ){
@@ -274,10 +277,12 @@ public class PasscodeCallbackHandler
             		null :
             		this.passcode.substring(this.passcode.length() - this.tokencodeLength.intValue())
             );
-        } else if (StandardCallbackPrompts.CONTEXT.equals(callback.getPrompt())){
+        } 
+        else if (StandardCallbackPrompts.CONTEXT.equals(callback.getPrompt())){
             callback.setText(this.context);
-		} else {
-    		unsupported(callback, callback.getPrompt());
+		} 
+        else {
+        	this.unsupported(callback, callback.getPrompt());
 		}
 	}
 

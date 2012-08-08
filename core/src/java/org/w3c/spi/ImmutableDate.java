@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ImmutableDate.java,v 1.1 2008/09/25 16:44:31 hburger Exp $
+ * Name:        $Id: ImmutableDate.java,v 1.2 2008/12/24 09:18:22 hburger Exp $
  * Description: Date 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/25 16:44:31 $
+ * Date:        $Date: 2008/12/24 09:18:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,6 +54,7 @@ import static javax.xml.datatype.DatatypeConstants.DATE;
 import static javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED;
 import static javax.xml.datatype.DatatypeConstants.INDETERMINATE;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
@@ -73,7 +74,7 @@ import javax.xml.namespace.QName;
  */
 final class ImmutableDate
     extends XMLGregorianCalendar
-    implements ImmutableDatatype, Comparable<XMLGregorianCalendar>
+    implements Serializable, ImmutableDatatype, Comparable<XMLGregorianCalendar>
 {
 
     /**
@@ -90,6 +91,11 @@ final class ImmutableDate
         this.basicValue = basicValue;
     }
     
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = -6028198343774949922L;
+
     /**
      * ISO8601:2000 Basic Format
      */

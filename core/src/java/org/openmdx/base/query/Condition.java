@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Condition.java,v 1.8 2008/09/09 12:06:39 hburger Exp $
+ * Name:        $Id: Condition.java,v 1.9 2009/01/06 10:21:19 wfro Exp $
  * Description: Condition
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/09 12:06:39 $
+ * Date:        $Date: 2009/01/06 10:21:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,7 +56,6 @@ import java.util.Arrays;
 import javax.resource.ResourceException;
 
 import org.openmdx.base.resource.Records;
-import org.openmdx.compatibility.base.query.Quantors;
 
 public abstract class Condition
     implements Serializable, Cloneable {
@@ -177,6 +176,8 @@ public abstract class Condition
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
+    private static final long serialVersionUID = 2403064228735670905L;
+
     protected final static Object[] EMPTY_OBJECT_ARRAY = new Object[]{};
     
     private short quantor;

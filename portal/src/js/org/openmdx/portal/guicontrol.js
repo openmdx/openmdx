@@ -1,10 +1,10 @@
 // ====================================================================
 // Project:     openmdx, http://www.openmdx.org/
-// Name:        $Id: guicontrol.js,v 1.7 2008/12/09 14:40:54 wfro Exp $
+// Name:        $Id: guicontrol.js,v 1.8 2009/01/14 14:18:39 cmu Exp $
 // Description: java script helpers
-// Revision:    $Revision: 1.7 $
+// Revision:    $Revision: 1.8 $
 // Owner:       OMEX AG, Switzerland, http://www.omex.ch
-// Date:        $Date: 2008/12/09 14:40:54 $
+// Date:        $Date: 2009/01/14 14:18:39 $
 // ====================================================================
 //
 // This software is published under the BSD license
@@ -1186,10 +1186,11 @@ function yuiPrint() {
         }
       }
     }
+    docprint.document.write('#menuOp {display:none;} #menuOpPanel {display:none;} .gridTableHeaderFull, .gridTableHeader {background-color:#eee;}');
     docprint.document.write('</style>');
     docprint.document.write('<script>function getEncodedHRef(components){var href = encodeURI(components[0]);for(i=1;i<components.length; i+=2){if(i==1){href+="?";}else{href+="&";}href+=components[i]+"="+encodeURIComponent(components[i+1]);}return href;}</script>');
     docprint.document.write('<script>sfinit = function(ULelt){};</script>');
-    docprint.document.write('</head><body class="ytheme-gray" onLoad="self.print()">');
+    docprint.document.write('</head><body class="yui-skin-sam" onLoad="self.print()">');
     docprint.document.write(content_value);
     docprint.document.write('</body></html>');
     docprint.document.close();

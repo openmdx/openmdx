@@ -25,7 +25,6 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.io.Serializable;
-
 import org.openmdx.uses.org.apache.commons.logging.Log;
 import org.openmdx.uses.org.apache.commons.logging.LogFactory;
 
@@ -111,7 +110,9 @@ import org.openmdx.uses.org.apache.commons.logging.LogFactory;
  * @see LazyDynaClass
  * @author Niall Pemberton
  */
-@SuppressWarnings({"unchecked", "serial"})
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class LazyDynaBean implements DynaBean, Serializable {
 
 

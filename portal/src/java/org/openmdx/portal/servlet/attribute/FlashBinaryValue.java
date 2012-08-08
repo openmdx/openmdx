@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: FlashBinaryValue.java,v 1.4 2008/09/29 12:31:42 wfro Exp $
+ * Name:        $Id: FlashBinaryValue.java,v 1.5 2009/01/13 23:48:40 wfro Exp $
  * Description: FlashBinaryValue 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/29 12:31:42 $
+ * Date:        $Date: 2009/01/13 23:48:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -77,7 +77,7 @@ public class FlashBinaryValue
         Object object,
         FieldDef fieldDef,
         ApplicationContext application
-    ) {
+    ) throws ServiceException {
         super(
             object, 
             fieldDef, 

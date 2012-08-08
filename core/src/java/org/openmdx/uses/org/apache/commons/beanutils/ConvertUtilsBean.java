@@ -27,8 +27,9 @@ import java.net.URL;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Map;
-import java.util.HashMap;
+
+import org.openmdx.uses.org.apache.commons.logging.Log;
+import org.openmdx.uses.org.apache.commons.logging.LogFactory;
 import org.openmdx.uses.org.apache.commons.beanutils.converters.ArrayConverter;
 import org.openmdx.uses.org.apache.commons.beanutils.converters.BigDecimalConverter;
 import org.openmdx.uses.org.apache.commons.beanutils.converters.BigIntegerConverter;
@@ -50,8 +51,6 @@ import org.openmdx.uses.org.apache.commons.beanutils.converters.SqlTimeConverter
 import org.openmdx.uses.org.apache.commons.beanutils.converters.SqlTimestampConverter;
 import org.openmdx.uses.org.apache.commons.beanutils.converters.StringConverter;
 import org.openmdx.uses.org.apache.commons.beanutils.converters.URLConverter;
-import org.openmdx.uses.org.apache.commons.logging.Log;
-import org.openmdx.uses.org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -125,10 +124,13 @@ import org.openmdx.uses.org.apache.commons.logging.LogFactory;
  * @author Ralph Schaer
  * @author Chris Audley
  * @author James Strachan
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:14 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:44 $
  * @since 1.7
  */
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings({
+    "unchecked"
+})
 public class ConvertUtilsBean {
     
     private static final Integer ZERO = new Integer(0);
@@ -150,7 +152,7 @@ public class ConvertUtilsBean {
      * The set of {@link Converter}s that can be used to convert Strings
      * into objects of a specified Class, keyed by the destination Class.
      */
-    private Map converters = new HashMap();
+    private WeakFastHashMap converters = new WeakFastHashMap();
 
     /**
      * The <code>Log</code> instance for this class.
@@ -161,7 +163,9 @@ public class ConvertUtilsBean {
 
     /** Construct a bean with standard converters registered */
     public ConvertUtilsBean() {
+        converters.setFast(false);   
         deregister();
+        converters.setFast(true);
     }
 
     // --------------------------------------------------------- Public Methods

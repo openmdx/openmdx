@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestQueryFilter_1.java,v 1.3 2008/09/09 14:20:58 hburger Exp $
+ * Name:        $Id: TestQueryFilter_1.java,v 1.4 2009/03/05 17:51:36 hburger Exp $
  * Description: Context Query Test
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/09 14:20:58 $
+ * Date:        $Date: 2009/03/05 17:51:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,34 +60,30 @@ import javax.jmi.reflect.RefPackage;
 
 import junit.framework.TestCase;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.accessor.Connection_1;
+import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
+import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1_1Connection;
 import org.openmdx.application.log.AppLog;
-import org.openmdx.base.accessor.generic.view.Manager_1;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
-import org.openmdx.base.application.deploy.Deployment;
-import org.openmdx.base.application.deploy.InProcessDeployment;
-import org.openmdx.base.application.deploy.RemoteDeployment;
-import org.openmdx.base.cci.Provider;
-import org.openmdx.base.jmi.BasePackage;
-import org.openmdx.compatibility.base.application.cci.Dataprovider_1Deployment;
-import org.openmdx.compatibility.base.application.cci.Model_1Deployment;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.transport.adapter.Provider_1;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
-import org.openmdx.compatibility.base.dataprovider.transport.delegation.Connection_1;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.compatibility.base.query.Quantors;
-import org.openmdx.compatibility.datastore1.cci.QueryFilter;
-import org.openmdx.compatibility.datastore1.jmi.Datastore1Package;
+import org.openmdx.base.accessor.view.Manager_1;
+import org.openmdx.base.jmi1.Provider;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Quantors;
+import org.openmdx.compatibility.datastore1.jmi1.Datastore1Package;
+import org.openmdx.compatibility.datastore1.jmi1.QueryFilter;
 import org.openmdx.kernel.application.deploy.cci.DeploymentProperties;
+import org.openmdx.kernel.application.deploy.spi.Deployment;
 import org.openmdx.kernel.collection.ArraysExtension;
-import org.openmdx.test.clock1.jmi.Clock1Package;
-import org.openmdx.test.clock1.query.SegmentQuery;
+import org.openmdx.test.clock1.cci2.SegmentQuery;
+import org.openmdx.test.clock1.jmi1.Clock1Package;
+
+import org.openmdx.base.jmi1.BasePackage;
 
 /**
  * Context Query Test
@@ -114,27 +110,27 @@ public class TestQueryFilter_1 extends TestCase {
         Path segmentPath = new Path(PROVIDER_PATH).add("segment").add(this.getName());
         System.out.println(message);
         AppLog.info(message, segmentPath);
-        this.dataproviderConnection = (
-                "Remote".equals(getName()) ? TestQueryFilter_1.remoteConnectionfactory : TestQueryFilter_1.inProcessConnectionfactory
-        ).createConnection();
-        RefPackage rootPkg = new RefRootPackage_1(
-            new Manager_1(
-                new Connection_1(
-                    new Provider_1(
-                        new RequestCollection(
-                            new ServiceHeader(),
-                            dataproviderConnection
-                        ),
-                        false
-                    ),
-                    false
-                )
-            ),
-            null, // impls
-            null, // context
-            "cci",
-            false
-        );
+// TODO  this.dataproviderConnection = (
+//                "Remote".equals(getName()) ? TestQueryFilter_1.remoteConnectionfactory : TestQueryFilter_1.inProcessConnectionfactory
+//        ).createConnection();
+        RefPackage rootPkg = null; // TODO new RefRootPackage_1(
+//            new Manager_1(
+//                new Connection_1(
+//                    new Provider_1(
+//                        new RequestCollection(
+//                            new ServiceHeader(),
+//                            dataproviderConnection
+//                        ),
+//                        false
+//                    ),
+//                    false
+//                )
+//            ),
+//            null, // impls
+//            null, // context
+//            "cci",
+//            false
+//        );
         this.clock1 = (Clock1Package)rootPkg.refPackage(
             "org:openmdx:test:clock1"
         );
@@ -261,54 +257,54 @@ public class TestQueryFilter_1 extends TestCase {
      */
     final private static boolean LOG_DEPLOYMENT_DETAIL = false;
 
-    private final static Deployment modelDeployment = new Model_1Deployment(
-        new String[]{
-            "org:openmdx:base",
-            "org:w3c",
-            "org:oasis-open",
-            "org:openmdx:compatibility:view1",
-            "org:openmdx:test:clock1"
-        }
-    );
+//    private final static Deployment modelDeployment = new Model_1Deployment(
+//        new String[]{
+//            "org:openmdx:base",
+//            "org:w3c",
+//            "org:oasis-open",
+//            "org:openmdx:compatibility:view1",
+//            "org:openmdx:test:clock1"
+//        }
+//    );
 
-    /**
-     * 
-     */
-    protected final static Dataprovider_1ConnectionFactory inProcessConnectionfactory = new Dataprovider_1Deployment(
-        new InProcessDeployment(
-            null,
-            APPLICATION_URL,
-            LOG_DEPLOYMENT_DETAIL ? System.out : null,
-                System.err
-        ),
-        modelDeployment,
-        JNDI_NAME
-    );
-
-
-    /**
-     * 
-     */
-    protected final static Dataprovider_1ConnectionFactory remoteConnectionfactory = new Dataprovider_1Deployment(
-        new RemoteDeployment(
-            ArraysExtension.asMap(
-                new String[]{
-                    DeploymentProperties.APPLICATION_URLS,
-                    "build.java.platform",
-                    "build.target.platform"
-                },
-                new String[]{
-                    APPLICATION_URL,
-                    System.getProperty("build.java.platform"),
-                    System.getProperty("build.target.platform")
-                }
-            ),
-            LOG_DEPLOYMENT_DETAIL ? System.out : null,
-                System.err
-        ),
-        modelDeployment,
-        JNDI_NAME
-    );
+//    /**
+//     * 
+//     */
+//    protected final static Dataprovider_1ConnectionFactory inProcessConnectionfactory = new Dataprovider_1Deployment(
+//        new InProcessDeployment(
+//            null,
+//            APPLICATION_URL,
+//            LOG_DEPLOYMENT_DETAIL ? System.out : null,
+//                System.err
+//        ),
+//        modelDeployment,
+//        JNDI_NAME
+//    );
+//
+//
+//    /**
+//     * 
+//     */
+//    protected final static Dataprovider_1ConnectionFactory remoteConnectionfactory = new Dataprovider_1Deployment(
+//        new RemoteDeployment(
+//            ArraysExtension.asMap(
+//                new String[]{
+//                    DeploymentProperties.APPLICATION_URLS,
+//                    "build.java.platform",
+//                    "build.target.platform"
+//                },
+//                new String[]{
+//                    APPLICATION_URL,
+//                    System.getProperty("build.java.platform"),
+//                    System.getProperty("build.target.platform")
+//                }
+//            ),
+//            LOG_DEPLOYMENT_DETAIL ? System.out : null,
+//                System.err
+//        ),
+//        modelDeployment,
+//        JNDI_NAME
+//    );
 
     static final String[] expectedAttributes = new String[]{
         "dateParam",

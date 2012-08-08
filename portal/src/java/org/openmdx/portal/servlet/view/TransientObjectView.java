@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TransientObjectView.java,v 1.1 2008/12/08 23:51:26 wfro Exp $
+ * Name:        $Id: TransientObjectView.java,v 1.2 2009/01/30 13:52:03 wfro Exp $
  * Description: FormView 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/08 23:51:26 $
+ * Date:        $Date: 2009/01/30 13:52:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,11 +57,11 @@ package org.openmdx.portal.servlet.view;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
-import javax.jdo.PersistenceManager;
-
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.attribute.Attribute;
@@ -134,6 +134,50 @@ public class TransientObjectView
         return parameterMap;
     }
     
+    //-------------------------------------------------------------------------
+    public org.openmdx.ui1.jmi1.ValuedField findField(
+        String forClass,
+        String featureName
+    ) throws ServiceException {
+        org.openmdx.ui1.jmi1.Inspector inspector = this.application.getInspector(forClass);
+        for(Iterator i = inspector.getMember().iterator(); i.hasNext(); ) {
+            Object pane = i.next();
+            if (pane instanceof org.openmdx.ui1.jmi1.AttributePane) {
+                org.openmdx.ui1.jmi1.AttributePane paneAttr = (org.openmdx.ui1.jmi1.AttributePane)pane;
+                for(Iterator j = paneAttr.getMember().iterator(); j.hasNext(); ) {
+                    org.openmdx.ui1.jmi1.Tab tab = (org.openmdx.ui1.jmi1.Tab)j.next();
+                    for(Iterator k = tab.getMember().iterator(); k.hasNext(); ) {
+                        org.openmdx.ui1.jmi1.FieldGroup fieldGroup = (org.openmdx.ui1.jmi1.FieldGroup)k.next();
+                        for(Iterator l = fieldGroup.getMember().iterator(); l.hasNext(); ) {
+                            org.openmdx.ui1.jmi1.ValuedField field = (org.openmdx.ui1.jmi1.ValuedField)l.next();
+                            if(field.getFeatureName().equals(featureName)) {
+                                return field;
+                            }
+                        }
+                    }
+                }
+            }          
+        }   
+        return null;
+    }    
+
+    //-------------------------------------------------------------------------
+    public String getFieldLabel(
+        String forClass,
+        String featureName,
+        short locale
+    ) throws ServiceException {
+        org.openmdx.ui1.jmi1.LabelledField field = this.findField(
+            forClass, 
+            featureName
+        );
+        return field == null
+            ? null
+            : locale < field.getLabel().size()
+                ? field.getLabel().get(locale)
+                : field.getLabel().get(0);
+    }
+        
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------

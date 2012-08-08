@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BooleanMarshaller.java,v 1.11 2008/09/25 23:36:59 hburger Exp $
+ * Name:        $Id: BooleanMarshaller.java,v 1.13 2009/01/08 10:21:10 wfro Exp $
  * Description: BooleanMarshaller class
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/25 23:36:59 $
+ * Date:        $Date: 2009/01/08 10:21:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,7 +52,7 @@
 package org.openmdx.base.accessor.jmi.spi;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
 
 
@@ -78,7 +78,6 @@ public class BooleanMarshaller
   }
 
   //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
   public Object marshal(
     Object source
   ) throws ServiceException {
@@ -100,7 +99,6 @@ public class BooleanMarshaller
   }
   
   //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
   public Object unmarshal (
     Object source
   ) throws ServiceException {

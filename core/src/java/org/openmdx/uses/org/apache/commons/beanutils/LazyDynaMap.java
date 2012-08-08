@@ -46,7 +46,9 @@ import java.util.Iterator;
  *
  * @author Niall Pemberton
  */
-@SuppressWarnings({"unchecked", "serial"})
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class LazyDynaMap extends LazyDynaBean implements MutableDynaClass {
 
     /**
@@ -267,12 +269,13 @@ public class LazyDynaMap extends LazyDynaBean implements MutableDynaClass {
      * with this DynaClass.
      * @return A new <code>DynaBean</code> instance
      */
+    @SuppressWarnings("cast")
     public DynaBean newInstance()  {
 
         // Create a new instance of the Map
         Map newMap = null;
         try {
-            newMap = getMap().getClass().newInstance();
+            newMap = (Map)getMap().getClass().newInstance();
         } catch(Exception ex) {
             newMap = newMap();
         }

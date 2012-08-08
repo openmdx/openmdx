@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PageEpilogControl.java,v 1.70 2008/11/10 10:20:11 wfro Exp $
+ * Name:        $Id: PageEpilogControl.java,v 1.71 2009/02/05 16:45:55 wfro Exp $
  * Description: PageEpilogControl 
- * Revision:    $Revision: 1.70 $
+ * Revision:    $Revision: 1.71 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
+ * Date:        $Date: 2009/02/05 16:45:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,7 +69,6 @@ import org.openmdx.portal.servlet.HtmlPage;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.attribute.DateValue;
 import org.openmdx.portal.servlet.view.EditObjectView;
-import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ReferencePane;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.view.View;
@@ -101,7 +100,7 @@ public class PageEpilogControl
         
         AppLog.detail("> paint");        
         
-        ObjectView view = (ObjectView)p.getView();
+        View view = p.getView();
         ApplicationContext app = view.getApplicationContext();
         SimpleDateFormat dateFormatter = DateValue.getLocalizedDateFormatter(
             null, 
@@ -585,21 +584,23 @@ public class PageEpilogControl
         p.write("  };");
         p.write("}");
         List calendarIds = (List)p.getProperty(HtmlPage.PROPERTY_CALENDAR_IDS);
-        for(Iterator i = calendarIds.iterator(); i.hasNext(); ) {
-            String calendarId = (String)i.next();
-            p.write("Calendar.setup({");
-            p.write("  flat         : \"", calendarId, "\",");
-            p.write("  onSelect     : dateSelected,");
-            p.write("  daFormat     : \"", DateValue.getCalendarFormat(dateFormatter), "\",");
-            p.write("  align        : \"Tc\",");
-            p.write("  firstDay     : ", Integer.toString(dateFormatter.getCalendar().getFirstDayOfWeek()-1), ",");
-            p.write("  singleClick  : true,");
-            p.write("  showsTime    : false,");
-            p.write("  weekNumbers  : true");
-            p.write("});");
+        if(calendarIds != null) {
+            for(Iterator i = calendarIds.iterator(); i.hasNext(); ) {
+                String calendarId = (String)i.next();
+                p.write("Calendar.setup({");
+                p.write("  flat         : \"", calendarId, "\",");
+                p.write("  onSelect     : dateSelected,");
+                p.write("  daFormat     : \"", DateValue.getCalendarFormat(dateFormatter), "\",");
+                p.write("  align        : \"Tc\",");
+                p.write("  firstDay     : ", Integer.toString(dateFormatter.getCalendar().getFirstDayOfWeek()-1), ",");
+                p.write("  singleClick  : true,");
+                p.write("  showsTime    : false,");
+                p.write("  weekNumbers  : true");
+                p.write("});");
+            }
         }
         // No grid panels in edit mode
-        if(!editMode) {
+        if(!editMode && (view instanceof ShowObjectView)) {
             ShowObjectView showView = (ShowObjectView)view;
             // Prepare grid panels
             int nReferencePanes = showView.getReferencePane().length;
@@ -639,16 +640,6 @@ public class PageEpilogControl
                 }
             }
             p.write("");
-        }
-//        p.write("YAHOO.ext.SSL_SECURE_URL = '", p.getHttpServletRequest().getContextPath(), "/blank.html';");
-//        p.write("YAHOO.ext.EventManager.ieDeferSrc = YAHOO.ext.SSL_SECURE_URL;");
-//        p.write("YAHOO.ext.UpdateManager.defaults.indicatorText = \"<div class='loading-indicator'>&nbsp;</div>\";");
-//        p.write("YAHOO.ext.UpdateManager.defaults.timeout = 60;");        
-//        p.write("YAHOO.ext.BasicDialog.prototype.syncHeightBeforeShow = true;");
-        // Declare variables for layout and grid panels. This way they can be accessed controls
-        if(!editMode) {
-            ShowObjectView showView = (ShowObjectView)view;
-            int nReferencePanes = showView.getReferencePane().length;
             for(int i = 0; i < nReferencePanes; i++) {
                 ReferencePane referencePane = showView.getReferencePane()[i];                
                 int referencePaneIndex = referencePane.getReferencePaneControl().getPaneIndex();
@@ -675,13 +666,14 @@ public class PageEpilogControl
         p.write("</script>");
         // Generate div for each popup image
         Map popupImages= (Map)p.getProperty(HtmlPage.PROPERTY_POPUP_IMAGES);
-        for(Iterator i = popupImages.keySet().iterator(); i.hasNext(); ) {
-            String imageId = (String)i.next();
-            String imageSrc = (String)popupImages.get(imageId);
-            p.write("  <div class=\"divImgPopUp\" id=\"divImgPopUp", imageId, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\" ondblclick=\"javascript:this.style.display='none'\" >");
-            p.write("  ", p.getImg("class=\"popUpImg\" id=\"popUpImg", imageId, "\" src=\"", imageSrc, "\" alt=\"\""), "</div>");
+        if(popupImages != null) {
+            for(Iterator i = popupImages.keySet().iterator(); i.hasNext(); ) {
+                String imageId = (String)i.next();
+                String imageSrc = (String)popupImages.get(imageId);
+                p.write("  <div class=\"divImgPopUp\" id=\"divImgPopUp", imageId, "\" style=\"display: none;\" onmousedown=\"dragPopupStart(event, this.id);\" ondblclick=\"javascript:this.style.display='none'\" >");
+                p.write("  ", p.getImg("class=\"popUpImg\" id=\"popUpImg", imageId, "\" src=\"", imageSrc, "\" alt=\"\""), "</div>");
+            }
         }
-
         AppLog.detail("< paint");        
     }
 

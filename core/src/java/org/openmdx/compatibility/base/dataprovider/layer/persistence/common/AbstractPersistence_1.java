@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractPersistence_1.java,v 1.13 2008/11/14 13:00:43 hburger Exp $
+ * Name:        $Id: AbstractPersistence_1.java,v 1.17 2009/03/02 13:38:15 wfro Exp $
  * Description: Abstract persistence layer
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/14 13:00:43 $
+ * Date:        $Date: 2009/03/02 13:38:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,25 +52,12 @@
 package org.openmdx.compatibility.base.dataprovider.layer.persistence.common;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
 
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.application.dataprovider.spi.OperationAwareLayer_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Database_1 implements a OO-to-Relational mapping and makes DataproviderObjects
@@ -84,7 +71,7 @@ import org.openmdx.kernel.exception.BasicException;
  */
 
 abstract public class AbstractPersistence_1
-extends StreamOperationAwareLayer_1 
+extends OperationAwareLayer_1 
 {
 
     /* (non-Javadoc)
@@ -94,7 +81,7 @@ extends StreamOperationAwareLayer_1
         short id, 
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception, ServiceException {
+    ) throws ServiceException {
         super.activate(
             id, 
             configuration, 
@@ -165,174 +152,6 @@ extends StreamOperationAwareLayer_1
      */
     protected File getStreamBufferDirectory() {
         return this.streamBufferDirectory;
-    }
-
-
-    /**
-     * Return an attribute's binary stream value
-     * 
-     * @param header
-     * @param objectPath
-     * @param feature
-     * 
-     * @return the attribute's binary stream value
-     * 
-     * @throws ServiceException
-     */
-    protected InputStream getBinaryStream(
-        ServiceHeader header,
-        Path objectPath,
-        String feature  
-    ) throws ServiceException{
-        try {
-            return (InputStream) get(
-                header,
-                new DataproviderRequest(
-                    new DataproviderObject(objectPath), // object
-                    DataproviderOperations.OBJECT_RETRIEVAL, // operation,
-                    AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES, // short attributeSelector,
-                    new AttributeSpecifier[]{
-                        new AttributeSpecifier(feature)
-                    }
-                )
-            ).getObject().values(feature).get(0);
-        } catch (ClassCastException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "Database should return an instance of InputStream",
-                new BasicException.Parameter("identitiy", objectPath),
-                new BasicException.Parameter("feature", feature)
-            );
-        } 
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.OutputStream, long)
-     */
-    protected DataproviderObject getStreamOperation(
-        ServiceHeader header,
-        Path objectPath,
-        String feature,
-        OutputStream value, 
-        long position, 
-        Path replyPath
-    ) throws ServiceException {
-        try {
-            InputStream source = getBinaryStream(header, objectPath, feature);
-            source.skip(position);
-            byte[] buffer = new byte[this.chunkSize];
-            long objectSize = position;
-            int chunkSize;
-            while((chunkSize = source.read(buffer)) > 0) {
-                objectSize += chunkSize;
-                value.write(buffer, 0, chunkSize);
-            }
-            value.flush();
-            return createResponse(replyPath, objectSize);
-        } catch (NullPointerException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "Binary content transfer failed",
-                new BasicException.Parameter("identitiy", objectPath),
-                new BasicException.Parameter("feature", feature)
-            );
-        } catch (IOException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.GENERIC,
-                "Returning binary content failed",
-                new BasicException.Parameter("identitiy", objectPath),
-                new BasicException.Parameter("feature", feature)
-            );
-        }
-    }
-
-    /**
-     * Return an attribute's character stream value
-     * 
-     * @param header
-     * @param objectPath
-     * @param feature
-     * 
-     * @return the attribute's character stream value
-     * 
-     * @throws ServiceException
-     */
-    protected Reader getCharacterStream(
-        ServiceHeader header,
-        Path objectPath,
-        String feature  
-    ) throws ServiceException{
-        try {
-            return (Reader) get(
-                header,
-                new DataproviderRequest(
-                    new DataproviderObject(objectPath), // object
-                    DataproviderOperations.OBJECT_RETRIEVAL, // operation,
-                    AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES, // short attributeSelector,
-                    new AttributeSpecifier[]{
-                        new AttributeSpecifier(feature)
-                    }
-                )
-            ).getObject().values(feature).get(0);
-        } catch (ClassCastException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "Database should return an instance of Reader",
-                new BasicException.Parameter("identitiy", objectPath),
-                new BasicException.Parameter("feature", feature)
-            );
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.Writer, long)
-     */
-    protected DataproviderObject getStreamOperation(
-        ServiceHeader header,
-        Path objectPath,
-        String feature,
-        Writer value, 
-        long position, Path replyPath
-    ) throws ServiceException {
-        try {
-            Reader source = getCharacterStream(header, objectPath, feature);
-            source.skip(position);
-            char[] buffer = new char[this.chunkSize];
-            long objectSize = position;
-            int chunkSize;
-            while((chunkSize = source.read(buffer)) > 0) {
-                objectSize += chunkSize;
-                value.write(buffer, 0, chunkSize);
-            }
-            value.flush();
-            return createResponse(replyPath, objectSize);
-        } catch (NullPointerException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "Character content transfer failed",
-                new BasicException.Parameter("identitiy", objectPath),
-                new BasicException.Parameter("feature", feature)
-            );
-        } catch (IOException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.GENERIC,
-                "Returning character content failed",
-                new BasicException.Parameter("identitiy", objectPath),
-                new BasicException.Parameter("feature", feature)
-            );
-        }
     }
 
 }

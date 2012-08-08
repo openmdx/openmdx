@@ -17,9 +17,9 @@
 
 package org.openmdx.uses.org.apache.commons.beanutils.locale;
 
-import org.openmdx.uses.org.apache.commons.beanutils.ConversionException;
 import org.openmdx.uses.org.apache.commons.logging.Log;
 import org.openmdx.uses.org.apache.commons.logging.LogFactory;
+import org.openmdx.uses.org.apache.commons.beanutils.ConversionException;
 
 import java.text.ParseException;
 import java.util.Locale;
@@ -34,7 +34,10 @@ import java.util.Locale;
  *
  * @author Yauheny Mikulski
  */
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings({
+    "unchecked"
+})
 public abstract class BaseLocaleConverter implements LocaleConverter {
 
     // ----------------------------------------------------- Instance Variables

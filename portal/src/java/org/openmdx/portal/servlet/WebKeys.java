@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WebKeys.java,v 1.29 2008/08/21 08:37:27 wfro Exp $
+ * Name:        $Id: WebKeys.java,v 1.30 2009/03/08 18:03:20 wfro Exp $
  * Description: WebKeys 
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/21 08:37:27 $
+ * Date:        $Date: 2009/03/08 18:03:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,75 +58,75 @@ package org.openmdx.portal.servlet;
 public class WebKeys {
 
     public static final String SERVLET_NAME = "ObjectInspectorServlet";
-    public static final String APPLICATION_KEY = SERVLET_NAME + ".ApplicationContext";
-    public static final String VIEW_CACHE_KEY_SHOW = SERVLET_NAME + ".ViewCache.Show";
-    public static final String VIEW_CACHE_KEY_EDIT = SERVLET_NAME + ".ViewCache.Edit";
-    public static final String VIEW_CACHE_CACHED_SINCE = SERVLET_NAME + ".ViewCache.CachedSince";    
-    public static final String CURRENT_VIEW_KEY = SERVLET_NAME + ".View";
+    public static final String APPLICATION_KEY = WebKeys.SERVLET_NAME + ".ApplicationContext";
+    public static final String VIEW_CACHE_KEY_SHOW = WebKeys.SERVLET_NAME + ".ViewCache.Show";
+    public static final String VIEW_CACHE_KEY_EDIT = WebKeys.SERVLET_NAME + ".ViewCache.Edit";
+    public static final String VIEW_CACHE_CACHED_SINCE = WebKeys.SERVLET_NAME + ".ViewCache.CachedSince";    
+    public static final String CURRENT_VIEW_KEY = WebKeys.SERVLET_NAME + ".View";
     public static final String LOCALE_KEY = "locale";
     public static final String TIMEZONE_KEY = "timezone";
     public static final String REQUEST_ID = "requestId";
     public static final String REQUEST_EVENT = "event";
     public static final String REQUEST_PARAMETER = "parameter";
-    public static final String REQUEST_PARAMETER_ENC = REQUEST_PARAMETER + ".enc";
-    public static final String REQUEST_PARAMETER_LIST = REQUEST_PARAMETER + ".list";    
+    public static final String REQUEST_PARAMETER_ENC = WebKeys.REQUEST_PARAMETER + ".enc";
+    public static final String REQUEST_PARAMETER_LIST = WebKeys.REQUEST_PARAMETER + ".list";    
     public static final String REQUEST_PARAMETER_FILTER_VALUES = "filtervalues";
     public static final String REQUEST_PARAMETER_PAGE_SIZE = "pagesize";  
     public static final String REQUEST_PARAMETER_LOCALE = "locale";      
     
     // Icons
     public static final String ICON_TYPE = ".gif";
-    public static final String ICON_DEFAULT = "default" + ICON_TYPE;
-    public static final String ICON_MISSING = "missing" + ICON_TYPE;
-    public static final String ICON_SEARCH_INC = "search_inc" + ICON_TYPE;
-    public static final String ICON_PAGE_WIDE = "page_wide" + ICON_TYPE;
-    public static final String ICON_PAGE_NARROW = "page_narrow" + ICON_TYPE;
-    public static final String ICON_DELETE = "delete" + ICON_TYPE;
-    public static final String ICON_FIRST = "first" + ICON_TYPE;
-    public static final String ICON_NEXT = "next" + ICON_TYPE;
-    public static final String ICON_NEXT_DISABLED = "next_disabled" + ICON_TYPE;
-    public static final String ICON_NEXT_FAST = "next_fast" + ICON_TYPE;
-    public static final String ICON_NEXT_FAST_DISABLED = "next_fast_disabled" + ICON_TYPE;
-    public static final String ICON_PREVIOUS = "previous" + ICON_TYPE;
-    public static final String ICON_PREVIOUS_DISABLED = "previous_disabled" + ICON_TYPE;
-    public static final String ICON_PREVIOUS_FAST = "previous_fast" + ICON_TYPE;
-    public static final String ICON_PREVIOUS_FAST_DISABLED = "previous_fast_disabled" + ICON_TYPE;
-    public static final String ICON_SORT_ANY = "sort_any" + ICON_TYPE;
-    public static final String ICON_SORT_UP = "sort_up" + ICON_TYPE;
-    public static final String ICON_SORT_DOWN = "sort_down" + ICON_TYPE;
-    public static final String ICON_CANCEL = "cancel" + ICON_TYPE;
-    public static final String ICON_SAVE = "save" + ICON_TYPE;
-    public static final String ICON_EDIT = "edit" + ICON_TYPE;
-    public static final String ICON_UP = "up" + ICON_TYPE;
-    public static final String ICON_MENU_DOWN = "menu_down" + ICON_TYPE; 
-    public static final String ICON_LOOKUP = "lookup" + ICON_TYPE;
-    public static final String ICON_LOOKUP_GRID = "lookup_grid" + ICON_TYPE;
-    public static final String ICON_LOOKUP_AUTOCOMPLETE_GRID = "lookup_auto_grid" + ICON_TYPE;
+    public static final String ICON_DEFAULT = "default" + WebKeys.ICON_TYPE;
+    public static final String ICON_MISSING = "missing" + WebKeys.ICON_TYPE;
+    public static final String ICON_SEARCH_INC = "search_inc" + WebKeys.ICON_TYPE;
+    public static final String ICON_PAGE_WIDE = "page_wide" + WebKeys.ICON_TYPE;
+    public static final String ICON_PAGE_NARROW = "page_narrow" + WebKeys.ICON_TYPE;
+    public static final String ICON_DELETE = "delete" + WebKeys.ICON_TYPE;
+    public static final String ICON_FIRST = "first" + WebKeys.ICON_TYPE;
+    public static final String ICON_NEXT = "next" + WebKeys.ICON_TYPE;
+    public static final String ICON_NEXT_DISABLED = "next_disabled" + WebKeys.ICON_TYPE;
+    public static final String ICON_NEXT_FAST = "next_fast" + WebKeys.ICON_TYPE;
+    public static final String ICON_NEXT_FAST_DISABLED = "next_fast_disabled" + WebKeys.ICON_TYPE;
+    public static final String ICON_PREVIOUS = "previous" + WebKeys.ICON_TYPE;
+    public static final String ICON_PREVIOUS_DISABLED = "previous_disabled" + WebKeys.ICON_TYPE;
+    public static final String ICON_PREVIOUS_FAST = "previous_fast" + WebKeys.ICON_TYPE;
+    public static final String ICON_PREVIOUS_FAST_DISABLED = "previous_fast_disabled" + WebKeys.ICON_TYPE;
+    public static final String ICON_SORT_ANY = "sort_any" + WebKeys.ICON_TYPE;
+    public static final String ICON_SORT_UP = "sort_up" + WebKeys.ICON_TYPE;
+    public static final String ICON_SORT_DOWN = "sort_down" + WebKeys.ICON_TYPE;
+    public static final String ICON_CANCEL = "cancel" + WebKeys.ICON_TYPE;
+    public static final String ICON_SAVE = "save" + WebKeys.ICON_TYPE;
+    public static final String ICON_EDIT = "edit" + WebKeys.ICON_TYPE;
+    public static final String ICON_UP = "up" + WebKeys.ICON_TYPE;
+    public static final String ICON_MENU_DOWN = "menu_down" + WebKeys.ICON_TYPE; 
+    public static final String ICON_LOOKUP = "lookup" + WebKeys.ICON_TYPE;
+    public static final String ICON_LOOKUP_GRID = "lookup_grid" + WebKeys.ICON_TYPE;
+    public static final String ICON_LOOKUP_AUTOCOMPLETE_GRID = "lookup_auto_grid" + WebKeys.ICON_TYPE;
     public static final String ICON_AUTOCOMPLETE_SELECT = "autocomplete_select.png";
-    public static final String ICON_FILTER_ALL = "filter_all" + ICON_TYPE;
-    public static final String ICON_FILTER_DEFAULT = "filter_default" + ICON_TYPE;    
-    public static final String ICON_FILTER_SET_AS_DEFAULT = "filter_set_as_default" + ICON_TYPE;
-    public static final String ICON_SHOW_ROWS_ON_INIT = "enable_default_filter_on_init" + ICON_TYPE;
-    public static final String ICON_HIDE_ROWS_ON_INIT = "disable_default_filter_on_init" + ICON_TYPE;
-    public static final String ICON_FILTER_HELP = "filter_help" + ICON_TYPE;
-    public static final String ICON_FILTER_CLASS = "filter_class" + ICON_TYPE;
-    public static final String ICON_FILTER_EXT = "filter_ext" + ICON_TYPE;
-    public static final String ICON_NOT_CHECKED_R = "notchecked_r" + ICON_TYPE; 
-    public static final String ICON_CHECKED_R = "checked_r" + ICON_TYPE;
-    public static final String ICON_COLLAPSE = "collapse" + ICON_TYPE; 
-    public static final String ICON_EXPAND = "expand" + ICON_TYPE;
-    public static final String ICON_CALENDAR = "cal" + ICON_TYPE; 
-    public static final String ICON_CLONE_SMALL = "clonesmall" + ICON_TYPE;
-    public static final String ICON_DELETE_SMALL = "deletesmall" + ICON_TYPE;
-    public static final String ICON_PANEL_DOWN = "panel_down" + ICON_TYPE;
-    public static final String ICON_CLOSE = "close" + ICON_TYPE;
-    public static final String ICON_SHOW_GRID_CONTENT = "show_content" + ICON_TYPE;    
-    public static final String ICON_SEARCH_PANEL = "search_panel" + ICON_TYPE;
+    public static final String ICON_FILTER_ALL = "filter_all" + WebKeys.ICON_TYPE;
+    public static final String ICON_FILTER_DEFAULT = "filter_default" + WebKeys.ICON_TYPE;    
+    public static final String ICON_FILTER_SET_AS_DEFAULT = "filter_set_as_default" + WebKeys.ICON_TYPE;
+    public static final String ICON_SHOW_ROWS_ON_INIT = "enable_default_filter_on_init" + WebKeys.ICON_TYPE;
+    public static final String ICON_HIDE_ROWS_ON_INIT = "disable_default_filter_on_init" + WebKeys.ICON_TYPE;
+    public static final String ICON_FILTER_HELP = "filter_help" + WebKeys.ICON_TYPE;
+    public static final String ICON_FILTER_CLASS = "filter_class" + WebKeys.ICON_TYPE;
+    public static final String ICON_FILTER_EXT = "filter_ext" + WebKeys.ICON_TYPE;
+    public static final String ICON_NOT_CHECKED_R = "notchecked_r" + WebKeys.ICON_TYPE; 
+    public static final String ICON_CHECKED_R = "checked_r" + WebKeys.ICON_TYPE;
+    public static final String ICON_COLLAPSE = "collapse" + WebKeys.ICON_TYPE; 
+    public static final String ICON_EXPAND = "expand" + WebKeys.ICON_TYPE;
+    public static final String ICON_CALENDAR = "cal" + WebKeys.ICON_TYPE; 
+    public static final String ICON_CLONE_SMALL = "clonesmall" + WebKeys.ICON_TYPE;
+    public static final String ICON_DELETE_SMALL = "deletesmall" + WebKeys.ICON_TYPE;
+    public static final String ICON_PANEL_DOWN = "panel_down" + WebKeys.ICON_TYPE;
+    public static final String ICON_CLOSE = "close" + WebKeys.ICON_TYPE;
+    public static final String ICON_SHOW_GRID_CONTENT = "show_content" + WebKeys.ICON_TYPE;    
+    public static final String ICON_SEARCH_PANEL = "search_panel" + WebKeys.ICON_TYPE;
     public static final String ICON_UI_MODE = "uiMode";
-    public static final String ICON_HEADER_SHOW = "headerShow" + ICON_TYPE;
-    public static final String ICON_HEADER_HIDE = "headerHide" + ICON_TYPE;
-    public static final String ICON_LOGOFF_SELECTED = "logoffSelected" + ICON_TYPE;
-    public static final String ICON_SAVE_SELECTED = "saveSelected" + ICON_TYPE;
+    public static final String ICON_HEADER_SHOW = "headerShow" + WebKeys.ICON_TYPE;
+    public static final String ICON_HEADER_HIDE = "headerHide" + WebKeys.ICON_TYPE;
+    public static final String ICON_LOGOFF_SELECTED = "logoffSelected" + WebKeys.ICON_TYPE;
+    public static final String ICON_SAVE_SELECTED = "saveSelected" + WebKeys.ICON_TYPE;
        
     // Configuration parameters
     public static final String CONFIG_USER_HOME = "userHome";

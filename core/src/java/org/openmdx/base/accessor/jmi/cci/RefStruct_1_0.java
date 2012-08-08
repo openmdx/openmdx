@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RefStruct_1_0.java,v 1.6 2004/06/19 22:50:03 wfro Exp $
+ * Name:        $Id: RefStruct_1_0.java,v 1.7 2009/01/09 01:08:38 wfro Exp $
  * Description: RefStruct_1_0 interface
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/06/19 22:50:03 $
+ * Date:        $Date: 2009/01/09 01:08:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,7 +53,7 @@ package org.openmdx.base.accessor.jmi.cci;
 
 import javax.jmi.reflect.RefStruct;
 
-import org.openmdx.base.accessor.generic.cci.Structure_1_0;
+import org.openmdx.base.accessor.cci.Structure_1_0;
 
 /**
  * This interface extends the javax.jmi.reflect.RefStruct interface by openMDX

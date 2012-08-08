@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingMap.java,v 1.20 2008/12/15 03:15:37 hburger Exp $
+ * Name:        $Id: MarshallingMap.java,v 1.23 2009/01/11 21:28:59 wfro Exp $
  * Description: Marshalling Map
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/15 03:15:37 $
+ * Date:        $Date: 2009/01/11 21:28:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,10 +56,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.CollectionMarshallerAdapter;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
+import org.openmdx.base.marshalling.ExceptionListenerMarshaller;
+import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.ReluctantUnmarshalling;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -79,9 +80,8 @@ public class MarshallingMap<K,V>
      * @param map
      * @param unmarshalling 
      */
-    @SuppressWarnings("unchecked")
     public MarshallingMap(
-        org.openmdx.base.persistence.spi.Marshaller marshaller,
+        Marshaller marshaller,
         Map<K,V> map, 
         Unmarshalling unmarshalling 
     ) {
@@ -96,26 +96,12 @@ public class MarshallingMap<K,V>
      * @param marshaller
      * @param map
      */
-    @SuppressWarnings("unchecked")
-    public MarshallingMap(
-        org.openmdx.base.persistence.spi.Marshaller marshaller,
-        Map<K,V> map 
-    ) {
-        this(marshaller, map, Unmarshalling.EAGER);
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param marshaller
-     * @param map
-     */
     public MarshallingMap(
         Marshaller marshaller,
         Map<K,V> map 
     ) {
         this(
-            new CollectionMarshallerAdapter(marshaller), 
+            new ExceptionListenerMarshaller(marshaller), 
             map, 
             marshaller instanceof ReluctantUnmarshalling ? Unmarshalling.RELUCTANT : Unmarshalling.EAGER
         );
@@ -140,10 +126,10 @@ public class MarshallingMap<K,V>
     /**
      * 
      */
-    protected final org.openmdx.base.persistence.spi.Marshaller marshaller;
+    protected final Marshaller marshaller;
     
     /**
-     * This method may be overridden by a sub-class for danymic delegation
+     * This method may be overridden by a sub-class for dynamic delegation
      * 
      * @return the delegate
      */
@@ -173,15 +159,22 @@ public class MarshallingMap<K,V>
     /* (non-Javadoc)
      * @see java.util.Map#containsValue(java.lang.Object)
      */
-    public boolean containsValue(Object value) {
-        switch(this.unmarshalling) {
-            case RELUCTANT:
-                return super.containsValue(value);
-            case EAGER: default: 
-                return getDelegate().containsValue(
-                    this.marshaller.unmarshal(value)
-                );
+    public boolean containsValue(
+        Object value
+    ) {
+        try {
+            switch(this.unmarshalling) {
+                case RELUCTANT:
+                    return super.containsValue(value);
+                case EAGER: default: 
+                    return getDelegate().containsValue(
+                        this.marshaller.unmarshal(value)
+                    );
+            }
         }
+        catch(ServiceException e) {
+            throw new RuntimeServiceException(e);
+        }        
     }
 
     /**
@@ -204,18 +197,25 @@ public class MarshallingMap<K,V>
      * @see java.util.Map#get(java.lang.Object)
      */
     @SuppressWarnings("unchecked")
-    public V get(Object key) {
-        Object value = getDelegate().get(key); 
-        if(this.marshaller instanceof CollectionMarshallerAdapter) {
-            try {
-                return (V) ((CollectionMarshallerAdapter)this.marshaller).getDelegate().marshal(value);
-            } catch (ServiceException exception) {
-                if(exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
-                    return null;
+    public V get(
+        Object key
+    ) {
+        try {
+            Object value = getDelegate().get(key); 
+            if(this.marshaller instanceof ExceptionListenerMarshaller) {
+                try {
+                    return (V) ((ExceptionListenerMarshaller)this.marshaller).getDelegate().marshal(value);
+                } catch (ServiceException exception) {
+                    if(exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
+                        return null;
+                    }
                 }
             }
+            return (V) this.marshaller.marshal(value);
         }
-        return (V) this.marshaller.marshal(value);
+        catch(ServiceException e) {
+            throw new RuntimeServiceException(e);
+        }        
     }
 
     /* (non-Javadoc)
@@ -240,9 +240,14 @@ public class MarshallingMap<K,V>
         K key, 
         V value
     ) {
-        return (V) this.marshaller.marshal(
-            getDelegate().put(key, (V)this.marshaller.unmarshal(value))
-        );
+        try {
+            return (V) this.marshaller.marshal(
+                getDelegate().put(key, (V)this.marshaller.unmarshal(value))
+            );
+        }
+        catch(ServiceException e) {
+            throw new RuntimeServiceException(e);
+        }        
     }
 
     /* (non-Javadoc)
@@ -252,9 +257,14 @@ public class MarshallingMap<K,V>
     public V remove(
         Object key
     ) {
-        return (V) this.marshaller.marshal(
-            getDelegate().remove(key)
-        );
+        try {
+            return (V) this.marshaller.marshal(
+                getDelegate().remove(key)
+            );
+        }
+        catch(ServiceException e) {
+            throw new RuntimeServiceException(e);
+        }        
     }
 
     /* (non-Javadoc)
@@ -284,7 +294,7 @@ public class MarshallingMap<K,V>
      * Map Entry Marshaller
      */
     static class MapEntryMarshaller<K,V>
-        implements org.openmdx.base.persistence.spi.Marshaller 
+        implements Marshaller 
      {
 
         /**
@@ -292,7 +302,7 @@ public class MarshallingMap<K,V>
          * @param marshaller
          */      
         public MapEntryMarshaller(
-            org.openmdx.base.persistence.spi.Marshaller marshaller
+            Marshaller marshaller
         ) {
             this.marshaller = marshaller;
         }
@@ -300,7 +310,6 @@ public class MarshallingMap<K,V>
         /**
          * 
          */
-        @SuppressWarnings("unchecked")
         public Object marshal(
             Object source
         ) {
@@ -325,7 +334,7 @@ public class MarshallingMap<K,V>
         /**
          * 
          */
-        private final org.openmdx.base.persistence.spi.Marshaller marshaller;
+        private final Marshaller marshaller;
   
     }
 
@@ -349,7 +358,7 @@ public class MarshallingMap<K,V>
          */
         @SuppressWarnings("unchecked")
         public MarshallingMapEntry(
-            org.openmdx.base.persistence.spi.Marshaller marshaller,
+            Marshaller marshaller,
             Object entry
         ) {
             this.marshaller = marshaller;
@@ -379,9 +388,14 @@ public class MarshallingMap<K,V>
         @SuppressWarnings("unchecked")
         public V getValue(
         ) {
-            return (V) this.marshaller.marshal(
-                this.entry.getValue()
-            );
+            try {
+                return (V) this.marshaller.marshal(
+                    this.entry.getValue()
+                );
+            }
+            catch(ServiceException e) {
+                throw new RuntimeServiceException(e);
+            }            
         }
 
         /**
@@ -390,11 +404,16 @@ public class MarshallingMap<K,V>
         public V setValue(
             V value
         ) {
-            V oldValue = this.getValue();
-            this.entry.setValue(
-                this.marshaller.unmarshal(value)
-            );
-            return oldValue;
+            try {
+                V oldValue = this.getValue();
+                this.entry.setValue(
+                    this.marshaller.unmarshal(value)
+                );
+                return oldValue;
+            }
+            catch(ServiceException e) {
+                throw new RuntimeServiceException(e);
+            }            
         }
         
         /**
@@ -405,7 +424,7 @@ public class MarshallingMap<K,V>
         /**
          * 
          */    
-        private final org.openmdx.base.persistence.spi.Marshaller marshaller;
+        private final Marshaller marshaller;
 
     }
 

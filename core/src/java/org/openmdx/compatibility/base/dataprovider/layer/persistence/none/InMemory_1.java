@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InMemory_1.java,v 1.27 2008/11/14 13:01:04 hburger Exp $
+ * Name:        $Id: InMemory_1.java,v 1.31 2009/02/24 15:48:55 hburger Exp $
  * Description: InMemory_1 class
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/14 13:01:04 $
+ * Date:        $Date: 2009/02/24 15:48:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,28 +75,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObjectFilter;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.dataprovider.cci.DataproviderOperations;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.Directions;
+import org.openmdx.application.dataprovider.cci.Orders;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObjectFilter;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReplyContexts;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.Orders;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.base.naming.Path;
 import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.AbstractIterator;
 import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.AbstractPersistence_1;
 import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.Sequences;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -490,7 +490,7 @@ extends AbstractPersistence_1 {
         short id,
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception, ServiceException {
+    ) throws ServiceException {
         super.activate(
             id, 
             configuration, 
@@ -1072,17 +1072,21 @@ extends AbstractPersistence_1 {
                     )
                 );
             } catch (Exception exception) {
-                BasicException assertionFailure = new BasicException(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN, 
-                    BasicException.Code.ASSERTION_FAILURE,
-                    "Compression/decompression failure"
+                Error assertionFailure = BasicException.initHolder(
+                    new Error(
+                        "Compression/decompression failure",
+                        BasicException.newEmbeddedExceptionStack(
+                            exception,
+                            BasicException.Code.DEFAULT_DOMAIN, 
+                            BasicException.Code.ASSERTION_FAILURE
+                        )
+                    )
                 );
                 SysLog.error(
                     assertionFailure.getMessage(), 
                     assertionFailure.getCause()
                 );
-                throw new Error(assertionFailure.getMessage());
+                throw assertionFailure;
             }     
         }
     }   

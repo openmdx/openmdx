@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestState.java,v 1.2 2008/11/25 17:49:18 hburger Exp $
+ * Name:        $Id: TestState.java,v 1.8 2009/03/05 17:51:36 hburger Exp $
  * Description: TestState 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/25 17:49:18 $
+ * Date:        $Date: 2009/03/05 17:51:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,12 +53,12 @@ package test.openmdx.compatibility.state1;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.openmdx.base.persistence.spi.AbstractManagerFactory.toSubject;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
@@ -68,17 +68,25 @@ import javax.resource.ResourceException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openmdx.application.dataprovider.deployment.Deployment_1;
+import org.openmdx.base.accessor.spi.AbstractPersistenceManagerFactory_1;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
-import org.openmdx.base.persistence.spi.ManagerFactory_2_0;
-import org.openmdx.compatibility.base.application.cci.Deployment_1;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.EntityManagerFactory;
+import org.openmdx.compatibility.state1.jmi1.DateState;
 import org.openmdx.compatibility.state1.jmi1.StateCapable;
-import org.openmdx.state2.cci.DateStateViews;
+import org.openmdx.compatibility.state1.spi.StateCapables;
+import org.openmdx.compatibility.state1.view.DateStateViews;
 import org.w3c.spi.DatatypeFactories;
 
+import test.openmdx.compatibility.state1.cci2.SegmentContainsStateNoState;
+import test.openmdx.compatibility.state1.cci2.StateAHasStateD;
+import test.openmdx.compatibility.state1.jmi1.E;
 import test.openmdx.compatibility.state1.jmi1.Segment;
 import test.openmdx.compatibility.state1.jmi1.State1Package;
 import test.openmdx.compatibility.state1.jmi1.StateA;
+import test.openmdx.compatibility.state1.jmi1.StateD;
 
 /**
  * TestState
@@ -89,9 +97,14 @@ public class TestState {
     
     private static final String PROVIDER_NAME = "Standard";
 
+    private static final Path TRANSACTIONAL_PATTERN = StateCapables.CORE_SEGMENT.getDescendant(
+        "extent",
+        ":*"
+    );
+    
     protected static Provider provider;
         
-    protected static final ManagerFactory_2_0 managerFactory = new Deployment_1(
+    protected static final EntityManagerFactory managerFactory = new Deployment_1(
         true, // IN_PROCESS
         "file:../test-core/src/connector/openmdx-2/oracle-10g.rar", // CONNECTOR_URL
         "file:../test-core/src/ear/test-state.ear", // APPLICATION_URL
@@ -104,8 +117,8 @@ public class TestState {
     @BeforeClass
     public static void reset(
     ) throws ResourceException{
-        PersistenceManager persistenceManager = managerFactory.createManager(
-            toSubject("JUnit", null, null)
+        PersistenceManager persistenceManager = managerFactory.getEntityManager(
+            AbstractPersistenceManagerFactory_1.toSubject("JUnit", null, null)
         );
         Transaction transaction = persistenceManager.currentTransaction();
         Authority authority = (Authority) persistenceManager.getObjectById(
@@ -140,74 +153,154 @@ public class TestState {
     protected static PersistenceManager getPersistenceManager(){
         return JDOHelper.getPersistenceManager(provider);
     }
-
+    
     protected static Transaction getTransaction(){
         return getPersistenceManager().currentTransaction();
     }
-    
+
     @Test
-    public void testStateA(
+    public void testStateCapable1(
     ){
         getTransaction().begin();
-        Segment segment = (Segment) provider.getSegment(false, SEGMENT_NAME);
-        StateCapable coreA = (StateCapable) getPersistenceManager().newInstance(StateCapable.class);
-        StateA stateA0_0 = (StateA) getPersistenceManager().newInstance(StateA.class);
-        stateA0_0.setCore(coreA);
-        stateA0_0.setStringValue("State A");
-        stateA0_0.setStateValidFrom(
-            DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-01-01")
+        Authority authority = (Authority) getPersistenceManager().getObjectById(
+            Authority.class, 
+            org.openmdx.compatibility.state1.jmi1.State1Package.AUTHORITY_XRI
         );
-        stateA0_0.setStateValidTo(
+        Provider provider = authority.getProvider("-");
+        org.openmdx.compatibility.state1.jmi1.Segment segment = (org.openmdx.compatibility.state1.jmi1.Segment) provider.getSegment("-");
+        StateCapable c0 = (StateCapable) getPersistenceManager().newInstance(StateCapable.class);
+        String transactionalObjectId = c0.getIdentity();
+        assertNotNull("Transactional Object Id", transactionalObjectId);
+        assertTrue("Transactional Object Id", new Path(transactionalObjectId).isLike(TRANSACTIONAL_PATTERN));
+        Path path = TestState.provider.refGetPath().getDescendant(
+            "segment",
+            SEGMENT_NAME,
+            "a",
+            "c0"
+        );
+        segment.addState1Core(path.toString(), c0);
+        getTransaction().commit();
+    }
+
+    @Test
+    public void testStateCapable2(
+    ){
+        testStateCapable2(false);
+        testStateCapable2(true);
+    }
+
+    private void testStateCapable2(
+        boolean direct
+    ){
+        StateCapable c0 = getStateCapable2(direct);
+        String suffix = direct ? " (direct)" : " (indirect)";
+        assertEquals(
+            "identitiy" + suffix, 
+            "xri://@openmdx*test.openmdx.compatibility.state1/provider/Standard/segment/Compatibility/a/c0", 
+            c0.getIdentity()
+        );
+        Path resourceIdentifier = c0.refGetPath();
+        assertEquals(
+            "resourceIdentifier" + suffix, 
+            "xri://@openmdx*org.openmdx.compatibility.state1/provider/-/segment/-/state1Core/(@openmdx*test.openmdx.compatibility.state1/provider/Standard/segment/Compatibility/a/c0)", 
+            resourceIdentifier.toResourceIdentifier()
+        );
+    }
+    
+    private StateCapable getStateCapable2(
+        boolean direct
+    ){
+        Path identity = TestState.provider.refGetPath().getDescendant(
+            "segment",
+            SEGMENT_NAME,
+            "a",
+            "c0"
+        );        
+        if(direct) {
+            Path path = new Path(
+                org.openmdx.compatibility.state1.jmi1.State1Package.AUTHORITY_XRI
+            ).getDescendant(
+                "provider",
+                "-",
+                "segment",
+                "-",
+                "state1Core",
+                identity.toString()
+            );
+            return (StateCapable) getPersistenceManager().getObjectById(path);
+        } else {
+            Authority authority = (Authority) getPersistenceManager().getObjectById(
+                Authority.class, 
+                org.openmdx.compatibility.state1.jmi1.State1Package.AUTHORITY_XRI
+            );
+            Provider provider = authority.getProvider("-");
+            org.openmdx.compatibility.state1.jmi1.Segment segment = (org.openmdx.compatibility.state1.jmi1.Segment) provider.getSegment("-");
+            return segment.getState1Core(identity.toString());
+        }
+    }
+    
+    @Test
+    public void testStateA_a(
+    ){
+        getTransaction().begin();
+        Segment segment = DateStateViews.getViewForTimeRange(
+            (Segment)provider.getSegment(false, SEGMENT_NAME),
+            DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-01-01"),
             DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-03-31")
-        );
-        StateA stateA0_1 = (StateA) getPersistenceManager().newInstance(StateA.class);
-        stateA0_1.setCore(coreA);
-        stateA0_1.getStringList().add("State A");
-        stateA0_1.setStateValidFrom(
-            DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-04-01")
-        );
-        stateA0_1.setStateValidTo(
+        );            
+        StateA stateA0_0 = (StateA) JDOHelper.getPersistenceManager(segment).newInstance(StateA.class);
+        E e0 = (E) JDOHelper.getPersistenceManager(segment).newInstance(E.class);
+        e0.setStringValue("Object E");
+        e0.setStateA(stateA0_0);
+        segment.addE("e0", e0);
+        stateA0_0.setStringValue("State A");
+        segment.addA(false, "a0", stateA0_0);
+        segment = (Segment) DateStateViews.getViewForTimeRange(
+            segment,
+            DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-04-01"),
             DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-04-30")
         );
-        segment.addState1Core(
-            false, 
-            segment.refGetPath().getDescendant("a","a0").toString(), 
-            coreA
-        );
+        StateA stateA0_1 = (StateA) JDOHelper.getPersistenceManager(segment).newInstance(StateA.class);
+        stateA0_1.getStringList().add("State A");
+        segment.addA(false, "a0", stateA0_1);
         assertEquals("a0!0#stringValue", "State A", stateA0_0.getStringValue());
         assertNull("a0!1#stringValue", stateA0_1.getStringValue());
-        Set<StateA> states = coreA.getState();
-        for(StateA s : states) {
+        System.out.println("Before commit");
+        List<? extends DateState> states = DateStateViews.getStates(stateA0_0);
+        for(DateState s : states) {
             System.out.println(s.toString());
         }
         getTransaction().commit();
-        for(StateA s : states) {
+        System.out.println("After commit");
+        states = DateStateViews.getStates(stateA0_0);
+        for(DateState s : states) {
             System.out.println(s.toString());
         }
         assertEquals("a0!0#stringValue", "State A", stateA0_0.getStringValue());
         assertNull("a0!1#stringValue", stateA0_1.getStringValue());
-        StateA stateA0_2 = (StateA) DateStateViews.getViewForTimeRange(
-            coreA, 
+        Object objectA0_2 = DateStateViews.getViewForTimeRange(
+            stateA0_0, 
             DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-03-20"), 
             DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-04-10")
         );
+        StateA stateA0_2 = (StateA) objectA0_2;
         getTransaction().begin();
         stateA0_2.setStringValue("State A+");
         getTransaction().commit();
-        StateA stateA0_a = (StateA) DateStateViews.getViewForTimePoint(
-            coreA, 
+        StateA stateA0_a = (StateA) DateStateViews.getView(
+            stateA0_0, 
             DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-03-19")
         );
-        StateA stateA0_b = (StateA) DateStateViews.getViewForTimePoint(
-            coreA, 
+        StateA stateA0_b = (StateA) DateStateViews.getView(
+            stateA0_0, 
             DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-03-20")
         );
-        StateA stateA0_c = (StateA) DateStateViews.getViewForTimePoint(
-            coreA, 
+        StateA stateA0_c = (StateA) DateStateViews.getView(
+            stateA0_0, 
             DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-04-10")
         );
-        StateA stateA0_d = (StateA) DateStateViews.getViewForTimePoint(
-            coreA, 
+        StateA stateA0_d = (StateA) DateStateViews.getView(
+            stateA0_0, 
             DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-04-11")
         );
         assertEquals("State A", stateA0_a.getStringValue());   
@@ -219,6 +312,24 @@ public class TestState {
         assertNull(stateA0_d.getStringValue());   
         assertArrayEquals(new Object[]{"State A"}, stateA0_d.getStringList().toArray());   
         assertSame("getCore", stateA0_a, stateA0_a.getCore());
+        
+        SegmentContainsStateNoState.E<E> e = segment.getE();
+        assertEquals("E", 1, e.size());
+        
+        StateAHasStateD.D<StateD> d = stateA0_a.getD();
+//        d = DateStateViews.getNoView(d);
     }
 
+    @Test
+    public void testStateA_b(
+    ){
+        Segment segment = DateStateViews.getView(
+            (Segment)provider.getSegment(false, SEGMENT_NAME),
+            DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-03-31")
+        );            
+        StateA stateA0_b = segment.getA("a0");
+        assertNotNull(stateA0_b);
+        assertEquals("State A+", stateA0_b.getStringValue());   
+    }
+    
 }

@@ -109,7 +109,7 @@ public class XRIAbsolutePath
     public String toIRINormalForm()
     {
         return "/" + super.toIRINormalForm();
-    }    
+    }
     
     /**
      * Tests to see if this absolute path is a subsegment-wise prefix of

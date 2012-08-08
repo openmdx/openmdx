@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: OptimisticLocking_1.java,v 1.13 2008/10/14 00:29:31 hburger Exp $
+ * Name:        $Id: OptimisticLocking_1.java,v 1.18 2009/01/12 02:41:46 hburger Exp $
  * Description: Optimistic Locking Plug-In
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/14 00:29:31 $
+ * Date:        $Date: 2009/01/12 02:41:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,19 +51,22 @@
  */
 package org.openmdx.compatibility.base.dataprovider.layer.model;
 
+import static org.openmdx.compatibility.base.dataprovider.layer.type.Strict_1.STATE1_CAPABLE_CLASS;
+
+import java.math.BigInteger;
 import java.util.Arrays;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -77,6 +80,11 @@ public class OptimisticLocking_1 extends SystemAttributes_1 {
     private boolean optimisticLocking = false;
 
     /**
+     * Tells whether even unmodified objects are checked.
+     */
+    private boolean always = false;
+    
+    /**
      * Calculates and sets an object's digest
      * 
      * @throws ServiceException 
@@ -87,13 +95,29 @@ public class OptimisticLocking_1 extends SystemAttributes_1 {
         if(
             object.getDigest() != null || // Do not override digest
             !isInstanceOfBasicObject(object) // relies on BasicObject's modifiedAt feature
-        ) return;
-        SparseList<?> modifiedAt = object.getValues(SystemAttributes.MODIFIED_AT);
-        if(modifiedAt == null) return;
-        Object source = modifiedAt.get(0);
-        if(source != null) object.setDigest(
-            UnicodeTransformation.toByteArray(source.toString())
-        );
+        ) {
+            return;
+        }
+        String objectClassName = this.getObjectClassName(object);
+        if(STATE1_CAPABLE_CLASS.equals(objectClassName)) {
+            SparseList<?> objectVersion = object.getValues(SystemAttributes.VERSION);
+            if(objectVersion != null) {
+                Number integerVersion = (Number) objectVersion.get(0);
+                if(integerVersion != null) {
+                    BigInteger bigintegerVersion = BigInteger.valueOf(integerVersion.longValue());
+                    object.setDigest(
+                        bigintegerVersion.toByteArray()
+                    );
+                }
+            }
+        } else {
+            SparseList<?> modifiedAt = object.getValues(SystemAttributes.MODIFIED_AT);
+            if(modifiedAt == null) return;
+            Object source = modifiedAt.get(0);
+            if(source != null) object.setDigest(
+                UnicodeTransformation.toByteArray(source.toString())
+            );
+        }
     }
 
     /**
@@ -129,31 +153,47 @@ public class OptimisticLocking_1 extends SystemAttributes_1 {
     ) throws ServiceException {
         if(this.optimisticLocking){
             DataproviderObject afterImage = request.object();
-            DataproviderObject_1_0 beforeImage = getBeforeImage(header, request);
-            propagateDigest(beforeImage);
-            if (
-                !Arrays.equals(beforeImage.getDigest(),afterImage.getDigest())
-            ) throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN, 
-                BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-                "Digest mismatch",
-                new BasicException.Parameter(
-                    "path",
-                    request.path()
-                ),
-                new BasicException.Parameter(
-                    "beforeImageDigest",
-                    beforeImage.getDigest()
-                ),
-                new BasicException.Parameter(
-                    "afterImageDigest",
-                    afterImage.getDigest()
-                )
-            );
+            if(this.always || isModified(afterImage)){
+                DataproviderObject_1_0 beforeImage = getBeforeImage(header, request);
+                propagateDigest(beforeImage);
+                if (
+                    !Arrays.equals(beforeImage.getDigest(),afterImage.getDigest())
+                ) throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+                    "Digest mismatch",
+                    new BasicException.Parameter(
+                        "path",
+                        request.path()
+                    ),
+                    new BasicException.Parameter(
+                        "beforeImageDigest",
+                        beforeImage.getDigest()
+                    ),
+                    new BasicException.Parameter(
+                        "afterImageDigest",
+                        afterImage.getDigest()
+                    )
+                );
+            }
         }
     }
 
-
+    protected boolean isModified(
+        DataproviderObject afterImage
+    ){
+        for(String attribute : afterImage.attributeNames()) {
+            if(
+                !SystemAttributes.OBJECT_CLASS.equals(attribute) &&
+                !SystemAttributes.MODIFIED_AT.equals(attribute) &&
+                !SystemAttributes.MODIFIED_BY.equals(attribute)
+            ){
+                return true;
+            }
+        }
+        return false;
+    }
+    
     //------------------------------------------------------------------------
     // Implements Layer_1_0
     //------------------------------------------------------------------------
@@ -165,9 +205,12 @@ public class OptimisticLocking_1 extends SystemAttributes_1 {
         short id,
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception {
+    ) throws ServiceException {
         super.activate(id, configuration, delegation);
-        this.optimisticLocking = configuration.isOn("optimisticLocking");
+        this.always = configuration.isOn(LayerConfigurationEntries.OPTIMISTIC_LOCKING);
+        this.optimisticLocking = this.always || "whenModified".equalsIgnoreCase(
+            configuration.getFirstValue(LayerConfigurationEntries.OPTIMISTIC_LOCKING)
+        );
     }
 
     /**
@@ -234,6 +277,19 @@ public class OptimisticLocking_1 extends SystemAttributes_1 {
         // Propagate Digest
         //
         propagateDigest(replies);
+    }
+
+    protected String getObjectClassName(
+        DataproviderObject_1_0 object
+    ){
+        if (object != null) {
+            //
+            // OBJECT_CLASS may be null in delete operations
+            //
+            SparseList<Object> objectClassAttribute = object.getValues(SystemAttributes.OBJECT_CLASS);
+            if (objectClassAttribute != null) return (String)objectClassAttribute.get(0);
+        }
+        return null;
     }
 
 }

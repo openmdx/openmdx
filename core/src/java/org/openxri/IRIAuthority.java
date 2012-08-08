@@ -128,9 +128,7 @@ public class IRIAuthority
                 bVal = bCheckIP ? verifyIP(sHost) : verifyDNS(sHost);
             }
         }
-        catch (URISyntaxException e) {
-            // ignore
-        }
+        catch (URISyntaxException e) {}
 
         // consume and return true if valid
         if (bVal)
@@ -173,9 +171,7 @@ public class IRIAuthority
             InetAddress oAddr = InetAddress.getByName(sIP);
             return oAddr != null;
         }
-        catch (UnknownHostException e) {
-            // ignore
-        }
+        catch (UnknownHostException e) {}
         return false;
 
     } // verifyIP()

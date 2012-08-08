@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Sequences.java,v 1.4 2008/03/21 18:46:49 hburger Exp $
+ * Name:        $Id: Sequences.java,v 1.5 2009/01/05 13:48:10 wfro Exp $
  * Description: Sequences
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:46:49 $
+ * Date:        $Date: 2009/01/05 13:48:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,9 +50,9 @@
  */
 package org.openmdx.compatibility.base.dataprovider.layer.persistence.common;
 
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;

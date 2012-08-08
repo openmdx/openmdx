@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePane.java,v 1.8 2008/08/12 16:38:07 wfro Exp $
+ * Name:        $Id: ReferencePane.java,v 1.10 2009/03/08 18:03:23 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:07 $
+ * Date:        $Date: 2009/03/08 18:03:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,7 +61,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.openmdx.application.log.AppLog;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.control.GridControl;
 import org.openmdx.portal.servlet.control.ReferencePaneControl;
@@ -102,7 +102,8 @@ public class ReferencePane
               ) {
                   initialReference = i;
               }
-          } catch(Exception e) {}
+          } 
+          catch(Exception e) {}
         }
     
         // init grid

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObjectNonIndexed.java,v 1.8 2008/03/21 18:47:38 hburger Exp $
+ * Name:        $Id: SlicedDbObjectNonIndexed.java,v 1.10 2009/01/12 16:44:43 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:47:38 $
+ * Date:        $Date: 2009/01/12 16:44:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,14 +55,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 /**
  * This class implements a non-indexed sliced db object. If indexing
  * is not required then this type may improve performance on queries
  * dramatically. This is often the case with user-defined views.
  */
-@SuppressWarnings("unchecked")
 public class SlicedDbObjectNonIndexed 
   extends SlicedDbObject {
 

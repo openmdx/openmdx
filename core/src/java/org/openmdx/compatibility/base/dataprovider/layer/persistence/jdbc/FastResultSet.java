@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: FastResultSet.java,v 1.11 2008/03/21 18:47:37 hburger Exp $
+ * Name:        $Id: FastResultSet.java,v 1.12 2009/01/12 15:43:05 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:47:37 $
+ * Date:        $Date: 2009/01/12 15:43:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,7 +58,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.openmdx.oracle.base.Datums;
 
 /**
  * FastResultSet

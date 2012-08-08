@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RefObject_1_0.java,v 1.9 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: RefObject_1_0.java,v 1.14 2009/01/09 13:30:30 wfro Exp $
  * Description: RefObject_1_0 interface
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2009/01/09 13:30:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,9 +56,9 @@ import java.util.Set;
 
 import javax.jmi.reflect.RefObject;
 
-import org.openmdx.base.accessor.generic.cci.Object_1_0;
+import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 /**
  * This interface extends the javax.jmi.reflect.RefObject interface 
@@ -79,7 +79,7 @@ public interface RefObject_1_0
    * 
    * @return Object_1_0 delegate object.
    */
-  public Object_1_0 refDelegate(
+  public ObjectView_1_0 refDelegate(
   );
 
   /**
@@ -189,24 +189,6 @@ public interface RefObject_1_0
    *              if the object can't be synchronized
    */
   public void refRefresh(
-  );
-
-  /**
-   * Flush the state of the instance to its provider. 
-   *
-   * @exception  JmiServiceException 
-   *              if the object can't be flushed.
-   */
-  public void refFlush(
-  );
-
-  /**
-   * Refresh the state of the instance from its provider asynchrounously.
-   *
-   * @exception  JmiServiceException 
-   *              if the object can't be synchronized asynchronously
-   */
-  public void refRefreshAsynchronously(
   );
 
   /**

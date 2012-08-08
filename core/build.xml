@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.193 2008/12/15 03:15:35 hburger Exp $
+= Name:        $Id: build.xml,v 1.206 2009/03/09 14:26:20 wfro Exp $
 = Description: openMDX/Core Build File
-= Revision:    $Revision: 1.193 $
-= Date:        $Date: 2008/12/15 03:15:35 $
-= Copyright:   (c) 2003-2008 OMEX AG
+= Revision:    $Revision: 1.206 $
+= Date:        $Date: 2009/03/09 14:26:20 $
+= Copyright:   (c) 2003-2009 OMEX AG
 =======================================================================
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2004-2008, OMEX AG, Switzerland
+= Copyright (c) 2004-2009, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -49,13 +49,12 @@
 	default="-projecthelp"
 	xmlns:openmdx="xri://(antlib:org.openmdx.tools.ant)"
 	xmlns:antcontrib="antlib:net.sf.antcontrib"
-	xmlns:jpox="http://www.jpox.org"
 >
 	<description>Builds the openMDX/Core component</description>
 	<property name="project.specification.title" value="openMDX/Core"/>
 
 	<!-- Slash separated platform list, the last entry being the default -->
-	<property name="project.platform.list" value="jre-1.6/jre-1.5"/>
+	<property name="project.platform.list" value="jre-1.5"/>
 
 	<!-- Override the default values -->
 	<property name="model.transformation.class.path" value="openmdx.bootstrap.bin"/>
@@ -103,26 +102,6 @@
 		<include name="org/openxri/*"/>
 		<include name="com/ibm/icu/**"/>
 	</patternset>
-	<patternset id="openmdx-kernel.jre-1.5">
-		<patternset refid="slf4j-api.content"/>
-		<patternset refid="jdo-api.content"/>
-		<include name="javax/jmi/**"/>
-		<include name="org/openmdx/kernel/**"/>
-		<include name="org/openmdx/compatibility/kernel/**"/>
-		<include name="org/openmdx/uses/gnu/**"/>
-		<include name="org/openmdx/uses/org/apache/commons/beanutils/**"/>
-		<include name="org/openmdx/uses/org/apache/commons/collections/**"/>
-		<include name="org/openmdx/uses/org/apache/commons/logging/**"/>
-		<include name="org/openmdx/uses/org/apache/commons/pool/**"/>
-		<include name="org/openmdx/uses/org/apache/commons/transaction/**"/>
-		<include name="org/openmdx/uses/org/apache/regexp/**"/>
-	</patternset>
-	<patternset id="openmdx-kernel.jre-1.6">
-		<patternset refid="openmdx-kernel.jre-1.5"/>
-	</patternset>
-	<patternset id="openmdx-kernel.jar.content">
-		<patternset refid="openmdx-kernel.${build.java.platform}"/>
-	</patternset>
 	<patternset id="openmdx-system.content">
 		<include name="org/openmdx/compatibility/kernel/url/protocol/**"/>
 		<include name="org/openmdx/kernel/url/protocol/**"/>
@@ -132,7 +111,10 @@
 		<include name="org/apache/juli/logging/*"/>
 	</patternset>
 	<patternset id="openmdx-base.jre-1.5">
+		<patternset refid="slf4j-api.content"/>
+		<patternset refid="jdo-api.content"/>
 		<patternset refid="openmdx-base.openxri-syntax"/>
+		<include name="javax/jmi/**"/>
 		<include name="net/*/NetPackage*"/>
 		<include name="net/rfc/*/RfcPackage*"/>
 		<include name="org/*/OrgPackage*"/>
@@ -141,30 +123,41 @@
 		<include name="org/oasisopen/**"/>
 		<include name="org/omg/**"/>
 		<include name="org/openmdx/*/OpenmdxPackage*"/>
+		<include name="org/openmdx/kernel/**"/>
+		<include name="org/openmdx/compatibility/kernel/**"/>
 		<include name="org/openmdx/base/**"/>
 		<include name="org/openmdx/compatibility/base/**"/>
 		<include name="org/openmdx/compatibility/*/CompatibilityPackage*"/>
 		<include name="org/openmdx/*1/**"/>
 		<include name="org/openmdx/*2/**"/>
 		<include name="org/openmdx/compatibility/*1/**"/>
+		<include name="org/openmdx/application/**"/>
+		<exclude name="org/openmdx/application/dataprovider/transport/ejb/**"/>
 		<include name="org/openmdx/oracle/base/**"/>
+		<include name="org/openmdx/jdo/**"/>
+		<include name="org/openmdx/uses/gnu/**"/>
+		<include name="org/openmdx/uses/org/apache/commons/beanutils/**"/>
+		<include name="org/openmdx/uses/org/apache/commons/collections/**"/>
+		<include name="org/openmdx/uses/org/apache/commons/fileupload/**"/>
+		<include name="org/openmdx/uses/org/apache/commons/logging/**"/>
+		<include name="org/openmdx/uses/org/apache/commons/pool/**"/>
+		<include name="org/openmdx/uses/org/apache/commons/transaction/**"/>
+		<include name="org/openmdx/uses/org/apache/regexp/**"/>
 		<include name="org/un/*/UnPackage*"/>
 		<include name="org/w3c/**"/>
 		<include name="org/xmi/*"/>
-	</patternset>
-	<patternset id="openmdx-base.jre-1.6">
-		<patternset refid="openmdx-base.jre-1.5"/>
+		<include name="META-INF/orm.xml"/>
+		<include name="META-INF/openmdxmof.properties"/>
 	</patternset>
 	<patternset id="openmdx-base.jar.content">					
 		<patternset refid="openmdx-base.${build.java.platform}"/>
 	</patternset>
-	<patternset id="openmdx-application.jar.content">
-		<include name="org/openmdx/application/**"/>
-		<include name="org/openmdx/compatibility/application/**"/>
-		<include name="org/openmdx/uses/org/apache/commons/fileupload/**"/>
+	<patternset id="openmdx-base-ext.jar.content">
+		<include name="org/openmdx/application/dataprovider/transport/ejb/cci/Dataprovider_1Home*"/>
+		<include name="org/openmdx/application/dataprovider/transport/ejb/cci/Dataprovider_1_0Remote*"/>
 	</patternset>
-	<patternset id="openmdx-connector.jar.content">
-		<include name="org/openmdx/base/security/pki/*Connection*"/>
+	<patternset id="openmdx-application.jar.content">
+		<include name="org/openmdx/application/dataprovider/transport/ejb/**"/>
 	</patternset>
 	
 	<!-- ******************************************************************* -->
@@ -180,9 +173,11 @@
 			<param name="version-file.property-file" location="${openmdx.home}/openmdx.version.properties"/>
 			<param name="version-file.template-file" location="${basedir}/etc/ant/Version.java.template"/>
 		</antcall>
+		<!--
 		<antcall target="-preprocess-jt-files-">
 			<param name="preprocess-jt.target" value="java"/>
 		</antcall>
+		-->
 		<fail message="JRE ${build.target.jre} not found" unless="build.target.jre.found"/>
 		<javac 
 			destdir="${build.dir}/bin" 
@@ -208,7 +203,7 @@
 			<include name="org/openmdx/compatibility/kernel/**/*.java"/>
 			<include name="org/openmdx/compatibility/model1/**/*.java"/>
 			<include name="org/openmdx/compatibility/state1/spi/*.java"/>
-			<include name="org/openmdx/model1/**/*.java"/>
+			<include name="org/openmdx/application/mof/**/*.java"/>
 			<include name="org/slf4j/*.java"/>
 			<include name="org/slf4j/helpers/*.java"/>
 			<include name="org/slf4j/impl/*.java"/>
@@ -221,7 +216,7 @@
 			<exclude name="org/openmdx/base/accessor/jmi1/**/*.java"/>
 			<exclude name="org/openmdx/base/persistence/**/*.java"/>
 			<exclude name="org/openmdx/base/transport/rest/**/*.java"/>
-			<exclude name="org/openmdx/base/aop2/standard/**/*.java"/>
+			<exclude name="org/openmdx/base/aop2/*.java"/>
 			<patternset refid="build.exclude"/>
 			<patternset refid="openmdx-base.openxri-syntax"/>
 		</javac>
@@ -313,29 +308,65 @@
 		name="java-archives" 
 		depends="deliverables-init,build"
 	>
-	    <openmdx:archive
-			destfile="${deliver.dir}/lib/openmdx-kernel.jar"
+    <openmdx:archive
+			destfile="${deliver.dir}/lib/openmdx-system.jar"
 			format="jar"
 		>
 			<openmdx:archivemanifest refid="project.manifest"/>
 			<openmdx:archivemanifest>
-				<attribute name="Specification-Title" value="${project.specification.title} Library kernel"/>
-				<attribute name="Implementation-Title" value="openmdx-kernel for ${build.target.platform}"/>
+				<attribute name="Specification-Title" value="${project.specification.title} Library System"/>
+				<attribute name="Implementation-Title" value="tomcat-system for ${build.target.platform}"/>
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx-kernel.jar.content"/>
+				<patternset refid="openmdx-system.content"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+		<openmdx:archive
+			destfile="${deliver.dir}/lib/openmdx-base.jar"
+			format="jar"
+			duplicate="preserve"
+		>
+			<openmdx:archivemanifest refid="project.manifest"/>
+			<openmdx:archivemanifest>
+				<attribute name="Specification-Title" value="${project.specification.title} Base Library"/>
+				<attribute name="Implementation-Title" value="openmdx-base for ${build.target.platform}"/>
+			</openmdx:archivemanifest>
+			<openmdx:archivefileset dir="${build.dir}/bin">
+				<patternset refid="openmdx-base.jar.content"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/resource" whenmissing="skip">
+				<patternset refid="openmdx-base.jar.content"/>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset dir="${basedir}/src/resource">
-				<patternset refid="openmdx-kernel.jar.content"/>
+				<patternset refid="openmdx-base.jar.content"/>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset src="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
-				<patternset refid="openmdx-kernel.jar.content"/>
-			</openmdx:archivefileset>
+				<patternset refid="openmdx-base.jar.content"/>
+			</openmdx:archivefileset>						
 			<openmdx:archivefileset src="${openmdx.home}/java2/${build.target.platform}/extension/lib/jdo2-api.jar">
 				<patternset refid="jdo-api.content"/>
 			</openmdx:archivefileset>
 		</openmdx:archive>
-	    <openmdx:archive
+		<openmdx:archive
+			destfile="${deliver.dir}/lib/openmdx-application.jar"
+			format="jar"
+		>
+			<openmdx:archivemanifest refid="project.manifest"/>
+			<openmdx:archivemanifest>
+				<attribute name="Specification-Title" value="${project.specification.title} Application Library"/>
+				<attribute name="Implementation-Title" value="openmdx-application for ${build.target.platform}"/>
+			</openmdx:archivemanifest>
+			<openmdx:archivefileset dir="${build.dir}/bin">
+				<patternset refid="openmdx-application.jar.content"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${basedir}/src/resource">
+				<patternset refid="openmdx-application.jar.content"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset src="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
+				<patternset refid="openmdx-application.jar.content"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+    <openmdx:archive
 			destfile="${deliver.dir}/lib/tomcat-juli.jar"
 			format="jar"
 		>
@@ -350,67 +381,23 @@
 			<openmdx:archivefileset src="${openmdx.home}/apache/${build.java.platform}/tomcat/lib/tomcat-juli.jar">
 				<patternset refid="tomcat-juli.content"/>
 			</openmdx:archivefileset>
-		</openmdx:archive>
+		</openmdx:archive>		
 		<openmdx:archive
-			destfile="${deliver.dir}/lib/openmdx-base.jar"
+			destfile="${deliver.dir}/lib/openmdx-base-ext.jar"
 			format="jar"
 		>
 			<openmdx:archivemanifest refid="project.manifest"/>
 			<openmdx:archivemanifest>
-				<attribute name="Specification-Title" value="${project.specification.title} Library base"/>
-				<attribute name="Implementation-Title" value="openmdx-base for ${build.target.platform}"/>
+				<attribute name="Specification-Title" value="${project.specification.title} Base Library Extension"/>
+				<attribute name="Implementation-Title" value="openmdx-base-ext for ${build.target.platform}"/>
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx-base.jar.content"/>
-			</openmdx:archivefileset>
-			<openmdx:archivefileset dir="${build.dir}/src/resource" whenmissing="skip">
-				<patternset refid="openmdx-base.jar.content"/>
+				<patternset refid="openmdx-base-ext.jar.content"/>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset dir="${basedir}/src/resource">
-				<patternset refid="openmdx-base.jar.content"/>
+				<patternset refid="openmdx-base-ext.jar.content"/>
 			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
-				<patternset refid="openmdx-base.jar.content"/>
-			</openmdx:archivefileset>
-		</openmdx:archive>
-
-		<openmdx:archive
-			destfile="${deliver.dir}/lib/openmdx-application.jar"
-			format="jar"
-		>
-			<openmdx:archivemanifest refid="project.manifest"/>
-			<openmdx:archivemanifest>
-				<attribute name="Specification-Title" value="${project.specification.title} Library application"/>
-				<attribute name="Implementation-Title" value="openmdx-application for ${build.target.platform}"/>
-			</openmdx:archivemanifest>
-			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx-application.jar.content"/>
-			</openmdx:archivefileset>
-			<openmdx:archivefileset dir="${basedir}/src/resource">
-				<patternset refid="openmdx-application.jar.content"/>
-			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
-				<patternset refid="openmdx-application.jar.content"/>
-			</openmdx:archivefileset>
-		</openmdx:archive>
-		
-		<openmdx:archive
-			destfile="${deliver.dir}/lib/openmdx-connector.jar"
-			format="jar"
-		>
-			<openmdx:archivemanifest refid="project.manifest"/>
-			<openmdx:archivemanifest>
-				<attribute name="Specification-Title" value="${project.specification.title} Library connector"/>
-				<attribute name="Implementation-Title" value="openmdx-connector for ${build.target.platform}"/>
-			</openmdx:archivemanifest>
-			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx-connector.jar.content"/>
-			</openmdx:archivefileset>
-			<openmdx:archivefileset dir="${basedir}/src/resource">
-				<patternset refid="openmdx-connector.jar.content"/>
-			</openmdx:archivefileset>
-		</openmdx:archive>
-		
+		</openmdx:archive>		
 	</target>
 	
 	<!-- ******************************************************************* -->
@@ -485,6 +472,7 @@
 				<include name="RELEASE-NOTES"/>
 				<include name="build.xml"/>
 				<include name="*.properties"/>
+				<include name="*.checkstyle"/>
 				<include name="*-properties.xml"/>
 				<include name=".cvsignore"/>
 				<include name="etc/**"/>
@@ -646,3 +634,4 @@ ${build.dir}/doc/api/index.html
 	</target>
 
 </project>
+

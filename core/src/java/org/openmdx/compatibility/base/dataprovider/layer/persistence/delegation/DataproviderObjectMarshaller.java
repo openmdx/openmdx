@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataproviderObjectMarshaller.java,v 1.23 2008/11/11 15:39:10 wfro Exp $
+ * Name:        $Id: DataproviderObjectMarshaller.java,v 1.33 2009/02/19 19:41:08 hburger Exp $
  * Description: DataproviderObjectMarshaller
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.33 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/11 15:39:10 $
+ * Date:        $Date: 2009/02/19 19:41:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,32 +81,32 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.ietf.jgss.Oid;
 import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.mof.cci.ModelAttributes;
+import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.application.mof.cci.PrimitiveTypes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.collection.MarshallingSortedMap;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.format.DateFormat;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.code.ModelAttributes;
-import org.openmdx.model1.code.Multiplicities;
-import org.openmdx.model1.code.PrimitiveTypes;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObject;
 import org.w3c.cci2.CharacterLargeObjects;
-import org.w3c.cci2.Datatypes;
 import org.w3c.cci2.LargeObject;
 import org.w3c.cci2.SparseArray;
+import org.w3c.spi2.Datatypes;
 
 /**
  * DataproviderObjectMarshaller
@@ -234,15 +234,15 @@ class DataproviderObjectMarshaller {
                 Set<String> attributes = new HashSet<String>();
                 String className = source.refClass().refMofId();
                 ModelElement_1_0 classDef = model.getElement(className);
-                SparseList<?> allFeatures = classDef.getValues("feature");
+                List<?> allFeatures = classDef.objGetList("feature");
                 for(
-                        Iterator<?> f = allFeatures.populationIterator();
-                        f.hasNext();
+                    Iterator<?> f = allFeatures.listIterator();
+                    f.hasNext();
                 ){
                     ModelElement_1_0 feature = model.getElement(f.next());
                     if(isAttribute(feature, model)) {
                         attributes.add(
-                            (String) feature.values("name").get(0)
+                            (String) feature.objGetValue("name")
                         );
                     }
                 }
@@ -257,9 +257,9 @@ class DataproviderObjectMarshaller {
         ModelElement_1_0 feature,
         Model_1_0 model
     ) throws ServiceException{
-        return !ModelAttributes.REFERENCE.equals(feature.values(SystemAttributes.OBJECT_CLASS).get(0)) || (
-                "none".equals(model.getElement(feature.values("exposedEnd").get(0)).values("aggregation").get(0)) &&
-                "none".equals(model.getElement(feature.values("referencedEnd").get(0)).values("aggregation").get(0))
+        return !ModelAttributes.REFERENCE.equals(feature.objGetValue(SystemAttributes.OBJECT_CLASS)) || (
+            "none".equals(model.getElement(feature.objGetValue("exposedEnd")).objGetValue("aggregation")) &&
+            "none".equals(model.getElement(feature.objGetValue("referencedEnd")).objGetValue("aggregation"))
         );
     }
 
@@ -383,14 +383,14 @@ class DataproviderObjectMarshaller {
                 true
             );
             if(
-                    featureDef != null &&
-                    model.referenceIsStoredAsAttribute(featureDef) && 
-                    Multiplicities.MAP.equals(featureDef.values("multiplicity").get(0))
+                featureDef != null &&
+                model.referenceIsStoredAsAttribute(featureDef) && 
+                Multiplicities.MAP.equals(featureDef.objGetValue("multiplicity"))
             ){
                 RefObject_1_0 lock = lenientGetContext(source,SystemAttributes.LOCK_CONTEXT);
                 if(
-                        (lock != null) &&
-                        SystemAttributes.OPTIMISTIC_LOCK_CLASS.equals(lock.refClass().refMofId())
+                    (lock != null) &&
+                    SystemAttributes.OPTIMISTIC_LOCK_CLASS.equals(lock.refClass().refMofId())
                 ) {
                     target.setDigest((byte[])lock.refGetValue(SystemAttributes.OBJECT_DIGEST));
                 }
@@ -404,9 +404,9 @@ class DataproviderObjectMarshaller {
         List<String> fetchGroup = new ArrayList<String>(requiredSet);
         // Assert that identity is fetched first
         for(
-                int step = 0;
-                step < FETCH_ITERATION_LIMIT;
-                step++
+            int step = 0;
+            step < FETCH_ITERATION_LIMIT;
+            step++
         ) {
             for(String feature : fetchGroup){
                 Map<String,RefObject_1_0> namespaces = null;
@@ -424,13 +424,13 @@ class DataproviderObjectMarshaller {
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_FOUND, 
                             "feature not member of classifier",
-                            new BasicException.Parameter("class", classDef.values("qualifiedName").get(0)),
+                            new BasicException.Parameter("class", classDef.objGetValue("qualifiedName")),
                             new BasicException.Parameter("feature", feature)
                         );
                         if(
-                                ModelAttributes.REFERENCE.equals(featureDef.values(SystemAttributes.OBJECT_CLASS).get(0)) && ( // isReference
-                                        model.referenceIsStoredAsAttribute(featureDef) && Multiplicities.MAP.equals(featureDef.values("multiplicity").get(0))
-                                )
+                            ModelAttributes.REFERENCE.equals(featureDef.objGetValue(SystemAttributes.OBJECT_CLASS)) && ( // isReference
+                                model.referenceIsStoredAsAttribute(featureDef) && Multiplicities.MAP.equals(featureDef.objGetValue("multiplicity"))
+                            )
                         ){ 
                             namespaceType = feature;
                             source.refGetValue(feature);
@@ -490,22 +490,25 @@ class DataproviderObjectMarshaller {
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_FOUND, 
                             "feature not member of classifier",
-                            new BasicException.Parameter("class", classDef.values("qualifiedName").get(0)),
+                            new BasicException.Parameter("class", classDef.objGetValue("qualifiedName")),
                             new BasicException.Parameter("feature", feature)
                         );
                     }
-                    boolean isAttribute = ModelAttributes.ATTRIBUTE.equals(featureDef.values(SystemAttributes.OBJECT_CLASS).get(0));
-                    boolean isReference = ModelAttributes.REFERENCE.equals(featureDef.values(SystemAttributes.OBJECT_CLASS).get(0));
+                    boolean isAttribute = ModelAttributes.ATTRIBUTE.equals(featureDef.objGetValue(SystemAttributes.OBJECT_CLASS));
+                    boolean isReference = ModelAttributes.REFERENCE.equals(featureDef.objGetValue(SystemAttributes.OBJECT_CLASS));
                     boolean isReferenceStoredAsAttribute = isReference && model.referenceIsStoredAsAttribute(featureDef);
+                    boolean isCoreAttribute = // TODO Handle state2 and other aspects as well!
+                        "org:openmdx:state2:StateCapable".equals(((Path)featureDef.objGetValue("container")).getBase()) &&
+                        !"org:openmdx:compatibility:state1:StateCapable".equals(classDef.objGetValue("qualifiedName"));
 
                     // attributes and references stored as attributes
-                    if(isAttribute || isReferenceStoredAsAttribute) {
+                    if((isAttribute || isReferenceStoredAsAttribute) && !isCoreAttribute) {
 
                         // structure types are not supported
                         ModelElement_1_0 featureType = model.getElementType(
                             featureDef
                         );
-                        if(ModelAttributes.STRUCTURE_TYPE.equals(featureType.values(SystemAttributes.OBJECT_CLASS).get(0))) {
+                        if(ModelAttributes.STRUCTURE_TYPE.equals(featureType.objGetValue(SystemAttributes.OBJECT_CLASS))) {
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.INVALID_CONFIGURATION, 
@@ -521,13 +524,13 @@ class DataproviderObjectMarshaller {
                          * is the modeled multiplicity. In case of a reference with a qualifier
                          * the multiplicity is <<list>> else the modeled multiplicity.
                          */
-                        String multiplicity = (String)featureDef.values("multiplicity").get(0);
+                        String multiplicity = (String)featureDef.objGetValue("multiplicity");
                         if(isReference) {
                             ModelElement_1_0 referencedEnd = model.getElement(
-                                featureDef.values("referencedEnd").get(0)
+                                featureDef.objGetValue("referencedEnd")
                             );
-                            if(!referencedEnd.values("qualifierType").isEmpty()) {
-                                ModelElement_1_0 qualifierType = model.getDereferencedType(referencedEnd.values("qualifierType").get(0));
+                            if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
+                                ModelElement_1_0 qualifierType = model.getDereferencedType(referencedEnd.objGetValue("qualifierType"));
                                 if(model.isNumericType(qualifierType)) {
                                     multiplicity = Multiplicities.LIST;
                                 }
@@ -667,7 +670,7 @@ class DataproviderObjectMarshaller {
                                 Object sourceValue = source.refGetValue(feature);
                                 if(sourceValue != null) {
                                     LargeObject lob = null;
-                                    String streamType = (String)featureType.values("qualifiedName").get(0);
+                                    String streamType = (String)featureType.objGetValue("qualifiedName");
                                     if(PrimitiveTypes.BINARY.equals(streamType)){
                                         if(sourceValue instanceof BinaryLargeObject) {
                                             lob = (BinaryLargeObject)sourceValue;
@@ -713,7 +716,6 @@ class DataproviderObjectMarshaller {
                                     exception,
                                     BasicException.Code.DEFAULT_DOMAIN,
                                     BasicException.Code.TRANSFORMATION_FAILURE,
-                                    null,
                                     "Large object propagation failure"
                                 );
                             }
@@ -884,17 +886,17 @@ class DataproviderObjectMarshaller {
                     new BasicException.Parameter("class", classDef),
                     new BasicException.Parameter("attribute name", featureName)
                 );        
-                String multiplicity = (String)featureDef.values("multiplicity").get(0);
+                String multiplicity = (String)featureDef.objGetValue("multiplicity");
                 if(model.isReferenceType(featureDef)) {
                     ModelElement_1_0 referencedEnd = model.getElement(
-                        featureDef.values("referencedEnd").get(0)
+                        featureDef.objGetValue("referencedEnd")
                     );
-                    if(referencedEnd.values("qualifierType").size() > 0) {
+                    if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
                         multiplicity = Multiplicities.LIST;
                     }
                     // map aggregation none, multiplicity 0..n, no qualifier to <<set>>
                     // in case <<list>> semantic is required it must be modeled as 
-                    // aggregation none, multiplicita 0..1, numeric qualifier
+                    // aggregation none, multiplicity 0..1, numeric qualifier
                     else if(Multiplicities.MULTI_VALUE.equals(multiplicity)) {
                         multiplicity = Multiplicities.SET;
                     }
@@ -1032,7 +1034,6 @@ class DataproviderObjectMarshaller {
     }
 
     //------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public static List<?> toStructureValues(
         DataproviderObject source,
         Map<Path,RefObject_1_0> objectCache,
@@ -1043,16 +1044,16 @@ class DataproviderObjectMarshaller {
         String typeName = (String)source.getValues(SystemAttributes.OBJECT_CLASS).get(0);
         ModelElement_1_0 structDef = model.getElement(typeName);
         Marshaller marshaller = new ToObjectMarshaller(objectCache, entityManager);
-        for(Object i: structDef.values("content")) {
+        for(Object i: structDef.objGetList("content")) {
             Path e = (Path)i;
             ModelElement_1_0 fieldDef = model.getElement(e);
-            String fieldName = (String)fieldDef.values("name").get(0);
-            String multiplicity = (String)fieldDef.values("multiplicity").get(0);
+            String fieldName = (String)fieldDef.objGetValue("name");
+            String multiplicity = (String)fieldDef.objGetValue("multiplicity");
             if(model.isReferenceType(fieldDef)) {
                 ModelElement_1_0 referencedEnd = model.getElement(
-                    fieldDef.values("referencedEnd").get(0)
+                    fieldDef.objGetValue("referencedEnd")
                 );
-                if(referencedEnd.values("qualifierType").size() > 0) {
+                if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
                     multiplicity = Multiplicities.LIST;
                 }
                 // map aggregation none, multiplicity 0..n, no qualifier to <<set>>
@@ -1180,11 +1181,7 @@ class DataproviderObjectMarshaller {
                 toClass(
                     (String) model.getElementType(
                         featureDef
-                    ).values(
-                        "qualifiedName"
-                    ).get(
-                        0
-                    )
+                    ).objGetValue("qualifiedName")
                 ),
                 (String) value
             ) : 

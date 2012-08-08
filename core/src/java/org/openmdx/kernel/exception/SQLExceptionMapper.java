@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SQLExceptionMapper.java,v 1.2 2006/01/12 16:24:35 hburger Exp $
+ * Name:        $Id: SQLExceptionMapper.java,v 1.4 2009/02/24 16:23:39 hburger Exp $
  * Description: SQL Exception Mapper
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/01/12 16:24:35 $
+ * Date:        $Date: 2009/02/24 16:23:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,8 +66,9 @@ final class SQLExceptionMapper implements BasicException.Mapper {
         Throwable throwable
     ) {
         SQLException exception = (SQLException)throwable;
+        Throwable cause = exception.getCause();
         return new BasicException(
-            exception.getNextException(),
+            cause == null ? exception.getNextException() : cause,
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.GENERIC,
             new BasicException.Parameter[]{

@@ -252,7 +252,6 @@ public class IRIUtils
 			s = URLEncoder.encode(UCharacter.toString(cp), "UTF-8");
 		}
 		catch (UnsupportedEncodingException e) {
-		    // ignore
 		}
 		return s;
 	}
@@ -329,10 +328,10 @@ public class IRIUtils
 	}
 	
 	
-	private static int countUTF8Sequence(String in, int _inIndex, byte[] u8buf)
+	private static int countUTF8Sequence(String in, int inIndex, byte[] u8buf)
 	{
 		int c[] = new int[4];
-		int inIndex = _inIndex;
+		
 		if (!isPercentEncoded(in, inIndex))
 			return 0;
 		
@@ -469,7 +468,7 @@ public class IRIUtils
 	 * @param index
 	 * @return The percent sequence String of length 3, or <code>null</code> if a valid sequence cannot be read.
 	 */
-	private static String getHex(String s, int index)
+    private static String getHex(String s, int index)
 	{
 		// make sure the string is long enough
 		if (s.length() < index + 3)

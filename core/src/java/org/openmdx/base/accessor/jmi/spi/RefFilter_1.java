@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefFilter_1.java,v 1.35 2008/11/11 15:37:51 wfro Exp $
+ * Name:        $Id: RefFilter_1.java,v 1.42 2009/02/10 16:36:37 hburger Exp $
  * Description: RefFilter_1 class
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/11 15:37:51 $
+ * Date:        $Date: 2009/02/10 16:36:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,6 +68,14 @@ import javax.jmi.reflect.RefPackage;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.omg.mof.spi.Identifier;
+import org.omg.mof.spi.Names;
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.application.dataprovider.cci.Orders;
+import org.openmdx.application.mof.cci.ModelAttributes;
+import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.application.mof.cci.PrimitiveTypes;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
@@ -76,25 +84,17 @@ import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_1;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.dataprovider.cci.Orders;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.compatibility.base.query.Quantors;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Quantors;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.code.ModelAttributes;
-import org.openmdx.model1.code.Multiplicities;
-import org.openmdx.model1.code.PrimitiveTypes;
-import org.openmdx.model1.mapping.Names;
-import org.openmdx.model1.mapping.java.Identifier;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.ImmutableDatatypeFactory;
 
@@ -130,7 +130,7 @@ implements RefFilter_1_1 {
     }
 
     //-------------------------------------------------------------------------
-    private Model_1_0 getModel(
+    private final Model_1_0 getModel(
     ) {
         return this.refPackage.refModel();
     }
@@ -170,7 +170,7 @@ implements RefFilter_1_1 {
     ) throws ServiceException {
 
         if(
-                !elementDef.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE) &&
+                !elementDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE) &&
                 !this.getModel().referenceIsStoredAsAttribute(elementDef)
         ) {
             throw new ServiceException (
@@ -194,7 +194,7 @@ implements RefFilter_1_1 {
 
         try {
             this.assertAttributeOrReferenceStoredAsAttribute(featureDef);
-            String featureName = (String)featureDef.values("name").get(0);
+            String featureName = (String)featureDef.objGetValue("name");
 
             SysLog.trace("feature", featureName);
             SysLog.trace("quantor", Quantors.toString(quantor));
@@ -202,17 +202,17 @@ implements RefFilter_1_1 {
             SysLog.trace("value", value);
 
             if(this.getModel().isReferenceType(featureDef)) {
-                if("org:openmdx:base:ContextCapable:context".equals(featureDef.values("qualifiedName").get(0))) {
+                if("org:openmdx:base:ContextCapable:context".equals(featureDef.objGetValue("qualifiedName"))) {
                     if(
-                            quantor == Quantors.THERE_EXISTS &&
-                            operator == FilterOperators.IS_IN 
+                        quantor == Quantors.THERE_EXISTS &&
+                        operator == FilterOperators.IS_IN 
                     ){
                         Model_1_0 m = getModel();
                         int ii = 0;
                         for(
-                                Iterator<?> i = value.iterator();
-                                i.hasNext();
-                                ii++
+                            Iterator<?> i = value.iterator();
+                            i.hasNext();
+                            ii++
                         ) {
                             Object c = i.next();
                             if(c instanceof RefObject_1_0){
@@ -229,8 +229,8 @@ implements RefFilter_1_1 {
                                         )
                                     );
                                     for(
-                                            Iterator<String> j = e.refDefaultFetchGroup().iterator();
-                                            j.hasNext();
+                                        Iterator<String> j = e.refDefaultFetchGroup().iterator();
+                                        j.hasNext();
                                     ){
                                         String attribute = j.next();
                                         Object v = e.refGetValue(attribute);
@@ -270,8 +270,8 @@ implements RefFilter_1_1 {
                 } else {
                     List<Path> paths = new ArrayList<Path>();
                     for(
-                            Iterator<?> i = value.iterator();
-                            i.hasNext();
+                        Iterator<?> i = value.iterator();
+                        i.hasNext();
                     ) {
                         Object v = i.next();
                         if(v instanceof RefObject_1_0){
@@ -307,7 +307,7 @@ implements RefFilter_1_1 {
                     );
                 }   
             } else if(this.getModel().isAttributeType(featureDef)) {
-                Object featureType = this.getModel().getElement(featureDef.values("type").get(0)).values("qualifiedName").get(0);
+                Object featureType = this.getModel().getElement(featureDef.objGetValue("type")).objGetValue("qualifiedName");
                 FilterProperty p = null;
                 if(
                     PrimitiveTypes.DATETIME.equals(featureType) ||
@@ -390,7 +390,7 @@ implements RefFilter_1_1 {
             SysLog.trace("order", Orders.toString(order));
             this.attributeSpecifiers.add(
                 new AttributeSpecifier(
-                    (String)featureDef.values("name").get(0),
+                    (String)featureDef.objGetValue("name"),
                     index,
                     order
                 )
@@ -418,8 +418,8 @@ implements RefFilter_1_1 {
     //-------------------------------------------------------------------------
     public Object refGetOrder(
         ModelElement_1_0 featureDef
-    ) {
-        String multiplicity = (String)featureDef.values("multiplicity").get(0);
+    ) throws ServiceException {
+        String multiplicity = (String)featureDef.objGetValue("multiplicity");
         return 
         Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
         Multiplicities.OPTIONAL_VALUE.equals(multiplicity) 
@@ -444,8 +444,8 @@ implements RefFilter_1_1 {
     //-------------------------------------------------------------------------
     public Object refGetPredicate(
         ModelElement_1_0 featureDef
-    ){
-        String multiplicity = (String)featureDef.values("multiplicity").get(0);
+    ) throws ServiceException {
+        String multiplicity = (String)featureDef.objGetValue("multiplicity");
         return Multiplicities.SINGLE_VALUE.equals(multiplicity) ? refGetPredicate(
             Quantors.THERE_EXISTS, // Quantors.FOR_ALL would give the same result but is very inefficient
             featureDef
@@ -480,11 +480,11 @@ implements RefFilter_1_1 {
         ModelElement_1_0 featureDef
     ){
         try {
-            String name = (String) featureDef.values("qualifiedName").get(0);
+            String name = (String) featureDef.objGetValue("qualifiedName");
             ModelElement_1_0 typeDef = this.getModel().getElementType(
                 featureDef
             );
-            String type = (String) typeDef.values("qualifiedName").get(0);
+            String type = (String) typeDef.objGetValue("qualifiedName");
             if(this.getModel().isPrimitiveType(typeDef)) {
                 return PrimitiveTypes.BOOLEAN.equals(type) ? (AbstractPredicate_1) new BooleanTypePredicate_1(
                     this,
@@ -662,12 +662,12 @@ implements RefFilter_1_1 {
     ) {
         try {
             ModelElement_1_0 classDef = this.refPackage.refModel().getElement(this.filterType);   
-            String qualifiedClassName = (String)classDef.values("qualifiedName").get(0);
+            String qualifiedClassName = (String)classDef.objGetValue("qualifiedName");
             FeatureMapper featureMapper = featureMappers.get(qualifiedClassName);
             if(featureMapper == null) {
                 String packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
                 String className = Identifier.CLASS_PROXY_NAME.toIdentifier(
-                    (String)classDef.values("name").get(0)
+                    (String)classDef.objGetValue("name")
                 );
                 Class<?> queryIntf = Classes.getApplicationClass(
                     packageName.replace(':', '.') + "." + Names.CCI2_PACKAGE_SUFFIX + "." + className + "Query"

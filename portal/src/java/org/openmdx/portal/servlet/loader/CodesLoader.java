@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodesLoader.java,v 1.11 2008/08/12 16:38:07 wfro Exp $
+ * Name:        $Id: CodesLoader.java,v 1.14 2009/03/08 18:03:20 wfro Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:07 $
+ * Date:        $Date: 2009/03/08 18:03:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,15 +72,15 @@ import javax.servlet.ServletContext;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
+import org.openmdx.base.naming.Path;
 import org.openmdx.compatibility.base.accessor.jmi.JmiHelper;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
-import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
@@ -285,7 +285,8 @@ public class CodesLoader
                             parent = loadedObjects.containsKey(parentIdentity)
                                 ? (RefObject_1_0)loadedObjects.get(parentIdentity)
                                 : (RefObject_1_0)store.getObjectById(parentIdentity);
-                        } catch(Exception e) {}
+                        } 
+                        catch(Exception e) {}
                         if(parent != null) {
                             RefContainer container = (RefContainer)parent.refGetValue(
                                 entry.path().get(entry.path().size() - 2)

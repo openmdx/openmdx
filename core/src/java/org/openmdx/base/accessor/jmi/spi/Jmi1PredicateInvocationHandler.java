@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1PredicateInvocationHandler.java,v 1.10 2008/11/24 10:17:07 wfro Exp $
+ * Name:        $Id: Jmi1PredicateInvocationHandler.java,v 1.15 2009/01/13 17:33:49 wfro Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/24 10:17:07 $
+ * Date:        $Date: 2009/01/13 17:33:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,13 +60,13 @@ import java.util.Collections;
 
 import javax.jdo.Query;
 
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.compatibility.base.query.Quantors;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Quantors;
 import org.w3c.cci2.AnyTypePredicate;
 
 /**
@@ -213,7 +213,7 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
                 methodName.substring(7),
                 FeatureMapper.MethodSignature.PREDICATE                                
             );
-            String featureName = (String)feature.values("name").get(0);
+            String featureName = (String)feature.objGetValue("name");
             return this.delegate.refGetOrder(
                 featureName
             );
@@ -233,7 +233,7 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
                     methodName.substring(11),
                     FeatureMapper.MethodSignature.PREDICATE                                
                 );
-                String featureName = (String)feature.values("name").get(0);
+                String featureName = (String)feature.objGetValue("name");
                 return this.delegate.refGetPredicate(
                     Quantors.THERE_EXISTS,
                     featureName
@@ -255,7 +255,7 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
                     methodName.substring(6),
                     FeatureMapper.MethodSignature.PREDICATE                
                 );
-                String featureName = (String)feature.values("name").get(0);
+                String featureName = (String)feature.objGetValue("name");
                 return this.delegate.refGetPredicate(
                     Quantors.FOR_ALL,
                     featureName
@@ -270,7 +270,7 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
                 methodName,
                 FeatureMapper.MethodSignature.PREDICATE                
             );
-            String featureName = (String)feature.values("name").get(0);            
+            String featureName = (String)feature.objGetValue("name");            
             return this.delegate.refGetPredicate(
                 featureName
             );

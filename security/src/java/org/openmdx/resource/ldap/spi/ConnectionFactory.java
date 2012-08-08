@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ConnectionFactory.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: ConnectionFactory.java,v 1.2 2009/03/08 18:52:19 wfro Exp $
  * Description: LDAP Connection Factory 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -118,7 +118,8 @@ public class ConnectionFactory
                 this.managedConnectionFactory, 
                 this.connectionRequestInfo
             );
-        } catch (ResourceException exception) {
+        } 
+        catch (ResourceException exception) {
             throw (LDAPException) new LDAPException(
                 "Connection handle acquisition failed",
                 LDAPException.CONNECT_ERROR,

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Filter.java,v 1.9 2008/09/09 10:52:22 hburger Exp $
+ * Name:        $Id: Filter.java,v 1.11 2009/01/06 10:21:19 wfro Exp $
  * Description: Filter
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/09 10:52:22 $
+ * Date:        $Date: 2009/01/06 10:21:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,9 +59,8 @@ import java.util.List;
 
 import javax.resource.ResourceException;
 
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.base.resource.Records;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.query.FilterProperty;
 import org.w3c.cci2.AnyTypePredicate;
 
 /**
@@ -76,7 +75,6 @@ import org.w3c.cci2.AnyTypePredicate;
  * @see java.beans.XMLDecoder
  * @see java.beans.XMLEncoder
  */
-@SuppressWarnings("unchecked")
 public class Filter
     implements Serializable, AnyTypePredicate {
 
@@ -86,8 +84,8 @@ public class Filter
      */
     public Filter(
     ) {
-        this.conditions = new ArrayList();
-        this.orderSpecifiers = new ArrayList();
+        this.conditions = new ArrayList<Condition>();
+        this.orderSpecifiers = new ArrayList<OrderSpecifier>();
     }
 
     //-------------------------------------------------------------------------
@@ -98,9 +96,9 @@ public class Filter
     public Filter(
         Condition[] conditions
     ) {
-        this.conditions = new ArrayList();
+        this.conditions = new ArrayList<Condition>();
         this.setCondition(conditions);
-        this.orderSpecifiers = new ArrayList();
+        this.orderSpecifiers = new ArrayList<OrderSpecifier>();
     }
 
     //-------------------------------------------------------------------------
@@ -112,9 +110,9 @@ public class Filter
         Condition[] conditions,
         OrderSpecifier[] orderSpecifiers
     ) {
-        this.conditions = new ArrayList();
+        this.conditions = new ArrayList<Condition>();
         this.setCondition(conditions);
-        this.orderSpecifiers = new ArrayList();
+        this.orderSpecifiers = new ArrayList<OrderSpecifier>();
         this.setOrderSpecifier(orderSpecifiers);
     }
 
@@ -123,13 +121,13 @@ public class Filter
          FilterProperty[] filterProperties,
          AttributeSpecifier[] attributeSpecifiers
     ) {
-        this.conditions = new ArrayList();
+        this.conditions = new ArrayList<Condition>();
         for(FilterProperty p: filterProperties) {
             this.conditions.add(
                 new AnyTypeCondition(p)
             );
         }
-        this.orderSpecifiers = new ArrayList();
+        this.orderSpecifiers = new ArrayList<OrderSpecifier>();
         for(AttributeSpecifier a: attributeSpecifiers) {
             this.orderSpecifiers.add(
                 new OrderSpecifier(
@@ -151,7 +149,7 @@ public class Filter
     public Condition getCondition(
         int index
     ) {
-        return (Condition)this.conditions.get(index);
+        return this.conditions.get(index);
     }
 
     //-------------------------------------------------------------------------
@@ -160,7 +158,7 @@ public class Filter
      */
     public Condition[] getCondition(
     ) {
-        return (Condition[])this.conditions.toArray(
+        return this.conditions.toArray(
             new Condition[this.conditions.size()]
         );
     }
@@ -202,7 +200,7 @@ public class Filter
     public OrderSpecifier getOrderSpecifier(
         int index
     ) {
-        return (OrderSpecifier)this.orderSpecifiers.get(index);
+        return this.orderSpecifiers.get(index);
     }
 
     //-------------------------------------------------------------------------
@@ -211,7 +209,7 @@ public class Filter
      */
     public OrderSpecifier[] getOrderSpecifier(
     ) {
-        return (OrderSpecifier[])this.orderSpecifiers.toArray(
+        return this.orderSpecifiers.toArray(
             new OrderSpecifier[this.orderSpecifiers.size()]
         );
     }
@@ -324,8 +322,8 @@ public class Filter
     // Variables
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3257285842266371888L;
-    private final List conditions;
-    private final List orderSpecifiers;
+    private final List<Condition> conditions;
+    private final List<OrderSpecifier> orderSpecifiers;
     private static final String[] TO_STRING_FIELDS = {
         "condition",
         "orderSpecifier"

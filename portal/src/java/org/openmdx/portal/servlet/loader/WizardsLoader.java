@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardsLoader.java,v 1.11 2008/08/12 16:38:07 wfro Exp $
+ * Name:        $Id: WizardsLoader.java,v 1.14 2009/03/08 18:03:21 wfro Exp $
  * Description: ReportsLoader
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:07 $
+ * Date:        $Date: 2009/03/08 18:03:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,7 +57,6 @@ package org.openmdx.portal.servlet.loader;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +65,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 import org.openmdx.portal.servlet.wizards.WizardDefinition;
 import org.openmdx.portal.servlet.wizards.WizardDefinitionFactory;
@@ -95,47 +94,70 @@ public class WizardsLoader
         String[] locale,
         Model_1_0 model
     ) throws ServiceException {
-
         Map wizardDefinitions = new HashMap();
-        int fallbackLocaleIndex = 0;
-        for(int i = 0; i < locale.length; i++) {
-            Set wizardPaths = new HashSet();
-            if(locale[i] != null) {
-                if(wizardDefinitions.get(locale[i]) == null) {
-                    wizardDefinitions.put(
-                        locale[i],
-                        new ArrayList()
-                    );
-                }
-                fallbackLocaleIndex = 0;
-                System.out.println("Loading wizards for locale " + locale[i]);     
-                wizardPaths = context.getResourcePaths("/wizards/" + locale[i]);
-                if(wizardPaths == null) {
-                    for(int j = i-1; j >= 0; j--) {
-                        if((locale[j] != null) && locale[i].substring(0,2).equals(locale[j].substring(0,2))) {
-                            fallbackLocaleIndex = j;
-                            break;
-                        }
-                    }
-                    System.out.println(locale[i] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
-                    wizardPaths = context.getResourcePaths("/wizards/" + locale[fallbackLocaleIndex]);
-                }
-                if(wizardPaths != null) {
-                    for(Iterator j = wizardPaths.iterator(); j.hasNext(); ) {
-                        String path = (String)j.next();
-                        if(!path.endsWith("/")) {            
-                            WizardDefinition wizardDefinition = 
-                                WizardDefinitionFactory.createWizardDefinition(
-                                    path,
-                                    locale[i],
-                                    (short)i,
-                                    context.getResourceAsStream(path)
-                                );
-                            if(wizardDefinition != null) {
-                                ((List)wizardDefinitions.get(
-                                    locale[i]
-                                )).add(wizardDefinition);
-                                System.out.println("Loaded " + path + " (forClass=" + wizardDefinition.getForClass() + ")");     
+        // Get all wizards of locale[0]
+        Set wizardPaths = context.getResourcePaths("/wizards/" + locale[0]);
+        if(wizardPaths != null) {
+            wizardDefinitions.put(
+                locale[0], 
+                new ArrayList()
+            );            
+            for(Iterator i = wizardPaths.iterator(); i.hasNext(); ) {
+                String path0 = (String)i.next();
+                if(!path0.endsWith("/")) {            
+                    WizardDefinition wizardDefinition0 = 
+                        WizardDefinitionFactory.createWizardDefinition(
+                            path0,
+                            locale[0],
+                            (short)0,
+                            context.getResourceAsStream(path0)
+                        );
+                    if(wizardDefinition0 != null) {
+                        ((List)wizardDefinitions.get(
+                            locale[0]
+                        )).add(wizardDefinition0);
+                        System.out.println("Loaded " + path0 + " (forClass=" + wizardDefinition0.getForClass() + ")");
+                        // Load locale-specific wizards
+                        for(int j = 1; j < locale.length; j++) {
+                            if(locale[j] != null) {
+                                if(wizardDefinitions.get(locale[j]) == null) {
+                                    wizardDefinitions.put(
+                                        locale[j], 
+                                        new ArrayList()
+                                    );
+                                }
+                                String path = path0.replace(locale[0], locale[j]);
+                                WizardDefinition wizardDefinition = null;
+                                try {
+                                    WizardDefinitionFactory.createWizardDefinition(
+                                        path,
+                                        locale[j],
+                                        (short)j,
+                                        context.getResourceAsStream(path)
+                                    );
+                                } 
+                                catch(Exception e) {}
+                                if(wizardDefinition != null) {
+                                    ((List)wizardDefinitions.get(
+                                        locale[j]
+                                    )).add(wizardDefinition);
+                                    System.out.println("Loaded " + path + " (forClass=" + wizardDefinition.getForClass() + ")");     
+                                }
+                                else {
+                                    int fallbackLocaleIndex = 0;
+                                    for(int k = j-1; k >= 0; k--) {
+                                        if((locale[k] != null) && locale[j].substring(0,2).equals(locale[k].substring(0,2))) {
+                                            fallbackLocaleIndex = k;
+                                            break;
+                                        }
+                                    }
+                                    List fallbackWizardDefinitions = (List)wizardDefinitions.get(locale[fallbackLocaleIndex]);
+                                    ((List)wizardDefinitions.get(
+                                        locale[j]
+                                    )).add(
+                                        fallbackWizardDefinitions.get(fallbackWizardDefinitions.size() - 1)
+                                    );
+                                }                            
                             }
                         }
                     }
@@ -145,8 +167,7 @@ public class WizardsLoader
         return new WizardDefinitionFactory(
             wizardDefinitions,
             model
-        );
-        
+        );        
     }
   
     //-------------------------------------------------------------------------

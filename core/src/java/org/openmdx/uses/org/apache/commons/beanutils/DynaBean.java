@@ -28,7 +28,7 @@ package org.openmdx.uses.org.apache.commons.beanutils;
  *
  * @author Craig McClanahan
  * @author Paulo Gaspar
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:14 $
+ * @version $Revision: 1.2 $ $Date: 2009/03/03 14:59:14 $
  */
 
 public interface DynaBean {

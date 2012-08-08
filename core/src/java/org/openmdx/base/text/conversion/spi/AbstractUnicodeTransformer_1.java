@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractUnicodeTransformer_1.java,v 1.8 2008/09/10 08:55:22 hburger Exp $
+ * Name:        $Id: AbstractUnicodeTransformer_1.java,v 1.10 2009/02/24 15:48:55 hburger Exp $
  * Description: SPICE Character Conversions: Abstract Unicode Transformation 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/10 08:55:22 $
+ * Date:        $Date: 2009/02/24 15:48:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,7 +51,6 @@
  */
 package org.openmdx.base.text.conversion.spi;
 
-import org.openmdx.base.exception.BadParameterException;
 import org.openmdx.base.text.conversion.cci.UnicodeTransformer_1_0;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -179,7 +178,7 @@ implements UnicodeTransformer_1_0
                     value &= 0x1F;
                     value <<= 6;
                     value |= 0x3F & getContinuation(source,sourceIndex++);
-                } else if (value >= 0x80) throw new BasicException(
+                } else if (value >= 0x80) throw BasicException.newStandAloneExceptionStack(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
                     "Unsolicited trail byte",
@@ -191,7 +190,7 @@ implements UnicodeTransformer_1_0
             }
             return trim(target, targetLimit);
         } catch (BasicException exception) {
-            throw new BadParameterException(exception);
+            throw new IllegalArgumentException(exception);
         }
     }
 
@@ -199,7 +198,7 @@ implements UnicodeTransformer_1_0
         byte[] source,
         int index
     ) throws BasicException {
-        if(index >= source.length) throw new BasicException(
+        if(index >= source.length) throw BasicException.newStandAloneExceptionStack(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
             "Missing trail byte",
@@ -207,7 +206,7 @@ implements UnicodeTransformer_1_0
             new BasicException.Parameter("index",index)
         ); 
         int unit = source[index];
-        if(unit < 0x80 || unit >= 0xC0) throw new BasicException(
+        if(unit < 0x80 || unit >= 0xC0) throw BasicException.newStandAloneExceptionStack(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
             "Missing trail byte",
@@ -249,7 +248,7 @@ implements UnicodeTransformer_1_0
                 if(value >= 0xD800 && value <= 0xDBFF){
                     value = 0x10000 + (value - 0xD800) * 0x400; // high-surrogate
                     value += getContinuation(source, sourceIndex++) - 0xDC00; // low-surrogate
-                } else if (value >= 0xDC00 && value <= 0xDFFF) throw new BasicException(
+                } else if (value >= 0xDC00 && value <= 0xDFFF) throw BasicException.newStandAloneExceptionStack(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
                     "Low-surrogate not preceeded by high-surrogate",
@@ -261,7 +260,7 @@ implements UnicodeTransformer_1_0
             }
             return trim(target, targetLimit);
         } catch (BasicException exception) {
-            throw new BadParameterException(exception);
+            throw new IllegalArgumentException(exception);
         }
     }
 
@@ -269,7 +268,7 @@ implements UnicodeTransformer_1_0
         char[] source,
         int index
     ) throws BasicException {
-        if(index >= source.length) throw new BasicException(
+        if(index >= source.length) throw BasicException.newStandAloneExceptionStack(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
             "Missing low-surrogate",
@@ -277,7 +276,7 @@ implements UnicodeTransformer_1_0
             new BasicException.Parameter("index",index)
         ); 
         int unit = source[index];
-        if(unit < 0xDC00 || unit > 0xDFFF) throw new BasicException(
+        if(unit < 0xDC00 || unit > 0xDFFF) throw BasicException.newStandAloneExceptionStack(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
             "Missing low surrogate",

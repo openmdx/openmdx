@@ -122,12 +122,15 @@ import org.openmdx.uses.org.apache.commons.beanutils.Converter;
  *    int[][] result = (int[][])matrixConverter.convert(int[][].class, matrixString);
  * </pre>
  *
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:16 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:59 $
  * @since 1.8.0
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked"
+})
 public class ArrayConverter extends AbstractConverter {
 
+    private Object defaultTypeInstance;
     private Converter elementConverter;
     private int defaultSize;
     private char delimiter    = ',';
@@ -147,13 +150,17 @@ public class ArrayConverter extends AbstractConverter {
      *  individual array elements.
      */
     public ArrayConverter(Class defaultType, Converter elementConverter) {
-        super(defaultType);
+        super();
+        if (defaultType == null) {
+            throw new IllegalArgumentException("Default type is missing");
+        }
         if (!defaultType.isArray()) {
             throw new IllegalArgumentException("Default type must be an array.");
         }
         if (elementConverter == null) {
             throw new IllegalArgumentException("Component Converter is missing.");
         }
+        this.defaultTypeInstance = Array.newInstance(defaultType.getComponentType(), 0);
         this.elementConverter = elementConverter;
     }
 
@@ -209,6 +216,15 @@ public class ArrayConverter extends AbstractConverter {
      */
     public void setOnlyFirstToString(boolean onlyFirstToString) {
         this.onlyFirstToString = onlyFirstToString;
+    }
+
+    /**
+     * Return the default type this <code>Converter</code> handles.
+     *
+     * @return The default type this <code>Converter</code> handles.
+     */
+    protected Class getDefaultType() {
+        return defaultTypeInstance.getClass();
     }
 
     /**
@@ -436,10 +452,12 @@ public class ArrayConverter extends AbstractConverter {
             while (true) {
                 int ttype = st.nextToken();
                 if ((ttype == StreamTokenizer.TT_WORD) || (ttype > 0)) {
-                    if (list == null) {
-                        list = new ArrayList();
+                    if (st.sval != null) {
+                        if (list == null) {
+                            list = new ArrayList();
+                        }
+                        list.add(st.sval);
                     }
-                    list.add(st.sval.trim());
                 } else if (ttype == StreamTokenizer.TT_EOF) {
                     break;
                 } else {

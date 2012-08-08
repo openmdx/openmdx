@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: URLConfiguration.java,v 1.4 2008/09/11 10:47:30 hburger Exp $
+ * Name:        $Id: URLConfiguration.java,v 1.7 2009/03/08 18:52:20 wfro Exp $
  * Description: URL Configuration
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/11 10:47:30 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,12 +69,12 @@ import javax.resource.cci.MappedRecord;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 
-import org.openmdx.base.exception.ExtendedIOException;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.DelegatingMappedRecord;
 import org.openmdx.base.text.conversion.URLReader;
 import org.openmdx.kernel.environment.SystemProperties;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 
 /**
  * This class represents an implementation for
@@ -106,7 +106,7 @@ public class URLConfiguration extends Configuration {
 	) throws IOException{
 		this.url = source;
         this.options = options;
-		load();
+		this.load();
 	}
 	
 	/**
@@ -161,7 +161,7 @@ public class URLConfiguration extends Configuration {
     public synchronized AppConfigurationEntry[] getAppConfigurationEntry (
 		String applicationName
 	){
-		if(this.configuration == null) refresh();
+		if(this.configuration == null) this.refresh();
 		if(this.configuration == null) return null;		
 		List entries = (List) this.configuration.get(
 			this.configuration.containsKey(applicationName) ? applicationName : "other"
@@ -182,9 +182,9 @@ public class URLConfiguration extends Configuration {
 	private void load (
 	) throws IOException {
 		Map configuration = new LinkedHashMap();
-		newStreamTokenizer();
+		this.newStreamTokenizer();
 		
-		newToken();
+		this.newToken();
 		while (this.currentToken != StreamTokenizer.TT_EOF) {
 			
 			String applicationName = this.tokenizer.sval;
@@ -193,29 +193,29 @@ public class URLConfiguration extends Configuration {
 			LinkedList configEntries = new LinkedList();
 			
 			// application name
-			newToken();
-			read('{');
+			this.newToken();
+			this.read('{');
 			
 			// get the modules
 			while (this.currentToken != '}') {
 				// get the module class name
-				moduleClass = read("module class name", false);
+				moduleClass = this.read("module class name", false);
 				
 				// controlFlag (required, optional, etc)
-				controlFlag = toControlFlag(
-					read("control flag", false)
+				controlFlag = this.toControlFlag(
+					this.read("control flag", false)
 				);
 				
 				// get the args
 				HashMap options = new HashMap(this.options);
 				while (this.currentToken != ';') {
-					String key = read("option key", false);
-					read('=');
-					String value = read("option value", URLConfiguration.EXPAND_PROPERTIES);
+					String key = this.read("option key", false);
+					this.read('=');
+					String value = this.read("option value", URLConfiguration.EXPAND_PROPERTIES);
 					options.put(key, value);
 				}
 				
-				newToken();
+				this.newToken();
 				
 				// create the new element
 				configEntries.add(
@@ -227,20 +227,19 @@ public class URLConfiguration extends Configuration {
 				);
 			}
 			
-			read('}');
-			read(';');
+			this.read('}');
+			this.read(';');
 			
 			// add this configuration entry
 			if (
 				configuration.containsKey(applicationName)
-			) throw new ExtendedIOException(
-			    new BasicException(
-				    BasicException.Code.DEFAULT_DOMAIN,
-				    BasicException.Code.INVALID_CONFIGURATION,
-				    "Can not specify multiple entries for application name",
-						new BasicException.Parameter("url", this.url),
-						new BasicException.Parameter("applicationName", applicationName)
-				)
+			) throw Throwables.initCause(
+				new IOException("Can not specify multiple entries for application name"),
+				null, // cause
+			    BasicException.Code.DEFAULT_DOMAIN,
+			    BasicException.Code.INVALID_CONFIGURATION,
+				new BasicException.Parameter("url", this.url),
+				new BasicException.Parameter("applicationName", applicationName)
 			);
 			configuration.put(applicationName, configEntries);
 		}
@@ -254,28 +253,31 @@ public class URLConfiguration extends Configuration {
 	 * 
 	 * @return the control flag for the given value
 	 * 
-	 * @throws ExtendedIOException
+	 * @throws IOException
 	 */
 	private AppConfigurationEntry.LoginModuleControlFlag toControlFlag(
 		String value
-	) throws ExtendedIOException{
+	) throws IOException{
 		if (value.equalsIgnoreCase("REQUIRED")) {
 			return AppConfigurationEntry.LoginModuleControlFlag.REQUIRED;
-		} else if (value.equalsIgnoreCase("REQUISITE")) {
+		} 
+		else if (value.equalsIgnoreCase("REQUISITE")) {
 			return AppConfigurationEntry.LoginModuleControlFlag.REQUISITE;
-		} else if (value.equalsIgnoreCase("SUFFICIENT")) {
+		} 
+		else if (value.equalsIgnoreCase("SUFFICIENT")) {
 			return AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT;
-		} else if (value.equalsIgnoreCase("OPTIONAL")) {
+		} 
+		else if (value.equalsIgnoreCase("OPTIONAL")) {
 			return AppConfigurationEntry.LoginModuleControlFlag.OPTIONAL;
-		} else throw new ExtendedIOException(
-		    new BasicException(
-			    BasicException.Code.DEFAULT_DOMAIN,
-			    BasicException.Code.INVALID_CONFIGURATION,
-			    "Invalid Control Flag",
-					new BasicException.Parameter("url", this.url),
-					new BasicException.Parameter("line", this.currentLine),
-					new BasicException.Parameter("controlFlag", value)
-			)
+		} 
+		else throw Throwables.initCause(
+			new IOException("Invalid Control Flag"),
+			null, // cause
+		    BasicException.Code.DEFAULT_DOMAIN,
+		    BasicException.Code.INVALID_CONFIGURATION,
+			new BasicException.Parameter("url", this.url),
+			new BasicException.Parameter("line", this.currentLine),
+			new BasicException.Parameter("controlFlag", value)
 		);
 	}
 	
@@ -289,8 +291,9 @@ public class URLConfiguration extends Configuration {
     public synchronized void refresh(
 	) {		
 		try {
-			load();
-		} catch (Exception exception) {
+			this.load();
+		} 
+		catch (Exception exception) {
 			this.configuration = null;
 		}
     }	
@@ -332,70 +335,68 @@ public class URLConfiguration extends Configuration {
 	) throws IOException {
 		switch(this.currentToken) {
 			case StreamTokenizer.TT_EOF:
-				throw new ExtendedIOException(
-				    new BasicException(
-					    BasicException.Code.DEFAULT_DOMAIN,
-					    BasicException.Code.INVALID_CONFIGURATION,
-					    "Unexpected end of file",
-							new BasicException.Parameter("url", this.url),
-							new BasicException.Parameter("expected", expected)
-					)
+				throw Throwables.initCause(
+					new IOException("Unexpected end of file"),
+					null, // cause
+				    BasicException.Code.DEFAULT_DOMAIN,
+				    BasicException.Code.INVALID_CONFIGURATION,
+					new BasicException.Parameter("url", this.url),
+					new BasicException.Parameter("expected", expected)
 				);				
 			case '{':
 			case ';':
 			case '}':
 			case '=':
 				if (this.currentToken == expected) {
-					newToken();
-				} else {
-					throw new ExtendedIOException(
-					    new BasicException(
-						    BasicException.Code.DEFAULT_DOMAIN,
-						    BasicException.Code.INVALID_CONFIGURATION,
-						    "Unexpected value",
-								new BasicException.Parameter(
-									"url", 
-									this.url
-								),
-								new BasicException.Parameter(
-									"line", 
-									this.currentLine
-								),
-								new BasicException.Parameter(
-									"expected",
-									expected
-								),
-								new BasicException.Parameter(
-									"found", 
-									this.tokenizer.sval
-								)
+					this.newToken();
+				} 
+				else {
+					throw Throwables.initCause(
+						new IOException("Unexpected value"),
+						null, // cause
+					    BasicException.Code.DEFAULT_DOMAIN,
+					    BasicException.Code.INVALID_CONFIGURATION,
+						new BasicException.Parameter(
+							"url", 
+							this.url
+						),
+						new BasicException.Parameter(
+							"line", 
+							this.currentLine
+						),
+						new BasicException.Parameter(
+							"expected",
+							expected
+						),
+						new BasicException.Parameter(
+							"found", 
+							this.tokenizer.sval
 						)
 					);
 				}
 				break;
 				
 			default:
-				throw new ExtendedIOException(
-				    new BasicException(
-					    BasicException.Code.DEFAULT_DOMAIN,
-					    BasicException.Code.INVALID_CONFIGURATION,
-					    "Unexpected value",
-							new BasicException.Parameter(
-								"url", 
-								this.url
-							),
-							new BasicException.Parameter(
-								"line", 
-								this.currentLine
-							),
-							new BasicException.Parameter(
-								"expected",
-								expected
-							),
-							new BasicException.Parameter(
-								"found", 
-								this.tokenizer.sval
-							)
+				throw Throwables.initCause(
+					new IOException("Unexpected value"),
+					null, // cause
+				    BasicException.Code.DEFAULT_DOMAIN,
+				    BasicException.Code.INVALID_CONFIGURATION,
+					new BasicException.Parameter(
+						"url", 
+						this.url
+					),
+					new BasicException.Parameter(
+						"line", 
+						this.currentLine
+					),
+					new BasicException.Parameter(
+						"expected",
+						expected
+					),
+					new BasicException.Parameter(
+						"found", 
+						this.tokenizer.sval
 					)
 				);
 		}
@@ -415,42 +416,40 @@ public class URLConfiguration extends Configuration {
 		
 		switch(this.currentToken) {
 			case StreamTokenizer.TT_EOF:
-				throw new ExtendedIOException(
-				    new BasicException(
-					    BasicException.Code.DEFAULT_DOMAIN,
-					    BasicException.Code.INVALID_CONFIGURATION,
-					    "Unexpected end of file",
-							new BasicException.Parameter("url", this.url),								
-							new BasicException.Parameter("expected", expected)
-					)
+				throw Throwables.initCause(
+					new IOException("Unexpected end of file"),
+					null, // cause
+				    BasicException.Code.DEFAULT_DOMAIN,
+				    BasicException.Code.INVALID_CONFIGURATION,
+					new BasicException.Parameter("url", this.url),								
+					new BasicException.Parameter("expected", expected)
 				);				
 			case '"':
 			case StreamTokenizer.TT_WORD:
 				String value = this.tokenizer.sval;
-				newToken();
+				this.newToken();
                 return SystemProperties.expand(expand, value);
 			default:
-				throw new ExtendedIOException(
-				    new BasicException(
-					    BasicException.Code.DEFAULT_DOMAIN,
-					    BasicException.Code.INVALID_CONFIGURATION,
-					    "Unexpected value",
-							new BasicException.Parameter(
-								"url", 
-								this.url
-							),
-							new BasicException.Parameter(
-								"line", 
-								this.currentLine
-							),
-							new BasicException.Parameter(
-								"expected", 
-								expected
-							),
-							new BasicException.Parameter(
-								"found", 
-								this.tokenizer.sval
-							)
+				throw Throwables.initCause(
+					new IOException("Unexpected value"),
+					null, // cause
+				    BasicException.Code.DEFAULT_DOMAIN,
+				    BasicException.Code.INVALID_CONFIGURATION,
+					new BasicException.Parameter(
+						"url", 
+						this.url
+					),
+					new BasicException.Parameter(
+						"line", 
+						this.currentLine
+					),
+					new BasicException.Parameter(
+						"expected", 
+						expected
+					),
+					new BasicException.Parameter(
+						"found", 
+						this.tokenizer.sval
 					)
 				);
 		}
@@ -465,7 +464,7 @@ public class URLConfiguration extends Configuration {
 	) throws IOException {
 		while (
 			(this.currentToken = this.tokenizer.nextToken()) == StreamTokenizer.TT_EOL
-		) this.currentLine++;
+		) { this.currentLine++; }
 	}
 	
 
@@ -479,7 +478,7 @@ public class URLConfiguration extends Configuration {
 	public String toString() {
 		try {
 			MappedRecord reply = Records.getRecordFactory().createMappedRecord(
-				getClass().getName(),
+				this.getClass().getName(),
 				"URL: " + this.url
 			);
 			for(
@@ -507,7 +506,8 @@ public class URLConfiguration extends Configuration {
 				);
 			}
 			return reply.toString();
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			return super.toString();
 		}
 	}

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMLExportHandler.java,v 1.15 2008/05/12 10:45:51 wfro Exp $
+ * Name:        $Id: XMLExportHandler.java,v 1.19 2009/01/13 17:34:50 wfro Exp $
  * Description: Export handler for synchronizer producing XML output
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/12 10:45:51 $
+ * Date:        $Date: 2009/01/13 17:34:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,15 +57,16 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.Base64;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.code.Multiplicities;
 
 /**
  * Class to export the callback data as an XML file.
@@ -188,7 +189,7 @@ public class XMLExportHandler implements TraversalHandler {
         DataproviderObject_1_0 object
     ) throws ServiceException {
         Map tags = this.getAttributeTags(object);        
-        DataproviderObject_1_0 objectClass = null;
+        ModelElement_1_0 objectClass = null;
         if (object.values(SystemAttributes.OBJECT_CLASS).get(0) != null) {
             objectClass = this.model.getDereferencedType(
                 object.getValues(SystemAttributes.OBJECT_CLASS).get(0)
@@ -209,7 +210,7 @@ public class XMLExportHandler implements TraversalHandler {
             if (objectClass != null) {
 
                 Map modelAttributes =
-                    (Map) objectClass.values("attribute").get(0);
+                    (Map) objectClass.objGetValue("attribute");
                 DataproviderObject attributeType =
                     (DataproviderObject) modelAttributes.get(attributeName);
 
@@ -345,7 +346,7 @@ public class XMLExportHandler implements TraversalHandler {
     /**
      * No action required.
      * 
-     * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#contentComplete(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.util.List)
+     * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#contentComplete(org.openmdx.base.naming.Path, java.lang.String, java.util.List)
      */
     public void contentComplete(
         Path objectPath, 
@@ -358,7 +359,7 @@ public class XMLExportHandler implements TraversalHandler {
     /**
      * No action required. 
      * 
-     * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#referenceComplete(org.openmdx.compatibility.base.naming.Path, java.util.Collection)
+     * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#referenceComplete(org.openmdx.base.naming.Path, java.util.Collection)
      */
     public void referenceComplete(
         Path reference, 

@@ -18,6 +18,8 @@
 package org.openmdx.uses.org.apache.commons.beanutils.locale;
 
 
+import org.openmdx.uses.org.apache.commons.logging.Log;
+import org.openmdx.uses.org.apache.commons.logging.LogFactory;
 import org.openmdx.uses.org.apache.commons.beanutils.BeanUtilsBean;
 import org.openmdx.uses.org.apache.commons.beanutils.ContextClassLoaderLocal;
 import org.openmdx.uses.org.apache.commons.beanutils.ConvertUtils;
@@ -28,8 +30,6 @@ import org.openmdx.uses.org.apache.commons.beanutils.DynaProperty;
 import org.openmdx.uses.org.apache.commons.beanutils.MappedPropertyDescriptor;
 import org.openmdx.uses.org.apache.commons.beanutils.PropertyUtilsBean;
 import org.openmdx.uses.org.apache.commons.beanutils.expression.Resolver;
-import org.openmdx.uses.org.apache.commons.logging.Log;
-import org.openmdx.uses.org.apache.commons.logging.LogFactory;
 
 import java.beans.IndexedPropertyDescriptor;
 import java.beans.PropertyDescriptor;
@@ -49,7 +49,10 @@ import java.util.Locale;
  * @author Yauheny Mikulski
  * @since 1.7
  */
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings({
+    "unchecked"
+})
 public class LocaleBeanUtilsBean extends BeanUtilsBean {
 
     /** 

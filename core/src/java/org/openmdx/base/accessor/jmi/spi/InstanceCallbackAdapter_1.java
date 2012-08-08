@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InstanceCallbackAdapter_1.java,v 1.2 2008/04/29 14:54:55 hburger Exp $
+ * Name:        $Id: InstanceCallbackAdapter_1.java,v 1.3 2009/01/04 21:17:19 wfro Exp $
  * Description: Instance Callback Adapter
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/29 14:54:55 $
+ * Date:        $Date: 2009/01/04 21:17:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,9 +56,9 @@ import javax.jdo.listener.DeleteCallback;
 import javax.jdo.listener.LoadCallback;
 import javax.jdo.listener.StoreCallback;
 
+import org.openmdx.base.event.InstanceCallbackEvent;
+import org.openmdx.base.event.InstanceCallbackListener;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.event.InstanceCallbackEvent;
-import org.openmdx.compatibility.base.event.InstanceCallbackListener;
 
 /**
  * Instance Callback Adapter

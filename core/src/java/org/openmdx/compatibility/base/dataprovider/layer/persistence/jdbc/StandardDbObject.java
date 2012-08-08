@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StandardDbObject.java,v 1.51 2008/12/01 10:50:15 hburger Exp $
+ * Name:        $Id: StandardDbObject.java,v 1.58 2009/03/03 17:23:08 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.51 $
+ * Revision:    $Revision: 1.58 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/01 10:50:15 $
+ * Date:        $Date: 2009/03/03 17:23:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,15 +57,16 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.text.pattern.cci.Matcher_1_0;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.query.FilterProperty;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterProperty;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public abstract class StandardDbObject 
 extends DbObject {
 
@@ -102,7 +103,7 @@ extends DbObject {
                 (typeConfiguration.getObjectIdPattern() != null) &&
                 (this.getObjectId() != null)
         ) {
-            Matcher_1_0 matcher = typeConfiguration.getObjectIdPatternMatcher().matcher(this.getObjectId());
+            Matcher matcher = typeConfiguration.getObjectIdPatternMatcher().matcher(this.getObjectId());
             if(matcher.matches()) {
                 for(int i = 1; i <= matcher.groupCount(); i++) {
                     this.objectIdValues.add(matcher.group(i));
@@ -268,9 +269,7 @@ extends DbObject {
                             statementParameters.get(j)
                         );
                     }
-                    SysLog.detail("statement", currentStatement);
-                    SysLog.detail("parameters", statementParameters);
-                    ps.executeUpdate();
+                    this.database.executeUpdate(ps, currentStatement, statementParameters);
                     ps.close(); ps = null;
                 }
             }
@@ -308,9 +307,7 @@ extends DbObject {
                             statementParameters.get(j)
                         );
                     }
-                    SysLog.detail("statement", currentStatement);
-                    SysLog.detail("parameters", statementParameters);
-                    ps.executeUpdate();
+                    this.database.executeUpdate(ps, currentStatement, statementParameters);
                     ps.close(); ps = null;
                 }
             }

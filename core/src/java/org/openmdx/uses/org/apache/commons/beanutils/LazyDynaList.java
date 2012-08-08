@@ -157,9 +157,11 @@ import java.lang.reflect.Array;
  * </code></pre>
  * 
  * @author Niall Pemberton
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:14 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:43 $
  */
-@SuppressWarnings({"unchecked", "serial"})
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class LazyDynaList extends ArrayList {
     
     /**
@@ -406,6 +408,7 @@ public class LazyDynaList extends ArrayList {
      * 
      * @return An Array of the elements in this List.
      */
+    @SuppressWarnings("cast")
     public Object[] toArray() {
 
         if (size() == 0 && elementType == null) {
@@ -417,8 +420,7 @@ public class LazyDynaList extends ArrayList {
             if (Map.class.isAssignableFrom(elementType)) {
                 array[i] = ((LazyDynaMap)get(i)).getMap(); 
             } else if (DynaBean.class.isAssignableFrom(elementType)) {
-                DynaBean dynaBean = (DynaBean)get(i);
-                array[i] = dynaBean;
+                array[i] = (DynaBean)get(i);
             } else {
                 array[i] = ((WrapDynaBean)get(i)).getInstance(); 
             }

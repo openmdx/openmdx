@@ -30,9 +30,12 @@ import java.util.Calendar;
  * Can be configured to either return a <i>default value</i> or throw a
  * <code>ConversionException</code> if a conversion error occurs.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.3 $
  * @since 1.8.0
  */
+@SuppressWarnings({
+    "unchecked"
+})
 public final class CalendarConverter extends DateTimeConverter {
 
     /**
@@ -40,7 +43,7 @@ public final class CalendarConverter extends DateTimeConverter {
      * a <code>ConversionException</code> if an error occurs.
      */
     public CalendarConverter() {
-        super(Calendar.class);
+        super();
     }
 
     /**
@@ -52,7 +55,16 @@ public final class CalendarConverter extends DateTimeConverter {
      * occurs converting the value.
      */
     public CalendarConverter(Object defaultValue) {
-        super(Calendar.class, defaultValue);
+        super(defaultValue);
+    }
+
+    /**
+     * Return the default type this <code>Converter</code> handles.
+     *
+     * @return The default type this <code>Converter</code> handles.
+     */
+    protected Class getDefaultType() {
+        return Calendar.class;
     }
 
 }

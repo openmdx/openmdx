@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: HandleEventResult.java,v 1.1 2008/05/31 23:40:07 wfro Exp $
+ * Name:        $Id: HandleEventResult.java,v 1.2 2009/03/08 18:03:21 wfro Exp $
  * Description: HandleEventResult 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/31 23:40:07 $
+ * Date:        $Date: 2009/03/08 18:03:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -78,7 +78,7 @@ public class HandleEventResult {
         ObjectView view,
         PaintScope paintScope
     ) {
-        this.statusCode = StatusCode.FORWARD;
+        this.statusCode = HandleEventResult.StatusCode.FORWARD;
         this.view = view;
         this.paintScope = paintScope;
     }

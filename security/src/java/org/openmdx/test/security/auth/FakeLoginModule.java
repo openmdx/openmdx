@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FakeLoginModule.java,v 1.5 2008/04/04 17:55:31 hburger Exp $
+ * Name:        $Id: FakeLoginModule.java,v 1.6 2009/03/08 18:52:19 wfro Exp $
  * Description: FakeLoginModule
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:55:31 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -117,46 +117,50 @@ public class FakeLoginModule implements LoginModule {
             this.callbackHandler.handle(
                 new Callback[]{nameCallback}
             );
-        } catch (IOException exception) {
+        } 
+        catch (IOException exception) {
             throw (LoginException) new FailedLoginException(
                  "Name retrieval failed"
             ).initCause(
                  exception
             );
-        } catch (UnsupportedCallbackException exception) {
+        } 
+        catch (UnsupportedCallbackException exception) {
             throw (LoginException) new FailedLoginException(
                     "Name retrieval not supported"
                ).initCause(
                     exception
                );
         }
-        PasswordCallback passwordCallback = createPasswordCallback(
+        PasswordCallback passwordCallback = this.createPasswordCallback(
             nameCallback.getName()
         );
         try {
             this.callbackHandler.handle(
                 new Callback[]{passwordCallback}
             );
-        } catch (IOException exception) {
+        } 
+        catch (IOException exception) {
             throw (LoginException) new FailedLoginException(
                 "Password retrieval failed"
             ).initCause(
                 exception
             );
-        } catch (UnsupportedCallbackException exception) {
+        } 
+        catch (UnsupportedCallbackException exception) {
             throw (LoginException) new FailedLoginException(
                 "Password retrieval not supported"
             ).initCause(
                 exception
             );
         }
-        checkPassword(
+        this.checkPassword(
             nameCallback.getName(),
             new String(passwordCallback.getPassword())
         );      
         this.principals.add(
             new GenericPrincipal(
-                PRINCIPAL_TYPE,
+                FakeLoginModule.PRINCIPAL_TYPE,
                 "ch::omex::mdx::compatibility::security1/provider/ch::omex/segment/ch::omex::mdx::test/subject/"+ nameCallback.getName() + "/role/SingleSignOn", 
                 nameCallback.getName()
             )
@@ -181,7 +185,8 @@ public class FakeLoginModule implements LoginModule {
                         "Challenge: " + pin.substring(0, 1) + ' ' + pin.substring(1,3) + ' ' + pin.substring(3) + " Response? ",
                         true
                     );
-                } catch (NumberFormatException exception) {
+                } 
+                catch (NumberFormatException exception) {
                     throw new FailedLoginException(
                         "User '" + name + "' with name length " + tag + " does not belong to realm"
                     ); 

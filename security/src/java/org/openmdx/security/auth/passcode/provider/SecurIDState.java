@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: SecurIDState.java,v 1.2 2007/12/05 15:21:51 hburger Exp $
+ * Name:        $Id: SecurIDState.java,v 1.3 2009/03/08 18:52:18 wfro Exp $
  * Description: SecurID State
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/05 15:21:51 $
+ * Date:        $Date: 2009/03/08 18:52:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -106,11 +106,11 @@ final class SecurIDState {
         String context
     ){
     	return 
-    		context == null ? NULL :
-    		context.startsWith("SECURID_NEXT|") ? SECURID_NEXT :
-			context.startsWith("SECURID_NPIN|") ? SECURID_NPIN :
-			context.startsWith("SECURID_WAIT|") ? SECURID_WAIT :
-			UNKNOWN;
+    		context == null ? SecurIDState.NULL :
+    		context.startsWith("SECURID_NEXT|") ? SecurIDState.SECURID_NEXT :
+			context.startsWith("SECURID_NPIN|") ? SecurIDState.SECURID_NPIN :
+			context.startsWith("SECURID_WAIT|") ? SecurIDState.SECURID_WAIT :
+				SecurIDState.UNKNOWN;
     }
 
     /**
@@ -127,7 +127,8 @@ final class SecurIDState {
             return context == null ? 
                 null :
                 context.substring(0, context.length() - 1).getBytes(RadiusClient.ENCODING);
-        } catch (UnsupportedEncodingException exception) {
+        } 
+        catch (UnsupportedEncodingException exception) {
             throw new ProviderException(
                 "The RadiusClient's \"" + RadiusClient.ENCODING + "\" encoding is not supported",
                 exception
@@ -160,12 +161,13 @@ final class SecurIDState {
     final static String getContext(
         RadiusPacket reply
     ){
-        byte[] state = getState(reply);
+        byte[] state = SecurIDState.getState(reply);
         try {
             return state == null ? 
                 null : 
                 new String(state, RadiusClient.ENCODING) + Character.forDigit(reply.getSocketIndex(), Character.MAX_RADIX);
-        } catch (UnsupportedEncodingException exception) {
+        } 
+        catch (UnsupportedEncodingException exception) {
             throw new ProviderException(
                 "The RadiusClient's \"" + RadiusClient.ENCODING + "\" encoding is not supported",
                 exception

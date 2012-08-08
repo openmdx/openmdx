@@ -1,5 +1,0 @@
-Name: openMDX Model Exporter
-Time: User
-Main-Class: org.openmdx.model1.together.plugin.ExporterPlugin
-Class-Path: openmdx-together-plugin.jar;j2ee-apis.jar;xml-apis.jar;commons-collections-extendedproperties.jar;openmdx-kernel.jar;openmdx-base.jar
-Folder: "org.openmdx"

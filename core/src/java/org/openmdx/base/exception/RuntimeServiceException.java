@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RuntimeServiceException.java,v 1.13 2008/10/06 17:34:52 hburger Exp $
+ * Project:     openMDXx, http://www.openmdx.org/
+ * Name:        $Id: RuntimeServiceException.java,v 1.17 2009/03/05 13:53:30 hburger Exp $
  * Description: Exception Framework 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/06 17:34:52 $
+ * Date:        $Date: 2009/03/05 13:53:30 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes or is based on software developed by other
+ * organizations as listed in the NOTICE file.
  */
 package org.openmdx.base.exception;
 
@@ -56,7 +55,6 @@ import java.io.PrintWriter;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.BasicException.Parameter;
-import org.openmdx.kernel.log.SysLog;
 
 /**
  * This class wrappes a ServiceException for cases where only RuntimeExceptions
@@ -66,21 +64,8 @@ import org.openmdx.kernel.log.SysLog;
  */
 public final class RuntimeServiceException 
     extends RuntimeException 
-    implements BasicException.Wrapper
+    implements BasicException.Holder
 { 
-
-    /**
-     * Constructor  
-     *
-     * @param exception the Exception to be wrapped 
-     */
-    public RuntimeServiceException (
-        BasicException exception
-    ){
-        super.initCause(
-            exception == null ? BasicException.toStackedException(this) : exception
-        );
-    }
 
     /**
      * Constructor  
@@ -96,48 +81,6 @@ public final class RuntimeServiceException
                 this
             )
         );
-    }
-
-    /**
-     * Rewraps the ServiceException's StackedException  
-     * <p>
-     * This constructor could be eliminated in favour of
-     * RuntimeServiceException(Exception exception) if recompile was enforced.
-     *
-     * @param exception   The ServiceException to be wrapped 
-     */
-    public RuntimeServiceException (
-        ServiceException exception
-    ) {
-        this((Exception)exception);
-    }
-
-    /**
-     * Creates a new <code>RuntimeServiceException</code>.
-     *
-     * @param   cause
-     *          The exception cause.
-     * @param   exceptionDomain
-     *          The exception domain or <code>null</code> for the
-     *          default exception domain containing negative exception codes
-     *          only.
-     * @param   exceptionCode
-     *          The exception code. Negative codes are shared by all exception
-     *          domains, while positive ones are (non-default) exception
-     *          domain specific.
-     * @param   parameters
-     *          The exception specific parameters.
-     * @param   description
-     *          A readable description usually not including the parameters.
-     */
-    public RuntimeServiceException(
-        Exception cause,
-        String exceptionDomain,
-        int exceptionCode,
-        BasicException.Parameter[] parameters,
-        String description
-    ){
-        this(cause, exceptionDomain, exceptionCode, description, parameters);
     }
 
     /**
@@ -165,6 +108,7 @@ public final class RuntimeServiceException
         String description,
         Parameter... parameters
     ){
+        super(description);
         super.initCause(
             new BasicException(
                 cause,
@@ -175,31 +119,6 @@ public final class RuntimeServiceException
                 this
             )
         );
-    }
-
-    /**
-     * Creates a new <code>RuntimeServiceException</code>.
-     *
-     * @param   exceptionDomain
-     *          The exception domain or <code>null</code> for the
-     *          default exception domain containing negative exception codes
-     *          only.
-     * @param   exceptionCode
-     *          The exception code. Negative codes are shared by all exception
-     *          domains, while positive ones are (non-default) exception
-     *          domain specific.
-     * @param   parameters
-     *          The exception specific parameters.
-     * @param   message
-     *          A readable description not including the parameters.
-     */
-    public RuntimeServiceException(
-        String exceptionDomain,
-        int exceptionCode,
-        BasicException.Parameter[] parameters,
-        String description
-    ) {
-        this(exceptionDomain, exceptionCode, description, parameters);
     }
 
     /**
@@ -243,117 +162,13 @@ public final class RuntimeServiceException
      *
      * @return this RuntimeServiceException
      */
-    public RuntimeServiceException log()
-    {
-        SysLog.warning(this);
-        return this;
-    }
-
-    public RuntimeServiceException appendCause(
-        Throwable cause
+    public RuntimeServiceException log(
     ){
-        getCause().appendCause(cause);
-        return this;
-    }
-
-
-    //------------------------------------------------------------------------
-    // Implements StackedException.Wrapper
-    //------------------------------------------------------------------------
-
-    /**
-     * Return a StackedException, this exception object's cause.
-     * 
-     * @return the StackedException wrapped by this object.
-     * 
-     * @deprecated use getCause()
-     */
-    public BasicException getExceptionStack (
-    ) {
-        return getCause();
+        return BasicException.log(this);
     }
 
     /**
-     * Retrieves the exception domain of this <code>ServiceException</code>.
-     *
-     * @return the exception domain
-     */
-    public String getExceptionDomain()
-    {
-        BasicException exceptionStack = getCause();
-        return exceptionStack == null ? 
-            BasicException.Code.DEFAULT_DOMAIN : 
-                exceptionStack.getExceptionDomain();
-    }
-
-    /**
-     * Retrieves the exception code of this <code>ServiceException</code>.
-     *
-     * @return the exception code
-     */
-    public int getExceptionCode()
-    {
-        BasicException exceptionStack = getCause();
-        return exceptionStack == null ? 
-            BasicException.Code.GENERIC : 
-                exceptionStack.getExceptionCode();
-    }
-
-    /**
-     * Returns the cause belonging to a specific exception domain.
-     * 
-     * @param 	exceptionDomain
-     * 			the desired exception domain,
-     *          or <code>null</code> to retrieve the initial cause.
-     *
-     * @return  Either the cause belonging to a specific exception domain
-     *          or the initial cause if <code>exceptionDomain</code> is
-     * 			<code>null</code>.  
-     */
-    public BasicException getCause(
-        String exceptionDomain
-    ){
-        BasicException exceptionStack = getCause();
-        return exceptionStack == null ? 
-            null : 
-                exceptionStack.getCause(exceptionDomain);
-    }
-
-
-    //------------------------------------------------------------------------
-    // Extends Throwable
-    //------------------------------------------------------------------------
-
-    /**
-     * Returns the detail message string of this RuntimeServiceException.  
-     */
-    public String getMessage(
-    ){
-        BasicException exceptionStack = getCause();
-        return exceptionStack == null ?
-            super.getMessage() : 
-                exceptionStack.getMessage() + ": " +
-                exceptionStack.getDescription();
-    }
-
-    /**
-     * A String consisting of the class of this exception, the exception 
-     * domain, the exception code, the exception description and the exception
-     * stack.
-     * 
-     * @return a multiline representation of this exception.
-     */     
-    public String toString(){
-        BasicException exceptionStack = getCause();
-        return 
-        exceptionStack == null ?
-            super.toString() : 
-                super.toString() + '\n' + exceptionStack;
-    }
-
-    /**
-     * Returns the cause of an exception. The cause actually is the wrapped
-     * exception.
+     * Returns the cause of an exception. The cause actually is the wrapped exception.
      *
      * @return Throwable  The exception cause.
      */
@@ -363,27 +178,46 @@ public final class RuntimeServiceException
     }
 
     /* (non-Javadoc)
+     * @see org.openmdx.kernel.exception.BasicException.Holder#getCause(java.lang.String)
+     */
+    public BasicException getCause(String exceptionDomain) {
+        return getCause().getCause(exceptionDomain);
+    }
+
+    /**
+     * Retrieves the exception domain of this <code>ServiceException</code>.
+     *
+     * @return the exception domain
+     */
+    public String getExceptionDomain(
+    ){
+        return getCause().getExceptionDomain();
+    }
+
+    /**
+     * Retrieves the exception code of this <code>ServiceException</code>.
+     *
+     * @return the exception code
+     */
+    public int getExceptionCode(
+    ){
+        return getCause().getExceptionCode();
+    }
+
+    /* (non-Javadoc)
      * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
      */
+    @Override
     public void printStackTrace(PrintStream s) {
-        BasicException exceptionStack = getCause();
-        if(exceptionStack == null){
-            super.printStackTrace(s);
-        } else {
-            exceptionStack.printStack(this, s, true);
-        }
+        getCause().printStackTrace(s);
     }
 
     /* (non-Javadoc)
      * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
      */
+    @Override
     public void printStackTrace(PrintWriter s) {
-        BasicException exceptionStack = getCause();
-        if(exceptionStack == null){
-            printStackTrace(s);
-        } else {
-            exceptionStack.printStack(this, s, true);
-        }
+        getCause().printStackTrace(s);
     }
 
 }

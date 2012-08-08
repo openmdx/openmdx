@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: GridControl.java,v 1.39 2008/11/10 10:20:11 wfro Exp $
+ * Name:        $Id: GridControl.java,v 1.43 2009/03/08 18:03:25 wfro Exp $
  * Description: GridControlDef
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.43 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
+ * Date:        $Date: 2009/03/08 18:03:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,9 +65,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.HtmlPage;
 import org.openmdx.portal.servlet.WebKeys;
@@ -180,7 +180,8 @@ public class GridControl
           boolean columnTitleIsSortable = false;
           try {
               columnTitleIsSortable = columnTitle.isSortable(); 
-          } catch(Exception e) {}
+          } 
+          catch(Exception e) {}
           if(!columnTitleIsSortable) {
               this.initialColumnSortOrders.put(
                   columnTitle.getFeatureName(),
@@ -219,8 +220,8 @@ public class GridControl
         boolean showRowSelectors = false;
         try {
             Set allReferencedTypes = new HashSet();
-            allReferencedTypes.addAll(referencedType.values("allSubtype"));
-            allReferencedTypes.addAll(referencedType.values("allSupertype"));
+            allReferencedTypes.addAll(referencedType.objGetList("allSubtype"));
+            allReferencedTypes.addAll(referencedType.objGetList("allSupertype"));
             for(Iterator i = allReferencedTypes.iterator(); i.hasNext(); ) {
                 ModelElement_1_0 type = model.getElement(i.next());
                 if(model.isSubtypeOf(type, lookupType)) {

@@ -35,10 +35,13 @@ import java.util.Map;
  * @author Chris Audley
  * @author Rey Francois
  * @author Gregor Rayman
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:13 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:43 $
  * @see BeanUtilsBean
  */
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings({
+    "unchecked"
+})
 public class BeanUtils {
 
 
@@ -465,5 +468,37 @@ public class BeanUtils {
      */
     public static boolean initCause(Throwable throwable, Throwable cause) {
         return BeanUtilsBean.getInstance().initCause(throwable, cause);
+    }
+
+    /**
+     * Create a cache.
+     * @return a new cache
+     */
+    public static Map createCache() {
+        return new WeakFastHashMap();
+    }
+
+    /**
+     * Return whether a Map is fast
+     * @param map The map
+     * @return Whether it is fast or not.
+     */
+    public static boolean getCacheFast(Map map) {
+        if (map instanceof WeakFastHashMap) {
+            return ((WeakFastHashMap)map).getFast();
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Set whether fast on a Map
+     * @param map The map
+     * @param fast Whether it should be fast or not.
+     */
+    public static void setCacheFast(Map map, boolean fast) {
+        if (map instanceof WeakFastHashMap) {
+            ((WeakFastHashMap)map).setFast(fast);
+        }
     }
 }

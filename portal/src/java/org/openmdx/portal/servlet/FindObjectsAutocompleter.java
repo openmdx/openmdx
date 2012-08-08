@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsAutocompleter.java,v 1.26 2008/11/27 23:57:00 wfro Exp $
+ * Name:        $Id: FindObjectsAutocompleter.java,v 1.28 2009/01/06 14:12:02 wfro Exp $
  * Description: ListAutocompleteControl 
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/27 23:57:00 $
+ * Date:        $Date: 2009/01/06 14:12:02 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,8 +61,8 @@ import java.util.List;
 
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.query.FilterOperators;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterOperators;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 

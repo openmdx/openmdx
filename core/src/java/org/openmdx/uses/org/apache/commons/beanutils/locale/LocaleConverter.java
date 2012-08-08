@@ -27,7 +27,10 @@ import org.openmdx.uses.org.apache.commons.beanutils.Converter;
  *
  * @author Yauheny Mikulski
  */
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings({
+    "unchecked"
+})
 public interface LocaleConverter extends Converter {
 
 

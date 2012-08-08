@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TransactionManager_1.java,v 1.12 2008/09/10 08:55:30 hburger Exp $
+ * Name:        $Id: TransactionManager_1.java,v 1.15 2009/02/24 15:48:55 hburger Exp $
  * Description: Transaction Manager
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/10 08:55:30 $
+ * Date:        $Date: 2009/02/24 15:48:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -112,7 +112,8 @@ public class TransactionManager_1 {
 					(int) (timeout / 1000) // ms -> s
 				);
 				transaction.begin();
-			} catch (NotSupportedException exception) {
+			} 
+			catch (NotSupportedException exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
@@ -122,7 +123,8 @@ public class TransactionManager_1 {
 					"support nested transactions.",
 					phase.getPhase()
 				);
-			} catch (SystemException exception) {
+			} 
+			catch (Exception exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
@@ -136,21 +138,24 @@ public class TransactionManager_1 {
 			phase.setPhase("afterBegin");
 			try {
 				synchronization.afterBegin();
-			} catch (ServiceException exception) {
+			} 
+			catch (Exception exception) {
 				throw rollback(transaction,synchronization,phase,exception);
 			}
 	
 			phase.setPhase("beforeCompletion");
 			try {
 				synchronization.beforeCompletion();
-			} catch (ServiceException exception) {
+			} 
+			catch (Exception exception) {
 				throw rollback(transaction,synchronization,phase,exception);
 			}
 	
 			phase.setPhase("commit");
 			try {
 				transaction.commit();
-			} catch (RollbackException exception) {
+			} 
+			catch (RollbackException exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
@@ -158,7 +163,8 @@ public class TransactionManager_1 {
 					"Transaction rolled back",
 					phase.getPhase()
 				);
-			} catch (HeuristicMixedException exception) {
+			} 
+			catch (HeuristicMixedException exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
@@ -168,7 +174,8 @@ public class TransactionManager_1 {
 					"while others have been rolled back",
 					phase.getPhase()
 				).log();
-			} catch (HeuristicRollbackException exception) {
+			} 
+			catch (HeuristicRollbackException exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
@@ -177,7 +184,8 @@ public class TransactionManager_1 {
 					"relevant updates have been rolled back",
 					phase.getPhase()
 				).log();
-			} catch (SecurityException exception) {
+			} 
+			catch (SecurityException exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
@@ -186,7 +194,8 @@ public class TransactionManager_1 {
 					"the transaction",
 					phase.getPhase()
 				).log();
-			} catch (IllegalStateException exception) {
+			} 
+			catch (IllegalStateException exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
@@ -195,7 +204,8 @@ public class TransactionManager_1 {
 					"transaction",
 					phase.getPhase()
 				).log();
-			} catch (SystemException exception) {
+			} 
+			catch(Exception exception) {
 				throw new ServiceException(
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
@@ -226,8 +236,9 @@ public class TransactionManager_1 {
 
 		phase.setPhase("afterCommit");
 		try {
-			synchronization.afterCompletion(true);
-		} catch (ServiceException exception) {
+			synchronization.afterCompletion(Status.STATUS_COMMITTED);
+		} 
+		catch (Exception exception) {
 			throw new ServiceException(
 				exception,
 				BasicException.Code.DEFAULT_DOMAIN,
@@ -235,15 +246,7 @@ public class TransactionManager_1 {
 				"The afterCompletion code failed",
 				phase.getPhase()
 			).log();
-		} catch (RuntimeException exception) {
-			throw new RuntimeServiceException(
-				exception,
-				BasicException.Code.DEFAULT_DOMAIN,
-				BasicException.Code.NONE,
-				"The afterCompletion code failed",
-				phase.getPhase()
-			).log();
-		}
+		} 
 
 	}
 
@@ -281,7 +284,7 @@ public class TransactionManager_1 {
                             "is already rolling back, i.e. there is " +
                             "no synchronization for rollback outcome",
                             phase.getPhase()
-                        )
+                        ), cause
                     );
                 }
     		} catch (SecurityException exception) {
@@ -295,7 +298,8 @@ public class TransactionManager_1 {
     					"The current thread is not allowed to roll " +
     					"back the transaction",
     					phase.getPhase()
-    				).appendCause(cause)
+    				), 
+    				cause
     			).log();
     		} catch (IllegalStateException exception) {
     			return noCommit(
@@ -308,7 +312,8 @@ public class TransactionManager_1 {
     					"The current thread is not associated with a " +
     					"transaction",
     					phase.getPhase()
-    				).appendCause(cause)
+    				), 
+    				cause
     			).log();
             }
             //
@@ -324,7 +329,7 @@ public class TransactionManager_1 {
     				BasicException.Code.ROLLBACK,
     				"Transaction rolled back",
     				phase.getPhase()
-    			)
+    			), cause
     		);
         } catch (SystemException exception) {
             return noCommit(
@@ -337,7 +342,8 @@ public class TransactionManager_1 {
                     "The transaction manager encountered an " +
                     "unexpected error condition",
                     phase.getPhase()
-                ).appendCause(cause)
+                ), 
+                cause
             ).log();
         }
 	}
@@ -346,24 +352,26 @@ public class TransactionManager_1 {
 	 * After completion
 	 * 
 	 * @param synchronization
+	 * @param initialCause TODO
 	 * @param status
 	 */
 	private static ServiceException noCommit(
 		Synchronization_1_0 synchronization,
 		Phase phase,
-		ServiceException cause
+		ServiceException cause, 
+		Throwable initialCause
 	){
 		try {
-			synchronization.afterCompletion(false);
+			synchronization.afterCompletion(Status.STATUS_ROLLEDBACK);
 			return cause;
-		} catch (ServiceException exception) {
-			return new ServiceException(
+		} 
+		catch (Exception exception) {
+		    ServiceException serviceException = new ServiceException(
 				exception,
-				exception.getExceptionDomain(),
-				exception.getExceptionCode(),
-				"After completion code failed",
 				phase.getPhase()
-			).appendCause(cause);
+			);
+		    serviceException.getCause(null).initCause(cause);
+		    return serviceException;
 		}
 	}
 	

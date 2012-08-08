@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FilterLoader.java,v 1.17 2008/11/10 15:16:45 wfro Exp $
+ * Name:        $Id: FilterLoader.java,v 1.22 2009/03/08 18:03:21 wfro Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 15:16:45 $
+ * Date:        $Date: 2009/03/08 18:03:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,16 +65,16 @@ import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 
+import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Model_1_3;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.OrderSpecifier;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.query.Quantors;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_3;
+import org.openmdx.base.query.Quantors;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.Filters;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
@@ -148,17 +148,18 @@ public class FilterLoader
 
         // Create a filter for each referenced type (only if there is more than one referenced type)
         Map assertableInspectors = uiContext.getAssertableInspectors(UiContext.MAIN_PERSPECTIVE);
-        if(referencedType.values("allSubtype").size() > 1) {
-            for(Iterator k = referencedType.values("allSubtype").iterator(); k.hasNext(); ) {
+        if(referencedType.objGetList("allSubtype").size() > 1) {
+            for(Iterator k = referencedType.objGetList("allSubtype").iterator(); k.hasNext(); ) {
                 ModelElement_1_0 subtype = model.getElement(k.next());
-                if(!((Boolean)subtype.values("isAbstract").get(0)).booleanValue()) {
-                    String inspectorQualifiedName = (String)subtype.values("qualifiedName").get(0);
+                if(!((Boolean)subtype.objGetValue("isAbstract")).booleanValue()) {
+                    String inspectorQualifiedName = (String)subtype.objGetValue("qualifiedName");
                     org.openmdx.ui1.jmi1.AssertableInspector inspector =
                         (org.openmdx.ui1.jmi1.AssertableInspector)assertableInspectors.get(inspectorQualifiedName);
                     if(inspector == null) {
                         AppLog.warning("No inspector found for", inspectorQualifiedName);
                         System.out.println("WARNING: no inspector found for " + inspectorQualifiedName);
-                    } else {
+                    } 
+                    else {
                         if(inspector.getIconKey() == null) {
                             AppLog.warning("No icon key found for inspector", inspectorQualifiedName);
                             System.out.println("WARNING: no icon key found for inspector " + inspectorQualifiedName);
@@ -187,7 +188,7 @@ public class FilterLoader
                                             Quantors.THERE_EXISTS,
                                             SystemAttributes.OBJECT_CLASS,
                                             true,
-                                            new Object[]{subtype.values("qualifiedName").get(0)}
+                                            new Object[]{subtype.objGetValue("qualifiedName")}
                                         )
                                     },
                                     new OrderSpecifier[]{},
@@ -285,13 +286,13 @@ public class FilterLoader
                 if(this.model.isClassType(element)) {
                     // Default filters for all modeled features
                     for(
-                        Iterator j = ((Map)element.values("allFeature").get(0)).values().iterator(); 
+                        Iterator j = ((Map)element.objGetValue("allFeature")).values().iterator(); 
                         j.hasNext(); 
                     ) {
                         ModelElement_1_0 feature = (ModelElement_1_0)j.next();
                         if(this.model.isReferenceType(feature)) {                            
-                            String qualifiedReferenceName = element.values("qualifiedName").get(0) + ":" + feature.values("name").get(0);
-                            ModelElement_1_0 referencedType = this.model.getElement(feature.values("type").get(0));                            
+                            String qualifiedReferenceName = element.objGetValue("qualifiedName") + ":" + feature.objGetValue("name");
+                            ModelElement_1_0 referencedType = this.model.getElement(feature.objGetValue("type"));                            
                             this.createDefaultFilters(
                                 qualifiedReferenceName, 
                                 referencedType, 

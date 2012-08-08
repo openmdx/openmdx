@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1_0.java,v 1.5 2004/04/07 17:01:18 wfro Exp $
+ * Name:        $Id: RefPackage_1_0.java,v 1.18 2009/01/13 02:10:43 wfro Exp $
  * Description: RefPackage_1_0 interface
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/07 17:01:18 $
+ * Date:        $Date: 2009/01/13 02:10:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,11 +55,12 @@ import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
 
-import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.base.accessor.cci.PersistenceManager_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.transaction.UnitOfWork_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.query.FilterProperty;
 
 /**
  * This interface extends the javax.jmi.reflect.RefPackage interface by
@@ -82,7 +83,7 @@ public interface RefPackage_1_0
    * 
    * @return ObjectFactory_1_0 object factory. 
    */
-  public ObjectFactory_1_0 refObjectFactory(
+  public PersistenceManager_1_0 refObjectFactory(
   );
     
   /**
@@ -102,6 +103,20 @@ public interface RefPackage_1_0
     String refMofId
   );
   
+  /**
+   * Get object with the given object id. This operation is equivalent to
+   * <pre>
+   *   Object_1_0 object = refPackage.refObject(objectId.toResourceIdentifier());
+   * </pre>
+   * 
+   * @param refMofId unique id of RefObject.
+   * 
+   * @return RefObject
+   */
+  RefObject refObject(
+    Path objectId
+  );
+    
   /**
    * Return the current unit of work. Equivalent to refOutermostPackage().refUnitOfWork().
    */
@@ -172,7 +187,22 @@ public interface RefPackage_1_0
     FilterProperty[] filterProperties,
     AttributeSpecifier[] attributeSpecifiers
   );
-  
+
+  /**
+   * @return config option userContext
+   */
+  Object refUserContext();
+    
+  /**
+   * Empty the cache
+   */
+  void clear();
+
+  /**
+   * Close
+   */
+  void close();
+        
 }
 
 //--- End of File -----------------------------------------------------------

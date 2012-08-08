@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: JavaNames.java,v 1.1 2008/01/08 16:16:31 hburger Exp $
+ * Name:        $Id: JavaNames.java,v 1.2 2009/01/13 02:10:43 wfro Exp $
  * Description: JavaNames 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:31 $
+ * Date:        $Date: 2009/01/13 02:10:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,7 +53,7 @@
 package org.openmdx.base.accessor.jmi.cci;
 
 
-import org.openmdx.model1.mapping.java.Identifier;
+import org.omg.mof.spi.Identifier;
 
 
 /**

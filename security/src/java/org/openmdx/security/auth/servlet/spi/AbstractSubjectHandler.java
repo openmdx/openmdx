@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractSubjectHandler.java,v 1.11 2008/09/11 10:47:30 hburger Exp $
+ * Name:        $Id: AbstractSubjectHandler.java,v 1.13 2009/03/08 18:52:18 wfro Exp $
  * Description: Signed Token
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/11 10:47:30 $
+ * Date:        $Date: 2009/03/08 18:52:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,8 +73,7 @@ import org.openmdx.security.auth.servlet.cci.HttpSubjectHandler;
 
 public abstract class AbstractSubjectHandler 
 extends AbstractHandler
-implements HttpSubjectHandler 
-{	
+implements HttpSubjectHandler {	
 
 	/**
 	 * 
@@ -206,60 +205,58 @@ implements HttpSubjectHandler
 	 */
 	public void init(ServletConfig configuration) throws ServletException {
 		super.init(configuration);
-		this.tokenTimeout = getInitParameter(
+		this.tokenTimeout = this.getInitParameter(
 				"token-timeout",
 				-1L // No expiration by default
 		);
-		this.signatureAlgorithm = getInitParameter(
+		this.signatureAlgorithm = this.getInitParameter(
 				"signature-algorithm",
 				"SHA1withRSA"
 		);
-		this.cookieName = getInitParameter(
+		this.cookieName = this.getInitParameter(
 				"cookie-name",
 				GenericPrincipals.TOKEN
 		);
-		this.cookieComment = getInitParameter(
+		this.cookieComment = this.getInitParameter(
 				"cookie-comment",
 				"openMDX Authentication Token"
 		);
-		this.cookieDomain = getInitParameter(
+		this.cookieDomain = this.getInitParameter(
 				"cookie-domain",
 				null
 		);
-		this.cookiePath = getInitParameter(
+		this.cookiePath = this.getInitParameter(
 				"cookie-path",
 				null
 		);
-		this.cookieSecure = getInitParameter(
+		this.cookieSecure = this.getInitParameter(
 				"cookie-secure",
 				true
 		);
 		try {
 			this.tokenFactory = new TokenFactory(
-					getSignatureAlgorithm(), 
-					(PrivateKey) getKeyProvider().getKey()
+				this.getSignatureAlgorithm(), 
+					(PrivateKey) this.getKeyProvider().getKey()
 			);
-			if(isDebug()) {
-				log("$Id: AbstractSubjectHandler.java,v 1.11 2008/09/11 10:47:30 hburger Exp $");
-				log("token-timeout:" + this.tokenTimeout);
-				log("signature-algorithm:" + this.signatureAlgorithm);
-				log("cookie-name:" + this.cookieName);
-				log("cookie-comment:" + this.cookieComment);
-				log("cookie-domain:" + this.cookieDomain);
-				log("cookie-path:" + this.cookiePath);
-				log("cookie-secure:" + this.cookieSecure);
+			if(this.isDebug()) {
+				this.log("$Id: AbstractSubjectHandler.java,v 1.13 2009/03/08 18:52:18 wfro Exp $");
+				this.log("token-timeout:" + this.tokenTimeout);
+				this.log("signature-algorithm:" + this.signatureAlgorithm);
+				this.log("cookie-name:" + this.cookieName);
+				this.log("cookie-comment:" + this.cookieComment);
+				this.log("cookie-domain:" + this.cookieDomain);
+				this.log("cookie-path:" + this.cookiePath);
+				this.log("cookie-secure:" + this.cookieSecure);
 			}
-		} catch (Exception exception) {
-			throw (UnavailableException) Throwables.initCause(
-					new UnavailableException(
-							"Token factory acquisition failed"
-					),
+		} 
+		catch (Exception exception) {
+			throw Throwables.initCause(
+					new UnavailableException("Token factory acquisition failed"),
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.ACTIVATION_FAILURE,
-					null,
-					new BasicException.Parameter("info", "$Id: AbstractSubjectHandler.java,v 1.11 2008/09/11 10:47:30 hburger Exp $"),
-					new BasicException.Parameter("name", getServletName()),
+					new BasicException.Parameter("info", "$Id: AbstractSubjectHandler.java,v 1.13 2009/03/08 18:52:18 wfro Exp $"),
+					new BasicException.Parameter("name", this.getServletName()),
 					new BasicException.Parameter("token-timeout", this.tokenTimeout),
 					new BasicException.Parameter("signature-algorithm", this.signatureAlgorithm),
 					new BasicException.Parameter("cookie-name", this.cookieName),
@@ -267,7 +264,7 @@ implements HttpSubjectHandler
 					new BasicException.Parameter("cookie-domain", this.cookieDomain),
 					new BasicException.Parameter("cookie-path", this.cookiePath),
 					new BasicException.Parameter("cookie-secure", this.cookieSecure),
-					new BasicException.Parameter("debug", isDebug())
+					new BasicException.Parameter("debug", this.isDebug())
 			);
 		}
 	}
@@ -286,14 +283,15 @@ implements HttpSubjectHandler
 	) throws LoginException {
 		Set<Principal> principalSet = subject.getPrincipals();
 		try {
-			return getTokenFactory(
+			return this.getTokenFactory(
 			).create(
-					getTokenTimeout(), 
+				this.getTokenTimeout(), 
 					principalSet.toArray(
 							new Principal[principalSet.size()]
 					)
 			);
-		} catch (TokenException exception) {
+		} 
+		catch (TokenException exception) {
 			throw (LoginException) new LoginException(
 					"Could not create the token for a given subject"
 			).initCause(
@@ -315,14 +313,14 @@ implements HttpSubjectHandler
 			Subject subject
 	) throws LoginException {
 		Cookie cookie = new Cookie(
-				getCookieName(),
-				Base64.encode(getToken(subject))
+			this.getCookieName(),
+				Base64.encode(this.getToken(subject))
 		);
 		String value;
-		if((value = getCookieComment()) != null) cookie.setComment(value);
-		if((value = getCookieDomain()) != null) cookie.setDomain(value);
-		if((value = getCookiePath()) != null) cookie.setPath(value); 
-		cookie.setSecure(isCookieSecure());
+		if((value = this.getCookieComment()) != null) cookie.setComment(value);
+		if((value = this.getCookieDomain()) != null) cookie.setDomain(value);
+		if((value = this.getCookiePath()) != null) cookie.setPath(value); 
+		cookie.setSecure(this.isCookieSecure());
 		return cookie;
 	}
 

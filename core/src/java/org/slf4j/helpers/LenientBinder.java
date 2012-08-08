@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LenientBinder.java,v 1.2 2008/11/18 01:30:42 hburger Exp $
+ * Name:        $Id: LenientBinder.java,v 1.3 2009/01/12 16:53:43 wfro Exp $
  * Description: Lenient Binder
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/18 01:30:42 $
+ * Date:        $Date: 2009/01/12 16:53:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -174,7 +174,6 @@ public abstract class LenientBinder<D,B> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private String getRequestedVersion(
         Class<B> binderClass
     ){

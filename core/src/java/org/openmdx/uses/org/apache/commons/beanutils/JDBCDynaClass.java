@@ -33,9 +33,12 @@ import java.util.Map;
  *
  * @author   Craig R. McClanahan
  * @author   George Franciscus
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:14 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:44 $
  */
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 abstract class JDBCDynaClass implements DynaClass, Serializable {
 
     // ----------------------------------------------------- Instance Variables

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: QuickAccessor.java,v 1.6 2008/04/04 11:53:44 hburger Exp $
+ * Name:        $Id: QuickAccessor.java,v 1.7 2009/01/06 14:12:01 wfro Exp $
  * Description: QuickAccess 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:53:44 $
+ * Date:        $Date: 2009/01/06 14:12:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,8 +55,8 @@ package org.openmdx.portal.servlet;
 import java.util.List;
 
 import org.openmdx.application.log.AppLog;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.Base64;
-import org.openmdx.compatibility.base.naming.Path;
 
 public class QuickAccessor {
     

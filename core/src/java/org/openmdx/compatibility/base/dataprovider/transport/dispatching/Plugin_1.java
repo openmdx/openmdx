@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Plugin_1.java,v 1.43 2008/09/10 08:55:21 hburger Exp $
+ * Name:        $Id: Plugin_1.java,v 1.52 2009/03/02 13:38:15 wfro Exp $
  * Description: Plugin_1
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.52 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/10 08:55:21 $
+ * Date:        $Date: 2009/03/02 13:38:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,30 +52,29 @@ package org.openmdx.compatibility.base.dataprovider.transport.dispatching;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.openmdx.base.accessor.generic.cci.LargeObject_1_0;
-import org.openmdx.base.accessor.generic.cci.Object_1_0;
+import javax.jdo.JDOHelper;
+
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.dataprovider.cci.DataproviderOperations;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.Directions;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.collection.FetchSize;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.collection.Reconstructable;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReplyContexts;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -85,7 +84,7 @@ import org.openmdx.kernel.log.SysLog;
  * ObjectFactory_1_0 object requests.
  */
 abstract public class Plugin_1
-extends OperationAwarePlugin_1 
+    extends OperationAwarePlugin_1 
 {
 
     /**
@@ -146,7 +145,7 @@ extends OperationAwarePlugin_1
                     request.path(),        
                     this.retrieveObject(request.path()),
                     request,
-                    this.model,
+                    getModel(),
                     batch, 
                     this.retrievalSize
                 )        
@@ -163,7 +162,7 @@ extends OperationAwarePlugin_1
                             path,        
                             this.retrieveObject(path),
                             Collections.EMPTY_SET,
-                            this.model,
+                            getModel(),
                             batch, 
                             this.retrievalSize
                         )        
@@ -189,7 +188,7 @@ extends OperationAwarePlugin_1
                     request.path(),        
                     this.retrieveObject(request.path()),
                     request,
-                    this.model,
+                    getModel(),
                     null, 
                     this.retrievalSize
                 )
@@ -258,10 +257,10 @@ extends OperationAwarePlugin_1
         ) {
             Object element = iterator.next();
             Path path;
-            Object_1_0 source;
-            if(element instanceof Object_1_0) {
-                source = (Object_1_0)element;
-                path = source.objGetPath();
+            DataObject_1_0 source;
+            if(element instanceof DataObject_1_0) {
+                source = (DataObject_1_0)element;
+                path = (Path)source.jdoGetObjectId();
             } 
             else {
                 path = (Path)element;
@@ -272,7 +271,7 @@ extends OperationAwarePlugin_1
                     path,
                     source,
                     request,
-                    this.model
+                    getModel()
                 )
             );
         }
@@ -370,10 +369,10 @@ extends OperationAwarePlugin_1
         DataproviderRequest    request
     ) throws ServiceException {
         Path identity = request.path();
-        Object_1_0 target = (Object_1_0)this.objectCache.get(identity);
+        DataObject_1_0 target = (DataObject_1_0)this.objectCache.get(identity);
         if(target == null) target = createObject(request);
         Path parentPath = identity.getPrefix( identity.size() - 2);
-        Object_1_0 parent = (Object_1_0)this.objectCache.get(parentPath);
+        DataObject_1_0 parent = (DataObject_1_0)this.objectCache.get(parentPath);
         if(parent==null) parent = this.retrieveObject(parentPath);
         DataproviderObjectMarshaller.toObject(    
             null,
@@ -381,7 +380,7 @@ extends OperationAwarePlugin_1
             target,
             this.objectCache,
             this.objectFactory,
-            this.model, true
+            getModel(), true
         );
         target.objMove(
             parent.objGetContainer(
@@ -389,19 +388,18 @@ extends OperationAwarePlugin_1
             ),
             identity.getBase()
         );
-        identity.setTo(target.objGetPath());
+        identity.setTo((Path)target.jdoGetObjectId());
         return new DataproviderReply(
             request.object()
         );
     }
 
     //---------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public DataproviderReply modify(
         ServiceHeader header,
         DataproviderRequest    request
     ) throws ServiceException {
-        Object_1_0 target = (Object_1_0)this.objectCache.get(request.path());
+        DataObject_1_0 target = (DataObject_1_0)this.objectCache.get(request.path());
         if(target == null) target = this.retrieveObject(request, true);
         DataproviderObjectMarshaller.toObject(
             null,
@@ -409,7 +407,7 @@ extends OperationAwarePlugin_1
             target,
             this.objectCache,
             this.objectFactory,
-            this.model, false
+            getModel(), false
         );
         if(request.attributeSelector() == AttributeSelectors.NO_ATTRIBUTES) {
             DataproviderObject reply = new DataproviderObject(
@@ -429,12 +427,11 @@ extends OperationAwarePlugin_1
     }
 
     //---------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public DataproviderReply replace(
         ServiceHeader header,
         DataproviderRequest    request
     ) throws ServiceException {
-        Object_1_0 target = (Object_1_0)this.objectCache.get(request.path());
+        DataObject_1_0 target = (DataObject_1_0)this.objectCache.get(request.path());
         if(target == null) target = this.retrieveObject(request, true);
         DataproviderObjectMarshaller.toObject(
             null,
@@ -442,7 +439,7 @@ extends OperationAwarePlugin_1
             target,
             this.objectCache,
             this.objectFactory,
-            this.model, true
+            getModel(), true
         );        
         if(request.attributeSelector() == AttributeSelectors.NO_ATTRIBUTES) {
             DataproviderObject reply = new DataproviderObject(
@@ -459,14 +456,13 @@ extends OperationAwarePlugin_1
                     request.path(),
                     target,
                     request,
-                    this.model
+                    getModel()
                 )
             );
         }
     }
 
     //---------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public DataproviderReply set(
         ServiceHeader header,
         DataproviderRequest request
@@ -502,53 +498,11 @@ extends OperationAwarePlugin_1
             header,
             request
         );
-        Object_1_0 target = this.retrieveObject(
+        DataObject_1_0 target = this.retrieveObject(
             request.path()
         );
-        target.objRemove();
+        JDOHelper.getPersistenceManager(target).deletePersistent(target);
         return reply;
-    }
-
-    //---------------------------------------------------------------------------  
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.OutputStream, long)
-     */
-    @Override
-    protected DataproviderObject getStreamOperation(
-        ServiceHeader header,
-        Path objectPath,
-        String feature,
-        OutputStream value, 
-        long position, 
-        Path replyPath
-    ) throws ServiceException {
-        LargeObject_1_0 object = this.retrieveObject(objectPath).objGetLargeObject(feature); 
-        object.getBinaryStream(value, position);
-        return this.createResponse(
-            replyPath, 
-            object.length()
-        );
-    }
-
-    //---------------------------------------------------------------------------  
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.Writer, long)
-     */
-    @Override
-    protected DataproviderObject getStreamOperation(
-        ServiceHeader header,
-        Path objectPath,
-        String feature,
-        Writer value, 
-        long position, 
-        Path replyPath
-    ) throws ServiceException {
-        LargeObject_1_0 object = this.retrieveObject(objectPath).objGetLargeObject(feature); 
-        object.getCharacterStream(value, position);
-        return this.createResponse(
-            replyPath, 
-            object.length()
-        );
     }
 
 }

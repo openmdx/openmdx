@@ -1,15 +1,13 @@
-﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html dir="ltr">
-<head>
-  <title>Features based on ActiveX Control</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr" lang="ro"><head>
+  
+  <title>Features based on ActiveX Control</title><meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <link href="_style/colors.css" rel="stylesheet" type="text/css">
-  <link href="_style/default.css" rel="stylesheet" type="text/css">
-</head>
+  <link href="_style/default.css" rel="stylesheet" type="text/css"></head>
 
-<body onLoad="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(50, 50);">
+<body style="direction: ltr;" onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(50, 50);">
 <table class="objectTitle">
-<tr>
+<tbody><tr>
   <td>ActiveX</td>
   <td align="right">
 	<script>
@@ -19,73 +17,71 @@
 	</script>
   </td>
 </tr>
-</table>
-<p>Use of features based on ActiveX controls requires that<br />
-<ul>
-  <li>your browser is <strong>capable of handling ActiveX controls</strong> (e.g. Internet Explorer on MS Windows) and</li>
-  <li>security settings are such that <strong>permission is granted to load/execute ActiveX controls</strong></p></li>
+</tbody></table>
+<p>Utilizarea&nbsp;funcţionalităţilor bazate pe&nbsp;controalele ActiveX necesită ca<br>
+</p><ul>
+  <li>navigatorul de web să fie&nbsp;<strong>capabil de a gestiona controale&nbsp;ActiveX&nbsp;</strong>(ex.&nbsp;Internet Explorer în sistem MS Windows) şi</li>
+  <li>configurările de securitate&nbsp;<strong>să permită încărcarea/execuţia controalelor&nbsp;ActiveX</strong></li>
 </ul>
-<p>Depending on the feature, certain third-party software packages might also be required:</p>
+<p>Dependent de funcţionalitatea utilizată, suplimentar ar putea fi solicitate anumite pachete software&nbsp;:</p>
 <table class="browserHints">
   <tbody>
   <tr>
-    <td><b>Feature</b></td>
-	<td><b>Requirement</b></td>
-  <td><strong>Additional Hints </strong></td>
+    <td><b>Funcţionalitate</b></td>
+	<td><b>Necesar</b></td>
+  <td><strong>Sugestii adiţionale </strong></td>
   </tr>
   <tr>
     <td>MS Word XML Merge</td>
-    <td>client-based installation of MS Word 2000 or newer</td>
+    <td>instalarea MS Word 2000 sau mai nouă, în configuraţie client</td>
   <td><a href="#trustedsites">Trusted Sites</a>, <a href="#activexsettings">ActiveX Permissions</a></td>
   </tr>
   <tr>
     <td>MS Excel XML Merge </td>
-    <td>client-based installation of MS Excel 2000 or newer</td>
+    <td>instalarea MS Excel 2000 sau mai nouă, în configuraţie client</td>
   <td>&nbsp;</td>
   </tr>
   <tr>
     <td>XML Export to MS Outlook</td>
-    <td>client-based installation of MS Outlook 2000 or newer</td>
+    <td>instalarea MS Outlook 2000 sau mai nouă, în configuraţie client</td>
   <td>&nbsp;</td>
   </tr>
   <tr>
     <td>XML Import from MS Outlook</td>
-    <td>client-based installation of MS Outlook 2000 or newer </td>
+    <td>instalarea MS Outlook 2000 sau mai nouă, în configuraţie client </td>
   <td>&nbsp;</td>
   </tr>
   </tbody>
 </table>
-<a name="trustedsites"></a><p class="hh1">Trusted Sites (Internet Explorer)</p>
-<p>For security reasons we do not recommend that you enable ActiveX controls for the <strong>Internet Zone</strong>. It is better to add the site running openCRX to your <strong>Trusted sites zone</strong> or to your <strong>Local intranet zone</strong> (only if the site really is in your Intranet) and then <a href="#activexsettings">enable ActiveX controls</a> for the respective zone. Below are examples for adding the openCRX demo server (<strong><font color="#FF0000">demo.opencrx.org</font></strong>) to your Trusted sites zone and adding a local openCRX server (<strong><font color="#FF0000">10.1.1.20</font></strong>) to the Local intranet zone. </p>
-<p><img src="images/ie_trusted_sites.png" width="384" height="342"> <img src="images/ie_local_intranet_zone.png" width="384" height="342"></p>
+<a name="trustedsites"></a><p class="hh1">Site-uri Sigure (Internet Explorer)</p>
+<p>Din motive de securitate nu e recomandată activarea controalelor&nbsp;ActiveX pentru&nbsp;<strong>Zona Internet</strong>. E mai bine să adăugaţi site-ul care rulează openCRX în lista site-urilor sigure&nbsp;<strong>Zona Site-urilor de Încredere</strong> sau&nbsp; <strong>Zona Intranet-ului Local</strong> (doar dacă site-ul este în reţeaua locală) după care&nbsp;&nbsp;<a href="#activexsettings">activaţi controalele&nbsp;ActiveX</a> pentru zona respectivă. Mai jos sunt exemplificate modalitaţile de adăugare a openCRX demo server&nbsp;(<strong><font color="#ff0000">demo.opencrx.org</font></strong>) la zona site-urilor de încredere şi modul de adăugare a unui server local&nbsp;openCRX&nbsp;(<strong><font color="#ff0000">10.1.1.20</font></strong>) la zona reţelei locale. </p>
+<p><img src="images/ie_trusted_sites.png" height="342" width="384"> <img src="images/ie_local_intranet_zone.png" height="342" width="384"></p>
 <a name="activexsettings"></a>
-<p class="hh1">ActiveX Permissions  (Internet Explorer)</p>
-<p>For security reasons we do not recommend that you enable ActiveX controls for the <strong>Internet Zone</strong>. It is better to add the site running openCRX to your <strong><a href="#trustedsites">Trusted sites zone</a></strong> or to your <strong><a href="#trustedsites">Local intranet zone</a></strong> (only if the site really is in your Intranet) and then enable ActiveX controls for the respective zone as follows:</p>
-<p class="hh1">Where to find your ActiveX security settings:</p>
+<p class="hh1">Permisiuni ActiveX&nbsp;(Internet Explorer)</p>
+<p>Din motive de securitate nu e recomandată activarea controalelor&nbsp;ActiveX pentru&nbsp;<strong>Zona Internet</strong>. E mai bine să adăugaţi site-ul care rulează openCRX în lista site-urilor sigure&nbsp;<strong>Zona Site-urilor de Încredere</strong> sau&nbsp; <strong>Zona Intranet-ului Local</strong> (doar dacă site-ul este în reţeaua locală) după care&nbsp;&nbsp;<a href="helpActiveX_ro_RO.html#activexsettings">activaţi controalele&nbsp;ActiveX</a> pentru zona respectivă astfel&nbsp;:</p><p class="hh1">Unde se află configurările de securitate&nbsp;ActiveX&nbsp;:</p>
 
 <table class="activeXHints">
-  <tr>
-    <td><b>Platform</b></td>
-    <td colSpan=2><b>Browser</b> &amp; <b>Version</b></td>
-    <td><b>Find ActiveX Settings in ...</b></td>
-    <td><strong>ActiveX enabled (with pop-up warnings)</strong></td>
-    <td><strong>ActiveX enabled (without pop-up warnings)</strong></td>
+  <tbody><tr>
+    <td><b>Platforma</b></td>
+    <td colspan="2"><b>Navigator</b> &amp; <b>Versiune</b></td>
+    <td><b>Găsiţi configurările ActiveX în ...</b></td>
+    <td><strong>ActiveX activat (cu avertizare&nbsp;pop-up)</strong></td>
+    <td><strong>ActiveX activat (fără avertizare pop-up)</strong></td>
   </tr>
   <tr>
     <td align="center">
-      <img height=38 src="images/icon-windows.gif" width=38 /><br />
-	  <strong>Microsoft<br />
+      <img src="images/icon-windows.gif" height="38" width="38"><br>
+	  <strong>Microsoft<br>
 	  Windows</strong>	</td>
     <td align="center">
-	  <img height=38 src="images/icon-ie.gif" width=38><br />
-	  <FONT size=-1>Internet<br />Explorer</FONT>
+	  <img src="images/icon-ie.gif" height="38" width="38"><br>
+	  <font size="-1">Internet<br>Explorer</font>
 	</td>
     <td>6.x</td>
-    <td>Tools &gt; Internet Options &gt; Security ...<br />
+    <td>Tools &gt; Internet Options &gt; Security ...<br>
       ... Custom Levels &gt; ActiveX controls and plug-ins</td>
-    <td><img src="images/ie_activex_settings_secure.png" width="352" height="666"></td>
-    <td><img src="images/ie_activex_settings_convenient.png" width="352" height="666"></td>
+    <td><img src="images/ie_activex_settings_secure.png" height="666" width="352"></td>
+    <td><img src="images/ie_activex_settings_convenient.png" height="666" width="352"></td>
   </tr>
-</table>
-</body>
-</html>
+</tbody></table>
+</body></html>

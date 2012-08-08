@@ -27,7 +27,10 @@ package org.openmdx.uses.org.apache.commons.beanutils;
  * @author Paulo Gaspar
  * @since 1.3
  */
-@SuppressWarnings({"unchecked", "serial"})
+
+@SuppressWarnings({
+    "serial"
+})
 public class ConversionException extends RuntimeException {
 
 

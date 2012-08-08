@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.5-properties.xml,v 1.10 2008/09/27 11:59:37 hburger Exp $
+= Name:        $Id: jre-1.5-properties.xml,v 1.12 2009/03/05 17:51:35 hburger Exp $
 = Description: openMDX/Core jre-1.3 Platform Properties
-= Revision:    $Revision: 1.10 $
-= Date:        $Date: 2008/09/27 11:59:37 $
+= Revision:    $Revision: 1.12 $
+= Date:        $Date: 2009/03/05 17:51:35 $
 = Copyright:   (c) 2006 OMEX AG
 =======================================================================
 =
@@ -44,16 +44,4 @@
 = POSSIBILITY OF SUCH DAMAGE.
 = 
 -->
-<project name="openmdx-test-core-jre-1.5-properties">
-	<property name="project.build.exclude.1" value="org/openmdx/test/compatibility/base/dataprovider/exporter/*"/>
-	<property name="project.build.exclude.2" value="org/openmdx/test/base/transport/http/**"/>
-	<property name="project.build.exclude.3" value="org/openmdx/base/plugin/standard/*"/>
-	<property name="project.build.exclude.4" value="org/openmdx/test/base/security/pki/**"/>
-	<property name="project.build.exclude.5" value="org/openmdx/test/base/transport/http/**"/>
-	<property name="project.build.exclude.6" value="org/openmdx/test/clock1/junit/**"/>
-	<property name="project.build.exclude.7" value="org/openmdx/test/compatibility/audit1/*"/>
-	<property name="project.build.exclude.8" value="org/openmdx/test/compatibility/base/dataprovider/layer/model/**"/>
-	<property name="project.build.exclude.9" value="org/openmdx/test/compatibility/datastore1/accessor/jmi/**"/>
-	<property name="project.build.exclude.10" value="org/openmdx/test/compatibility/state1/**"/>
-	<property name="project.build.exclude.11" value="test/openmdx/base/*"/>
-</project>
+<project name="openmdx-test-core-jre-1.5-properties"/>

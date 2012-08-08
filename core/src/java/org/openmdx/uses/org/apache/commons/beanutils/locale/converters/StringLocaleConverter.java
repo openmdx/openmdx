@@ -17,9 +17,9 @@
  
 package org.openmdx.uses.org.apache.commons.beanutils.locale.converters;
 
-import org.openmdx.uses.org.apache.commons.beanutils.locale.BaseLocaleConverter;
 import org.openmdx.uses.org.apache.commons.logging.Log;
 import org.openmdx.uses.org.apache.commons.logging.LogFactory;
+import org.openmdx.uses.org.apache.commons.beanutils.locale.BaseLocaleConverter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -283,7 +283,7 @@ public class StringLocaleConverter extends BaseLocaleConverter {
                 numberFormat.applyPattern(pattern);
             }
         } else {
-            log.info("No pattern provided, using default.");
+            log.debug("No pattern provided, using default.");
         }
 
         return numberFormat;

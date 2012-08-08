@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: URIMarshaller.java,v 1.2 2008/09/25 23:37:51 hburger Exp $
+ * Name:        $Id: URIMarshaller.java,v 1.4 2009/01/09 13:30:30 wfro Exp $
  * Description: URI Marshaller class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/25 23:37:51 $
+ * Date:        $Date: 2009/01/09 13:30:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,8 +54,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
+import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.ReluctantUnmarshalling;
 import org.openmdx.kernel.exception.BasicException;
 
 
@@ -120,7 +120,6 @@ public class URIMarshaller
     }
 
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public Object marshal(
         Object source
     ) throws ServiceException {
@@ -131,7 +130,6 @@ public class URIMarshaller
     }
 
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public Object unmarshal (
         Object source
     ) throws ServiceException {

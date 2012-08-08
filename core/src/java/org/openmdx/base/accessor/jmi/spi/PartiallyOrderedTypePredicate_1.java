@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PartiallyOrderedTypePredicate_1.java,v 1.3 2008/09/09 12:15:06 hburger Exp $
+ * Name:        $Id: PartiallyOrderedTypePredicate_1.java,v 1.6 2009/01/13 02:10:30 wfro Exp $
  * Description: Partially Ordered Type Predicate implementation
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/09 12:15:06 $
+ * Date:        $Date: 2009/01/13 02:10:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,8 +54,8 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.FilterOperators;
 import org.w3c.cci2.PartiallyOrderedTypePredicate;
 
 /**

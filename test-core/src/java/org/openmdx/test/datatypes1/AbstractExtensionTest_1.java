@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractExtensionTest_1.java,v 1.6 2008/11/07 17:54:14 hburger Exp $
+ * Name:        $Id: AbstractExtensionTest_1.java,v 1.8 2009/02/19 16:39:12 hburger Exp $
  * Description: Extension Unit Test
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/07 17:54:14 $
+ * Date:        $Date: 2009/02/19 16:39:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -75,7 +75,7 @@ import org.junit.Test;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
-import org.openmdx.base.persistence.spi.ManagerFactory_2_0;
+import org.openmdx.base.persistence.cci.EntityManagerFactory;
 import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.test.datatypes1.cci2.NonStatedQuery;
 import org.openmdx.test.datatypes1.jmi1.Data;
@@ -115,7 +115,7 @@ public abstract class AbstractExtensionTest_1 {
     protected static final int VALUE11b = VALUE_COUNT++;
     protected static final int SLICE_COUNT = 3;
 
-    protected static ManagerFactory_2_0 managerFactory;
+    protected static EntityManagerFactory managerFactory;
     private Object[][] values;
     
     /**
@@ -264,7 +264,7 @@ public abstract class AbstractExtensionTest_1 {
         String segmentName
     ) throws Exception {
         System.out.println("Acquire persistence manager...");
-        PersistenceManager persistenceManager = managerFactory.createManager();
+        PersistenceManager persistenceManager = managerFactory.getEntityManager();
         Transaction unitOfWork = persistenceManager.currentTransaction();
         Authority authority = (Authority) persistenceManager.getObjectById(
             Authority.class,
@@ -339,7 +339,7 @@ public abstract class AbstractExtensionTest_1 {
         String segmentName
     ) throws Exception {
         System.out.println("Acquire persistence manager...");
-        PersistenceManager persistenceManager = managerFactory.createManager();
+        PersistenceManager persistenceManager = managerFactory.getEntityManager();
         Authority authority = (Authority) persistenceManager.getObjectById(
             Authority.class,
             Datatypes1Package.AUTHORITY_XRI

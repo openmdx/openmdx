@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AmendingCallbackHandler.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: AmendingCallbackHandler.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
  * Description: Amending Callback Handler
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -111,14 +111,14 @@ public final class AmendingCallbackHandler implements CallbackHandler {
 	 * @param prolog the prolog to set
 	 */
 	public void setProlog(Callback[] prolog) {
-		this.prolog = prolog == null ? NONE : prolog;
+		this.prolog = prolog == null ? AmendingCallbackHandler.NONE : prolog;
 	}
 
 	/**
 	 * @param epilog the epilog to set
 	 */
 	public void setEpilog(Callback[] epilog) {
-		this.epilog = epilog == null ? NONE : epilog;
+		this.epilog = epilog == null ? AmendingCallbackHandler.NONE : epilog;
 	}
 
 	/**

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InMemoryIterator.java,v 1.6 2005/02/21 13:09:00 hburger Exp $
+ * Name:        $Id: InMemoryIterator.java,v 1.9 2009/01/06 10:21:20 wfro Exp $
  * Description: JDBC Iterator for find requests
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:09:00 $
+ * Date:        $Date: 2009/01/06 10:21:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,8 +51,8 @@
  */
 package org.openmdx.compatibility.base.dataprovider.layer.persistence.none;
 
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.query.FilterProperty;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.base.query.FilterProperty;
 import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.AbstractIterator;
 
 /**

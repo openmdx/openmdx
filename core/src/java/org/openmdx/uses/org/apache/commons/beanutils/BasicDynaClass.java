@@ -34,9 +34,12 @@ import java.util.HashMap;
  * used to associate the DynaBean instance with this DynaClass.</p>
  *
  * @author Craig McClanahan
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:13 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:43 $
  */
-@SuppressWarnings({"unchecked", "serial"})
+
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class BasicDynaClass implements DynaClass, Serializable {
 
 

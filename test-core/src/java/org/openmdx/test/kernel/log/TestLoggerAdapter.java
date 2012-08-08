@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestLoggerAdapter.java,v 1.4 2007/03/29 10:37:35 hburger Exp $
+ * Name:        $Id: TestLoggerAdapter.java,v 1.5 2009/03/05 17:51:36 hburger Exp $
  * Description: TestLoggerAdapter 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/29 10:37:35 $
+ * Date:        $Date: 2009/03/05 17:51:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,71 +50,23 @@
  */
 package org.openmdx.test.kernel.log;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Test;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.kernel.log.SysLog;
-import org.slf4j.InvocationTest;
 
 /**
  * TestLoggerAdapter
  */
-public class TestLoggerAdapter
-    extends InvocationTest
-{
+public class TestLoggerAdapter {
 
     /**
-     * Constructor 
-     *
-     * @param name
+     * Test Logging via Jakarta Commons Logging
      */
-    public TestLoggerAdapter(String name) {
-        super(name);
-    }
-
-    /**
-     * The batch TestRunner can be given a class to run directly.
-     * To start the batch runner from your main you can write: 
-     */
-    public static void main (
-        String[] args
-    ){
-        TestRunner.run (suite());
-    }
-
-
-    /* (non-Javadoc)
-     * @see org.slf4j.InvocationTest#setUp()
-     */
-    protected void setUp(
-    )throws Exception {
-        super.setUp();
-        this.log = "testFromJCL".equals(getName()) ?
-            LogFactory.getLog(TestLoggerAdapter.class) :
-            null;
-    }
-
-    /**
-     * A test runner either expects a static method suite as the
-     * entry point to get a test to run or it will extract the 
-     * suite automatically. 
-     */
-    public static Test suite(
-    ){
-//        return new TestSuite(TestLoggerAdapter.class);
-        TestSuite suite = new TestSuite();
-        suite.addTest(new TestLoggerAdapter("testSysLog"));
-        return suite;
-    }
-
-    /**
-     * Test Jakarta Commons Logging 1.0.4
-     */
+    @Test
     public void testFromJCL() {
+        Log log = LogFactory.getLog(TestLoggerAdapter.class);
         Exception e = new Exception("This is a test exception");
         log.trace("A trace message");
         log.debug("A debug message");
@@ -127,6 +79,7 @@ public class TestLoggerAdapter
     /**
      * Test Logging via SysLog
      */
+    @Test
     public void testSysLog() {
         Exception e = new Exception("This is a test exception");
         SysLog.trace("A trace message");
@@ -140,6 +93,7 @@ public class TestLoggerAdapter
     /**
      * Test Logging via AppLog
      */
+    @Test
     public void testAppLog() {
         Exception e = new Exception("This is a test exception");
         AppLog.trace("A trace message");
@@ -150,9 +104,4 @@ public class TestLoggerAdapter
         AppLog.criticalError("A fatal exception", e);
     }
 
-    /**
-     * Jakarta Commons Logging 1.0.4 Logger
-     */
-    private Log log;
-    
 }

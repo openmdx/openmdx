@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestOffsetArrayList.java,v 1.4 2004/04/02 16:59:05 wfro Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: TestOffsetArrayList.java,v 1.6 2009/01/07 02:44:16 hburger Exp $
  * Description: class TestOffsetArrayList 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:05 $
+ * Date:        $Date: 2009/01/07 02:44:16 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.test.compatibility.base.collection;
 
@@ -59,8 +58,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.openmdx.compatibility.base.collection.OffsetArrayList;
-import org.openmdx.compatibility.base.collection.SparseList;
+import org.openmdx.base.collection.OffsetArrayList;
+import org.openmdx.base.collection.SparseList;
 
 public class TestOffsetArrayList extends TestCase {
 
@@ -91,55 +90,55 @@ public class TestOffsetArrayList extends TestCase {
     /**
      * Add an instance variable for each part of the fixture 
      */
-    protected OffsetArrayList populatedBySparseList;
+    protected OffsetArrayList<Object> populatedBySparseList;
 
     /**
      * Add an instance variable for each part of the fixture 
      */
-    protected OffsetArrayList populatedByCollection;
+    protected OffsetArrayList<Object> populatedByCollection;
 
     /**
      * Add an instance variable for each part of the fixture 
      */
-    protected OffsetArrayList populatedAscending;
+    protected OffsetArrayList<Object> populatedAscending;
 
     /**
      * Add an instance variable for each part of the fixture 
      */
-    protected OffsetArrayList populatedDescending;
+    protected OffsetArrayList<Object> populatedDescending;
 
     /**
      * Add an instance variable for each part of the fixture 
      */
-    protected OffsetArrayList populatedFromCenter;
+    protected OffsetArrayList<Object> populatedFromCenter;
 
     /**
      * Add an instance variable for each part of the fixture 
      */
-    protected OffsetArrayList addAllTarget;
+    protected OffsetArrayList<Object> addAllTarget;
 
     /**
      * Add an instance variable for each part of the fixture 
      */
-    protected List addAllSource;
+    protected List<Object> addAllSource;
 
     /**
      * Sets up the fixture, for example, open a network connection.
      * This method is called before a test is executed.
      */
     protected void setUp() {
-        populatedByCollection = new OffsetArrayList (
+        populatedByCollection = new OffsetArrayList<Object> (
             Arrays.asList(
                 new Object[]{null,"A",null,"B",null,"C",null}
             )
         );
-        populatedBySparseList = new OffsetArrayList (
+        populatedBySparseList = new OffsetArrayList<Object> (
             populatedByCollection
         );
-        populatedAscending = new OffsetArrayList();
-        populatedDescending = new OffsetArrayList();
-        populatedFromCenter = new OffsetArrayList();
-        addAllTarget = new OffsetArrayList (
+        populatedAscending = new OffsetArrayList<Object>();
+        populatedDescending = new OffsetArrayList<Object>();
+        populatedFromCenter = new OffsetArrayList<Object>();
+        addAllTarget = new OffsetArrayList<Object> (
             Arrays.asList(
                 new Object[]{null,"A","C",null}
             )
@@ -231,7 +230,7 @@ public class TestOffsetArrayList extends TestCase {
      * Be sure to make it public, or it can't be invoked through reflection. 
      */
     public void verifySparseList(
-        SparseList list
+        SparseList<Object> list
     ) {
         String detail = "{offset=" + list.firstIndex() + 
             ", values=" + list.subList(list.firstIndex(), list.size()) + '}';
@@ -275,7 +274,7 @@ public class TestOffsetArrayList extends TestCase {
             detail + ".get(6)",
             null, list.get(6)
         );
-        ListIterator iterator = list.populationIterator();
+        ListIterator<Object> iterator = list.populationIterator();
         detail += ": populationIterator";
         assertTrue(
             detail + ".hasNext():0",
@@ -329,7 +328,7 @@ public class TestOffsetArrayList extends TestCase {
      * Be sure to make it public, or it can't be invoked through reflection. 
      */
     public void verifyPopulation(
-        List list
+        List<Object> list
     ) {
         String detail = list.toString();
         assertEquals(
@@ -348,7 +347,7 @@ public class TestOffsetArrayList extends TestCase {
             detail + ".get(2)",
             "C", list.get(2)
         );
-        ListIterator iterator = list.listIterator();
+        ListIterator<Object> iterator = list.listIterator();
         detail = "iterator";
         assertTrue(
             detail + ".hasNext():0",

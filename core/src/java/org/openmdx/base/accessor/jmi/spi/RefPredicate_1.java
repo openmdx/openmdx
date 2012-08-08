@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPredicate_1.java,v 1.8 2008/09/27 11:47:51 hburger Exp $
+ * Name:        $Id: RefPredicate_1.java,v 1.11 2009/01/06 10:21:20 wfro Exp $
  * Description: RefFilter_1 based AnyTypePredicate implementation
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/27 11:47:51 $
+ * Date:        $Date: 2009/01/06 10:21:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,14 +54,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.compatibility.base.query.Quantors;
+import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Quantors;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.AnyTypePredicate;
 

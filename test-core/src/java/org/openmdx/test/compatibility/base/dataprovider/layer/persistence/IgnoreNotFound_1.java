@@ -1,21 +1,21 @@
 //////////////////////////////////////////////////////////////////////////////
 //
-// Name:        $Id: IgnoreNotFound_1.java,v 1.2 2008/10/07 08:52:28 hburger Exp $
+// Name:        $Id: IgnoreNotFound_1.java,v 1.3 2009/01/07 02:44:15 hburger Exp $
 // Description: Type layer Ignore_1 plugin
-// Revision:    $Revision: 1.2 $
+// Revision:    $Revision: 1.3 $
 // Author:      $Author: hburger $
-// Date:        $Date: 2008/10/07 08:52:28 $
+// Date:        $Date: 2009/01/07 02:44:15 $
 // Copyright:   (c) 2000-2003 OMEX AG
 //
 //////////////////////////////////////////////////////////////////////////////
 package org.openmdx.test.compatibility.base.dataprovider.layer.persistence;
 
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReplyContexts;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 

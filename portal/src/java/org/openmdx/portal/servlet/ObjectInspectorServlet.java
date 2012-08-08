@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectInspectorServlet.java,v 1.78 2008/11/27 01:51:26 wfro Exp $
+ * Name:        $Id: ObjectInspectorServlet.java,v 1.86 2009/03/08 18:03:20 wfro Exp $
  * Description: ObjectInspectorServlet 
- * Revision:    $Revision: 1.78 $
+ * Revision:    $Revision: 1.86 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/27 01:51:26 $
+ * Date:        $Date: 2009/03/08 18:03:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -123,19 +123,20 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
 
+import org.openmdx.application.dataprovider.transport.ejb.cci.Jmi1AccessorFactory_2;
 import org.openmdx.application.log.AppLog;
+import org.openmdx.application.mof.cci.Multiplicities;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.mof.spi.Model_1Factory;
+import org.openmdx.base.naming.Path;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_3;
-import org.openmdx.model1.accessor.basic.spi.Model_1;
-import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.portal.servlet.control.ControlFactory;
 import org.openmdx.portal.servlet.eventhandler.EditObjectEventHandler;
 import org.openmdx.portal.servlet.eventhandler.EventHandlerHelper;
@@ -220,7 +221,7 @@ public class ObjectInspectorServlet
         );
         properties.put(
             ConfigurableProperty.PersistenceManagerFactoryClass.qualifiedName(), 
-            "org.openmdx.base.accessor.jmi1.AccessorFactory_2"
+            Jmi1AccessorFactory_2.class.getName()
         );
         return JDOHelper.getPersistenceManagerFactory(properties);
     }
@@ -233,17 +234,8 @@ public class ObjectInspectorServlet
         ServletContext context = this.getServletContext();
 
         // initialize model repository
-        int i = 0;
-        List<String> modelPackages = new ArrayList<String>(); 
-        while(getInitParameter("modelPackage[" + i + "]") != null) {
-            modelPackages.add(
-                getInitParameter("modelPackage[" + i + "]")
-            );
-            i++;
-        }
         try {
-            this.model = new Model_1();
-            this.model.addModels(modelPackages);
+            this.model = Model_1Factory.getModel();
         }
         catch(Exception e) {
             System.out.println("can not initialize model repository " + e.getMessage());
@@ -261,13 +253,13 @@ public class ObjectInspectorServlet
         // Get locales. Non-configured locales are stored as null.
         // For non-configured locales texts, ui and code entries fall back to locale[0]
         int maxLocale = 1;
-        for(i = 0; i < 1000; i++) {
+        for(int i = 0; i < 1000; i++) {
             if(this.getInitParameter("locale[" + i + "]") != null) {
                 maxLocale = i+1;
             }
         }
         this.locale = new String[maxLocale];
-        for(i = 0; i < maxLocale; i++) {
+        for(int i = 0; i < maxLocale; i++) {
             this.locale[i] = this.getInitParameter("locale[" + i + "]");
         }
         AppLog.info("configured locale " + locale);
@@ -298,13 +290,14 @@ public class ObjectInspectorServlet
         if(this.getInitParameter("realm") != null) {
             try {
                 this.realmIdentity = new Path(this.getInitParameter("realm"));
-            } catch(Exception e) {}
+            } 
+            catch(Exception e) {}
             AppLog.info("realm", this.realmIdentity);
         }
 
         // retrieve by path patterns
         this.retrieveByPathPatterns = new ArrayList<Path>();
-        for(i = 0; i < 100; i++) {
+        for(int i = 0; i < 100; i++) {
             if(this.getInitParameter("retrieveByPathPattern[" + i + "]") != null) {
                 this.retrieveByPathPatterns.add(
                     new Path(this.getInitParameter("retrieveByPathPattern[" + i + "]"))
@@ -317,12 +310,12 @@ public class ObjectInspectorServlet
         // Role mapper
         this.roleMapper = new DefaultRoleMapper();
         try {
-            if(getInitParameter(WebKeys.CONFIG_ROLE_MAPPER) != null) {
-                this.roleMapper = (RoleMapper_1_0)Classes.getApplicationClass(getInitParameter(WebKeys.CONFIG_ROLE_MAPPER)).newInstance();
+            if(this.getInitParameter(WebKeys.CONFIG_ROLE_MAPPER) != null) {
+                this.roleMapper = (RoleMapper_1_0)Classes.getApplicationClass(this.getInitParameter(WebKeys.CONFIG_ROLE_MAPPER)).newInstance();
             }
         }
         catch(Exception e) {
-            log("loading " + WebKeys.CONFIG_ROLE_MAPPER + " failed", e);
+            this.log("loading " + WebKeys.CONFIG_ROLE_MAPPER + " failed", e);
         }      
         // Ui config
         this.uiProviderPath = new Path(this.getInitParameter("uiSegment")).getPrefix(3);
@@ -338,7 +331,7 @@ public class ObjectInspectorServlet
             );
         }
         catch(ServiceException e) {
-            log("loading texts failed", e);
+            this.log("loading texts failed", e);
         }      
         // Layouts
         try {
@@ -352,7 +345,7 @@ public class ObjectInspectorServlet
             );
         }
         catch(ServiceException e) {
-            log("loading layouts failed");
+            this.log("loading layouts failed");
         }      
         // Get reports
         try {
@@ -367,7 +360,7 @@ public class ObjectInspectorServlet
             );
         }
         catch(ServiceException e) {
-            log("loading reports failed", e);
+            this.log("loading reports failed", e);
         }      
         // Get wizards
         try {
@@ -382,7 +375,7 @@ public class ObjectInspectorServlet
             );
         }
         catch(ServiceException e) {
-            log("loading wizards failed", e);
+            this.log("loading wizards failed", e);
         }
         // Control factory
         this.controlFactory = new ControlFactory(
@@ -401,7 +394,7 @@ public class ObjectInspectorServlet
             this.loadRootObjects();
         }
         catch(ServiceException e) {
-            log("loading roots failed", e);
+        	this.log("loading roots failed", e);
         }      
         // Load bootstrap data
         try {
@@ -414,7 +407,7 @@ public class ObjectInspectorServlet
             );
         }
         catch(ServiceException e) {
-            log("bootstrap data import failed", e);
+        	this.log("bootstrap data import failed", e);
         }
         // Filter config
         try {
@@ -429,7 +422,7 @@ public class ObjectInspectorServlet
             );
         }
         catch(ServiceException e) {
-            log("loading filters failed");
+        	this.log("loading filters failed");
         }
         // Application name
         this.applicationName = this.getInitParameter("applicationName");
@@ -437,12 +430,14 @@ public class ObjectInspectorServlet
         if(this.getInitParameter("requestSizeThreshold") != null) {
             try {
                 this.requestSizeThreshold = new Integer(this.getInitParameter("requestSizeThreshold")).intValue();
-            } catch(Exception e) {}
+            } 
+            catch(Exception e) {}
         }
         if(this.getInitParameter("requestSizeMax") != null) {
             try {
                 this.requestSizeMax = new Integer(this.getInitParameter("requestSizeMax")).intValue();
-            } catch(Exception e) {}
+            } 
+            catch(Exception e) {}
         }
         AppLog.info("requestSizeThreshold", new Integer(this.requestSizeThreshold));
         AppLog.info("requestSizeMax", new Integer(this.requestSizeMax));
@@ -450,38 +445,40 @@ public class ObjectInspectorServlet
         if(this.getInitParameter("uiRefreshRate") != null) {
             try {
                 this.uiRefreshRate = new Integer(this.getInitParameter("uiRefreshRate")).intValue();
-            } catch(Exception e) {}
+            } 
+            catch(Exception e) {}
         }
         AppLog.info("uiRefreshRate", new Integer(this.uiRefreshRate));
         // Portal extension
         this.evaluator = new DefaultPortalExtension();
         try {
-            if(getInitParameter("evaluator") != null) {
-                this.evaluator = (PortalExtension_1_0)Classes.getApplicationClass(getInitParameter("evaluator")).newInstance();
+            if(this.getInitParameter("evaluator") != null) {
+                this.evaluator = (PortalExtension_1_0)Classes.getApplicationClass(this.getInitParameter("evaluator")).newInstance();
             }
         }
         catch(Exception e) {
-            log("loading evaluator failed", e);
+        	this.log("loading evaluator failed", e);
         }
         // httpEncoder
         this.htmlEncoder = new DefaultHtmlEncoder();
         try {
-            if(getInitParameter(WebKeys.CONFIG_HTML_ENCODER) != null) {
-                this.htmlEncoder = (HtmlEncoder_1_0)Classes.getApplicationClass(getInitParameter(WebKeys.CONFIG_HTML_ENCODER)).newInstance();
+            if(this.getInitParameter(WebKeys.CONFIG_HTML_ENCODER) != null) {
+                this.htmlEncoder = (HtmlEncoder_1_0)Classes.getApplicationClass(this.getInitParameter(WebKeys.CONFIG_HTML_ENCODER)).newInstance();
             }
         }
         catch(Exception e) {
-            log("loading " + WebKeys.CONFIG_HTML_ENCODER + " failed", e);
+        	this.log("loading " + WebKeys.CONFIG_HTML_ENCODER + " failed", e);
         }
         // favoritesReference
         if(this.getInitParameter("favoritesReference") != null) {
             try {
                 this.favoritesReference = this.getInitParameter("favoritesReference");
-            } catch(Exception e) {}
+            } 
+            catch(Exception e) {}
         }
         AppLog.info("favoritesReference", this.favoritesReference);
         // Mime type mapping
-        i = 0;
+        int i = 0;
         this.mimeTypeImpls = new HashMap<String,String>();
         while(this.getInitParameter("mimeType[" + i + "]") != null) {
             this.mimeTypeImpls.put(
@@ -528,9 +525,9 @@ public class ObjectInspectorServlet
     ) throws ServiceException {
         List<String> rootObjectIdentities = new ArrayList<String>();
         int i = 0;
-        while(getInitParameter("rootObject[" + i + "]") != null) {
+        while(this.getInitParameter("rootObject[" + i + "]") != null) {
             rootObjectIdentities.add(
-                getInitParameter("rootObject[" + i + "]")
+            	this.getInitParameter("rootObject[" + i + "]")
             );
             i++;
         }
@@ -646,7 +643,7 @@ public class ObjectInspectorServlet
             (request.getUserPrincipal() == null)
         ) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            ServletContext sc = getServletContext();
+            ServletContext sc = this.getServletContext();
             RequestDispatcher rd = sc.getRequestDispatcher(
                 WebKeys.ERROR_PAGE
             ); 
@@ -978,8 +975,12 @@ public class ObjectInspectorServlet
                       null
                   );
               }
-              // Send back a window.location.href. This reloads the page based on this view
-              if(view != null) {
+              // FIND_OBJECT events are handled even if the view is newly created
+              // Otherwise send back a window.location.href. This reloads the page based on this view
+              if(
+                  (view != null) && 
+                  (event != Action.EVENT_FIND_OBJECT)
+              ) {
                   view.createRequestId();
                   showViewsCache.addView(
                       view.getRequestId(),
@@ -1011,7 +1012,7 @@ public class ObjectInspectorServlet
               AppLog.warning(e0.getMessage(), e0.getCause());
               session.invalidate();
               response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-              ServletContext sc = getServletContext();
+              ServletContext sc = this.getServletContext();
               RequestDispatcher rd = sc.getRequestDispatcher(
                   WebKeys.ERROR_PAGE
               ); 
@@ -1043,7 +1044,7 @@ public class ObjectInspectorServlet
                         this.codes.refresh();
                     }
                     catch(ServiceException e) {
-                        log("code import failed", e);
+                    	this.log("code import failed", e);
                     }
                     // Data
                     try {
@@ -1056,7 +1057,7 @@ public class ObjectInspectorServlet
                         );
                     }
                     catch(ServiceException e) {
-                        log("data import failed", e);
+                    	this.log("data import failed", e);
                     }
                     // Ui
                     this.reloadUi();
@@ -1121,7 +1122,7 @@ public class ObjectInspectorServlet
                     RefObject_1_0 refObj = (RefObject_1_0)application.getPmData().getObjectById(objectIdentity);
                     String feature = Action.getParameter(parameter, Action.PARAMETER_FEATURE);
                     ModelElement_1_0 featureDef = application.getModel().getElement(feature);
-                    if(Multiplicities.STREAM.equals(featureDef.values("multiplicity").get(0))) {
+                    if(Multiplicities.STREAM.equals(featureDef.objGetValue("multiplicity"))) {
                         long length = refObj.refGetValue(feature, os, 0);
                         response.setContentLength(new Long(length).intValue());       
                     }
@@ -1289,7 +1290,7 @@ public class ObjectInspectorServlet
                     );
                 }            
                 // reply
-                ServletContext sc = getServletContext();
+                ServletContext sc = this.getServletContext();
                 RequestDispatcher rd = sc.getRequestDispatcher(
                     "/jsp/" + nextView.getType() + ".jsp" + 
                     "?" + Action.PARAMETER_REQUEST_ID + "=" + nextView.getRequestId() +
@@ -1357,7 +1358,7 @@ public class ObjectInspectorServlet
     private Map<String,String> mimeTypeImpls = null;
     private String exceptionDomain = null;
     private String filterCriteriaField = null;
-    private String[] filterValuePattern = new String[]{"(?i)",  "%", "%"};
+    private String[] filterValuePattern = new String[]{"(?i)",  ".*", ".*"};
     private UiLoader uiLoader;
     private FilterLoader filterLoader;
     private TextsLoader textsLoader;

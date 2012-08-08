@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AddressCallbackHandler.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: AddressCallbackHandler.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
  * Description: Address Callback Handler
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,8 +65,7 @@ import org.openmdx.kernel.security.authentication.callback.AddressCallback;
  * and delegate the remaining requests to a delegate callback handler. 
  */
 public abstract class AddressCallbackHandler 
-	implements CallbackHandler 
-{
+	implements CallbackHandler {
 
     /**
      * Constructor
@@ -130,7 +129,7 @@ public abstract class AddressCallbackHandler
     ){
     	return 
     		callback instanceof AddressCallback &&
-    		accept((AddressCallback) callback);
+    		this.accept((AddressCallback) callback);
     }
     
     /**
@@ -144,7 +143,7 @@ public abstract class AddressCallbackHandler
 	public void handle(
         Callback[] callbacks
     ) throws IOException, UnsupportedCallbackException {
-		if(accept()) {
+		if(this.accept()) {
 			boolean[] handled = new boolean[callbacks.length];
 			int remaining = callbacks.length;
 			for(
@@ -152,8 +151,8 @@ public abstract class AddressCallbackHandler
 				i < callbacks.length;
 				i++
 			){
-				if(handled[i] = accept(callbacks[i])) {
-					handle((AddressCallback)callbacks[i]);
+				if(handled[i] = this.accept(callbacks[i])) {
+					this.handle((AddressCallback)callbacks[i]);
 	                remaining--;
 				}
 			}
@@ -161,7 +160,8 @@ public abstract class AddressCallbackHandler
 	        	Callback[] remainder;
 	        	if(remaining == callbacks.length) {
 	        		remainder = callbacks;
-	        	} else {
+	        	} 
+	        	else {
 	        		remainder = new Callback[remaining];
 	        		int delegated = 0;
 	        		for(
@@ -176,7 +176,8 @@ public abstract class AddressCallbackHandler
 	        	}
 	        	this.delegate.handle(remainder);
 	        }
-		} else {
+		} 
+		else {
 			this.delegate.handle(callbacks);
 		}
     }

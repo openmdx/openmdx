@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ProvidingUid_1.java,v 1.5 2005/01/10 00:56:27 hburger Exp $
+ * Name:        $Id: ProvidingUid_1.java,v 1.7 2009/01/06 13:14:46 wfro Exp $
  * Description: ProvidingUid_1 plugin
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/01/10 00:56:27 $
+ * Date:        $Date: 2009/01/06 13:14:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,12 +51,12 @@
  */
 package org.openmdx.compatibility.base.dataprovider.layer.application;
 
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 /**
  * A basic implementation of the application layer.

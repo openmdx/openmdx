@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectEventHandler.java,v 1.40 2008/11/27 01:51:26 wfro Exp $
+ * Name:        $Id: ShowObjectEventHandler.java,v 1.47 2009/03/09 16:02:34 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.40 $
+ * Revision:    $Revision: 1.47 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/27 01:51:26 $
+ * Date:        $Date: 2009/03/09 16:02:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -77,11 +77,11 @@ import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.Base64;
-import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.url.protocol.XriProtocols;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.PaintScope;
@@ -310,6 +310,7 @@ public class ShowObjectEventHandler {
                     AppLog.detail("creating object", Action.PARAMETER_FOR_CLASS + "=" + forClass + "; " + Action.PARAMETER_FOR_REFERENCE + "=" + forReference);
                     RefObject_1_0 parent = currentView.getRefObject(); 
                     RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(forClass).refCreateInstance(null);
+                    newObject.refInitialize(false, false);
                     nextView = new EditObjectView(
                         currentView.getId(),
                         currentView.getContainerElementId(),
@@ -398,7 +399,8 @@ public class ShowObjectEventHandler {
                     AppLog.warning(e0.getMessage(), e0.getCause());
                     try {
                         pm.currentTransaction().rollback();
-                    } catch (Exception e1) {}
+                    } 
+                    catch (Exception e1) {}
                     currentView.handleCanNotCommitException(e0.getCause());
                 }
                 break;
@@ -421,7 +423,8 @@ public class ShowObjectEventHandler {
                     AppLog.warning(e0.getMessage(), e0.getCause());
                     try {
                         pm.currentTransaction().rollback();
-                    } catch (Exception e1) {}
+                    } 
+                    catch (Exception e1) {}
                     currentView.handleCanNotCommitException(e0.getCause());
                 }
                 break;
@@ -531,7 +534,7 @@ public class ShowObjectEventHandler {
                                 ModelElement_1_0 fieldDef = model.getElement(((Attribute) fieldMap.values().iterator().next())
                                         .getValue()
                                         .getName());
-                                paramDef = model.getElement(fieldDef.values("container").get(0));
+                                paramDef = model.getElement(fieldDef.objGetValue("container"));
                             }
                             // no input parameters --> Void
                             else {
@@ -540,17 +543,18 @@ public class ShowObjectEventHandler {
     
                             // prepare parameter values
                             List paramValues = new ArrayList();
-                            for (Iterator j = paramDef.values("content").iterator(); j.hasNext();) {
+                            for (Iterator j = paramDef.objGetList("content").iterator(); j.hasNext();) {
                                 ModelElement_1_0 fieldDef = model.getElement(j.next());
-                                paramValues.add(paramValuesMap.get(fieldDef.values("qualifiedName").get(0)));
+                                paramValues.add(paramValuesMap.get(fieldDef.objGetValue("qualifiedName")));
                             }
                             RefStruct param = ((RefPackage_1_0) currentView.getRefObject().refImmediatePackage()).refCreateStruct(
-                                (String)paramDef.values("qualifiedName").get(0), 
+                                (String)paramDef.objGetValue("qualifiedName"), 
                                 paramValues
                             );
                             RefStruct result = null;
                             try {
-                                AppLog.detail("invoking operation", "parameter=" + parameter + "; argument " + paramValues);
+                                // Reset error messages not related to operation invocation
+                                application.getErrorMessages().clear();
                                 pm.currentTransaction().begin();
                                 result = (RefStruct) currentView.getRefObject().refInvokeOperation(
                                     tab.getOperationTabControl().getOperationName(), 
@@ -692,7 +696,7 @@ public class ShowObjectEventHandler {
                                     RefObject_1_0 parent = currentView.getRefObject();
                                     EditObjectView editView = null;
                                     // Edit existing object
-                                    if (objectXri.startsWith(XriProtocols.OPENMDX_PREFIX)) {
+                                    if (objectXri.startsWith("xri://@openmdx") || objectXri.startsWith("xri:@openmdx:")) {
                                         Path objectIdentity = new Path(objectXri);
                                         RefObject_1_0 editObject = (RefObject_1_0)pm.getObjectById(objectIdentity);
                                         try {

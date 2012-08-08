@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Control.java,v 1.23 2008/11/10 13:57:48 wfro Exp $
+ * Name:        $Id: Control.java,v 1.25 2009/03/08 18:03:24 wfro Exp $
  * Description: Control
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 13:57:48 $
+ * Date:        $Date: 2009/03/08 18:03:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -163,7 +163,7 @@ public abstract class Control
                 // Try to find a model-specific script
                 if(p.getView().getObject() instanceof RefObject) {
                     RefMetaObject_1 classDef = (RefMetaObject_1)((RefObject)p.getView().getObject()).refMetaObject();
-                    String qualifiedClassName = (String)classDef.getElementDef().values("qualifiedName").get(0);
+                    String qualifiedClassName = (String)classDef.getElementDef().objGetValue("qualifiedName");
                     String qualifiedPackageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(":"));
                     String qualifiedScriptName = this.id + ":" + qualifiedPackageName;
                     String name = scriptNames.get(qualifiedScriptName);
@@ -288,8 +288,8 @@ public abstract class Control
         //-----------------------------------------------------------------------
         private URL[] roots;
         private final GroovyClassLoader groovyClassLoader = new GroovyClassLoader();
-        private ConcurrentHashMap<String,ScriptCacheEntry> scriptCache = 
-            new ConcurrentHashMap<String,ScriptCacheEntry>();
+        private ConcurrentHashMap<String,Control.ScriptEngine.ScriptCacheEntry> scriptCache = 
+            new ConcurrentHashMap<String,Control.ScriptEngine.ScriptCacheEntry>();
         
     }
     

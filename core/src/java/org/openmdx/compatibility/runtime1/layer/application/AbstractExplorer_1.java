@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractExplorer_1.java,v 1.11 2008/11/27 16:46:56 hburger Exp $
+ * Name:        $Id: AbstractExplorer_1.java,v 1.14 2009/01/12 16:45:26 wfro Exp $
  * Description: Abstract Explorer Plug-In
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/27 16:46:56 $
+ * Date:        $Date: 2009/01/12 16:45:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,23 +62,23 @@ import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.Directions;
+import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkReply;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkRequest;
+import org.openmdx.application.dataprovider.spi.DelegatingLayer_0;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1_1Connection;
+import org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1ConnectionFactoryImpl;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1ConnectionFactoryImpl;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
-import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
-import org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
@@ -127,7 +127,6 @@ public abstract class AbstractExplorer_1 extends DelegatingLayer_0 {
     /**
      * 
      */
-    @SuppressWarnings("deprecation")
     public void activate(
         short id,
         Configuration configuration,

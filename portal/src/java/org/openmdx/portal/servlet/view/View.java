@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: View.java,v 1.57 2008/11/12 01:05:06 wfro Exp $
+ * Name:        $Id: View.java,v 1.60 2009/01/13 23:48:42 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.57 $
+ * Revision:    $Revision: 1.60 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 01:05:06 $
+ * Date:        $Date: 2009/01/13 23:48:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,13 +64,11 @@ import java.util.Map;
 import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefStruct;
 
-import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.QuickAccessor;
@@ -259,10 +257,10 @@ public abstract class View
         RefStruct from,
         Map to,
         ModelElement_1_0 structDef
-    ) throws JmiServiceException {
-        for(Iterator i = ((Map)structDef.values("field").get(0)).values().iterator(); i.hasNext(); ) {
+    ) throws ServiceException {
+        for(Iterator i = ((Map)structDef.objGetValue("field")).values().iterator(); i.hasNext(); ) {
           ModelElement_1_0 field = (ModelElement_1_0)i.next();
-          String fieldName = (String)field.values("qualifiedName").get(0);
+          String fieldName = (String)field.objGetValue("qualifiedName");
           try {
             to.put(
               fieldName,

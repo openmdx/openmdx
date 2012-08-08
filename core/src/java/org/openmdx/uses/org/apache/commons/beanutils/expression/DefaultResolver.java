@@ -51,7 +51,7 @@ package org.openmdx.uses.org.apache.commons.beanutils.expression;
  *     supported.</li>
  * </ul>
  *
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:17 $
+ * @version $Revision: 1.2 $ $Date: 2009/03/03 14:59:14 $
  * @since 1.8.0
  */
 public class DefaultResolver implements Resolver {

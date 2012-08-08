@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateViewContext.java,v 1.3 2008/11/04 09:59:38 hburger Exp $
+ * Name:        $Id: StateViewContext.java,v 1.4 2009/03/03 15:24:38 hburger Exp $
  * Description: AbstractStateContext 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/04 09:59:38 $
+ * Date:        $Date: 2009/03/03 15:24:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,7 @@ import org.openmdx.state2.cci.ViewKind;
 /**
  * AbstractStateContext
  */
+@SuppressWarnings("serial")
 public abstract class StateViewContext<V>
     implements InteractionSpec, StateContext<V>
 {

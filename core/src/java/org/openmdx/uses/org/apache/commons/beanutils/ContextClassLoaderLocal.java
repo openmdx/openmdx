@@ -100,7 +100,9 @@ import java.util.WeakHashMap;
  * @see java.lang.Thread#getContextClassLoader  
  * @author Eric Pabst
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked"
+})
 public class ContextClassLoaderLocal {
     private Map valueByClassLoader = new WeakHashMap();
     private boolean globalValueInitialized = false;

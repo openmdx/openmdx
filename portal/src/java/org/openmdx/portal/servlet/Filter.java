@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Filter.java,v 1.10 2008/09/26 12:10:39 hburger Exp $
+ * Name:        $Id: Filter.java,v 1.11 2009/03/08 18:03:19 wfro Exp $
  * Description: Filter
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/26 12:10:39 $
+ * Date:        $Date: 2009/03/08 18:03:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -89,7 +89,7 @@ implements Serializable {
     ) {
         super(
             condition,
-            removeDuplicateOrderSpecifiers(name, orderSpecifier, context)
+            Filter.removeDuplicateOrderSpecifiers(name, orderSpecifier, context)
         );
         this.name = name;
         this.labels = labels;
@@ -245,7 +245,7 @@ implements Serializable {
     ) {
         try {
             return Records.getRecordFactory().asMappedRecord(
-                getClass().getName(), 
+                this.getClass().getName(), 
                 this.groupName + '-' + this.labels,
                 TO_STRING_FIELDS,
                 new Object[]{
@@ -266,7 +266,8 @@ implements Serializable {
                     )
                 }
             ).toString();
-        } catch (ResourceException exception) {
+        } 
+        catch (ResourceException exception) {
             return super.toString();
         }
     }

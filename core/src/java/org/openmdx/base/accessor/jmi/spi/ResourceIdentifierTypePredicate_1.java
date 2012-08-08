@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ResourceIdentifierTypePredicate_1.java,v 1.2 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: ResourceIdentifierTypePredicate_1.java,v 1.7 2009/02/18 12:54:32 hburger Exp $
  * Description: Resource Identifier Type Predicate implementation
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2009/02/18 12:54:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,8 +55,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.FilterOperators;
 import org.w3c.cci2.MatchableTypePredicate;
 
 /**
@@ -113,7 +113,7 @@ class ResourceIdentifierTypePredicate_1<V extends Comparable<?>>
         refAddValue(
             super.quantor,
             FilterOperators.IS_LIKE,
-            StringTypePredicate_1.sqlWildcards.fromJDO(operand)
+            operand
         );
     }
 
@@ -148,7 +148,7 @@ class ResourceIdentifierTypePredicate_1<V extends Comparable<?>>
         refAddValue(
             super.quantor,
             FilterOperators.IS_UNLIKE,
-            StringTypePredicate_1.sqlWildcards.fromJDO(operand)
+            operand
         );
     }
 
@@ -183,7 +183,7 @@ class ResourceIdentifierTypePredicate_1<V extends Comparable<?>>
         refAddValue(
             super.quantor,
             FilterOperators.IS_LIKE,
-            StringTypePredicate_1.sqlWildcard(operand, true)
+            StringTypePredicate_1.jdoWildcard(operand, true)
         );
     }
 
@@ -218,7 +218,7 @@ class ResourceIdentifierTypePredicate_1<V extends Comparable<?>>
         refAddValue(
             super.quantor,
             FilterOperators.IS_LIKE,
-            StringTypePredicate_1.sqlWildcard(operand, false)
+            StringTypePredicate_1.jdoWildcard(operand, false)
         );
     }
 
@@ -253,7 +253,7 @@ class ResourceIdentifierTypePredicate_1<V extends Comparable<?>>
         refAddValue(
             super.quantor,
             FilterOperators.IS_UNLIKE,
-            StringTypePredicate_1.sqlWildcard(operand, true)
+            StringTypePredicate_1.jdoWildcard(operand, true)
         );
     }
 
@@ -288,7 +288,7 @@ class ResourceIdentifierTypePredicate_1<V extends Comparable<?>>
         refAddValue(
             super.quantor,
             FilterOperators.IS_UNLIKE,
-            StringTypePredicate_1.sqlWildcard(operand, false)
+            StringTypePredicate_1.jdoWildcard(operand, false)
         );
     }
 

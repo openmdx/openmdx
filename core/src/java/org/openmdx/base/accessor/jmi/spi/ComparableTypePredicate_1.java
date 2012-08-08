@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ComparableTypePredicate_1.java,v 1.2 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: ComparableTypePredicate_1.java,v 1.5 2009/01/13 02:10:33 wfro Exp $
  * Description: Comparable Type Predicate implementation
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2009/01/13 02:10:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,8 +54,8 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.FilterOperators;
 import org.w3c.cci2.ComparableTypePredicate;
 
 /**

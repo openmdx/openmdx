@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceManager_1.java,v 1.36 2008/12/15 03:15:33 hburger Exp $
+ * Name:        $Id: PersistenceManager_1.java,v 1.51 2009/03/03 17:23:07 hburger Exp $
  * Description: PersistenceManager_1 
- * Revision:    $Revision: 1.36 $
+ * Revision:    $Revision: 1.51 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/15 03:15:33 $
+ * Date:        $Date: 2009/03/03 17:23:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,10 +57,8 @@ import java.util.List;
 
 import javax.jdo.Extent;
 import javax.jdo.FetchPlan;
-import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalDataStoreException;
-import javax.jdo.JDOFatalInternalException;
 import javax.jdo.JDOOptimisticVerificationException;
 import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.JDOUserException;
@@ -72,21 +70,18 @@ import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.RefObject;
-import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
-import org.openmdx.base.accessor.generic.cci.StructureFactory_1_0;
-import org.openmdx.base.accessor.generic.cci.Structure_1_0;
-import org.openmdx.base.accessor.generic.spi.Delegating_1_0;
+import org.openmdx.base.accessor.cci.Structure_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_4;
+import org.openmdx.base.accessor.spi.Delegating_1_0;
+import org.openmdx.base.accessor.spi.StructureFactory_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.object.spi.AbstractPersistenceManager;
-import org.openmdx.base.object.spi.InstanceLifecycleNotifier;
-import org.openmdx.base.transaction.Synchronization_1_0;
-import org.openmdx.base.transaction.UnitOfWork_1_2;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.spi.AbstractPersistenceManager;
+import org.openmdx.base.persistence.spi.InstanceLifecycleNotifier;
+import org.openmdx.base.transaction.UnitOfWork_1_0;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 
@@ -109,7 +104,7 @@ class PersistenceManager_1
     PersistenceManager_1(
         PersistenceManagerFactory factory, 
         InstanceLifecycleNotifier notifier,
-        RefPackage_1_6 refPackage
+        RefRootPackage_1 refPackage
     ) {
         super(
             factory,
@@ -127,13 +122,12 @@ class PersistenceManager_1
     /**
      * 
      */
-    RefPackage_1_6 refPackage;
+    RefRootPackage_1 refPackage;
 
     /**
-     * Only a subset of the JDO methods are implemented in openMDX 1
+     * Only a subset of the JDO methods is already implemented 
      */
-    protected static final String OPENMDX_1_JDO = 
-        "This JDO operation is not supported in openMDX 1 compatibility mode";
+    protected static final String OPENMDX_2_JDO = "This JDO operation is not yet supported";
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#isClosed()
@@ -188,10 +182,12 @@ class PersistenceManager_1
         if(pc instanceof RefObject_1_0) try {
             ((RefObject_1_0)pc).refRefresh();
         } catch (JmiServiceException exception) {
-            throw new JDOException(
-                "Refresh failure",
-                exception,
-                pc
+            throw BasicException.initHolder(
+            	new JDOException(
+            	    "Refresh failure",
+            	    BasicException.newEmbeddedExceptionStack(exception),
+            	    pc
+            	)
             );
         }
     } 
@@ -200,7 +196,7 @@ class PersistenceManager_1
      * @see javax.jdo.PersistenceManager#refreshAll()
      */
     public void refreshAll() {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
@@ -217,21 +213,21 @@ class PersistenceManager_1
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.Object)
      */
     public Query newQuery(Object compiled) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.String)
      */
     public Query newQuery(String query) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.String, java.lang.Object)
      */
     public Query newQuery(String language, Object query) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
@@ -257,7 +253,7 @@ class PersistenceManager_1
      */
     @SuppressWarnings("unchecked")
     public Query newQuery(Extent cln) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
@@ -265,7 +261,7 @@ class PersistenceManager_1
      */
     @SuppressWarnings("unchecked")
     public Query newQuery(Class cls, Collection cln) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
@@ -273,7 +269,7 @@ class PersistenceManager_1
      */
     @SuppressWarnings("unchecked")
     public Query newQuery(Class cls, String filter) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
@@ -281,7 +277,7 @@ class PersistenceManager_1
      */
     @SuppressWarnings("unchecked")
     public Query newQuery(Class cls, Collection cln, String filter) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
@@ -289,7 +285,7 @@ class PersistenceManager_1
      */
     @SuppressWarnings("unchecked")
     public Query newQuery(Extent cln, String filter) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
@@ -297,29 +293,39 @@ class PersistenceManager_1
      */
     @SuppressWarnings("unchecked")
     public Query newNamedQuery(Class cls, String queryName) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getExtent(java.lang.Class, boolean)
      */
-    @SuppressWarnings("unchecked")
-    public Extent getExtentRaw(
-        Class persistenceCapableClass,
+    public <T> Extent<T> getExtent(
+        Class<T> persistenceCapableClass,
         boolean subclasses
     ) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object, boolean)
      */
     public Object getObjectById(Object oid, boolean validate) {
-        return oid instanceof Path ? this.refPackage.refObject(
-            (Path)oid
-        ) : this.refPackage.refObject(
-            oid.toString()
-        );
+        if(oid instanceof Path) {
+            Path resourceIdentifier = (Path) oid;
+            if(resourceIdentifier.size() % 2 == 1) {
+                return this.refPackage.refObject(resourceIdentifier);
+            } else {
+                return this.refPackage.refObject(
+                    resourceIdentifier.getParent()
+                ).refGetValue(
+                    resourceIdentifier.getBase()
+                );
+            }
+        } else {
+            return this.refPackage.refObject(
+                oid.toString()
+            );
+        }
     }
 
     /* (non-Javadoc)
@@ -356,11 +362,25 @@ class PersistenceManager_1
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.object.spi.AbstractPersistenceManager#makePersistentRaw(java.lang.Object)
+     * @see org.openmdx.base.persistence.spi.AbstractPersistenceManager#newInstance(java.lang.Class)
      */
-    @Override
-    protected Object makePersistentRaw(Object pc) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+    @SuppressWarnings("unchecked")
+    public <T> T newInstance(Class<T> pcClass) {
+        return (T) this.refPackage.refClass(
+            RefRootPackage_1.getMofClassName(
+                pcClass.getName().intern(),
+                this.refPackage.refModel()
+            )
+        ).refCreateInstance(
+            null
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.PersistenceManager#makePersistent(java.lang.Object)
+     */
+    public <T> T makePersistent(T pc) {
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
@@ -392,7 +412,7 @@ class PersistenceManager_1
      * @see javax.jdo.PersistenceManager#makeTransient(java.lang.Object, boolean)
      */
     public void makeTransient(Object pc, boolean useFetchPlan) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
@@ -400,14 +420,14 @@ class PersistenceManager_1
      */
     @SuppressWarnings("unchecked")
     public void makeTransientAll(Collection pcs, boolean useFetchPlan) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[], boolean)
      */
     public void makeTransientAll(Object[] pcs, boolean useFetchPlan) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
@@ -439,7 +459,7 @@ class PersistenceManager_1
      * @see javax.jdo.PersistenceManager#makeNontransactional(java.lang.Object)
      */
     public void makeNontransactional(Object pc) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
@@ -458,58 +478,45 @@ class PersistenceManager_1
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.object.spi.AbstractPersistenceManager#detachCopyRaw(java.lang.Object)
+     * @see javax.jdo.PersistenceManager#detachCopy(java.lang.Object)
      */
-    @Override
-    protected Object detachCopyRaw(Object pc) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);
+    public <T> T detachCopy(T pc) {
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#attachCopy(java.lang.Object, boolean)
      */
     public Object attachCopy(Object pc, boolean makeTransactional) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#flush()
      */
     public void flush() {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#checkConsistency()
      */
     public void checkConsistency() {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getFetchPlan()
      */
     public FetchPlan getFetchPlan() {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
-    }
-
-    @SuppressWarnings("unchecked")
-    protected Object newInstanceRaw(Class pcClass) {
-        return this.refPackage.refClass(
-            RefRootPackage_1.getMofClassName(
-                pcClass.getName().intern(),
-                this.refPackage.refModel()
-            )
-        ).refCreateInstance(
-            null
-        );
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getSequence(java.lang.String)
      */
     public Sequence getSequence(String name) {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);            
     }
 
     /* (non-Javadoc)
@@ -541,7 +548,7 @@ class PersistenceManager_1
      * @see javax.jdo.PersistenceManager#getServerDate()
      */
     public Date getServerDate() {
-        throw new UnsupportedOperationException(OPENMDX_1_JDO);
+        throw new UnsupportedOperationException(OPENMDX_2_JDO);
     }
 
     /* (non-Javadoc)
@@ -559,10 +566,10 @@ class PersistenceManager_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.Delegating_1_0#objGetDelegate()
      */
-    public RefPackage_1_6 objGetDelegate() {
+    public RefRootPackage_1 objGetDelegate(
+    ) {
         return this.refPackage;
     }
-
     
     //------------------------------------------------------------------------
     // Implements StructureFactory_1_0
@@ -587,7 +594,7 @@ class PersistenceManager_1
     ) throws ServiceException {
         StructureFactory_1_0 delegate = this.hasLegacyDelegate() ? 
             this.refPackage.refObjectFactory() :
-                (StructureFactory_1_0)((RefPackage_1_4)this.refPackage).getDelegate();
+                (StructureFactory_1_0)((Jmi1Package_1_0)this.refPackage).getDelegate();
             return delegate.createStructure(
                 type,
                 fieldNames,
@@ -603,15 +610,11 @@ class PersistenceManager_1
     /**
      * Transaction_1
      */
-    class Transaction_1
-    implements Transaction, Synchronization, Synchronization_1_0
-    {
+    class Transaction_1 implements Transaction {
 
-        /**
-         * 
-         */
-        private final UnitOfWork_1_2 getDelegate(){
-            return (UnitOfWork_1_2) refPackage.refUnitOfWork();
+        private final UnitOfWork_1_0 getDelegate(
+        ) {
+            return refPackage.refUnitOfWork();
         }
 
         /* (non-Javadoc)
@@ -619,80 +622,89 @@ class PersistenceManager_1
          */
         public void begin(
         ) {
-            try {
-                getDelegate().begin();
-            } catch (ServiceException exception) {
-                throw new JDOUserException(
-                    "Transaction begin failed",
-                    exception
-                );
-            }
+            this.getDelegate().begin();
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.Transaction#commit()
          */
-        public void commit() {
+        public void commit(
+        ) {
             try {
                 getDelegate().commit();
-            } catch (ServiceException exception) {                
-                BasicException initialCause = exception.getCause(null);   
-                throw initialCause.getExceptionCode() == BasicException.Code.CONCURRENT_ACCESS_FAILURE ?
-                    new JDOOptimisticVerificationException(
-                        exception.getMessage(),
-                        new Throwable[]{
-                            new JDOOptimisticVerificationException(
-                                initialCause.getDescription() + ": " + initialCause.getParameter("path"),
-                                new Throwable[]{initialCause}
-                            )
-                        }
-                    ) : new JDOFatalDataStoreException(
+            }  catch (Exception exception) {
+            	BasicException exceptionStack = BasicException.toExceptionStack(exception);
+                BasicException initialCause = exceptionStack.getCause(null);
+                throw initialCause.getExceptionCode() == BasicException.Code.CONCURRENT_ACCESS_FAILURE ? new JDOOptimisticVerificationException(
+                    exception.getMessage(),
+                    new JDOOptimisticVerificationException[]{
+                        BasicException.initHolder(
+                        	new JDOOptimisticVerificationException(
+                        	    initialCause.getDescription(),
+                        	    BasicException.newEmbeddedExceptionStack(exceptionStack),
+                        	    lenientGetObjectById(initialCause.getParameter("path"))
+                        	)
+                        )
+                    }
+                ) : BasicException.initHolder(
+            		new JDOFatalDataStoreException(
                         "Transaction commit failed",
-                        exception
-                    );
+                        BasicException.newEmbeddedExceptionStack(exceptionStack)
+                    )
+                );
             }
         }
 
+        /**
+         * Retrieve the object to be added as exception argument
+         * 
+         * @param objectId
+         * 
+         * @return an object; or <code>null</code> if if can't be retrieved
+         */
+        private Object lenientGetObjectById(
+        	String objectId
+        ){
+            if(objectId == null) {
+                return null;
+            }
+            try {
+                 return getObjectById(objectId, false);
+            } catch (Exception ignore) {
+                return null;
+            }
+        }
+        
         /* (non-Javadoc)
          * @see javax.jdo.Transaction#rollback()
          */
-        public void rollback() {
-            try {
-                getDelegate().rollback();
-            } catch (ServiceException exception) {
-                throw new JDOFatalDataStoreException(
-                    "Transaction rollback failed",
-                    exception
-                );
-            }
+        public void rollback(
+        ) {
+            this.getDelegate().rollback();
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.Transaction#isActive()
          */
-        public boolean isActive() {
+        public boolean isActive(
+        ) {
             return getDelegate().isActive();
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.Transaction#getRollbackOnly()
          */
-        public boolean getRollbackOnly() {
+        public boolean getRollbackOnly(
+        ) {
             return getDelegate().getRollbackOnly();
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.Transaction#setRollbackOnly()
          */
-        public void setRollbackOnly() {
-            try {
-                getDelegate().setRollbackOnly();
-            } catch (ServiceException exception) {
-                throw new JDOUserException(
-                    exception.getMessage(),
-                    exception
-                );
-            }
+        public void setRollbackOnly(
+        ) {
+            this.getDelegate().setRollbackOnly();
         }
 
         /* (non-Javadoc)
@@ -707,9 +719,10 @@ class PersistenceManager_1
         /* (non-Javadoc)
          * @see javax.jdo.Transaction#getNontransactionalRead()
          */
-        public boolean getNontransactionalRead() {
-            UnitOfWork_1_2 delegate = getDelegate();
-            return delegate.isOptimistic() || !delegate.isTransactional();
+        public boolean getNontransactionalRead(
+        ) {
+            UnitOfWork_1_0 delegate = getDelegate();
+            return delegate.getOptimistic() || !delegate.isTransactional();
         }
 
         /* (non-Javadoc)
@@ -773,21 +786,22 @@ class PersistenceManager_1
          * @see javax.jdo.Transaction#getOptimistic()
          */
         public boolean getOptimistic() {
-            return getDelegate().isOptimistic();
+            return getDelegate().getOptimistic();
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.Transaction#setSynchronization(javax.transaction.Synchronization)
          */
         public void setSynchronization(Synchronization sync) {
-            throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.Transaction#getSynchronization()
          */
-        public Synchronization getSynchronization() {
-            throw new UnsupportedOperationException(OPENMDX_1_JDO);            
+        public Synchronization getSynchronization(
+        ) {
+            return this.getDelegate().getSynchronization();
         }
 
         /* (non-Javadoc)
@@ -797,54 +811,18 @@ class PersistenceManager_1
             return PersistenceManager_1.this;
         }
 
-        /**
-         * @throws ServiceException
-         * @see org.openmdx.base.transaction.Synchronization_1_0#afterBegin()
+        /* (non-Javadoc)
+         * @see javax.jdo.Transaction#getIsolationLevel()
          */
-        public void afterBegin()
-        throws ServiceException {
-            getDelegate().afterBegin();
-        }
-
-        /**
-         * @param committed
-         * @throws ServiceException
-         * @see org.openmdx.base.transaction.Synchronization_1_0#afterCompletion(boolean)
-         */
-        public void afterCompletion(
-            boolean committed
-        ) throws ServiceException {
-            getDelegate().afterCompletion(committed);
+        public String getIsolationLevel() {
+            throw new UnsupportedOperationException("Operation not supported by PersistenceManager_1.Transaction_1");
         }
 
         /* (non-Javadoc)
-         * @see javax.transaction.Synchronization#afterCompletion(int)
+         * @see javax.jdo.Transaction#setIsolationLevel(java.lang.String)
          */
-        public void afterCompletion(int status) {
-            try {
-                getDelegate().afterCompletion(status == Status.STATUS_COMMITTED);
-            } catch (ServiceException exception) {
-                throw new JDOFatalInternalException(
-                    "After completion failure",
-                    exception
-                );
-            }
-        }
-
-        /* (non-Javadoc)
-         * @see javax.transaction.Synchronization#beforeCompletion()
-         * @see org.openmdx.base.transaction.Synchronization_1_0#beforeCompletion()
-         */
-        public void beforeCompletion(){
-            try {
-                getDelegate().beforeCompletion();
-            } catch (ServiceException exception) {
-                this.setRollbackOnly();
-                throw new JDODataStoreException(
-                    "Before completion failure",
-                    exception
-                );
-            }
+        public void setIsolationLevel(String arg0) {
+            throw new UnsupportedOperationException("Operation not supported by PersistenceManager_1.Transaction_1");
         }
 
     }

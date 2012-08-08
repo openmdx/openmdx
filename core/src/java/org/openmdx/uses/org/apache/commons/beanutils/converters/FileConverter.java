@@ -26,10 +26,12 @@ import java.io.File;
  * <code>ConversionException</code> if a conversion error occurs.
  *
  * @author James Strachan
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:16 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:59 $
  * @since 1.6
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked"
+})
 public final class FileConverter extends AbstractConverter {
 
     /**
@@ -37,7 +39,7 @@ public final class FileConverter extends AbstractConverter {
      * a <code>ConversionException</code> if an error occurs.
      */
     public FileConverter() {
-        super(File.class);
+        super();
     }
 
     /**
@@ -49,7 +51,16 @@ public final class FileConverter extends AbstractConverter {
      * occurs converting the value.
      */
     public FileConverter(Object defaultValue) {
-        super(File.class, defaultValue);
+        super(defaultValue);
+    }
+
+    /**
+     * Return the default type this <code>Converter</code> handles.
+     *
+     * @return The default type this <code>Converter</code> handles.
+     */
+    protected Class getDefaultType() {
+        return File.class;
     }
 
     /**

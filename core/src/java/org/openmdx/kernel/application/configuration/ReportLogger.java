@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ReportLogger.java,v 1.2 2008/11/18 01:31:41 hburger Exp $
+ * Name:        $Id: ReportLogger.java,v 1.3 2009/02/24 15:48:54 hburger Exp $
  * Description: ReportLogger 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/18 01:31:41 $
+ * Date:        $Date: 2009/02/24 15:48:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -198,7 +198,7 @@ public class ReportLogger
      * @see org.slf4j.Logger#info(java.lang.String, java.lang.Throwable)
      */
     public void info(String msg, Throwable t) {
-        this.report.addInfo(msg + ": " + BasicException.toStackedException(t));
+        this.report.addInfo(msg + ": " + BasicException.toExceptionStack(t));
     }
 
     /* (non-Javadoc)

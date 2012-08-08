@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationTabControl.java,v 1.36 2008/12/07 23:58:49 wfro Exp $
+ * Name:        $Id: OperationTabControl.java,v 1.38 2009/03/08 18:03:25 wfro Exp $
  * Description: OperationTabControl
- * Revision:    $Revision: 1.36 $
+ * Revision:    $Revision: 1.38 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/07 23:58:49 $
+ * Date:        $Date: 2009/03/08 18:03:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -145,7 +145,7 @@ public class OperationTabControl
         ShowObjectView view,
         ApplicationContext application
     ) throws ServiceException {
-        // build-in operations
+        // built-in operations
         if(Ui_1.EDIT_OBJECT_OPERATION_NAME.equals(this.getOperationName())) {
             return view.getObjectReference().getEditObjectAction(ViewMode.EMBEDDED);
         }
@@ -375,7 +375,8 @@ public class OperationTabControl
                                                     ObjectReference objectReference = null;
                                                     try {
                                                         objectReference = (ObjectReference)valueHolder.getValue(false);
-                                                    } catch (Exception e) {}
+                                                    } 
+                                                    catch (Exception e) {}
                                                     Autocompleter_1_0 autocompleter = ((ObjectReferenceValue)valueHolder).getAutocompleter(
                                                         view.getLookupObject()
                                                     );

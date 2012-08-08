@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.56 2008/11/11 15:38:56 wfro Exp $
+ * Name:        $Id: Standard_1.java,v 1.69 2009/03/02 13:38:15 wfro Exp $
  * Description: Model layer Standard_1 plugin
- * Revision:    $Revision: 1.56 $
+ * Revision:    $Revision: 1.69 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/11 15:38:56 $
+ * Date:        $Date: 2009/03/02 13:38:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,34 +64,32 @@ import java.util.Set;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.dataprovider.cci.DataproviderOperations;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.DataproviderRequestContexts;
+import org.openmdx.application.dataprovider.cci.Directions;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.application.mof.cci.AggregationKind;
+import org.openmdx.application.mof.cci.ModelAttributes;
+import org.openmdx.application.mof.cci.PrimitiveTypes;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Quantors;
 import org.openmdx.base.text.format.DatatypeFormat;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequestContexts;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.dataprovider.spi.SystemOperations;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.compatibility.base.query.Quantors;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.code.AggregationKind;
-import org.openmdx.model1.code.ModelAttributes;
-import org.openmdx.model1.code.PrimitiveTypes;
 
 /**
  * Standard implementation for model layer.
@@ -116,7 +114,7 @@ public class Standard_1 extends OptimisticLocking_1 {
         short id,
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception {
+    ) throws ServiceException {
         super.activate(id, configuration, delegation);
         //
         // Warnings
@@ -124,21 +122,6 @@ public class Standard_1 extends OptimisticLocking_1 {
         this.throwWarning = configuration.isOn(
             LayerConfigurationEntries.THROW_WARNING
         );
-        //
-        // Model
-        //
-        List<Model_1_0> models = configuration.values(SharedConfigurationEntries.MODEL);
-        if (models.isEmpty()) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                "A model must be configured with option '" + 
-                SharedConfigurationEntries.MODEL + 
-                "'"
-            );
-        } else {
-            this.model = models.get(0);
-        }
         //
         // XML Datatype Usage
         //
@@ -195,9 +178,9 @@ public class Standard_1 extends OptimisticLocking_1 {
     ) throws ServiceException {
         boolean roleContained = false;
         String objectClassName = this.getObjectClassName(object);
-        ModelElement_1_0 objClass = objectClassName == null ?
-            null :
-                this.model.getDereferencedType(objectClassName);
+        ModelElement_1_0 objClass = 
+            objectClassName == null ? null :
+            getModel().getDereferencedType(objectClassName);
         List<String> missingClassesForRoles = null; // used for error reporting
         if (object != null) {
             // System.out.println("\n objectClass: " + objectClassName);
@@ -207,7 +190,7 @@ public class Standard_1 extends OptimisticLocking_1 {
             roleClasses.put(null, objClass);
 
             Map<?,?> modelAttributes =
-                objClass == null ? null : (Map<?,?>)objClass.values("attribute").get(0);
+                objClass == null ? null : (Map<?,?>)objClass.objGetValue("attribute");
 
             String attributeName = null;
             for (Iterator<String> i = object.attributeNames().iterator(); i.hasNext();) {
@@ -225,10 +208,9 @@ public class Standard_1 extends OptimisticLocking_1 {
                     && !attributeName.equals(SystemAttributes.MODIFIED_BY)
                     && !attributeName.equals(SystemAttributes.CREATED_AT)
                     && !attributeName.equals(SystemAttributes.CREATED_BY)
+                    && !attributeName.equals(SystemAttributes.REMOVED_AT)
+                    && !attributeName.equals(SystemAttributes.REMOVED_BY)
                     && !attributeName.equals(SystemAttributes.OBJECT_CLASS)
-                    && !attributeName.equals(State_1_Attributes.INVALIDATED_AT)
-//                  && !attributeName.equals(AbstractState_1.STATE_NUMBER)
-//                  && !attributeName.equals(AbstractState_1.ID_ATTRIBUTE_NAME)
                  ) {
                     int sep = attributeName.indexOf("$");
                     String role = null;
@@ -260,7 +242,7 @@ public class Standard_1 extends OptimisticLocking_1 {
                                         .get(0);
                             }
                             if (objectClassName != null) {
-                                objClass = this.model.getDereferencedType(objectClassName);
+                                objClass = getModel().getDereferencedType(objectClassName);
                             }
                             roleClasses.put(role, objClass);
                         }
@@ -268,7 +250,7 @@ public class Standard_1 extends OptimisticLocking_1 {
                         modelAttributes =
                             objClass == null
                             ? null
-                                : (Map<?,?>)objClass.values("attribute").get(0);
+                                : (Map<?,?>)objClass.objGetValue("attribute");
                     }
                     if (modelAttributes != null) {
                         if (!SystemAttributes.OBJECT_CLASS.equals(attributeName)) {
@@ -284,8 +266,8 @@ public class Standard_1 extends OptimisticLocking_1 {
                             }
                             // remove derived attributes
                             else if(
-                                    (attributeDef.getValues("isDerived") != null) && 
-                                    ((Boolean)attributeDef.getValues("isDerived").get(0)).booleanValue()
+                                (attributeDef.objGetList("isDerived") != null) && 
+                                ((Boolean)attributeDef.objGetValue("isDerived")).booleanValue()
                             ) {
                                 i.remove();
                             }
@@ -365,7 +347,7 @@ public class Standard_1 extends OptimisticLocking_1 {
         // no_attributes, just don't set instanceOf.
         //
         if(objectClassName == null) return null;
-        ModelElement_1_0 objClass = this.model.getDereferencedType(objectClassName);
+        ModelElement_1_0 objClass = getModel().getDereferencedType(objectClassName);
         if(objClass == null) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ASSERTION_FAILURE, 
@@ -377,7 +359,7 @@ public class Standard_1 extends OptimisticLocking_1 {
         // evaluate the set of classes
         Set<String> classes = new HashSet<String>();
         for (
-                Iterator<?> i = objClass.values("allSupertype").iterator();
+                Iterator<?> i = objClass.objGetList("allSupertype").iterator();
                 i.hasNext();
         ) classes.add(((Path)i.next()).getBase());
         return classes;
@@ -402,7 +384,7 @@ public class Standard_1 extends OptimisticLocking_1 {
         ModelElement_1_0 baseObjClass = getObjectClass(object);
         if(
                 baseObjClass != null &&
-                model.isClassType(baseObjClass)
+                getModel().isClassType(baseObjClass)
         ) {      
             ModelElement_1_0 objectClass = null;      
             for(String attributeName :object.attributeNames()){
@@ -433,7 +415,7 @@ public class Standard_1 extends OptimisticLocking_1 {
                                     new BasicException.Parameter("attribute role object class", attributeRoledObjectClass)
                                 );
                             }
-                            objectClass = model.getDereferencedType(
+                            objectClass = getModel().getDereferencedType(
                                 object.getValues(attributeRoledObjectClass).get(0)
                             );
                         }
@@ -445,14 +427,14 @@ public class Standard_1 extends OptimisticLocking_1 {
                         }
                     }
                     if(
-                            !objectClass.values("reference").isEmpty() &&
-                            ((Map<?,?>) objectClass.values("reference").get(0)).containsKey(attributeName) &&
-                            (object.getValues(attributeName) != null)
+                        !objectClass.objGetList("reference").isEmpty() &&
+                        ((Map<?,?>) objectClass.objGetValue("reference")).containsKey(attributeName) &&
+                        (object.getValues(attributeName) != null)
                     ) {
                         // it must be a path, convert all values
                         for(
-                                ListIterator<Object> v = object.getValues(attributeName).populationIterator();
-                                v.hasNext(); 
+                            ListIterator<Object> v = object.getValues(attributeName).populationIterator();
+                            v.hasNext(); 
                         ) {
                             Object value = v.next();
                             if(value instanceof String) {
@@ -564,10 +546,10 @@ public class Standard_1 extends OptimisticLocking_1 {
                     new BasicException.Parameter("attribute", attributeName)
                 );
             }
-            type = model.getDereferencedType(typeNameList.get(0));
+            type = getModel().getDereferencedType(typeNameList.get(0));
             if (type != null) {
                 Boolean nonPathType = attributeIsInstanceOf(
-                    (Map<?,?>)type.values("attribute").get(0),
+                    (Map<?,?>)type.objGetValue("attribute"),
                     attributeName,
                     NON_PATH_TYPES
                 );
@@ -600,13 +582,9 @@ public class Standard_1 extends OptimisticLocking_1 {
         ModelElement_1_0 attributeDef = (ModelElement_1_0) attributeDefs.get(attributeName);
         return attributeDef == null ? null : Boolean.valueOf(
             candidates.contains(
-                model.getElementType(
+                getModel().getElementType(
                     attributeDef
-                ).values(
-                    "qualifiedName"
-                ).get(
-                    0
-                )
+                ).objGetValue("qualifiedName")
             )
         );
     }
@@ -643,7 +621,7 @@ public class Standard_1 extends OptimisticLocking_1 {
         if(object.getValues(SystemAttributes.OBJECT_CLASS) != null) {
             String objectClass = (String)object.getValues(SystemAttributes.OBJECT_CLASS).get(0);
             if(
-                    this.model.isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") &&
+                    getModel().isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") &&
                     (!object.attributeNames().contains(SystemAttributes.OBJECT_IDENTITY))                      
             ) {
                 object.clearValues(SystemAttributes.OBJECT_IDENTITY).add(
@@ -676,11 +654,11 @@ public class Standard_1 extends OptimisticLocking_1 {
         } else {
             objectFeaturesToBeVerified.remove(viewClassAttribute);
             try {
-                ModelElement_1_0 elementDef = this.model.getElement(
+                ModelElement_1_0 elementDef = getModel().getElement(
                     viewClassValues.get(0)
                 ); 
                 classDef = ModelAttributes.STRUCTURE_TYPE.equals(
-                    elementDef.values(SystemAttributes.OBJECT_CLASS).get(0)
+                    elementDef.objGetValue(SystemAttributes.OBJECT_CLASS)
                 ) ? null : elementDef;
             } catch(ServiceException e){
                 classDef = null;
@@ -688,8 +666,8 @@ public class Standard_1 extends OptimisticLocking_1 {
         }
         if(classDef == null) {
             for(
-                    Iterator<String> i = objectFeaturesToBeVerified.iterator();
-                    i.hasNext();
+                Iterator<String> i = objectFeaturesToBeVerified.iterator();
+                i.hasNext();
             ){
                 if(attributeBelongsToView(viewPrefix, i.next())) {
                     i.remove();
@@ -715,29 +693,29 @@ public class Standard_1 extends OptimisticLocking_1 {
             }
             objectFeaturesToBeVerified.remove(scopedInstanceOf);
             for(
-                    Iterator<?> i = ((Map<?,?>)classDef.values("allFeature").get(0)).values().iterator();
+                    Iterator<?> i = ((Map<?,?>)classDef.objGetValue("allFeature")).values().iterator();
                     i.hasNext();
             ) {
                 ModelElement_1_0 featureDef = (ModelElement_1_0)i.next();
                 boolean touch;
                 boolean attribute;
                 if(
-                        this.model.isAttributeType(featureDef)
+                        getModel().isAttributeType(featureDef)
                 ) {
                     attribute = true;
-                    touch = touchNonDerivedFeatures && !((Boolean)featureDef.values("isDerived").get(0)).booleanValue();
+                    touch = touchNonDerivedFeatures && !((Boolean)featureDef.objGetValue("isDerived")).booleanValue();
                 } else if (
-                        this.model.isReferenceType(featureDef) && 
-                        this.model.referenceIsStoredAsAttribute(featureDef)
+                        getModel().isReferenceType(featureDef) && 
+                        getModel().referenceIsStoredAsAttribute(featureDef)
                 ) {
                     attribute = true;
-                    touch = touchNonDerivedFeatures && !this.model.referenceIsDerived(featureDef); 
+                    touch = touchNonDerivedFeatures && !getModel().referenceIsDerived(featureDef); 
                 } else {
                     attribute = false;
                     touch = false;
                 }
                 if(attribute) {
-                    String feature = (String) featureDef.values("name").get(0);
+                    String feature = (String) featureDef.objGetValue("name");
                     String scopedFeature = scopedFeatures.get(feature);
                     if(scopedFeature == null) {
                         scopedFeatures.put(
@@ -749,24 +727,6 @@ public class Standard_1 extends OptimisticLocking_1 {
                         object.values(scopedFeature);
                     }
                     objectFeaturesToBeVerified.remove(scopedFeature);
-//                  if(State_1_Attributes.INVALIDATED_AT.equals(feature)) {
-//                      scopedFeature = scopedFeatures.get(AbstractState_1.STATE_NUMBER);
-//                      if(scopedFeature == null) {
-//                          scopedFeatures.put(
-//                              AbstractState_1.STATE_NUMBER,
-//                              scopedFeature = viewPrefix + AbstractState_1.STATE_NUMBER
-//                          );
-//                      }
-//                      objectFeaturesToBeVerified.remove(scopedFeature);
-//                      scopedFeature = scopedFeatures.get(AbstractState_1.ID_ATTRIBUTE_NAME);
-//                      if(scopedFeature == null) {
-//                          scopedFeatures.put(
-//                              AbstractState_1.ID_ATTRIBUTE_NAME,
-//                              scopedFeature = viewPrefix + AbstractState_1.ID_ATTRIBUTE_NAME
-//                          );
-//                      }
-//                      objectFeaturesToBeVerified.remove(scopedFeature);
-//                    }
                 }
             }
         }
@@ -931,32 +891,27 @@ public class Standard_1 extends OptimisticLocking_1 {
                     0
                 );
             }
-            if(
-                !SystemOperations.GET_BINARY_STREAM_ARGUMENTS.equals(objectType) &&
-                !SystemOperations.GET_CHARACTER_STREAM_ARGUMENTS.equals(objectType)
-            ) {
-                ModelElement_1_0 objectClass = objectType == null ? 
-                    null : 
-                        this.model.getDereferencedType(objectType);
-                Map<?,?> featureDefs = objectClass == null ?
-                    null :
-                        (Map<?,?>) objectClass.values("allFeature").get(0);
-                if(featureDefs != null) { 
-                    for(String attributeName : object.attributeNames()) {
-                        if(
-                            attributeMightBeInstanceOfAnXMLDatatype(
-                                featureDefs,
-                                attributeName
-                            )            
+            ModelElement_1_0 objectClass = objectType == null ? 
+                null : 
+                    getModel().getDereferencedType(objectType);
+            Map<?,?> featureDefs = objectClass == null ?
+                null :
+                    (Map<?,?>) objectClass.objGetValue("allFeature");
+            if(featureDefs != null) { 
+                for(String attributeName : object.attributeNames()) {
+                    if(
+                        attributeMightBeInstanceOfAnXMLDatatype(
+                            featureDefs,
+                            attributeName
+                        )            
+                    ) {
+                        for (
+                            ListIterator<Object> j = object.values(attributeName).populationIterator();
+                            j.hasNext();                        
                         ) {
-                            for (
-                                ListIterator<Object> j = object.values(attributeName).populationIterator();
-                                j.hasNext();                        
-                            ) {
-                                j.set(
-                                    this.datatypeFormat.marshal(j.next())                            
-                                );
-                            }
+                            j.set(
+                                this.datatypeFormat.marshal(j.next())                            
+                            );
                         }
                     }
                 }
@@ -965,14 +920,8 @@ public class Standard_1 extends OptimisticLocking_1 {
         if(request.operation() == DataproviderOperations.ITERATION_START) {        
             DataproviderRequest findRequest = request;
             List<FilterProperty> mappedFilterProperties = new ArrayList<FilterProperty>();
-            int typeIndex = -1;
             ModelElement_1_0 classDef = null;
-            for(
-                    int i = 0;
-                    i < request.attributeFilter().length;
-                    i++
-            ) {
-                FilterProperty requestedFilterProperty = request.attributeFilter()[i];
+            for(FilterProperty requestedFilterProperty : request.attributeFilter()) {
                 if(SystemAttributes.OBJECT_INSTANCE_OF.equals(requestedFilterProperty.name())) {
                     //
                     // Add all subtypes to OBJECT_CLASS
@@ -982,34 +931,16 @@ public class Standard_1 extends OptimisticLocking_1 {
                             (requestedFilterProperty.quantor()  == Quantors.THERE_EXISTS) &&
                             (requestedFilterProperty.getValues().length == 1)  
                     ) {
-                        classDef = this.model.getDereferencedType(requestedFilterProperty.getValue(0));
-                        Set<String> subClasses = new HashSet<String>();
-                        // Adding the filter property OBJECT_CLASS for BasicObject typically results
-                        // in a long list of subclasses which is expensive to process for database 
-                        // systems. Eliminating the BasicObject filter could result in returning objects
-                        // which are not instance of BasicObject. However this should never happen because
-                        // BasicObject's and non-BasicObject's must never be mixed in the same database table.
-                        if(
-                                (classDef != null) && 
-                                !"org:openmdx:base:BasicObject".equals(classDef.values("qualifiedName").get(0))
-                        ) {
-                            typeIndex = i;
-                            for(
-                                    Iterator<?> subIter = classDef.values("allSubtype").iterator();
-                                    subIter.hasNext();
-                            ) {
-                                Path path = (Path) subIter.next(); 
-                                subClasses.add(path.getBase());
-                            }                           
-                            mappedFilterProperties.add(
-                                new FilterProperty(
-                                    Quantors.THERE_EXISTS ,
-                                    SystemAttributes.OBJECT_CLASS,  
-                                    FilterOperators.IS_IN,
-                                    subClasses.toArray()
-                                )
+                        classDef = getModel().getDereferencedType(requestedFilterProperty.getValue(0));
+                        if(classDef != null) { 
+                            FilterProperty mappedFilterProperty = mapInstanceOfFilterProperty(
+                                request,
+                                classDef
                             );
-                        } 
+                            if(mappedFilterProperty != null) {
+                                mappedFilterProperties.add(mappedFilterProperty);
+                            } 
+                        }
                         else {
                             SysLog.info(
                                 "Skipping filter property OBJECT_INSTANCE_OF", 
@@ -1035,35 +966,32 @@ public class Standard_1 extends OptimisticLocking_1 {
                     String objectType = (String) request.context(
                         DataproviderRequestContexts.OBJECT_TYPE
                     ).get(0);
-                    if(objectType != null) classDef = model.getDereferencedType(
+                    if(objectType != null) classDef = getModel().getDereferencedType(
                         objectType
                     );
                     if(classDef == null) {
-                        classDef = this.model.getTypes(request.path())[2];
+                        classDef = getModel().getTypes(request.path())[2];
                     }
                 }
                 if(classDef != null) {
-                    Map<?,?> featureDefs = (Map<?,?>)classDef.values("allFeature").get(0); 
+                    Map<?,?> featureDefs = (Map<?,?>)classDef.objGetValue("allFeature"); 
                     if (featureDefs != null) {
-                        for(int i = 0; i < mappedFilterProperties.size(); i++) {
-                            if(i != typeIndex) {
-                                FilterProperty requestedFilterProperty = request.attributeFilter()[i];
-                                if(this.attributeMightBeInstanceOfAnXMLDatatype(featureDefs, requestedFilterProperty.name())) {
-                                    Object[] requestValues = requestedFilterProperty.getValues();
-                                    Object[] mappedValues = new Object[requestValues.length];
-                                    for(int j = 0; j < requestValues.length; j++) {
-                                        mappedValues[j] = this.datatypeFormat.marshal(requestValues[j]);
-                                    }
-                                    mappedFilterProperties.set(
-                                        i,
-                                        new FilterProperty(
-                                            requestedFilterProperty.quantor(),
-                                            requestedFilterProperty.name(),
-                                            requestedFilterProperty.operator(),
-                                            mappedValues
-                                        )
-                                    );
+                        for(ListIterator<FilterProperty> i = mappedFilterProperties.listIterator(); i.hasNext();) {
+                            FilterProperty requestedFilterProperty = i.next();
+                            if(this.attributeMightBeInstanceOfAnXMLDatatype(featureDefs, requestedFilterProperty.name())) {
+                                Object[] requestValues = requestedFilterProperty.getValues();
+                                Object[] mappedValues = new Object[requestValues.length];
+                                for(int j = 0; j < requestValues.length; j++) {
+                                    mappedValues[j] = this.datatypeFormat.marshal(requestValues[j]);
                                 }
+                                i.set(
+                                    new FilterProperty(
+                                        requestedFilterProperty.quantor(),
+                                        requestedFilterProperty.name(),
+                                        requestedFilterProperty.operator(),
+                                        mappedValues
+                                    )
+                                );
                             }
                         }
                     }
@@ -1090,6 +1018,47 @@ public class Standard_1 extends OptimisticLocking_1 {
             return request;
         }
     }
+    
+    /**
+     * Map an <code>OBJECT_INSTANCE_OF</code> filter property
+     * 
+     * @param request the original request
+     * @param classDef the class' model element
+     * 
+     * @return the mapped filter property; 
+     * or <code>null</code> if the filter property should be ignored
+     * 
+     * @throws ServiceException
+     */
+    protected FilterProperty mapInstanceOfFilterProperty(
+        DataproviderRequest request,
+        ModelElement_1_0 classDef
+    ) throws ServiceException {
+        String qualifiedName = (String) classDef.objGetValue("qualifiedName");
+        if("org:openmdx:base:BasicObject".equals(qualifiedName)) {
+            // Adding the filter property OBJECT_CLASS for BasicObject typically results
+            // in a long list of subclasses which is expensive to process for database 
+            // systems. Eliminating the BasicObject filter could result in returning objects
+            // which are not instance of BasicObject. However this should never happen because
+            // BasicObject's and non-BasicObject's must never be mixed in the same database table.
+            SysLog.info(
+                "Skipping filter property 'object_instanceof'", 
+                qualifiedName
+            );
+            return null;
+        } else {
+            Set<String> subClasses = new HashSet<String>();
+            for(Object path : classDef.objGetList("allSubtype")) {
+                subClasses.add(((Path)path).getBase());
+            }
+            return new FilterProperty(
+                Quantors.THERE_EXISTS ,
+                SystemAttributes.OBJECT_CLASS,  
+                FilterOperators.IS_IN,
+                subClasses.toArray()
+            );
+        }
+    };
 
     // --------------------------------------------------------------------------
     public DataproviderReply get(
@@ -1178,20 +1147,20 @@ public class Standard_1 extends OptimisticLocking_1 {
             ).getObject();
             objectClass = this.getObjectClassName(object);
         }
-        Map<?,?> references = (Map<?,?>)this.model.getElement(
+        Map<?,?> references = (Map<?,?>)getModel().getElement(
             objectClass
-        ).values("reference").get(0);
+        ).objGetValue("reference");
         for(Object i : references.values()) {
             ModelElement_1_0 featureDef = (ModelElement_1_0)i;
-            ModelElement_1_0 referencedEnd = this.model.getElement(
-                featureDef.values("referencedEnd").get(0)
+            ModelElement_1_0 referencedEnd = getModel().getElement(
+                featureDef.objGetValue("referencedEnd")
             );
             boolean referenceIsCompositeAndChangeable = 
-                this.model.isReferenceType(featureDef) &&
-                AggregationKind.COMPOSITE.equals(referencedEnd.values("aggregation").get(0)) &&
-                ((Boolean)referencedEnd.values("isChangeable").get(0)).booleanValue();
+                getModel().isReferenceType(featureDef) &&
+                AggregationKind.COMPOSITE.equals(referencedEnd.objGetValue("aggregation")) &&
+                ((Boolean)referencedEnd.objGetValue("isChangeable")).booleanValue();
             if(referenceIsCompositeAndChangeable) {
-                String reference = (String)featureDef.values("name").get(0);
+                String reference = (String)featureDef.objGetValue("name");
                 DataproviderObject[] composites = super.find(
                     header,
                     new DataproviderRequest(
@@ -1277,27 +1246,13 @@ public class Standard_1 extends OptimisticLocking_1 {
     }
 
     //--------------------------------------------------------------------------
-    protected String getObjectClassName(
-        DataproviderObject_1_0 object
-    ){
-        if (object != null) {
-            //
-            // OBJECT_CLASS may be null in delete operations
-            //
-            SparseList<Object> objectClassAttribute = object.getValues(SystemAttributes.OBJECT_CLASS);
-            if (objectClassAttribute != null) return (String)objectClassAttribute.get(0);
-        }
-        return null;
-    }
-
-    //--------------------------------------------------------------------------
     protected ModelElement_1_0 getObjectClass(
         DataproviderObject_1_0 object
     ) throws ServiceException {
         String objectClassName = getObjectClassName(object);
         return objectClassName == null ?
             null :
-                this.model.getDereferencedType(objectClassName);
+                getModel().getDereferencedType(objectClassName);
     }
 
     // --------------------------------------------------------------------------
@@ -1315,7 +1270,6 @@ public class Standard_1 extends OptimisticLocking_1 {
     }
 
     //--------------------------------------------------------------------------
-    private Model_1_0 model = null;
 
     /**
      * 2-dim map with entries <view, <feature name, scoped feature name>> 

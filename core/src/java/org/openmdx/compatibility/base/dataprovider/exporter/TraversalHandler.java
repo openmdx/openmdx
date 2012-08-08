@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TraversalHandler.java,v 1.6 2008/05/12 10:45:50 wfro Exp $
+ * Name:        $Id: TraversalHandler.java,v 1.8 2009/01/06 13:14:45 wfro Exp $
  * Description: A traversal handler receives and treats callbacks from a Traverser. 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/12 10:45:50 $
+ * Date:        $Date: 2009/01/06 13:14:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,9 +55,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 /**
  * The TraversalHandler receives and treats callbacks from a Traverser.

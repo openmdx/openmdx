@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AlternativeDatatypeFactory.java,v 1.4 2008/11/05 00:49:19 hburger Exp $
+ * Name:        $Id: AlternativeDatatypeFactory.java,v 1.6 2009/02/24 15:48:55 hburger Exp $
  * Description: Immutable Datatype Factory
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/05 00:49:19 $
+ * Date:        $Date: 2009/02/24 15:48:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,8 +60,6 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.openmdx.base.exception.BadParameterException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -110,10 +108,16 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
         try {
             return toDateTime(DateFormat.getInstance().parse(value));
         } catch (ParseException exception) {
-            throw new BadParameterException(
-                exception,
-                "Could not parse as org::w3c::dateTime value",
-                new BasicException.Parameter("value", value)
+        	throw BasicException.initHolder(
+        		new IllegalArgumentException(
+        		    "Could not parse as org::w3c::dateTime value",
+        		    BasicException.newEmbeddedExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("value", value)
+                    )
+                )
             );
         }
     }
@@ -138,13 +142,15 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
         } else if(extendedDatePattern.matcher(value).matches()) {
             return new ImmutableDate(toBasicFormat(value));
         } else {
-            throw new BadParameterException(
-                new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.BAD_PARAMETER,
+            throw BasicException.initHolder(
+                new IllegalArgumentException(
                     "The value does not match the org::w3c::date pattern",
-                    new BasicException.Parameter("pattern", "YYYY[...]-MM-DD", "YYYY[...]-MM-DD"),
-                    new BasicException.Parameter("value", value.toString())
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("pattern", "YYYY[...]-MM-DD", "YYYY[...]-MM-DD"),
+                        new BasicException.Parameter("value", value)
+                    )
                 )
             );
         }
@@ -284,13 +290,15 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
         } else if (datatype instanceof XMLGregorianCalendar) {
             return toBasicFormat(((XMLGregorianCalendar)datatype).toXMLFormat());
         } else {
-            throw new BadParameterException(
-                new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.TRANSFORMATION_FAILURE,
+            throw BasicException.initHolder(
+                new IllegalArgumentException(
                     "Unsupported Argument Class",
-                    new BasicException.Parameter("class", datatype.getClass().getName()),
-                    new BasicException.Parameter("value", datatype.toString())
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.TRANSFORMATION_FAILURE,
+                        new BasicException.Parameter("class", datatype.getClass().getName()),
+                        new BasicException.Parameter("value", datatype.toString())
+                    )
                 )
             );
         }
@@ -332,13 +340,15 @@ class AlternativeDatatypeFactory implements ImmutableDatatypeFactory {
         } else if (datatype instanceof XMLGregorianCalendar) {
             return ((XMLGregorianCalendar)datatype).toXMLFormat();
         } else {
-            throw new BadParameterException(
-                new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.TRANSFORMATION_FAILURE,
+            throw BasicException.initHolder(
+                new IllegalArgumentException(
                     "Unsupported Argument Class",
-                    new BasicException.Parameter("class", datatype.getClass().getName()),
-                    new BasicException.Parameter("value", datatype.toString())
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.TRANSFORMATION_FAILURE,
+                        new BasicException.Parameter("class", datatype.getClass().getName()),
+                        new BasicException.Parameter("value", datatype.toString())
+                    )
                 )
             );
         }

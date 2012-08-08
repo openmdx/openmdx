@@ -4,6 +4,7 @@ package javax.jmi.reflect;
 /** Ancestor for all JMI exceptions thrown by reflective and generated
  * methods.
  */
+@SuppressWarnings("serial")
 public abstract class JmiException extends RuntimeException {
     private final RefObject elementInError;
     private final Object objectInError;

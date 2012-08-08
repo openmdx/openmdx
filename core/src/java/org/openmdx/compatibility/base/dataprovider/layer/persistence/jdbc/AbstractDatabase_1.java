@@ -1,17 +1,15 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractDatabase_1.java,v 1.271 2008/12/17 13:47:59 wfro Exp $
+ * Name:        $Id: AbstractDatabase_1.java,v 1.297 2009/03/05 12:57:43 wfro Exp $
  * Description: AbstractDatabase_1 plugin
- * Revision:    $Revision: 1.271 $
+ * Revision:    $Revision: 1.297 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/17 13:47:59 $
+ * Date:        $Date: 2009/03/05 12:57:43 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,6 +49,8 @@
  */
 package org.openmdx.compatibility.base.dataprovider.layer.persistence.jdbc;
 
+import static org.openmdx.base.naming.SpecialResourceIdentifiers.EXTENT_REFERENCES;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -88,40 +88,45 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
+import javax.sql.DataSource;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.openmdx.application.cci.DbConnectionManager_1_0;
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderOperations;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.DataproviderRequestContexts;
+import org.openmdx.application.dataprovider.cci.Directions;
+import org.openmdx.application.dataprovider.cci.Orders;
+import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkRequest;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.application.mof.cci.ModelAttributes;
+import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.application.mof.cci.PrimitiveTypes;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.text.pattern.StringExpression;
-import org.openmdx.base.text.pattern.cci.Pattern_1_0;
-import org.openmdx.compatibility.base.application.cci.DbConnectionManager_1_0;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReplyContexts;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequestContexts;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.Orders;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
+import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_6;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Quantors;
 import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.AbstractIterator;
 import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.AbstractPersistence_1;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.compatibility.base.query.Quantors;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
@@ -129,11 +134,6 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.openmdx.kernel.uri.scheme.OpenMDXSchemes;
 import org.openmdx.kernel.url.protocol.XRI_1Protocols;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.code.ModelAttributes;
-import org.openmdx.model1.code.Multiplicities;
-import org.openmdx.model1.code.PrimitiveTypes;
 import org.w3c.cci2.BinaryLargeObject;
 
 //---------------------------------------------------------------------------
@@ -148,10 +148,17 @@ import org.w3c.cci2.BinaryLargeObject;
  * start logging JDBC calls: DriverManager.setLogStream(System.out);
  */
 @SuppressWarnings("unchecked")
-abstract public class AbstractDatabase_1 extends AbstractPersistence_1 
-implements DataTypes 
-{
+abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implements DataTypes {
 
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.spi.Layer_1#getModel()
+     */
+    @Override
+    protected Model_1_6 getModel() {
+        return super.getModel();
+    }
+
+    //---------------------------------------------------------------------------
     abstract int resultSetGetRow(
         ResultSet rs
     ) throws SQLException;
@@ -198,16 +205,16 @@ implements DataTypes
     ) throws ServiceException, SQLException;
 
     //---------------------------------------------------------------------------
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation"})
     public void activate(
         short id, 
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception, ServiceException {
+    ) throws ServiceException {
 
         SysLog.detail(
             "activating", 
-            "$Id: AbstractDatabase_1.java,v 1.271 2008/12/17 13:47:59 wfro Exp $"
+            "$Id: AbstractDatabase_1.java,v 1.297 2009/03/05 12:57:43 wfro Exp $"
         );
 
         super.activate( 
@@ -325,18 +332,6 @@ implements DataTypes
             SysLog.info("resultSetType", type);
         }
 
-        // load model if modelDriven is active
-        if(!configuration.values(SharedConfigurationEntries.MODEL).isEmpty()) {
-            this.model = (Model_1_0)configuration.values(SharedConfigurationEntries.MODEL).get(0);
-        }
-        else {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION, 
-                "A model must be configured with options 'modelPackage' and 'packageImpl'"
-            );
-        }    
-
         // allowsSqlSequenceFallback 
         this.allowsSqlSequenceFallback = configuration.isOn(LayerConfigurationEntries.ALLOWS_SQL_SEQUENCE_FALLBACK);
 
@@ -432,21 +427,21 @@ implements DataTypes
         }
 
         // PATH_MACRO_NAME, PATH_MACRO_VALUE
-        this.pathMacros = new HashMap();
+        this.pathMacros = new HashMap<String,String>();
         for(int i = 0; i < configuration.values(LayerConfigurationEntries.PATH_MACRO_NAME).size(); i++) {
             this.pathMacros.put(
-                configuration.values(LayerConfigurationEntries.PATH_MACRO_NAME).get(i),
-                configuration.values(LayerConfigurationEntries.PATH_MACRO_VALUE).get(i)
+                (String)configuration.values(LayerConfigurationEntries.PATH_MACRO_NAME).get(i),
+                (String)configuration.values(LayerConfigurationEntries.PATH_MACRO_VALUE).get(i)
             );
         }
         SysLog.info("pathMacros", this.pathMacros);
 
         // STRING_MACRO_COLUMN, STRING_MACRO_NAME, STRING_MACRO_VALUE
-        this.stringMacros = new HashMap();
+        this.stringMacros = new HashMap<String,List<String[]>>();
         for(int i = 0; i < configuration.values(LayerConfigurationEntries.STRING_MACRO_COLUMN).size(); i++) {
             this.stringMacros.put(
-                configuration.values(LayerConfigurationEntries.STRING_MACRO_COLUMN).get(i),
-                new ArrayList()
+                (String)configuration.values(LayerConfigurationEntries.STRING_MACRO_COLUMN).get(i),
+                new ArrayList<String[]>()
             );
         }
         for(int i = 0; i < configuration.values(LayerConfigurationEntries.STRING_MACRO_COLUMN).size(); i++) {
@@ -468,7 +463,7 @@ implements DataTypes
         );
 
         // connection
-        this.connectionManagers = configuration.values(
+        this.dataSources = configuration.values(
             SharedConfigurationEntries.DATABASE_CONNECTION_FACTORY
         );
 
@@ -501,9 +496,9 @@ implements DataTypes
             this.useNormalizedReferences,
             configuration.isOn(LayerConfigurationEntries.USE_NORMALIZED_OBJECT_IDS),
                 // The database configuration is always retrieved from the first configured connection manager
-                this.connectionManagers.isEmpty()
+                this.dataSources.isEmpty()
                 ? null
-                    : (DbConnectionManager_1_0)this.connectionManagers.get(0), configuration
+                    : (DbConnectionManager_1_0)this.dataSources.get(0), configuration
         );
     }
 
@@ -514,35 +509,39 @@ implements DataTypes
      * getConnectionManager() can return a manager from any of the configured connection 
      * managers according to a criteria derived from the request info.
      */
-    protected DbConnectionManager_1_0 getConnectionManager(
+    protected DataSource getDataSource(
         DataproviderRequest request
     ) throws ServiceException {
-        if(this.connectionManagers.isEmpty()) {
+        if(this.dataSources.isEmpty()) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION, 
                 "can not get connection manager"
             );
         }
-        return ((DbConnectionManager_1_0)this.connectionManagers.get(0));
+        return this.dataSources.get(0);
     }
 
     //---------------------------------------------------------------------------
     protected Connection getConnection(
         DataproviderRequest request
-    ) throws ServiceException{
+    ) throws ServiceException, SQLException {
         String unitOfWorkId = (String) request.context(DataproviderRequestContexts.UNIT_OF_WORK_ID).get(0);
         this.unitOfWorkId = unitOfWorkId == null || unitOfWorkId.length() == 0 ? uidAsString() : "noUnitOfWorkId";
-        return this.getConnectionManager(request).getConnection();
+        return this.getDataSource(request).getConnection();
     }
 
     //---------------------------------------------------------------------------
     protected void closeConnection(
-        DataproviderRequest request,
         Connection conn
     ) throws ServiceException{
         if(conn != null) {
-            this.getConnectionManager(request).closeConnection(conn);
+            try {
+                conn.close();
+            }
+            catch(Exception e) {
+                throw new ServiceException(e);
+            }
         }
     }
 
@@ -623,11 +622,11 @@ implements DataTypes
             if(pos >= 0) {
                 columnName = columnName.substring(pos+1);
             }
-            List stringReplacements = (List)this.stringMacros.get(columnName);
+            List<String[]> stringReplacements = this.stringMacros.get(columnName);
             if(stringReplacements != null) {
                 for(int i = 0; i < stringReplacements.size(); i++) {
-                    String macroName = ((String[])stringReplacements.get(i))[0];
-                    String macroValue = ((String[])stringReplacements.get(i))[1];
+                    String macroName = stringReplacements.get(i)[0];
+                    String macroValue = stringReplacements.get(i)[1];
                     // replace matching macro value with macro name
                     if(((String)value).startsWith(macroValue)) {
                         return macroName + ((String)value).substring(macroValue.length());
@@ -649,11 +648,11 @@ implements DataTypes
         if(pos >= 0) {
             columnName = columnName.substring(pos+1);
         }
-        List stringReplacements = (List)this.stringMacros.get(columnName);
+        List<String[]> stringReplacements = this.stringMacros.get(columnName);
         if(stringReplacements != null) {
             for(int i = 0; i < stringReplacements.size(); i++) {
-                String macroName = ((String[])stringReplacements.get(i))[0];
-                String macroValue = ((String[])stringReplacements.get(i))[1];
+                String macroName = stringReplacements.get(i)[0];
+                String macroValue = stringReplacements.get(i)[1];
                 // replace matching macro name with macro value
                 if(value.startsWith(macroName)) {
                     return macroValue + value.substring(macroName.length());
@@ -686,12 +685,12 @@ implements DataTypes
         else {
             String converted = source.toXri();
             boolean modified = false;
-            for(Iterator i = this.pathMacros.entrySet().iterator(); i.hasNext(); ) {
-                Entry e = (Entry)i.next();
-                String macroName = (String)e.getKey();
-                String macroValue = (String)e.getValue();
+            for(Iterator<Entry<String,String>> i = this.pathMacros.entrySet().iterator(); i.hasNext(); ) {
+                Entry<String,String> e = i.next();
+                String macroName = e.getKey();
+                String macroValue = e.getValue();
                 if(converted.indexOf(macroValue) >= 0) {
-                    Pattern_1_0 pattern = StringExpression.compile(macroValue);
+                    Pattern pattern = Pattern.compile(macroValue);
                     converted = pattern.matcher(converted).replaceFirst("xri:*" + macroName);
                     converted = pattern.matcher(converted).replaceAll("(*" + macroName + ")");
                     modified = true;
@@ -715,13 +714,13 @@ implements DataTypes
         } else {
             String converted = source;
             boolean modified = false;
-            for(Iterator i = this.pathMacros.entrySet().iterator(); i.hasNext(); ) {
-                Entry e = (Entry)i.next();
-                String macroName = (String)e.getKey();
-                String macroValue = (String)e.getValue();
+            for(Iterator<Entry<String,String>> i = this.pathMacros.entrySet().iterator(); i.hasNext(); ) {
+                Entry<String,String> e = i.next();
+                String macroName = e.getKey();
+                String macroValue = e.getValue();
                 if(converted.indexOf(macroName) >= 0) {
-                    converted = StringExpression.compile("xri:*" + macroName).matcher(converted).replaceFirst(macroValue);
-                    converted = StringExpression.compile("(*" + macroName + ")").matcher(converted).replaceAll(macroValue);
+                    converted = Pattern.compile("xri:*" + macroName).matcher(converted).replaceFirst(macroValue);
+                    converted = Pattern.compile("(*" + macroName + ")").matcher(converted).replaceAll(macroValue);
                     modified = true;
                 }
             }
@@ -736,7 +735,7 @@ implements DataTypes
     public ResultSet executeQuery(
         PreparedStatement ps,
         String statement,
-        List statementParameters
+        List<?> statementParameters
     ) throws SQLException {
         ps.setFetchSize(this.fetchSize);
         ps.setFetchDirection(ResultSet.FETCH_FORWARD);
@@ -745,8 +744,24 @@ implements DataTypes
         long startTime = System.currentTimeMillis();
         ResultSet rs = ps.executeQuery();
         long duration = System.currentTimeMillis() - startTime;
-        SysLog.detail("execution time", new Long(duration));
+        SysLog.detail("execution time", Long.valueOf(duration));
         return rs;
+    }
+
+    //---------------------------------------------------------------------------
+    public int executeUpdate(
+        PreparedStatement ps,
+        String statement,
+        List<?> statementParameters
+    ) throws SQLException {
+        SysLog.detail("statement", statement);
+        SysLog.detail("parameters", statementParameters);
+        long startTime = System.currentTimeMillis();
+        int rowCount = ps.executeUpdate();
+        long duration = System.currentTimeMillis() - startTime;
+        SysLog.detail("rowCount", Integer.valueOf(rowCount));
+        SysLog.detail("execution time", Long.valueOf(duration));
+        return rowCount;
     }
 
     //---------------------------------------------------------------------------
@@ -830,9 +845,9 @@ implements DataTypes
         String dbObjectHint,
         short viewMode,
         String requestedColumnSelector,
-        Set requestedMixinAttributes
+        Set<String> requestedMixins
     ) throws ServiceException {
-        Set mixinAttributes = requestedMixinAttributes;
+        Set<String> mixins = requestedMixins;
         String columnSelector = requestedColumnSelector == null ? 
             DEFAULT_COLUMN_SELECTOR : 
             requestedColumnSelector;
@@ -870,39 +885,38 @@ implements DataTypes
                 if(dbObjectForQuery != null) {
                     // replace driver specific operations / functions
                     try {
-
                         if(dbObjectForQuery.indexOf("STRCAT.PREFIX") >= 0) {
-                            dbObjectForQuery = StringExpression.compile("STRCAT.PREFIX").matcher(dbObjectForQuery).replaceAll(
+                            dbObjectForQuery = Pattern.compile("STRCAT.PREFIX").matcher(dbObjectForQuery).replaceAll(
                                 this.jdbcDriverSqlProperties.getProperty(databaseProductName + ".STRCAT.PREFIX")
                             );
                         }
                         if(dbObjectForQuery.indexOf("STRCAT.INFIX") >= 0) {
-                            dbObjectForQuery = StringExpression.compile("STRCAT.INFIX").matcher(dbObjectForQuery).replaceAll(
+                            dbObjectForQuery = Pattern.compile("STRCAT.INFIX").matcher(dbObjectForQuery).replaceAll(
                                 this.jdbcDriverSqlProperties.getProperty(databaseProductName + ".STRCAT.INFIX")
                             );
                         }
                         if(dbObjectForQuery.indexOf("STRCAT.SUFFIX") >= 0) {
-                            dbObjectForQuery = StringExpression.compile("STRCAT.SUFFIX").matcher(dbObjectForQuery).replaceAll(
+                            dbObjectForQuery = Pattern.compile("STRCAT.SUFFIX").matcher(dbObjectForQuery).replaceAll(
                                 this.jdbcDriverSqlProperties.getProperty(databaseProductName + ".STRCAT.SUFFIX")
                             );
                         }
                         if(dbObjectForQuery.indexOf("NULL.NUMERIC") >= 0) {
-                            dbObjectForQuery = StringExpression.compile("NULL.NUMERIC").matcher(dbObjectForQuery).replaceAll(
+                            dbObjectForQuery = Pattern.compile("NULL.NUMERIC").matcher(dbObjectForQuery).replaceAll(
                                 this.jdbcDriverSqlProperties.getProperty(databaseProductName + ".NULL.NUMERIC")
                             );
                         }
                         if(dbObjectForQuery.indexOf("NULL.CHARACTER") >= 0) {
-                            dbObjectForQuery = StringExpression.compile("NULL.CHARACTER").matcher(dbObjectForQuery).replaceAll(
+                            dbObjectForQuery = Pattern.compile("NULL.CHARACTER").matcher(dbObjectForQuery).replaceAll(
                                 this.jdbcDriverSqlProperties.getProperty(conn.getMetaData().getDatabaseProductName() + ".NULL.CHARACTER")
                             );
                         }
                         if(dbObjectForQuery.indexOf("CORREL.SUBQUERY.BEGIN") >= 0) {
-                            dbObjectForQuery = StringExpression.compile("CORREL.SUBQUERY.BEGIN").matcher(dbObjectForQuery).replaceAll(
+                            dbObjectForQuery = Pattern.compile("CORREL.SUBQUERY.BEGIN").matcher(dbObjectForQuery).replaceAll(
                                 this.jdbcDriverSqlProperties.getProperty(databaseProductName + ".CORREL.SUBQUERY.BEGIN")
                             );
                         }
                         if(dbObjectForQuery.indexOf("CORREL.SUBQUERY.END") >= 0) {
-                            dbObjectForQuery = StringExpression.compile("CORREL.SUBQUERY.END").matcher(dbObjectForQuery).replaceAll(
+                            dbObjectForQuery = Pattern.compile("CORREL.SUBQUERY.END").matcher(dbObjectForQuery).replaceAll(
                                 this.jdbcDriverSqlProperties.getProperty(databaseProductName + ".CORREL.SUBQUERY.END")
                             );
                         }
@@ -946,28 +960,23 @@ implements DataTypes
              * The mixinAttributes are taken from v in this case.
              */
             if(
-                    (mixinAttributes != null) && 
-                    !mixinAttributes.isEmpty()
+                (mixins != null) && 
+                !mixins.isEmpty()
             ) {
-                mixinAttributes = new HashSet(mixinAttributes);
-                mixinAttributes.add(SystemAttributes.OBJECT_CLASS);      
-                mixinAttributes.removeAll(
+                mixins = new HashSet<String>(mixins);
+                mixins.add(SystemAttributes.OBJECT_CLASS);      
+                mixins.removeAll(
                     dbObject.getExcludeAttributes()
                 );
                 String view = "";
-
                 view += "SELECT " + dbObject.getHint() + " " + columnSelector;
-                for(
-                        Iterator i = mixinAttributes.iterator();
-                        i.hasNext();
-                ) {
-                    String attributeName = (String)i.next();    
-                    int upperBound = this.embeddedFeatures.containsKey(attributeName)
-                    ? ((Number)this.embeddedFeatures.get(attributeName)).intValue()
-                        : 1;
+                for(String mixin: mixins) {
+                    int upperBound = this.embeddedFeatures.containsKey(mixin) ? 
+                        ((Number)this.embeddedFeatures.get(mixin)).intValue() : 
+                        1;
                     for(int j = 0; j < upperBound; j++) {
-                        String columnName = this.getColumnName(conn, attributeName, j, upperBound > 1, true);
-                        String prefixedColumnName = this.getColumnName(conn, this.privateAttributesPrefix + attributeName, j, upperBound > 1, true);
+                        String columnName = this.getColumnName(conn, mixin, j, upperBound > 1, true);
+                        String prefixedColumnName = this.getColumnName(conn, this.privateAttributesPrefix + mixin, j, upperBound > 1, true);
                         view += ", " + (dbObject.getIndexColumn() == null ? "v." : "vm.") + columnName + " AS " + prefixedColumnName;
                     }
                 }              
@@ -975,15 +984,15 @@ implements DataTypes
                 if(dbObject.getIndexColumn() != null) {
                     boolean useInnerJoin = !databaseProductName.startsWith("DB2");  
                     if(useInnerJoin) {
-                        view += isComplex
-                        ? " FROM (" + dbObjectForQuery1 + ") v INNER JOIN (" + (dbObjectForQuery2 == null ? dbObjectForQuery1 : dbObjectForQuery2) + ") vm"
-                            : " FROM " + dbObjectForQuery1 + " v INNER JOIN " + (dbObjectForQuery2 == null ? dbObjectForQuery1 : dbObjectForQuery2) + " vm";
+                        view += isComplex ? 
+                            " FROM (" + dbObjectForQuery1 + ") v INNER JOIN (" + (dbObjectForQuery2 == null ? dbObjectForQuery1 : dbObjectForQuery2) + ") vm" : 
+                            " FROM " + dbObjectForQuery1 + " v INNER JOIN " + (dbObjectForQuery2 == null ? dbObjectForQuery1 : dbObjectForQuery2) + " vm";
                         view += " ON ";
                     }
                     else {
-                        view += isComplex
-                        ? " FROM (" + dbObjectForQuery1 + ") v, (" + (dbObjectForQuery2 == null ? dbObjectForQuery1 : dbObjectForQuery2) + ") vm"
-                            : " FROM " + dbObjectForQuery1 + " v, " + (dbObjectForQuery2 == null ? dbObjectForQuery1 : dbObjectForQuery2) + " vm";
+                        view += isComplex ? 
+                            " FROM (" + dbObjectForQuery1 + ") v, (" + (dbObjectForQuery2 == null ? dbObjectForQuery1 : dbObjectForQuery2) + ") vm" : 
+                            " FROM " + dbObjectForQuery1 + " v, " + (dbObjectForQuery2 == null ? dbObjectForQuery1 : dbObjectForQuery2) + " vm";
                         view += " WHERE ";              
                     }
                     int k = 0;
@@ -1005,13 +1014,13 @@ implements DataTypes
                 }
                 // Non-indexed db object (--> secondary view is always null)
                 else {
-                    view += isComplex
-                    ? " FROM (" + dbObjectForQuery1 + ") v"
-                        : " FROM " + dbObjectForQuery1 + " v";
+                    view += isComplex ? 
+                        " FROM (" + dbObjectForQuery1 + ") v" : 
+                        " FROM " + dbObjectForQuery1 + " v";
                     // Join criteria supported only for primary, non-indexed views with exactly one object id column
                     if(
-                            (dbObject.getJoinCriteria() != null) &&
-                            (dbObject.getObjectIdColumn().size() == 1)
+                        (dbObject.getJoinCriteria() != null) &&
+                        (dbObject.getObjectIdColumn().size() == 1)
                     ) {
                         String[] joinCriteria = dbObject.getJoinCriteria();
                         String objectIdColumn = (String)dbObject.getObjectIdColumn().get(0);
@@ -1024,8 +1033,8 @@ implements DataTypes
             // No mixin attributes
             else {
                 if(
-                        (dbObject.getJoinCriteria() != null) &&
-                        (dbObject.getObjectIdColumn().size() == 1)
+                    (dbObject.getJoinCriteria() != null) &&
+                    (dbObject.getObjectIdColumn().size() == 1)
                 ) {
                     String[] joinCriteria = dbObject.getJoinCriteria();
                     String objectIdColumn = (String)dbObject.getObjectIdColumn().get(0);
@@ -1038,9 +1047,9 @@ implements DataTypes
         }
         // Return columns of secondary db object
         else if(viewMode == VIEW_MODE_SECONDARY_COLUMNS) {
-            return dbObjectForQuery2 == null
-            ? dbObjectForQuery1
-                : dbObjectForQuery2;
+            return dbObjectForQuery2 == null ? 
+                dbObjectForQuery1 : 
+                dbObjectForQuery2;
         }
         else {
             throw new ServiceException(
@@ -1063,7 +1072,7 @@ implements DataTypes
         Object val,
         String attributeName,
         ModelElement_1_0 attributeDef
-    ) throws SQLException;
+    ) throws ServiceException, SQLException;
 
     //---------------------------------------------------------------------------
     /**
@@ -1074,7 +1083,7 @@ implements DataTypes
         Object val,
         String attributeName,
         ModelElement_1_0 attributeDef
-    ) throws SQLException;
+    ) throws ServiceException, SQLException;
 
     //---------------------------------------------------------------------------
     /**
@@ -1112,7 +1121,7 @@ implements DataTypes
     public String getSelectReferenceIdsClause(
         Connection conn,
         Path pattern,
-        List statementParameters
+        List<Object> statementParameters
     ) throws ServiceException {
         Path referencePattern = pattern.size() % 2 == 1
         ? pattern.getParent()
@@ -1173,7 +1182,7 @@ implements DataTypes
     private String getSelectReferenceIdsFormatRefTableClause(
         Connection conn,
         Path referencePattern,
-        List statementParameters
+        List<Object> statementParameters
     ) throws ServiceException {
         return 
         "SELECT " + this.referenceLookupStatementHint + " " + OBJECT_RID + 
@@ -1185,7 +1194,7 @@ implements DataTypes
     String getSelectReferenceIdsFromRefTableClause(
         Connection conn,
         Path pathPattern,
-        List statementParameters
+        List<Object> statementParameters
     ) throws ServiceException {
         String currentClause = "";
         boolean isFirst = true;
@@ -1226,25 +1235,25 @@ implements DataTypes
         }
         else {
             currentClause += "(n " + (matchExact ? "=" : ">=") + " ?)";
-            statementParameters.add(new Integer(pathPattern.size()));          
+            statementParameters.add(Integer.valueOf(pathPattern.size()));          
         }
         return currentClause;
     }
 
     //---------------------------------------------------------------------------
-    private Set findReferenceIdsFormatRefTable(
+    private Set<Long> findReferenceIdsFormatRefTable(
         Connection conn,
         Path pathPattern
     ) throws ServiceException {
 
         PreparedStatement ps = null;
         ResultSet rs = null;
-        Set referenceIds = new HashSet();
+        Set<Long> referenceIds = new HashSet<Long>();
         String statement = null;
 
         try {
             // get referenceId of reference
-            List statementParameters = new ArrayList();
+            List<Object> statementParameters = new ArrayList<Object>();
             ps = this.prepareStatement(
                 conn,
                 statement = this.getSelectReferenceIdsFormatRefTableClause(
@@ -1261,10 +1270,10 @@ implements DataTypes
                 statement,
                 statementParameters
             );
-            referenceIds = new HashSet();
+            referenceIds = new HashSet<Long>();
             while(rs.next()) {
                 referenceIds.add(
-                    new Long(rs.getLong(OBJECT_RID))
+                    Long.valueOf(rs.getLong(OBJECT_RID))
                 );
             }
         }
@@ -1428,7 +1437,6 @@ implements DataTypes
     public String getAutonumValue(
         Connection conn,
         String sequenceName,
-        String dbObject,
         String asFormat
     ) throws ServiceException, SQLException {
 
@@ -1474,18 +1482,18 @@ implements DataTypes
         boolean forceCreate
     ) throws ServiceException {  
 
-        Long referenceId = new Long(-1);
+        Long referenceId = Long.valueOf(-1);
         String currentStatement = null;
         PreparedStatement ps = null;
 
-        Set referenceIds = this.findReferenceIdsFormatRefTable(
+        Set<Long> referenceIds = this.findReferenceIdsFormatRefTable(
             conn,
             reference
         );
 
         // either return when found or create on demand
         try {
-            if(referenceIds.size() == 0) {
+            if(referenceIds.isEmpty()) {
                 SysLog.trace("No referenceIds found for reference", reference + "; forceCreate=" + forceCreate);
                 if(forceCreate) {
 
@@ -1498,7 +1506,6 @@ implements DataTypes
                     String dbObjectRef = this.namespaceId + "_" + T_REF;
                     String autonumValue = this.getAutonumValue(
                         conn,
-                        dbObjectRef,
                         dbObjectRef,
                         null
                     );
@@ -1518,20 +1525,25 @@ implements DataTypes
                         conn,
                         currentStatement.toString()
                     );
+                    List<Object> statementParameters = new ArrayList<Object>();
+                    int statementParameter1;
                     ps.setInt(
                         1,
-                        reference.size()
+                        statementParameter1 = reference.size()
                     );
+                    statementParameters.add(statementParameter1);
                     // fill reference components up to maxReferenceComponents.
                     // fill missing component columns with blanks. This allows to
                     // define a unique key on the component columns.
                     for(int i = 0; i < this.maxReferenceComponents; i++) {
+                        String statementParameterN;
                         ps.setString(
                             i + 2, 
-                            i < reference.size() ? reference.get(i) : "#"
+                            statementParameterN = i < reference.size() ? reference.get(i) : "#"
                         );
+                        statementParameters.add(statementParameterN);
                     }
-                    ps.executeUpdate();
+                    executeUpdate(ps, currentStatement, statementParameters);
                     ps.close(); 
                     ps = null;
 
@@ -1540,7 +1552,7 @@ implements DataTypes
                         reference
                     );
                     if(referenceIds.size() == 1) {
-                        referenceId = (Long)referenceIds.iterator().next();
+                        referenceId = referenceIds.iterator().next();
                     }
                     else {
                         throw new ServiceException(
@@ -1570,7 +1582,7 @@ implements DataTypes
                 );
             }
             else {
-                referenceId = (Long)referenceIds.iterator().next();
+                referenceId = referenceIds.iterator().next();
             }
         }
         catch(SQLException ex) {
@@ -1626,7 +1638,7 @@ implements DataTypes
         Connection conn,
         String referenceId
     ) throws ServiceException {
-        List components = new ArrayList();
+        List<String> components = new ArrayList<String>();
         StringTokenizer t = new StringTokenizer(referenceId, "/");
         while(t.hasMoreTokens()) {
             components.add(t.nextToken());          
@@ -1640,7 +1652,7 @@ implements DataTypes
             );          
         }
         DbObjectConfiguration dbObjectConfiguration = this.configuration.getDbObjectConfiguration(
-            (String)components.get(0)
+            components.get(0)
         );
         Path type = dbObjectConfiguration.getType();
         String[] referenceComponents = new String[type.size()-1];
@@ -1656,7 +1668,7 @@ implements DataTypes
                         new BasicException.Parameter("type", type)
                     );                            
                 }
-                referenceComponents[i] = (String)components.get(pos);
+                referenceComponents[i] = components.get(pos);
                 pos++;
             }
             else {
@@ -1681,7 +1693,7 @@ implements DataTypes
         Path reference = null;
 
         try {
-            List statementParameters = new ArrayList();
+            List<Object> statementParameters = new ArrayList<Object>();
             ps = this.prepareStatement(
                 conn,
                 statement = "SELECT * FROM " + this.namespaceId + "_" + T_REF + " WHERE (" + OBJECT_RID + " = ?)"
@@ -1761,7 +1773,7 @@ implements DataTypes
         boolean indexSuffixIfZero,
         boolean ignoreReservedWords
     ) throws ServiceException {
-        String columnName = (String)this.columnNames.get(attributeName);
+        String columnName = this.columnNames.get(attributeName);
         if(columnName == null) {
             String name = "";
             for(
@@ -1868,7 +1880,7 @@ implements DataTypes
         if(this.configuration.getToFromColumnNameMapping().containsKey(columnName)) {
             columnName = (String)this.configuration.getToFromColumnNameMapping().get(columnName);
         }
-        String attributeName = (String)this.attributeNames.get(columnName);
+        String attributeName = this.attributeNames.get(columnName);
         if(attributeName == null) {        
             String name = "";
             boolean nextAsUpperCase = false;
@@ -2055,7 +2067,7 @@ implements DataTypes
                         (((String)value).getBytes("UTF-8").length > 32000)
                 ) {
                     try {
-                        Class cl =  ps.getClass();
+                        Class<?> cl =  ps.getClass();
                         Method setStringForClob = cl.getMethod(
                             "setStringForClob",
                             new Class[]{int.class, String.class}
@@ -2120,7 +2132,7 @@ implements DataTypes
         boolean checkIdentity
     ) throws ServiceException, SQLException {
 
-        List objects = new ArrayList();
+        List<DataproviderObject> objects = new ArrayList<DataproviderObject>();
 
         this.getObjects(
             conn,
@@ -2142,7 +2154,7 @@ implements DataTypes
                 new BasicException.Parameter("cardinality", objects.size())
             );
         }
-        DataproviderObject object = (DataproviderObject)objects.get(0);
+        DataproviderObject object = objects.get(0);
         if(checkIdentity && !object.path().startsWith(request.path())) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -2158,10 +2170,11 @@ implements DataTypes
 
     //---------------------------------------------------------------------------
     /**
-     * Touch object feature (set empty value). The feature must be a modeled feature
-     * otherwise the feature is touched.
+     * Touch object feature (set empty value). The feature must be a modeled 
+     * feature which are either non-derived or system attributes (otherwise 
+     * the feature is not touched).
      */
-    private void touchNonDerivedFeature(
+    private void touchAttributes(
         DataproviderObject object,
         String view,
         String featureName
@@ -2169,37 +2182,55 @@ implements DataTypes
         if(object.getValues(view + SystemAttributes.OBJECT_CLASS) != null) {
             ModelElement_1_0 classDef = null;
             try {
-                classDef = this.model.getElement(
-                    object.getValues(view + SystemAttributes.OBJECT_CLASS).get(0)
+                String scopedObjectClass = this.scopedObjectClasses.get(view);
+                if(scopedObjectClass == null) {
+                    this.scopedObjectClasses.put(
+                        view,
+                        scopedObjectClass = view + SystemAttributes.OBJECT_CLASS
+                    );
+                }
+                classDef = getModel().getElement(
+                    object.getValues(scopedObjectClass).get(0)
                 );
             } catch(Exception e){
                 // ignore
             }
             if(classDef != null) {
-                ModelElement_1_0 featureDef = (ModelElement_1_0)((Map)classDef.values("allFeature").get(0)).get(featureName);
+                ModelElement_1_0 featureDef = (ModelElement_1_0)((Map)classDef.objGetValue("allFeature")).get(featureName);
                 if(
-                        (featureDef != null) &&
-                        ((this.model.isAttributeType(featureDef) && !((Boolean)featureDef.values("isDerived").get(0)).booleanValue()) || 
-                                (this.model.isReferenceType(featureDef) && this.model.referenceIsStoredAsAttribute(featureDef) && !this.model.referenceIsDerived(featureDef)))
+                    featureDef != null && (
+                        ((getModel().isAttributeType(featureDef) && (
+                             !((Boolean)featureDef.objGetValue("isDerived")).booleanValue() ||
+                             Arrays.binarySearch(QUALIFIED_SYSTEM_ATTRIBUTES, featureDef.objGetValue("qualifiedName")) >= 0
+                         )) || 
+                        (getModel().isReferenceType(featureDef) && getModel().referenceIsStoredAsAttribute(featureDef) && !getModel().referenceIsDerived(featureDef)))
+                    )
                 ) {
-                    // Cache scoped features. This reduces string allocations
-                    Map scopedFeatures = (Map)this.scopedFeatures.get(view);
-                    if(scopedFeatures == null) {
-                        this.scopedFeatures.put(
-                            view,
-                            scopedFeatures = new HashMap()
+                    String feature = (String) featureDef.objGetValue("name");
+                    if("".equals(view)) {
+                        object.values(feature);
+                    } else {
+                        //
+                        // Cache scoped features. This reduces string allocations
+                        //
+                        Map<String,String> scopedFeatures = this.scopedFeatures.get(view);
+                        if(scopedFeatures == null) {
+                            this.scopedFeatures.put(
+                                view,
+                                scopedFeatures = new HashMap<String,String>()
+                            );
+                        }
+                        String scopedFeature = scopedFeatures.get(
+                            feature
                         );
+                        if(scopedFeature == null) {
+                            scopedFeatures.put(
+                                feature,
+                                scopedFeature = view + feature
+                            );
+                        }
+                        object.values(scopedFeature);
                     }
-                    String scopedFeature = (String)scopedFeatures.get(
-                        featureDef.values("name").get(0)
-                    );
-                    if(scopedFeature == null) {
-                        scopedFeatures.put(
-                            featureDef.values("name").get(0),
-                            scopedFeature = view + (String)featureDef.values("name").get(0)
-                        );
-                    }
-                    object.values(scopedFeature);
                 }
             }
         }
@@ -2240,7 +2271,7 @@ implements DataTypes
         Connection conn,
         DbObject dbObject,
         ResultSet rs,
-        List objects,
+        List<DataproviderObject> objects,
         short attributeSelector,
         Map attributeSpecifiers,
         int position,
@@ -2252,12 +2283,12 @@ implements DataTypes
 
         // set row count of rs to corresponding position
         ResultSetMetaData rsmd = rs.getMetaData();
-        List columnNames = FastResultSet.getColumnNames(rsmd);
-        Map attributeNames = new HashMap();
+        List<String> columnNames = FastResultSet.getColumnNames(rsmd);
+        Map<String,String> attributeNames = new HashMap<String,String>();
 
         // <rid, reference> mapping
-        for(Iterator i = columnNames.iterator(); i.hasNext();) {
-            String columnName = (String)i.next();
+        for(Iterator<String> i = columnNames.iterator(); i.hasNext();) {
+            String columnName = i.next();
             attributeNames.put(
                 columnName,
                 this.getAttributeName(columnName)
@@ -2273,11 +2304,11 @@ implements DataTypes
         boolean hasMore = frs != null;
 
         // get objects
-        Map candidates = new HashMap();
+        Map<Path,DataproviderObject> candidates = new HashMap<Path,DataproviderObject>();
         String previousObjectId = null;
-        Map featureDefs = null;
+        Map<String,ModelElement_1_0> featureDefs = null;
         DataproviderObject current = null;
-        Set processedIdxs = new HashSet();
+        Set<Integer> processedIdxs = new HashSet<Integer>();
         String objectClass = null;
 
         while(hasMore) {
@@ -2297,7 +2328,7 @@ implements DataTypes
                 featureDefs = null;
                 if(objectClass != null) {      
                     try {
-                        featureDefs = (Map)this.model.getElement(objectClass).values("allFeatureWithSubtype").get(0);
+                        featureDefs = (Map)getModel().getElement(objectClass).objGetValue("allFeatureWithSubtype");
                     }
                     // if class not found in model fall back to non model-driven mode
                     catch(Exception e) {
@@ -2336,15 +2367,15 @@ implements DataTypes
             }
 
             // Duplicate indices are allowed. However, they are skipped
-            if(!processedIdxs.contains(new Integer(idx))) {
+            if(!processedIdxs.contains(Integer.valueOf(idx))) {
 
                 // Iterate through object attributes and add values
                 for(
-                        Iterator i = frs.getColumnNames().iterator();
+                        Iterator<String> i = frs.getColumnNames().iterator();
                         i.hasNext();
                 ) { 
-                    String columnName = (String)i.next();
-                    String featureName = (String)attributeNames.get(columnName);  
+                    String columnName = i.next();
+                    String featureName = attributeNames.get(columnName);  
                     boolean isReferenceFeature =        
                         this.useNormalizedReferences &&
                         (frs.getColumnNames().contains(this.getColumnName(conn, this.privateAttributesPrefix + featureName + this.referenceIdAttributesSuffix, 0, false, true)) ||
@@ -2390,7 +2421,7 @@ implements DataTypes
                         if(addValue) {
                             String featureType = featureDef == null
                             ? null
-                                : (String)this.model.getElementType(featureDef).values("qualifiedName").get(0);                
+                                : (String)getModel().getElementType(featureDef).objGetValue("qualifiedName");                
                             Object val = frs.getObject(columnName);
                             // Embedded attribute? If yes derive idx from column name suffix (instead of slice index)
                             int valueIdx = idx;
@@ -2411,7 +2442,7 @@ implements DataTypes
                                         isReferenceFeature ||
                                         ((featureType == null) && ((String)val).startsWith(OpenMDXSchemes.URI_PREFIX)) ||
                                         ((featureType == null) && ((String)val).startsWith("xri:")) ||
-                                        ((featureType != null) && (PrimitiveTypes.OBJECT_ID.equals(featureType) || this.model.isClassType(featureType)))
+                                        ((featureType != null) && (PrimitiveTypes.OBJECT_ID.equals(featureType) || getModel().isClassType(featureType)))
                                 ) {
                                     if(this.useNormalizedReferences) {
                                         //
@@ -2521,10 +2552,9 @@ implements DataTypes
                             else if(val == null) {
                                 // Touch feature if value is null and feature is member of class
                                 if(valueIdx == 0) {
-                                    String view = featureName.indexOf(":") > 0
-                                    ? featureName.substring(0, featureName.lastIndexOf(":") + 1)
-                                        : "";
-                                    this.touchNonDerivedFeature(
+                                    int colon = featureName.lastIndexOf(':');
+                                    String view = colon < 0 ? "" : featureName.substring(0, colon + 1);
+                                    this.touchAttributes(
                                         current,
                                         view,
                                         featureName
@@ -2546,7 +2576,7 @@ implements DataTypes
                 }
             }
             hasMore = frs.next();
-            processedIdxs.add(new Integer(idx));
+            processedIdxs.add(Integer.valueOf(idx));
         }
         return hasMore;
     }
@@ -2554,7 +2584,7 @@ implements DataTypes
     //---------------------------------------------------------------------------
     private void setValue(
         Connection conn,      
-        SparseList target,
+        SparseList<Object> target,
         int idx,
         Object val,
         String featureType
@@ -2660,14 +2690,14 @@ implements DataTypes
         Connection conn,
         String view,
         DbObject dbObject,
-        List filterProperties,
+        List<FilterProperty> filterProperties,
         boolean negate,
-        Collection filterValues,
+        Collection<Object> filterValues,
         boolean singleValued
     ) throws ServiceException {
 
         String clause = "";
-        List clauseFilterValues = new ArrayList();    
+        List<Object> clauseFilterValues = new ArrayList<Object>();    
         boolean hasProperties = false;
         boolean viewIsIndexed = dbObject.getIndexColumn() != null;
         String operator = "";
@@ -2678,10 +2708,10 @@ implements DataTypes
          * If !minus --> expr0 AND expr1 ... 
          */    
         for(
-                Iterator i = filterProperties.iterator();
+                Iterator<FilterProperty> i = filterProperties.iterator();
                 i.hasNext();
         ) {
-            FilterProperty p = (FilterProperty)i.next();
+            FilterProperty p = i.next();
             /**
              * FOR_ALL --> all attribute values must match --> all slices must match
              * THERE_EXISTS --> at least one attribute value must match --> at least one row must match --> subtract all rows which do not match
@@ -2780,7 +2810,7 @@ implements DataTypes
         FilterProperty p,
         boolean negate,
         String columnName,
-        Collection filterValues
+        Collection<Object> filterValues
     ) throws ServiceException {
 
         String clause = "";
@@ -2909,16 +2939,16 @@ implements DataTypes
                     Object v = p.getValue(j);
                     if(v instanceof Path) {            
                         Path vp = (Path)v;
-                        Set matchingPatterns = new HashSet();
+                        Set<Path> matchingPatterns = new HashSet<Path>();
                         boolean includeSubTree = "%".equals(vp.getBase());
                         // If path ends with % get the set of matching types
                         if(includeSubTree) {
                             vp.remove(vp.size()-1);
                             for(
-                                    Iterator k = this.configuration.getDbObjectConfigurations().iterator(); 
+                                    Iterator<DbObjectConfiguration> k = this.configuration.getDbObjectConfigurations().iterator(); 
                                     k.hasNext(); 
                             ) {
-                                DbObjectConfiguration dbObjectConfiguration = (DbObjectConfiguration)k.next();
+                                DbObjectConfiguration dbObjectConfiguration = k.next();
                                 if(
                                         (dbObjectConfiguration.getType().size() > vp.size()) &&
                                         vp.isLike(dbObjectConfiguration.getType().getPrefix(vp.size()))
@@ -2944,11 +2974,11 @@ implements DataTypes
                         // LIKE clause for each path pattern
                         int ii = 0;
                         for(
-                            Iterator i = matchingPatterns.iterator();
+                            Iterator<Path> i = matchingPatterns.iterator();
                             i.hasNext();
                             ii++
                         ) {
-                            Path pattern = (Path)i.next();
+                            Path pattern = i.next();
                             if(ii > 0) {
                                 clause += " OR ";
                             }
@@ -2997,28 +3027,27 @@ implements DataTypes
                         }
                     }
                     else {
-                        Object externalized = this.externalizeStringValue(columnName, v);
-                        if(
-                            (externalized instanceof String) &&
-                            ((String)externalized).startsWith(JDO_CASE_INSENSITIVE_FLAG)
-                        ) {
+                        String externalized = (String)this.externalizeStringValue(columnName, v);
+                        externalized = externalized.replace(".*", "%");
+                        if(externalized.startsWith(JDO_CASE_INSENSITIVE_FLAG)) {
                             String databaseProductName = "N/A";
                             try {
                                 DatabaseMetaData dbm = conn.getMetaData();
                                 databaseProductName = dbm.getDatabaseProductName();
-                            } catch(Exception e) {
+                            } 
+                            catch(Exception e) {
                                 // ignore
                             }
                             if(databaseProductName.startsWith("DB2")) {
                                 clause += "(UPPER(" + columnName + ") LIKE ? " + getEscapeClause(conn) + ")";                                
                                 filterValues.add(
-                                    ((String)externalized).substring(JDO_CASE_INSENSITIVE_FLAG.length()).toUpperCase()
+                                    externalized.substring(JDO_CASE_INSENSITIVE_FLAG.length()).toUpperCase()
                                 );
                             }
                             else {
                                 clause += "(UPPER(" + columnName + ") LIKE UPPER(?) " + getEscapeClause(conn) + ")";
                                 filterValues.add(
-                                    ((String)externalized).substring(JDO_CASE_INSENSITIVE_FLAG.length())
+                                    externalized.substring(JDO_CASE_INSENSITIVE_FLAG.length())
                                 );
                             }
                         }
@@ -3045,20 +3074,20 @@ implements DataTypes
                     Object v = p.getValue(j);
                     if(v instanceof Path) {
                         Path vp = (Path)v;
-                        Set matchingTypes = new HashSet();
+                        Set<Path> matchingTypes = new HashSet<Path>();
                         matchingTypes.add(vp);
                         boolean includeSubTree = "%".equals(vp.getBase());
                         // If path ends with % get the set of matching types
                         if(includeSubTree) {
                             vp.remove(vp.size()-1);
                             for(
-                                    Iterator i = this.configuration.getDbObjectConfigurations().iterator(); 
-                                    i.hasNext(); 
+                                Iterator<DbObjectConfiguration> i = this.configuration.getDbObjectConfigurations().iterator(); 
+                                i.hasNext(); 
                             ) {
-                                DbObjectConfiguration dbObject = (DbObjectConfiguration)i.next();
+                                DbObjectConfiguration dbObject = i.next();
                                 if(
-                                        (dbObject.getType().size() > vp.size()) &&
-                                        vp.isLike(dbObject.getType().getPrefix(vp.size()))
+                                    (dbObject.getType().size() > vp.size()) &&
+                                    vp.isLike(dbObject.getType().getPrefix(vp.size()))
                                 ) {
                                     matchingTypes.add(
                                         dbObject.getType()
@@ -3069,9 +3098,9 @@ implements DataTypes
                         // NOT LIKE clause for each path pattern
                         int ii = 0;
                         for(
-                                Iterator i = matchingTypes.iterator();
-                                i.hasNext();
-                                ii++
+                            Iterator i = matchingTypes.iterator();
+                            i.hasNext();
+                            ii++
                         ) {
                             Path type = (Path)i.next();
                             if(ii > 0) {
@@ -3122,14 +3151,12 @@ implements DataTypes
                         }
                     }
                     else {
-                        Object externalized = this.externalizeStringValue(columnName, v);
-                        if(
-                                (externalized instanceof String) &&
-                                ((String)externalized).startsWith(JDO_CASE_INSENSITIVE_FLAG)
-                        ) {
+                        String externalized = (String)this.externalizeStringValue(columnName, v);
+                        externalized = externalized.replace(".*", "%");
+                        if(externalized.startsWith(JDO_CASE_INSENSITIVE_FLAG)) {
                             clause += "(NOT (UPPER(" + columnName + ") LIKE ? " + getEscapeClause(conn) + "))";
                             filterValues.add(
-                                ((String)externalized).substring(JDO_CASE_INSENSITIVE_FLAG.length()).toUpperCase()
+                                externalized.substring(JDO_CASE_INSENSITIVE_FLAG.length()).toUpperCase()
                             );
                         }
                         else {
@@ -3146,9 +3173,9 @@ implements DataTypes
                 clause += "(SOUNDEX(" + columnName + ") IN (SOUNDEX(?)";
                 filterValues.add(this.externalizeStringValue(columnName, p.getValue(0)));
                 for(
-                        int j = 1; 
-                        j < p.getValues().length; 
-                        j++
+                    int j = 1; 
+                    j < p.getValues().length; 
+                    j++
                 ) {
                     clause += ", SOUNDEX(?)";
                     filterValues.add(this.externalizeStringValue(columnName, p.getValue(j)));
@@ -3161,9 +3188,9 @@ implements DataTypes
                 clause += "(SOUNDEX(" + columnName + ") NOT IN (SOUNDEX(?)";
                 filterValues.add(this.externalizeStringValue(columnName, p.getValue(0)));
                 for(
-                        int j = 1; 
-                        j < p.getValues().length; 
-                        j++
+                    int j = 1; 
+                    j < p.getValues().length; 
+                    j++
                 ) {
                     clause += ", SOUNDEX(?)";
                     filterValues.add(this.externalizeStringValue(columnName, p.getValue(j)));
@@ -3184,28 +3211,28 @@ implements DataTypes
     }
 
     //------------------------------------------------------------------------
-    private List getSingleValuedFilterProperties(
+    private List<FilterProperty> getSingleValuedFilterProperties(
         Path referenceFilter,
-        List attributeFilter
+        List<FilterProperty> attributeFilter
     ) throws ServiceException {
 
-        List singleValuedFilterProperties = new ArrayList();
+        List<FilterProperty> singleValuedFilterProperties = new ArrayList<FilterProperty>();
 
         // try to determine multiplicity of filter properties in order to optimize query
-        Set referencedTypes = null;
+        Set<ModelElement_1_0> referencedTypes = null;
         try {
-            ModelElement_1_0 referencedTypeDef = this.model == null 
+            ModelElement_1_0 referencedTypeDef = getModel() == null 
             ? null 
-                : this.model.getTypes(referenceFilter)[2];
+                : getModel().getTypes(referenceFilter)[2];
             // filter property can be an attribute of all super and subtypes of referenced type
-            SysLog.trace("referenced type", referencedTypeDef.path());
-            referencedTypes = new HashSet();
+            SysLog.trace("referenced type", referencedTypeDef.jdoGetObjectId());
+            referencedTypes = new HashSet<ModelElement_1_0>();
             // All subtypes and their supertypes of referenced type
-            for(Iterator i = referencedTypeDef.values("allSubtype").iterator(); i.hasNext(); ) {
-                ModelElement_1_0 subtype = this.model.getElement(i.next());
+            for(Iterator<Object> i = referencedTypeDef.objGetList("allSubtype").iterator(); i.hasNext(); ) {
+                ModelElement_1_0 subtype = getModel().getElement(i.next());
                 referencedTypes.add(subtype);
-                for(Iterator j = subtype.values("allSupertype").iterator(); j.hasNext(); ) {
-                    ModelElement_1_0 supertype = this.model.getElement(j.next());
+                for(Iterator<Object> j = subtype.objGetList("allSupertype").iterator(); j.hasNext(); ) {
+                    ModelElement_1_0 supertype = getModel().getElement(j.next());
                     referencedTypes.add(supertype);
                 }
             }
@@ -3214,10 +3241,10 @@ implements DataTypes
             // ignore
         }        
         for(
-                Iterator i = attributeFilter.iterator();
+                Iterator<FilterProperty> i = attributeFilter.iterator();
                 i.hasNext();
         ) {
-            FilterProperty p = (FilterProperty)i.next();
+            FilterProperty p = i.next();
 
             /**
              * Try to determine the modeled multiplicity of the filter property.
@@ -3238,21 +3265,21 @@ implements DataTypes
                     // try to find filter property in any of the subtypes of referencedType
                     boolean found = false;
                     for(
-                            Iterator j = referencedTypes.iterator();
+                            Iterator<ModelElement_1_0> j = referencedTypes.iterator();
                             j.hasNext();
                     ) {
-                        ModelElement_1_0 subtype = (ModelElement_1_0)j.next();
-                        String qualifiedFilterPropertyName = subtype.values("qualifiedName").get(0) + ":" + filterPropertyName;
+                        ModelElement_1_0 subtype = j.next();
+                        String qualifiedFilterPropertyName = subtype.objGetValue("qualifiedName") + ":" + filterPropertyName;
                         SysLog.trace("lookup of model element", qualifiedFilterPropertyName);
-                        ModelElement_1_0 featureDef = this.model.findElement(qualifiedFilterPropertyName);
+                        ModelElement_1_0 featureDef = getModel().findElement(qualifiedFilterPropertyName);
                         if(featureDef != null) {
-                            filterPropertyMultiplicity = (String)featureDef.values("multiplicity").get(0);                  
+                            filterPropertyMultiplicity = (String)featureDef.objGetValue("multiplicity");                  
                             // Reference stored as attribute. Multiplicity is 0..1 if there is no qualifier
-                            if(featureDef.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)) {
-                                ModelElement_1_0 referencedEnd = this.model.getElement(
-                                    featureDef.values("referencedEnd").get(0)
+                            if(featureDef.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)) {
+                                ModelElement_1_0 referencedEnd = getModel().getElement(
+                                    featureDef.objGetValue("referencedEnd")
                                 );
-                                if(referencedEnd.values("qualifierType").size() > 0 ) {
+                                if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
                                     filterPropertyMultiplicity = Multiplicities.MULTI_VALUE;
                                 }
                             }
@@ -3287,10 +3314,10 @@ implements DataTypes
     ) {
         // remove attributes with private prefix
         for(
-                Iterator i = object.attributeNames().iterator();
+                Iterator<String> i = object.attributeNames().iterator();
                 i.hasNext();
         ) {
-            String attributeName = (String)i.next();
+            String attributeName = i.next();
             if(attributeName.startsWith(this.privateAttributesPrefix)) {
                 i.remove();
             }
@@ -3322,10 +3349,10 @@ implements DataTypes
         DataproviderObject beforeImage
     ) throws ServiceException {
         for(
-                Iterator i = beforeImage.attributeNames().iterator();
+                Iterator<String> i = beforeImage.attributeNames().iterator();
                 i.hasNext();
         ) {
-            String attributeName = (String)i.next();
+            String attributeName = i.next();
             if(attributeName.indexOf(':')<0) {
                 obj.clearValues(SystemAttributes.CONTEXT_PREFIX+"BeforeImage:" + attributeName).addAll(
                     beforeImage.values(attributeName)
@@ -3396,7 +3423,7 @@ implements DataTypes
 
         // extent access requires special treatment
         // get the set of referenceIds specified by filter property 'identity'
-        if(filter != null && accessPath.isLike(EXTENT_PATTERN)) {
+        if(filter != null && accessPath.isLike(EXTENT_REFERENCES)) {
             for(FilterProperty p : filter) {
                 if(SystemAttributes.OBJECT_IDENTITY.equals(p.name())) {
                     if(p.values().size() > 1) {
@@ -3409,7 +3436,16 @@ implements DataTypes
                         );                        
                     }
                     isExtent = true;
-                    resourceIdentifier = new Path(p.getValue(0).toString());
+                    short operator = p.operator();
+                    boolean escaped = 
+                        FilterOperators.IS_LIKE == operator ||
+                        FilterOperators.IS_UNLIKE == operator;
+                    String raw = p.getValue(0).toString();     
+                    resourceIdentifier = escaped ? toPattern(
+                        raw
+                    ) : new Path(
+                        raw
+                    );
                 }
             }
             if(!isExtent) {
@@ -3492,8 +3528,8 @@ implements DataTypes
         else {
             DbObject dbObject = null;
             try {
-                Class dbObjectClass = Class.forName(configuration.getDbObjectFormat());
-                Constructor constructor = dbObjectClass.getConstructor(
+                Class<?> dbObjectClass = Classes.getApplicationClass(configuration.getDbObjectFormat());
+                Constructor<?> constructor = dbObjectClass.getConstructor(
                     new Class[]{
                         AbstractDatabase_1.class,
                         Connection.class,
@@ -3566,10 +3602,10 @@ implements DataTypes
         DataproviderRequest[] requests,
         DataproviderReply[] replies  ) throws ServiceException {
         for(
-                Iterator i = this.temporaryFiles.iterator();
+                Iterator<File> i = this.temporaryFiles.iterator();
                 i.hasNext();
         ){
-            File f = (File) i.next();
+            File f = i.next();
             if(!f.delete()) SysLog.warning(
                 "Could not delete temporary file",
                 f
@@ -3609,12 +3645,12 @@ implements DataTypes
                 request
             );
         }
-        catch(ServiceException e) {
-            throw e;
+        catch(Exception e) {
+            throw new ServiceException(e);
         }
         finally {
             try {
-                this.closeConnection(request, conn);
+                this.closeConnection(conn);
             }
             catch(Throwable ex) {
                 // ignore
@@ -3714,10 +3750,10 @@ implements DataTypes
                 conn,
                 currentStatement = statement
             );
-            List statementParameters = new ArrayList();
+            List<Object> statementParameters = new ArrayList<Object>();
             int pos = 1;
             if(useReferenceClause) {
-                List referenceValues = dbObject.getReferenceValues();
+                List<Object> referenceValues = dbObject.getReferenceValues();
                 statementParameters.addAll(referenceValues);
                 for(int i = 0; i < referenceValues.size(); i++) {
                     this.setPreparedStatementValue(
@@ -3728,7 +3764,7 @@ implements DataTypes
                     );
                 }
             }
-            List objectIdValues = dbObject.getObjectIdValues();
+            List<Object> objectIdValues = dbObject.getObjectIdValues();
             statementParameters.addAll(objectIdValues);
             for(int i = 0; i < objectIdValues.size(); i++) {
                 this.setPreparedStatementValue(
@@ -3789,7 +3825,7 @@ implements DataTypes
         DataproviderObject replyObj = null;
         if(this.useObjectCache && this.objectCache.containsKey(request.path())) {
             replyObj = new DataproviderObject(
-                (DataproviderObject)this.objectCache.get(request.path())
+                this.objectCache.get(request.path())
             );
         }
         else {
@@ -3881,7 +3917,7 @@ implements DataTypes
         Connection conn = null;
         DataproviderReply reply = null;
         String statement = null;
-        List statementParameters = null;
+        List<Object> statementParameters = null;
         Path referencedType = null;
         int lastPosition;
         int lastRowCount;
@@ -3969,12 +4005,12 @@ implements DataTypes
                         DataproviderReplyContexts.TOTAL
                     ).set(
                         0, 
-                        INTEGER_0
+                        Integer.valueOf(0)
                     );
                     // ATTRIBUTE_SELECTOR
                     reply.context(DataproviderReplyContexts.ATTRIBUTE_SELECTOR).set(
                         0,
-                        new Short(request.attributeSelector())
+                        Short.valueOf(request.attributeSelector())
                     );
                     SysLog.detail("< find");
                     return this.completeReply(reply);
@@ -3984,15 +4020,15 @@ implements DataTypes
                 // Check for query filter context
                 String queryFilterContext = null;
                 for(
-                        int i = 0, iLimit = request.attributeFilter().length;
-                        i < iLimit;
-                        i++
+                    int i = 0, iLimit = request.attributeFilter().length;
+                    i < iLimit;
+                    i++
                 ) {
                     FilterProperty p = request.attributeFilter()[i];
                     if(
-                            p.name().startsWith(SystemAttributes.CONTEXT_PREFIX) &&
-                            p.name().endsWith(SystemAttributes.OBJECT_CLASS) &&
-                            Database_1_Attributes.QUERY_FILTER_CLASS.equals(p.getValue(0))
+                        p.name().startsWith(SystemAttributes.CONTEXT_PREFIX) &&
+                        p.name().endsWith(SystemAttributes.OBJECT_CLASS) &&
+                        Database_1_Attributes.QUERY_FILTER_CLASS.equals(p.getValue(0))
                     ) {
                         queryFilterContext = p.name().substring(0, p.name().indexOf(SystemAttributes.OBJECT_CLASS));
                         break;
@@ -4001,10 +4037,11 @@ implements DataTypes
 
                 // Get attribute and query filter. The query filter is passed as
                 // FilterProperty with context prefix QUERY_FILTER_CONTEXT
-                List attributeFilter = new ArrayList();
+                List<String> orderBy = new ArrayList<String>();
+                List<FilterProperty> attributeFilter = new ArrayList<FilterProperty>();
                 String queryFilterClause = null;
                 String columnSelector = DEFAULT_COLUMN_SELECTOR;
-                Map queryFilterParameters = new HashMap();
+                Map<String,List<Object>> queryFilterParameters = new HashMap<String,List<Object>>();
                 for(
                     int i = 0, iLimit = request.attributeFilter().length;
                     i < iLimit;
@@ -4016,7 +4053,7 @@ implements DataTypes
                     // This mapping is not required in case of an extent search because
                     // dbObject is already correctly prepared
                     if(SystemAttributes.OBJECT_IDENTITY.equals(p.name())) {
-                        if(!request.path().isLike(EXTENT_PATTERN)) {
+                        if(!request.path().isLike(EXTENT_REFERENCES)) {
                             attributeFilter.add(
                                 dbObject.mapToIdentityFilterProperty(p)
                             );
@@ -4028,6 +4065,7 @@ implements DataTypes
                         if((queryFilterContext + Database_1_Attributes.QUERY_FILTER_CLAUSE).equals(p.name())) {
                             queryFilterClause = (String)p.getValue(0);
                             countResultSet = queryFilterClause.indexOf(Database_1_Attributes.HINT_COUNT) >= 0;
+                            // !COLUMNS
                             int posColumnSelector = queryFilterClause.indexOf(Database_1_Attributes.HINT_COLUMN_SELECTOR);
                             if(posColumnSelector >= 0) {
                                 columnSelector = queryFilterClause.substring(
@@ -4035,6 +4073,18 @@ implements DataTypes
                                     queryFilterClause.indexOf("*/", posColumnSelector)
                                 );
                             }
+                            // !ORDER BY
+                            int posOrderBy = queryFilterClause.indexOf(Database_1_Attributes.HINT_ORDER_BY);
+                            if(posOrderBy >= 0) {
+                                String orderByClause = queryFilterClause.substring(
+                                    posOrderBy + Database_1_Attributes.HINT_ORDER_BY.length(),
+                                    queryFilterClause.indexOf("*/", posOrderBy)
+                                );
+                                StringTokenizer tokenizer = new StringTokenizer(orderByClause, ",", false);
+                                while(tokenizer.hasMoreTokens()) {
+                                    orderBy.add(tokenizer.nextToken());
+                                }
+                            }                         
                         }
                         // Parameters
                         else {
@@ -4050,12 +4100,12 @@ implements DataTypes
                         attributeFilter.add(p);              
                     }
                 }
-
                 lastPosition = -1;
                 lastRowCount = -1;
-
-                // prepare orderBy attributes. In addition all orderBy attributes are required attributes
-                List orderBy = new ArrayList();
+                // Mixins
+                Set<String> mixins = new HashSet<String>();
+                
+                // ORDER BY attributes
                 for(
                     int i = 0; 
                     i < request.attributeSpecifier().length; 
@@ -4063,31 +4113,27 @@ implements DataTypes
                 ) {
                     // only add to orderBy set if unspecified order
                     if(request.attributeSpecifier()[i].order() != Orders.ANY) {
-                        orderBy.add(
-                            request.attributeSpecifier()[i].name()
-                        );
+                        String attributeName = request.attributeSpecifier()[i].name();
+                        orderBy.add(attributeName);
+                        mixins.add(attributeName);
                     }
                 }
-
                 // Prepare filter properties stored in primary dbObject
-                List primaryFilterProperties = this.getSingleValuedFilterProperties(
+                List<FilterProperty> primaryFilterProperties = this.getSingleValuedFilterProperties(
                     dbObject.getReference(),
                     attributeFilter
                 );
                 // Add filter properties which map to embedded features
-                for(Iterator i = attributeFilter.iterator(); i.hasNext(); ) {
-                    FilterProperty p = (FilterProperty)i.next();
+                for(Iterator<FilterProperty> i = attributeFilter.iterator(); i.hasNext(); ) {
+                    FilterProperty p = i.next();
                     if(this.embeddedFeatures.containsKey(p.name())) {
                         primaryFilterProperties.add(p);
                     }
                 }
-
-                // mixinAttributes = orderBy + singleValuedAttributes
-                Set mixinAttributes = new HashSet(orderBy);
-                for(Iterator i = primaryFilterProperties.iterator(); i.hasNext(); ) {
-                    mixinAttributes.add(((FilterProperty)i.next()).name());
+                // Add singleValuedAttributes to mixins
+                for(Iterator<FilterProperty> i = primaryFilterProperties.iterator(); i.hasNext(); ) {
+                    mixins.add((i.next()).name());
                 }
-
                 // View returning primary attributes. Allows sorting and
                 // filtering with single-valued filter properties
                 String dbObjectHint = null;
@@ -4104,7 +4150,7 @@ implements DataTypes
                     dbObjectHint,
                     VIEW_MODE_ADD_MIXIN_COLUMNS_TO_PRIMARY,
                     columnSelector,
-                    mixinAttributes
+                    mixins
                 );
                 // View returning multi-valued columns which allows filtering
                 // of multi-valued filter properties
@@ -4117,14 +4163,14 @@ implements DataTypes
                     null
                 );
 
-                List positiveAttributeFilterClauses = new ArrayList();
-                List positiveAttributeFilterValues = new ArrayList();
-                List negativeAttributeFilterClauses = new ArrayList();
-                List negativeAttributeFilterValues = new ArrayList();
-                List attributeFilterValues = null;                   
+                List<String> positiveAttributeFilterClauses = new ArrayList<String>();
+                List<List<Object>> positiveAttributeFilterValues = new ArrayList<List<Object>>();
+                List<String> negativeAttributeFilterClauses = new ArrayList<String>();
+                List<List<Object>> negativeAttributeFilterValues = new ArrayList<List<Object>>();
+                List<Object> attributeFilterValues = null;                   
 
                 // WHERE clause for single-valued filter properties          
-                attributeFilterValues = new ArrayList();
+                attributeFilterValues = new ArrayList<Object>();
 
                 // positive single-valued filter
                 positiveAttributeFilterClauses.add(
@@ -4141,7 +4187,7 @@ implements DataTypes
                 positiveAttributeFilterValues.add(attributeFilterValues);
 
                 // negative single-valued filter
-                attributeFilterValues = new ArrayList();
+                attributeFilterValues = new ArrayList<Object>();
                 positiveAttributeFilterClauses.add(
                     this.attributeFilterToSqlClause(
                         conn,
@@ -4157,14 +4203,14 @@ implements DataTypes
 
                 // WHERE clauses for multi-valued filter properties
                 for(
-                        Iterator i = attributeFilter.iterator();
+                        Iterator<FilterProperty> i = attributeFilter.iterator();
                         i.hasNext();
                 ) {
-                    FilterProperty p = (FilterProperty)i.next();
+                    FilterProperty p = i.next();
                     if(!primaryFilterProperties.contains(p)) {
 
                         // plus clause
-                        attributeFilterValues = new ArrayList();
+                        attributeFilterValues = new ArrayList<Object>();
                         positiveAttributeFilterClauses.add(
                             this.attributeFilterToSqlClause(
                                 conn,
@@ -4182,7 +4228,7 @@ implements DataTypes
                          * Minus clauses are only required if maxSlicesPerObject > 0. In this case
                          * non-matching slices have to be subtracted from the plus result set.
                          */
-                        attributeFilterValues = new ArrayList();
+                        attributeFilterValues = new ArrayList<Object>();
                         negativeAttributeFilterClauses.add(
                             this.attributeFilterToSqlClause(
                                 conn,
@@ -4202,7 +4248,7 @@ implements DataTypes
                  * get all slices of objects which match the reference and attribute filter
                  */
                 statement = "";
-                statementParameters = new ArrayList();
+                statementParameters = new ArrayList<Object>();
                 statement += view1WithMixinAttributes.startsWith("SELECT")
                 ? view1WithMixinAttributes + " AND " + dbObject.getReferenceClause()
                     : "SELECT " + dbObject.getHint() + " " + columnSelector + " FROM " + view1WithMixinAttributes + " v WHERE " + dbObject.getReferenceClause();
@@ -4223,32 +4269,32 @@ implements DataTypes
                         int index = Integer.valueOf(queryFilterClause.substring(pos+2, pos+3)).intValue();
                         if(queryFilterClause.startsWith("?s", pos)) {
                             statementParameters.add(
-                                ((List)queryFilterParameters.get("stringParam")).get(index)
+                                ((String)queryFilterParameters.get("stringParam").get(index)).replace(".*", "%")
                             );
                         }
                         else if(queryFilterClause.startsWith("?i", pos)) {
                             statementParameters.add(
-                                ((List)queryFilterParameters.get("integerParam")).get(index)
+                                queryFilterParameters.get("integerParam").get(index)
                             );
                         }
                         else if(queryFilterClause.startsWith("?n", pos)) {
                             statementParameters.add(
-                                ((List)queryFilterParameters.get("decimalParam")).get(index)
+                                queryFilterParameters.get("decimalParam").get(index)
                             );
                         }
                         else if(queryFilterClause.startsWith("?b", pos)) {
                             statementParameters.add(
-                                ((List)queryFilterParameters.get("booleanParam")).get(index)
+                                queryFilterParameters.get("booleanParam").get(index)
                             );
                         }
                         else if(queryFilterClause.startsWith("?d", pos)) {
                             statementParameters.add(
-                                ((List)queryFilterParameters.get("dateParam")).get(index)
+                                queryFilterParameters.get("dateParam").get(index)
                             );
                         }
                         else if(queryFilterClause.startsWith("?t", pos)) {
                             statementParameters.add(
-                                ((List)queryFilterParameters.get("dateTimeParam")).get(index)
+                                queryFilterParameters.get("dateTimeParam").get(index)
                             );
                         }
                         pos++;
@@ -4268,12 +4314,12 @@ implements DataTypes
                     i < positiveAttributeFilterClauses.size(); 
                     i++
                 ) {
-                    String filterClause = (String)positiveAttributeFilterClauses.get(i);
+                    String filterClause = positiveAttributeFilterClauses.get(i);
                     if(filterClause.length() > 0) { 
                         statement += " AND ";
                         statement += filterClause;
                         statementParameters.addAll(
-                            (List)positiveAttributeFilterValues.get(i)
+                            positiveAttributeFilterValues.get(i)
                         );
                     }
                 }
@@ -4284,7 +4330,7 @@ implements DataTypes
                     i < negativeAttributeFilterClauses.size(); 
                     i++
                 ) {
-                    hasNegativeAttributeFilterClauses = hasNegativeAttributeFilterClauses || (((String)negativeAttributeFilterClauses.get(i)).length() > 0);
+                    hasNegativeAttributeFilterClauses = hasNegativeAttributeFilterClauses || (negativeAttributeFilterClauses.get(i).length() > 0);
                 }
                 if(hasNegativeAttributeFilterClauses) {
                     for(
@@ -4292,12 +4338,12 @@ implements DataTypes
                         i < negativeAttributeFilterClauses.size(); 
                         i++
                     ) {
-                        String filterClause = (String)negativeAttributeFilterClauses.get(i);
+                        String filterClause = negativeAttributeFilterClauses.get(i);
                         if(filterClause.length() > 0) { 
                             statement += " AND ";
                             statement += filterClause;
                             statementParameters.addAll(
-                                (ArrayList)negativeAttributeFilterValues.get(i)
+                                negativeAttributeFilterValues.get(i)
                             );
                         }
                     }
@@ -4370,7 +4416,7 @@ implements DataTypes
             );
 
             // get selected objects
-            List objects = new ArrayList();
+            List<DataproviderObject> objects = new ArrayList<DataproviderObject>();
             int replySize = (request.size() >= BATCH_MODE_SIZE_MIN) && (request.size() <= BATCH_MODE_SIZE_MAX)
             ? request.size()
                 : java.lang.Math.min(request.size(), this.batchSize);
@@ -4394,7 +4440,7 @@ implements DataTypes
             );
             // Complete requested attributes
             for(int i = 0; i < objects.size(); i++) {
-                DataproviderObject object = (DataproviderObject)objects.get(i);
+                DataproviderObject object = objects.get(i);
                 boolean fetchAll = false;          
                 if(request.attributeSelector() == AttributeSelectors.ALL_ATTRIBUTES) {
                     fetchAll = true;
@@ -4452,7 +4498,7 @@ implements DataTypes
                         DataproviderReplyContexts.TOTAL
                     ).set(
                         0,
-                        new Integer(request.position() + objects.size())
+                        Integer.valueOf(request.position() + objects.size())
                     );
                 }
                 // Issue a SELECT COUNT(*) if the result set is not indexed and counting is requested
@@ -4492,7 +4538,7 @@ implements DataTypes
                                 DataproviderReplyContexts.TOTAL
                             ).set(
                                 0,
-                                new Integer(rs.getInt(1))
+                                Integer.valueOf(rs.getInt(1))
                             );
                         }
                         rs.close(); rs = null;
@@ -4518,7 +4564,7 @@ implements DataTypes
             // context.ATTRIBUTE_SELECTOR
             reply.context(DataproviderReplyContexts.ATTRIBUTE_SELECTOR).set(
                 0,
-                new Short(request.attributeSelector())
+                Short.valueOf(request.attributeSelector())
             );
         }
         catch(SQLException ex) {
@@ -4544,7 +4590,7 @@ implements DataTypes
             );
         }
         finally {
-            this.closeConnection(request, conn);
+            this.closeConnection(conn);
         }
         SysLog.detail("< find");
         return this.completeReply(
@@ -4568,12 +4614,12 @@ implements DataTypes
                 request
             );
         }
-        catch(ServiceException e) {
-            throw e;
+        catch(Exception e) {
+            throw new ServiceException(e);
         }
         finally {
             try {
-                this.closeConnection(request, conn);
+                this.closeConnection(conn);
             }
             catch(Throwable ex) {
                 // ignore
@@ -4628,7 +4674,7 @@ implements DataTypes
         DataproviderRequest request
     ) throws ServiceException {
         try {
-            SparseList instanceOf = request.object().values(SystemAttributes.OBJECT_CLASS);
+            SparseList<Object> instanceOf = request.object().values(SystemAttributes.OBJECT_CLASS);
             String objectClass = (String)instanceOf.get(0);
             if(instanceOf.size() > 1) {
                 //
@@ -4705,9 +4751,9 @@ implements DataTypes
             request
         ).getObject();      
         Connection conn = null;    
-        conn = this.getConnection(request);
         String currentStatement = null;
         try {
+            conn = this.getConnection(request);
             Path accessPath = request.path();
             // Remove object ...
             DbObject dbObject = this.createDbObject(
@@ -4717,12 +4763,12 @@ implements DataTypes
             );
             dbObject.remove();
             // ... and its composites
-            Map processedDbObjectConfigurations = new HashMap();
+            Map<Path,DbObjectConfiguration> processedDbObjectConfigurations = new HashMap<Path,DbObjectConfiguration>();
             for(
-                Iterator i = this.configuration.getDbObjectConfigurations().iterator();
+                Iterator<DbObjectConfiguration> i = this.configuration.getDbObjectConfigurations().iterator();
                 i.hasNext();
             ) {
-                DbObjectConfiguration dbObjectConfiguration = (DbObjectConfiguration)i.next();
+                DbObjectConfiguration dbObjectConfiguration = i.next();
                 if(
                     (dbObjectConfiguration.getType().size() > accessPath.size()) &&
                     accessPath.isLike(dbObjectConfiguration.getType().getPrefix(accessPath.size())) &&
@@ -4731,10 +4777,10 @@ implements DataTypes
                     boolean processed = false;
                     // Check whether dbObjectConfiguration is already processed
                     for(
-                        Iterator j = processedDbObjectConfigurations.values().iterator();
+                        Iterator<DbObjectConfiguration> j = processedDbObjectConfigurations.values().iterator();
                         j.hasNext();
                     ) {
-                        DbObjectConfiguration processedDbObjectConfiguration = (DbObjectConfiguration)j.next();
+                        DbObjectConfiguration processedDbObjectConfiguration = j.next();
                         // dbObject is processed if type if 
                         // <ul>
                         //   <li>db object is composite to processed db object
@@ -4770,7 +4816,7 @@ implements DataTypes
             }
             // Clean up REF table
             if(!this.useNormalizedReferences) {
-                List statementParameters = new ArrayList();
+                List<Object> statementParameters = new ArrayList<Object>();
                 PreparedStatement ps = this.prepareStatement(
                     conn,
                     currentStatement = 
@@ -4785,8 +4831,7 @@ implements DataTypes
                         statementParameters.get(i)
                     );
                 }
-                SysLog.detail("statement", currentStatement);
-                ps.executeUpdate();
+                executeUpdate(ps, currentStatement, statementParameters);
                 ps.close(); ps = null;
             }
         }
@@ -4803,7 +4848,7 @@ implements DataTypes
         }
         finally {
             try {
-                this.closeConnection(request, conn);
+                this.closeConnection(conn);
             }
             catch(Exception ex) {
                 // ignore
@@ -4823,26 +4868,22 @@ implements DataTypes
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
-
         SysLog.detail("> modify", request.object());
-
         PreparedStatement ps = null;
         String currentStatement = null;
-        Connection conn = this.getConnection(request);
-
+        Connection conn = null;
         try {
+            conn = this.getConnection(request);
             DataproviderObject object = request.object();
             DbObject dbObject = this.createDbObject(
                 conn,
                 object.path(),
                 true
             );
-
             RequestCollection requests = new RequestCollection(
                 header, 
                 this
             );
-
             // get current object with ALL_ATTRIBUTES
             DataproviderObject toReplace = new DataproviderObject(
                 requests.addGetRequest(
@@ -4851,16 +4892,15 @@ implements DataTypes
                     null
                 )
             );
-
             // modify attribute values
             for(
-                    Iterator i = request.object().attributeNames().iterator();
+                    Iterator<String> i = request.object().attributeNames().iterator();
                     i.hasNext();
             ) {
-                String attributeName = (String)i.next();
-                List valuesToReplace = toReplace.values(attributeName);
+                String attributeName = i.next();
+                List<Object> valuesToReplace = toReplace.values(attributeName);
                 for(
-                        ListIterator j = object.values(attributeName).listIterator();
+                        ListIterator<Object> j = object.values(attributeName).listIterator();
                         j.hasNext();
                 ) {
                     int index = j.nextIndex();
@@ -4877,7 +4917,7 @@ implements DataTypes
                 currentStatement = "DELETE FROM " + dbObject.getConfiguration().getDbObjectForUpdate1() + " WHERE " + this.removeViewPrefix(dbObject.getReferenceClause() + " AND " + dbObject.getObjectIdClause())
             );
             int pos = 1;
-            List referenceValues = dbObject.getReferenceValues();
+            List<Object> referenceValues = dbObject.getReferenceValues();
             for(int i = 0; i < referenceValues.size(); i++) {
                 this.setPreparedStatementValue(
                     conn,
@@ -4886,7 +4926,7 @@ implements DataTypes
                     referenceValues.get(i)
                 );
             }      
-            List objectIdValues = dbObject.getObjectIdValues();
+            List<Object> objectIdValues = dbObject.getObjectIdValues();
             for(int i = 0; i < objectIdValues.size(); i++) {
                 this.setPreparedStatementValue(
                     conn,
@@ -4895,8 +4935,7 @@ implements DataTypes
                     objectIdValues.get(i)
                 );
             }
-            SysLog.detail("statement", currentStatement);
-            ps.executeUpdate();
+            executeUpdate(ps, currentStatement, referenceValues);
 
             // create with replaced attributes
             return new DataproviderReply(
@@ -4937,7 +4976,7 @@ implements DataTypes
                 // ignore
             }
             try {
-                this.closeConnection(request, conn);
+                this.closeConnection(conn);
             } catch(Throwable ex) {
                 // ignore
             }
@@ -4950,24 +4989,20 @@ implements DataTypes
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
-
         SysLog.detail("> replace", request.object());
-
         PreparedStatement ps = null;
         String currentStatement = null;
-        Connection conn = this.getConnection(request);
-
+        Connection conn = null;
         try {
+            conn = this.getConnection(request);
             DataproviderObject object = request.object();            
             DbObject dbObject = this.createDbObject(
                 conn,
                 object.path(),
                 true
             );
-
-            // extent supports object replacement
+            // Extent supports object replacement
             if(dbObject.supportsObjectReplacement()) {
-
                 // get current object with ALL_ATTRIBUTES
                 DataproviderObject obj = new DataproviderObject(
                     this.get(
@@ -4988,7 +5023,6 @@ implements DataTypes
                 DataproviderObject[] oldSlices = dbObject.sliceAndNormalizeObject(
                     obj
                 );
-
                 // Replace attribute values
                 obj.addClones(
                     request.object(),
@@ -4998,8 +5032,7 @@ implements DataTypes
                 DataproviderObject[] newSlices = dbObject.sliceAndNormalizeObject(
                     obj
                 );
-
-                // replace existing slices
+                // Replace existing slices
                 for(
                         int i = 0; 
                         i < java.lang.Math.min(oldSlices.length, newSlices.length);
@@ -5013,8 +5046,7 @@ implements DataTypes
                         );
                     }
                 }
-
-                // remove extra old slices
+                // Remove extra old slices
                 if(oldSlices.length > newSlices.length) {
                     boolean isIndexed;
                     if(dbObject.getConfiguration().getDbObjectForUpdate2() != null) {
@@ -5046,7 +5078,7 @@ implements DataTypes
                         );
                     }
                     int pos = 1;
-                    List referenceValues = dbObject.getReferenceValues();
+                    List<Object> referenceValues = dbObject.getReferenceValues();
                     for(int i = 0; i < referenceValues.size(); i++) {
                         this.setPreparedStatementValue(
                             conn,
@@ -5055,7 +5087,7 @@ implements DataTypes
                             referenceValues.get(i)
                         );
                     }
-                    List objectIdValues = dbObject.getObjectIdValues();
+                    List<Object> objectIdValues = dbObject.getObjectIdValues();
                     for(int i = 0; i < objectIdValues.size(); i++) {
                         this.setPreparedStatementValue(
                             conn,
@@ -5067,11 +5099,9 @@ implements DataTypes
                     if(isIndexed) {
                         ps.setInt(pos++, newSlices.length);
                     }
-                    SysLog.detail("statement", currentStatement);
-                    ps.executeUpdate();
+                    executeUpdate(ps, currentStatement, objectIdValues);
                 }
-
-                // create extra new slices
+                // Create extra new slices
                 if(newSlices.length > oldSlices.length) {
                     String objectClass = 
                         (String)object.values(SystemAttributes.OBJECT_CLASS).get(0);
@@ -5096,8 +5126,7 @@ implements DataTypes
                     )
                 );
             }
-
-            // implement replacement by remove/create
+            // Implement replacement by remove/create
             else { 
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
@@ -5135,25 +5164,11 @@ implements DataTypes
                 // ignore
             }
             try {
-                this.closeConnection(request, conn);
+                this.closeConnection(conn);
             } catch(Throwable ex) {
                 // ignore
             }
         }
-    }
-
-    //---------------------------------------------------------------------------
-    protected DataproviderObject otherOperation(
-        ServiceHeader header,
-        DataproviderRequest request,
-        String operation, Path replyPath
-    ) throws ServiceException {
-        return super.otherOperation(
-            header, 
-            request, 
-            operation, 
-            replyPath
-        );
     }
 
     //---------------------------------------------------------------------------
@@ -5264,6 +5279,21 @@ implements DataTypes
         );
     }
 
+    /**
+     * This is mainly used for identity attribute processing
+     * 
+     * @param likeValue
+     * 
+     * @return the corresponding path
+     * 
+     * @see SystemAttributes#OBJECT_IDENTITY
+     */
+    public static Path toPattern(
+        String likeValue
+    ){
+        return new Path(likeValue.replace("\\.", "."));
+    }
+        
     /**
      * Retrieves the configured date type
      * 
@@ -5393,9 +5423,21 @@ implements DataTypes
         SystemAttributes.CREATED_AT,
         SystemAttributes.CREATED_BY, 
         SystemAttributes.MODIFIED_BY, 
-        SystemAttributes.MODIFIED_AT
+        SystemAttributes.MODIFIED_AT,
+        SystemAttributes.REMOVED_AT,
+        SystemAttributes.REMOVED_BY
     };
 
+    // sort for binary search later 
+    protected static final String[] QUALIFIED_SYSTEM_ATTRIBUTES = new String[] {
+        "org:openmdx:base:Creatable:" + SystemAttributes.CREATED_AT,
+        "org:openmdx:base:Creatable:" + SystemAttributes.CREATED_BY,
+        "org:openmdx:base:Modifiable:" + SystemAttributes.MODIFIED_AT,
+        "org:openmdx:base:Modifiable:" + SystemAttributes.MODIFIED_BY,
+        "org:openmdx:base:Removable:" + SystemAttributes.REMOVED_AT,
+        "org:openmdx:base:Removable:" + SystemAttributes.REMOVED_BY
+    };
+    
     protected static final int DEFAULT_BATCH_SIZE = 50;
     protected static final String DEFAULT_OID_SUFFIX = "_objectid";
     protected static final String DEFAULT_RID_SUFFIX = "_referenceid";
@@ -5433,7 +5475,7 @@ implements DataTypes
      * connectionManagers at position 0. A user-defined implementation of
      * getConnection() may return any of the configured connection managers.
      */
-    protected List connectionManagers;
+    protected List<DataSource> dataSources;
 
     /**
      * Configuration of plugin.
@@ -5445,11 +5487,6 @@ implements DataTypes
      * defined by ResultSet.TYPE_... Default is TYPE_FORWARD_ONLY.
      */
     protected int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
-
-    /**
-     * Model is set when option modelDriven is set to true
-     */  
-    protected Model_1_0 model;
 
     // driver features
     protected boolean allowsSqlSequenceFallback;
@@ -5483,10 +5520,10 @@ implements DataTypes
      * macros
      */
     // key=column name, value=List of [macro name, macro value]
-    protected Map stringMacros;
+    protected Map<String,List<String[]>> stringMacros;
 
     // key=macro name, value=macro value
-    protected Map pathMacros;
+    protected Map<String,String> pathMacros;
 
     // referenceId format
     protected String referenceIdFormat;
@@ -5509,15 +5546,16 @@ implements DataTypes
      * from column names and vice versa is expensive. Therefore it
      * is cached.
      */
-    protected Map attributeNames = new HashMap();
-    protected Map columnNames = new HashMap();
+    protected Map<String,String> attributeNames = new HashMap<String,String>();
+    protected Map<String,String> columnNames = new HashMap<String,String>();
     /**
      * 2-dim map with entries <view, <feature name, scoped feature name>> 
      * In order to reduce String operations in touchNonDerivedFeatures()
      * the map contains scoped feature names. 
      */
-    protected final Map scopedFeatures = new HashMap();
-
+    protected final Map<String,Map<String,String>> scopedFeatures = new HashMap<String,Map<String,String>>();
+    protected final Map<String,String> scopedObjectClasses = new HashMap<String,String>();
+    
     /**
      * nullAsCharacter defines the string used to produce a type-safe
      * NULL string, e.g. CAST(NULL AS CHARACTER)
@@ -5534,7 +5572,7 @@ implements DataTypes
      */
     protected boolean useObjectCache = true;
     // object cache at unit of work level
-    protected final Map objectCache = new HashMap();
+    protected final Map<Path,DataproviderObject> objectCache = new HashMap<Path,DataproviderObject>();
 
     /**
      * technical column names: object_oid, object_rid, object_idx
@@ -5545,19 +5583,16 @@ implements DataTypes
     public String OBJECT_RID;
     public String OBJECT_ID;
 
-    final static protected Path EXTENT_PATTERN = new Path("xri:@openmdx:**/provider/**/segment/**/extent");
-
     protected Properties jdbcDriverSqlProperties = null;
     protected static final String JDBC_DRIVER_SQL_PROPERTIES = "org/openmdx/kernel/application/deploy/jdbc-driver-sql.properties";  
 
     protected final Collection temporaryFiles = new ArrayList();
     protected String unitOfWorkId;
 
-    static final Integer INTEGER_0 = new Integer(0);
-
     static {
         // must guarantee sort order for binary search access
         Arrays.sort(SYSTEM_ATTRIBUTES);
+        Arrays.sort(QUALIFIED_SYSTEM_ATTRIBUTES);
     }
 
 }

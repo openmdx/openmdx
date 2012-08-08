@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Delegation_1.java,v 1.9 2008/11/27 16:46:56 hburger Exp $
+ * Name:        $Id: Delegation_1.java,v 1.10 2009/01/05 13:48:10 wfro Exp $
  * Description: Delegation_1 plugin
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/27 16:46:56 $
+ * Date:        $Date: 2009/01/05 13:48:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,18 +55,18 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkReply;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkRequest;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
-import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 

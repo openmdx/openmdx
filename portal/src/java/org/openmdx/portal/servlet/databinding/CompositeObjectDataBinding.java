@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CompositeObjectDataBinding.java,v 1.10 2008/12/12 10:41:48 wfro Exp $
+ * Name:        $Id: CompositeObjectDataBinding.java,v 1.15 2009/03/08 18:03:26 wfro Exp $
  * Description: CompositeObjectDataBinding 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/12 10:41:48 $
+ * Date:        $Date: 2009/03/08 18:03:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,6 +74,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
+import org.omg.mof.spi.Identifier;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.text.conversion.UUIDConversion;
@@ -81,9 +82,8 @@ import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.id.cci.UUIDGenerator;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.mapping.java.Identifier;
 import org.openmdx.portal.servlet.DataBinding_1_0;
-import org.w3c.cci2.Datatypes;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Allows to set/get features of composite objects.
@@ -146,13 +146,13 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
             String[] nv = null;
             boolean include = false;
             if(parameter.startsWith("[") && parameter.endsWith("]")) {
-                if(parameterMode != ParameterMode.OMIT_OPTIONAL) {
+                if(parameterMode != CompositeObjectDataBinding.ParameterMode.OMIT_OPTIONAL) {
                     nv = parameter.substring(1, parameter.length()-1).split("=");
                     include = true;
                 }
             }
             else {
-                if(parameterMode != ParameterMode.OPTIONAL_ONLY) {
+                if(parameterMode != CompositeObjectDataBinding.ParameterMode.OPTIONAL_ONLY) {
                     nv = parameter.split("=");
                     include = true;
                 }
@@ -324,6 +324,9 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
                     parameterMode,
                     JDOHelper.getPersistenceManager(object) 
                 );
+                if(candidates.isEmpty()) {
+                    return null;
+                }
                 query.setCandidates(candidates);            
                 List<?> resultSet = (List<?>)query.execute();
                 return resultSet.isEmpty() ?
@@ -427,7 +430,7 @@ public class CompositeObjectDataBinding implements DataBinding_1_0 {
             }
         }
         catch(Exception e) {
-            AppLog.warning("Unable to get composite object. Can not get value", Arrays.asList(object.refMofId(), qualifiedFeatureName, e.getMessage()));
+            AppLog.detail("Unable to get composite object. Can not get value", Arrays.asList(object.refMofId(), qualifiedFeatureName, e.getMessage()));
             return null;
         }
     }

@@ -30,9 +30,12 @@ import java.util.Date;
  * Can be configured to either return a <i>default value</i> or throw a
  * <code>ConversionException</code> if a conversion error occurs.
  *
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.3 $
  * @since 1.8.0
  */
+@SuppressWarnings({
+    "unchecked"
+})
 public final class DateConverter extends DateTimeConverter {
 
     /**
@@ -40,7 +43,7 @@ public final class DateConverter extends DateTimeConverter {
      * a <code>ConversionException</code> if an error occurs.
      */
     public DateConverter() {
-        super(Date.class);
+        super();
     }
 
     /**
@@ -52,7 +55,16 @@ public final class DateConverter extends DateTimeConverter {
      * occurs converting the value.
      */
     public DateConverter(Object defaultValue) {
-        super(Date.class, defaultValue);
+        super(defaultValue);
+    }
+
+    /**
+     * Return the default type this <code>Converter</code> handles.
+     *
+     * @return The default type this <code>Converter</code> handles.
+     */
+    protected Class getDefaultType() {
+        return Date.class;
     }
 
 }

@@ -17,12 +17,11 @@
 
 package org.openmdx.uses.org.apache.commons.beanutils.locale.converters;
 
-import org.openmdx.uses.org.apache.commons.beanutils.locale.BaseLocaleConverter;
 import org.openmdx.uses.org.apache.commons.logging.Log;
 import org.openmdx.uses.org.apache.commons.logging.LogFactory;
+import org.openmdx.uses.org.apache.commons.beanutils.locale.BaseLocaleConverter;
 
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
 
@@ -40,6 +39,9 @@ import java.util.Locale;
  * @since 1.7
  */
 
+@SuppressWarnings({
+    "static-access"
+})
 public class DecimalLocaleConverter extends BaseLocaleConverter {
 
 
@@ -237,7 +239,7 @@ public class DecimalLocaleConverter extends BaseLocaleConverter {
         // fact that objects returned from this method have the same toString
         // representation, each call to getInstance actually returns a new
         // object.
-        DecimalFormat formatter = (DecimalFormat) NumberFormat.getInstance(locale);
+        DecimalFormat formatter = (DecimalFormat) DecimalFormat.getInstance(locale);
 
         // if some constructors default pattern to null, it makes only sense 
         // to handle null pattern gracefully
@@ -248,7 +250,7 @@ public class DecimalLocaleConverter extends BaseLocaleConverter {
                 formatter.applyPattern(pattern);
             }
         } else {
-            log.info("No pattern provided, using default.");
+            log.debug("No pattern provided, using default.");
         }
 
         return formatter.parse((String) value);

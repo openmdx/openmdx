@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultPortalExtension.java,v 1.53 2008/12/15 17:25:20 wfro Exp $
+ * Name:        $Id: DefaultPortalExtension.java,v 1.68 2009/03/08 18:03:19 wfro Exp $
  * Description: DefaultEvaluator
- * Revision:    $Revision: 1.53 $
+ * Revision:    $Revision: 1.68 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/15 17:25:20 $
+ * Date:        $Date: 2009/03/08 18:03:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,6 +57,7 @@ package org.openmdx.portal.servlet;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -95,20 +96,20 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.application.log.AppLog;
+import org.openmdx.application.mof.cci.AggregationKind;
+import org.openmdx.application.mof.cci.PrimitiveTypes;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.query.FilterOperators;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterOperators;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_3;
-import org.openmdx.model1.code.AggregationKind;
-import org.openmdx.model1.code.PrimitiveTypes;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.BinaryValue;
@@ -144,6 +145,13 @@ public class DefaultPortalExtension
             : obj.toString();
     }
     
+    //-------------------------------------------------------------------------
+    protected String toNbspS(
+        Object obj
+    ) {
+        return this.toS(obj).replace(" ", "&nbsp;");
+    }
+    
     //-------------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTitle(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, short, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
@@ -171,25 +179,25 @@ public class DefaultPortalExtension
             attributeDefs.keySet().contains("fullName") &&
             (refObj.refGetValue("fullName") != null)
           ) {
-            return toS(refObj.refGetValue("fullName"));
+            return this.toS(refObj.refGetValue("fullName"));
           }
           else if(
             attributeDefs.keySet().contains("title") &&
             (refObj.refGetValue("title") != null)
           ) {
-            return toS(refObj.refGetValue("title"));
+            return this.toS(refObj.refGetValue("title"));
           }
           else if(
             attributeDefs.keySet().contains("name") &&
             (refObj.refGetValue("name") != null) 
           ) {
-            return toS(refObj.refGetValue("name"));
+            return this.toS(refObj.refGetValue("name"));
           }
           else if(
             attributeDefs.keySet().contains("description") &&
             (refObj.refGetValue("description") != null)
           ) {
-            return toS(refObj.refGetValue("description"));
+            return this.toS(refObj.refGetValue("description"));
           }
           else {
             return p.getBase();
@@ -273,8 +281,8 @@ public class DefaultPortalExtension
      */
     public boolean isLookupType(
         ModelElement_1_0 classDef
-    ) {
-        String qualifiedName = (String)classDef.values("qualifiedName").get(0);
+    ) throws ServiceException {
+        String qualifiedName = (String)classDef.objGetValue("qualifiedName");
         return 
             !"org:openmdx:base:BasicObject".equals(qualifiedName) &&
             !"org:openmdx:base:ContextCapable".equals(qualifiedName);
@@ -295,7 +303,7 @@ public class DefaultPortalExtension
             // Get lookup type from model
             try {
                 ModelElement_1_0 lookupFeature = model.getElement(qualifiedFeatureName);
-                lookupType = model.getElement(lookupFeature.values("type").get(0));
+                lookupType = model.getElement(lookupFeature.objGetValue("type"));
             }
             catch(Exception e) {
                 try {
@@ -336,22 +344,22 @@ public class DefaultPortalExtension
                 ) {
                     ModelElement_1_0 feature = (ModelElement_1_0)i.next();
                     if(model.isReferenceType(feature)) {
-                        ModelElement_1_0 referencedEnd = model.getElement(feature.values("referencedEnd").get(0));
-                        ModelElement_1_0 referencedType = model.getElement(feature.values("type").get(0));
+                        ModelElement_1_0 referencedEnd = model.getElement(feature.objGetValue("referencedEnd"));
+                        ModelElement_1_0 referencedType = model.getElement(feature.objGetValue("type"));
                         List allReferencedTypes = new ArrayList();
-                        for(Iterator j = referencedType.values("allSubtype").iterator(); j.hasNext(); ) {
+                        for(Iterator j = referencedType.objGetList("allSubtype").iterator(); j.hasNext(); ) {
                             allReferencedTypes.addAll(
-                                model.getElement(j.next()).values("allSupertype")
+                                model.getElement(j.next()).objGetList("allSupertype")
                             );
                         }
                         if(
                             !referencedType.equals(extentCapableClass) && 
                             !referencedType.equals(contextCapableClass) && 
                             !referencedType.equals(basicObjectClass) &&
-                            !AggregationKind.NONE.equals(referencedEnd.values("aggregation").get(0)) &&
-                            allReferencedTypes.contains(lookupType.path()) 
+                            !AggregationKind.NONE.equals(referencedEnd.objGetValue("aggregation")) &&
+                            allReferencedTypes.contains(lookupType.jdoGetObjectId()) 
                         ) {
-                            String lookupReferenceName = (String)feature.values("name").get(0);
+                            String lookupReferenceName = (String)feature.objGetValue("name");
                             // Get default order by features for context object. Get all attributes
                             // which include the strings name, description, title or number and
                             // the attribute type is PrimitiveTypes.STRING
@@ -359,8 +367,8 @@ public class DefaultPortalExtension
                             Map lookupTypeAttributes = model.getAttributeDefs(lookupType, true, false);
                             for(Iterator k = lookupTypeAttributes.values().iterator(); k.hasNext(); ) {
                                 ModelElement_1_0 attributeDef = (ModelElement_1_0)k.next();
-                                ModelElement_1_0 attributeType = model.getElement(attributeDef.values("type").get(0));
-                                String attributeName = (String)attributeDef.values("name").get(0);
+                                ModelElement_1_0 attributeType = model.getElement(attributeDef.objGetValue("type"));
+                                String attributeName = (String)attributeDef.objGetValue("name");
                                 if(
                                     (attributeName.indexOf("name") >= 0 ||
                                     attributeName.indexOf("Name") >= 0 ||
@@ -372,15 +380,15 @@ public class DefaultPortalExtension
                                     attributeName.indexOf("Address") >= 0 ||
                                     attributeName.indexOf("number") >= 0 ||
                                     attributeName.indexOf("Number") >= 0) &&
-                                    PrimitiveTypes.STRING.equals(attributeType.values("qualifiedName").get(0))                                    
+                                    PrimitiveTypes.STRING.equals(attributeType.objGetValue("qualifiedName"))                                    
                                 ) {
                                     int order = 10000 * (filterByFeatures.size() + 1);
                                     try {
                                         org.openmdx.ui1.jmi1.ElementDefinition field = application.getUiElementDefinition(
-                                            (String)attributeDef.values("qualifiedName").get(0)
+                                            (String)attributeDef.objGetValue("qualifiedName")
                                         );
                                         org.openmdx.ui1.jmi1.AssertableInspector referencedTypeInspector =
-                                            application.getAssertableInspector((String)referencedType.values("qualifiedName").get(0));                                        
+                                            application.getAssertableInspector((String)referencedType.objGetValue("qualifiedName"));                                        
                                         String referencedTypeLabel =  application.getLabel(
                                             referencedTypeInspector.getForClass()
                                         );
@@ -446,7 +454,7 @@ public class DefaultPortalExtension
                     return new FindObjectsAutocompleter(
                         lookupObjectIdentity,
                         (String[])lookupReferenceNames.values().toArray(new String[lookupReferenceNames.size()]),
-                        (String)lookupType.values("qualifiedName").get(0),
+                        (String)lookupType.objGetValue("qualifiedName"),
                         (String[])filterByFeatures.values().toArray(new String[filterByFeatures.size()]),
                         (String[])filterByLabels.values().toArray(new String[filterByLabels.size()]),
                         filterOperators,
@@ -510,7 +518,7 @@ public class DefaultPortalExtension
     public void updateObject(
         Object target,
         Map parameterMap,
-        Map fieldMap,
+        Map<String,Attribute> fieldMap,
         ApplicationContext application,
         PersistenceManager pm
     ) {
@@ -545,7 +553,7 @@ public class DefaultPortalExtension
                 // Lookup feature in model repository
                 try {
                     ModelElement_1_0 featureDef = model.getElement(feature);
-                    featureTypeName = (String)model.getElement(featureDef.values("type").get(0)).values("qualifiedName").get(0);
+                    featureTypeName = (String)model.getElement(featureDef.objGetValue("type")).objGetValue("qualifiedName");
                 }             
                 catch(Exception e) {
                     try {
@@ -597,7 +605,7 @@ public class DefaultPortalExtension
                             (String)parameterValues.get(0);
                         String mappedNewValue = multiLineString.length() == 0 ? null : multiLineString;
                         if(target instanceof RefObject) {
-                          boolean isModified = !areEqual(
+                          boolean isModified = !DefaultPortalExtension.areEqual(
                               valueHolder.getDataBinding().getValue(
                                   (RefObject)target, 
                                   feature
@@ -641,7 +649,7 @@ public class DefaultPortalExtension
                             }
                         }
                         List mappedNewValues = newValues;
-                        boolean isModified = !areEqual(
+                        boolean isModified = !DefaultPortalExtension.areEqual(
                             values,
                             mappedNewValues
                         );
@@ -681,7 +689,7 @@ public class DefaultPortalExtension
                           if(number == null) {
                               Object mappedNewValue = null;
                               if(target instanceof RefObject) {
-                                boolean isModified = !areEqual(
+                                boolean isModified = !DefaultPortalExtension.areEqual(
                                     valueHolder.getDataBinding().getValue(
                                         (RefObject)target, 
                                         feature
@@ -708,7 +716,7 @@ public class DefaultPortalExtension
                           else if(PrimitiveTypes.INTEGER.equals(featureTypeName)) {
                               Integer mappedNewValue = new Integer(number.intValue());
                               if(target instanceof RefObject) {
-                                boolean isModified = !areEqual(
+                                boolean isModified = !DefaultPortalExtension.areEqual(
                                     valueHolder.getDataBinding().getValue(
                                         (RefObject)target, 
                                         feature
@@ -735,7 +743,7 @@ public class DefaultPortalExtension
                           else if(PrimitiveTypes.LONG.equals(featureTypeName)) {
                               Long mappedNewValue = new Long(number.longValue());
                               if(target instanceof RefObject) {
-                                  boolean isModified = !areEqual(
+                                  boolean isModified = !DefaultPortalExtension.areEqual(
                                       valueHolder.getDataBinding().getValue(
                                           (RefObject)target, 
                                           feature
@@ -762,7 +770,7 @@ public class DefaultPortalExtension
                           else if(PrimitiveTypes.DECIMAL.equals(featureTypeName)) {
                               BigDecimal mappedNewValue = number;
                               if(target instanceof RefObject) {
-                                boolean isModified = !areEqual(
+                                boolean isModified = !DefaultPortalExtension.areEqual(
                                     valueHolder.getDataBinding().getValue(
                                         (RefObject)target,
                                         feature
@@ -789,7 +797,7 @@ public class DefaultPortalExtension
                           else { //if(PrimitiveTypes.SHORT.equals(featureTypeName)) {
                               Short mappedNewValue = new Short(number.shortValue());
                               if(target instanceof RefObject) {
-                                  boolean isModified = !areEqual(
+                                  boolean isModified = !DefaultPortalExtension.areEqual(
                                       valueHolder.getDataBinding().getValue(
                                           (RefObject)target,
                                           feature
@@ -903,7 +911,7 @@ public class DefaultPortalExtension
                             );
                           }
                         }
-                        boolean isModified = !areEqual(
+                        boolean isModified = !DefaultPortalExtension.areEqual(
                           values,
                           mappedNewValues
                         );
@@ -946,7 +954,7 @@ public class DefaultPortalExtension
                           if(newValues.size() == 0) {
                             Object mappedNewValue = null;
                             if(target instanceof RefObject) {
-                              boolean isModified = !areEqual(
+                              boolean isModified = !DefaultPortalExtension.areEqual(
                                   valueHolder.getDataBinding().getValue(
                                       (RefObject)target,
                                       feature
@@ -982,14 +990,14 @@ public class DefaultPortalExtension
                             if(mappedNewValue != null) {
                               cal.setTime(mappedNewValue);
                               if(PrimitiveTypes.DATE.equals(featureTypeName)) {
-                                XMLGregorianCalendar mappedNewValueDate = xmlDatatypeFactory().newXMLGregorianCalendarDate(
+                                XMLGregorianCalendar mappedNewValueDate = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
                                     cal.get(Calendar.YEAR),
                                     cal.get(Calendar.MONTH) + 1,
                                     cal.get(Calendar.DAY_OF_MONTH),
                                     DatatypeConstants.FIELD_UNDEFINED
                                 );
                                 if(target instanceof RefObject) {
-                                  boolean isModified = !areEqual(
+                                  boolean isModified = !DefaultPortalExtension.areEqual(
                                       valueHolder.getDataBinding().getValue(
                                           (RefObject)target,
                                           feature
@@ -1015,7 +1023,7 @@ public class DefaultPortalExtension
                               }
                               else if(PrimitiveTypes.DATETIME.equals(featureTypeName)) {
                                 if(target instanceof RefObject) {
-                                  boolean isModified = !areEqual(
+                                  boolean isModified = !DefaultPortalExtension.areEqual(
                                       valueHolder.getDataBinding().getValue(
                                           (RefObject)target,
                                           feature
@@ -1102,7 +1110,7 @@ public class DefaultPortalExtension
                             if(dateTime != null) {
                               cal.setTime(dateTime);
                               if(PrimitiveTypes.DATE.equals(featureTypeName)) {
-                                XMLGregorianCalendar date = xmlDatatypeFactory().newXMLGregorianCalendarDate(
+                                XMLGregorianCalendar date = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
                                     cal.get(Calendar.YEAR),
                                     cal.get(Calendar.MONTH) + 1,
                                     cal.get(Calendar.DAY_OF_MONTH),
@@ -1142,7 +1150,7 @@ public class DefaultPortalExtension
                             );
                           }
                         }
-                        boolean isModified = !areEqual(
+                        boolean isModified = !DefaultPortalExtension.areEqual(
                           values,
                           mappedNewValues
                         );
@@ -1230,14 +1238,15 @@ public class DefaultPortalExtension
                                   boolean isModified = true;
                                   // force modify in case the referenced object does not exist
                                   try {
-                                    isModified = !areEqual(
+                                    isModified = !DefaultPortalExtension.areEqual(
                                         valueHolder.getDataBinding().getValue(
                                             (RefObject)target,
                                             feature
                                         ),
                                         mappedNewValue
                                     );
-                                  } catch(Exception e) {}
+                                  } 
+                                  catch(Exception e) {}
                                   AppLog.trace("modify feature", feature + "=" + isModified);
                                   if(isModified) {
                                       valueHolder.getDataBinding().setValue(
@@ -1297,7 +1306,7 @@ public class DefaultPortalExtension
                               : (Short)longTexts.get(newValues.get(0).toString());
                           if(mappedNewValue != null) {
                               if(target instanceof RefObject) {
-                                  boolean isModified = !areEqual(
+                                  boolean isModified = !DefaultPortalExtension.areEqual(
                                       valueHolder.getDataBinding().getValue(
                                           (RefObject)target,
                                           feature
@@ -1383,7 +1392,7 @@ public class DefaultPortalExtension
                             );
                           }
                         }
-                        boolean isModified = !areEqual(
+                        boolean isModified = !DefaultPortalExtension.areEqual(
                           values,
                           mappedNewValues
                         );
@@ -1419,7 +1428,7 @@ public class DefaultPortalExtension
                                 application.getTexts().getTrueText().equals(newValues.get(0)))
                             );
                         if(target instanceof RefObject) {
-                          boolean isModified = !areEqual(
+                          boolean isModified = !DefaultPortalExtension.areEqual(
                               valueHolder.getDataBinding().getValue(
                                   (RefObject)target,
                                   feature
@@ -1473,7 +1482,7 @@ public class DefaultPortalExtension
                                 )
                             );
                         }
-                        boolean isModified = !areEqual(
+                        boolean isModified = !DefaultPortalExtension.areEqual(
                             values,
                             mappedNewValues
                         );
@@ -1522,8 +1531,8 @@ public class DefaultPortalExtension
                                     null
                                 );
                             }
-                          } catch(Exception e) {}
-        
+                          } 
+                          catch(Exception e) {}        
                           // reset name
                           try {
                             if(target instanceof RefObject) {
@@ -1539,8 +1548,8 @@ public class DefaultPortalExtension
                                     null
                                 );
                             }
-                          } catch(Exception e) {}
-        
+                          } 
+                          catch(Exception e) {}        
                           // reset mimeType
                           try {
                             if(target instanceof RefObject) {
@@ -1556,7 +1565,8 @@ public class DefaultPortalExtension
                                     null
                                 );
                             }
-                          } catch(Exception e) {}
+                          } 
+                          catch(Exception e) {}
                         }
         
                         // get binary stream and store
@@ -1630,42 +1640,42 @@ public class DefaultPortalExtension
                           }
         
                           // set bytes
-                          byte[] bytes = null;
                           String location = application.getTempFileName((String)key, "");
-                          try {
-                            InputStream is = new FileInputStream(location);
-                            ByteArrayOutputStream os = new ByteArrayOutputStream();
-                            int b = 0;
-                            while((b = is.read()) != -1) {
-                              os.write(b);
-                            }
-                            is.close();
-                            os.close();
-                            bytes = os.toByteArray();
-                          }
-                          catch(FileNotFoundException e) {
-                              AppLog.error("can not open uploaded stream", location);
-                              new ServiceException(e).log();
-                              uploadStreamValid = false;
-                          }
-                          catch(IOException e) {
-                              AppLog.error("can not read uploaded stream", location);
-                              new ServiceException(e).log();
-                              uploadStreamValid = false;
-                          }
                           if(uploadStreamValid) {
                               if(target instanceof RefObject) {
-                                  valueHolder.getDataBinding().setValue(
-                                      (RefObject)target,
-                                      feature,
-                                      org.w3c.cci2.BinaryLargeObjects.valueOf(bytes) // bytes
-                                  );
+                                  try {
+                                      valueHolder.getDataBinding().setValue(
+                                          (RefObject)target,
+                                          feature,
+                                          org.w3c.cci2.BinaryLargeObjects.valueOf(new File(location))
+                                      );
+                                  }
+                                  catch(Exception e) {
+                                      AppLog.error("Unable to upload binary content", location);
+                                      new ServiceException(e).log();
+                                  }
                               }
                               else {
-                                  ((Map)target).put(
-                                      feature,
-                                      bytes
-                                  );
+                                  try {
+                                      byte[] bytes = null;
+                                      InputStream is = new FileInputStream(location);
+                                      ByteArrayOutputStream os = new ByteArrayOutputStream();
+                                      int b = 0;
+                                      while((b = is.read()) != -1) {
+                                        os.write(b);
+                                      }
+                                      is.close();
+                                      os.close();
+                                      bytes = os.toByteArray();
+                                      ((Map)target).put(
+                                          feature,
+                                          bytes
+                                      );
+                                    }
+                                    catch(Exception e) {
+                                        AppLog.error("Unable to upload binary content", location);
+                                        new ServiceException(e).log();
+                                    }
                               }
                           }
                         }
@@ -1691,6 +1701,30 @@ public class DefaultPortalExtension
             if(modifiedFeatures.isEmpty()) break;
             count++;
         }
+        // Validate mandatory fields
+        for(Attribute attribute: fieldMap.values()) {
+            try {
+                if(
+                    attribute.getValue().getFieldDef().isMandatory && 
+                    attribute.getValue().getFieldDef().isChangeable
+                ) {
+                    Object value = target instanceof RefObject ?
+                        attribute.getValue().getDataBinding().getValue((RefObject)target, attribute.getName()) :
+                        ((Map)target).get(attribute.getName());
+                    if(
+                        (value == null) || 
+                        (value instanceof String && ((String)value).length() == 0) || 
+                        (value instanceof Collection && ((Collection)value).isEmpty())
+                    ) {
+                        application.addErrorMessage(
+                            application.getTexts().getErrorTextMandatoryField(),
+                            new String[]{attribute.getLabel()}
+                        );
+                    }
+                }
+            } 
+            catch(Exception e) {}
+        }
     }
     
     //-------------------------------------------------------------------------  
@@ -1708,7 +1742,7 @@ public class DefaultPortalExtension
         Model_1_0 model = ofType.getModel();
         
         // add ofType to hierarchy
-        String currentTypeName = (String)ofType.values("qualifiedName").get(0);
+        String currentTypeName = (String)ofType.objGetValue("qualifiedName");
         if(hierarchy.get(currentTypeName) == null) {
           hierarchy.put(
             currentTypeName,
@@ -1718,15 +1752,15 @@ public class DefaultPortalExtension
     
         // get all types which are involved in composition hierarchy
         List typesToCheck = new ArrayList();
-        if(ofType.values("compositeReference").size() > 0) {
+        if(!ofType.objGetList("compositeReference").isEmpty()) {
           typesToCheck.add(ofType);
         }
         else {
-          for(Iterator i = ofType.values("allSubtype").iterator(); i.hasNext(); ) {
+          for(Iterator i = ofType.objGetList("allSubtype").iterator(); i.hasNext(); ) {
             ModelElement_1_0 subtype = model.getElement(i.next());
             if(
-              !ofType.values("qualifiedName").get(0).equals(subtype.values("qualifiedName").get(0)) &&
-              subtype.values("compositeReference").size() > 0
+              !ofType.objGetValue("qualifiedName").equals(subtype.objGetValue("qualifiedName")) &&
+              !subtype.objGetList("compositeReference").isEmpty()
              ) {
               typesToCheck.add(subtype);
             }
@@ -1735,16 +1769,16 @@ public class DefaultPortalExtension
         
         for(Iterator i = typesToCheck.iterator(); i.hasNext(); ) {
           ModelElement_1_0 type = (ModelElement_1_0)i.next();
-          ModelElement_1_0 compositeReference = model.getElement(type.values("compositeReference").get(0));
-          ModelElement_1_0 exposingType = model.getElement(compositeReference.values("container").get(0));
+          ModelElement_1_0 compositeReference = model.getElement(type.objGetValue("compositeReference"));
+          ModelElement_1_0 exposingType = model.getElement(compositeReference.objGetValue("container"));
           this.createCompositionHierarchy(
             exposingType,
             hierarchy
           );
           ((Set)hierarchy.get(
-            exposingType.values("qualifiedName").get(0)
+            exposingType.objGetValue("qualifiedName")
           )).add(
-            compositeReference.values("name").get(0)
+            compositeReference.objGetValue("name")
           );
         }
     }
@@ -1761,7 +1795,7 @@ public class DefaultPortalExtension
     ) throws ServiceException {
 
         Model_1_0 model = application.getModel();
-        String qualifiedNameLookupType = (String)lookupType.values("qualifiedName").get(0);
+        String qualifiedNameLookupType = (String)lookupType.objGetValue("qualifiedName");
         Map compositionHierarchy = new HashMap();
         this.createCompositionHierarchy(
           lookupType,
@@ -1845,7 +1879,7 @@ public class DefaultPortalExtension
             application,
             application.getPmData()
         );
-        String qualifiedNameLookupType = (String)lookupType.values("qualifiedName").get(0);        
+        String qualifiedNameLookupType = (String)lookupType.objGetValue("qualifiedName");        
         ObjectView view = new ShowObjectView(
             id,
             null,
@@ -1908,22 +1942,48 @@ public class DefaultPortalExtension
             }
             int end = pos+5;
             boolean suffixHasDot = false;
+            int posParams = -1;
             while(end < value.length()) {
                 char c = value.charAt(end);
-                if(!Character.isLetterOrDigit(c) && (c != '.') && (c != '-') && (c != '_')) break;
+                // Mail URL ends with whitespace or opening tag
+                if(Character.isWhitespace(c) || (c == '<')) break;
+                if(c == '?' && posParams < 0) posParams = end;
                 suffixHasDot |= c == '.';
                 end++;
             }
             if((start+1 < pos) && (end-1 > pos) && suffixHasDot) {
                 String address = value.substring(start+1, end);
-                String emailAsHRef = "<a href=\"mailto:" + address + "\">" + address + "</a>";
-                value = value.substring(0, start+1) + emailAsHRef + value.substring(end);
-                fromIndex = start + emailAsHRef.length() + 1;
+                String addressTitle = posParams > 0 ?
+                    value.substring(start+1, posParams) :
+                    value.substring(start+1, end);
+                String href = "<a href=\"mailto:" + address + "\">" + addressTitle + "</a>";
+                value = value.substring(0, start+1) + href + value.substring(end);
+                fromIndex = start + href.length() + 1;
             }
             else {
-                fromIndex = pos+1;
+                fromIndex = pos + 1;
             }
         }
+        // Map phone number to <a href="tel:...
+        fromIndex = 0;
+        while((pos = value.indexOf(" +", fromIndex)) >= 0) {
+            int start = pos + 1;
+            int end = start;
+            while(end < value.length()) {
+                char c = value.charAt(end);
+                if(!Character.isDigit(c) && (c != '+') && (c != '(') && (c != ')') && (c != '-')) break;
+                end++;
+            }
+            if(end > start + 10) {
+                String address = value.substring(start, end);
+                String href =  "<a href=\"tel:" + address + "\">" + address + "</a>";
+                value = value.substring(0, start) + href + value.substring(end);
+                fromIndex = start + href.length();
+            }
+            else {
+                fromIndex = pos + 1;
+            }
+        }        
         // Map substrings starting with well-known protocols to <a href...
         for(
             Iterator i = WELL_KNOWN_PROTOCOLS.iterator();
@@ -2036,12 +2096,13 @@ public class DefaultPortalExtension
      */
     protected static synchronized DatatypeFactory xmlDatatypeFactory(
     ){
-        if(datatypeFactory == null) try {
-          datatypeFactory = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException e) {
+        if(DefaultPortalExtension.datatypeFactory == null) try {
+        	DefaultPortalExtension.datatypeFactory = DatatypeFactory.newInstance();
+        } 
+        catch (DatatypeConfigurationException e) {
           throw new RuntimeServiceException(e);
         }
-        return datatypeFactory;
+        return DefaultPortalExtension.datatypeFactory;
     }
     
 }

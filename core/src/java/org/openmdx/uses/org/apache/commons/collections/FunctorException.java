@@ -24,13 +24,11 @@ import java.io.PrintWriter;
  * If required, a root cause error can be wrapped within this one.
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:26 $
+ * @version $Revision: 1.5 $ $Date: 2009/03/03 14:59:14 $
  *
  * @author Stephen Colebourne
  */
-@SuppressWarnings({
-    "unchecked", "serial"
-})
+@SuppressWarnings("serial")
 public class FunctorException extends RuntimeException {
     
     /**

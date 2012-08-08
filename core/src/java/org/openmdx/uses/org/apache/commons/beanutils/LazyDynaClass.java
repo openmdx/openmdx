@@ -42,7 +42,9 @@ package org.openmdx.uses.org.apache.commons.beanutils;
  * @see LazyDynaBean
  * @author Niall Pemberton
  */
-@SuppressWarnings({"unchecked", "serial"})
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class LazyDynaClass extends BasicDynaClass implements MutableDynaClass  {
 
     /**

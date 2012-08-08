@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiContext.java,v 1.26 2008/12/07 23:43:35 wfro Exp $
+ * Name:        $Id: UiContext.java,v 1.29 2009/03/08 18:03:19 wfro Exp $
  * Description: UiContext 
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/07 23:43:35 $
+ * Date:        $Date: 2009/03/08 18:03:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,7 +69,7 @@ import javax.jmi.reflect.RefObject;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 public class UiContext
     implements Serializable {
@@ -109,7 +109,7 @@ public class UiContext
     ) {
         this.uiSegmentPaths = uiSegmentPaths.toArray(new Path[uiSegmentPaths.size()]);
         this.pm = pm;
-        this.uiPackage = getUiPackage(this.pm);
+        this.uiPackage = UiContext.getUiPackage(this.pm);
         this.uiSegments = new org.openmdx.ui1.jmi1.Segment[this.uiSegmentPaths.length];
         this.allAssertableInspectors = null;        
         this.allAssertedInspectors = null;
@@ -164,7 +164,7 @@ public class UiContext
             AppLog.warning(e.getMessage(), e.getCause());
         }
         if(inspector == null) {
-            AppLog.warning("Can not get inspector for", forClass);
+            AppLog.info("Can not get inspector for", forClass);
             return "N/A";
         }
         else {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TokenCallback.java,v 1.1 2005/11/08 14:28:22 hburger Exp $
+ * Name:        $Id: TokenCallback.java,v 1.2 2009/03/08 18:52:18 wfro Exp $
  * Description: TokenCallback 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/11/08 14:28:22 $
+ * Date:        $Date: 2009/03/08 18:52:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,8 +61,7 @@ import javax.security.auth.callback.Callback;
  *
  */
 public class TokenCallback
-    implements Callback, Serializable
-{
+    implements Callback, Serializable {
 
     /**
      * Implements <code>Serializable</code>

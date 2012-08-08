@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractAuthenticationHandler.java,v 1.22 2008/09/11 10:47:30 hburger Exp $
+ * Name:        $Id: AbstractAuthenticationHandler.java,v 1.24 2009/03/08 18:52:18 wfro Exp $
  * Description: Abstract HTTP Authentication Handler
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/11 10:47:30 $
+ * Date:        $Date: 2009/03/08 18:52:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -74,8 +74,7 @@ import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
  */
 public abstract class AbstractAuthenticationHandler 
 extends AbstractHandler 
-implements HttpAuthenticationHandler, Invalidator 
-{
+implements HttpAuthenticationHandler, Invalidator {
 
 	/**
 	 * Constructor 
@@ -135,43 +134,43 @@ implements HttpAuthenticationHandler, Invalidator
 	 */
 	public void init(
 	) throws ServletException {
-		String loginConfiguration = getInitParameter(
+		String loginConfiguration = this.getInitParameter(
 				"login-configuration",
-				loginConfigurationDefault()            
+				this.loginConfigurationDefault()            
 		); 
-		String  applicationName = getInitParameter(
+		String  applicationName = this.getInitParameter(
 				"application-name",
-				applicationNameDefault()
+				this.applicationNameDefault()
 		);
-		int initialCapacity = getInitParameter(
+		int initialCapacity = this.getInitParameter(
 				"initial-capacity",
-				initialCapacityDefault()
+				this.initialCapacityDefault()
 		);
-		int maximumCapacity = getInitParameter(
+		int maximumCapacity = this.getInitParameter(
 				"maximum-capacity",
-				maximumCapacityDefault()
+				this.maximumCapacityDefault()
 		);
-		long maximumWait = getInitParameter(
+		long maximumWait = this.getInitParameter(
 				"maximum-wait",
-				maximumWaitDefault()
+				this.maximumWaitDefault()
 		);
-		long idleTimeout = getInitParameter(
+		long idleTimeout = this.getInitParameter(
 				"idle-timeout",
-				idleTimeoutDefault()
+				this.idleTimeoutDefault()
 		);
-		long callbackTimeout =  getInitParameter(
+		long callbackTimeout =  this.getInitParameter(
 				"callback-timeout",
-				callbackTimeoutDefault()
+				this.callbackTimeoutDefault()
 		);
-		this.lenient = getInitParameter(
+		this.lenient = this.getInitParameter(
 				"lenient",
-				lenientDefault()
+				this.lenientDefault()
 		);
 		try {
 			this.pool = AuthenticationContextThread.newPool(
 					new URLConfiguration(
 							new URL(loginConfiguration), 
-							getSharedOptions()
+							this.getSharedOptions()
 					), 
 					applicationName,
 					initialCapacity,
@@ -179,34 +178,35 @@ implements HttpAuthenticationHandler, Invalidator
 					maximumWait,
 					idleTimeout,
 					callbackTimeout, 
-					isDebug(), 
+					this.isDebug(), 
 					this
 			);
 			this.associations = Collections.synchronizedMap(new HashMap<String,AuthenticationContext>());
-			if(isDebug()) {
-				log("$Id: AbstractAuthenticationHandler.java,v 1.22 2008/09/11 10:47:30 hburger Exp $");
-				log("login-configuration: " + loginConfiguration);
-				log("application-name: " + applicationName);
-				log("initial-capacity: " + initialCapacity);
-				log("maximum-capacity: " + maximumCapacity);
-				log("maximum-wait: " + maximumWait);
-				log("idle-timeout: " + idleTimeout);
-				log("callback-timeout: " + callbackTimeout);
-				log("lenient: " + lenient);
+			if(this.isDebug()) {
+				this.log("$Id: AbstractAuthenticationHandler.java,v 1.24 2009/03/08 18:52:18 wfro Exp $");
+				this.log("login-configuration: " + loginConfiguration);
+				this.log("application-name: " + applicationName);
+				this.log("initial-capacity: " + initialCapacity);
+				this.log("maximum-capacity: " + maximumCapacity);
+				this.log("maximum-wait: " + maximumWait);
+				this.log("idle-timeout: " + idleTimeout);
+				this.log("callback-timeout: " + callbackTimeout);
+				this.log("lenient: " + this.lenient);
 			}
-		} catch (UnavailableException exception) {
+		} 
+		catch (UnavailableException exception) {
 			throw exception;
-		} catch (Exception exception) {
-			throw (UnavailableException) Throwables.initCause(
+		} 
+		catch (Exception exception) {
+			throw Throwables.initCause(
 					new UnavailableException(
-							"Acquisition of the servlet's authentication provider failed"                     
+						"Acquisition of the servlet's authentication provider failed"                     
 					),
 					exception,
 					BasicException.Code.DEFAULT_DOMAIN,
 					BasicException.Code.ACTIVATION_FAILURE,
-					null,
-					new BasicException.Parameter("info", "$Id: AbstractAuthenticationHandler.java,v 1.22 2008/09/11 10:47:30 hburger Exp $"),
-					new BasicException.Parameter("name", getServletName()),
+					new BasicException.Parameter("info", "$Id: AbstractAuthenticationHandler.java,v 1.24 2009/03/08 18:52:18 wfro Exp $"),
+					new BasicException.Parameter("name", this.getServletName()),
 					new BasicException.Parameter("login-configuration", loginConfiguration),
 					new BasicException.Parameter("application-name", applicationName),
 					new BasicException.Parameter("initial-capacity", initialCapacity),
@@ -214,8 +214,8 @@ implements HttpAuthenticationHandler, Invalidator
 					new BasicException.Parameter("maximum-wait", maximumWait),
 					new BasicException.Parameter("idle-timeout", idleTimeout),
 					new BasicException.Parameter("callback-timeout", callbackTimeout),
-					new BasicException.Parameter("lenient", isLenient()),
-					new BasicException.Parameter("debug", isDebug())
+					new BasicException.Parameter("lenient", this.isLenient()),
+					new BasicException.Parameter("debug", this.isDebug())
 			);
 		}
 	}
@@ -228,9 +228,11 @@ implements HttpAuthenticationHandler, Invalidator
 		try {
 			this.associations.clear();
 			this.pool.close();
-		} catch (Exception exception) {
-			log("Authentication Object Pool Destruction Failure", exception);
-		} finally {
+		} 
+		catch (Exception exception) {
+			this.log("Authentication Object Pool Destruction Failure", exception);
+		} 
+		finally {
 			this.associations = null;
 			this.pool = null;
 			super.destroy();
@@ -261,7 +263,7 @@ implements HttpAuthenticationHandler, Invalidator
 			HttpServletRequest request, 
 			boolean create
 	) throws ServletException, TimeoutException {
-		String correlationId = getCorrelationId(request);
+		String correlationId = this.getCorrelationId(request);
 		AuthenticationContext reply = (AuthenticationContext) this.associations.get(correlationId);
 		if(create){
 			if(reply == null || !correlationId.equals(reply.getCorrelationId())) try {
@@ -271,18 +273,20 @@ implements HttpAuthenticationHandler, Invalidator
 						correlationId, 
 						reply
 				);
-			} catch (Exception exception) {
+			} 
+			catch (Exception exception) {
 				throw new ServletException(
 						"No Authentication Context available",
 						exception
 				);
 			}
-			if(isDebug()) log(
+			if(this.isDebug()) this.log(
 					"Thread " + Thread.currentThread().getName() + 
 					" borrowed Authenticator " + reply.getName() +
 					" from the pool"
 			);
-		} else {
+		} 
+		else {
 			if(reply != null && !correlationId.equals(reply.getCorrelationId())) {                    
 				this.associations.remove(correlationId);
 				reply = null;
@@ -290,7 +294,7 @@ implements HttpAuthenticationHandler, Invalidator
 			if(reply == null) throw new TimeoutException(
 					"Authentication Context no longer available"
 			);
-			if(isDebug()) log(
+			if(this.isDebug()) this.log(
 					"Thread " + Thread.currentThread().getName() + 
 					" re-associated with Authenticator " + reply.getName()
 			);
@@ -304,30 +308,33 @@ implements HttpAuthenticationHandler, Invalidator
 	public void returnAuthentication(
 			HttpServletRequest request
 	) throws ServletException, TimeoutException {
-		String correlationId = getCorrelationId(request);
+		String correlationId = this.getCorrelationId(request);
 		AuthenticationContext authenticationContext = (AuthenticationContext) this.associations.remove(correlationId);
 		if(authenticationContext == null) {
-			if(isDebug() || !isLenient()) log(
+			if(this.isDebug() || !this.isLenient()) this.log(
 					"Thread " + Thread.currentThread().getName() + 
 					" tries to return its authentication context" +
 					" while none is assoicated with it" 
 			);
-		} else if(!correlationId.equals(authenticationContext.getCorrelationId())) {
-			if(isDebug() || !isLenient()) log(
+		} 
+		else if(!correlationId.equals(authenticationContext.getCorrelationId())) {
+			if(this.isDebug() || !this.isLenient()) this.log(
 					"Thread " + Thread.currentThread().getName() + 
 					" tries to return the authentication context " + authenticationContext.getName() +
 					" already owned by another login context now"
 			);
-		} else try {
+		} 
+		else try {
 			authenticationContext.setCorrelationId(null);
 			this.pool.returnObject(authenticationContext);
-			if(isDebug()) log(
+			if(this.isDebug()) this.log(
 					"Thread " + Thread.currentThread().getName() + 
 					" returned authentication context " + authenticationContext.getName() +
 					" to the pool"
 			);
-		} catch (Exception exception) {
-			if(!isLenient()) throw (ServletException) new ServletException(
+		} 
+		catch (Exception exception) {
+			if(!this.isLenient()) throw (ServletException) new ServletException(
 					"Failed to return authentication context" + authenticationContext.getName()
 			).initCause(
 					exception
@@ -340,7 +347,7 @@ implements HttpAuthenticationHandler, Invalidator
 	 */
 	public void invalidateObject(Object obj)
 	throws Exception {
-		pool.invalidateObject(obj);
+		this.pool.invalidateObject(obj);
 	}
 
 	/**
@@ -380,7 +387,7 @@ implements HttpAuthenticationHandler, Invalidator
 	 */
 	protected long maximumWaitDefault(
 	){
-		return 1 * MINUTE;
+		return 1 * AbstractAuthenticationHandler.MINUTE;
 
 	}
 
@@ -391,7 +398,7 @@ implements HttpAuthenticationHandler, Invalidator
 	 */
 	protected long idleTimeoutDefault(
 	){
-		return 30 * MINUTE;
+		return 30 * AbstractAuthenticationHandler.MINUTE;
 	}
 
 	/**
@@ -401,7 +408,7 @@ implements HttpAuthenticationHandler, Invalidator
 	 */
 	protected long callbackTimeoutDefault(
 	){
-		return 1 * MINUTE;
+		return 1 * AbstractAuthenticationHandler.MINUTE;
 	}
 
 	/**

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefMetaObject_1.java,v 1.2 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: RefMetaObject_1.java,v 1.4 2009/01/13 17:33:49 wfro Exp $
  * Description: RefMetaObject_1 class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2009/01/13 17:33:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,8 @@ import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 //---------------------------------------------------------------------------
 public class RefMetaObject_1
@@ -148,7 +149,12 @@ public class RefMetaObject_1
   public java.lang.Object refGetValue(
     String featureName
   ) throws JmiException {
-    return this.elementDef.values(featureName);
+      try {
+          return this.elementDef.objGetList(featureName);
+      }
+      catch(Exception e) {
+          throw new JmiServiceException(e);
+      }
   }
 
   //-------------------------------------------------------------------------

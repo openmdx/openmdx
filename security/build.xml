@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.47 2008/09/19 22:30:01 wfro Exp $
+= Name:        $Id: build.xml,v 1.54 2009/03/09 14:25:47 wfro Exp $
 = Description: openMDX/Security Ant Build File
-= Revision:    $Revision: 1.47 $
-= Date:        $Date: 2008/09/19 22:30:01 $
+= Revision:    $Revision: 1.54 $
+= Date:        $Date: 2009/03/09 14:25:47 $
 = Copyright:   (c) 2003-2005 OMEX AG
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2003-2007, OMEX AG, Switzerland
+ * Copyright (c) 2003-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -73,8 +73,6 @@
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath"/>
-		<path refid="oracle.jdbc.lib"/>		
-		<path refid="microsoft.sql-server.lib"/>		
 		<pathelement location="${basedir}/src/resource"/>
 		<pathelement location="${build.dir}/bin"/>
 		<pathelement location="${build.dir}/src/resource"/>
@@ -89,9 +87,12 @@
 	<patternset id="openmdx-security.jar.content">
 		<include name="org/openmdx/application/exception/**"/>
 		<include name="org/openmdx/security/**"/>
+		<include name="org/openmdx/kernel/security/**"/>
 		<include name="org/openmdx/uses/javax/security/**"/> <!-- before jre-1.5 only! -->
 		<include name="org/openmdx/uses/layout/**"/>
 		<exclude name="org/openmdx/security/radius/**"/>
+		<include name="META-INF/orm.xml"/>
+		<include name="META-INF/openmdxmof.properties"/>
 	</patternset>
 	<patternset id="openmdx-radius.jar.content">
 		<include name="org/openmdx/security/radius/**"/>
@@ -102,9 +103,11 @@
 	<!-- * generate -->
 	<!-- ******************************************************************* -->
 	<target name="generate" description="Generate version, jt and model dependend files" depends="build-init">
+<!--	
 		<ant dir="${openmdx.home}/core" inheritAll="false" target="prepare"> 
 			<property name="build.target.platform" value="${build.java.platform}"/>
 		</ant>
+-->		
 		<antcall target="-preprocess-jt-files-">
 			<param name="preprocess-jt.target" value="java"/>
 		</antcall>
@@ -145,6 +148,7 @@
 				<include name="*.properties"/>
 				<include name="*.xml"/>
 				<include name=".cvsignore"/>
+				<include name="*.checkstyle"/>				
 				<include name="etc/**"/>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset 
@@ -208,6 +212,7 @@
 		<openmdx:archive
 			destfile="${deliver.dir}/lib/openmdx-security.jar"
 			format="jar"
+			duplicate="preserve"
 		>
 			<openmdx:archivemanifest refid="project.manifest"/>
 			<openmdx:archivemanifest>
@@ -266,8 +271,8 @@
 			<packageset dir="${basedir}/src/java"/>
 			<packageset dir="${build.dir}/src/java"/>
 			<classpath refid="project.bin.classpath"/>
-			<link href="http://java.sun.com/j2se/1.4/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2se/"/>
-			<link href="http://java.sun.com/j2ee/1.4/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2ee/"/>
+			<link href="http://java.sun.com/j2se/1.5/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2se/"/>
+			<link href="http://java.sun.com/j2ee/1.5/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2ee/"/>
 			<link href="http://www.openmdx.org/openmdx/core/1.16/java-jre-1.4/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/openmdx/"/>
 			<group>
 				<title>${project.specification.title} Radius</title>

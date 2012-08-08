@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LayerConfigurationEntries.java,v 1.7 2008/11/14 00:30:16 wfro Exp $
+ * Name:        $Id: LayerConfigurationEntries.java,v 1.8 2009/01/05 13:48:24 wfro Exp $
  * Description: Generated constants for LayerConfigurationEntries
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/14 00:30:16 $
+ * Date:        $Date: 2009/01/05 13:48:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,7 +60,7 @@ package org.openmdx.compatibility.runtime1.layer.application;
 
 
 
-public class LayerConfigurationEntries extends org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries {
+public class LayerConfigurationEntries extends org.openmdx.application.dataprovider.cci.SharedConfigurationEntries {
 
   
   protected LayerConfigurationEntries() {
@@ -111,7 +111,7 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
    */
   static public int min()
   {
-  return org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries.min();  // delegate
+  return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.min();  // delegate
   }
 
 
@@ -124,7 +124,7 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
    */
   static public int max()
   {
-  return org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries.max();  // delegate
+  return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.max();  // delegate
   }
 
 
@@ -137,7 +137,7 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
    */
   static public String toString(int code)
   {
-      return org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries.toString(code);  // delegate
+      return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.toString(code);  // delegate
   }
 
 
@@ -154,7 +154,7 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
   static public int fromString(String code)
   {  
 
-    return org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries.fromString(code);  // delegate
+    return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.fromString(code);  // delegate
   }
 
 

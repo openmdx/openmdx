@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestInternalMethodInvocationArguments.java,v 1.10 2008/10/07 09:21:22 hburger Exp $
+ * Name:        $Id: TestInternalMethodInvocationArguments.java,v 1.12 2009/01/12 17:51:00 wfro Exp $
  * Description: Test Internal Method Invocation Arguments
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/07 09:21:22 $
+ * Date:        $Date: 2009/01/12 17:51:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,14 +62,14 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReplyContexts;
 import org.openmdx.kernel.application.container.spi.ejb.InternalMethodInvocationArguments;
-import org.openmdx.kernel.application.container.spi.rmi.ByteString;
-import org.openmdx.kernel.application.container.spi.rmi.ByteStringInputStream;
-import org.openmdx.kernel.application.container.spi.rmi.CharacterString;
-import org.openmdx.kernel.application.container.spi.rmi.CharacterStringReader;
+import org.w3c.cci2.ByteString;
+import org.w3c.cci2.ByteStringInputStream;
+import org.w3c.cci2.CharacterString;
+import org.w3c.cci2.CharacterStringReader;
 
 /**
  * Test Internal Method Invocation Arguments

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1.java,v 1.41 2008/11/07 17:45:15 hburger Exp $
+ * Name:        $Id: RefPackage_1.java,v 1.62 2009/03/03 17:23:07 hburger Exp $
  * Description: RefPackage_1 class
- * Revision:    $Revision: 1.41 $
+ * Revision:    $Revision: 1.62 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/07 17:45:15 $
+ * Date:        $Date: 2009/03/03 17:23:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,6 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,24 +72,26 @@ import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
 import javax.resource.cci.InteractionSpec;
 
-import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0;
+import org.oasisopen.jmi1.RefContainer;
+import org.omg.mof.spi.Identifier;
+import org.omg.mof.spi.Names;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.base.accessor.cci.PersistenceManager_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_5;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.transaction.UnitOfWork_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.mapping.Names;
-import org.openmdx.model1.mapping.java.Identifier;
+import org.w3c.cci2.Container;
 
 //---------------------------------------------------------------------------
 /**
@@ -100,7 +101,7 @@ import org.openmdx.model1.mapping.java.Identifier;
  * members to the immediate and outermost package. Other members are static.
  */
 public abstract class RefPackage_1
-    implements RefPackage_1_5, Serializable 
+    implements Jmi1Package_1_0, Serializable 
 {
 
     //-------------------------------------------------------------------------
@@ -235,11 +236,24 @@ public abstract class RefPackage_1
 
     //-------------------------------------------------------------------------
     /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_2#refContainer(org.openmdx.compatibility.base.naming.Path)
+     */
+    public RefContainer refContainer(
+        Path resourceIdentifier,
+        Class<Container<RefObject>> containerClass
+    ) {
+        return this.outermostPackage.refContainer(resourceIdentifier,containerClass);
+    }
+
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_2#refViewContext()
      */
     public InteractionSpec refInteractionSpec() {
-        return (this.outermostPackage).refInteractionSpec();
+        return this.outermostPackage.refInteractionSpec();
     }
+
+
 
 
     //-------------------------------------------------------------------------
@@ -265,31 +279,9 @@ public abstract class RefPackage_1
      * 
      * @return ObjectFactory_1_0 object factory. 
      */
-    public ObjectFactory_1_0 refObjectFactory(
+    public PersistenceManager_1_0 refObjectFactory(
     ){
         return this.outermostPackage.refObjectFactory();
-    }
-
-    /**
-     * Returns a proxy implementing the same interfaces as the secondary
-     * <code>RefObject and delegating to<ol>
-     * <li>the primary <code>RefObject</code> if possible
-     * <li>the secondary <code>RefObject</code> as fallback
-     * </ol>
-     * 
-     * @param primary its methods override the secondary object's methods
-     * @param secondary its interfacse are implemented by the proxy object as well
-     * 
-     * @return a proxy object delgating to the primary or secondary object as appropriate
-     */
-    public RefObject refObject (
-        RefObject primary,
-        RefObject secondary
-    ){
-        return this.outermostPackage.refObject(
-            primary, 
-            secondary
-        );
     }
 
     //-------------------------------------------------------------------------
@@ -306,6 +298,13 @@ public abstract class RefPackage_1
     }
 
     //-------------------------------------------------------------------------
+    public RefObject refObject(
+        Path objectId
+    ) {
+        return this.outermostPackage.refObject(objectId);
+    }
+
+    //-------------------------------------------------------------------------
     public UnitOfWork_1_0 refUnitOfWork(
     ) {
         return this.outermostPackage.refUnitOfWork();
@@ -317,7 +316,7 @@ public abstract class RefPackage_1
         try {
             this.refUnitOfWork().begin();
         }
-        catch(ServiceException e) {
+        catch(Exception e) {
             throw new JmiServiceException(e);
         }
     }
@@ -328,7 +327,7 @@ public abstract class RefPackage_1
         try {
             this.refUnitOfWork().commit();
         }
-        catch(ServiceException e) {
+        catch(Exception e) {
             throw new JmiServiceException(e);
         }
     }
@@ -339,7 +338,7 @@ public abstract class RefPackage_1
         try {
             this.refUnitOfWork().rollback();
         }
-        catch(ServiceException e) {
+        catch(Exception e) {
             throw new JmiServiceException(e);
         }
     }
@@ -383,13 +382,10 @@ public abstract class RefPackage_1
                         packageName.replace(':', '.') + "." +
                         this.outermostPackage.refBindingPackageSuffix() + "." +
                         Identifier.CLASS_PROXY_NAME.toIdentifier(className);                         
-                    return (RefStruct)Proxy.newProxyInstance(
-                        this.getClass().getClassLoader(), 
-                        new Class[]{
-                            Classes.getApplicationClass(qualifiedClassName),
-                            RefStruct_1_0.class
-                        },
-                        (InvocationHandler)struct
+                    return Classes.newProxyInstance(
+                        (InvocationHandler)struct,
+                        Classes.getApplicationClass(qualifiedClassName),
+                        RefStruct_1_0.class
                     );
                 }
                 else {
@@ -507,14 +503,12 @@ public abstract class RefPackage_1
             );
             if(filter instanceof InvocationHandler) {
                 String cciClassName = Identifier.CLASS_PROXY_NAME.toIdentifier(className);
-                return (RefFilter_1_0)Proxy.newProxyInstance(
-                    this.getClass().getClassLoader(), 
-                    new Class[]{
-                        RefFilter_1_1.class,
-                        Query.class,
-                        Classes.getApplicationClass(packageName.replace(':', '.') + "." + Names.CCI2_PACKAGE_SUFFIX + "." + (cciClassName.endsWith("Query") ? cciClassName : cciClassName + "Query"))
-                    },
-                    (InvocationHandler)filter
+                return Classes.newProxyInstance(
+                    (InvocationHandler)filter,
+                    RefFilter_1_1.class,
+                    Query.class,
+                    Classes.getApplicationClass(packageName.replace(':', '.') + "." + Names.CCI2_PACKAGE_SUFFIX + "." + (cciClassName.endsWith("Query") ? cciClassName : cciClassName + "Query"))
+                    
                 );
             }
             else {
@@ -665,16 +659,13 @@ public abstract class RefPackage_1
                             )
                         );
                     }
-                    refClass = (RefClass)Proxy.newProxyInstance(
-                        this.getClass().getClassLoader(), 
-                        new Class[]{
-                            Classes.getApplicationClass(loadedClassName = classNameIntf),
-                            Jmi1Class.class,
-                        }, 
+                    refClass = Classes.newProxyInstance(
                         new Jmi1ClassInvocationHandler(
                             qualifiedClassName,
                             immediatePackage
-                        )
+                        ),
+                        Classes.getApplicationClass(loadedClassName = classNameIntf),
+                        Jmi1Class_1_0.class
                     );
                     this.classes.put(
                         qualifiedClassName,
@@ -758,7 +749,7 @@ public abstract class RefPackage_1
                     this.refModel().isStructureType(structType)
             ) {
                 return this.refCreateStruct(
-                    (String)((ModelElement_1_0)structType).values("qualifiedName").get(0),
+                    (String)((ModelElement_1_0)structType).objGetValue("qualifiedName"),
                     args
                 );
             }
@@ -859,6 +850,8 @@ public abstract class RefPackage_1
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
+
+    private static final long serialVersionUID = 350730437983426852L;
 
     /**
      * These members are serialized when serializing a package. However, this

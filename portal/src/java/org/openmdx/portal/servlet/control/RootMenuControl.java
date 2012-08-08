@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: RootMenuControl.java,v 1.18 2008/11/14 14:56:47 wfro Exp $
+ * Name:        $Id: RootMenuControl.java,v 1.22 2009/03/08 18:03:26 wfro Exp $
  * Description: RootMenuControl
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/14 14:56:47 $
+ * Date:        $Date: 2009/03/08 18:03:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,7 +58,7 @@ package org.openmdx.portal.servlet.control;
 import java.io.Serializable;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlPage;
@@ -88,10 +88,11 @@ public class RootMenuControl
         HtmlPage p
     ) throws ServiceException {
         ObjectView view = (ObjectView)p.getView();        
+        String spacer = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
         if(view.getQuickAccessActions().length > 0) {
             for(int i = 0; i < view.getQuickAccessActions().length; i++) {
                 Action action = view.getQuickAccessActions()[i];
-                p.write("  <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\" title=\"", action.getToolTip(), "\">", (action.getIconKey() == null ? "" : p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\"")), " " , action.getTitle(), "</a></li>");
+                p.write("  <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\" title=\"", action.getToolTip(), "\">", spacer, (action.getIconKey() == null ? "" : p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\"")), " " ,action.getTitle(), "</a></li>");
             }
         }        
         ApplicationContext app = p.getApplicationContext();
@@ -102,72 +103,12 @@ public class RootMenuControl
         Action saveSettingsAction = view.getSaveSettingsAction();
         String showHeaderTitle = texts.getShowHeaderTitle();
         String hideHeaderTitle = texts.getHideHeaderTitle();
-        p.write("  <li><a href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(hideHeaderAction), ", {asynchronous:true});try{$('logoTable').id='logoTableNH';$('content').id='contentNH';}catch(e){};\" title=\"", hideHeaderTitle, "\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_HEADER_HIDE, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", hideHeaderTitle, "</a></li>");             
-        p.write("  <li><a href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(showHeaderAction), ", {asynchronous:true});try{$('logoTableNH').id='logoTable';$('contentNH').id='content';}catch(e){};\" title=\"", showHeaderTitle, "\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_HEADER_SHOW, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", showHeaderTitle, "</a></li>"); 
-        p.write("  <li><a href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(saveSettingsAction), ", {asynchronous:true});\" title=\"", saveSettingsAction.getTitle(), "\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SAVE_SELECTED, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", saveSettingsAction.getTitle(), "</a></li>");             
-        p.write("  <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(logoffAction), ";\" title=\"", logoffAction.getTitle(), "\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_LOGOFF_SELECTED, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", logoffAction.getTitle(), "</a></li>");             
+        p.write("  <li><a href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(hideHeaderAction), ", {asynchronous:true});try{$('logoTable').id='logoTableNH';$('content').id='contentNH';}catch(e){};\" title=\"", hideHeaderTitle, "\">", spacer, p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_HEADER_HIDE, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", hideHeaderTitle, "</a></li>");             
+        p.write("  <li><a href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(showHeaderAction), ", {asynchronous:true});try{$('logoTableNH').id='logoTable';$('contentNH').id='content';}catch(e){};\" title=\"", showHeaderTitle, "\">", spacer, p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_HEADER_SHOW, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", showHeaderTitle, "</a></li>"); 
+        p.write("  <li><a href=\"#\" onclick=\"javascript:new Ajax.Request(", p.getEvalHRef(saveSettingsAction), ", {asynchronous:true});\" title=\"", saveSettingsAction.getTitle(), "\">", spacer, p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SAVE_SELECTED, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", saveSettingsAction.getTitle(), "</a></li>");             
+        p.write("  <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(logoffAction), ";\" title=\"", logoffAction.getTitle(), "\">", spacer, p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_LOGOFF_SELECTED, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;", logoffAction.getTitle(), "</a></li>");             
     }
     
-    //-------------------------------------------------------------------------
-    public static void paintRootObjects(
-        HtmlPage p
-    ) throws ServiceException {
-        ObjectView view = (ObjectView)p.getView();
-        ApplicationContext application = view.getApplicationContext();
-        Action[] selectRootObjectAction = view.getSelectRootObjectActions();
-        int lastItemLevel = 0;
-        int currentItemLevel = 0;
-        int i = 0;
-        int indexItemLevel0 = 0;
-        String stateItemLevel0 = "1";
-        while(i < selectRootObjectAction.length) {
-            Action action = selectRootObjectAction[i];
-            currentItemLevel = 0;
-            if((action.getEvent() == Action.EVENT_SELECT_OBJECT) && (action.getParameter(Action.PARAMETER_REFERENCE).length() > 0)) {
-              currentItemLevel = 1;
-            }
-            else if(action.getEvent() == Action.EVENT_SELECT_AND_NEW_OBJECT) {
-              currentItemLevel = 2;
-            }
-            // Get state of root object
-            if(currentItemLevel == 0) {
-                stateItemLevel0 = application.getSettings().getProperty("RootObject." + indexItemLevel0 + ".State", "1");
-                indexItemLevel0++;
-            }
-            // Only show menu entry if state is "1"
-            if("1".equals(stateItemLevel0)) {
-                // open levels
-                int j = 0;
-                while(j < currentItemLevel - lastItemLevel) {
-                  p.write("  <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
-                  j++;
-                }
-                // close levels
-                j = 0;
-                while(j < lastItemLevel - currentItemLevel) {
-                    p.write("  </ul>");
-                    p.write("</li>");
-                    j++;
-                }
-                if(currentItemLevel == 1) {
-                    p.write("    <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">&nbsp;&nbsp;", action.getTitle(), "</a></li>");
-                }
-                else {
-                    p.write("<li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), " " , action.getTitle(), "</a>");
-                }
-            }
-            lastItemLevel = currentItemLevel;
-            i++;
-        }
-        // close levels
-        i = 0;
-        while(i < currentItemLevel) {
-            p.write("  </ul>");
-            p.write("</li>");
-            i++;
-        }        
-    }
-   
     //-------------------------------------------------------------------------
     public static void paintTopNavigation(
         HtmlPage p
@@ -184,7 +125,8 @@ public class RootMenuControl
         int topNavigationShowMax = 6;
         try {
             topNavigationShowMax = Integer.valueOf(application.getSettings().getProperty("TopNavigation.ShowMax", "7")).intValue();
-        } catch(Exception e) {}
+        } 
+        catch(Exception e) {}
         String stateItemLevel0 = "1";                
         while(i < selectRootObjectAction.length) {
             Action action = selectRootObjectAction[i];
@@ -258,30 +200,6 @@ public class RootMenuControl
         }
     }
    
-    //-------------------------------------------------------------------------
-    public static void paintHistory(
-        HtmlPage p
-    ) throws ServiceException {        
-        ObjectView view = (ObjectView)p.getView();      
-        ApplicationContext app = view.getApplicationContext();        
-        Texts_1_0 texts = app.getTexts();        
-        String state = app.getSettings().getProperty("History.State", "1");
-        if("1".equals(state)) {
-            if(view.getHistoryAction().length > 0) {
-                p.write("<li><a href=\"#\">", p.getImg("src=\"", p.getResourcePath("images/"), "access_history", p.getImgType(), "\" border=\"0\" align=\"bottom\" alt=\">\" title=\"\""), " " , texts.getHistoryText(), "</a>");
-                p.write("  <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
-                int i = 0;
-                while(i < view.getHistoryAction().length) {
-                    Action action = view.getHistoryAction()[i];
-                    p.write("    <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\" title=\"", action.getTitle(), "\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey() + "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), " " , action.getTitle(), "</a></li>");
-                    i++;
-                }
-                p.write("  </ul>");
-                p.write("</li>");
-            }
-        }
-    }
-    
     //---------------------------------------------------------------------------------
     // Members
     //---------------------------------------------------------------------------------

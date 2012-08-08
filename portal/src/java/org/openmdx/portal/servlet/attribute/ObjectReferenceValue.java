@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReferenceValue.java,v 1.56 2008/12/04 10:37:23 wfro Exp $
+ * Name:        $Id: ObjectReferenceValue.java,v 1.62 2009/02/27 17:15:40 wfro Exp $
  * Description: ObjectReferenceValue 
- * Revision:    $Revision: 1.56 $
+ * Revision:    $Revision: 1.62 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/04 10:37:23 $
+ * Date:        $Date: 2009/02/27 17:15:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,8 +64,8 @@ import java.util.List;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.collection.MarshallingCollection;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -287,10 +287,8 @@ implements Serializable {
                     new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("path")
-                        },
-                        "Null object can not be marshalled"
+                        "Null object can not be marshalled",
+                        new BasicException.Parameter("path")
                     ),
                     this.application
                 );
@@ -341,18 +339,21 @@ implements Serializable {
         if(forEditing && this.isSingleValued()) {
             String feature = this.getName();
             ObjectReference objectReference = (ObjectReference)this.getValue(false);
-            id = (id == null) || (id.length() == 0)
-            ? feature + "[" + tabIndex + "]"
-                : id;
+            id = (id == null) || (id.length() == 0) ? 
+                feature + "[" + tabIndex + "]" : 
+                id;
             p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             p.write("<td ", rowSpanModifier, ">");
             // Predefined, selectable values only allowed for single-valued attributes with spanRow == 1
             // Show drop-down instead of input field
-            Autocompleter_1_0 autocompleter = this.isChangeable()
-            ? this.getAutocompleter(lookupObject)
-                : null;
+            Autocompleter_1_0 autocompleter = this.isChangeable() ? 
+                this.getAutocompleter(lookupObject) : 
+                null;
             if(autocompleter == null) {
-                p.write("  <input id=\"", id, ".Title\" name=\"", id, ".Title\" type=\"text\" class=\"valueL", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", (objectReference == null ? "" : objectReference.getTitle()), "\"");
+                String classModifier = this.isMandatory() ?
+                    "valueL mandatory" :
+                    "valueL";
+                p.write("  <input id=\"", id, ".Title\" name=\"", id, ".Title\" type=\"text\" class=\"", classModifier, "\"", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", (objectReference == null ? "" : objectReference.getTitle()), "\"");
                 p.writeEventHandlers("    ", attribute.getEventHandler());
                 p.write("  >");
                 p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"hidden\" class=\"valueLLocked\" readonly value=\"", (objectReference == null ? "" : objectReference.refMofId()), "\">");
@@ -367,7 +368,9 @@ implements Serializable {
                     false,
                     null,
                     "class=\"autocompleterInput\"",
-                    "class=\"valueL valueAC\"",
+                    this.isMandatory() ? 
+                        "class=\"valueL valueAC mandatory\"" : 
+                        "class=\"valueL valueAC\"",
                     null
                 );                    
             }

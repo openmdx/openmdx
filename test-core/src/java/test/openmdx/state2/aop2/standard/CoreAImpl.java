@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CoreAImpl.java,v 1.1 2008/11/25 17:49:18 hburger Exp $
+ * Name:        $Id: CoreAImpl.java,v 1.2 2009/02/18 13:00:20 hburger Exp $
  * Description: CoraAImpl 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/25 17:49:18 $
+ * Date:        $Date: 2009/02/18 13:00:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,7 +52,7 @@ package test.openmdx.state2.aop2.standard;
 
 import javax.jdo.listener.LoadCallback;
 
-import org.openmdx.base.aop2.standard.AbstractObject;
+import org.openmdx.base.aop2.AbstractObject;
 
 /**
  * CoraAImpl

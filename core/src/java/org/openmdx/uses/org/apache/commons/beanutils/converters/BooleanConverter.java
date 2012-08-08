@@ -49,10 +49,12 @@ import org.openmdx.uses.org.apache.commons.beanutils.ConversionException;
  * <p>Case is ignored when converting values to true or false.</p>
  *
  * @author Craig R. McClanahan
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:16 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:59 $
  * @since 1.3
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked"
+})
 public final class BooleanConverter extends AbstractConverter {
 
 
@@ -65,7 +67,7 @@ public final class BooleanConverter extends AbstractConverter {
      * not one of the known true strings, nor one of the known false strings.
      */
     public BooleanConverter() {
-        super(Boolean.class);
+        super();
     }
 
 
@@ -82,7 +84,7 @@ public final class BooleanConverter extends AbstractConverter {
      *  in which case this constructor acts like the no-argument one.
      */
     public BooleanConverter(Object defaultValue) {
-        super(Boolean.class);
+        super();
         if (defaultValue != NO_DEFAULT) {
             setDefaultValue(defaultValue);
         }
@@ -105,7 +107,7 @@ public final class BooleanConverter extends AbstractConverter {
      *  ignored.
      */
     public BooleanConverter(String[] trueStrings, String[] falseStrings) {
-        super(Boolean.class);
+        super();
         this.trueStrings = copyStrings(trueStrings);
         this.falseStrings = copyStrings(falseStrings);
     }
@@ -134,7 +136,7 @@ public final class BooleanConverter extends AbstractConverter {
      */
     public BooleanConverter(String[] trueStrings, String[] falseStrings, 
                 Object defaultValue) {
-        super(Boolean.class);
+        super();
         this.trueStrings = copyStrings(trueStrings);
         this.falseStrings = copyStrings(falseStrings);
         if (defaultValue != NO_DEFAULT) {
@@ -169,6 +171,15 @@ public final class BooleanConverter extends AbstractConverter {
     private String[] falseStrings = {"false", "no", "n", "off", "0"};
 
     // --------------------------------------------------------- Protected Methods
+
+    /**
+     * Return the default type this <code>Converter</code> handles.
+     *
+     * @return The default type this <code>Converter</code> handles.
+     */
+    protected Class getDefaultType() {
+        return Boolean.class;
+    }
 
     /**
      * Convert the specified input object into an output object of the

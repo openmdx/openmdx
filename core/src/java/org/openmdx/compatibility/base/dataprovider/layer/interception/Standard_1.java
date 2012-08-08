@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.7 2008/11/13 18:01:27 wfro Exp $
+ * Name:        $Id: Standard_1.java,v 1.10 2009/01/12 16:42:46 wfro Exp $
  * Description: Standard Transport Layer Plug-In
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/13 18:01:27 $
+ * Date:        $Date: 2009/01/12 16:42:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,15 +50,15 @@
  */
 package org.openmdx.compatibility.base.dataprovider.layer.interception;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderOperations;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 
 /**
  * The standard implementation of the interception layer's plug-in.
@@ -95,7 +95,7 @@ public class Standard_1
         short id,
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception {
+    ) throws ServiceException {
         super.activate(id,configuration,delegation);
         this.interceptSet = ! configuration.isOn(LayerConfigurationEntries.PROPAGATE_SET);
     }
@@ -111,7 +111,6 @@ public class Standard_1
      * @exception   ServiceException
      *              on failure
      */
-    @SuppressWarnings("unchecked")
     public void prolog(
         ServiceHeader header,
         DataproviderRequest[] requests

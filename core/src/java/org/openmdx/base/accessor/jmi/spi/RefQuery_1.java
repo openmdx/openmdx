@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RefQuery_1.java,v 1.3 2008/09/29 18:19:05 hburger Exp $
+ * Name:        $Id: RefQuery_1.java,v 1.9 2009/02/02 15:49:23 hburger Exp $
  * Description: RefQuery_1 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/29 18:19:05 $
+ * Date:        $Date: 2009/02/02 15:49:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,13 +67,13 @@ import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefObject;
 
 import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_1;
 import org.openmdx.base.collection.Lists;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.FilterProperty;
 
 /**
  * RefQuery_1
@@ -318,7 +318,7 @@ public class RefQuery_1
     /* (non-Javadoc)
      * @see javax.jdo.Query#deletePersistentAll(java.lang.Object[])
      */
-    public long deletePersistentAll(Object[] parameters) {
+    public long deletePersistentAll(Object... parameters) {
         throw new UnsupportedOperationException(ARGUMENTS);
     }
 
@@ -374,7 +374,7 @@ public class RefQuery_1
     /* (non-Javadoc)
      * @see javax.jdo.Query#executeWithArray(java.lang.Object[])
      */
-    public Object executeWithArray(Object[] parameters) {
+    public Object executeWithArray(Object... parameters) {
         throw new UnsupportedOperationException(ARGUMENTS);
     }
 
@@ -428,6 +428,7 @@ public class RefQuery_1
     /* (non-Javadoc)
      * @see javax.jdo.Query#setCandidates(javax.jdo.Extent)
      */
+    @SuppressWarnings("unchecked")
     public void setCandidates(Extent pcs) {
         throw new UnsupportedOperationException(
             "Extent can't be set via JDO query yet"
@@ -542,6 +543,40 @@ public class RefQuery_1
      */
     public void setUnmodifiable() {
         this.unmodifiable = true;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String, java.lang.String)
+     */
+    public void addSubquery(Query arg0, String arg1, String arg2) {
+        throw new UnsupportedOperationException("Operation not supported by RefQuery_1");        
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String, java.lang.String, java.lang.String)
+     */
+    public void addSubquery(Query arg0, String arg1, String arg2, String arg3) {
+        throw new UnsupportedOperationException("Operation not supported by RefQuery_1");        
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String, java.lang.String, java.lang.String[])
+     */
+    public void addSubquery(
+        Query arg0,
+        String arg1,
+        String arg2,
+        String... arg3
+    ) {
+        throw new UnsupportedOperationException("Operation not supported by RefQuery_1");        
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String, java.lang.String, java.util.Map)
+     */
+    @SuppressWarnings("unchecked")
+    public void addSubquery(Query arg0, String arg1, String arg2, Map arg3) {
+        throw new UnsupportedOperationException("Operation not supported by RefQuery_1");        
     }
 
 }

@@ -1,4 +1,4 @@
-import org.openmdx.compatibility.base.naming.*;
+import org.openmdx.base.naming.*;
 import org.openmdx.portal.servlet.*;
 import org.openmdx.portal.servlet.texts.*;
 import org.openmdx.portal.servlet.view.*;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestSQLServer_1.java,v 1.2 2008/11/07 17:54:14 hburger Exp $
+ * Name:        $Id: TestSQLServer_1.java,v 1.4 2009/01/12 17:50:59 wfro Exp $
  * Description: Test SQL Server 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/07 17:54:14 $
+ * Date:        $Date: 2009/01/12 17:50:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,7 +55,7 @@ import java.io.IOException;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.openmdx.compatibility.base.application.cci.Deployment_1;
+import org.openmdx.application.dataprovider.deployment.Deployment_1;
 
 /**
  * Test SQL Server

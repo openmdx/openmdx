@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: State_1.java,v 1.2 2007/10/24 07:50:15 hburger Exp $
+ * Name:        $Id: State_1.java,v 1.3 2009/01/05 13:48:09 wfro Exp $
  * Description: State_1 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/24 07:50:15 $
+ * Date:        $Date: 2009/01/05 13:48:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,11 +51,11 @@
 
 package org.openmdx.compatibility.base.dataprovider.layer.type;
 
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attributes;
 
 /**

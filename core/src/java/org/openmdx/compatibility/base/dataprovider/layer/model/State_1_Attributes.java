@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: State_1_Attributes.java,v 1.10 2007/10/19 18:37:48 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: State_1_Attributes.java,v 1.14 2009/02/17 10:06:22 hburger Exp $
  * Description: Generated constants for State_1_Attributes
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/19 18:37:48 $
+ * Date:        $Date: 2009/02/17 10:06:22 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,247 +50,75 @@
  */
 package org.openmdx.compatibility.base.dataprovider.layer.model;
 
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.compatibility.base.query.Quantors;
-
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Quantors;
 
 /**
  * Attributes used by State_1.
  */
-
-
-
-
 public class State_1_Attributes {
 
-  
-  protected State_1_Attributes() {
-   // Avoid instantiation
-  }
-
-
-  /**
-   * Attribute name.
-   */
-  static public final String VALID_FROM = "object_validFrom";
-
-
-
-  /**
-   * Attribute name.
-   */
-  static public final String VALID_TO = "object_validTo";
-
-
-
-  /**
-   * Attribute name.
-   */
-  static public final String STATE_VALID_FROM = "stateValidFrom";
-
-
-
-  /**
-   * Attribute name.
-   */
-  static public final String STATE_VALID_TO = "stateValidTo";
-
-
-
-  /**
-   * Attribute name.
-   */
-  static public final String STATED_OBJECT = "statedObject";
-
-
-
-  /**
-   * Attribute name.
-   */
-  static public final String UNDERLYING_STATE = "underlyingState";
-
-
-
-  /**
-   * Attribute name.
-   */
-  static public final String INVALIDATED_AT = "object_invalidatedAt";
-
-
-  
-  /**
-   * Attribute name.
-   */
-  static public final String KEEPING_INVALIDATED_STATES = "keepingInvalidatedStates";
-
-  
-  
-  /**
-   * Reference name.
-   */
-  static public final String REF_HISTORY = "historyState";
-
-
-
-  /**
-   * Reference name.
-   */
-  static public final String REF_VALID = "validState";
-
-
-
-  /**
-   * Reference name.
-   */
-  static public final String REF_STATE = "state";
-
-
-
-  /**
-   * Reference name.
-   */
-  static public final String STATE_CONTEXT = "State";
-
-  
-  
-  /**
-   * Operation parameter name
-   */
-  static public final String OP_STATE = "state";
-
-
-
-  /**
-   * Operation parameter name
-   */
-  static public final String OP_VALID_FROM = "validFrom";
-
-
-
-  /**
-   * Operation parameter name
-   */
-  static public final String OP_VALID_TO = "validTo";
-
-
-
-  /**
-   * Operation parameter name
-   */
-  static public final String OP_SKIP_MISSING_STATES = "skipMissingStates";
-
-
-
-  /**
-   * Operation parameter value
-   */
-  static public final String OP_VAL_EVER = "ever";
-
-
-
-  /**
-   * Operation parameter value
-   */
-  static public final String OP_VAL_FIRST = "first";
-
-
-
-  /**
-   * Operation parameter value
-   */
-  static public final String OP_VAL_LAST = "last";
-
-
-
-  /**
-   * Returns the smallest defined integer constant or
-   * Integer.MAX_VALUE if no integer constant is defined.
-   *
-   * @return an int
-   */
-  static public int min()
-  {
-  return Integer.MAX_VALUE; // no constants defined
-  }
-
-
-
-  /**
-   * Returns the biggest defined integer constant or
-   * Integer.MIN_VALUE if no integer constant is defined.
-   *
-   * @return an int
-   */
-  static public int max()
-  {
-  return Integer.MIN_VALUE; // no constants defined
-  }
-
-
-
-  /**
-   * Returns a string representation of the passed code
-   *
-   * @param code  a code to be stringified
-   * @return a stringified code
-   */
-  static public String toString(int code)
-  {
-      // no integer constants defined
-      return String.valueOf(code);
-  }
-
-
-
-  /**
-   * Returns the code of the passed code's string representation.
-   * The string representation is case insensitive.
-   *
-   * @exception  throws an <code>IllegalArgumentException</code> 
-   *             if the stringified code cannot be resolved
-   * @param code a stringified code
-   * @return a code
-   */
-  static public int fromString(String code)
-  {  
-
-    // Not found
-    throw new IllegalArgumentException(
-          "The code '" + code + "' is unkown to the class State_1_Attributes");
-  }
-
-
-  /**
-   * Search for stated object filter property
-   * 
-   * @param attributeFilter the attribute filter to be searched for
-   * 
-   * @return the index of the stated object filter property, or <code>-1</code>
-   * if it is not found
-   */
-  public static int indexOfStatedObject(
-      FilterProperty[] attributeFilter
-  ){
-      for(
-          int i = 0;
-          i < attributeFilter.length;
-          i++
-      ){
-          FilterProperty filter = attributeFilter[i];
-          if (
-              Quantors.THERE_EXISTS == filter.quantor() &&
-              State_1_Attributes.STATED_OBJECT.equals(filter.name()) &&
-              filter.operator() == (
-                  filter.values().isEmpty() ? FilterOperators.IS_NOT_IN : FilterOperators.IS_IN  
-              )
-          ) {
-              return i;
-          }                
-      }
-      return -1;
-  }
+    protected State_1_Attributes() {
+        // Avoid instantiation
+    }
+
+
+    /**
+     * Attribute name.
+     */
+    static public final String STATED_OBJECT = "statedObject";
+
+    /**
+     * Attribute name.
+     */
+    static public final String KEEPING_INVALIDATED_STATES = "keepingInvalidatedStates";
+
+    /**
+     * 
+     */
+    public static final String CREATED_AT_ALIAS = SystemAttributes.MODIFIED_AT;
+
+    /**
+     * 
+     */
+    public static final String REMOVED_AT_ALIAS = "object_invalidatedAt";
+
+    /**
+     * 
+     */
+    public static final String REMOVED_BY_ALIAS = SystemAttributes.MODIFIED_BY;
+
+
+    /**
+     * Search for stated object filter property
+     * 
+     * @param attributeFilter the attribute filter to be searched for
+     * 
+     * @return the index of the stated object filter property, or <code>-1</code>
+     * if it is not found
+     */
+    public static int indexOfStatedObject(
+        FilterProperty[] attributeFilter
+    ){
+        for(
+                int i = 0;
+                i < attributeFilter.length;
+                i++
+        ){
+            FilterProperty filter = attributeFilter[i];
+            if (
+                    Quantors.THERE_EXISTS == filter.quantor() &&
+                    State_1_Attributes.STATED_OBJECT.equals(filter.name()) &&
+                    filter.operator() == (
+                            filter.values().isEmpty() ? FilterOperators.IS_NOT_IN : FilterOperators.IS_IN  
+                    )
+            ) {
+                return i;
+            }                
+        }
+        return -1;
+    }
 
 }
-
-// end-of-file

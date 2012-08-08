@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LenientNumberComparator.java,v 1.5 2008/09/22 23:38:20 hburger Exp $
+ * Name:        $Id: LenientNumberComparator.java,v 1.6 2009/01/06 10:21:19 wfro Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/22 23:38:20 $
+ * Date:        $Date: 2009/01/06 10:21:19 $
  * ====================================================================
  *
  * This software is published under the BSD license

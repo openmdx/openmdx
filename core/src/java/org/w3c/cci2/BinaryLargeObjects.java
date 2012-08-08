@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BinaryLargeObjects.java,v 1.6 2008/07/03 23:02:49 wfro Exp $
+ * Name:        $Id: BinaryLargeObjects.java,v 1.11 2009/01/12 12:54:16 wfro Exp $
  * Description: Binary Large Object Factory 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/03 23:02:49 $
+ * Date:        $Date: 2009/01/12 12:54:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,18 +51,18 @@
 package org.w3c.cci2;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.openmdx.base.exception.ExtendedIOException;
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.accessor.object.cci.ReadableLargeObject;
+import org.openmdx.application.dataprovider.transport.rmi.InprocessMarshaller;
 
 /**
  * Binary Large Object Factory
@@ -276,71 +276,53 @@ public class BinaryLargeObjects {
 
     }
 
-    public static BinaryLargeObject valueOf(
-        ReadableLargeObject delegate
-    ){
-        return new CompatibilityLargeObject(delegate);
-    }
+    //------------------------------------------------------------------------
+    public static class BinaryHolder implements Serializable  {
     
-    /**
-     * Compatibility CLOB
-     */
-    private static class CompatibilityLargeObject implements BinaryLargeObject {
-
         /**
          * Constructor 
          *
-         * @param delegate
-         */
-        CompatibilityLargeObject(ReadableLargeObject delegate) {
-            this.delegate = delegate;
-        }
-
-        /**
+         * @param stream
          * 
+         * @throws IOException
          */
-        private final ReadableLargeObject delegate;
-        
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.BinaryLargeObject#getContent()
-         */
-        public InputStream getContent() throws IOException {
-            try {
-                return this.delegate.getBinaryStream();
-            } catch (ServiceException exception) {
-                throw new ExtendedIOException(exception);
+        public BinaryHolder(
+            InputStream stream
+        ) throws IOException {
+            if(stream instanceof ByteStringInputStream) {
+                this.string = ((ByteStringInputStream)stream).getString();
+            } else {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                int b;
+                while((b = stream.read()) != -1) {
+                    out.write(b);
+                }
+                this.string = new ByteString(out.toByteArray());
             }
         }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.LargeObject#getLength()
+    
+        /**
+         * Implements <code>Serializable</code>
          */
-        public Long getLength(
-        ) throws IOException {
-            try {
-                return asLength(this.delegate.length());
-            } catch (ServiceException exception) {
-                throw new ExtendedIOException(exception);
-            }
+        private static final long serialVersionUID = 1300727842760003691L;
+    
+        /**
+         * The content
+         */
+        private final ByteString string;
+    
+        /**
+         * Create an input stream
+         * 
+         * @return a newly created input stream
+         */
+        public InprocessMarshaller.BinarySource_1InputStream toStream(
+        ){
+            return new InprocessMarshaller.BinarySource_1InputStream(this.string);
         }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.BinaryLargeObject#getContent(java.io.OutputStream, long)
-         */
-        public void getContent(
-            OutputStream stream, 
-            long position
-        ) throws IOException {
-            try {
-                this.delegate.getBinaryStream(stream, position);
-            } catch (ServiceException exception) {
-                throw new ExtendedIOException(exception);
-            }
-        }        
-        
+    
     }
 
-    
     /**
      * A negative length is converted to <code>null</code>.
      * 

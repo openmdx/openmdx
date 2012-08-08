@@ -38,9 +38,12 @@ import java.util.Map;
  * property values are <code>Serializable</code>.</p>
  *
  * @author Craig McClanahan
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:13 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:44 $
  */
-@SuppressWarnings({"unchecked", "serial"})
+
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class BasicDynaBean implements DynaBean, Serializable {
 
 

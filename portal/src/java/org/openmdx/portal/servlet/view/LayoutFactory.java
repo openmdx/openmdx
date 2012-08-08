@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: LayoutFactory.java,v 1.9 2008/08/12 16:38:07 wfro Exp $
+ * Name:        $Id: LayoutFactory.java,v 1.10 2009/01/13 02:16:09 wfro Exp $
  * Description: TextsFactory
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:07 $
+ * Date:        $Date: 2009/01/13 02:16:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,7 +64,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.openmdx.application.log.AppLog;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 
 public class LayoutFactory
   implements Serializable {

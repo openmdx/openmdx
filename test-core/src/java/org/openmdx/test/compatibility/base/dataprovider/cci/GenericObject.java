@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: GenericObject.java,v 1.1 2005/11/01 18:30:23 hburger Exp $
+ * Name:        $Id: GenericObject.java,v 1.4 2009/02/04 11:06:38 hburger Exp $
  * Description: Generic Object
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/11/01 18:30:23 $
+ * Date:        $Date: 2009/02/04 11:06:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,7 +55,7 @@ package org.openmdx.test.compatibility.base.dataprovider.cci;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 /**
  * Generic Object
@@ -66,11 +66,11 @@ public final class GenericObject {
         Path path
     ) {
         this.path = path;
-        this.values = new HashMap(20);
+        this.values = new HashMap<String,Object>(20);
     }
     
     private final Path path;
-    private final Map values;
+    private final Map<String,Object> values;
 
     
     public Path path(){

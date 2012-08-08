@@ -21,7 +21,7 @@ package org.openmdx.uses.org.apache.commons.collections;
  * exceeded.
  *
  * @since Commons Collections 2.1
- * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:23 $
+ * @version $Revision: 1.5 $ $Date: 2009/03/03 14:59:14 $
  * 
  * @author Avalon
  * @author <a href="mailto:bloritsch@apache.org">Berin Loritsch</a>
@@ -29,9 +29,7 @@ package org.openmdx.uses.org.apache.commons.collections;
  * @author Paul Jack
  * @author Stephen Colebourne
  */
-@SuppressWarnings({
-    "unchecked", "serial"
-})
+@SuppressWarnings("serial")
 public class BufferOverflowException extends RuntimeException {
     
     /** The root cause throwable */

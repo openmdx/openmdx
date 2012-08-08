@@ -4,9 +4,9 @@
 	<enterprise-beans>
 	    <session>
 			<ejb-name>EntityManagerFactory</ejb-name>
-			<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2LocalHome</local-home>
-			<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2_0Local</local>
-			<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.EntityManagerFactory_2Bean</ejb-class>
+			<local-home>org.openmdx.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2LocalHome</local-home>
+			<local>org.openmdx.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2_0Local</local>
+			<ejb-class>org.openmdx.application.dataprovider.transport.ejb.server.EntityManagerFactory_2Bean</ejb-class>
 			<session-type>Stateless</session-type>
 			<transaction-type>Container</transaction-type>
 			<env-entry>
@@ -22,7 +22,7 @@
 			<env-entry>
 				<env-entry-name>EntityManager/Callbacks/packageImpl[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>test.openmdx.state2.aop2.standard</env-entry-value>
+				<env-entry-value>test.openmdx.state2.aop2</env-entry-value>
 			</env-entry>
 			<env-entry>
 		        <env-entry-name>EntityManager/lenient</env-entry-name>
@@ -52,12 +52,12 @@
 			<env-entry>
 			  <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+			  <env-entry-value>org.openmdx.application.dataprovider.spi.DelegatingLayer_0</env-entry-value>
 			</env-entry>
 			<env-entry>
 			  <env-entry-name>KERNEL/TYPE</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+			  <env-entry-value>org.openmdx.compatibility.state1.layer.type.StateCapable_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 			  <env-entry-name>KERNEL/APPLICATION</env-entry-name>
@@ -67,7 +67,7 @@
 			<env-entry>
 			  <env-entry-name>KERNEL/MODEL</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+			  <env-entry-value>org.openmdx.application.dataprovider.spi.DelegatingLayer_0</env-entry-value>
 			</env-entry>
 			<env-entry>
 			  <env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
@@ -78,6 +78,15 @@
 			  <env-entry-name>APPLICATION/runtimeSegment</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
 			  <env-entry-value>xri://@openmdx*org.openmdx.compatibility.runtime1/provider/test.openmdx/segment/state2</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>
+					TYPE/stateCapable[0]
+				</env-entry-name>
+				<env-entry-type>java.lang.String</env-entry-type>
+				<env-entry-value>
+					xri://@openmdx*org.openmdx.compatibility.state1/provider/($..)/segment/($..)/state1Core/($..)
+				</env-entry-value>
 			</env-entry>
 			<ejb-local-ref>
 			  <ejb-ref-name>ejb/dataprovider[0]</ejb-ref-name>
@@ -96,11 +105,11 @@
 		</session>
 	    <session>
 			<ejb-name>Gateway</ejb-name>
-			<home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
-			<remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
-			<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-			<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
-	  		<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction.Gateway_1Bean</ejb-class>
+			<home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+			<remote>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+			<local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			<local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+	  		<ejb-class>org.openmdx.application.dataprovider.transport.ejb.transaction.Gateway_1Bean</ejb-class>
 			<session-type>Stateless</session-type>
 			<transaction-type>Container</transaction-type>
 			<env-entry>
@@ -131,12 +140,12 @@
 			<env-entry>
 			  <env-entry-name>KERNEL/APPLICATION</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.Layer_1</env-entry-value>
+			  <env-entry-value>org.openmdx.application.dataprovider.spi.Layer_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 			  <env-entry-name>KERNEL/MODEL</env-entry-name>
 			  <env-entry-type>java.lang.String</env-entry-type>
-			  <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.Layer_1</env-entry-value>
+			  <env-entry-value>org.openmdx.application.dataprovider.spi.Layer_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 			  <env-entry-name>KERNEL/PERSISTENCE</env-entry-name>

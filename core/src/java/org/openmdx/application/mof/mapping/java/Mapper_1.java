@@ -1,0 +1,1705 @@
+/*
+ * ====================================================================
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Name:        $Id: Mapper_1.java,v 1.3 2009/03/03 17:23:08 hburger Exp $
+ * Description: Mapper_1
+ * Revision:    $Revision: 1.3 $
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Date:        $Date: 2009/03/03 17:23:08 $
+ * ====================================================================
+ *
+ * This software is published under the BSD license as listed below.
+ * 
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * ------------------
+ * 
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
+ */
+package org.openmdx.application.mof.mapping.java;
+
+import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import org.omg.mof.cci.VisibilityKind;
+import org.omg.mof.spi.AbstractNames;
+import org.omg.mof.spi.Identifier;
+import org.omg.mof.spi.Names;
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.mof.cci.ModelAttributes;
+import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.application.mof.cci.PrimitiveTypes;
+import org.openmdx.application.mof.mapping.cci.AttributeDef;
+import org.openmdx.application.mof.mapping.cci.ClassDef;
+import org.openmdx.application.mof.mapping.cci.ClassifierDef;
+import org.openmdx.application.mof.mapping.cci.ExceptionDef;
+import org.openmdx.application.mof.mapping.cci.Mapper_1_1;
+import org.openmdx.application.mof.mapping.cci.MappingTypes;
+import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
+import org.openmdx.application.mof.mapping.cci.OperationDef;
+import org.openmdx.application.mof.mapping.cci.ReferenceDef;
+import org.openmdx.application.mof.mapping.cci.StructDef;
+import org.openmdx.application.mof.mapping.cci.StructuralFeatureDef;
+import org.openmdx.application.mof.mapping.java.metadata.ClassMetaData;
+import org.openmdx.application.mof.mapping.java.metadata.FieldMetaData;
+import org.openmdx.application.mof.mapping.spi.AbstractMapper_1;
+import org.openmdx.application.mof.repository.accessor.ModelElement_1;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_5;
+import org.openmdx.base.naming.Path;
+import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
+
+//---------------------------------------------------------------------------
+public class Mapper_1 extends AbstractMapper_1 implements Mapper_1_1 {
+
+    //---------------------------------------------------------------------------  
+    /**
+     * Constructor.
+     * @param mappingFormat mapping format defined MapperFactory_1.
+     * @param packageSuffix The suffix for the package to be generated in (without leading dot), e.g. 'cci'.
+     * @param fileExtension The file extension (without leading point), e.g. 'java'.
+     */
+    public Mapper_1(
+        String mappingFormat,
+        String packageSuffix,
+        String fileExtension
+    ) throws ServiceException {
+        super(
+            packageSuffix
+        );    
+        this.fileExtension = fileExtension;
+        if(mappingFormat.startsWith(MappingTypes.JPA3 + ':')) {
+            this.format = Format.JPA3;
+        } 
+        else {
+            this.format = 
+                MappingTypes.CCI2.equals(mappingFormat) ? Format.CCI2 :
+                    MappingTypes.JMI1.equals(mappingFormat) ? Format.JMI1 :
+                        MappingTypes.JPA3.equals(mappingFormat) ? Format.JPA3 :
+                            null;
+        }
+    }
+
+    //---------------------------------------------------------------------------  
+    /**
+     * Is called for all ModelAttribute features of a class including suerptyes.
+     * This method must check wheter modelAttribute.container = modelClass and
+     * behave accordingly. 
+     * @param jdoMetaDataMapper 
+     * @param jdoSliceMetaDataMapper 
+     * @param ormMetaDataMapper 
+     * @param ormSliceMetaDataMapper 
+     */
+    void mapAttribute(
+        ModelElement_1_0 classDef,
+        ModelElement_1_0 attributeDef,
+        QueryMapper queryMapper,
+        InstanceMapper instanceMapper,
+        MetaDataMapper ormMetaDataMapper, 
+        MetaDataMapper ormSliceMetaDataMapper        
+    ) throws ServiceException {
+
+        SysLog.trace("attribute", attributeDef.jdoGetObjectId());
+        String multiplicity = (String)attributeDef.objGetValue("multiplicity");
+        boolean isDerived = ((Boolean)attributeDef.objGetValue("isDerived")).booleanValue();
+        boolean isChangeable = ((Boolean)attributeDef.objGetValue("isChangeable")).booleanValue();
+        // required for ...Class.create...() operations
+        this.processedAttributes.add(attributeDef);
+        try {
+            if(
+                (this.format == Format.JPA3) ||
+                VisibilityKind.PUBLIC_VIS.equals(attributeDef.objGetValue("visibility"))
+            ) {    
+                AttributeDef mAttributeDef = new AttributeDef(
+                    attributeDef,
+                    this.model
+                );       
+                ClassDef mClassDef = new ClassDef(
+                    classDef,
+                    this.model,
+                    this.metaData
+                );
+                // Attributes are read-only if they are not changeable or derived
+                boolean isReadOnly = !isChangeable || isDerived;
+                // setter/getter interface only if modelAttribute.container = modelClass. 
+                // Otherwise inherit from super interfaces.
+                if(
+                    ((this.format == Format.JPA3) && (((ClassMetaData)mClassDef.getClassMetaData()).getBaseClass() == null)) ||
+                    attributeDef.objGetValue("container").equals(classDef.jdoGetObjectId())
+                ){
+                    // query interface
+                    if(queryMapper != null) {
+                        queryMapper.mapStructurealFeature(mClassDef, mAttributeDef);
+                    }
+                    // Note:
+                    // Set operations in interfaces are generated only if the attribute
+                    // is changeable and is not derived.
+
+                    // set/get interface 0..1
+                    if(Multiplicities.OPTIONAL_VALUE.equals(multiplicity)) {
+                        if(instanceMapper != null) {
+                            instanceMapper.mapAttributeGet0_1(mAttributeDef);
+                        }
+                        if(this.format == Format.JPA3) {
+                            ormMetaDataMapper.mapAttribute(mAttributeDef);
+                        }
+                        if(!isReadOnly) {
+                            if(instanceMapper != null) {
+                                instanceMapper.mapAttributeSet0_1(mAttributeDef);
+                            }
+                        }
+                    }
+
+                    // set/get interface 1..1
+                    else if(Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
+                        if(instanceMapper != null) {
+                            instanceMapper.mapAttributeGet1_1(mAttributeDef);
+                        }
+                        if(this.format == Format.JPA3) {
+                            ormMetaDataMapper.mapAttribute(mAttributeDef);
+                        }
+                        if(!isReadOnly) {
+                            if(instanceMapper != null) {
+                                instanceMapper.mapAttributeSet1_1(mAttributeDef);
+                            }
+                        }
+                    }
+
+                    // set/get interface list
+                    else if(Multiplicities.LIST.equals(multiplicity)) {
+                        if(instanceMapper != null) {
+                            instanceMapper.mapAttributeGetList(mAttributeDef);
+                        }
+                        if(this.format == Format.JPA3) {
+                            FieldMetaData fieldMetaData = instanceMapper.getFieldMetaData(mAttributeDef.getQualifiedName()); 
+                            Integer embedded = fieldMetaData == null ? null : fieldMetaData.getEmbedded();
+                            if(embedded == null) {
+                                ormSliceMetaDataMapper.mapAttribute(mAttributeDef);
+                                ormMetaDataMapper.mapSize(mAttributeDef);
+                            } 
+                            else {
+                                ormMetaDataMapper.mapEmbedded(mAttributeDef, fieldMetaData);
+                            }
+                        }
+                        if(!isReadOnly) {
+                            if(instanceMapper != null) {                
+                                instanceMapper.mapAttributeSetList(mAttributeDef);
+                            }
+                        }
+                    }  
+                    // set/get interface set
+                    else if(Multiplicities.SET.equals(multiplicity)) {
+                        if(instanceMapper != null) {
+                            instanceMapper.mapAttributeGetSet(mAttributeDef);
+                        }
+                        if(this.format == Format.JPA3) {
+                            FieldMetaData fieldMetaData = instanceMapper.getFieldMetaData(mAttributeDef.getQualifiedName()); 
+                            Integer embedded = fieldMetaData == null ? null : fieldMetaData.getEmbedded();
+                            if(embedded == null) {
+                                ormSliceMetaDataMapper.mapAttribute(mAttributeDef);
+                                ormMetaDataMapper.mapSize(mAttributeDef);
+                            } else {
+                                ormMetaDataMapper.mapEmbedded(mAttributeDef, fieldMetaData);
+                            }
+                        }
+                        if(!isReadOnly) {
+                            if(instanceMapper != null) {               
+                                instanceMapper.mapAttributeSetSet(mAttributeDef);
+                            }
+                        }
+                    }  
+
+                    // set/get interface sparsearray
+                    else if(Multiplicities.SPARSEARRAY.equals(multiplicity)) {
+                        if(instanceMapper != null) {
+                            instanceMapper.mapAttributeGetSparseArray(mAttributeDef);
+                        }
+                        if(this.format == Format.JPA3) {
+                            ormSliceMetaDataMapper.mapAttribute(mAttributeDef);
+                            ormMetaDataMapper.mapSize(mAttributeDef);
+                        }
+                        if(!isReadOnly) {
+                            if(instanceMapper != null) {
+                                instanceMapper.mapAttributeSetSparseArray(mAttributeDef);
+                            }
+                        }
+                    }  
+                    // set/get interface map
+                    else if(Multiplicities.MAP.equals(multiplicity)) {
+                        if(instanceMapper != null) {
+                            instanceMapper.mapAttributeGetMap(mAttributeDef);
+                        }
+
+                    }  
+                    // set/get interface stream
+                    else if(Multiplicities.STREAM.equals(multiplicity)) {
+                        if(instanceMapper != null) {
+                            instanceMapper.mapAttributeGetStream(mAttributeDef);
+                        }
+
+                        if(!isReadOnly) {
+                            if(instanceMapper != null) {
+                                instanceMapper.mapAttributeSetStream(mAttributeDef);
+                            }
+                        }
+                    }  
+                    // set/get interface with lower and upper bound, e.g. 0..n
+                    else {
+                        if(instanceMapper != null) {
+                            instanceMapper.mapAttributeGetList(mAttributeDef);
+                        }
+                        if(this.format == Format.JPA3) {
+                            ormSliceMetaDataMapper.mapAttribute(mAttributeDef);
+                            ormMetaDataMapper.mapSize(mAttributeDef);
+                        }
+                    }  
+                }
+            }
+        } 
+        catch(Exception ex) {
+            throw new ServiceException(ex);
+        }
+    }
+
+    //---------------------------------------------------------------------------    
+    @SuppressWarnings("unchecked")
+    void mapReference(
+        ModelElement_1_0 classDef,
+        ModelElement_1_0 referenceDef,
+        QueryMapper queryMapper,
+        InstanceMapper instanceMapper, 
+        MetaDataMapper ormMetaDataMapper, 
+        MetaDataMapper ormSliceMetaDataMapper, 
+        boolean inherited
+    ) throws ServiceException {
+        SysLog.trace("reference", referenceDef.jdoGetObjectId());
+        ModelElement_1_0 referencedEnd = this.model.getElement(
+            referenceDef.objGetValue("referencedEnd")
+        );
+        ModelElement_1_0 association = this.model.getElement(
+            referencedEnd.objGetValue("container")
+        );
+        ClassDef mClassDef = new ClassDef(
+            classDef,
+            this.model,
+            this.metaData
+        );
+        SysLog.trace("referencedEnd", referencedEnd);
+        SysLog.trace("association", association);
+        // setter/getter interface only if modelAttribute.container = modelClass. 
+        // Otherwise inherit from super interfaces.
+        boolean includeInClass =
+            ((this.format == Format.JPA3) && (((ClassMetaData)mClassDef.getClassMetaData()).getBaseClass() == null)) ||
+            referenceDef.objGetValue("container").equals(classDef.jdoGetObjectId());
+        String multiplicity = (String)referenceDef.objGetValue("multiplicity");
+        String visibility = (String)referenceDef.objGetValue("visibility");
+        List qualifierNames = referencedEnd.objGetList("qualifierName");
+        List qualifierTypes = referencedEnd.objGetList("qualifierType");
+        boolean isChangeable = ((Boolean)referenceDef.objGetValue("isChangeable")).booleanValue();
+        boolean isDerived = ((Boolean)association.objGetValue("isDerived")).booleanValue();
+        boolean includeExtensions = this.format == Format.JMI1 && !inherited;
+        // Check whether this reference is stored as attribute
+        // required for ...Class.create...() operations
+        if(this.model.referenceIsStoredAsAttribute(referenceDef)) {
+            SysLog.trace(
+                "the reference is stored as attribute", 
+                referenceDef.objGetValue("qualifiedName")
+            );
+            ModelElement_1_0 referenceAsAttribute = null;
+            this.processedAttributes.add(
+                referenceAsAttribute = new ModelElement_1(referenceDef)
+            );
+            if(!qualifierNames.isEmpty()) {
+                SysLog.trace(qualifierNames.toString(), qualifierTypes);
+                String newMultiplicity = 
+                    qualifierTypes.size() == 1 && 
+                    PrimitiveTypes.STRING.equals(((Path)qualifierTypes.get(0)).getBase()) ? 
+                        Multiplicities.MAP : 
+                            Multiplicities.MULTI_VALUE;
+                SysLog.trace("Adjust multiplicity to " + Multiplicities.MULTI_VALUE, newMultiplicity);
+                // 0..n association        
+                // set multiplicity to 0..n, this ensures that the instance creator uses
+                // a multivalued parameter for this reference attribute
+                referenceAsAttribute.objSetValue("multiplicity", newMultiplicity);
+            }
+            referenceAsAttribute.objSetValue("isDerived", association.objGetValue("isDerived"));
+        }
+        try {
+            if(VisibilityKind.PUBLIC_VIS.equals(visibility)) {  
+                ReferenceDef mReferenceDef = new ReferenceDef(
+                    referenceDef,
+                    this.model, 
+                    false // openmdx1
+                );
+                /**
+                 * References are read-only if they are not changeable. In addition they are also
+                 * read-only if the reference is derived and stored as attribute.
+                 */
+                boolean isReadOnly = !isChangeable || (
+                    isDerived && this.model.referenceIsStoredAsAttribute(referenceDef)
+                );
+                if(this.model.referenceIsStoredAsAttribute(referenceDef)) {  
+                    if(includeInClass && (queryMapper != null) && !inherited) {
+                        queryMapper.mapStructurealFeature(mClassDef, mReferenceDef);
+                    } 
+                    if(
+                        includeInClass && 
+                        (this.format == Format.JPA3) 
+                    ) {
+                        if(qualifierNames.isEmpty()) {
+                            if(
+                                Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ||
+                                Multiplicities.SINGLE_VALUE.equals(multiplicity)
+                            ){
+                                ormMetaDataMapper.mapReference(mReferenceDef);
+                            } 
+                            else if(
+                                Multiplicities.LIST.equals(multiplicity) ||
+                                Multiplicities.SET.equals(multiplicity) ||
+                                Multiplicities.MULTI_VALUE.equals(multiplicity) ||
+                                Multiplicities.SPARSEARRAY.equals(multiplicity)
+                            ){
+                                ormSliceMetaDataMapper.mapReference(mReferenceDef);
+                                ormMetaDataMapper.mapSize(mReferenceDef);
+                            }
+                        } 
+                        else {
+                            ormSliceMetaDataMapper.mapReference(mReferenceDef);
+                            ormMetaDataMapper.mapSize(mReferenceDef);
+                        }
+                    }
+                }
+                // no qualifier, multiplicity must be [0..1|1..1|0..n]
+                if(qualifierNames.isEmpty()) {
+                    // 0..1
+                    if(Multiplicities.OPTIONAL_VALUE.equals(multiplicity)) {
+                        if(includeInClass && !inherited) {                            
+                            if(instanceMapper != null){
+                                // get
+                                instanceMapper.mapReferenceGetx_1NoQualifier(
+                                    mReferenceDef, 
+                                    true, // optional
+                                    true // referencedEnd
+                                );
+                                if(!isReadOnly) {
+                                    // set
+                                    instanceMapper.mapReferenceSetNoQualifier(
+                                        mReferenceDef, 
+                                        true // referencedEnd
+                                    );
+                                    if(includeExtensions) {
+                                        instanceMapper.mapReferenceRemoveOptional(mReferenceDef);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // 1..1
+                    else if (Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
+                        if(includeInClass && !inherited) {
+                            if(instanceMapper != null){
+                                // get
+                                instanceMapper.mapReferenceGetx_1NoQualifier(
+                                    mReferenceDef, 
+                                    false, // optional
+                                    true // referencedEnd
+                                );
+                                if(!isReadOnly) {
+                                    // set
+                                    instanceMapper.mapReferenceSetNoQualifier(
+                                        mReferenceDef, 
+                                        true // referencedEnd
+                                    );
+                                }
+                            }
+                        }
+                    }
+                    // 0..n
+                    else {
+                        if(includeInClass) {
+                            if(instanceMapper != null){
+                                instanceMapper.mapReferenceGet0_nNoQuery(mReferenceDef, inherited);                  
+                            }
+                        }
+                    }          
+                }
+                // 0..n association where qualifier qualifies 1..1, 0..1, 0..n
+                else { 
+                    boolean qualifierTypeIsPrimitive = this.model.isPrimitiveType(qualifierTypes.get(0));
+                    boolean optional = Multiplicities.OPTIONAL_VALUE.equals(multiplicity);
+                    boolean mandatory = Multiplicities.SINGLE_VALUE.equals(multiplicity); 
+                    boolean qualifiesUniquely = optional | mandatory;
+                    if(qualifiesUniquely) {
+                        if(
+                            includeInClass &&
+                            instanceMapper != null
+                        ){
+                            if(this.model.referenceIsStoredAsAttribute(referenceDef)) {
+                                instanceMapper.mapReferenceGet0_nNoQuery(mReferenceDef, inherited);                  
+                            } 
+                            else {
+                                instanceMapper.mapReferenceGet0_nWithQuery(mReferenceDef);
+                                if(optional) {
+                                    instanceMapper.mapReferenceGet0_1WithQualifier(mReferenceDef);
+                                } 
+                                else {
+                                    instanceMapper.mapReferenceGet1_1WithQualifier(mReferenceDef);
+                                }
+                                if(this.format == Format.JPA3) {
+                                    ormMetaDataMapper.mapReference(mReferenceDef);
+                                }
+                            }
+                        }
+                    } 
+                    else {
+                        //
+                        // !qualifiesUniquely. qualifier is required
+                        //
+                        if(!this.model.referenceIsStoredAsAttribute(referenceDef)) {  
+                            if(includeInClass) {
+                                if(instanceMapper != null){
+                                    instanceMapper.mapReferenceGet0_nWithQualifier(mReferenceDef, inherited);
+                                }
+                                if(this.format == Format.JPA3) {
+                                    // TODO: feature not yet implemented for JPA3. 
+                                    // Do not generate meta data
+                                    if(false) {
+                                        ormMetaDataMapper.mapReference(mReferenceDef);
+                                    }
+                                }
+                            }
+                        }
+                        /**
+                         * It is NOT possible to have this situation. If a qualifier does
+                         * not qualify uniquely, then it must be a non-primitive type.
+                         * (If the qualifier type is primitive, then the multiplicity must
+                         * be 0..1 or 1..1, i.e. the qualifier qualifies uniquely [openMDX 
+                         * Constraint].)
+                         * Non-primitive, ambiguous qualifiers are used to indicate the 
+                         * owner of the associated element. The owner is only used if the
+                         * reference is NOT stored as attribute (otherwise you would know 
+                         * your associated elements).
+                         */
+                        else {              
+                            throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.ASSERTION_FAILURE,
+                                "reference with non-primitive, ambiguous qualifier cannot be stored as attribute",
+                                new BasicException.Parameter("reference", referenceDef.jdoGetObjectId()),
+                                new BasicException.Parameter("qualifier", qualifierNames.get(0))
+                            );
+                        }
+                    }  
+                    // add with qualifier
+                    if(qualifiesUniquely && qualifierTypeIsPrimitive) {
+                        if(!isReadOnly) {
+                            if(includeInClass) {
+                                if(instanceMapper != null){
+                                    instanceMapper.mapReferenceAddWithQualifier(mReferenceDef);
+                                }
+                            }
+                        }
+                    }
+                    if(includeExtensions) {
+                        // add without qualifier
+                        if(!isReadOnly) {
+                            if(includeInClass) {
+                                if(instanceMapper != null){
+                                    instanceMapper.mapReferenceAddWithoutQualifier(mReferenceDef);
+                                }
+                            }
+                        }
+                        // remove with qualifier if qualifier qualifies uniquely
+                        if(qualifiesUniquely) {
+
+                            if(!isReadOnly) {
+                                if(includeInClass) {
+                                    if(instanceMapper != null){
+                                        instanceMapper.mapReferenceRemoveWithQualifier(mReferenceDef);
+                                    }
+                                }
+                            }
+                        }
+                    }              
+                }
+            }
+        } 
+        catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+    }
+
+    //---------------------------------------------------------------------------    
+    void mapOperation(
+        ModelElement_1_0 classDef,
+        ModelElement_1_0 operationDef,
+        InstanceMapper instanceMapper 
+    ) throws ServiceException {
+        SysLog.trace("operation", operationDef.jdoGetObjectId());
+        boolean includeInClass = this.format == Format.JPA3 || operationDef.objGetValue("container").equals(classDef.jdoGetObjectId());
+        if(VisibilityKind.PUBLIC_VIS.equals(operationDef.objGetValue("visibility"))) {
+            try {
+                OperationDef mOperationDef = new OperationDef(
+                    operationDef,
+                    this.model 
+                );
+                if(includeInClass) {
+                    instanceMapper.mapOperation(mOperationDef);
+                }
+            } 
+            catch(Exception ex) {
+                throw new ServiceException(ex).log();
+            }
+        }
+    }
+
+    //---------------------------------------------------------------------------    
+    void mapException(
+        ModelElement_1_0 exceptionDef,
+        ExceptionMapper exceptionMapper
+    ) throws ServiceException {
+
+        SysLog.trace("exception", exceptionDef.jdoGetObjectId());
+        if(VisibilityKind.PUBLIC_VIS.equals(exceptionDef.objGetValue("visibility"))) {
+            try {
+                exceptionMapper.mapException();
+            } 
+            catch(Exception ex) {
+                throw new ServiceException(ex).log();
+            }
+        }
+    }
+
+    //---------------------------------------------------------------------------    
+    boolean mapAssociation(
+        ModelElement_1_0 associationDef,
+        AssociationMapper associationMapper
+    ) throws ServiceException {
+
+        SysLog.trace("association", associationDef.jdoGetObjectId());
+        if(VisibilityKind.PUBLIC_VIS.equals(associationDef.objGetValue("visibility"))) try {
+            return associationMapper.mapAssociation();
+        } catch(Exception exception) {
+            throw new ServiceException(exception).log();
+        } else {
+            return false;
+        }
+    }
+
+    //---------------------------------------------------------------------------    
+    void mapBeginClass(
+        ModelElement_1_0 classDef,
+        ClassMapper classMapper,
+        InstanceMapper instanceMapper, 
+        InterfaceMapper interfaceMapper,
+        MetaDataMapper ormMetaDataMapper, 
+        MetaDataMapper ormSliceMetaDataMapper
+    ) throws ServiceException {
+
+        SysLog.trace("class", classDef.jdoGetObjectId());
+        boolean isAbstract = ((Boolean)classDef.objGetValue("isAbstract")).booleanValue();
+        try {
+            if(this.format == Format.JMI1 && !isAbstract) {
+                classMapper.mapBegin();
+            }
+            instanceMapper.mapBegin();
+            if(this.format == Format.JPA3) {
+                if(interfaceMapper != null) {
+                    interfaceMapper.mapBegin();
+                }
+                ormMetaDataMapper.mapBegin(instanceMapper.isSliceHolder());
+                ormSliceMetaDataMapper.mapBegin(instanceMapper.isSliceHolder());
+            }
+        } 
+        catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+        this.processedAttributes = new ArrayList<ModelElement_1_0>();
+    }
+
+    //---------------------------------------------------------------------------    
+    void mapObjectCreator(
+        ModelElement_1_0 classDef,
+        ModelElement_1_0 supertypeDef,
+        ClassMapper classMapper
+    ) throws ServiceException {
+
+        SysLog.trace("class", classDef.jdoGetObjectId());
+
+        // traverse all processed attributes (this includes all regular attributes and
+        // those references that are stored as attributes) to find out which 
+        // attributes are mandatory
+        List<AttributeDef> allAttributes = new ArrayList<AttributeDef>();
+        List<AttributeDef> requiredAttributes = new ArrayList<AttributeDef>();
+        for(
+                Iterator<ModelElement_1_0> i = this.processedAttributes.iterator();
+                i.hasNext();
+        ) {
+            ModelElement_1_0 attributeDef = i.next();
+            // attribute member of class, non-derived and public
+            if(
+                    ((supertypeDef == null) || !supertypeDef.objGetList("feature").contains(attributeDef.jdoGetObjectId())) &&
+                    !((Boolean)attributeDef.objGetValue("isDerived")).booleanValue() &&
+                    VisibilityKind.PUBLIC_VIS.equals(attributeDef.objGetValue("visibility"))
+            ) {
+                AttributeDef att = new AttributeDef(
+                    attributeDef,
+                    this.model
+                );
+                allAttributes.add(att);
+                // required attribute
+                String multiplicity = (String)attributeDef.objGetValue("multiplicity");
+                SysLog.trace(attributeDef.objGetValue("qualifiedName").toString(), multiplicity);
+                if(Multiplicities.SINGLE_VALUE.equals(attributeDef.objGetValue("multiplicity"))) {
+                    requiredAttributes.add(att);
+                } 
+                else {
+                    /* isAllAttributesRequired = false; */
+                }
+            }
+        }
+
+        try {
+            // creators
+            if(supertypeDef == null) {        
+
+                // check whether all attributes are mandatory and whether there are some
+                // mandatory attributes at all; if so, do not generate creator 
+                // (otherwise we get a duplicate creator definition)
+                if(/*!isAllAttributesRequired &&*/ requiredAttributes.size() > 0) {
+                    classMapper.mapInstanceCreatorRequiredAttributes(requiredAttributes);      
+                }
+            }
+            // extenders
+            else {
+                ClassDef mSuperclassDef = new ClassDef(
+                    supertypeDef,
+                    this.model,
+                    this.metaData
+                );
+                // check whether all attributes are mandatory and whether there are some
+                // mandatory attributes at all; if so, do not generate creator 
+                // (otherwise we get a duplicate creator definition)
+                if(/*!isAllAttributesRequired &&*/ requiredAttributes.size() > 0) {
+                    classMapper.mapInstanceExtenderRequiredAttributes(mSuperclassDef, requiredAttributes);    
+                }
+            }
+        } 
+        catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+    }
+
+    //---------------------------------------------------------------------------    
+    void mapEndClass(
+        ModelElement_1_0 classDef,
+        ClassMapper classMapper,
+        InstanceMapper instanceMapper, 
+        InterfaceMapper interfaceMapper,
+        MetaDataMapper ormMetaDataMapper, 
+        MetaDataMapper ormSliceMetaDataMapper
+    ) throws ServiceException {
+
+        if (this.format == Format.JMI1) {
+            // add additional template references to context
+            List<StructuralFeatureDef> structuralFeatures = new ArrayList<StructuralFeatureDef>();
+            List<OperationDef> operations = new ArrayList<OperationDef>();
+            for(
+                Iterator<?> i = classDef.objGetList("feature").iterator();
+                i.hasNext();
+            ) {
+                ModelElement_1_0 feature = this.model.getElement(i.next());
+                if(
+                    VisibilityKind.PUBLIC_VIS.equals(feature.objGetValue("visibility"))
+                ) {
+                    if(
+                        feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE)
+                    ) {
+                        structuralFeatures.add(
+                            new AttributeDef(
+                                feature, 
+                                this.model
+                            )
+                        );
+                    }
+                    else if(
+                        feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)
+                    ) {
+                        ModelElement_1_0 referencedEnd = this.model.getElement(
+                            feature.objGetValue("referencedEnd")
+                        );
+                        List<?> qualifierTypes = referencedEnd.objGetList("qualifierType");
+                        // skip references for which a qualifier exists and the qualifier is
+                        // not a primitive type
+                        if(
+                            qualifierTypes.isEmpty() ||
+                            this.model.isPrimitiveType(qualifierTypes.get(0))
+                        ) {
+                            structuralFeatures.add(
+                                new ReferenceDef(
+                                    feature,
+                                    this.model,
+                                    true
+                                )
+                            );
+                        }
+                    }
+                    else if(
+                        feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION)
+                    ) {
+                        operations.add(
+                            new OperationDef(
+                                feature,
+                                this.model 
+                            )
+                        );
+                    }
+                }
+            }
+        }
+        boolean classIsAbstract = ((Boolean)classDef.objGetValue("isAbstract")).booleanValue();
+        try {
+            if (
+                this.format == Format.JMI1 &&
+                !classIsAbstract
+            ) {  
+                // standard creators
+                mapObjectCreator(
+                    classDef,
+                    null,
+                    classMapper
+                );
+                // narrow creators
+                SysLog.trace("creators for", classDef.jdoGetObjectId());
+                SysLog.trace("supertypes", classDef.objGetList("allSupertype"));
+                for(
+                    Iterator<?> i = classDef.objGetList("allSupertype").iterator();
+                    i.hasNext();
+                ) {
+                    ModelElement_1_0 supertype = this.model.getDereferencedType(
+                        i.next()
+                    );
+                    if(!supertype.jdoGetObjectId().equals(classDef.jdoGetObjectId())) {
+                        SysLog.trace("creating", supertype.jdoGetObjectId());
+                        this.mapObjectCreator(
+                            classDef,
+                            supertype,
+                            classMapper
+                        );
+                    }
+                    else {
+                        SysLog.trace("skipping", supertype.jdoGetObjectId());
+                    }
+                }
+                classMapper.mapEnd();  
+            }
+            // impl for non-abstract and abstract classes (JMI plugins)
+            instanceMapper.mapEnd();
+            if(this.format == Format.JPA3) {
+                if(interfaceMapper != null) {
+                    interfaceMapper.mapEnd();
+                }
+                boolean process = 
+                    instanceMapper.isSliceHolder() || 
+                    instanceMapper.hasSlices(); 
+                ormSliceMetaDataMapper.setProcess(process);
+                ormMetaDataMapper.mapEnd(ormSliceMetaDataMapper);
+            }
+        } catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+    }
+
+    //---------------------------------------------------------------------------    
+    void mapBeginQuery(
+        ClassifierDef mClassifierDef,
+        QueryMapper queryMapper
+    ) throws ServiceException {
+        if(queryMapper != null) try {
+            queryMapper.mapBegin(mClassifierDef);
+        } 
+        catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+    }
+
+    //---------------------------------------------------------------------------    
+    void mapEndQuery(
+        QueryMapper queryMapper
+    ) throws ServiceException {
+        if(queryMapper != null) try {
+            queryMapper.mapEnd();  
+        } 
+        catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+    }
+
+    //---------------------------------------------------------------------------    
+    void mapBeginStructure(
+        ModelElement_1_0 structDef,
+        StructureMapper structureMapper
+    ) throws ServiceException {
+        SysLog.trace("struct", structDef.jdoGetObjectId());
+        try {
+            structureMapper.mapBegin();  
+        } 
+        catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+        this.processedAttributes = new ArrayList<ModelElement_1_0>();
+    }
+
+    //--------------------------------------------------------------------------------
+    /**
+     * Is called for all ModelAttribute features of a class including suerptyes.
+     * This method must check wheter modelAttribute.container = modelClass and
+     * behave accordingly. 
+     */
+    void mapStructureField(
+        ModelElement_1_0 classDef,
+        ModelElement_1_0 structureFieldDef,
+        QueryMapper queryMapper,
+        StructureMapper structureMapper, 
+        boolean jmi
+    ) throws ServiceException {
+
+        SysLog.trace("structure field", structureFieldDef.jdoGetObjectId());
+        String multiplicity = (String)structureFieldDef.objGetValue("multiplicity");
+
+        // required for ...Class.create...() operations
+        this.processedAttributes.add(structureFieldDef);
+        try {
+            AttributeDef mStructureFieldDef = new AttributeDef(
+                structureFieldDef,
+                this.model
+            );
+            StructDef mStructDef = new StructDef(
+                classDef,
+                this.model, 
+                false // openmdx1
+            );
+            // getter interface only if modelAttribute.container = modelClass. 
+            // Otherwise inherit from super interfaces.
+            if(
+                this.format == Format.JPA3 ||
+                structureFieldDef.objGetValue("container").equals(classDef.jdoGetObjectId())
+            ) {
+                // query interface
+                if(queryMapper != null) {
+                    queryMapper.mapStructurealFeature(mStructDef, mStructureFieldDef);
+                }
+                // get interface 0..1
+                if(Multiplicities.OPTIONAL_VALUE.equals(multiplicity)) {
+                    structureMapper.mapFieldGet0_1(mStructureFieldDef);
+                }
+                // get interface 1..1
+                else if(Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
+                    structureMapper.mapFieldGet1_1(mStructureFieldDef);
+                }
+                // get interface list
+                else if(Multiplicities.LIST.equals(multiplicity)) {
+                    structureMapper.mapFieldGetList(mStructureFieldDef);
+                }
+                // get interface set
+                else if(Multiplicities.SET.equals(multiplicity)) {
+                    structureMapper.mapFieldGetSet(mStructureFieldDef);
+                }
+                // get interface sparsearray
+                else if(Multiplicities.SPARSEARRAY.equals(multiplicity)) {
+                    structureMapper.mapFieldGetSparseArray(mStructureFieldDef);
+                }
+                // get interface stream
+                else if(Multiplicities.STREAM.equals(multiplicity)) {
+                    structureMapper.mapFieldGetStream(mStructureFieldDef);
+                }
+                // get interface with lower and upper bound, e.g. 0..n
+                else {
+                    structureMapper.mapFieldGetList(mStructureFieldDef);
+                }  
+            }
+        } 
+        catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+    }
+
+    //---------------------------------------------------------------------------    
+    void mapEndStructure(
+        StructureMapper structureMapper
+    ) throws ServiceException {
+        try {
+            structureMapper.mapEnd();  
+        } 
+        catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+    }
+
+    //--------------------------------------------------------------------------------
+    void mapBeginPackage(
+        String forPackage,
+        PackageMapper packageMapper
+    ) throws ServiceException {
+        try {
+            packageMapper.mapBegin(forPackage);
+        } 
+        catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+    }
+
+    //--------------------------------------------------------------------------------
+    void mapEndPackage(
+        String forPackage,
+        PackageMapper packageMapper
+    ) throws ServiceException {
+        try {
+            packageMapper.mapEnd();  
+        } catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+    }
+
+    //--------------------------------------------------------------------------------
+    void mapObjectMarshaller(
+        ModelElement_1_0 classDef,
+        PackageMapper packageMapper
+    ) throws ServiceException {
+        try {
+            ClassDef mClassDef = new ClassDef(
+                classDef,
+                this.model,
+                this.metaData
+            );
+            packageMapper.mapClassAccessor(mClassDef);  
+        } catch(Exception ex) {
+            throw new ServiceException(ex);
+        }
+
+    }
+
+    //--------------------------------------------------------------------------------
+    private void mapStructureCreator(
+        ModelElement_1_0 structDef,
+        PackageMapper packageMapper
+    ) throws ServiceException {
+        try {
+            StructDef mStructDef = new StructDef(
+                structDef,
+                this.model, 
+                false // openmdx1
+            );
+            packageMapper.mapStructCreator(mStructDef);
+        } catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+    }
+
+    //--------------------------------------------------------------------------------
+    // Generates create query operations for a struct or a class in the current 
+    // package
+    private void mapQueryCreator(
+        ClassifierDef mClassifierDef,
+        PackageMapper packageMapper
+    ) throws ServiceException {
+        try {
+            packageMapper.mapQueryCreator(mClassifierDef);
+        } 
+        catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+    }
+
+    //---------------------------------------------------------------------------    
+    protected Model_1_5 getModel(){
+        return (Model_1_5) super.model;
+    }
+
+    //---------------------------------------------------------------------------    
+    /**
+     * Externalizes given packageContent and stores result in the jar output
+     * stream. 
+     * 
+     * @param qualifiedPackageName fully qualified, ':' separated name of a 
+     *         model package. '%' as last character is allowed as wildcard, e.g.
+     *         'org:%' exports all models contained in package 'org', 'org:openmdx:%' 
+     *         exports all models contained in package 'org:openmdx'. All models
+     *         are written to os.
+     * @param model
+     * @param os
+     * 
+     * @throws ServiceException
+     */
+    public void externalize(
+        String qualifiedPackageName,
+        org.openmdx.base.mof.cci.Model_1_3 model,
+        ZipOutputStream os
+    ) throws ServiceException {
+        externalize(
+            qualifiedPackageName,
+            model,
+            os,
+            null // openmdxjdoMetadataDirectory
+        );
+    }
+
+    /**
+     * Externalizes given packageContent and stores result in the jar output
+     * stream. 
+     * 
+     * @param qualifiedPackageName fully qualified, ':' separated name of a 
+     *         model package. '%' as last character is allowed as wildcard, e.g.
+     *         'org:%' exports all models contained in package 'org', 'org:openmdx:%' 
+     *         exports all models contained in package 'org:openmdx'. All models
+     *         are written to os.
+     * @param model
+     * @param zip
+     * @param openmdxjdoMetadataDirectory base directory for .openmdxjdo meta data files
+     * 
+     * @throws ServiceException
+     */
+    public void externalize(
+        String qualifiedPackageName,
+        org.openmdx.base.mof.cci.Model_1_3 model,
+        ZipOutputStream zip,
+        String openmdxjdoMetadataDirectory
+    ) throws ServiceException {
+
+        SysLog.trace("Exporting", qualifiedPackageName);
+        super.model = model;
+        this.metaData = new MetaData_2(openmdxjdoMetadataDirectory);
+        List<ModelElement_1_0> packagesToExport = this.getMatchingPackages(qualifiedPackageName);
+        final boolean jmi1 = this.format == Format.JMI1;
+        final boolean cci2 = this.format == Format.CCI2;
+        final boolean jpa3 = this.format == Format.JPA3;
+
+        try {
+            // allocate streams one time
+            ByteArrayOutputStream pkgFile = jpa3 ? null : new ByteArrayOutputStream();
+            ByteArrayOutputStream classFile = jmi1 ? new ByteArrayOutputStream() : null;
+            ByteArrayOutputStream instanceFile = new ByteArrayOutputStream();
+            ByteArrayOutputStream interfaceFile = new ByteArrayOutputStream();
+            ByteArrayOutputStream sliceInstanceFile = jpa3 ? new ByteArrayOutputStream() : null;
+            ByteArrayOutputStream ormMetaDataFile = jpa3 ? new ByteArrayOutputStream() : null;
+            ByteArrayOutputStream structFile = jpa3 ? null : new ByteArrayOutputStream();
+            ByteArrayOutputStream queryFile = cci2 ? new ByteArrayOutputStream() : null;
+            ByteArrayOutputStream exceptionFile = jpa3 ? null : new ByteArrayOutputStream();
+            ByteArrayOutputStream associationFile = cci2 ? new ByteArrayOutputStream() : null;
+
+            Writer packageWriter = jpa3 ? null : new OutputStreamWriter(pkgFile); 
+            Writer classWriter = jmi1 ? new OutputStreamWriter(classFile) : null;
+            Writer queryWriter = cci2 ? new OutputStreamWriter(queryFile) : null;
+            Writer instanceWriter = new OutputStreamWriter(instanceFile);
+            Writer interfaceWriter = new OutputStreamWriter(interfaceFile);
+            Writer sliceInstanceWriter = jpa3 ? new OutputStreamWriter(sliceInstanceFile) : null;
+            Writer ormMetaDataWriter = jpa3 ? new OutputStreamWriter(ormMetaDataFile) : null;
+            CharArrayWriter ormSliceMetaDataWriter = jpa3 ? new CharArrayWriter() : null;
+            Writer structWriter = jpa3 ? null : new OutputStreamWriter(structFile);            
+            // Export matching packages
+            PrintWriter ormMetaDataPrintWriter = null;
+            if(jpa3) {
+                ormMetaDataPrintWriter = new PrintWriter(ormMetaDataWriter);
+                MetaDataMapper.fileHeader(ormMetaDataPrintWriter);
+                ormMetaDataPrintWriter.flush();
+            }
+            for(
+                Iterator<ModelElement_1_0> pkgs = packagesToExport.iterator(); 
+                pkgs.hasNext();
+            ) {
+                ModelElement_1_0 currentPackage = pkgs.next();
+                String currentPackageName = (String)currentPackage.objGetValue("qualifiedName");
+                if(!this.excludePackage(currentPackageName)) {
+                    SysLog.detail("Processing package", currentPackageName);
+                    PackageMapper packageMapper = null;
+                    if(jmi1) {
+                        pkgFile.reset();
+                        packageMapper = new PackageMapper(
+                            packageWriter, 
+                            getModel(), 
+                            this.format, 
+                            this.packageSuffix, 
+                            this.metaData
+                        );
+                        // initialize package
+                        this.mapBeginPackage(
+                            currentPackageName,
+                            packageMapper
+                        );
+                    }    
+                    // Process package content
+                    for(
+                        Iterator<ModelElement_1_0> i = getModel().getContent().iterator(); 
+                        i.hasNext();
+                    ) {  
+                        ModelElement_1_0 element = i.next();
+                        if(this.getModel().isLocal(element, currentPackageName)) {
+                            // Only generate elements which are content of the model package. 
+                            // Do not generate for imported model elements
+                            SysLog.trace("processing package element", element.jdoGetObjectId());
+                            // org:omg:model1:Class
+                            if(this.getModel().isClassType(element)) {
+                                ClassDef classDef = new ClassDef(
+                                    element,
+                                    this.model,
+                                    this.metaData
+                                );
+                                if(
+                                    this.includeClass(classDef) && 
+                                    !this.excludeClass(classDef)
+                                ) {
+                                    if(
+                                        (this.format != Format.JPA3) || 
+                                        !classDef.isMixIn() || 
+                                        (((ClassMetaData)classDef.getClassMetaData()).getTable() != null)
+                                    ) {
+                                        SysLog.detail("Processing class", classDef.getQualifiedName());
+                                        if(jmi1) {
+                                            if(!classDef.isAbstract()) {
+                                                this.mapObjectMarshaller(
+                                                    element,
+                                                    packageMapper
+                                                );
+                                            }
+                                            this.mapQueryCreator(
+                                                classDef,
+                                                packageMapper
+                                            );
+                                            classFile.reset();
+                                        }
+                                        if(cci2) {
+                                            queryFile.reset();
+                                        }
+                                        instanceFile.reset();
+                                        if(jpa3) {
+                                            sliceInstanceFile.reset();
+                                            ormSliceMetaDataWriter.reset();
+                                        }
+                                        ClassMapper classMapper = jmi1 ? new ClassMapper(
+                                            element, 
+                                            classWriter, 
+                                            getModel(), 
+                                            this.format, 
+                                            this.packageSuffix,
+                                            this.metaData
+                                        ) : null;
+                                        InstanceMapper instanceMapper = new InstanceMapper(
+                                            element, 
+                                            instanceWriter, 
+                                            sliceInstanceWriter,
+                                            getModel(), 
+                                            this.format, 
+                                            this.packageSuffix,
+                                            this.metaData
+                                        );
+                                        InterfaceMapper interfaceMapper = jpa3 && instanceMapper.hasSPI() ? new InterfaceMapper(
+                                            element, 
+                                            interfaceWriter, 
+                                            getModel(), 
+                                            Format.SPI2,
+                                            Names.SPI2_PACKAGE_SUFFIX,
+                                            this.metaData
+                                        ) : null;
+                                        MetaDataMapper ormMetaDataMapper = jpa3 ? new MetaDataMapper(
+                                            element, 
+                                            ormMetaDataWriter,
+                                            getModel(), 
+                                            this.format, 
+                                            this.packageSuffix,
+                                            null,
+                                            this.metaData, 
+                                            new StandardObjectRepositoryMetadataPlugin()
+                                        ) : null;
+                                        MetaDataMapper ormSliceMetaDataMapper = jpa3 ? new MetaDataMapper(
+                                            element, 
+                                            ormSliceMetaDataWriter, 
+                                            getModel(), 
+                                            this.format, 
+                                            this.packageSuffix,
+                                            InstanceMapper.SLICE_CLASS_NAME,
+                                            this.metaData, 
+                                            new StandardObjectRepositoryMetadataPlugin()
+                                        ) : null;
+                                        QueryMapper queryMapper = cci2 ? new QueryMapper(
+                                            queryWriter, 
+                                            getModel(), 
+                                            this.format, 
+                                            this.packageSuffix, this.metaData
+                                        ) : null;
+                                        this.mapBeginClass(
+                                            element,
+                                            classMapper,
+                                            instanceMapper, 
+                                            interfaceMapper,
+                                            ormMetaDataMapper, 
+                                            ormSliceMetaDataMapper
+                                        );                
+                                        this.mapBeginQuery(
+                                            classDef,
+                                            queryMapper
+                                        );                
+                                        // Map class features
+                                        for(Object f : getFeatures(element, instanceMapper, false)) {
+                                            ModelElement_1_0 feature = f instanceof ModelElement_1_0 ? 
+                                                (ModelElement_1_0) f :
+                                                getModel().getElement(f);  
+                                            SysLog.trace("processing class feature", feature.jdoGetObjectId());
+                                            if(feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE)) {
+                                                this.mapAttribute(
+                                                    element,
+                                                    feature,
+                                                    queryMapper,
+                                                    instanceMapper, 
+                                                    ormMetaDataMapper, 
+                                                    ormSliceMetaDataMapper
+                                                );
+                                            } 
+                                            else if(feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)) {
+                                                this.mapReference(
+                                                    element,
+                                                    feature,
+                                                    queryMapper,
+                                                    instanceMapper, 
+                                                    ormMetaDataMapper, 
+                                                    ormSliceMetaDataMapper, 
+                                                    false // inherited
+                                                );
+                                            } 
+                                            else if(feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION)) {
+                                                this.mapOperation(
+                                                    element,
+                                                    feature,
+                                                    instanceMapper
+                                                );
+                                            }
+                                        }
+                                        this.mapEndQuery(
+                                            queryMapper
+                                        );                
+                                        this.mapEndClass(
+                                            element,
+                                            classMapper,
+                                            instanceMapper,                                             
+                                            interfaceMapper,
+                                            ormMetaDataMapper, 
+                                            ormSliceMetaDataMapper
+                                        );                
+                                        instanceWriter.flush();
+                                        String elementName = instanceMapper.getClassName();
+                                        this.addToZip(
+                                            zip, 
+                                            instanceFile, 
+                                            element, 
+                                            elementName, 
+                                            "." + this.fileExtension
+                                        );                
+                                        if(jpa3){
+                                            if(interfaceMapper != null ){
+                                                interfaceWriter.flush();
+                                                this.addToZip(
+                                                    zip,
+                                                    interfaceFile,
+                                                    element,
+                                                    elementName,
+                                                    "." + this.fileExtension,
+                                                    true, 
+                                                    Names.SPI2_PACKAGE_SUFFIX
+                                                );
+                                            }
+                                            sliceInstanceWriter.flush();
+                                            this.addToZip(
+                                                zip,
+                                                sliceInstanceFile,
+                                                element,
+                                                elementName,
+                                                InstanceMapper.SLICE_CLASS_NAME + "." + this.fileExtension,
+                                                true, 
+                                                Names.JPA3_PACKAGE_SUFFIX
+                                            );
+                                        }                
+                                        if(cci2) {
+                                            queryWriter.flush();
+                                            this.addToZip(
+                                                zip, 
+                                                queryFile, 
+                                                element, 
+                                                elementName, 
+                                                "Query." + this.fileExtension
+                                            );
+                                        }
+                                        if(jmi1 && !classDef.isAbstract()) {
+                                            classWriter.flush();
+                                            this.addToZip(
+                                                zip, 
+                                                classFile, 
+                                                element, 
+                                                elementName, 
+                                                "Class." + this.fileExtension
+                                            );
+                                        }
+                                    }
+                                }
+                            }
+                            // org:omg:model1:StructureType
+                            else if(
+                                getModel().isStructureType(element)
+                            ) {
+                                SysLog.trace("processing structure type", element.jdoGetObjectId());
+                                StructDef mStructDef = new StructDef(
+                                    element,
+                                    getModel(), 
+                                    false // openmdx1
+                                );
+                                if(jmi1) {
+                                    this.mapStructureCreator(
+                                        element,
+                                        packageMapper
+                                    );
+                                }
+                                if(structFile != null) {
+                                    structFile.reset();
+                                }
+                                if(cci2) queryFile.reset();    
+                                StructureMapper structureMapper = jpa3 ? 
+                                    null : 
+                                    new StructureMapper(
+                                        element, 
+                                        structWriter, 
+                                        getModel(), 
+                                        this.format, 
+                                        this.packageSuffix, 
+                                        this.metaData
+                                    );
+                                QueryMapper queryMapper = cci2 ? 
+                                    new QueryMapper(
+                                        queryWriter, 
+                                        getModel(), 
+                                        this.format, 
+                                        this.packageSuffix, 
+                                        this.metaData
+                                    ) : 
+                                    null;                                            
+                                if(structureMapper != null) {
+                                    this.mapBeginStructure(
+                                        element,
+                                        structureMapper
+                                    );
+                                }            
+                                this.mapBeginQuery(
+                                    mStructDef,
+                                    queryMapper
+                                );
+                                // StructureFields
+                                for(
+                                    Iterator<?> j = element.objGetList("content").iterator();
+                                    j.hasNext();
+                                ) {
+                                    ModelElement_1_0 feature = getModel().getElement(j.next());    
+                                    SysLog.trace("processing structure field", feature.jdoGetObjectId());   
+                                    if(
+                                        structureMapper != null &&
+                                        feature.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_FIELD)
+                                    ) {
+                                        this.mapStructureField(
+                                            element,
+                                            feature,
+                                            queryMapper,
+                                            structureMapper, 
+                                            jmi1
+                                        );
+                                    }
+                                }    
+                                this.mapEndQuery(
+                                    queryMapper
+                                );
+                                String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier(
+                                    (String)element.objGetValue("name")
+                                );    
+                                if(structureMapper != null) {
+                                    this.mapEndStructure(
+                                        structureMapper
+                                    );
+                                    structWriter.flush();
+                                    this.addToZip(zip, structFile, element, elementName, "." + this.fileExtension);
+                                }    
+                                if (cci2) {
+                                    queryWriter.flush();
+                                    this.addToZip(zip, queryFile, element, elementName, "Query." + this.fileExtension);
+                                }
+                            }
+                            // org:omg:model1:Exception
+                            else if(
+                                element.objGetList(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.EXCEPTION)
+                            ) {   
+                                SysLog.trace("processing exception", element.jdoGetObjectId());
+                                if(!jpa3) {  
+                                    exceptionFile.reset();
+                                    Writer exceptionWriter = new OutputStreamWriter(exceptionFile);
+                                    ExceptionMapper exceptionMapper = new ExceptionMapper(
+                                        element,
+                                        exceptionWriter,
+                                        getModel(),
+                                        this.format, 
+                                        packageSuffix, 
+                                        this.metaData
+                                    );
+                                    this.mapException(
+                                        element,
+                                        exceptionMapper
+                                    );
+                                    exceptionWriter.flush();
+                                    String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier(
+                                        (String)element.objGetValue("name"),
+                                        null, // removablePrefix
+                                        null, // prependablePrefix
+                                        ExceptionDef.STANDARD_COMPLIANT ? "exception" : null, // removableSuffix
+                                        ExceptionDef.STANDARD_COMPLIANT ? "exception" : null //appendableSuffix
+                                    );
+                                    this.addToZip(zip, exceptionFile, element, elementName, "." + this.fileExtension);
+                                }
+                            } 
+                            // org:omg:model1:AssociationType
+                            else if(getModel().isAssociationType(element)) {
+                                SysLog.trace("processing association", element.jdoGetObjectId());
+                                if(cci2) {
+                                    associationFile.reset();
+                                    Writer associationWriter = new OutputStreamWriter(associationFile);                                    
+                                    AssociationMapper associationMapper = new AssociationMapper(
+                                        element, 
+                                        associationWriter, 
+                                        getModel(), 
+                                        this.format, 
+                                        this.packageSuffix,
+                                        this.metaData
+                                    );
+                                    if(mapAssociation(element, associationMapper)){
+                                        associationWriter.flush();
+                                        this.addToZip(
+                                            zip, 
+                                            associationFile, 
+                                            element, 
+                                            associationMapper.associationName, 
+                                            "." + this.fileExtension
+                                        );
+                                    }
+                                }
+                            } else {
+                                SysLog.trace("Ignoring element", element.jdoGetObjectId());
+                            }
+                        } else {
+                            SysLog.trace("Skipping non-package element", element.jdoGetObjectId());
+                        }
+                    }    
+                    if(jmi1) {
+                        // flush package
+                        this.mapEndPackage(
+                            currentPackageName,
+                            packageMapper
+                        );    
+                        packageWriter.flush();
+                        this.addToZip(
+                            zip, 
+                            pkgFile, 
+                            currentPackage, 
+                            AbstractNames.openmdx2PackageName(
+                                new StringBuffer(),
+                                (String)currentPackage.objGetValue("name")
+                            ).toString(),
+                            '.' + this.fileExtension
+                        );
+                    }
+                }
+            }
+            if(jpa3){
+                MetaDataMapper.fileFooter(ormMetaDataPrintWriter);
+                ormMetaDataPrintWriter.flush();
+                ormMetaDataWriter.flush();
+                ZipEntry zipEntry = new JarEntry(
+                    "META-INF/orm.xml"
+                );
+                zipEntry.setSize(ormMetaDataFile.size());
+                zip.putNextEntry(zipEntry);
+                ormMetaDataFile.writeTo(zip);
+            }
+        } 
+        catch(Exception ex) {
+            throw new ServiceException(ex).log();
+        }
+        SysLog.trace("done");
+    }
+
+    /**
+     * 
+     * @param classDef
+     * @param instanceMapper
+     * @param inherited 
+     * @return
+     */
+    private Collection<?> getFeatures(
+        ModelElement_1_0 classDef,
+        InstanceMapper instanceMapper, 
+        boolean inherited
+    ) throws ServiceException {
+        return inherited || format == Format.JPA3 ?
+            instanceMapper.getFeatures(inherited).values() :
+                classDef.objGetList("feature");
+    }
+
+    /**
+     * Test whether the given model is in an archive
+     * 
+     * @param packageName the qualified model package name
+     * 
+     * @return <code>true</code> if model is in an archive
+     */
+    private boolean excludePackage(
+        String packageName
+    ){
+        if(EXCLUDED_PACKAGES.contains(packageName)) {
+            return true;
+        } else {
+            String[] components = packageName.split(":");
+            StringBuilder resource = new StringBuilder();
+            for(
+                    int i = 0;
+                    i < components.length;
+                    i++
+            ){
+                resource.append(
+                    i == 0 ? "" :
+                        i == components.length - 1 ? "/xmi1/" :
+                            "/"
+                ).append(
+                    components[i]
+                );
+
+            }
+            return artifactIsInArchive(resource.append(".xml"));
+        }
+    }
+
+    /**
+     * Test whether the given JDO metadata is in an archive
+     * 
+     * @param className
+     * 
+     * @return <code>true</code> if model is in an archive
+     */
+    private boolean excludeClass(
+        ClassDef classDef
+    ){
+        String className = classDef.getQualifiedName();
+        if(EXCLUDED_CLASSES.contains(className)) {
+            return true;
+        } 
+        else {
+            String[] components = className.split(":");
+            StringBuilder resource = new StringBuilder();
+            for(
+                int i = 0;
+                i < components.length;
+                i++
+            ){
+                resource.append(
+                    i == 0 ? "" :
+                        i == components.length - 1 ? "/jdo2/" :
+                            "/"
+                ).append(
+                    components[i]
+                );
+
+            }
+            return artifactIsInArchive(resource.append(".jdo"));
+        }
+    }
+
+    private boolean includeClass(
+        ClassDef classDef
+    ) {
+        return 
+            (this.format != Format.JPA3) ||
+            !classDef.isAbstract() ||
+            classDef.getSuperClassDef(true) == null;        
+    }
+    
+    /**
+     * Test whether the given artifact is in an archive
+     * 
+     * @param name
+     * 
+     * @return <code>true</code> if model is in an archive
+     */
+    private static boolean artifactIsInArchive(
+        CharSequence iri
+    ){
+        String uri = iri.toString();
+        URL url = Classes.getApplicationResource(uri);
+        SysLog.detail(uri, url);
+        return url != null && "jar".equals(url.getProtocol());
+    }
+
+    //--------------------------------------------------------------------------------
+    // Members
+    //--------------------------------------------------------------------------------
+    /**
+     * Packages not to be processed
+     */
+    private final static Collection<String> EXCLUDED_PACKAGES = Arrays.asList(
+        "org:omg:PrimitiveTypes:PrimitiveTypes" // due to a conflict between jmi and jmi1 
+    );
+    private final static Collection<String> EXCLUDED_CLASSES = Arrays.asList();
+    private MetaData_1_0 metaData;
+    private final String fileExtension;
+    private List<ModelElement_1_0> processedAttributes = null;  
+    private final Format format;
+
+}
+
+//--- End of File -----------------------------------------------------------

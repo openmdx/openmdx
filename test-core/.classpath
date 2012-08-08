@@ -5,12 +5,11 @@
 	<classpathentry kind="src" path="/openMDX Thirdparty ~ Java2 Extension (jre-1.5)"/>
 	<classpathentry kind="src" path="/openMDX Thirdparty ~ Java2 Enterprise (jre-1.5)"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX 2 ~ Core (jre-1.5)"/>
-	<classpathentry excluding="**/CVS/**|**/jre/before1_4/**|**/jre/before1_5/**|**/jre/since1_6/**|org/openmdx/base/plugin/standard/*|org/openmdx/test/base/security/pki/**|org/openmdx/test/base/transport/http/**|org/openmdx/test/clock1/junit/**|org/openmdx/test/compatibility/audit1/*|org/openmdx/test/compatibility/base/dataprovider/exporter/*|org/openmdx/test/compatibility/base/dataprovider/layer/model/**|org/openmdx/test/compatibility/datastore1/accessor/jmi/**|org/openmdx/test/compatibility/state1/**|test/openmdx/base/*" kind="src" path="src/java"/>
-	<classpathentry excluding="**/jre/before1_4/**|**/jre/before1_5/**|**/jre/since1_6/**|org/openmdx/test/base/security/pki/**|org/openmdx/test/clock1/junit/**|org/openmdx/test/compatibility/base/dataprovider/exporter/*|org/openmdx/test/compatibility/base/dataprovider/layer/model/**|org/openmdx/test/test/compatibility/state1/viewi/**" kind="src" path="build/jre-1.5/src/java"/>
+	<classpathentry excluding="**/CVS/**|**/jre/before1_4/**|**/jre/before1_5/**|**/jre/since1_6/**" kind="src" path="src/java"/>
+	<classpathentry excluding="**/jre/before1_4/**|**/jre/before1_5/**|**/jre/since1_6/**" kind="src" path="build/jre-1.5/src/java"/>
 	<classpathentry exported="true" kind="lib" path="src/resource"/>
 	<classpathentry exported="true" kind="lib" path="build/jre-1.5/model/openmdx-test-core.openmdx-xmi.zip"/>
 	<classpathentry kind="lib" path="build/jre-1.5/src/resource"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Oracle 11g (jre-1.5)"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Microsoft SQLServer 2005 (jre-1.5)"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openMDX 2 ~ EJB (jre-1.5)"/>
 	<classpathentry kind="output" path="build/jre-1.5/eclipse"/>
 </classpath>

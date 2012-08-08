@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TestThreadSafety.java,v 1.8 2008/08/12 16:38:08 wfro Exp $
+ * Name:        $Id: TestThreadSafety.java,v 1.9 2009/03/08 18:03:26 wfro Exp $
  * Description: TestThreadSafety
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:08 $
+ * Date:        $Date: 2009/03/08 18:03:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -136,7 +136,7 @@ public class TestThreadSafety
             String sessionId = null;
             for(int i = 0; i < this.actions.length; i++) {
                 try {
-                    String encodedHRef = getEncodedHRef(
+                    String encodedHRef = TestThreadSafety.getEncodedHRef(
                         this.actions[i],
                         requestId
                     );
@@ -150,7 +150,7 @@ public class TestThreadSafety
                     );
                     int responseCode = connection.getResponseCode(); 
                     if(responseCode != HttpURLConnection.HTTP_OK) {
-                        fail("Unexpected response: " + url);
+                    	TestThreadSafety.fail("Unexpected response: " + url);
                     }
                     URL responseURL = connection.getURL();
                     if(sessionId == null) {
@@ -163,11 +163,11 @@ public class TestThreadSafety
                 }
                 catch (MalformedURLException e) {
                     e.printStackTrace();
-                    fail("MalformedURLException");
+                    TestThreadSafety.fail("MalformedURLException");
                 }
                 catch (IOException e) {
                     e.printStackTrace();
-                    fail("IOException");
+                    TestThreadSafety.fail("IOException");
                 }
             }            
         }
@@ -201,7 +201,7 @@ public class TestThreadSafety
     public static void main(
         String[] args
     ) throws MalformedURLException, FileNotFoundException, IOException {
-        TestRunner.run(suite());
+        TestRunner.run(TestThreadSafety.suite());
     }
      
     //---------------------------------------------------------------------------    
@@ -235,7 +235,7 @@ public class TestThreadSafety
     //---------------------------------------------------------------------------
     public void runTest(
     ) throws Throwable {
-        testServlet();
+    	this.testServlet();
     }
 
     //-------------------------------------------------------------------------
@@ -288,22 +288,25 @@ public class TestThreadSafety
         Action action,
         String requestId
     ) {
-        String[] components = getHRef(
+        String[] components = TestThreadSafety.getHRef(
             action, 
             requestId
         );
         StringBuilder href = new StringBuilder(components[0]);
-        for(int i = 1; i < components.length; i+=2) try {
-            href.append(
-                i == 1 ? "?" : "&"
-            ).append(
-                components[i]
-            ).append(
-                "="
-            ).append(
-                URLEncoder.encode(components[i+1], "UTF-8")
-            );
-        } catch(UnsupportedEncodingException e) {}
+        for(int i = 1; i < components.length; i+=2) {
+        	try {
+	            href.append(
+	                i == 1 ? "?" : "&"
+	            ).append(
+	                components[i]
+	            ).append(
+	                "="
+	            ).append(
+	                URLEncoder.encode(components[i+1], "UTF-8")
+	            );
+        	} 
+        	catch(UnsupportedEncodingException e) {}
+        }
         return href.toString();
     }
     
@@ -316,7 +319,10 @@ public class TestThreadSafety
             t[i].start();
         }
         for(int i = 0; i < this.nThreads; i++) {
-            try { t[i].join(); } catch(Exception e) {}
+            try { 
+            	t[i].join(); 
+            } 
+            catch(Exception e) {}
         }
     }
   

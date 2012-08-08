@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Explorer_1.java,v 1.10 2005/01/11 19:03:01 hburger Exp $
+ * Name:        $Id: Explorer_1.java,v 1.11 2009/01/05 13:48:24 wfro Exp $
  * Description: Standard Explorer Plug-In
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/01/11 19:03:01 $
+ * Date:        $Date: 2009/01/05 13:48:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,12 +52,12 @@
 package org.openmdx.compatibility.runtime1.layer.application;
 
 
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkReply;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkRequest;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
-import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
 
 /**
  * Standard Explorer Plug-In

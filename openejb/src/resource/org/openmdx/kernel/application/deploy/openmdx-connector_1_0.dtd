@@ -1,0 +1,171 @@
+<!--
+ ! ====================================================================
+ ! Project:     openmdx, http://www.openmdx.org/
+ ! Name:        $Id: openmdx-connector_1_0.dtd,v 1.1 2009/01/23 00:21:39 wfro Exp $
+ ! Description: openMDX Connector Configuration DTD 1.0
+ ! Revision:    $Revision: 1.1 $
+ ! Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ ! Date:        $Date: 2009/01/23 00:21:39 $
+ ! ====================================================================
+ !
+ ! This software is published under the BSD license
+ ! as listed below.
+ ! 
+ ! Copyright (c) 2004, OMEX AG, Switzerland
+ ! All rights reserved.
+ ! 
+ ! Redistribution and use in source and binary forms, with or
+ ! without modification, are permitted provided that the following
+ ! conditions are met:
+ ! 
+ ! * Redistributions of source code must retain the above copyright
+ !   notice, this list of conditions and the following disclaimer.
+ ! 
+ ! * Redistributions in binary form must reproduce the above copyright
+ !   notice, this list of conditions and the following disclaimer in
+ !   the documentation and/or other materials provided with the
+ !   distribution.
+ ! 
+ ! * Neither the name of the openMDX team nor the names of its
+ !   contributors may be used to endorse or promote products derived
+ !   from this software without specific prior written permission.
+ ! 
+ ! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ ! CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ ! INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ ! MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ ! DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ ! BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ ! EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ ! TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ ! DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ! ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ ! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ ! OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ ! POSSIBILITY OF SUCH DAMAGE.
+ ! 
+ ! _________________
+ ! 
+ ! This product includes software developed by the Apache Software
+ ! Foundation (http://www.apache.org/).
+ !-->
+<!--
+XML DTD for openMDX specific Resource Adapter deployment
+descriptor. This DTD is intended to be accompanied with the J2EE Connector
+Architecture v1.0 Resource Adapter deployment descriptor (ra.xml).
+
+All openMDX Connector Extension 1.0 deployment descriptors must include a 
+DOCTYPE of the following form:
+
+  <!DOCTYPE openmdx-connector PUBLIC
+	"-//openMDX//DTD Connector Extension 1.0//EN"
+	"http://www.openmdx.org/dtd/openmdx-connector_1_0.dtd">
+-->
+<!--
+This DTD defines the openMDX specific deployment information for defining
+a deployable Resource Adapter Connection Factory.  It provides for complete
+specification of all configurable Connection Factory parameters including
+Connection Pool parameters, Security parameters for Resource Principal Mapping
+and the ability to define values for configuration parameters which exist in
+the ra.xml deployment descriptor.
+-->
+<!--
+  *********************************************************************
+  openMDX Connector Configuration
+  *********************************************************************
+-->
+<!--
+The openmdx-connector element is the root element of the
+openMDX specific deployment descriptor for the deployed resource adapter.
+
+It contains:
+	- an optional description of the openmdx-connector file
+  - the resource adapter
+-->
+<!ELEMENT openmdx-connector (description?, resourceadapter)>
+<!--
+The description element is used to provide text describing the parent element.
+The description element should include any information that the deployer wants
+to describe about the deployed Connection Factory.
+
+This is an optional element.
+-->
+<!ELEMENT description (#PCDATA)>
+<!--
+The jndi-name element defines the name that will be used to bind the Connection
+Factory Object into the openMDX JNDI Namespace.  Client EJBs and Servlets will
+use this same JNDI in their defined Reference Desciptor elements of the openMDX
+specific deployment descriptors.
+
+This is a required element.
+-->
+<!ELEMENT connectionfactory-jndi-name (#PCDATA)>
+<!--
+The resource adapter specifies
+
+	- the jndi name to be used to bind the connection factory into
+	  the openMDX JNID namespace
+  - an optional manged connection pool configuration
+-->
+<!ELEMENT resourceadapter (connectionfactory-jndi-name, pool?)>
+<!--
+The pool element is the root element for providing Connection Pool
+specific parameters for this Connection Factory.
+
+openMDX will use these specifications in controlling the behavior of the
+maintained pool of Managed Connections.
+
+This is an optional element.  Failure to specify this element or any of its
+specific element items will result in default values being assigned.  Refer to
+the description of each individual element for the designated default value.
+-->
+<!--
+  *********************************************************************
+  openMDX Pool Configuration
+  *********************************************************************
+-->
+<!ELEMENT pool (initial-capacity?, maximum-capacity?, maximum-wait?)>
+<!--
+The initial-capacity element identifies the initial number of managed connections
+which the openMDX Container will attempt to obtain during deployment.
+
+This is an optional element.
+
+Failure to specify this value will result in openMDX using its defined default value.
+
+Default Value:	1
+
+Used in: pool 
+-->
+<!ELEMENT initial-capacity (#PCDATA)>
+<!--
+The maximum-capacity element identifies the maximum number of managed connections
+which the openMDX Container will allow. Requests beyond this limit will result in an
+Exception being returned to the caller unless an instance becomes available before 
+maximum-wait has passed.
+
+This is an optional element.
+
+Failure to specify this value will result in openMDX using its defined default value.
+
+Default Value:  java.lang.Integer.MAX_VALUE
+
+Used in: pool 
+-->
+<!ELEMENT maximum-capacity (#PCDATA)>
+<!--
+The maximum-wait element identifies the time in milliseconds to wait for an 
+instance to be returned to the pool when there are maximum-capacity active instances.
+
+A value of 0 will mean not to wait at all. When a request times out 
+waiting for an instance an Exception is generated and the call aborted.
+
+This is an optional element.
+
+Failure to specify this value will result in openMDX using its defined default value.
+
+Default Value:	java.lang.Long.MAX_VALUE
+
+Used in: pool 
+-->
+<!ELEMENT maximum-wait (#PCDATA)>

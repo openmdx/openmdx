@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Launch.java,v 1.1 2007/04/24 16:41:51 hburger Exp $
+ * Name:        $Id: Launch.java,v 1.2 2008/12/20 00:21:59 wfro Exp $
  * Description: Launch
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/04/24 16:41:51 $
+ * Date:        $Date: 2008/12/20 00:21:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,7 +65,7 @@ import java.util.List;
 public class Launch {
 
 	/**
-	 * Expand argumet files and launch the specified class
+	 * Expand argument files and launch the specified class
 	 * 
 	 * @param arguments
 	 * 

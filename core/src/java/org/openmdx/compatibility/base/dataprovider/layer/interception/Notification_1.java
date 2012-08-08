@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Notification_1.java,v 1.5 2008/06/28 00:21:45 hburger Exp $
+ * Name:        $Id: Notification_1.java,v 1.8 2009/01/06 13:14:45 wfro Exp $
  * Description: Notification_1 class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:45 $
+ * Date:        $Date: 2009/01/06 13:14:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,15 +65,15 @@ import javax.jms.TopicSession;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.DataproviderOperations;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 /**
  * A notifying interception layer plugin
@@ -87,29 +87,34 @@ public class Notification_1
         short id,
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception, ServiceException {
+    ) throws ServiceException {
         super.activate(id, configuration, delegation);
-        Context context = new InitialContext();
-        TopicConnectionFactory factory = (
-            TopicConnectionFactory
-        ) context.lookup(
-            (String)configuration.values(
-                LayerConfigurationEntries.JMS_CONNECTION_FACTORY
-            ).get(0)
-        );
-        this.connection = factory.createTopicConnection();
-        this.session = this.connection.createTopicSession(
-            false, 
-            Session.AUTO_ACKNOWLEDGE // WLTopicSession.NO_ACKNOWLEDGE
-        );
-        this.topic = (Topic) context.lookup(
-            (String)configuration.values(
-                LayerConfigurationEntries.JMS_TOPIC
-            ).get(0)
-        );
-        this.publisher = this.session.createPublisher(this.topic);
-        this.message = session.createMapMessage(); 
-        this.connection.start();
+        try {
+            Context context = new InitialContext();
+            TopicConnectionFactory factory = (
+                TopicConnectionFactory
+            ) context.lookup(
+                (String)configuration.values(
+                    LayerConfigurationEntries.JMS_CONNECTION_FACTORY
+                ).get(0)
+            );
+            this.connection = factory.createTopicConnection();
+            this.session = this.connection.createTopicSession(
+                false, 
+                Session.AUTO_ACKNOWLEDGE // WLTopicSession.NO_ACKNOWLEDGE
+            );
+            this.topic = (Topic) context.lookup(
+                (String)configuration.values(
+                    LayerConfigurationEntries.JMS_TOPIC
+                ).get(0)
+            );
+            this.publisher = this.session.createPublisher(this.topic);
+            this.message = session.createMapMessage(); 
+            this.connection.start();
+        }
+        catch(Exception e) {
+            throw new ServiceException(e);
+        }
     }
 
     private static Object marshal(

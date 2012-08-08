@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DateValue.java,v 1.46 2008/11/12 10:36:53 wfro Exp $
+ * Name:        $Id: DateValue.java,v 1.48 2009/03/08 18:03:22 wfro Exp $
  * Description: DateValue 
- * Revision:    $Revision: 1.46 $
+ * Revision:    $Revision: 1.48 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 10:36:53 $
+ * Date:        $Date: 2009/03/08 18:03:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -171,7 +171,7 @@ public class DateValue
             dateFormatter.setTimeZone(
                 TimeZone.getTimeZone(application.getCurrentTimeZone())
             );
-            assert4DigitYear(dateFormatter);            
+            DateValue.assert4DigitYear(dateFormatter);            
             cachedDateFormatters.put(
                 key,
                 dateFormatter
@@ -219,7 +219,7 @@ public class DateValue
             dateTimeFormatter.setTimeZone(
                 TimeZone.getTimeZone(application.getCurrentTimeZone())
             );
-            assert4DigitYear(dateTimeFormatter);                        
+            DateValue.assert4DigitYear(dateTimeFormatter);                        
             cachedDateTimeFormatters.put(
                 key,
                 dateTimeFormatter
@@ -353,13 +353,16 @@ public class DateValue
         }
         if(forEditing) {
             String feature = this.getName();
-            id = (id == null) || (id.length() == 0)            
-                ? feature + "[" + Integer.toString(tabIndex) + "]"
-                : id;            
+            id = (id == null) || (id.length() == 0) ? 
+                feature + "[" + Integer.toString(tabIndex) + "]" : 
+                id;            
             p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             if(this.isSingleValued()) {
+                String classModifier = this.isMandatory() ?
+                    "valueR mandatory" :
+                    "valueR";                
                 p.write("<td ", rowSpanModifier, ">");
-                p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"text\" class=\"valueR", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", stringifiedValue, "\"");
+                p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"text\" class=\"", classModifier, "\"", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", stringifiedValue, "\"");
                 p.writeEventHandlers("    ", attribute.getEventHandler());
                 p.write("  >");
                 p.write("</td>");

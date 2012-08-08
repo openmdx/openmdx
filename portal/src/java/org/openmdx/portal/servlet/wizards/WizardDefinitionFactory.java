@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardDefinitionFactory.java,v 1.17 2008/09/19 20:54:23 wfro Exp $
+ * Name:        $Id: WizardDefinitionFactory.java,v 1.23 2009/03/08 18:03:24 wfro Exp $
  * Description: WizardDefinitionFactory 
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/19 20:54:23 $
+ * Date:        $Date: 2009/03/08 18:03:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,8 +68,7 @@ import java.util.TreeMap;
 
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 
 public class WizardDefinitionFactory
 implements Serializable {
@@ -94,14 +93,8 @@ implements Serializable {
             return null;
         }
         else {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("name", path)
-                },
-                "Unsupported wizard definition format. Supported formats are [.jsp]"
-            );
+            AppLog.info("Unsupported wizard definition format. Supported formats are [.jsp]", path);
+            return null;
         }
     }
 
@@ -145,15 +138,15 @@ implements Serializable {
 
         int ii = 0;
         for(
-                Iterator i = wizardDefinitions.iterator();
-                i.hasNext();
-                ii++
+            Iterator i = wizardDefinitions.iterator();
+            i.hasNext();
+            ii++
         ) {
             WizardDefinition wizardDefinition = (WizardDefinition)i.next();
             try {
                 for(
-                        Iterator j = wizardDefinition.getForClass().iterator(); 
-                        j.hasNext(); 
+                    Iterator j = wizardDefinition.getForClass().iterator(); 
+                    j.hasNext(); 
                 ) {
                     String wizardClass = (String)j.next();
                     /**
@@ -165,9 +158,9 @@ implements Serializable {
                      */                  
                     List order = wizardDefinition.getOrder();
                     if(
-                            model.isSubtypeOf(forClass, wizardClass) &&
-                            ((orderPattern == null) && !customizedDefinitions.contains(wizardDefinition.getName()) || 
-                                    ((orderPattern != null) && (order != null) && order.contains(orderPattern)))
+                        model.isSubtypeOf(forClass, wizardClass) &&
+                        ((orderPattern == null) && !customizedDefinitions.contains(wizardDefinition.getName()) || 
+                                ((orderPattern != null) && (order != null) && order.contains(orderPattern)))
                     ) {
                         matchingWizardDefinitions.put(
                             order + ":" + ii,

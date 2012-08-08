@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Connection.java,v 1.2 2007/12/03 18:30:45 hburger Exp $
+ * Name:        $Id: Connection.java,v 1.3 2009/03/08 18:52:19 wfro Exp $
  * Description: LDAP Connection 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/03 18:30:45 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,8 +69,7 @@ import netscape.ldap.LDAPv3;
  * LDAP Connection
  */
 public class Connection
-    implements org.openmdx.resource.ldap.cci.Connection
-{
+    implements org.openmdx.resource.ldap.cci.Connection {
 
     /**
      * 
@@ -113,15 +112,15 @@ public class Connection
 	//------------------------------------------------------------------------
 
     public void abandon(LDAPSearchResults arg0) throws LDAPException {
-		getDelegate().abandon(arg0);
+		this.getDelegate().abandon(arg0);
 	}
 
 	public void add(LDAPEntry arg0, LDAPConstraints arg1) throws LDAPException {
-		getDelegate().add(arg0, arg1);
+		this.getDelegate().add(arg0, arg1);
 	}
 
 	public void add(LDAPEntry arg0) throws LDAPException {
-		getDelegate().add(arg0);
+		this.getDelegate().add(arg0);
 	}
 
 	public void authenticate(int arg0, String arg1, String arg2)
@@ -134,21 +133,21 @@ public class Connection
 	}
 
 	public void bind(int arg0, String arg1, String arg2) throws LDAPException {
-		getDelegate().bind(arg0, arg1, arg2);
+		this.getDelegate().bind(arg0, arg1, arg2);
 	}
 
 	public void bind(String arg0, String arg1) throws LDAPException {
-		getDelegate().bind(arg0, arg1);
+		this.getDelegate().bind(arg0, arg1);
 	}
 
 	public boolean compare(String arg0, LDAPAttribute arg1, LDAPConstraints arg2)
 			throws LDAPException {
-		return getDelegate().compare(arg0, arg1, arg2);
+		return this.getDelegate().compare(arg0, arg1, arg2);
 	}
 
 	public boolean compare(String arg0, LDAPAttribute arg1)
 			throws LDAPException {
-		return getDelegate().compare(arg0, arg1);
+		return this.getDelegate().compare(arg0, arg1);
 	}
 
 	public void connect(int arg0, String arg1, int arg2, String arg3,
@@ -166,11 +165,11 @@ public class Connection
 	}
 
 	public void delete(String arg0, LDAPConstraints arg1) throws LDAPException {
-		getDelegate().delete(arg0, arg1);
+		this.getDelegate().delete(arg0, arg1);
 	}
 
 	public void delete(String arg0) throws LDAPException {
-		getDelegate().delete(arg0);
+		this.getDelegate().delete(arg0);
 	}
 
 	public void disconnect() throws LDAPException {
@@ -181,82 +180,82 @@ public class Connection
 
 	public LDAPExtendedOperation extendedOperation(LDAPExtendedOperation arg0)
 			throws LDAPException {
-		return getDelegate().extendedOperation(arg0);
+		return this.getDelegate().extendedOperation(arg0);
 	}
 
 	public Object getOption(int arg0) throws LDAPException {
-		return getDelegate().getOption(arg0);
+		return this.getDelegate().getOption(arg0);
 	}
 
 	public LDAPControl[] getResponseControls() {
-		return getDelegate().getResponseControls();
+		return this.getDelegate().getResponseControls();
 	}
 
 	public void modify(String arg0, LDAPModification arg1, LDAPConstraints arg2)
 			throws LDAPException {
-		getDelegate().modify(arg0, arg1, arg2);
+		this.getDelegate().modify(arg0, arg1, arg2);
 	}
 
 	public void modify(String arg0, LDAPModification arg1) throws LDAPException {
-		getDelegate().modify(arg0, arg1);
+		this.getDelegate().modify(arg0, arg1);
 	}
 
 	public void modify(String arg0, LDAPModificationSet arg1,
 			LDAPConstraints arg2) throws LDAPException {
-		getDelegate().modify(arg0, arg1, arg2);
+		this.getDelegate().modify(arg0, arg1, arg2);
 	}
 
 	public void modify(String arg0, LDAPModificationSet arg1)
 			throws LDAPException {
-		getDelegate().modify(arg0, arg1);
+		this.getDelegate().modify(arg0, arg1);
 	}
 
 	public LDAPEntry read(String arg0, String[] arg1, LDAPSearchConstraints arg2)
 			throws LDAPException {
-		return getDelegate().read(arg0, arg1, arg2);
+		return this.getDelegate().read(arg0, arg1, arg2);
 	}
 
 	public LDAPEntry read(String arg0, String[] arg1) throws LDAPException {
-		return getDelegate().read(arg0, arg1);
+		return this.getDelegate().read(arg0, arg1);
 	}
 
 	public LDAPEntry read(String arg0) throws LDAPException {
-		return getDelegate().read(arg0);
+		return this.getDelegate().read(arg0);
 	}
 
 	public void rename(String arg0, String arg1, boolean arg2,
 			LDAPConstraints arg3) throws LDAPException {
-		getDelegate().rename(arg0, arg1, arg2, arg3);
+		this.getDelegate().rename(arg0, arg1, arg2, arg3);
 	}
 
 	public void rename(String arg0, String arg1, boolean arg2)
 			throws LDAPException {
-		getDelegate().rename(arg0, arg1, arg2);
+		this.getDelegate().rename(arg0, arg1, arg2);
 	}
 
 	public void rename(String arg0, String arg1, String arg2, boolean arg3,
 			LDAPConstraints arg4) throws LDAPException {
-		getDelegate().rename(arg0, arg1, arg2, arg3, arg4);
+		this.getDelegate().rename(arg0, arg1, arg2, arg3, arg4);
 	}
 
 	public void rename(String arg0, String arg1, String arg2, boolean arg3)
 			throws LDAPException {
-		getDelegate().rename(arg0, arg1, arg2, arg3);
+		this.getDelegate().rename(arg0, arg1, arg2, arg3);
 	}
 
 	public LDAPSearchResults search(String arg0, int arg1, String arg2,
 			String[] arg3, boolean arg4, LDAPSearchConstraints arg5)
 			throws LDAPException {
-		return getDelegate().search(arg0, arg1, arg2, arg3, arg4, arg5);
+		return this.getDelegate().search(arg0, arg1, arg2, arg3, arg4, arg5);
 	}
 
 	public LDAPSearchResults search(String arg0, int arg1, String arg2,
 			String[] arg3, boolean arg4) throws LDAPException {
-		return getDelegate().search(arg0, arg1, arg2, arg3, arg4);
+		return this.getDelegate().search(arg0, arg1, arg2, arg3, arg4);
 	}
 
 	public void setOption(int arg0, Object arg1) throws LDAPException {
-		getDelegate().setOption(arg0, arg1);
+		this.getDelegate().setOption(arg0, arg1);
 	}
     
 	final static private String MANAGED_ENVIRONMENT = 

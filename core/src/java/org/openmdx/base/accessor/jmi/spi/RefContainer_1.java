@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefContainer_1.java,v 1.20 2008/12/15 03:15:33 hburger Exp $
+ * Name:        $Id: RefContainer_1.java,v 1.33 2009/02/24 15:48:54 hburger Exp $
  * Description: RefContainer_1 class
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.33 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/15 03:15:33 $
+ * Date:        $Date: 2009/02/24 15:48:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,29 +56,30 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.jmi.reflect.RefBaseObject;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
 import org.oasisopen.jmi1.RefContainer;
-import org.openmdx.base.accessor.generic.cci.Object_1_0;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.base.accessor.cci.Container_1_0;
+import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
+import org.openmdx.base.accessor.view.ObjectView_1_0;
+import org.openmdx.base.collection.Container;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.collection.MarshallingSequentialList;
 import org.openmdx.base.collection.MarshallingSet;
-import org.openmdx.base.exception.InvalidCardinalityException;
-import org.openmdx.base.exception.MarshalException;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
+import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.query.OrderSpecifier;
-import org.openmdx.compatibility.base.collection.Container;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.kernel.exception.BasicException;
 
 //---------------------------------------------------------------------------
@@ -86,8 +87,8 @@ import org.openmdx.kernel.exception.BasicException;
 //---------------------------------------------------------------------------
 @SuppressWarnings("deprecation")
 public class RefContainer_1
-extends AbstractCollection<RefObject_1_0>
-implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.LegacyContainer, RefContainer
+    extends AbstractCollection<RefObject_1_0>
+    implements Serializable, org.openmdx.base.accessor.jmi.spi.RefObjectFactory_1.LegacyContainer, RefContainer
 {
 
     /**
@@ -97,7 +98,7 @@ implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.Le
 
     private Marshaller marshaller;
 
-    private FilterableMap<String,Object_1_0> container;
+    private Container_1_0 container;
 
     //-------------------------------------------------------------------------
     /**
@@ -107,39 +108,18 @@ implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.Le
      *           objects.
      * @param   The delegate contains unmarshalled elements
      */
-    @SuppressWarnings("unchecked")
     public RefContainer_1(
         Marshaller marshaller,
-        FilterableMap<String,Object_1_0> container
+        Container_1_0 container
     ) {
         this.marshaller = marshaller;
         this.container = container;
     }
 
     //-------------------------------------------------------------------------
-    public FilterableMap<String,Object_1_0> refDelegate(
+    public Container_1_0 refDelegate(
     ) {
         return this.container;
-    }
-    
-    //  -------------------------------------------------------------------------
-
-    /**
-     * Retrieve the delegate in case of a RefContainer instance
-     * 
-     * @return the delegate in case of a RefContainer instance
-     * 
-     * @throws UnsupportedOperationException unless the delegate is an instance of RefContainer
-     */
-    private RefBaseObject refBaseObject(){
-        if(this.container instanceof RefBaseObject) {
-            return (RefBaseObject)this.container;
-        }
-        throw new UnsupportedOperationException(
-            "The delegate is not an instance of " + RefBaseObject.class.getName() + ": " + (
-                 this.container == null ? "null" : this.container.getClass().getName()
-            )
-        );
     }
     
     /* (non-Javadoc)
@@ -154,25 +134,29 @@ implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.Le
     /* (non-Javadoc)
      * @see javax.jmi.reflect.RefBaseObject#refMetaObject()
      */
-    public RefObject refMetaObject() {
-        return refBaseObject().refMetaObject();
+    public RefObject refMetaObject(
+    ) {
+        throw new UnsupportedOperationException("Operation not supported by RefContainer_1");
     }
 
     /* (non-Javadoc)
      * @see javax.jmi.reflect.RefBaseObject#refMofId()
      */
-    public String refMofId() {
-        return refBaseObject().refMofId();
+    public String refMofId(
+    ) {
+        return ((Path)this.container.getContainerId()).toResourceIdentifier();
     }
 
     /* (non-Javadoc)
      * @see javax.jmi.reflect.RefBaseObject#refVerifyConstraints(boolean)
      */
-    public Collection<?> refVerifyConstraints(boolean deepVerify) {
-        return refBaseObject().refVerifyConstraints(deepVerify);
+    public Collection<?> refVerifyConstraints(
+        boolean deepVerify
+    ) {
+        throw new UnsupportedOperationException("Operation not supported by RefContainer_1");
     }
 
-//  -------------------------------------------------------------------------
+    //  -------------------------------------------------------------------------
     public RefPackage refOutermostPackage(
     ) {
         return (RefPackage) this.marshaller;
@@ -184,7 +168,8 @@ implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.Le
         RefObject_1_0 value
     ) {
         try {
-            value.refDelegate().objMove(
+            ObjectView_1_0 objectView = (ObjectView_1_0) this.marshaller.unmarshal(value);
+            objectView.objMove(
                 this.container,
                 qualifier
             );
@@ -198,10 +183,10 @@ implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.Le
     public Container<RefObject_1_0> subSet(
         Object filter
     ) {
-        FilterableMap<String, Object_1_0> delegate;
+        Container_1_0 delegate;
         if(filter instanceof RefFilter_1_0) {
             Collection<FilterProperty> filterProperties = ((RefFilter_1_0)filter).refGetFilterProperties();
-            delegate = this.container.subMap(
+            delegate = (Container_1_0)this.container.subMap(
                 filterProperties.toArray(new FilterProperty[filterProperties.size()])
             );
         } else if(filter instanceof Filter) {
@@ -215,9 +200,9 @@ implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.Le
                     condition.getValue()
                 );
             }
-            delegate = this.container.subMap(mapped);
+            delegate = (Container_1_0)this.container.subMap(mapped);
         } else {
-            delegate = this.container.subMap(filter);
+            delegate = (Container_1_0)this.container.subMap(filter);
         }
         return new RefContainer_1(
             this.marshaller,
@@ -245,10 +230,10 @@ implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.Le
             source = this.container.subMap(null);
         }
         else if(
-                (criteria instanceof Object[]) && 
-                (((Object[])criteria).length == 2) &&
-                (((Object[])criteria)[0] instanceof FilterProperty[]) && 
-                (((Object[])criteria)[1] instanceof AttributeSpecifier[]) 
+            (criteria instanceof Object[]) && 
+            (((Object[])criteria).length == 2) &&
+            (((Object[])criteria)[0] instanceof FilterProperty[]) && 
+            (((Object[])criteria)[1] instanceof AttributeSpecifier[]) 
         ) {
             source = this.container.subMap(((Object[])criteria)[0]);
             criteria = ((Object[])criteria)[1];
@@ -306,23 +291,54 @@ implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.Le
     }
 
     /* (non-Javadoc)
+     * @see java.util.AbstractCollection#clear()
+     */
+    @Override
+    public void clear() {
+        this.container.clear();
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.AbstractCollection#isEmpty()
+     */
+    @Override
+    public boolean isEmpty() {
+        return this.container.isEmpty();
+    }
+
+    /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.collection.Container#get(java.lang.Object)
      */
     public RefObject_1_0 get(Object filter) {
         if(filter instanceof String) {
             try {
-                Object_1_0 object = this.container.get(filter);
+                DataObject_1_0 object = this.container.get(filter);
                 return (RefObject_1_0) this.marshaller.marshal(object);
             } catch (ServiceException exception){
                 if(exception.getExceptionCode() == BasicException.Code.NOT_FOUND) return null;
-                throw new MarshalException(exception);
+                throw new RuntimeServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.TRANSFORMATION_FAILURE,
+                    "Marshal failure"
+                );
             }
         } else {
             List<RefObject_1_0> selection = toList(filter);
             switch(selection.size()){
                 case 0: return null;
                 case 1: return selection.get(0);
-                default: throw new InvalidCardinalityException("Matching objects: " + selection.size());
+                default: throw BasicException.initHolder( 
+                    new IllegalArgumentException(
+                        "More than one object matches the give criteria",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.INVALID_CARDINALITY,
+                            new BasicException.Parameter("expected", 0, 1),
+                            new BasicException.Parameter("actual", selection.size())
+                        )
+                    )
+                );
             }
         }
     }
@@ -417,9 +433,9 @@ implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.Le
                 arguments[1]
             );
             for(
-                    int i = 2;
-                    i < size;
-                    i++
+                int i = 2;
+                i < size;
+                i++
             ){
                 qualifier.append(
                     arguments[i] == PERSISTENT ? '!' : '*'

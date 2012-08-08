@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: TestTransaction.java,v 1.17 2008/11/16 22:21:38 hburger Exp $
+ * Name:        $Id: TestTransaction.java,v 1.24 2009/03/04 19:09:19 hburger Exp $
  * Description: Lightweight container transaction management test
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/16 22:21:38 $
+ * Date:        $Date: 2009/03/04 19:09:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,27 +58,20 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
-import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_4;
-import org.openmdx.base.accessor.generic.view.Manager_1;
+import org.openmdx.application.dataprovider.accessor.Connection_1;
+import org.openmdx.application.dataprovider.cci.QualityOfService;
+import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
+import org.openmdx.base.accessor.cci.PersistenceManager_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_1;
 import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
-import org.openmdx.base.application.deploy.Deployment;
-import org.openmdx.base.application.deploy.InProcessDeployment;
+import org.openmdx.base.accessor.view.Manager_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Provider;
-import org.openmdx.compatibility.base.application.cci.Dataprovider_1Deployment;
-import org.openmdx.compatibility.base.application.cci.Model_1Deployment;
-import org.openmdx.compatibility.base.dataprovider.cci.QualityOfService;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.transport.adapter.Provider_1;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Provider_1_0;
-import org.openmdx.compatibility.base.dataprovider.transport.delegation.Connection_1;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.spi.Model_1;
 import org.openmdx.test.app1.jmi1.App1Package;
 import org.openmdx.test.app1.jmi1.ProductGroup;
 import org.openmdx.test.app1.jmi1.Segment;
@@ -134,12 +127,12 @@ public class TestTransaction extends TestCase {
         System.out.println("Creating connection to " + this.getName() + "...");
         this.transactional = getName().startsWith("transactional_");
         this.schema = !getName().endsWith("_ejb-2.0");
-        this.dataprovider = new Dataprovider_1Deployment(
-            dataproviderDeployment,
-            modelDeployment,
-            this.schema ? "org/openmdx/test-ejb-2_1/gateway1/NoOrNew" : "org/openmdx/test/gateway1/NoOrNew"
-        );
-        this.provider1 = new Provider_1(
+//        this.dataprovider = new Dataprovider_1Deployment(
+//            dataproviderDeployment,
+//            modelDeployment,
+//            this.schema ? "org/openmdx/test-ejb-2_1/gateway1/NoOrNew" : "org/openmdx/test/gateway1/NoOrNew"
+//        );
+        this.connection = new Connection_1(
             new RequestCollection(
                 new ServiceHeader(
                     PRINCIPALS[0],
@@ -149,7 +142,8 @@ public class TestTransaction extends TestCase {
                 ),
                 dataprovider.createConnection()
             ),
-            this.transactional
+            this.transactional,
+            false
         );
         Segment segment = getSegment();
         Transaction unitOfWork = JDOHelper.getPersistenceManager(this.provider).currentTransaction();
@@ -181,18 +175,10 @@ public class TestTransaction extends TestCase {
      */
     private Segment getSegment(
     ) throws ServiceException {
-        ObjectFactory_1_4 manager = new Manager_1(
-            new Connection_1(
-                this.provider1,
-                false // containerManagedUnitOfWork
-           )
-        ); 
-        manager.setModel(new Model_1());
+        Manager_1 manager = new Manager_1(this.connection);
+//        manager.setModel(Model_1Factory.getModel());
         RefPackage_1_1 rootPkg = new RefRootPackage_1(
-            manager,
-            null, // packageImpls
-            null, // context
-            null // binding
+            manager
         );
         this.provider = (Provider) rootPkg.refPersistenceManager().getObjectById(
             Provider.class,
@@ -261,7 +247,7 @@ public class TestTransaction extends TestCase {
     /**
      * 
      */
-    protected Provider_1_0 provider1;
+    protected PersistenceManager_1_0 connection;
     
     /**
      * 
@@ -309,33 +295,33 @@ public class TestTransaction extends TestCase {
     final private static String SCHEMA_BASED_APPLICATION_URL = 
         "file:../test-core/src/ear/test-ejb_2_1.ear";
     
-    /**
-     * The model deployment is shared
-     */
-    final private static Deployment modelDeployment = new Model_1Deployment(
-        new String[]{
-            "org:openmdx:base",
-            "org:openmdx:state2",
-            "org:openmdx:generic1",
-            "org:openmdx:test:app1",
-            "org:w3c"
-        }
-    );    
+//    /**
+//     * The model deployment is shared
+//     */
+//    final private static Deployment modelDeployment = new Model_1Deployment(
+//        new String[]{
+//            "org:openmdx:base",
+//            "org:openmdx:state2",
+//            "org:openmdx:generic1",
+//            "org:openmdx:test:app1",
+//            "org:w3c"
+//        }
+//    );    
 
-    /**
-     * The dataprovider deployment is shared
-     */
-    protected final static Deployment dataproviderDeployment = new InProcessDeployment(
-        new String[]{
-            CONNECTOR_URL
-         },
-        new String[]{
-            DTD_BASED_APPLICATION_URL,
-            SCHEMA_BASED_APPLICATION_URL
-        },
-        LOG_DEPLOYMENT_DETAIL ? System.out : null,
-        System.err
-    );
+//    /**
+//     * The dataprovider deployment is shared
+//     */
+//    protected final static Deployment dataproviderDeployment = new InProcessDeployment(
+//        new String[]{
+//            CONNECTOR_URL
+//         },
+//        new String[]{
+//            DTD_BASED_APPLICATION_URL,
+//            SCHEMA_BASED_APPLICATION_URL
+//        },
+//        LOG_DEPLOYMENT_DETAIL ? System.out : null,
+//        System.err
+//    );
     
     /**
      * Test specific data provider

@@ -31,7 +31,7 @@ html>body #content-wrap {
   height:100%; /* 100 % height */
 }
 html>body #content { /* header visible */
-  padding:13.5em 0.5em 10em 0.5em; /* 13em = height of #header and #footer + 1em, 1em = give the content some breathing space */
+  padding:14.5em 0.5em 10em 0.5em; /* 13em = height of #header and #footer + 1em, 1em = give the content some breathing space */
   margin:0 5px 0 5px;
 }
 html>body #contentNH { /* header not visible */
@@ -148,11 +148,13 @@ a:hover {
 
 /* define consistent font-size across various browsers */
 *, * td, * ul {
-  font-family: Arial,Verdana,Helvetica,sans-serif;
-  font-size: 10pt; /* default font size */
+  font-family: Arial,Geneva,Helvetica,Verdana,sans-serif;
+  text-decoration:none;
+  font-size: 9pt;
+  color:#444444;
 }
 .smallFont {
-  font-size:8pt;
+  font-size:7pt;
 }
 
 img {
@@ -160,14 +162,22 @@ img {
 }
 
 .abutton {
-  border:solid 1px #FFFFFF;
+  border:solid 1px #bbb;
   padding:2px;
   font-size:9pt;
 }
 .abutton:hover{
   color:#000000;
-  background-color:#FFFFFF;
-  border:solid 1px #CCCCCC;
+  background-color:#fff;
+  border:solid 1px #ccc;
+}
+#head .abutton {
+  border:solid 1px #fff;
+}
+#head .abutton:hover{
+  color:#000000;
+  background-color:#fff;
+  border:solid 1px #ccc;
 }
 .wide{
   width: 100%;
@@ -210,6 +220,11 @@ img {
 }
 #segmentLogo {
   text-align:center;
+}
+#menuFlyIn {
+  position:absolute;
+  z-index:1000;
+  left:-4px;
 }
 #menuOps {
 	padding: 2px 0 0 12px;
@@ -789,6 +804,7 @@ input.classsubmithover { /* IE :hover workaround */
 }
 .borderedimg {
   border-style: solid;
+  border-color: transparent;
   border-width: 1px;
   white-space: nowrap;
   margin-left: 1px;

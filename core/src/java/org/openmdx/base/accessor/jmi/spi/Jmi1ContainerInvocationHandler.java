@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.9 2008/11/24 10:17:07 wfro Exp $
+ * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.11 2009/01/11 21:19:33 wfro Exp $
  * Description: ContainerInvocationHandler 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/24 10:17:07 $
+ * Date:        $Date: 2009/01/11 21:19:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,7 +59,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.persistence.spi.Marshaller;
+import org.openmdx.base.marshalling.Marshaller;
 import org.slf4j.LoggerFactory;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.Container;
@@ -67,7 +67,6 @@ import org.w3c.cci2.Container;
 /**
  * ContainerInvocationHandler
  */
-@SuppressWarnings("unchecked")
 public class Jmi1ContainerInvocationHandler
     implements InvocationHandler
 {

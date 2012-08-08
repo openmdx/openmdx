@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Ui_1.java,v 1.48 2008/12/09 13:45:36 wfro Exp $
+ * Name:        $Id: Ui_1.java,v 1.61 2009/03/08 18:03:23 wfro Exp $
  * Description: Ui_1 plugin
- * Revision:    $Revision: 1.48 $
+ * Revision:    $Revision: 1.61 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/09 13:45:36 $
+ * Date:        $Date: 2009/03/08 18:03:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,31 +70,31 @@ import java.util.TreeMap;
 
 import javax.jmi.reflect.RefException;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.Directions;
+import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.application.mof.cci.AggregationKind;
+import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.application.mof.cci.PrimitiveTypes;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReplyContexts;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.naming.PathComponent;
-import org.openmdx.compatibility.base.query.FilterProperty;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.query.FilterProperty;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_3;
-import org.openmdx.model1.code.AggregationKind;
-import org.openmdx.model1.code.Multiplicities;
-import org.openmdx.model1.code.PrimitiveTypes;
 
 /**
  * Implementation of the model org:openmdx:ui1.
@@ -117,10 +117,10 @@ public class Ui_1 extends Layer_1 {
 
         public FeatureDefinition(
             ModelElement_1_0 element
-        ) {
-            this.name = (String)element.values("name").get(0);
-            this.qualifiedName = (String)element.values("qualifiedName").get(0);
-            this.container = element.values("container").get(0);
+        ) throws ServiceException {
+            this.name = (String)element.objGetValue("name");
+            this.qualifiedName = (String)element.objGetValue("qualifiedName");
+            this.container = element.objGetValue("container");
             this.modelElement = element;
         }
 
@@ -152,7 +152,7 @@ public class Ui_1 extends Layer_1 {
     }
 
     //------------------------------------------------------------------------
-    private class StructuralFeatureDefinition extends FeatureDefinition {
+    private class StructuralFeatureDefinition extends Ui_1.FeatureDefinition {
 
         public StructuralFeatureDefinition(
             String name,
@@ -181,22 +181,22 @@ public class Ui_1 extends Layer_1 {
             ModelElement_1_0 element
         ) throws ServiceException {
             super(element);
-            this.type = element.values("type").get(0);
-            this.multiplicity = (String)element.values("multiplicity").get(0);
-            this.isChangeable = (element.getValues("isChangeable") == null) || (element.values("isChangeable").isEmpty()) ? 
+            this.type = element.objGetValue("type");
+            this.multiplicity = (String)element.objGetValue("multiplicity");
+            this.isChangeable = (element.objGetValue("isChangeable") == null) || (element.objGetList("isChangeable").isEmpty()) ? 
                 new Boolean(Ui_1.this.changableDefaultValue) : 
-                (Boolean)element.values("isChangeable").get(0);
+                (Boolean)element.objGetValue("isChangeable");
             if(Ui_1.this.model.isAttributeType(element) || Ui_1.this.model.isStructureFieldType(element)) {
                 this.isReference = false;
                 this.isReferenceStoredAsAttribute = false;
             }
             else if(Ui_1.this.model.isReferenceType(element)) {
-                ModelElement_1_0 referencedEnd = Ui_1.this.model.getElement(element.values("referencedEnd").get(0));
-                ModelElement_1_0 exposedEnd = Ui_1.this.model.getElement(element.values("exposedEnd").get(0));
+                ModelElement_1_0 referencedEnd = Ui_1.this.model.getElement(element.objGetValue("referencedEnd"));
+                ModelElement_1_0 exposedEnd = Ui_1.this.model.getElement(element.objGetValue("exposedEnd"));
                 // A reference is handled as attribute in case of a single-valued reference with aggregation=none
                 this.isReference = 
-                    !referencedEnd.values("qualifierName").isEmpty() || 
-                    !exposedEnd.values("qualifierName").isEmpty();
+                    !referencedEnd.objGetList("qualifierName").isEmpty() || 
+                    !exposedEnd.objGetList("qualifierName").isEmpty();
                 this.isReferenceStoredAsAttribute = Ui_1.this.model.referenceIsStoredAsAttribute(element);
             }
             else {
@@ -239,7 +239,7 @@ public class Ui_1 extends Layer_1 {
     }
 
     //------------------------------------------------------------------------
-    private class OperationDefinition extends FeatureDefinition {
+    private class OperationDefinition extends Ui_1.FeatureDefinition {
 
         public OperationDefinition(
             String name,
@@ -257,11 +257,11 @@ public class Ui_1 extends Layer_1 {
 
         public OperationDefinition(
             ModelElement_1_0 element
-        ) {
+        ) throws ServiceException {
             super(element);
-            this.isQuery = element.values("isQuery").isEmpty()
+            this.isQuery = element.objGetList("isQuery").isEmpty()
             ? true
-                : ((Boolean)element.values("isQuery").get(0)).booleanValue();
+                : ((Boolean)element.objGetValue("isQuery")).booleanValue();
         }
 
         public boolean isQuery(
@@ -278,7 +278,7 @@ public class Ui_1 extends Layer_1 {
         short id,
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception, ServiceException {
+    ) throws ServiceException {
         super.activate(
             id, 
             configuration, 
@@ -293,7 +293,6 @@ public class Ui_1 extends Layer_1 {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                null,
                 "A model must be configured with options 'modelPackage' and 'packageImpl'"
             );
         }
@@ -465,6 +464,7 @@ public class Ui_1 extends Layer_1 {
         Integer skipRow,
         boolean filterable,
         boolean sortable,
+        boolean mandatory,
         String featureName,
         String qualifiedFeatureName,
         String dataBindingName
@@ -485,6 +485,7 @@ public class Ui_1 extends Layer_1 {
         f.values("displayValueExpr").addAll(displayValueExprs);
         f.values("filterable").add(new Boolean(filterable));
         f.values("sortable").add(new Boolean(sortable));
+        f.values("mandatory").add(new Boolean(mandatory));
         f.values("featureName").add(featureName);
         f.values("qualifiedFeatureName").add(qualifiedFeatureName);
         if(dataBindingName != null) {
@@ -501,7 +502,7 @@ public class Ui_1 extends Layer_1 {
             feature.getType()
         );
         objectReference.values("referenceName").add(feature.getName());
-        objectReference.values("referencedTypeName").add(featureType.values("qualifiedName").get(0));
+        objectReference.values("referencedTypeName").add(featureType.objGetValue("qualifiedName"));
         // Reference
         if(feature.isReference()) {
             objectReference.values("referenceIsStoredAsAttribute").add(
@@ -510,10 +511,10 @@ public class Ui_1 extends Layer_1 {
             ModelElement_1_0 element = feature.getModelElement();
             if(element != null) {
                 ModelElement_1_0 referencedEnd = this.model.getElement(
-                    element.values("referencedEnd").get(0)
+                    element.objGetValue("referencedEnd")
                 );
-                if(!referencedEnd.values("qualifierName").isEmpty()) {
-                    String qualifierName = (String)referencedEnd.values("qualifierName").get(0);           
+                if(!referencedEnd.objGetList("qualifierName").isEmpty()) {
+                    String qualifierName = (String)referencedEnd.objGetValue("qualifierName");           
                     objectReference.values("userDefinedQualifier").add(
                         new Boolean(!"id".equals(qualifierName))
                     );
@@ -642,7 +643,7 @@ public class Ui_1 extends Layer_1 {
     ) throws ServiceException {
         // Try to find element with inspectorClass
         String containerName = 
-            "" + inspectorClass.values("qualifiedName").get(0) + ":Pane:" + paneName +
+            "" + inspectorClass.objGetValue("qualifiedName") + ":Pane:" + paneName +
             ":Tab:" + tabName +
             (level > 0 ? ":Group:" + groupName : "");
         DataproviderObject elementDefinition = this.existingElementDefinitions.get(segmentIdentity).get(containerName);
@@ -667,7 +668,7 @@ public class Ui_1 extends Layer_1 {
                 containedFeature.getContainer()
             );
             containerName = 
-                "" + definingClass.values("qualifiedName").get(0) + ":Pane:" + paneName +
+                "" + definingClass.objGetValue("qualifiedName") + ":Pane:" + paneName +
                 ":Tab:" + tabName +
                 (level > 0 ? ":Group:" + groupName : "");
             return this.getElementDefinition(
@@ -834,7 +835,7 @@ public class Ui_1 extends Layer_1 {
         );
         // Overload definition if a definition for inspectorClass exists
         if(inspectorClass != null) {
-            String qualifiedNameBase = (String)inspectorClass.values("qualifiedName").get(0) + ":" + feature.getName();
+            String qualifiedNameBase = (String)inspectorClass.objGetValue("qualifiedName") + ":" + feature.getName();
             if(
                 (this.existingElementDefinitions.get(segmentIdentity).get(qualifiedNameBase) != null) ||
                 (this.existingElementDefinitions.get(segmentIdentity.getParent().getChild("Root")).get(qualifiedNameBase) != null)
@@ -883,6 +884,9 @@ public class Ui_1 extends Layer_1 {
             elementDefinition.values("filterable").add(
                 Boolean.FALSE
             );
+            elementDefinition.values("mandatory").add(
+                Boolean.FALSE
+            );
         }
         // Default sizeXWeight
         if(!feature.isReference()) {
@@ -907,7 +911,7 @@ public class Ui_1 extends Layer_1 {
         ModelElement_1_0 featureType = this.model.getDereferencedType(
             feature.getType()
         );
-        String typeName = (String)featureType.values("qualifiedName").get(0);
+        String typeName = (String)featureType.objGetValue("qualifiedName");
         boolean isAdditionalElementDefinition = 
             "org:openmdx:ui1:AdditionalElementDefinition".equals(definition.values(SystemAttributes.OBJECT_CLASS).get(0));
         // Default value
@@ -1068,24 +1072,27 @@ public class Ui_1 extends Layer_1 {
                 (String)definition.values("iconKey").get(0),
                 (String)definition.values("color").get(0), 
                 (String)definition.values("backColor").get(0), 
-                definition.values("multiplicity").isEmpty() 
-                ? feature.getMultiplicity() 
-                    : (String)definition.values("multiplicity").get(0),
-                    !definition.values("spanRow").isEmpty() 
-                    ? (Integer)definition.values("spanRow").get(0) 
-                        : new Integer(1), 
-                        !definition.values("skipRow").isEmpty() 
-                        ? (Integer)definition.values("skipRow").get(0) 
-                            : new Integer(0), 
-                            definition.values("filterable").isEmpty() 
-                            ? !isReferenceField 
-                                : ((Boolean)definition.values("filterable").get(0)).booleanValue(),
-                                definition.values("sortable").isEmpty() 
-                                ? isSortable 
-                                    : ((Boolean)definition.values("sortable").get(0)).booleanValue(),
-                                    feature.getName(),
-                                    feature.getQualifiedName(),
-                                    (String)definition.values("dataBindingName").get(0)
+                definition.values("multiplicity").isEmpty() ? 
+                    feature.getMultiplicity() : 
+                    (String)definition.values("multiplicity").get(0),
+                !definition.values("spanRow").isEmpty() ? 
+                    (Integer)definition.values("spanRow").get(0) : 
+                    new Integer(1), 
+                !definition.values("skipRow").isEmpty() ? 
+                    (Integer)definition.values("skipRow").get(0) : 
+                    new Integer(0), 
+                definition.values("filterable").isEmpty() ? 
+                    !isReferenceField : 
+                    ((Boolean)definition.values("filterable").get(0)).booleanValue(),
+                definition.values("sortable").isEmpty() ? 
+                    isSortable : 
+                    ((Boolean)definition.values("sortable").get(0)).booleanValue(),
+                definition.values("mandatory").isEmpty() ? 
+                    Multiplicities.SINGLE_VALUE.equals(feature.getMultiplicity()) && feature.isChangeable() : 
+                    ((Boolean)definition.values("mandatory").get(0)).booleanValue(),
+                feature.getName(),
+                feature.getQualifiedName(),
+                (String)definition.values("dataBindingName").get(0)
             );
         }
     }
@@ -1181,13 +1188,13 @@ public class Ui_1 extends Layer_1 {
     private void addElementsToAttributePane(
         Path segmentIdentity,
         DataproviderObject_1_0 pane,
-        List<StructuralFeatureDefinition> featureDefinitions,
+        List<Ui_1.StructuralFeatureDefinition> featureDefinitions,
         ModelElement_1_0 inspectorClass
     ) throws ServiceException {
         Map<Path,DataproviderObject_1_0> cachedDefinitions = new HashMap<Path,DataproviderObject_1_0>();
         Set<String> modifiedGroups = new HashSet<String>();
         Set<String> modifiedTabs = new HashSet<String>();
-        String paneName = inspectorClass.values("qualifiedName").get(0) + ":Pane:Attr";
+        String paneName = inspectorClass.objGetValue("qualifiedName") + ":Pane:Attr";
         // Process all features
         for(StructuralFeatureDefinition feature: featureDefinitions) {
             if(!feature.isReference()) {
@@ -1233,7 +1240,6 @@ public class Ui_1 extends Layer_1 {
                                 throw new ServiceException(
                                     BasicException.Code.DEFAULT_DOMAIN,
                                     BasicException.Code.INVALID_CONFIGURATION,
-                                    null,
                                     "order.size() == 3 for element definitions mapped to tabs/field groups"
                                 );
                             }
@@ -1438,7 +1444,7 @@ public class Ui_1 extends Layer_1 {
         DataproviderObject_1_0 container,
         String containerName,
         List<Object> showMemberRange,
-        List<StructuralFeatureDefinition> featureDefinitions,
+        List<Ui_1.StructuralFeatureDefinition> featureDefinitions,
         ModelElement_1_0 inspectorClass,
         Map memberMimeTypes,
         Map memberDefaultValues
@@ -1449,7 +1455,7 @@ public class Ui_1 extends Layer_1 {
          * not customized make sure that features of inspectorClass appear first
          * (--> must be at the end of orderedFeatures because of quick sort below)
          */
-        List<StructuralFeatureDefinition> orderedFeatures = new ArrayList<StructuralFeatureDefinition>();
+        List<Ui_1.StructuralFeatureDefinition> orderedFeatures = new ArrayList<Ui_1.StructuralFeatureDefinition>();
         StructuralFeatureDefinition featureN = null; // feature with name="name"
         StructuralFeatureDefinition featureD = null; // feature with name="description"
         StructuralFeatureDefinition featureT = null; // feature with name="title"
@@ -1457,7 +1463,7 @@ public class Ui_1 extends Layer_1 {
             // feature is member of inspectorClass
             if(
                 (featureDefinition.getModelElement() != null) &&
-                inspectorClass.values("content").contains(featureDefinition.getModelElement().path())
+                inspectorClass.objGetList("content").contains(featureDefinition.getModelElement().jdoGetObjectId())
             ) {            
                 String featureName = (String)featureDefinition.getName();
                 if("name".equals(featureName)) {
@@ -1629,7 +1635,7 @@ public class Ui_1 extends Layer_1 {
             );
             // filter additional definition: add definition only if base class matches for class
             // or if forClass is unspecified
-            String inspectorClassName = (String)inspectorClass.values("qualifiedName").get(0);
+            String inspectorClassName = (String)inspectorClass.objGetValue("qualifiedName");
             if((target.getValues("forClass") == null) || target.values("forClass").contains(inspectorClassName)) {
                 definitions.add(
                     target
@@ -1721,11 +1727,11 @@ public class Ui_1 extends Layer_1 {
     }
 
     //-------------------------------------------------------------------------
-    private List<StructuralFeatureDefinition> getStructFeatureDefinitions(
+    private List<Ui_1.StructuralFeatureDefinition> getStructFeatureDefinitions(
         ModelElement_1_0 paramType
     ) throws ServiceException {
-        Collection fieldDefs = ((Map)paramType.values("field").get(0)).values();
-        List<StructuralFeatureDefinition> featureDefinitions = new ArrayList<StructuralFeatureDefinition>();
+        Collection fieldDefs = ((Map)paramType.objGetValue("field")).values();
+        List<Ui_1.StructuralFeatureDefinition> featureDefinitions = new ArrayList<Ui_1.StructuralFeatureDefinition>();
         for(
             Iterator i = fieldDefs.iterator();
             i.hasNext();
@@ -1739,7 +1745,7 @@ public class Ui_1 extends Layer_1 {
 
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    private List<StructuralFeatureDefinition> getStructuralFeatureDefinitions(
+    private List<Ui_1.StructuralFeatureDefinition> getStructuralFeatureDefinitions(
         Path segmentIdentity,
         ModelElement_1_0 classDef,
         boolean includeSubtypes,
@@ -1753,16 +1759,16 @@ public class Ui_1 extends Layer_1 {
                 attributesOnly
             ).values()          
         );
-        Map<String,StructuralFeatureDefinition> featureDefinitions = new HashMap<String,StructuralFeatureDefinition>();
+        Map<String,Ui_1.StructuralFeatureDefinition> featureDefinitions = new HashMap<String,Ui_1.StructuralFeatureDefinition>();
         // Add modeled structural features
         for(ModelElement_1_0 featureDef: featureDefs) {
             StructuralFeatureDefinition feature = new StructuralFeatureDefinition(featureDef);            
             if(feature.isReference()) {
                 // Only add reference features if not explicitly excluded and exposed end is not composite
-                ModelElement_1_0 exposedEnd = this.model.getElement(featureDef.values("exposedEnd").get(0));
+                ModelElement_1_0 exposedEnd = this.model.getElement(featureDef.objGetValue("exposedEnd"));
                 if(
                     !(REFERENCES_TO_EXCLUDE.contains(feature.getQualifiedName()) || REFERENCES_TO_EXCLUDE.contains(feature.getName())) &&
-                    !AggregationKind.COMPOSITE.equals(exposedEnd.values("aggregation").get(0))
+                    !AggregationKind.COMPOSITE.equals(exposedEnd.objGetValue("aggregation"))
                 ) {
                     featureDefinitions.put(
                         feature.getQualifiedName(),
@@ -1801,36 +1807,50 @@ public class Ui_1 extends Layer_1 {
                 );
             }
         }      
-        return new ArrayList<StructuralFeatureDefinition>(featureDefinitions.values());
+        return new ArrayList<Ui_1.StructuralFeatureDefinition>(featureDefinitions.values());
     }
 
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    private List<OperationDefinition> getOperationDefinitions(
+    private List<Ui_1.OperationDefinition> getOperationDefinitions(
         Path segmentIdentity,
         ModelElement_1_0 classDef
     ) throws ServiceException {
-        List<OperationDefinition> featureDefinitions = new ArrayList<OperationDefinition>();
+        Map<String,Ui_1.OperationDefinition> featureDefinitions = new HashMap<String,Ui_1.OperationDefinition>();
         // Add modeled operations
-        Collection features = ((Map)classDef.values("allFeature").get(0)).values();
+        Collection features = ((Map)classDef.objGetValue("allFeature")).values();
         for(
             Iterator<ModelElement_1_0> i = features.iterator(); 
             i.hasNext(); 
         ) {
             ModelElement_1_0 feature = i.next();
-            if(this.model.isOperationType(feature)) {                    
-                featureDefinitions.add(
-                    new OperationDefinition(feature)
+            if(this.model.isOperationType(feature)) {
+                OperationDefinition featureDefinition = new OperationDefinition(feature);
+                featureDefinitions.put(
+                    featureDefinition.getQualifiedName(),
+                    featureDefinition
                 );
             }
         }
-        // Add customized operations
-        for(OperationDefinition featureDefinition: this.operationDefinitions.get(segmentIdentity)) {
+        // Add customized operations for segment Root
+        for(OperationDefinition featureDefinition: this.operationDefinitions.get(segmentIdentity.getParent().getChild("Root"))) {
             if(this.model.isSubtypeOf(classDef, featureDefinition.getContainer())) {
-                featureDefinitions.add(featureDefinition);
+                featureDefinitions.put(
+                    featureDefinition.getQualifiedName(),
+                    featureDefinition
+                );
             }
         }      
-        return featureDefinitions;
+        // Add customized operations for current segment
+        for(OperationDefinition featureDefinition: this.operationDefinitions.get(segmentIdentity)) {
+            if(this.model.isSubtypeOf(classDef, featureDefinition.getContainer())) {
+                featureDefinitions.put(
+                    featureDefinition.getQualifiedName(),
+                    featureDefinition
+                );
+            }
+        }      
+        return new ArrayList<Ui_1.OperationDefinition>(featureDefinitions.values());
     }
 
     //-------------------------------------------------------------------------
@@ -1884,11 +1904,11 @@ public class Ui_1 extends Layer_1 {
                     "";
                 // Create new ObjectContainer if it is a reference of classDef
                 DataproviderObject container = this.existingElements.get(segmentIdentity).get(
-                    this.model.getElement(feature.getContainer()).values("qualifiedName").get(0) + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix
+                    this.model.getElement(feature.getContainer()).objGetValue("qualifiedName") + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix
                 );
                 if(
                     (container == null) ||
-                    (feature.getQualifiedName()).startsWith(inspectorClassDef.values("qualifiedName").get(0) + ":")
+                    (feature.getQualifiedName()).startsWith(inspectorClassDef.objGetValue("qualifiedName") + ":")
                 ) { 
                     String containerName = forClass + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix;
                     container = new DataproviderObject(
@@ -2024,7 +2044,7 @@ public class Ui_1 extends Layer_1 {
         }
         return inspectorClass == null ? 
             "Pane:" + paneType : 
-            inspectorClass.values("qualifiedName").get(0) + ":Pane:" + id;
+            inspectorClass.objGetValue("qualifiedName") + ":Pane:" + id;
     }
 
     //-------------------------------------------------------------------------
@@ -2197,7 +2217,7 @@ public class Ui_1 extends Layer_1 {
                 if(operationDef.getModelElement() != null) {
                     // Map parameter to FieldGroup
                     for(
-                        Iterator j = operationDef.getModelElement().values("content").iterator();
+                        Iterator j = operationDef.getModelElement().objGetList("content").iterator();
                         j.hasNext();
                     ) {        
                         // create group and add to tab
@@ -2205,11 +2225,11 @@ public class Ui_1 extends Layer_1 {
                         DataproviderObject_1_0 groupElementDefinition = this.getOperationDefinition(
                             segmentIdentity,
                             operationDef,
-                            (String)paramDef.values("name").get(0),
+                            (String)paramDef.objGetValue("name"),
                             1,
                             inspectorClass
                         );
-                        String groupName = tabName + ":Group:" + paramDef.values("name").get(0);
+                        String groupName = tabName + ":Group:" + paramDef.objGetValue("name");
                         DataproviderObject group = new DataproviderObject(
                             segmentIdentity.getDescendant(new String[]{"element", groupName})
                         );
@@ -2325,14 +2345,14 @@ public class Ui_1 extends Layer_1 {
         ModelElement_1_0 classDef = this.model.getElement(forClass);
         // Create inspector for all supertypes
         for(
-            Iterator i = classDef.values("allSupertype").iterator();
+            Iterator i = classDef.objGetList("allSupertype").iterator();
             i.hasNext(); 
         ) {
             ModelElement_1_0 supertype = this.model.getElement(i.next());
             if(supertype != classDef) {
                 this.createInspector(
                     segmentIdentity,
-                    (String)supertype.values("qualifiedName").get(0)
+                    (String)supertype.objGetValue("qualifiedName")
                 );
             }
         }
@@ -2389,8 +2409,9 @@ public class Ui_1 extends Layer_1 {
                 new Integer(0),
                 false,
                 false,
-                (String)classDef.values("name").get(0),
-                (String)classDef.values("qualifiedName").get(0),
+                false,
+                (String)classDef.objGetValue("name"),
+                (String)classDef.objGetValue("qualifiedName"),
                 null
             );
             this.storeElement(
@@ -2406,7 +2427,7 @@ public class Ui_1 extends Layer_1 {
         /**
          * Operation panes
          */    
-        List<OperationDefinition> operationDefs = this.getOperationDefinitions(
+        List<Ui_1.OperationDefinition> operationDefs = this.getOperationDefinitions(
             segmentIdentity,
             classDef
         );
@@ -2472,7 +2493,7 @@ public class Ui_1 extends Layer_1 {
         /**
          * Object container panes (reference panes)
          */    
-        List<StructuralFeatureDefinition> structuralFeatureDefinitions = this.getStructuralFeatureDefinitions(segmentIdentity, classDef, false, false);
+        List<Ui_1.StructuralFeatureDefinition> structuralFeatureDefinitions = this.getStructuralFeatureDefinitions(segmentIdentity, classDef, false, false);
         for(StructuralFeatureDefinition feature: structuralFeatureDefinitions) {
             if(feature.isReference()) {
                 this.addReferenceTab(
@@ -2562,12 +2583,12 @@ public class Ui_1 extends Layer_1 {
             }
         }
         // Prepare feature definitions
-        List<StructuralFeatureDefinition> structuralFeatureDefinitions = new ArrayList<StructuralFeatureDefinition>();
+        List<Ui_1.StructuralFeatureDefinition> structuralFeatureDefinitions = new ArrayList<Ui_1.StructuralFeatureDefinition>();
         this.structuralFeatureDefinitions.put(
             segmentIdentity,
             structuralFeatureDefinitions
         );
-        List<OperationDefinition> operationDefinitions = new ArrayList<OperationDefinition>();
+        List<Ui_1.OperationDefinition> operationDefinitions = new ArrayList<Ui_1.OperationDefinition>();
         this.operationDefinitions.put(
             segmentIdentity,
             operationDefinitions
@@ -2721,7 +2742,7 @@ public class Ui_1 extends Layer_1 {
                 ModelElement_1_0 elementDef = (ModelElement_1_0)i.next();
                 if(this.model.isClassType(elementDef)) {
                     DataproviderObject assertableInspector = new DataproviderObject(
-                        request.path().getChild((String)elementDef.values("qualifiedName").get(0))
+                        request.path().getChild((String)elementDef.objGetValue("qualifiedName"))
                     );
                     assertableInspector.values(SystemAttributes.OBJECT_CLASS).add(
                         "org:openmdx:ui1:AssertableInspector"
@@ -2734,7 +2755,7 @@ public class Ui_1 extends Layer_1 {
                         inspectorDefinition
                     );
                     assertableInspector.values("forClass").addAll(
-                        elementDef.values("qualifiedName")
+                        elementDef.objGetList("qualifiedName")
                     );
                     // label
                     assertableInspector.values("label").addAll(
@@ -2857,11 +2878,9 @@ public class Ui_1 extends Layer_1 {
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.CREATION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("typeName", "org:openmdx:ui1:CanNotCreateInspector"),
-                        new BasicException.Parameter("reason", e.getCause().toStringTopLevel(false))
-                    },
-                    "Inspector for class " + arguments.values("forClass").get(0) + " can not be created"
+                    "Inspector for class " + arguments.values("forClass").get(0) + " can not be created",
+                    new BasicException.Parameter("typeName", "org:openmdx:ui1:CanNotCreateInspector"),
+                    new BasicException.Parameter("reason", e.getCause().getDescription())
                 );
             }
             catch(Exception e) {
@@ -2869,11 +2888,9 @@ public class Ui_1 extends Layer_1 {
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.CREATION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("typeName", "org:openmdx:ui1:CanNotCreateInspector"),
-                        new BasicException.Parameter("reason", e.getMessage())
-                    },
-                    "Inspector for class " + arguments.values("forClass").get(0) + " can not be created"
+                    "Inspector for class " + arguments.values("forClass").get(0) + " can not be created",
+                    new BasicException.Parameter("typeName", "org:openmdx:ui1:CanNotCreateInspector"),
+                    new BasicException.Parameter("reason", e.getMessage())
                 );
             }
             DataproviderObject result = new DataproviderObject(
@@ -2887,10 +2904,8 @@ public class Ui_1 extends Layer_1 {
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("operation", operation)
-            },
-            "operation not supported"
+            "operation not supported",
+            new BasicException.Parameter("operation", operation)
         );
     }
 
@@ -2924,10 +2939,10 @@ public class Ui_1 extends Layer_1 {
         new HashMap<Path,Map<String,DataproviderObject>>();
     private Map<Path,Map<String,DataproviderObject>> existingElements =
         new HashMap<Path,Map<String,DataproviderObject>>();
-    private Map<Path,List<StructuralFeatureDefinition>> structuralFeatureDefinitions = 
-        new HashMap<Path,List<StructuralFeatureDefinition>>();
-    private Map<Path,List<OperationDefinition>> operationDefinitions =
-        new HashMap<Path,List<OperationDefinition>>();
+    private Map<Path,List<Ui_1.StructuralFeatureDefinition>> structuralFeatureDefinitions = 
+        new HashMap<Path,List<Ui_1.StructuralFeatureDefinition>>();
+    private Map<Path,List<Ui_1.OperationDefinition>> operationDefinitions =
+        new HashMap<Path,List<Ui_1.OperationDefinition>>();
     private boolean changableDefaultValue = true;
 
     private RequestCollection delegation = null; // initialized in prolog()

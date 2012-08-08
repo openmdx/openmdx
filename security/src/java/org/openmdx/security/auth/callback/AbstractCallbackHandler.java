@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AbstractCallbackHandler.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: AbstractCallbackHandler.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
  * Description: Abstract Callback Handler
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -88,7 +88,7 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
     protected void handle(
     	ChoiceCallback callback
     ) throws IOException, UnsupportedCallbackException {
-    	unsupported(callback);
+    	this.unsupported(callback);
     }
     
     /**
@@ -102,7 +102,7 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
     protected void handle(
     	ConfirmationCallback callback
     ) throws IOException, UnsupportedCallbackException {
-    	unsupported(callback);
+    	this.unsupported(callback);
     }
     
     /**
@@ -130,7 +130,7 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
     protected void handle(
     	NameCallback callback
     ) throws IOException, UnsupportedCallbackException {
-    	unsupported(callback);
+    	this.unsupported(callback);
     }
     
     /**
@@ -144,7 +144,7 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
     protected void handle(
     	PasswordCallback callback
     ) throws IOException, UnsupportedCallbackException {
-    	unsupported(callback);
+    	this.unsupported(callback);
     }
     
     /**
@@ -158,7 +158,7 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
     protected void handle(
     	TextInputCallback callback
     ) throws IOException, UnsupportedCallbackException {
-    	unsupported(callback);
+    	this.unsupported(callback);
     }
     
     /**
@@ -172,7 +172,7 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
     protected void handle(
     	TextOutputCallback callback
     ) throws IOException, UnsupportedCallbackException {
-    	unsupported(callback);
+    	this.unsupported(callback);
     }
 
     /**
@@ -186,7 +186,7 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
     protected void handle(
     	AddressCallback callback
     ) throws IOException, UnsupportedCallbackException {
-    	unsupported(callback);
+    	this.unsupported(callback);
     }
     
     /**
@@ -200,23 +200,31 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
         Callback callback
     ) throws IOException, UnsupportedCallbackException {
     	if(callback instanceof ChoiceCallback){
-    		handle((ChoiceCallback)callback);
-        } else if (callback instanceof ConfirmationCallback) {
-    		handle((ConfirmationCallback)callback);
-        } else if (callback instanceof LanguageCallback) {
-    		handle((LanguageCallback)callback);
-        } else if (callback instanceof NameCallback) {
-    		handle((NameCallback)callback);
-        } else if (callback instanceof PasswordCallback) {
-    		handle((PasswordCallback)callback);
-        } else if (callback instanceof TextInputCallback) {
-    		handle((TextInputCallback)callback);
-        } else if (callback instanceof TextOutputCallback) {
-    		handle((TextOutputCallback)callback);
-        } else if (callback instanceof AddressCallback) {
-    		handle((AddressCallback)callback);
-        } else {
-        	unsupported(callback);
+    		this.handle((ChoiceCallback)callback);
+        } 
+    	else if (callback instanceof ConfirmationCallback) {
+    		this.handle((ConfirmationCallback)callback);
+        } 
+    	else if (callback instanceof LanguageCallback) {
+    		this.handle((LanguageCallback)callback);
+        } 
+    	else if (callback instanceof NameCallback) {
+    		this.handle((NameCallback)callback);
+        } 
+    	else if (callback instanceof PasswordCallback) {
+    		this.handle((PasswordCallback)callback);
+        } 
+    	else if (callback instanceof TextInputCallback) {
+    		this.handle((TextInputCallback)callback);
+        } 
+    	else if (callback instanceof TextOutputCallback) {
+    		this.handle((TextOutputCallback)callback);
+        } 
+    	else if (callback instanceof AddressCallback) {
+    		this.handle((AddressCallback)callback);
+        } 
+    	else {
+    		this.unsupported(callback);
         }
     }
     
@@ -233,7 +241,7 @@ public abstract class AbstractCallbackHandler implements CallbackHandler {
             i < callbacks.length;
             i++
         ){
-        	handle(callbacks[i]);
+        	this.handle(callbacks[i]);
         }
     }
     

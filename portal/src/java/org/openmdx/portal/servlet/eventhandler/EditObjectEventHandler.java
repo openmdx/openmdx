@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectEventHandler.java,v 1.29 2008/11/10 10:20:11 wfro Exp $
+ * Name:        $Id: EditObjectEventHandler.java,v 1.31 2009/03/08 18:03:21 wfro Exp $
  * Description: EditObjectEventHandler 
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
+ * Date:        $Date: 2009/03/08 18:03:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,6 +56,7 @@
 package org.openmdx.portal.servlet.eventhandler;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.jdo.PersistenceManager;
@@ -100,13 +101,71 @@ public class EditObjectEventHandler {
             case Action.EVENT_SAVE: {
                 Map attributeMap = new HashMap();    
                 PersistenceManager pm = currentView.getPersistenceManager();
+                boolean hasErrors;
                 try {  
                     pm.currentTransaction().begin();
                     currentView.storeObject(
                         parameterMap,
                         attributeMap
                     );
-                    pm.currentTransaction().commit();
+                    List errorMessages = application.getErrorMessages();
+                    hasErrors = !errorMessages.isEmpty();
+                    if(hasErrors) {
+                        errorMessages.clear();                        
+                    }
+                    else {
+                        pm.currentTransaction().commit();
+                    }
+                }
+                catch(Exception e) {
+                    ServiceException e0 = new ServiceException(e);
+                    AppLog.warning(e0.getMessage(), e0.getMessage());
+                    AppLog.detail(e0.getMessage(), e0.getCause());
+                    currentView.handleCanNotCommitException(e0.getCause());                    
+                    hasErrors = true;
+                }
+                if(hasErrors) {
+                    try {
+                        pm.currentTransaction().rollback();
+                    } 
+                    catch(Exception e) {}
+                    try {
+                        // create a new empty instance ...
+                        RefObject_1_0 workObject = (RefObject_1_0)currentView.getRefObject().refClass().refCreateInstance(null);
+                        workObject.refInitialize(false, false);
+                        // Initialize with received attribute values. This also updates the error messages
+                        application.getPortalExtension().updateObject(
+                            workObject,
+                            parameterMap,
+                            attributeMap,
+                            application,
+                            currentView.getPersistenceManager()
+                        );
+                        nextView = new EditObjectView(
+                            currentView.getId(),
+                            currentView.getContainerElementId(),
+                            workObject,
+                            currentView.getEditObjectIdentity(),
+                            application,
+                            pm,
+                            currentView.getHistoryActions(),
+                            currentView.getLookupType(),
+                            currentView.getRestrictToElements(),
+                            currentView.getParentObject(),
+                            currentView.getForReference(),
+                            currentView.getMode()
+                        );                
+                        // Current view is dirty. Remove it and replace it by newly created. 
+                        editViewsCache.removeView(
+                            currentView.getRequestId()
+                        );
+                    }
+                    // Can not stay in edit object view. Return to returnToView as fallback
+                    catch(Exception e1) {
+                        nextView = currentView.getPreviousView(null);
+                    }
+                }
+                else {
                     nextView = currentView.getPreviousView(showViewsCache);
                     if(!currentView.isEditMode() && (nextView instanceof ShowObjectView)) {
                         // Refresh derived attributes of newly created objects
@@ -138,54 +197,14 @@ public class EditObjectEventHandler {
                     );
                     // Paint attributes if view is embedded
                     if(currentView.getMode() == ViewMode.EMBEDDED) {
-                        nextView.refresh(true);
+                        try {
+                            nextView.refresh(true);
+                        }
+                        catch(Exception e) {
+                            new ServiceException(e).log();
+                        }
                         nextPaintMode = PaintScope.ATTRIBUTE_PANE;
                     }
-                }
-                // In case of an exception stay with edit object view and
-                // let the user fix the input data
-                catch(Exception e) {
-                    ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e0.getMessage(), e0.getCause());
-                    try {
-                        pm.currentTransaction().rollback();
-                    } catch(Exception e1) {}
-                    try {
-                        // create a new empty instance ...
-                        RefObject_1_0 workObject = (RefObject_1_0)currentView.getRefObject().refClass().refCreateInstance(null);
-                        workObject.refInitialize(false, false);
-                        // ... and initialize with received attribute values
-                        application.getPortalExtension().updateObject(
-                            workObject,
-                            parameterMap,
-                            attributeMap,
-                            application,
-                            currentView.getPersistenceManager()
-                        );
-                        nextView = new EditObjectView(
-                            currentView.getId(),
-                            currentView.getContainerElementId(),
-                            workObject,
-                            currentView.getEditObjectIdentity(),
-                            application,
-                            pm,
-                            currentView.getHistoryActions(),
-                            currentView.getLookupType(),
-                            currentView.getRestrictToElements(),
-                            currentView.getParentObject(),
-                            currentView.getForReference(),
-                            currentView.getMode()
-                        );                
-                        // Current view is dirty. Remove it and replace it by newly created. 
-                        editViewsCache.removeView(
-                            currentView.getRequestId()
-                        );
-                    }
-                    // Can not stay in edit object view. Return to returnToView as fallback
-                    catch(Exception e1) {
-                        nextView = currentView.getPreviousView(null);
-                    }
-                    currentView.handleCanNotCommitException(e0.getCause());
                 }
                 break;
             }

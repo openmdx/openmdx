@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build-properties.xml,v 1.31 2008/11/19 16:10:54 hburger Exp $
+= Name:        $Id: build-properties.xml,v 1.33 2009/02/13 18:21:36 wfro Exp $
 = Description: openMDX Build Properties
-= Revision:    $Revision: 1.31 $
-= Date:        $Date: 2008/11/19 16:10:54 $
+= Revision:    $Revision: 1.33 $
+= Date:        $Date: 2009/02/13 18:21:36 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
 = This software is published under the BSD license
 = as listed below.
 = 
-= Copyright (c) 2004-2008, OMEX AG, Switzerland
+= Copyright (c) 2004-2009, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -198,6 +198,10 @@
 		<patternset refid="openmdx-2.edition.pattern"/>
 		<include name="**/jonas*.xml"/>
 	</patternset>
+	<patternset id="openejb-3.edition.pattern">
+		<patternset refid="openmdx-2.edition.pattern"/>
+		<include name="**/openejb*.xml"/>
+	</patternset>
 	<patternset id="tomcat-6.edition.pattern">
 		<patternset refid="openmdx-2.edition.pattern"/>
 		<include name="**/tomcat-6*.xml"/>
@@ -227,8 +231,8 @@
 	<!-- =================================================================== -->
 	<!-- = Vendor Properties                                               = -->
 	<!-- =================================================================== -->
-	<property name="project.vendor.name" value="OMEX AG" />
-	<property name="project.vendor.id" value="ch.omex" />
+	<property name="project.vendor.name" value="openMDX" />
+	<property name="project.vendor.id" value="www.openmdx.org" />
 	
 	<!-- =================================================================== -->
 	<!-- = MOF Model Externalization                                       = -->

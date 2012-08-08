@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestFilter.java,v 1.7 2008/09/27 12:00:12 hburger Exp $
+ * Name:        $Id: TestFilter.java,v 1.10 2009/02/04 11:06:38 hburger Exp $
  * Description: Test Filter
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/27 12:00:12 $
+ * Date:        $Date: 2009/02/04 11:06:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.openmdx.application.dataprovider.cci.Directions;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsBetweenCondition;
@@ -71,9 +72,8 @@ import org.openmdx.base.query.IsGreaterOrEqualCondition;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.OrderSpecifier;
+import org.openmdx.base.query.Quantors;
 import org.openmdx.base.query.SoundsLikeCondition;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.query.Quantors;
 
 /**
  * Test Filter

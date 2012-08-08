@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObjectNonIndexedParentRidOnly.java,v 1.3 2008/03/21 18:47:38 hburger Exp $
+ * Name:        $Id: SlicedDbObjectNonIndexedParentRidOnly.java,v 1.5 2009/01/12 16:44:43 wfro Exp $
  * Description: SlicedDbObjectParentRidOnly class
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:47:38 $
+ * Date:        $Date: 2009/01/12 16:44:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,7 +55,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 /**
  * Rows of this type do not contain the column object_rid. Instead, the rows
@@ -67,7 +67,6 @@ import org.openmdx.compatibility.base.naming.Path;
  * is not required then this type may improve performance on queries
  * dramatically. This is often the case with user-defined views.
  */
-@SuppressWarnings("unchecked")
 public class SlicedDbObjectNonIndexedParentRidOnly 
   extends SlicedDbObjectParentRidOnly
 {

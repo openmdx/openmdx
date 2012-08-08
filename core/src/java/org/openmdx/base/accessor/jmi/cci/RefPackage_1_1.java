@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1_1.java,v 1.4 2007/09/28 17:54:53 hburger Exp $
+ * Name:        $Id: RefPackage_1_1.java,v 1.8 2009/03/03 17:23:07 hburger Exp $
  * Description: RefPackage_1_1 interface
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/09/28 17:54:53 $
+ * Date:        $Date: 2009/03/03 17:23:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,10 +51,9 @@
 package org.openmdx.base.accessor.jmi.cci;
 
 import javax.jdo.PersistenceManager;
-import javax.jmi.reflect.RefObject;
 
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.query.FilterProperty;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.base.query.FilterProperty;
 
 /**
  * This interface extends the javax.jmi.reflect.RefPackage interface by
@@ -71,23 +70,6 @@ public interface RefPackage_1_1
    */
   PersistenceManager refPersistenceManager(
   );
-
-  /**
-   * Returns a proxy implementing the same interfaces as the secondary
-   * <code>RefObject and delegating to<ol>
-   * <li>the primary <code>RefObject</code> if possible
-   * <li>the secondary <code>RefObject</code> as fallback
-   * </ol>
-   * 
-   * @param primary its methods override the secondary object's methods
-   * @param secondary its interfacse are implemented by the proxy object as well
-   * 
-   * @return a proxy object delgating to the primary or secondary object as appropriate
-   */
-   RefObject refObject (
-      RefObject primary,
-      RefObject secondary
-   );
 
    /**
     * Create a filter

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AuthenticationContextFactory.java,v 1.9 2008/03/17 16:29:18 hburger Exp $
+ * Name:        $Id: AuthenticationContextFactory.java,v 1.10 2009/03/08 18:52:19 wfro Exp $
  * Description: Authentication Context Factory
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/17 16:29:18 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,8 +63,7 @@ import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
  */
 class AuthenticationContextFactory
 	extends ThreadGroup
-	implements PoolableObjectFactory, Invalidator 
-{
+	implements PoolableObjectFactory, Invalidator {
 
 	/**
 	 * Constructor
@@ -170,11 +169,12 @@ class AuthenticationContextFactory
 		try {
 			authenticator.start();
 			authenticator.status.awaitState(
-				PASSIVE,
+				AuthenticationContextFactory.PASSIVE,
 				authenticator.iterate,
-				getMaximumWait()
+				this.getMaximumWait()
 			);
-		} finally {
+		} 
+		finally {
 			authenticator.lock.unlock();
 		}
 		return authenticator;
@@ -253,7 +253,7 @@ class AuthenticationContextFactory
 	 */
 	void terminate(
 	){
-		setDaemon(true);
+		this.setDaemon(true);
 	}
 
 	/* (non-Javadoc)

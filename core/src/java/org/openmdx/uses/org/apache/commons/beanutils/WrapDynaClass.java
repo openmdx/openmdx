@@ -19,6 +19,8 @@ package org.openmdx.uses.org.apache.commons.beanutils;
 
 
 import java.beans.PropertyDescriptor;
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -43,10 +45,11 @@ import java.util.WeakHashMap;
  * <p>
  *
  * @author Craig McClanahan
- * @version $Revision: 1.2 $ $Date: 2008/06/28 00:21:29 $
+ * @version $Revision: 1.4 $ $Date: 2009/03/03 15:23:43 $
  */
+
 @SuppressWarnings({
-    "unchecked", "serial"
+    "unchecked", "serial","synthetic-access"
 })
 public class WrapDynaClass implements DynaClass {
 
@@ -63,7 +66,8 @@ public class WrapDynaClass implements DynaClass {
      */
     private WrapDynaClass(Class beanClass) {
 
-        this.beanClass = beanClass;
+        this.beanClassRef = new SoftReference(beanClass);
+        this.beanClassName = beanClass.getName();
         introspect();
 
     }
@@ -71,10 +75,21 @@ public class WrapDynaClass implements DynaClass {
 
     // ----------------------------------------------------- Instance Variables
 
+    /**
+     * Name of the JavaBean class represented by this WrapDynaClass.
+     */
+    private String beanClassName = null;
+
+    /**
+     * Reference to the JavaBean class represented by this WrapDynaClass.
+     */
+    private Reference beanClassRef = null;
 
     /**
      * The JavaBean <code>Class</code> which is represented by this
      * <code>WrapDynaClass</code>.
+     *
+     * @deprecated No longer initialized, use getBeanClass() method instead
      */
     protected Class beanClass = null;
 
@@ -120,7 +135,7 @@ public class WrapDynaClass implements DynaClass {
     /**
      * Get the wrap dyna classes cache
      */
-    static Map getDynaClassesMap() {
+    private static Map getDynaClassesMap() {
         return (Map)CLASSLOADER_CACHE.get();
     }
 
@@ -208,6 +223,14 @@ public class WrapDynaClass implements DynaClass {
 
     // ------------------------------------------------------ DynaClass Methods
 
+    /**
+     * Return the class of the underlying wrapped bean.
+     *
+     * @return the class of the underlying wrapped bean
+     */
+    protected Class getBeanClass() {
+        return (Class)beanClassRef.get();
+    }
 
     /**
      * Return the name of this DynaClass (analogous to the
@@ -219,7 +242,7 @@ public class WrapDynaClass implements DynaClass {
      */
     public String getName() {
 
-        return (this.beanClass.getName());
+        return beanClassName;
 
     }
 
@@ -291,7 +314,7 @@ public class WrapDynaClass implements DynaClass {
     public DynaBean newInstance()
             throws IllegalAccessException, InstantiationException {
 
-        return new WrapDynaBean(beanClass.newInstance());
+        return new WrapDynaBean(getBeanClass().newInstance());
 
     }
 
@@ -356,6 +379,7 @@ public class WrapDynaClass implements DynaClass {
     protected void introspect() {
 
         // Look up the property descriptors for this bean class
+        Class beanClass = getBeanClass();
         PropertyDescriptor[] regulars =
                 PropertyUtils.getPropertyDescriptors(beanClass);
         if (regulars == null) {

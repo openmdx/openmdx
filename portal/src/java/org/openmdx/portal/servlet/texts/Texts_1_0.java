@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Texts_1_0.java,v 1.14 2008/11/14 17:26:24 wfro Exp $
+ * Name:        $Id: Texts_1_0.java,v 1.15 2009/02/27 15:52:52 wfro Exp $
  * Description: Texts_1_0
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/14 17:26:24 $
+ * Date:        $Date: 2009/02/27 15:52:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -104,6 +104,7 @@ public interface Texts_1_0 {
     public String getErrorTextCanNotInvokeOperation();
     public String getErrorTextCanNotSetOperationResult();
     public String getErrorTextCanNotRetrieveReferencedObjects();
+    public String getErrorTextMandatoryField();
     public String getClickToDownloadText();
     public String getEnterNullToDeleteText();
     public String getSearchIncrementallyText();

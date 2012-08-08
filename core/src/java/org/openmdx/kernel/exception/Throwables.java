@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Throwables.java,v 1.6 2008/10/06 17:34:52 hburger Exp $
+ * Name:        $Id: Throwables.java,v 1.12 2009/03/05 13:53:30 hburger Exp $
  * Description: Throwables
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/06 17:34:52 $
+ * Date:        $Date: 2009/03/05 13:53:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,7 +52,9 @@
 package org.openmdx.kernel.exception;
 
 import org.openmdx.kernel.exception.BasicException.Parameter;
-import org.openmdx.kernel.log.SysLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.spi.LocationAwareLogger;
 
 /**
  * JRE dependent exception handling methods. 
@@ -64,17 +66,36 @@ public class Throwables {
     }
 
     /**
+     * The Throwables' Standard Logger
+     */
+    private final static Logger logger = LoggerFactory.getLogger(Throwables.class);
+    
+    /**
      * Log the throwable at warning level.
      * 
      * @param throwable
      * 
-     * @return th throwable
+     * @return the throwable
      */
-    public static Throwable log(
-        Throwable throwable
+    public static <T extends Throwable> T log(
+        T throwable
     ){
-        Exception stackedException = BasicException.toStackedException(throwable);
-        SysLog.warning(stackedException.getMessage(), stackedException.getCause());
+        BasicException exceptionStack = BasicException.toExceptionStack(throwable);
+        String message = exceptionStack.getDescription();
+        if(logger instanceof LocationAwareLogger) {
+            ((LocationAwareLogger)logger).log(
+                null, // marker
+                Throwables.class.getName(), 
+                LocationAwareLogger.WARN_INT, 
+                message, 
+                exceptionStack
+             );
+        } else {
+            logger.warn(
+                message, 
+                exceptionStack
+            );
+        }
         return throwable;
     }
 
@@ -90,25 +111,25 @@ public class Throwables {
      * exceptions codes. Positive exception codes are specific for a given
      * exception domain.
      * @param parameters  Any exception parameters, maybe <code>null</code>
-     * @param description The description, maybe <code>null</code> in which
-     * case the throwable's message is used
-     * @deprecated Use {@link #initCause(Throwable,Throwable,String,int,String,BasicException.Parameter[])} instead
      */
-    public static Throwable initCause (
-        Throwable throwable,
+    public static <T extends Throwable> T initCause (
+        T throwable,
         Throwable cause,
         String exceptionDomain,
         int exceptionCode,
-        BasicException.Parameter[] parameters,
-        String description
+        Parameter... parameters
     ) {
-        return initCause(
-            throwable,
-            cause,
-            exceptionDomain,
-            exceptionCode,
-            description,
-            parameters);
+        throwable.initCause(
+            new BasicException(
+                cause,
+                exceptionDomain,
+                exceptionCode,
+                parameters,
+                null,
+                throwable
+            )
+        );
+        return throwable;
     }
 
     /**
@@ -122,30 +143,31 @@ public class Throwables {
      * @param exceptionCode  An exception code. Negative codes describe common
      * exceptions codes. Positive exception codes are specific for a given
      * exception domain.
-     * @param description The description, maybe <code>null</code> in which
-     * case the throwable's message is used
+     * @param description the detail message
      * @param parameters  Any exception parameters, maybe <code>null</code>
      */
-    public static Throwable initCause (
-        Throwable throwable,
+    public static <T extends Throwable> T initCause (
+        T throwable,
         Throwable cause,
-        String exceptionDomain,
+        String exceptionDomain,        
         int exceptionCode,
         String description,
         Parameter... parameters
     ) {
-        return throwable.initCause(
+        throwable.initCause(
             new BasicException(
                 cause,
                 exceptionDomain,
                 exceptionCode,
                 parameters,
-                description == null ? throwable.getMessage() : description,
+                description,
                 throwable
             )
         );
+        return throwable;
     }
 
+    
     /**
      * Returns the cause belonging to a specific exception domain.
      * 
@@ -157,7 +179,6 @@ public class Throwables {
      *          or the initial cause if <code>exceptionDomain</code> is
      *          <code>null</code>.  
      */
-    @SuppressWarnings("deprecation")
     public static BasicException getCause(
         Throwable throwable,
         String exceptionDomain
@@ -170,8 +191,8 @@ public class Throwables {
         ){
             if(cursor instanceof BasicException) {
                 exceptionStack = (BasicException) cursor;
-            } else if(cursor instanceof BasicException.Wrapper) {
-                exceptionStack = ((BasicException.Wrapper)cursor).getCause();
+            } else if(cursor instanceof BasicException.Holder) {
+                exceptionStack = ((BasicException.Holder)cursor).getCause();
             } else {
                 continue Cause; 
             }
@@ -186,5 +207,4 @@ public class Throwables {
         }
         return exceptionDomain == null ? exceptionStack : null;
     }
-
 }

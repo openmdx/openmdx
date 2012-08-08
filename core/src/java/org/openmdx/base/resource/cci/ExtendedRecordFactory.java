@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExtendedRecordFactory.java,v 1.6 2008/02/28 13:59:08 hburger Exp $
+ * Name:        $Id: ExtendedRecordFactory.java,v 1.7 2009/02/19 16:30:58 hburger Exp $
  * Description: Java Connector Architecture: Initialized Record Factory
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/28 13:59:08 $
+ * Date:        $Date: 2009/02/19 16:30:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -87,8 +87,6 @@ public interface ExtendedRecordFactory
    *            <li>Resource adapter internal error</li>
    *            <li>Failed to access metadata repository</li>
    *            </ul>
-   * @exception NotSupportedException
-   *            Operation not supported
    */
   MappedRecord createMappedRecord(
     String recordName,
@@ -115,8 +113,6 @@ public interface ExtendedRecordFactory
    *            <li>Resource adapter internal error</li>
    *            <li>Failed to access metadata repository</li>
    *            </ul>
-   * @exception NotSupportedException
-   *            Operation not supported
    */
   MappedRecord createMappedRecord(
     String recordName,
@@ -146,8 +142,6 @@ public interface ExtendedRecordFactory
    *            <li>Resource adapter internal error</li>
    *            <li>Failed to access metadata repository</li>
    *            </ul>
-   * @exception NotSupportedException
-   *            Operation not supported
    */
   MappedRecord createMappedRecord(
     String recordName,
@@ -180,8 +174,6 @@ public interface ExtendedRecordFactory
    *            <li>Resource adapter internal error</li>
    *            <li>Failed to access metadata repository</li>
    *            </ul>
-   * @exception NotSupportedException
-   *            Operation not supported
    */
   MappedRecord asMappedRecord(
     String recordName,
@@ -214,8 +206,6 @@ public interface ExtendedRecordFactory
    *            <li>Resource adapter internal error</li>
    *            <li>Failed to access metadata repository</li>
    *            </ul>
-   * @exception NotSupportedException
-   *            Operation not supported
    */
   IndexedRecord createIndexedRecord(
     String recordName,
@@ -242,8 +232,6 @@ public interface ExtendedRecordFactory
    *            <li>Resource adapter internal error</li>
    *            <li>Failed to access metadata repository</li>
    *            </ul>
-   * @exception NotSupportedException
-   *            Operation not supported
    */
   IndexedRecord createIndexedRecord(
     String recordName,
@@ -273,8 +261,6 @@ public interface ExtendedRecordFactory
    *            <li>Resource adapter internal error</li>
    *            <li>Failed to access metadata repository</li>
    *            </ul>
-   * @exception NotSupportedException
-   *            Operation not supported
    */
   IndexedRecord asIndexedRecord(
     String recordName,

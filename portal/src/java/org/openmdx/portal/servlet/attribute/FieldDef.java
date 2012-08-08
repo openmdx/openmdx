@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FieldDef.java,v 1.11 2008/08/12 16:38:06 wfro Exp $
+ * Name:        $Id: FieldDef.java,v 1.12 2009/02/27 15:52:52 wfro Exp $
  * Description: FieldDef 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:06 $
+ * Date:        $Date: 2009/02/27 15:52:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,6 +70,7 @@ public class FieldDef
         String qualifiedFeatureName,
         String multiplicity,
         boolean isChangeable,
+        boolean isMandatory,
         String iconKey,
         String color,
         String backColor,
@@ -80,6 +81,7 @@ public class FieldDef
         this.qualifiedFeatureName = qualifiedFeatureName;
         this.multiplicity = multiplicity;
         this.isChangeable = isChangeable;
+        this.isMandatory = isMandatory;
         this.iconKey = iconKey;
         this.color = color;
         this.backColor = backColor;
@@ -100,6 +102,7 @@ public class FieldDef
         String qualifiedFeatureName,
         String multiplicity,
         boolean isChangeable,
+        boolean isMandatory,
         String iconKey,
         String color,
         String backColor,
@@ -111,6 +114,7 @@ public class FieldDef
         this.qualifiedFeatureName = qualifiedFeatureName;
         this.multiplicity = multiplicity;
         this.isChangeable = isChangeable;
+        this.isMandatory = isMandatory;
         this.iconKey = iconKey;
         this.color = color;
         this.backColor = backColor;
@@ -135,6 +139,7 @@ public class FieldDef
         BigDecimal maxValue,
         BigDecimal increment,
         boolean isChangeable,
+        boolean isMandatory,
         String iconKey,
         String color,
         String backColor,
@@ -149,6 +154,7 @@ public class FieldDef
         this.maxValue = maxValue;
         this.increment = increment;
         this.isChangeable = isChangeable;
+        this.isMandatory = isMandatory;
         this.iconKey = iconKey;
         this.color = color;
         this.backColor = backColor;
@@ -165,6 +171,7 @@ public class FieldDef
         String qualifiedFeatureName,
         String multiplicity,
         boolean isChangeable,
+        boolean isMandatory,
         String iconKey,
         String color,
         String backColor,
@@ -176,6 +183,7 @@ public class FieldDef
         this.qualifiedFeatureName = qualifiedFeatureName; 
         this.multiplicity = multiplicity;
         this.isChangeable = isChangeable;
+        this.isMandatory = isMandatory;
         this.iconKey = iconKey;
         this.color = color;
         this.backColor = backColor;
@@ -200,6 +208,7 @@ public class FieldDef
             f.getQualifiedFeatureName(),
             f.getMultiplicity(),
             f.isChangeable(),
+            f.isMandatory(),
             f.getIconKey(),
             f.getColor(),
             f.getBackColor(),
@@ -222,6 +231,7 @@ public class FieldDef
             f.getMaxValue(),
             f.getIncrement(),
             f.isChangeable(),
+            f.isMandatory(),
             f.getIconKey(),
             f.getColor(),
             f.getBackColor(),
@@ -240,6 +250,7 @@ public class FieldDef
             f.getQualifiedFeatureName(),
             f.getMultiplicity(),         
             f.isChangeable(),
+            f.isMandatory(),
             f.getIconKey(),
             f.getColor(),
             f.getBackColor(),
@@ -259,6 +270,7 @@ public class FieldDef
             f.getQualifiedFeatureName(),
             f.getMultiplicity(),
             f.isChangeable(),
+            f.isMandatory(),
             f.getIconKey(),
             f.getColor(),
             f.getBackColor(),
@@ -275,6 +287,7 @@ public class FieldDef
     public final String qualifiedFeatureName;
     public final String multiplicity;
     public final boolean isChangeable;
+    public final boolean isMandatory;
     public final String iconKey;
     public final String color;
     public final String backColor;

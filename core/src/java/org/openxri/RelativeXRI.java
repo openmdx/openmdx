@@ -40,9 +40,7 @@ public class RelativeXRI
     */ /**
     * Protected Constructor used by package only
     */
-    RelativeXRI() {
-     // Constructor()
-    } 
+    RelativeXRI() {} // Constructor()
 
     /*
     ****************************************************************************

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.5-properties.xml,v 1.43 2008/09/26 15:50:50 hburger Exp $
+= Name:        $Id: jre-1.5-properties.xml,v 1.45 2008/12/20 00:21:34 wfro Exp $
 = Description: JRE 5.0 Platform Properties
-= Revision:    $Revision: 1.43 $
-= Date:        $Date: 2008/09/26 15:50:50 $
+= Revision:    $Revision: 1.45 $
+= Date:        $Date: 2008/12/20 00:21:34 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -49,7 +49,7 @@
 	<property name="build.target.platform" value="jre-1.5"/>
 	<property name="build.target.version" value="1.5"/>
 
-	<property name="model.build.formats" value="--format=xmi1 --format=uml.openmdx-1 --format=uml2.openmdx-1 --format=together.openmdx-1 --format=cci2 --format=jmi1 --format=jdo2 "/>
+	<property name="model.build.formats" value="--format=xmi1 --format=uml.openmdx-1 --format=uml2.openmdx-1 --format=together.openmdx-1 --format=cci2 --format=jmi1 --format=jpa3 "/>
 	
 	<condition property="build.target.jre" value="${java.home}">
 		<equals arg1="${java.specification.version}" arg2="${build.target.version}"/>
@@ -99,7 +99,7 @@
 		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/jcl104-over-slf4j.jar"/>		
 		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/wsdl4j-1.6.1.jar"/>		
 		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/jdo2-api.jar"/>
-		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/jpox.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/openjpa.jar"/>
 	</path>
 	<path id="java2.standard.lib">
 		<pathelement location="${build.target.jre}/lib/jce.jar"/>
@@ -116,16 +116,17 @@
 		<path refid="java2.standard.lib"/>
 		<pathelement location="${openmdx.home}/java2/${build.java.platform}/enterprise/lib/netscape-ldap.jar"/>				
 	</path>
-	<path id="jpox.ant.lib">
+	<path id="jpa.ant.lib">
 		<path refid="java2.extension.lib"/>
 		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/log4j-over-slf4j.jar"/>
-		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/bcel.jar"/>		
-		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/jpox-enhancer.jar"/>
-		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/asm.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/serp.jar"/>		
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/commons-lang.jar"/>		
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/commons-collections.jar"/>		
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/openjpa.jar"/>
 		<pathelement location="${openmdx.home}/jre-1.5/ant/lib/openmdx-ant.jar"/>
 	</path>
-	<path id="jpox.ant.bin">
-		<path refid="jpox.ant.lib"/>
+	<path id="jpa.ant.bin">
+		<path refid="jpa.ant.lib"/>
 		<path refid="project.bin.classpath"/>
 	</path>	
 	<path id="openmdx.core.lib">

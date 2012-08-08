@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: TerminalCallbackHandler.java,v 1.1 2007/11/26 14:04:35 hburger Exp $
+ * Name:        $Id: TerminalCallbackHandler.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
  * Description: Terminal Callback Handler
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:35 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -109,7 +109,7 @@ public class TerminalCallbackHandler extends AbstractCallbackHandler {
 	protected void handle(
 		NameCallback callback
 	) throws UnsupportedCallbackException, IOException {
-        String value = accept(callback.getPrompt(), callback.getDefaultName());
+        String value = this.accept(callback.getPrompt(), callback.getDefaultName());
         if(value != null){
             callback.setName(value);
         }
@@ -119,7 +119,7 @@ public class TerminalCallbackHandler extends AbstractCallbackHandler {
 	protected void handle(
 		PasswordCallback callback
 	) throws UnsupportedCallbackException, IOException {
-        String value = accept(callback.getPrompt(), null);
+        String value = this.accept(callback.getPrompt(), null);
         if(value != null){
             callback.setPassword(value.toCharArray());
         }
@@ -129,7 +129,7 @@ public class TerminalCallbackHandler extends AbstractCallbackHandler {
 	protected void handle(
 		TextInputCallback callback
     ) throws IOException, UnsupportedCallbackException {
-        String value = accept(callback.getPrompt(), callback.getDefaultText());
+        String value = this.accept(callback.getPrompt(), callback.getDefaultText());
         if(value != null){
             callback.setText(value);
         }

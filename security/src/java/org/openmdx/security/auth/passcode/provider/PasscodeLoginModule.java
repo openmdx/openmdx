@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: PasscodeLoginModule.java,v 1.7 2008/09/11 10:47:30 hburger Exp $
+ * Name:        $Id: PasscodeLoginModule.java,v 1.8 2009/03/08 18:52:19 wfro Exp $
  * Description: Passcode Login Module
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/11 10:47:30 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -159,7 +159,7 @@ public class PasscodeLoginModule implements LoginModule {
 	protected final Logger getLogger(
 	){
 		return this.logger == null ?
-				this.logger = newLogger() :
+				this.logger = this.newLogger() :
 					this.logger;
 	}
 
@@ -192,9 +192,9 @@ public class PasscodeLoginModule implements LoginModule {
 			Map<java.lang.String, ?> options
 	){
 		this.callbackHandler = handler;
-		this.radiusClientPool = (ObjectPool) options.get(RADIUS_CLIENT_POOL);
-		this.tokenCodeLength = (Integer)options.get(TOKEN_CODE_LENGTH);
-		this.debug = ((Boolean) options.get(DEBUG)).booleanValue();
+		this.radiusClientPool = (ObjectPool) options.get(PasscodeLoginModule.RADIUS_CLIENT_POOL);
+		this.tokenCodeLength = (Integer)options.get(PasscodeLoginModule.TOKEN_CODE_LENGTH);
+		this.debug = ((Boolean) options.get(PasscodeLoginModule.DEBUG)).booleanValue();
 	}
 
 	/**
@@ -209,13 +209,15 @@ public class PasscodeLoginModule implements LoginModule {
 			this.callbackHandler.handle(
 					callbacks
 			);
-		} catch (IOException exception) {
-			throw toLoginException(
+		} 
+		catch (IOException exception) {
+			throw this.toLoginException(
 					"Callback Handling Failure",
 					exception
 			);
-		} catch (UnsupportedCallbackException exception) {
-			throw toLoginException(
+		} 
+		catch (UnsupportedCallbackException exception) {
+			throw this.toLoginException(
 					"Inappropriate Callback Handler",
 					exception
 			);
@@ -238,7 +240,7 @@ public class PasscodeLoginModule implements LoginModule {
 			NameCallback nameCallback = new NameCallback(
 					StandardCallbackPrompts.USERNAME
 			);
-			handle(
+			this.handle(
 					new Callback[]{
 							nameCallback,
 					}
@@ -246,7 +248,7 @@ public class PasscodeLoginModule implements LoginModule {
 			//
 			// Test whether the module should be ignored or not
 			//
-			if(isPasscodeExempt(nameCallback.getName())) {
+			if(this.isPasscodeExempt(nameCallback.getName())) {
 				return false; 
 			}
 			//
@@ -267,20 +269,21 @@ public class PasscodeLoginModule implements LoginModule {
 						StandardCallbackPrompts.TOKENCODE
 				);
 				passCodeCallback = null;
-				handle(
+				this.handle(
 						new Callback[]{
 								pinCallback,
 								tokenCodeCallback,
 								contextCallback
 						}
 				);
-			} else {
+			} 
+			else {
 				tokenCodeCallback = null;
 				pinCallback = null;
 				passCodeCallback = new TextInputCallback(
 						StandardCallbackPrompts.PASSCODE
 				);
-				handle(
+				this.handle(
 						new Callback[]{
 								passCodeCallback,
 								contextCallback
@@ -290,8 +293,9 @@ public class PasscodeLoginModule implements LoginModule {
 			RadiusClient radiusClient = null;
 			try {
 				radiusClient = (RadiusClient) this.radiusClientPool.borrowObject();
-			} catch (Exception exception) {
-				throw toLoginException(
+			} 
+			catch (Exception exception) {
+				throw this.toLoginException(
 						"Radius Client Acquistion Failure",
 						exception
 				);
@@ -313,17 +317,17 @@ public class PasscodeLoginModule implements LoginModule {
 				);
 				switch(reply.getPacketType()){
 				case RadiusPacket.ACCESS_ACCEPT: {
-					if(isDebug()) getLogger().fine(
+					if(this.isDebug()) this.getLogger().fine(
 							"User " + nameCallback.getName() + " provided a valid passcode"
 					);
 					return this.verified = true;
 				}
 				case RadiusPacket.ACCESS_REJECT: 
-					throw new FailedLoginException(getMessage(reply));
+					throw new FailedLoginException(this.getMessage(reply));
 				case RadiusPacket.ACCESS_CHALLENGE: {
-					String message = getMessage(reply);
+					String message = this.getMessage(reply);
 					context = SecurIDState.getContext(reply); 
-					if(isDebug()) getLogger().fine(
+					if(this.isDebug()) this.getLogger().fine(
 							"[" + context + "] User " + nameCallback.getName() + " is challenged: " + message
 					);
 					switch(SecurIDState.getTag(context)){
@@ -343,16 +347,16 @@ public class PasscodeLoginModule implements LoginModule {
 						);
 						switch(reply.getPacketType()){
 						case RadiusPacket.ACCESS_ACCEPT: 
-							if(isDebug()) getLogger().fine(
+							if(this.isDebug()) this.getLogger().fine(
 									"User " + nameCallback.getName() + " provided a valid token code"
 							);
 							return this.verified = true;
 						case RadiusPacket.ACCESS_REJECT: 
 							throw new FailedLoginException(
-									getMessage(reply)
+								this.getMessage(reply)
 							);            	
 						case RadiusPacket.ACCESS_CHALLENGE:
-							message = getMessage(reply);
+							message = this.getMessage(reply);
 							context = SecurIDState.getContext(reply);
 							switch(SecurIDState.getTag(context)){
 							case SecurIDState.SECURID_NEXT: 
@@ -389,43 +393,50 @@ public class PasscodeLoginModule implements LoginModule {
 							new BasicException.Parameter("packetType", reply.getPacketType())
 					);            	
 				}
-			} catch (RadiusException exception) {
-				throw toLoginException(
+			} 
+			catch (RadiusException exception) {
+				throw this.toLoginException(
 						"General Passcode Authentication Failure",
 						exception
 				);
-			} catch (InvalidParameterException exception) {
-				throw toLoginException(
+			} 
+			catch (InvalidParameterException exception) {
+				throw this.toLoginException(
 						"General Passcode Authentication Failure",
 						exception
 				);
-			} finally {
+			} 
+			finally {
 				try {
 					this.radiusClientPool.returnObject(radiusClient);
-				} catch (Exception exception) {
-					getLogger().log(
+				} 
+				catch (Exception exception) {
+					this.getLogger().log(
 							Level.WARNING,
 							"Could not return RadiusClient to its pool", 
 							exception
 					);
 				}
 			}
-		} catch (FailedLoginException exception) {
-			if(isDebug()) getLogger().log(
+		} 
+		catch (FailedLoginException exception) {
+			if(this.isDebug()) this.getLogger().log(
 					Level.FINE,
 					"Unsuccessful authentication attempt", 
 					exception
 			);		  
 			throw exception;
-		} catch (CredentialException exception) {
-			if(isDebug()) getLogger().log(
+		} 
+		catch (CredentialException exception) {
+			if(this.isDebug()) this.getLogger().log(
 					Level.FINE,
 					"Authentication attempt with an invalid or expired credential", 
 					exception
 			);		    
 			throw exception;
-		} catch (LoginException exception) {
-			getLogger().log(
+		} 
+		catch (LoginException exception) {
+			this.getLogger().log(
 					Level.WARNING,
 					"Unexpected authentication failure", 
 					exception
@@ -476,7 +487,8 @@ public class PasscodeLoginModule implements LoginModule {
 					attribute.getType() == RadiusAttributeValues.REPLY_MESSAGE
 			) try {
 				return new String(attribute.getValue(), RadiusClient.ENCODING);
-			} catch (UnsupportedEncodingException exception) {
+			} 
+			catch (UnsupportedEncodingException exception) {
 				throw new ProviderException(
 						"The RadiusClient's \"" + RadiusClient.ENCODING + "\" encoding is not supported",
 						exception
@@ -515,7 +527,7 @@ public class PasscodeLoginModule implements LoginModule {
 	 */
 	public boolean abort(
 	) throws LoginException {
-		return reset();
+		return this.reset();
 	}
 
 	/**
@@ -525,7 +537,7 @@ public class PasscodeLoginModule implements LoginModule {
 	 */
 	public boolean logout(
 	) throws LoginException {
-		return reset();
+		return this.reset();
 	}
 
 }

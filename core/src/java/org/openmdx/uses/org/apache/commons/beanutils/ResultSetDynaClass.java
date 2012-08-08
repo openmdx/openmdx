@@ -78,9 +78,12 @@ import java.util.Iterator;
  * </pre>
  *
  * @author Craig R. McClanahan
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:16 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:43 $
  */
-@SuppressWarnings({"unchecked", "serial"})
+
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class ResultSetDynaClass extends JDBCDynaClass implements DynaClass {
 
 

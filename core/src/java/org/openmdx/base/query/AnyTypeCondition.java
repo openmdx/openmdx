@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AnyTypeCondition.java,v 1.1 2008/04/25 23:34:29 wfro Exp $
+ * Name:        $Id: AnyTypeCondition.java,v 1.2 2009/01/06 10:21:19 wfro Exp $
  * Description: AnyTypeCondition 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 23:34:29 $
+ * Date:        $Date: 2009/01/06 10:21:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,8 +52,6 @@
 
 package org.openmdx.base.query;
 
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.compatibility.base.query.FilterProperty;
 
 /**
  * AnyTypeCondition

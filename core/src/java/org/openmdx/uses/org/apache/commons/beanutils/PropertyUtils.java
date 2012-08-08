@@ -40,11 +40,14 @@ import org.openmdx.uses.org.apache.commons.collections.FastHashMap;
  * @author Gregor Rayman
  * @author Jan Sorensen
  * @author Scott Sanders
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:15 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:43 $
  * @see PropertyUtilsBean
  * @see org.openmdx.uses.org.apache.commons.beanutils.expression.Resolver
  */
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings({
+    "unchecked"
+})
 public class PropertyUtils {
 
 
@@ -573,7 +576,7 @@ public class PropertyUtils {
      *
      * @param descriptor Property descriptor to return a getter for
      * @return The read method
-     * @see PropertyUtilsBean#getReadMethod
+     * @see PropertyUtilsBean#getReadMethod(PropertyDescriptor)
      */
     public static Method getReadMethod(PropertyDescriptor descriptor) {
 
@@ -621,7 +624,7 @@ public class PropertyUtils {
      *
      * @param descriptor Property descriptor to return a setter for
      * @return The write method
-     * @see PropertyUtilsBean#getWriteMethod
+     * @see PropertyUtilsBean#getWriteMethod(PropertyDescriptor)
      */
     public static Method getWriteMethod(PropertyDescriptor descriptor) {
 

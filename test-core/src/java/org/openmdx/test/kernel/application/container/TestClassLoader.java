@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestClassLoader.java,v 1.1 2008/09/08 13:35:42 hburger Exp $
+ * Name:        $Id: TestClassLoader.java,v 1.2 2009/03/05 17:51:36 hburger Exp $
  * Description: TestClassLoader 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/08 13:35:42 $
+ * Date:        $Date: 2009/03/05 17:51:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,46 +51,21 @@
 
 package org.openmdx.test.kernel.application.container;
 
+import static org.junit.Assert.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
 
 /**
  * TestClassLoader
  */
-public class TestClassLoader  extends TestCase {
+public class TestClassLoader {
 
-    /**
-     * Constructor 
-     */
-    public TestClassLoader() {
-        super();
-    }
-
-    /**
-     * Constructor 
-     *
-     * @param name
-     */
-    public TestClassLoader(String name) {
-        super(name);
-    }
-
-    /**
-     * A test runner either expects a static method suite as the
-     * entry point to get a test to run or it will extract the 
-     * suite automatically. 
-     */
-    public static Test suite() {
-        return new TestSuite(TestClassLoader.class);
-    }
-    
+    @Test
     public void testNoResource() throws MalformedURLException{
         URL NO_RESOURCE = new URL("file","","");
-        System.out.println("No resource: " + NO_RESOURCE);
+        assertEquals("No Resource ULR", "file:", NO_RESOURCE.toExternalForm());
     }
 
 }

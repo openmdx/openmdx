@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: LayoutLoader.java,v 1.5 2008/08/12 16:38:07 wfro Exp $
+ * Name:        $Id: LayoutLoader.java,v 1.6 2009/01/13 02:16:09 wfro Exp $
  * Description: LayoutLoader
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:07 $
+ * Date:        $Date: 2009/01/13 02:16:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,7 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 import org.openmdx.portal.servlet.view.LayoutFactory;
 

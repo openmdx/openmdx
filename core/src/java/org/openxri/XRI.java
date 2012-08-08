@@ -48,8 +48,7 @@ public class XRI
      */
     XRI()
     {
-     // Constructor()
-    } 
+    }
 
 
     /**
@@ -282,6 +281,45 @@ public class XRI
 
     }
 
+    
+    public String toString(boolean wantScheme, boolean caseFoldAuthority)
+    {
+    	StringBuffer sb = new StringBuffer();
+    	
+    	if (moAuthorityPath != null) {
+        	if (wantScheme) {
+        		sb.append(XRI_SCHEME);
+        	}
+
+        	String a = moAuthorityPath.toString();
+        	if (caseFoldAuthority)
+        		a = a.toLowerCase();
+        	
+        	sb.append(a);
+    	}
+    	
+    	if (moAbsolutePath != null)
+    		sb.append(moAbsolutePath.toString());
+    	
+    	if (query != null) {
+    		sb.append("?");
+    		sb.append(query.toString());
+    	}
+    	
+    	if (fragment != null) {
+    		sb.append("#");
+    		sb.append(fragment.toString());
+    	}
+    	
+    	return sb.toString();
+    }
+
+    
+    public boolean equals(XRI x)
+    {
+    	return toString(false, true).equals(x.toString(false, true));
+    }
+    
     
     public String toIRINormalForm()
     {

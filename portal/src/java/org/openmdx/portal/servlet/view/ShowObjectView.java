@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectView.java,v 1.66 2008/11/12 16:10:58 wfro Exp $
+ * Name:        $Id: ShowObjectView.java,v 1.68 2009/03/08 18:03:23 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.66 $
+ * Revision:    $Revision: 1.68 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 16:10:58 $
+ * Date:        $Date: 2009/03/08 18:03:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,7 +66,7 @@ import java.util.TreeMap;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -294,7 +294,8 @@ public class ShowObjectView
             org.openmdx.ui1.jmi1.Segment uiSegment = null;
             try {
                 uiSegment = this.getApplicationContext().getUiContext().getUiSegment(ii);
-            } catch(Exception e) {}
+            } 
+            catch(Exception e) {}
             selectPerspectiveActions.add(
                 new Action(
                     Action.EVENT_SELECT_PERSPECTIVE,

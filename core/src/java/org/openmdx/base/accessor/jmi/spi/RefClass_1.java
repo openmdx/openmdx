@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefClass_1.java,v 1.32 2008/12/15 03:15:30 hburger Exp $
+ * Name:        $Id: RefClass_1.java,v 1.52 2009/03/03 17:23:07 hburger Exp $
  * Description: RefClass_1 class
- * Revision:    $Revision: 1.32 $
+ * Revision:    $Revision: 1.52 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/15 03:15:30 $
+ * Date:        $Date: 2009/03/03 17:23:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,8 +54,8 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -74,23 +74,22 @@ import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
 
-import org.openmdx.base.accessor.generic.cci.Object_1_0;
+import org.omg.mof.spi.Identifier;
+import org.omg.mof.spi.Names;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_4;
 import org.openmdx.base.accessor.jmi.spi.Jmi1ObjectInvocationHandler.StandardMarshaller;
+import org.openmdx.base.accessor.spi.AbstractPersistenceManagerFactory_1;
+import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.persistence.spi.AbstractManagerFactory;
-import org.openmdx.base.persistence.spi.Entity_2_0;
-import org.openmdx.compatibility.base.marshalling.CachingMarshaller_1_0;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.marshalling.CachingMarshaller_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
+import org.openmdx.jdo.listener.ConstructCallback;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.mapping.Names;
-import org.openmdx.model1.mapping.java.Identifier;
 
 //---------------------------------------------------------------------------
 /**
@@ -100,7 +99,8 @@ import org.openmdx.model1.mapping.java.Identifier;
  * This implementation supports efficient serialization. The immediate
  * package is the only member. Other members are transient.
  */
-public abstract class RefClass_1 implements Jmi1Class, Serializable {
+public abstract class RefClass_1 
+    implements Jmi1Class_1_0, Serializable {
 
     /**
      * Constructor 
@@ -110,7 +110,7 @@ public abstract class RefClass_1 implements Jmi1Class, Serializable {
     public RefClass_1(
         RefPackage_1_0 refPackage
     ) {
-        this.immediatePackage = (RefPackage_1_4) refPackage;
+        this.immediatePackage = (Jmi1Package_1_0) refPackage;
     }
 
 
@@ -134,12 +134,12 @@ public abstract class RefClass_1 implements Jmi1Class, Serializable {
      * @param refClass refClass is supplied as class when constructing the object, i.e.
      *        the method refClass() of the constructed object returns refClass.
      */
-    @SuppressWarnings("unchecked")
-    public RefObject refCreateInstance(
-        List args,
+    RefObject refCreateInstance(
+        List<?> args,
         RefClass refClass
     ) {
         try {
+            boolean legacyDelegate = this.hasLegacyDelegate();            
             if(this.defaultImplConstructor == null) {
 
                 /**
@@ -177,7 +177,6 @@ public abstract class RefClass_1 implements Jmi1Class, Serializable {
                 // implementation when no user-defined implementation can be found. Moreover, the default 
                 // instance-level objects are passed as parameter to the user-defined instance as delegation 
                 // object in the tie approach.
-                this.defaultImplConstructor = null;
                 if(!Names.JMI1_PACKAGE_SUFFIX.equals(bindingPackageSuffix)) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
@@ -189,67 +188,86 @@ public abstract class RefClass_1 implements Jmi1Class, Serializable {
                 }
                 try {
                     this.defaultImplConstructor = Jmi1ObjectInvocationHandler.class.getConstructor(
-                        this.hasLegacyDelegate() ? Object_1_0.class : PersistenceCapable.class,
-                        Jmi1Class.class
+                        legacyDelegate ? ObjectView_1_0.class : PersistenceCapable.class,
+                        Jmi1Class_1_0.class
                     );
-                } catch(NoSuchMethodException e0) {
-                    throw new ServiceException(e0);
+                } catch(NoSuchMethodException exception) {
+                    throw new ServiceException(exception);
                 }
             }
 
-            // Prepare argument as Object_1_0
-            Object delegateInstance = null;
-            boolean legacyDelegate = hasLegacyDelegate();
-            if(args == null) {
+            // Prepare argument as ObjectView_1_0
+            PersistenceCapable delegateInstance;
+            boolean construct = args == null;
+            if(construct) {
                 delegateInstance = legacyDelegate ?
-                    this.immediatePackage.refObjectFactory().createObject(this.refMofId()) :
-                        this.immediatePackage.getDelegate().newInstance(getDelegateClass());
-            } else if(args.size() != 1){
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE,
-                    "args must either be null or have exactly one element",
-                    new BasicException.Parameter [] {
-                        new BasicException.Parameter("args", args)
-                    }
-                );
-            } else {
+                    (ObjectView_1_0)this.immediatePackage.refObjectFactory().newInstance(this.refMofId()) :
+                    (PersistenceCapable)this.immediatePackage.getDelegate().newInstance(getDelegateClass());
+            } else if(args.size() == 1){
                 Object argument = args.get(0);
                 if(legacyDelegate) {
                     if(argument instanceof Path){
-                        //
-                        // When Path get the object from accessor. The marshaller itself calls
-                        // refCreateInstance with the delegate instance as parameter
-                        //
-                        delegateInstance = this.immediatePackage.refObjectFactory().getObject(argument);
-                    } else if(argument instanceof Object_1_0) {
-                        delegateInstance = argument;
+                        delegateInstance = (ObjectView_1_0)this.immediatePackage.refObjectFactory().getObjectById(
+                            argument
+                        );
+                    } else if(argument instanceof ObjectView_1_0) {
+                        delegateInstance = (ObjectView_1_0)argument;
                     } else if(argument instanceof RefObject_1_0) {
                         delegateInstance = ((RefObject_1_0)argument).refDelegate();
+                    } else if(argument instanceof PersistenceCapable){
+                        delegateInstance = (ObjectView_1_0)this.immediatePackage.refObjectFactory().getObjectById(
+                            ((PersistenceCapable)argument).jdoGetObjectId()
+                        );
                     } else throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
-                        "argument must be null or instanceof [Path|Object_1_0|RefObject_1_0]",
-                        new BasicException.Parameter("args", args)
+                        "JMI 1 compliant initialization with a list of arguments is not supported at the moment",
+                        new BasicException.Parameter(
+                            "args", 
+                            args
+                        ),
+                        new BasicException.Parameter(
+                            "supported", 
+                            Arrays.asList(
+                                "<null>",
+                                Path.class.getName(),
+                                ObjectView_1_0.class.getName(),
+                                RefObject_1_0.class.getName(),
+                                PersistenceCapable.class.getName()
+                            )
+                        )
                     );
                 } else {
                     if(argument instanceof Path) {
-                        //
-                        // When Path get the object from accessor. The marshaller itself calls
-                        // refCreateInstance with the delegate instance as parameter
-                        //
-                        delegateInstance = this.immediatePackage.getDelegate().getObjectById(argument);
+                        delegateInstance = (PersistenceCapable)this.immediatePackage.getDelegate().getObjectById(argument);
                     } else if (argument instanceof PersistenceCapable) {
-                        delegateInstance = argument;
+                        delegateInstance = (PersistenceCapable)argument;
                     } else throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
-                        "argument must be null or instanceof [Path|PersistenceCapable]",
-                        new BasicException.Parameter("args", args)
+                        "JMI 1 compliant initialization with a list of arguments is not supported at the moment",
+                        new BasicException.Parameter(
+                            "args", 
+                            args
+                        ),
+                        new BasicException.Parameter(
+                            "supported", 
+                            Arrays.asList(
+                                "<null>",
+                                Path.class.getName(),
+                                PersistenceCapable.class.getName()
+                            )
+                        )
                     );
                 }
-            }
-
+            } else throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "JMI 1 compliant initialization with a list of arguments is not supported at the moment",
+                new BasicException.Parameter [] {
+                    new BasicException.Parameter("args", args)
+                }
+            );
             /**
              * Create an instance with the help of the constructors in the following order:
              * <ul>
@@ -265,19 +283,23 @@ public abstract class RefClass_1 implements Jmi1Class, Serializable {
                 );
                 RefObject_1_0 instance;
                 if(defaultInstance instanceof InvocationHandler) {
-                    Set<Class<?>> mixedIn = refOutermostPackage().getMixedInInterfaces(
+                    Set<Class<?>> mixedIn = this.refOutermostPackage().getMixedInInterfaces(
                         refMofId()
                     );
-                    instance = (RefObject_1_0) Proxy.newProxyInstance(
-                        this.getClass().getClassLoader(),
+                    instance = Classes.newProxyInstance(
+                        (InvocationHandler)defaultInstance,
                         legacyDelegate ? Classes.combineInterfaces(
                             mixedIn, // append
-                            this.intfClass, PersistenceCapable.class // prepend
-                        ) :  Classes.combineInterfaces(
+                            this.intfClass, 
+                            PersistenceCapable.class, 
+                            org.openmdx.base.persistence.spi.Cloneable.class
+                        ) : Classes.combineInterfaces(
                             mixedIn, // append
-                            this.intfClass, PersistenceCapable.class, Entity_2_0.class // prepend
-                        ),
-                        (InvocationHandler)defaultInstance
+                            this.intfClass, 
+                            PersistenceCapable.class, 
+                            org.openmdx.base.persistence.spi.Cloneable.class, 
+                            Jmi1ObjectInvocationHandler.DelegatingRefObject.class 
+                        )
                     );
                 } else {
                     instance = (RefObject_1_0) defaultInstance;
@@ -286,21 +308,24 @@ public abstract class RefClass_1 implements Jmi1Class, Serializable {
                 // Keep a reference to the newly created instance
                 //
                 if(args == null){
-                    ((CachingMarshaller_1_0)refOutermostPackage()).cache(delegateInstance, instance);
+                    ((CachingMarshaller_1_0)refOutermostPackage()).cacheObject(delegateInstance, instance);
                     // TODO ensure instance callback registration
                 }
-                if(
-                  refOutermostPackage().isAccessor() && (
+                if(refOutermostPackage().isAccessor()) {
+                   if(
                       instance instanceof ClearCallback ||
                       instance instanceof DeleteCallback ||
                       instance instanceof LoadCallback ||
                       instance instanceof StoreCallback
-                  )
-                ){
-                  instance.refAddEventListener(
-                      null, 
-                      InstanceCallbackAdapter_1.newInstance(instance)
-                  );  
+                   ){
+                      instance.refAddEventListener(
+                          null, 
+                          InstanceCallbackAdapter_1.newInstance(instance)
+                      );  
+                   }
+                   if(construct && instance instanceof ConstructCallback) {
+                       ((ConstructCallback)instance).openmdxjdoPostConstruct();
+                   }
                 }
                 return instance;
             } catch(InvocationTargetException e) {
@@ -539,9 +564,9 @@ public abstract class RefClass_1 implements Jmi1Class, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    public final RefPackage_1_6 refOutermostPackage(
+    public final RefRootPackage_1 refOutermostPackage(
     ) {
-        return (RefPackage_1_6) this.immediatePackage.refOutermostPackage();
+        return (RefRootPackage_1) this.immediatePackage.refOutermostPackage();
     }
 
     //-------------------------------------------------------------------------  
@@ -580,16 +605,16 @@ public abstract class RefClass_1 implements Jmi1Class, Serializable {
     ) {
         if(this.delegateClass == null) {
             PersistenceManagerFactory delegateManagerFactory = this.immediatePackage.getDelegate().getPersistenceManagerFactory();
-            String bindingPackageSuffix = delegateManagerFactory instanceof AbstractManagerFactory 
-            ? ((AbstractManagerFactory)delegateManagerFactory).getBindingPackageSuffix() 
+            String bindingPackageSuffix = delegateManagerFactory instanceof AbstractPersistenceManagerFactory_1 
+            ? ((AbstractPersistenceManagerFactory_1)delegateManagerFactory).getBindingPackageSuffix() 
                 : null;
             String[] modelClass = refMofId().split(":");
             StringBuilder javaClass = new StringBuilder();
             int iLimit = modelClass.length - 1;
             for(
-                    int i = 0;
-                    i < iLimit;
-                    i++
+                int i = 0;
+                i < iLimit;
+                i++
             ) {
                 javaClass.append(
                     Identifier.PACKAGE_NAME.toIdentifier(modelClass[i])
@@ -670,7 +695,6 @@ public abstract class RefClass_1 implements Jmi1Class, Serializable {
     //-------------------------------------------------------------------------
 
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public Set<ModelElement_1_0> refFeaturesHavingNoImpl(
     ) {
         if(this.featuresHavingNoImpl == null) {
@@ -682,11 +706,12 @@ public abstract class RefClass_1 implements Jmi1Class, Serializable {
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
-
+    private static final long serialVersionUID = -4760917422523646941L;
+    
     /**
      * @serial
      */
-    private RefPackage_1_4 immediatePackage = null;
+    private Jmi1Package_1_0 immediatePackage = null;
 
     private transient Constructor<?> defaultImplConstructor = null;
     private transient Class<?> intfClass = null;

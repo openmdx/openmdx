@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Database_1_Attributes.java,v 1.6 2008/12/15 15:17:24 wfro Exp $
+ * Name:        $Id: Database_1_Attributes.java,v 1.7 2009/01/27 18:55:56 wfro Exp $
  * Description: Database_1_Attributes 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/15 15:17:24 $
+ * Date:        $Date: 2009/01/27 18:55:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -110,10 +110,16 @@ public class Database_1_Attributes {
    * The hint allows to specify a list of columns which are included in the 
    * result set. By default all columns are returned using SELECT v.* FROM T v ...,
    * i.e. the default column selector is v.*. This option allows to minimize
-   * the by byte count of the result set. 
+   * the by byte count of the result set or to add additional columns.
    */
   public static final String HINT_COLUMN_SELECTOR = "/*!COLUMNS ";
 
+  /**
+   * The hint allows to specify a list of columns which are added to the 
+   * ORDER BY clause. 
+   */
+  public static final String HINT_ORDER_BY = "/*!ORDER BY ";
+  
   /**
    * Hint for qualifying the dbObject used in queries. The format can be one of the following
    * <ul>

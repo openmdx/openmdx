@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractPlugin_1.java,v 1.12 2008/11/21 14:58:03 hburger Exp $
+ * Name:        $Id: AbstractPlugin_1.java,v 1.35 2009/03/02 13:38:15 wfro Exp $
  * Description: AbstractPlugin_1
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.35 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/21 14:58:03 $
+ * Date:        $Date: 2009/03/02 13:38:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,34 +60,29 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0;
-import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_1;
-import org.openmdx.base.accessor.generic.cci.Object_1_0;
-import org.openmdx.base.accessor.generic.view.Manager_1;
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.accessor.Connection_1;
+import org.openmdx.application.dataprovider.accessor.Switch_1;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
+import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.application.dataprovider.spi.OperationAwareLayer_1;
+import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.PersistenceManager_1_0;
+import org.openmdx.base.accessor.view.Manager_1;
 import org.openmdx.base.collection.FilterableMap;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.transaction.Synchronization_1_0;
 import org.openmdx.compatibility.base.dataprovider.layer.application.CommonConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1;
-import org.openmdx.compatibility.base.dataprovider.transport.adapter.Provider_1;
-import org.openmdx.compatibility.base.dataprovider.transport.adapter.Switch_1;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Provider_1_0;
-import org.openmdx.compatibility.base.dataprovider.transport.delegation.Connection_1;
-import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_5;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.naming.PathComponent;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_3;
 
 //-----------------------------------------------------------------------------
 /**
@@ -97,7 +92,7 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_3;
  */
 @SuppressWarnings("unchecked")
 abstract public class AbstractPlugin_1
-extends StreamOperationAwareLayer_1 
+extends OperationAwareLayer_1 
 {
 
     //---------------------------------------------------------------------------
@@ -105,7 +100,7 @@ extends StreamOperationAwareLayer_1
      * Retrieve object with given id. The object is retrieved by navigating
      * the object hierarchy except the objects configured with getDirectAccessPaths() 
      */
-    protected Object_1_0 retrieveObject(
+    protected DataObject_1_0 retrieveObject(
         Path identity
     ) throws ServiceException {
         return this.retrieveObject(identity, true);
@@ -113,10 +108,10 @@ extends StreamOperationAwareLayer_1
 
     //---------------------------------------------------------------------------
     protected FilterableMap getContainer(
-        Object_1_0 _object,
+        DataObject_1_0 _object,
         String _featureName
     ) throws ServiceException {
-        Object_1_0 object = _object;
+        DataObject_1_0 object = _object;
         String featureName = _featureName;
         // handle namespaces
         if(featureName.indexOf(':') >= 0){
@@ -134,7 +129,7 @@ extends StreamOperationAwareLayer_1
      * Retrieve object with given id. The object is retrieved by navigating
      * the object hierarchy except the objects configured with getDirectAccessPaths() 
      */
-    protected Object_1_0 retrieveObject(
+    protected DataObject_1_0 retrieveObject(
         Path identity,
         boolean mandatory
     ) throws ServiceException {
@@ -155,7 +150,7 @@ extends StreamOperationAwareLayer_1
             }
         }
         // getting objects starting from 'startFrom'
-        Object_1_0 object = this.getObject(
+        DataObject_1_0 object = this.getObject(
             identity.getPrefix(startFrom),
             mandatory
         );
@@ -165,7 +160,7 @@ extends StreamOperationAwareLayer_1
                 i+=2
         ) { 
             try {
-                object = (Object_1_0)this.getContainer(
+                object = (DataObject_1_0)this.getContainer(
                     object,
                     identity.get(i)
                 ).get(identity.get(i+1));
@@ -189,12 +184,12 @@ extends StreamOperationAwareLayer_1
     }
 
     //---------------------------------------------------------------------------
-    protected Object_1_0 retrieveObject(
+    protected DataObject_1_0 retrieveObject(
         DataproviderRequest request,
         boolean mandatory
     ) throws ServiceException {
         Path identity = request.path();
-        Object_1_0 object = this.retrieveObject(
+        DataObject_1_0 object = this.retrieveObject(
             identity, 
             mandatory
         );
@@ -236,12 +231,11 @@ extends StreamOperationAwareLayer_1
     //---------------------------------------------------------------------------
     // Layer_1_0
     //---------------------------------------------------------------------------
-    @SuppressWarnings("deprecation")
     public void activate(
         short id,
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception, ServiceException {
+    ) throws ServiceException {
         super.activate(
             id, 
             configuration, 
@@ -351,30 +345,17 @@ extends StreamOperationAwareLayer_1
                 this.getDelegation()
             );
         }                
-        //
-        // get model
-        //
-        List models = configuration.values(SharedConfigurationEntries.MODEL);
-        if (models.isEmpty()) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION,
-                "A model must be configured with options 'modelPackage' and 'packageImpl'"
-            );
-        } 
-        else {
-            this.model = (Model_1_3) models.get(0);
-        }
+
         this.objectCache = new HashMap();
         this.objectIsNew = new HashMap();
     }
 
     //-------------------------------------------------------------------------
-    protected Object_1_0 createObject(
+    protected DataObject_1_0 createObject(
         DataproviderRequest request
     ) throws ServiceException {
         Path identity = request.path();
-        Object_1_0 object = this.objectFactory.createObject(
+        DataObject_1_0 object = this.objectFactory.newInstance(
             (String)request.object().values(SystemAttributes.OBJECT_CLASS).get(0)
         );
         if(identity.size() % 2 == 0){
@@ -408,20 +389,16 @@ extends StreamOperationAwareLayer_1
                     header,
                     delegation
                 );
-                Provider_1_0 provider = new Provider_1(
+                PersistenceManager_1_0 interaction = new Connection_1(
                     this.delegation,
-                    false // transactionPolicyIsNew
-                );
-                Connection_1_5 interaction = new Connection_1(
-                    provider,
+                    false, // transactionPolicyIsNew
                     true, // containerManagedUnitOfWork
                     this.defaultQualifierType
                 ); 
-                interaction.setModel(this.model);
                 this.manager = new Manager_1(interaction);
             }
             this.objectFactory = this.getObjectFactory();
-            this.objectFactory.getUnitOfWork().afterBegin();
+            ((Synchronization_1_0)this.objectFactory.currentTransaction().getSynchronization()).afterBegin();
             this.objectCache.clear();
             this.objectIsNew.clear();
     }
@@ -432,7 +409,7 @@ extends StreamOperationAwareLayer_1
         DataproviderRequest[] requests,
         DataproviderReply[] replies
     ) throws ServiceException {
-        this.objectFactory.getUnitOfWork().beforeCompletion();
+        this.objectFactory.currentTransaction().getSynchronization().beforeCompletion();
         this.objectCache.clear();
         super.epilog(
             header, 
@@ -446,7 +423,7 @@ extends StreamOperationAwareLayer_1
     //---------------------------------------------------------------------------
 
     //---------------------------------------------------------------------------
-    abstract protected ObjectFactory_1_0 getObjectFactory(
+    abstract protected PersistenceManager_1_0 getObjectFactory(
     ) throws ServiceException;
 
     //---------------------------------------------------------------------------
@@ -494,16 +471,10 @@ extends StreamOperationAwareLayer_1
     }
 
     //---------------------------------------------------------------------------
-    public Model_1_0 getModel(
-    ) {
-        return this.model;
-    }
-
-    //---------------------------------------------------------------------------
     /**
      * Return default manager.
      */
-    public ObjectFactory_1_1 getManager(
+    public PersistenceManager_1_0 getManager(
     ) {
         return this.manager;
     }
@@ -512,30 +483,28 @@ extends StreamOperationAwareLayer_1
     /**
      * Create a new manager with specified ServiceHeader
      */
-    public ObjectFactory_1_0 getManager(
+    public PersistenceManager_1_0 getManager(
         ServiceHeader header
     ) throws ServiceException {
         return new Manager_1(
-            new Connection_1(
-                getProvider(header),
-                true,
-                this.defaultQualifierType
-            )
+            this.getConnection(header)
         );
     }
 
     /**
      * Create a new provider with specified ServiceHeader
      */
-    public Provider_1_0 getProvider(
+    public PersistenceManager_1_0 getConnection(
         ServiceHeader header
     ) throws ServiceException {
-        return new Provider_1(
+        return new Connection_1(
             new RequestCollection(
                 header,
                 this.router
             ),
-            false
+            false, // transactionPolicyIsNew
+            true, // containerManagedUnitOfWork
+            this.defaultQualifierType
         );
     }
 
@@ -552,18 +521,19 @@ extends StreamOperationAwareLayer_1
     }
 
     //---------------------------------------------------------------------------
-    protected Object_1_0 getObject(
+    protected DataObject_1_0 getObject(
         Path id,
         boolean mandatory
     ) throws ServiceException {
-        Object_1_0 object = null;
+        DataObject_1_0 object = null;
         ServiceException cause = null;
         try {
-            object = this.objectFactory.getObject(id);
+            object = (DataObject_1_0)this.objectFactory.getObjectById(id);
         } 
-        catch(ServiceException e) {
-            if(e.getExceptionCode() != BasicException.Code.NOT_FOUND) throw e;
-            cause = e;
+        catch(Exception e) {
+            ServiceException e0 = new ServiceException(e);
+            if(e0.getExceptionCode() != BasicException.Code.NOT_FOUND) throw e0;
+            cause = e0;
         }
         if(mandatory && object == null) {
             throw new ServiceException(
@@ -583,8 +553,7 @@ extends StreamOperationAwareLayer_1
     protected int retrievalSize = 1;
     protected int batchSize = Integer.MAX_VALUE;
     protected Dataprovider_1_0 router = null;
-    protected ObjectFactory_1_0 objectFactory = null;
-    protected Model_1_3 model = null;
+    protected PersistenceManager_1_0 objectFactory = null;
     protected Map packageImpls = null;
     protected RequestCollection delegation = null;    
     protected Manager_1 manager = null;

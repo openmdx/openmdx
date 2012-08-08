@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CharacterLargeObjects.java,v 1.5 2008/04/21 16:52:08 hburger Exp $
+ * Name:        $Id: CharacterLargeObjects.java,v 1.10 2009/01/12 12:54:16 wfro Exp $
  * Description: Object Relational Mapping 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/21 16:52:08 $
+ * Date:        $Date: 2009/01/12 12:54:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,6 +51,7 @@
 package org.w3c.cci2;
 
 import java.io.CharArrayReader;
+import java.io.CharArrayWriter;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -58,13 +59,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
 
-import org.openmdx.base.exception.ExtendedIOException;
-import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.accessor.object.cci.ReadableLargeObject;
+import org.openmdx.application.dataprovider.transport.rmi.InprocessMarshaller;
 
 /**
  * Object Relational Mapping
@@ -287,73 +287,53 @@ public class CharacterLargeObjects {
 
     }
 
-    public static CharacterLargeObject valueOf(
-        ReadableLargeObject delegate
-    ){
-        return new CompatibilityLargeObject(delegate);
-    }
+    //------------------------------------------------------------------------
+    public static class CharacterHolder implements Serializable  {
     
-    /**
-     * Compatibility CLOB
-     */
-    private static class CompatibilityLargeObject implements CharacterLargeObject {
-
         /**
          * Constructor 
          *
-         * @param delegate
-         */
-        CompatibilityLargeObject(ReadableLargeObject delegate) {
-            this.delegate = delegate;
-        }
-
-        /**
+         * @param reader
          * 
+         * @throws IOException
          */
-        private final ReadableLargeObject delegate;
-        
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.CharacterLargeObject#getContent()
-         */
-        public Reader getContent() throws IOException {
-            try {
-                return this.delegate.getCharacterStream();
-            } catch (ServiceException exception) {
-                throw new ExtendedIOException(exception);
+        public CharacterHolder(
+            Reader reader
+        ) throws IOException {
+            if(reader instanceof CharacterStringReader) {
+                this.string = ((CharacterStringReader)reader).getString();
+            } else {
+                CharArrayWriter out = new CharArrayWriter();
+                int c;
+                while((c = reader.read()) != -1) {
+                    out.write(c);
+                }
+                this.string = new CharacterString(out.toCharArray());
             }
         }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.LargeObject#getLength()
-         */
-        public Long getLength(
-        ) throws IOException {
-            try {
-                return asLength(this.delegate.length());
-            } catch (ServiceException exception) {
-                throw new ExtendedIOException(exception);
-            }
-        }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.CharacterLargeObject#getContent(java.io.Writer, long)
-         */
-        public void getContent(
-            Writer writer, 
-            long position
-        ) throws IOException {
-            try {
-                this.delegate.getCharacterStream(
-                    writer,
-                    position
-                );
-            } catch (ServiceException exception) {
-                throw new ExtendedIOException(exception);
-            }
-        }        
-        
-    }
     
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = -1526645671101459098L;
+    
+        /**
+         * The content
+         */
+        private final CharacterString string;
+    
+        /**
+         * Create an input stream
+         * 
+         * @return a newly created input stream
+         */
+        public InprocessMarshaller.CharacterSource_1Reader toStream(
+        ){
+            return new InprocessMarshaller.CharacterSource_1Reader(this.string);
+        }
+    
+    }
+
     /**
      * A negative length is converted to <code>null</code>.
      * 

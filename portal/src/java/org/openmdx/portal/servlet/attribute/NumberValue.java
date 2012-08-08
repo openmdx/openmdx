@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: NumberValue.java,v 1.43 2008/11/12 10:36:53 wfro Exp $
+ * Name:        $Id: NumberValue.java,v 1.45 2009/03/08 18:03:22 wfro Exp $
  * Description: NumberValue
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.45 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 10:36:53 $
+ * Date:        $Date: 2009/03/08 18:03:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -250,9 +250,9 @@ public class NumberValue
         }
         if(forEditing) {
             String feature = this.getName();
-            id = (id == null) || (id.length() == 0)            
-                ? feature + "[" + Integer.toString(tabIndex) + "]"
-                : id;            
+            id = (id == null) || (id.length() == 0) ? 
+                feature + "[" + Integer.toString(tabIndex) + "]" : 
+                id;            
             p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             if(this.isSingleValued()) {
                 p.write("<td ", rowSpanModifier, ">");
@@ -277,15 +277,18 @@ public class NumberValue
                 }
                 else {
                     BigDecimal minValue = this.getMinValue();
-                    String minValueModifier = minValue.compareTo(new BigDecimal(Long.MIN_VALUE)) <= 0
-                        ? ""
-                        : "if (parseInt(removeThousandsSeparator(this.value))<" + Long.toString(minValue.longValue()) + ") {this.value=" + Long.toString(minValue.longValue()) + ";};";
+                    String minValueModifier = minValue.compareTo(new BigDecimal(Long.MIN_VALUE)) <= 0 ? 
+                        "" : 
+                        "if (parseInt(removeThousandsSeparator(this.value))<" + Long.toString(minValue.longValue()) + ") {this.value=" + Long.toString(minValue.longValue()) + ";};";
                     BigDecimal maxValue = this.getMaxValue();
-                    String maxValueModifier = maxValue.compareTo(new BigDecimal(Long.MAX_VALUE)) >= 0
-                        ? ""
-                        : "if (parseInt(removeThousandsSeparator(this.value))>" + maxValue + ") {this.value=" + maxValue + ";};";
+                    String maxValueModifier = maxValue.compareTo(new BigDecimal(Long.MAX_VALUE)) >= 0 ? 
+                        "" : 
+                        "if (parseInt(removeThousandsSeparator(this.value))>" + maxValue + ") {this.value=" + maxValue + ";};";
+                    String classModifier = this.isMandatory() ?
+                        "valueR mandatory" :
+                        "valueR";
                     p.debug("  <!-- " + minValue + " | " + maxValue + " | " + new BigDecimal(Long.MIN_VALUE) + " | " + new BigDecimal(Long.MAX_VALUE) + " | -->");
-                    p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"text\" class=\"valueR", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", stringifiedValue, "\" onkeypress=\"javascript: var kc = null; if (window.event) {kc = window.event.keyCode;} else {kc = event.which;}; if (!(((kc>=37) && (kc<=40)) || ((kc>=44) && (kc<=46)) || ((kc>=48) && (kc<=57)) || (kc==0) || (kc==8) || (kc==9) || (kc==13))) {if (window.event) {window.event.returnValue=false;} else {event.preventDefault();}}\" onchange=\"javascript: ", minValueModifier, " ", maxValueModifier, ";\"");
+                    p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"text\" class=\"", classModifier, "\"", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", stringifiedValue, "\" onkeypress=\"javascript: var kc = null; if (window.event) {kc = window.event.keyCode;} else {kc = event.which;}; if (!(((kc>=37) && (kc<=40)) || ((kc>=44) && (kc<=46)) || ((kc>=48) && (kc<=57)) || (kc==0) || (kc==8) || (kc==9) || (kc==13))) {if (window.event) {window.event.returnValue=false;} else {event.preventDefault();}}\" onchange=\"javascript: ", minValueModifier, " ", maxValueModifier, ";\"");
                     p.writeEventHandlers("    ", attribute.getEventHandler());
                     p.write("  >");
                 }
@@ -335,7 +338,7 @@ public class NumberValue
     static {        
         Locale[] locales = DecimalFormat.getAvailableLocales();
         for(int i = 0; i < locales.length; i++) {
-            availableLocales.put(
+            NumberValue.availableLocales.put(
                 locales[i].toString(),
                 locales[i]
             );

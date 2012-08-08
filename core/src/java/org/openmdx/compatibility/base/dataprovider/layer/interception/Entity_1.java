@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Entity_1.java,v 1.1 2008/06/24 16:17:21 hburger Exp $
+ * Name:        $Id: Entity_1.java,v 1.2 2009/01/05 13:48:09 wfro Exp $
  * Description: Entity_1 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/24 16:17:21 $
+ * Date:        $Date: 2009/01/05 13:48:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,12 +52,12 @@
 
 package org.openmdx.compatibility.base.dataprovider.layer.interception;
 
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkReply;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkRequest;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
-import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
 
 /**
  * Entity_1

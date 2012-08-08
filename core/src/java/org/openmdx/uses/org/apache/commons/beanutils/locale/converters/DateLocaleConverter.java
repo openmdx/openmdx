@@ -17,10 +17,10 @@
 
 package org.openmdx.uses.org.apache.commons.beanutils.locale.converters;
 
+import org.openmdx.uses.org.apache.commons.logging.LogFactory;
+import org.openmdx.uses.org.apache.commons.logging.Log;
 import org.openmdx.uses.org.apache.commons.beanutils.ConversionException;
 import org.openmdx.uses.org.apache.commons.beanutils.locale.BaseLocaleConverter;
-import org.openmdx.uses.org.apache.commons.logging.Log;
-import org.openmdx.uses.org.apache.commons.logging.LogFactory;
 
 import java.text.ParseException;
 import java.text.ParsePosition;
@@ -329,7 +329,7 @@ public class DateLocaleConverter extends BaseLocaleConverter {
                                                 localChars,
                                                 DEFAULT_PATTERN_CHARS);
          } catch (Exception ex) {
-             log.info("Converting pattern '" + localizedPattern + "' for " + locale, ex);
+             log.debug("Converting pattern '" + localizedPattern + "' for " + locale, ex);
          }
          return convertedPattern; 
     }

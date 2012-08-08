@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE openmdxjdo
+    PUBLIC "-//openMDX//DTD Java Data Objects Metadata Extension 2.0//EN"
+    "http://www.openmdx.org/dtd/openmdx-jdo_2_0.dtd"
+>
+<openmdxjdo>
+	<package name="org.openmdx.base.jpa3">
+		<class name="Provider" requires-extent="false" requires-slices="false">
+			<field name="openmdxjdoIdentity" visibility="none">
+				<column name="OBJECT_ID"/>
+			</field>        		
+		</class>
+	</package>
+</openmdxjdo>

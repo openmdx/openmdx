@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestTestApp_1Jmi.java,v 1.102 2008/11/14 11:54:06 hburger Exp $
+ * Name:        $Id: TestTestApp_1Jmi.java,v 1.108 2009/03/05 17:51:36 hburger Exp $
  * Description: Unit test for model app1
- * Revision:    $Revision: 1.102 $
+ * Revision:    $Revision: 1.108 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/14 11:54:06 $
+ * Date:        $Date: 2009/03/05 17:51:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -88,38 +88,34 @@ import junit.textui.TestRunner;
 
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.Directions;
+import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.deployment.Deployment_1;
+import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1_1Connection;
 import org.openmdx.application.log.AppLog;
-import org.openmdx.base.accessor.generic.view.Manager_1;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
+import org.openmdx.base.accessor.jmi.spi.Jmi1ObjectInvocationHandler.DelegatingRefObject;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
-import org.openmdx.base.persistence.spi.Entity_2_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.spi.Model_1Factory;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.SQLWildcards;
 import org.openmdx.base.text.format.DateFormat;
-import org.openmdx.compatibility.base.application.cci.Deployment_1;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
-import org.openmdx.compatibility.base.dataprovider.transport.adapter.Provider_1;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Provider_1_1;
-import org.openmdx.compatibility.base.dataprovider.transport.delegation.Connection_1;
-import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.datastore1.jmi1.Datastore1Package;
 import org.openmdx.compatibility.datastore1.jmi1.QueryFilter;
 import org.openmdx.generic1.jmi1.BooleanProperty;
 import org.openmdx.generic1.jmi1.Generic1Package;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.accessor.basic.spi.Model_1;
 import org.openmdx.test.app1.cci2.CycleMember1Query;
 import org.openmdx.test.app1.cci2.InvoiceHasInvoicePosition;
 import org.openmdx.test.app1.cci2.InvoicePositionQuery;
@@ -160,9 +156,9 @@ import org.openmdx.test.app1.jmi1.PostalAddress;
 import org.openmdx.test.app1.jmi1.Product;
 import org.openmdx.test.app1.jmi1.Segment;
 import org.w3c.cci2.BinaryLargeObject;
-import org.w3c.cci2.Datatypes;
 import org.w3c.cci2.SparseArray;
 import org.w3c.cci2.StringTypePredicate;
+import org.w3c.spi2.Datatypes;
 
 /**
  * AbstractTestApp_1Jmi
@@ -269,10 +265,10 @@ public class TestTestApp_1Jmi extends TestCase {
         public void run(
         ) {
             try {
-                Model_1_0 model = new Model_1();
+                Model_1_0 model = Model_1Factory.getModel();
                 for(
-                        int i = 0; i < 5000000;
-                        i++
+                    int i = 0; i < 5000000;
+                    i++
                 ) {
                     model.getElement("org:openmdx:base:BasicObject");
                 }
@@ -355,18 +351,6 @@ public class TestTestApp_1Jmi extends TestCase {
                 new String[]{"xri:+resource/org/openmdx/test/test/app1/data.xml"}
             );
 
-            // get layer.provider.dataprovider 
-            Provider_1_1 provider = new Provider_1(
-                channel,
-                false, 
-                true
-            );
-            new Manager_1(
-                new Connection_1(
-                    provider,
-                    false
-                )
-            );
             File scratchFile = this.context.getScratchFile();
             
             if(scratchFile == null) scratchFile = File.createTempFile(getClass().getName(), null);
@@ -551,8 +535,8 @@ public class TestTestApp_1Jmi extends TestCase {
                     persistenceManager, 
                     m
                 );
-                assertTrue("Implementation detail", flag instanceof Entity_2_0);
-                Entity_2_0 entity = (Entity_2_0) flag;
+                assertTrue("Implementation detail", flag instanceof DelegatingRefObject);
+                DelegatingRefObject entity = (DelegatingRefObject) flag;
                 assertNotSame("Made persistent", entity.openmdxjdoGetDelegate(), entity.openmdxjdoGetDataObject());
             }
             {
@@ -984,11 +968,11 @@ public class TestTestApp_1Jmi extends TestCase {
             for(Address address : assignedAddresses) {
                 // postal code refreshed
                 if(refGetPath(address).equals(refGetPath(postalAddress))) {
-                    if(address instanceof Entity_2_0) {
+                    if(address instanceof DelegatingRefObject) {
                         assertSame(
                             "created and retrieved object should be the same",
-                            ((Entity_2_0)address).openmdxjdoGetDelegate(), 
-                            ((Entity_2_0)postalAddress).openmdxjdoGetDelegate()
+                            ((DelegatingRefObject)address).openmdxjdoGetDelegate(), 
+                            ((DelegatingRefObject)postalAddress).openmdxjdoGetDelegate()
                         );
                     } else {
                         assertSame(
@@ -1044,11 +1028,11 @@ public class TestTestApp_1Jmi extends TestCase {
                         );
                     }
                     if(refGetPath(address).equals(refGetPath(postalAddress))) {
-                        if(address instanceof Entity_2_0) {
+                        if(address instanceof DelegatingRefObject) {
                             assertSame(
                                 "created and retrieved object should be the same",
-                                ((Entity_2_0)address).openmdxjdoGetDelegate(),
-                                ((Entity_2_0)postalAddress).openmdxjdoGetDelegate()
+                                ((DelegatingRefObject)address).openmdxjdoGetDelegate(),
+                                ((DelegatingRefObject)postalAddress).openmdxjdoGetDelegate()
                             );
                         } else {
                             assertSame(
@@ -1301,7 +1285,7 @@ public class TestTestApp_1Jmi extends TestCase {
                 "blabla",
                 false
             );
-            Map<?,?> attributes = (Map<?,?>)personDef.values("attribute").get(0);
+            Map<?,?> attributes = (Map<?,?>)personDef.objGetValue("attribute");
             /* salutationDef = (ModelElement_1_0) */ attributes.get("salutation");
 
             // get person on 'none', derived association 'SegmentReferencesForeignPerson'
@@ -1490,10 +1474,10 @@ public class TestTestApp_1Jmi extends TestCase {
                         "InvalidFormat"
                     )
                 );
-            }
-
-            catch(CanNotFormatNameException e) {
-                System.out.println("formatNameAs() raised exception as expected \n" + e.getMessage());
+//            }
+//
+//            catch(CanNotFormatNameException e) {
+//                System.out.println("formatNameAs() raised exception as expected \n" + e.getMessage());
             }
 
             catch(Exception e) {
@@ -1985,7 +1969,7 @@ public class TestTestApp_1Jmi extends TestCase {
         public PersistenceManager getPersistenceManager(
         ) throws ServiceException {
             if(this.persistenceManager == null) try {
-                this.persistenceManager = accessorFactory.createManager();
+                this.persistenceManager = accessorFactory.getEntityManager();
             } catch (ResourceException exception) {
                 throw new ServiceException(exception);
             }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Filters.java,v 1.13 2008/09/26 12:10:39 hburger Exp $
+ * Name:        $Id: Filters.java,v 1.14 2009/03/08 18:03:18 wfro Exp $
  * Description: Filters
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/26 12:10:39 $
+ * Date:        $Date: 2009/03/08 18:03:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -285,7 +285,7 @@ public class Filters
   ) {
     try {
       return Records.getRecordFactory().asMappedRecord(
-        getClass().getName(), 
+        this.getClass().getName(), 
         null,
         TO_STRING_FIELDS,
         new Object[]{
@@ -301,7 +301,8 @@ public class Filters
           )
         }
       ).toString();
-    } catch (ResourceException exception) {
+    } 
+    catch (ResourceException exception) {
         return super.toString();
     }    
   }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateCapable_1.java,v 1.2 2008/12/15 03:15:37 hburger Exp $
+ * Name:        $Id: StateCapable_1.java,v 1.11 2009/02/17 10:06:22 hburger Exp $
  * Description: State Capable Layer
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/15 03:15:37 $
+ * Date:        $Date: 2009/02/17 10:06:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,41 +50,31 @@
  */
 package org.openmdx.compatibility.state1.layer.type;
 
-import static org.openmdx.base.aop2.core.Aspect_1.CORE;
-
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkReply;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkRequest;
+import org.openmdx.application.dataprovider.spi.DelegatingLayer_1;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_1;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.state1.aop2.core.DateState_1;
+import org.openmdx.base.naming.Path;
 import org.openmdx.compatibility.state1.spi.StateCapables;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 
 /**
  * State Capable Layer
  */
 public class StateCapable_1 extends DelegatingLayer_1 {
 
-    /**
-     * The path's to be handled by this class
-     */
-    private Collection<Path> stateCapablePattern;
-    
     /**
      * The identity prefix for objects with unique transaction time
      */
@@ -94,14 +84,7 @@ public class StateCapable_1 extends DelegatingLayer_1 {
      * The identity prefix for objects with unique valid time
      */
     private Collection<Path> validTimeUnique;
-    
-    /**
-     * The model repository accessor
-     */
-    private Model_1_0 model;
 
-    private Path dateState;
-    
     /**
      * Convert configuration values to a path set
      * 
@@ -131,25 +114,13 @@ public class StateCapable_1 extends DelegatingLayer_1 {
         short id,
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception {
-        this.stateCapablePattern = toPaths(
-            configuration.values(LayerConfigurationEntries.STATE_CAPABLE)
-        );
+    ) throws ServiceException {
         this.transactionTimeUnique = toPaths(
             configuration.values(LayerConfigurationEntries.TRANSACTION_TIME_UNIQUE)
         );
         this.validTimeUnique = toPaths(
             configuration.values(LayerConfigurationEntries.VALID_TIME_UNIQUE)
         );
-        this.model = (Model_1_0) configuration.values(
-            SharedConfigurationEntries.MODEL
-        ).get(
-            0
-        );
-        ModelElement_1_0 dateState = this.model == null ? null : this.model.findElement(
-            DateState_1.CLASS
-        );
-        this.dateState = dateState == null ? null : dateState.path();
         super.activate(id, configuration, delegation);
     }
 
@@ -188,6 +159,29 @@ public class StateCapable_1 extends DelegatingLayer_1 {
     }
     
     
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.spi.DelegatingLayer_1#create(org.openmdx.application.dataprovider.cci.ServiceHeader, org.openmdx.application.dataprovider.cci.DataproviderRequest)
+     */
+    @Override
+    public DataproviderReply create(
+        ServiceHeader header,
+        DataproviderRequest request
+    ) throws ServiceException {
+        DataproviderObject object = request.object();
+        if(getModel().isSubtypeOf(object.values(SystemAttributes.OBJECT_CLASS).get(0), "org:openmdx:compatibility:state1:BasicState")) {
+            SparseList<Object> coreValues = object.getValues("core");
+            if(coreValues != null) {
+                Path coreValue = (Path) coreValues.get(0); 
+                if(coreValue != null && StateCapables.isCoreObject(coreValue)) {
+                    if(StateCapables.getResourceIdentifier(coreValue).getLastComponent().isPlaceHolder()) {
+                        coreValue.setTo(StateCapables.getStateCapable(request.path()));
+                    }
+                }
+            }
+        }
+        return super.create(header, request);
+    }
+
     /**
      * Get the object specified by the requests's path
      *
@@ -207,65 +201,90 @@ public class StateCapable_1 extends DelegatingLayer_1 {
         DataproviderRequest request
     ) throws ServiceException {
         Path requestPath = request.path();
-        for(Path stateCapablePattern : this.stateCapablePattern) {
-            if(requestPath.isLike(stateCapablePattern)) {
-                Path corePath = requestPath;
-                DataproviderObject core = new DataproviderObject(corePath);
-                core.values(
-                    SystemAttributes.OBJECT_CLASS
-                ).set(
-                    0, 
-                    org.openmdx.compatibility.state1.aop2.core.StateCapable_1.CLASS
-                );
-                Path resourceIdentifier = new Path(corePath.getBase());
-                core.values(LayerConfigurationEntries.TRANSACTION_TIME_UNIQUE).set(0, isTransactionTimeUnique(resourceIdentifier)); 
-                core.values(LayerConfigurationEntries.VALID_TIME_UNIQUE).set(0, isValidTimeUnique(resourceIdentifier)); 
-//              core.values(STATE).set(0, resourceIdentifier);
-                DataproviderObject view = new DataproviderObject(resourceIdentifier);
-                view.values(
-                    SystemAttributes.OBJECT_CLASS
-                ).set(
-                    0, 
-                    DateState_1.CLASS
-                );
-                view.values(CORE).set(0, corePath);
-                return new DataproviderReply(
-                    Arrays.asList(core, view)
-                );
-            }
-        }
-        if(requestPath.getBase().indexOf('!') < 0) {
-            ModelElement_1_0[] ends = this.model == null ? null : this.model.getTypes(requestPath);
-            if(ends != null && ends[2].values("allSupertype").contains(this.dateState)) {
-                Path resourceIdentifier = requestPath;
-                Path stateCapable = StateCapables.getStateCapable(resourceIdentifier);
-                DataproviderObject core = new DataproviderObject(stateCapable);
-                core.values(
-                    SystemAttributes.OBJECT_CLASS
-                ).set(
-                    0, 
-                    org.openmdx.compatibility.state1.aop2.core.StateCapable_1.CLASS
-                );
-                core.values(LayerConfigurationEntries.TRANSACTION_TIME_UNIQUE).set(0, isTransactionTimeUnique(resourceIdentifier)); 
-                core.values(LayerConfigurationEntries.VALID_TIME_UNIQUE).set(0, isValidTimeUnique(resourceIdentifier)); 
-//              core.values(STATE).set(0, resourceIdentifier);
-                DataproviderObject view = new DataproviderObject(resourceIdentifier);
-                view.values(
-                    SystemAttributes.OBJECT_CLASS
-                ).set(
-                    0, 
-                    DateState_1.CLASS
-                );
-                view.values(CORE).set(0, stateCapable);
-                return new DataproviderReply(
-                    Arrays.asList(view, core)
-                );
-            }
+        if(StateCapables.CORE_SEGMENT.equals(requestPath)) {
+            DataproviderObject segment = new DataproviderObject(requestPath);
+            segment.values(
+                SystemAttributes.OBJECT_CLASS
+            ).set(
+                0, 
+                "org:openmdx:compatibility:state1:Segment"
+            );
+            return new DataproviderReply(segment);            
+        } else if (StateCapables.isCoreObject(requestPath)) {
+            DataproviderObject stateCapable = new DataproviderObject(requestPath);
+            stateCapable.values(
+                SystemAttributes.OBJECT_CLASS
+            ).set(
+                0, 
+                "org:openmdx:compatibility:state1:StateCapable"
+            );
+            stateCapable.values(
+                "openmdxjdoVersion"
+            ).set(
+                0,
+                Integer.valueOf(0)
+            );
+            completeStateCapable(stateCapable, new Path(requestPath.getBase()));
+            return new DataproviderReply(stateCapable);            
         }
         return super.get(
             header, 
             request
         );
+    }
+
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.spi.DelegatingLayer_1#process(org.openmdx.application.dataprovider.cci.ServiceHeader, org.openmdx.application.dataprovider.cci.UnitOfWorkRequest)
+     */
+    @Override
+    protected UnitOfWorkReply process(
+        ServiceHeader header,
+        UnitOfWorkRequest unitOfWorkRequest
+    ) {
+        UnitOfWorkReply unitOfWorkReply = super.process(header, unitOfWorkRequest);
+        if(!unitOfWorkReply.failure()) {
+            for(DataproviderReply dataproviderReply : unitOfWorkReply.getReplies()) {
+                for(DataproviderObject dataproviderObject : dataproviderReply.getObjects()) {
+                    Object objectClass = dataproviderObject.values(SystemAttributes.OBJECT_CLASS).get(0);
+                    if("org:openmdx:compatibility:state1:StateCapable".equals(objectClass)) {
+                        completeStateCapable(dataproviderObject, dataproviderObject.path());
+                    }
+                }
+            }
+        }
+        return unitOfWorkReply;
+    }
+
+    /**
+     * Add the derived attributes
+     * 
+     * @param stateCapable
+     */
+    private void completeStateCapable(
+        DataproviderObject stateCapable,
+        Path identity
+    ){
+        if(stateCapable.getValues("transactionTimeUnique") == null) {
+            stateCapable.values(
+                "transactionTimeUnique"
+            ).set(
+                0,
+                isTransactionTimeUnique(
+                    identity
+                )
+            );
+        }
+        if(stateCapable.getValues("validTimeUnique") == null) {
+            stateCapable.values(
+                "validTimeUnique"
+            ).set(
+                0,
+                isValidTimeUnique(
+                    identity
+                )
+            );
+        }
     }
 
 }

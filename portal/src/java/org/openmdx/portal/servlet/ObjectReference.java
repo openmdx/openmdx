@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReference.java,v 1.29 2008/12/04 10:37:23 wfro Exp $
+ * Name:        $Id: ObjectReference.java,v 1.32 2009/01/13 23:48:40 wfro Exp $
  * Description: ObjectReference 
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.32 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/04 10:37:23 $
+ * Date:        $Date: 2009/01/13 23:48:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,15 +56,15 @@
 package org.openmdx.portal.servlet;
 
 import java.io.Serializable;
+import java.util.regex.Pattern;
 
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.text.pattern.StringExpression;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.portal.servlet.view.ViewMode;
 import org.openmdx.ui1.layer.application.Ui_1;
 
@@ -108,7 +108,7 @@ public class ObjectReference
   //-------------------------------------------------------------------------
   public String getTitleEscapeQuote(
   ) {
-      return StringExpression.compile("'").matcher(this.getTitle()).replaceAll("\\'");
+      return Pattern.compile("'").matcher(this.getTitle()).replaceAll("\\'");
   }
   
   //-------------------------------------------------------------------------

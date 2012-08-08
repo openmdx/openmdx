@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatabaseConfiguration.java,v 1.27 2008/12/15 03:15:36 hburger Exp $
+ * Name:        $Id: DatabaseConfiguration.java,v 1.31 2009/01/06 13:14:44 wfro Exp $
  * Description: DatabaseConfiguration 
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/15 03:15:36 $
+ * Date:        $Date: 2009/01/06 13:14:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,14 +65,14 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import org.openmdx.application.cci.DbConnectionManager_1_0;
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.DataproviderLayers;
+import org.openmdx.base.collection.OffsetArrayList;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.Base64;
-import org.openmdx.compatibility.base.application.cci.DbConnectionManager_1_0;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.collection.OffsetArrayList;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderLayers;
-import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -240,7 +240,7 @@ public class DatabaseConfiguration {
                     // ignore
                 }      
                 try {
-                    connectionManager.closeConnection(conn);
+                    if(conn != null) conn.close();
                 } catch(Throwable ex) {
                     // ignore
                 }
@@ -432,7 +432,7 @@ public class DatabaseConfiguration {
     }
 
     //---------------------------------------------------------------------------
-    String buildReferenceId(
+    public String buildReferenceId(
         Path resourceIdentifier
     ) throws ServiceException{
         DbObjectConfiguration dbObjectConfiguration = getDbObjectConfiguration(resourceIdentifier);
@@ -469,7 +469,7 @@ public class DatabaseConfiguration {
     }
     
     //---------------------------------------------------------------------------
-    String buildObjectId(
+    public String buildObjectId(
         Path resourceIdentifier
     ) throws ServiceException{
         DbObjectConfiguration dbObjectConfiguration = getDbObjectConfiguration(resourceIdentifier);
@@ -493,14 +493,14 @@ public class DatabaseConfiguration {
     }     
 
     //---------------------------------------------------------------------------
-    String buildObjectId(
+    public String buildObjectId(
         String component
     ) throws ServiceException{
         return isConvertible(component) ? buildObjectId(new Path(component)) : component;
     }
     
     //---------------------------------------------------------------------------
-    Path buildResourceIdentifier(
+    public Path buildResourceIdentifier(
         String id, 
         boolean reference
     ) throws ServiceException {

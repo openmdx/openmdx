@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportDefinitionFactory.java,v 1.18 2008/09/19 20:54:23 wfro Exp $
+ * Name:        $Id: ReportDefinitionFactory.java,v 1.21 2009/02/20 22:05:43 wfro Exp $
  * Description: TextsFactory
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/19 20:54:23 $
+ * Date:        $Date: 2009/02/20 22:05:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,8 +67,8 @@ import java.util.TreeMap;
 
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 
 public class ReportDefinitionFactory
 implements Serializable {
@@ -100,10 +100,8 @@ implements Serializable {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("name", path)
-                },
-                "Unsupported report definition format. Supported formats are [.rptdesign,.jsp]"
+                "Unsupported report definition format. Supported formats are [.rptdesign,.jsp]",
+                new BasicException.Parameter("name", path)
             );
         }
     }

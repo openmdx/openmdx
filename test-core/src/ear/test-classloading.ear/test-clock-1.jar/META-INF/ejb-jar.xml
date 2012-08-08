@@ -5,9 +5,9 @@
 	<enterprise-beans>
 		<session>
 			<ejb-name>clock-1</ejb-name>
-			<home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
-			<remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
-			<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
+			<local-home>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			<local>org.openmdx.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			<ejb-class>org.openmdx.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
 			<session-type>Stateless</session-type>
 			<transaction-type>Container</transaction-type>
 			<env-entry>
@@ -37,11 +37,6 @@
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/modelPackage[3]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:view1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[4]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>org:openmdx:test:clock1</env-entry-value>
 			</env-entry>
@@ -78,7 +73,7 @@
 				<ejb-name>clock-1</ejb-name>
 				<method-name>*</method-name>
 			</method>
-			<trans-attribute>Never</trans-attribute>
+			<trans-attribute>Supports</trans-attribute>
 		</container-transaction>
 	</assembly-descriptor>
 </ejb-jar>

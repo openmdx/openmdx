@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSortedMap.java,v 1.12 2008/10/02 17:32:13 hburger Exp $
+ * Name:        $Id: MarshallingSortedMap.java,v 1.14 2009/01/11 21:19:33 wfro Exp $
  * Description: Marshalling Sorted Map
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/02 17:32:13 $
+ * Date:        $Date: 2009/01/11 21:19:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.SortedMap;
 
-import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.Marshaller;
 
 /**
  * A Marshalling Sorted Map
@@ -72,7 +72,7 @@ public class MarshallingSortedMap
      * @param unmarshalling 
      */    
     public MarshallingSortedMap(
-        org.openmdx.base.persistence.spi.Marshaller marshaller,
+        Marshaller marshaller,
         SortedMap<Integer,Object> sortedMap, 
         Unmarshalling unmarshalling 
     ) {
@@ -90,25 +90,12 @@ public class MarshallingSortedMap
      * @param sortedMap
      */    
     public MarshallingSortedMap(
-        org.openmdx.base.persistence.spi.Marshaller marshaller,
-        SortedMap<Integer,Object> sortedMap 
-    ) {
-        super(marshaller, sortedMap);
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param marshaller
-     * @param sortedMap
-     */    
-    public MarshallingSortedMap(
         Marshaller marshaller,
         SortedMap<Integer,Object> sortedMap 
     ) {
         super(marshaller, sortedMap);
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.MarshallingMap#getDelegate()
      */

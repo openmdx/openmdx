@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: LookupObjectEventHandler.java,v 1.16 2008/11/10 15:16:44 wfro Exp $
+ * Name:        $Id: LookupObjectEventHandler.java,v 1.19 2009/03/08 18:03:21 wfro Exp $
  * Description: LookupObjectEventHandler 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 15:16:44 $
+ * Date:        $Date: 2009/03/08 18:03:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,8 +67,8 @@ import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.PaintScope;
@@ -108,7 +108,7 @@ public class LookupObjectEventHandler {
                         RefPackage_1_0 rootPkg = (RefPackage_1_0) currentView.getRefObject().refOutermostPackage();
                         Model_1_0 model = rootPkg.refModel();
                         ModelElement_1_0 reference = model.getElement(referenceName);
-                        ModelElement_1_0 lookupType = model.getElement(reference.values("type").get(0));
+                        ModelElement_1_0 lookupType = model.getElement(reference.objGetValue("type"));
                         Object[] parameterValues = (Object[]) parameterMap.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES);
                         String filterValues = parameterValues == null ? null : (parameterValues.length > 0 ? (String) parameterValues[0] : null);
                         nextView = application.getPortalExtension().getLookupView(
@@ -148,7 +148,7 @@ public class LookupObjectEventHandler {
                   // Try to get lookup type from model
                   try {
                       ModelElement_1_0 reference = model.getElement(referenceName);
-                      lookupType = model.getElement(reference.values("type").get(0));
+                      lookupType = model.getElement(reference.objGetValue("type"));
                   }
                   catch(Exception e) {
                       try {
@@ -179,9 +179,16 @@ public class LookupObjectEventHandler {
                 }
                 catch(Exception e) {
                   new ServiceException(e).log();
+                  String lookupTypeName = null;
+                  try {
+                      lookupTypeName = lookupType == null ? 
+                          null : 
+                          (String)lookupType.objGetValue("qualifiedName");
+                  } 
+                  catch(Exception e0) {}
                   application.addErrorMessage(
                     application.getTexts().getErrorTextCanNotLookupObject(),
-                    new String[]{(lookupType == null ? null : (String)lookupType.values("qualifiedName").get(0)), e.getMessage()}
+                    new String[]{lookupTypeName, e.getMessage()}
                   );
                 }
                 break;

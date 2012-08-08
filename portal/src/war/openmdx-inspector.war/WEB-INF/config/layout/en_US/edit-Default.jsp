@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: edit-Default.jsp,v 1.44 2008/08/27 13:21:18 wfro Exp $
+ * Name:        $Id: edit-Default.jsp,v 1.46 2009/02/26 16:09:55 wfro Exp $
  * Description: edit-Default.jsp
- * Revision:    $Revision: 1.44 $
+ * Revision:    $Revision: 1.46 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/27 13:21:18 $
+ * Date:        $Date: 2009/02/26 16:09:55 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,7 +61,7 @@ java.math.*,
 org.openmdx.portal.servlet.*,
 org.openmdx.portal.servlet.view.*,
 org.openmdx.portal.servlet.control.*,
-org.openmdx.compatibility.base.naming.*,
+org.openmdx.base.naming.*,
 org.openmdx.portal.servlet.texts.*
 " %><%
 	ApplicationContext app = (ApplicationContext)session.getValue(WebKeys.APPLICATION_KEY);
@@ -122,7 +122,11 @@ org.openmdx.portal.servlet.texts.*
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html dir="<%= texts.getDir() %>">
 <head>
-  <title><%= app.getApplicationName() + " - " + view.getObjectReference().getTitle() + (view.getObjectReference().getTitle().length() == 0 ? "" : " - ") + view.getObjectReference().getLabel() %></title>
+<%
+	String objectTitle = view.getObjectReference().getTitle();
+	if(objectTitle == null) objectTitle = "#NULL";
+%>
+  <title><%= app.getApplicationName() + " - " + objectTitle + (objectTitle.length() == 0 ? "" : " - ") + view.getObjectReference().getLabel() %></title>
 <%
 	prolog.paint(p, PagePrologControl.FRAME_PRE_PROLOG, false);
 	p.flush();

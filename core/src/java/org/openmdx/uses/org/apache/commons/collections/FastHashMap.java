@@ -58,13 +58,13 @@ import java.util.Set;
  * Double-Checked Locking Idiom Is Broken Declaration</a>.</p>
  *
  * @since Commons Collections 1.0
- * @version $Revision: 1.7 $ $Date: 2008/06/27 16:59:28 $
+ * @version $Revision: 1.9 $ $Date: 2009/03/03 15:24:12 $
  * 
  * @author Craig R. McClanahan
  * @author Stephen Colebourne
  */
 @SuppressWarnings({
-    "unchecked", "serial"
+    "unchecked", "serial","synthetic-access"
 })
 public class FastHashMap extends HashMap {
 
@@ -158,11 +158,11 @@ public class FastHashMap extends HashMap {
      * @return the value mapped to that key, or null
      */
     public Object get(Object key) {
-        if (this.fast) {
-            return (this.map.get(key));
+        if (fast) {
+            return (map.get(key));
         } else {
-            synchronized (this.map) {
-                return (this.map.get(key));
+            synchronized (map) {
+                return (map.get(key));
             }
         }
     }
@@ -173,11 +173,11 @@ public class FastHashMap extends HashMap {
      * @return the current size of the map
      */
     public int size() {
-        if (this.fast) {
-            return (this.map.size());
+        if (fast) {
+            return (map.size());
         } else {
-            synchronized (this.map) {
-                return (this.map.size());
+            synchronized (map) {
+                return (map.size());
             }
         }
     }
@@ -188,11 +188,11 @@ public class FastHashMap extends HashMap {
      * @return is the map currently empty
      */
     public boolean isEmpty() {
-        if (this.fast) {
-            return (this.map.isEmpty());
+        if (fast) {
+            return (map.isEmpty());
         } else {
-            synchronized (this.map) {
-                return (this.map.isEmpty());
+            synchronized (map) {
+                return (map.isEmpty());
             }
         }
     }
@@ -438,6 +438,7 @@ public class FastHashMap extends HashMap {
     /**
      * Return a collection view of the mappings contained in this map.  Each
      * element in the returned collection is a <code>Map.Entry</code>.
+     * @return the set of map Map entries
      */
     public Set entrySet() {
         return new EntrySet();
@@ -445,6 +446,7 @@ public class FastHashMap extends HashMap {
 
     /**
      * Return a set view of the keys contained in this map.
+     * @return the set of the Map's keys
      */
     public Set keySet() {
         return new KeySet();
@@ -452,6 +454,7 @@ public class FastHashMap extends HashMap {
 
     /**
      * Return a collection view of the values contained in this map.
+     * @return the set of the Map's values
      */
     public Collection values() {
         return new Values();
@@ -592,7 +595,9 @@ public class FastHashMap extends HashMap {
 
 
         public boolean equals(Object o) {
-            if (o == this) return true;
+            if (o == this) {
+                return true;
+            }
             if (fast) {
                 return get(map).equals(o);
             } else {
@@ -674,7 +679,7 @@ public class FastHashMap extends HashMap {
     /**
      * Set implementation over the keys of the FastHashMap
      */
-    class KeySet extends CollectionView implements Set {
+    private class KeySet extends CollectionView implements Set {
     
         protected Collection get(Map map) {
             return map.keySet();
@@ -689,7 +694,7 @@ public class FastHashMap extends HashMap {
     /**
      * Collection implementation over the values of the FastHashMap
      */
-    class Values extends CollectionView {
+    private class Values extends CollectionView {
     
         protected Collection get(Map map) {
             return map.values();
@@ -703,7 +708,7 @@ public class FastHashMap extends HashMap {
     /**
      * Set implementation over the entries of the FastHashMap
      */
-    class EntrySet extends CollectionView implements Set {
+    private class EntrySet extends CollectionView implements Set {
     
         protected Collection get(Map map) {
             return map.entrySet();

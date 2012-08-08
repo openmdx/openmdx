@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ClassInvocationHandler.java,v 1.13 2008/11/24 10:17:07 wfro Exp $
+ * Name:        $Id: Jmi1ClassInvocationHandler.java,v 1.15 2009/02/03 11:12:24 hburger Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/24 10:17:07 $
+ * Date:        $Date: 2009/02/03 11:12:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,6 +58,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.jmi.reflect.JmiException;
+import javax.jmi.reflect.RefBaseObject;
+import javax.jmi.reflect.RefClass;
+import javax.jmi.reflect.RefFeatured;
 
 import org.openmdx.base.accessor.jmi.cci.RefClass_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
@@ -162,22 +165,21 @@ public class Jmi1ClassInvocationHandler implements InvocationHandler {
                 }
                 return false;
             }
-        } else if("refCreateInstance".equals(methodName) && args.length == 1) {
-            return this.delegation.refCreateInstance(
-                (List<?>)args[0], // arguments
-                (RefClass_1_0)proxy
-            );
         } else if(
-            declaringClass == Jmi1Class.class || (    
-                methodName.startsWith("ref") && 
-                methodName.length() > 3 &&
-                Character.isUpperCase(method.getName().charAt(3))
-            )
-        ) {
+            declaringClass == Jmi1Class_1_0.class || 
+            declaringClass == RefClass.class ||
+            declaringClass == RefFeatured.class ||
+            declaringClass == RefBaseObject.class
+        ){
             //
             // RefObject API
             //
-            try {
+            if("refCreateInstance".equals(methodName) && args.length == 1) {
+                return this.delegation.refCreateInstance(
+                    (List<?>)args[0], // arguments
+                    (RefClass_1_0)proxy
+                );
+            } else try {
                 return method.invoke(
                     this.delegation, 
                     args

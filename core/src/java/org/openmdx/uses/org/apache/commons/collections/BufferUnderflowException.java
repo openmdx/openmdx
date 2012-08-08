@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
  * NOTE: From version 3.0, this exception extends NoSuchElementException.
  * 
  * @since Commons Collections 2.1
- * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:23 $
+ * @version $Revision: 1.5 $ $Date: 2009/03/03 14:59:14 $
  *
  * @author Avalon
  * @author Berin Loritsch
@@ -32,9 +32,7 @@ import java.util.NoSuchElementException;
  * @author Paul Jack
  * @author Stephen Colebourne
  */
-@SuppressWarnings({
-    "unchecked", "serial"
-})
+@SuppressWarnings("serial")
 public class BufferUnderflowException extends NoSuchElementException {
     
     /** The root cause throwable */

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AbstractHttpClient.java,v 1.2 2008/02/18 14:14:16 hburger Exp $
+ * Name:        $Id: AbstractHttpClient.java,v 1.3 2009/03/08 18:52:20 wfro Exp $
  * Description: Abstract HTTP Client
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:14:16 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -91,7 +91,7 @@ public abstract class AbstractHttpClient {
     private HttpURLConnection getConnection(
     	boolean secure
     ) throws IOException{
-        URL url = getAuthenticationURL();
+        URL url = this.getAuthenticationURL();
         if(
     		secure &&
     		!"https".equalsIgnoreCase(url.getProtocol())
@@ -115,7 +115,7 @@ public abstract class AbstractHttpClient {
     protected HttpURLConnection getPostConnection(
     	boolean secure
     ) throws IOException{
-        HttpURLConnection connection = getConnection(secure);
+        HttpURLConnection connection = this.getConnection(secure);
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type", "application/octet-stream");
         connection.setDoOutput(true);
@@ -135,7 +135,7 @@ public abstract class AbstractHttpClient {
     protected HttpURLConnection getHeadConnection(
     	boolean secure
     ) throws IOException{
-        HttpURLConnection connection = getConnection(secure);
+        HttpURLConnection connection = this.getConnection(secure);
         connection.setRequestMethod("HEAD");
         return connection;
     }
@@ -165,8 +165,8 @@ public abstract class AbstractHttpClient {
     ){
     	if(closeable != null) try {
 			closeable.close();
-		} catch (IOException ignored) {
-		}
+		} 
+    	catch (IOException ignored) {}
     }
 
 }

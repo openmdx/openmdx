@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE openmdxjdo
+    PUBLIC "-//openMDX//DTD Java Data Objects Metadata Extension 2.0//EN"
+    "http://www.openmdx.org/dtd/openmdx-jdo_2_0.dtd"
+>
+<openmdxjdo>
+  <package name="org.openmdx.security.authorization1.jpa3">
+    <class name="Segment" table="OOMSE2_SEGMENT" requires-extent="false" requires-slices="true">
+		<inheritance strategy="TABLE_PER_CLASS"/>
+		<field name="openmdxjdoIdentity" visibility="none">
+			<column name="OBJECT_ID"/>
+		</field>    		
+	</class>
+  </package>
+</openmdxjdo>

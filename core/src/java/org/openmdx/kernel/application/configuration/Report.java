@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Report.java,v 1.8 2008/01/15 17:28:31 hburger Exp $
+ * Name:        $Id: Report.java,v 1.11 2009/03/09 10:04:01 hburger Exp $
  * Description: Configuration result
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/15 17:28:31 $
+ * Date:        $Date: 2009/03/09 10:04:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,6 +51,8 @@
 package org.openmdx.kernel.application.configuration;
 
 
+import java.io.CharArrayWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -135,7 +137,7 @@ public class Report
         String report,
                 Throwable cause
     ) {
-        addError(report + ": " + BasicException.toStackedException(cause));
+        addError(toEntry(report, cause));
     }
 
     /**
@@ -148,6 +150,28 @@ public class Report
     }
 
     /**
+     * Fromat an exception entry
+     * 
+     * @param message
+     * @param cause
+     * 
+     * @return the stringified exception entry
+     */
+    private static String toEntry(
+        String message,
+        Throwable cause
+    ){
+        CharArrayWriter exceptionStack = new CharArrayWriter();
+        exceptionStack.append(message).append(": ");
+        BasicException.toExceptionStack(
+            cause
+        ).printStackTrace(
+            new PrintWriter(exceptionStack)
+        );
+        return exceptionStack.toString();
+    }
+        
+    /**
      * Report a warning including its cause.
      * 
      * @param message
@@ -157,7 +181,7 @@ public class Report
         String message,
                 Throwable cause
     ) {
-        addWarning(message + ": " + BasicException.toStackedException(cause));
+        addWarning(toEntry(message, cause));
     }
 
     /**

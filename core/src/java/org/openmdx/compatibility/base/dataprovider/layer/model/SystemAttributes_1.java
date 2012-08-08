@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SystemAttributes_1.java,v 1.8 2008/10/14 00:27:08 hburger Exp $
+ * Name:        $Id: SystemAttributes_1.java,v 1.10 2009/01/05 13:48:09 wfro Exp $
  * Description: Handle the BasicObjects' Attributes
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/14 00:27:08 $
+ * Date:        $Date: 2009/01/05 13:48:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,16 +53,16 @@ package org.openmdx.compatibility.base.dataprovider.layer.model;
 import java.util.Date;
 import java.util.List;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.dataprovider.cci.DataproviderOperations;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.spi.BeforeImageCachingLayer_1;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.format.DateFormat;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.spi.BeforeImageCachingLayer_1;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 
 /**
  * Handle the BasicObjects' Attributes.
@@ -85,7 +85,7 @@ public class SystemAttributes_1
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.BeforeImageCachingLayer_1#activate(short, org.openmdx.compatibility.base.application.configuration.Configuration, org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0)
      */
-    public void activate(short id, Configuration configuration, Layer_1_0 delegation) throws Exception, ServiceException {
+    public void activate(short id, Configuration configuration, Layer_1_0 delegation) throws ServiceException {
         super.activate(id, configuration, delegation);
         this.principalLimit = configuration.containsEntry(LayerConfigurationEntries.PRINCIPAL_LIMIT) ? 
             ((Integer) configuration.values(LayerConfigurationEntries.PRINCIPAL_LIMIT).get(0)).intValue() : 

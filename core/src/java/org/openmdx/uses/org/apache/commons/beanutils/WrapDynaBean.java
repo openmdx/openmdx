@@ -42,9 +42,12 @@ import java.lang.reflect.InvocationTargetException;
  * support the <code>contains()</code> and <code>remove()</code> methods.</p>
  *
  * @author Craig McClanahan
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:16 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:44 $
  */
-@SuppressWarnings({"unchecked", "serial"})
+
+@SuppressWarnings({
+    "serial"
+})
 public class WrapDynaBean implements DynaBean, Serializable {
 
 

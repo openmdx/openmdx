@@ -1,6 +1,6 @@
 ﻿// ** I18N
 
-// Calendar EN language
+// Calendar RU language
 // Author: Mihai Bazon, <mishoo@infoiasi.ro>
 // Encoding: any
 // Distributed under the same terms as the calendar itself.
@@ -11,14 +11,14 @@
 
 // full day names
 Calendar._DN = new Array
-("Sunday",
- "Monday",
- "Tuesday",
- "Wednesday",
- "Thursday",
- "Friday",
- "Saturday",
- "Sunday");
+("Воскресенье",
+ "Понедельник",
+ "Вторник",
+ "Среда",
+ "Четверг",
+ "Пятница",
+ "Суббота",
+ "Воскресенье");
 
 // First day of the week. "0" means display Sunday first, "1" means display
 // Monday first, etc.
@@ -38,90 +38,90 @@ Calendar._FD = 0;
 
 // short day names
 Calendar._SDN = new Array
-("Sun",
- "Mon",
- "Tue",
- "Wed",
- "Thu",
- "Fri",
- "Sat",
- "Sun");
+("Вск",
+ "Пон",
+ "Втр",
+ "Срд",
+ "Чтв",
+ "Птн",
+ "Сбт",
+ "Вск");
 
 // full month names
 Calendar._MN = new Array
-("January",
- "February",
- "March",
- "April",
- "May",
- "June",
- "July",
- "August",
- "September",
- "October",
- "November",
- "December");
+("Январь",
+ "Февраль",
+ "Март",
+ "Апрель",
+ "Май",
+ "Июнь",
+ "Июль",
+ "Август",
+ "Сентябрь",
+ "Октябрь",
+ "Ноябрь",
+ "Декабрь");
 
 // short month names
 Calendar._SMN = new Array
-("Jan",
- "Feb",
- "Mar",
- "Apr",
- "May",
- "Jun",
- "Jul",
- "Aug",
- "Sep",
- "Oct",
- "Nov",
- "Dec");
+("Янв",
+ "Фев",
+ "Мар",
+ "Апр",
+ "Май",
+ "Июн",
+ "Июл",
+ "Авг",
+ "Сен",
+ "Окт",
+ "Ноя",
+ "Дек");
 
 // tooltips
 Calendar._TT = {};
-Calendar._TT["INFO"] = "About the calendar";
+Calendar._TT["INFO"] = "Об этом календаре";
 
 Calendar._TT["ABOUT"] =
 "DHTML Date/Time Selector\n" +
 "(c) dynarch.com 2002-2003\n" + // don't translate this this ;-)
-"For latest version visit: http://dynarch.com/mishoo/calendar.epl\n" +
-"Distributed under GNU LGPL.  See http://gnu.org/licenses/lgpl.html for details." +
+"Для получения последней версии перейдите по ссылке: http://dynarch.com/mishoo/calendar.epl\n" +
+"Распространяется под лицензией GNU LGPL.  See http://gnu.org/licenses/lgpl.html for details." +
 "\n\n" +
 "Date selection:\n" +
-"- Use the \u00ab, \u00bb buttons to select the year\n" +
-"- Use the \u2039, \u203a buttons to select the month\n" +
-"- Hold mouse button on any of the above buttons for faster selection.";
+"- Используйте кнопки \u00ab, \u00bb для выбора года\n" +
+"- Используйте кнопки \u2039, \u203a для выбора месяца\n" +
+"- Удерживайте кнопку мыши на при щелчке по кнопке для быстрого выбора.";
 Calendar._TT["ABOUT_TIME"] = "\n\n" +
 "Time selection:\n" +
-"- Click on any of the time parts to increase it\n" +
-"- or Shift-click to decrease it\n" +
-"- or click and drag for faster selection.";
+"- Щелкните на любой показатель времени для его увеличения\n" +
+"- или Shift-click для уменьшения\n" +
+"- или щелчок с протаскиванием для бустрого выбора.";
 
-Calendar._TT["PREV_YEAR"] = "Prev. year (hold for menu)";
-Calendar._TT["PREV_MONTH"] = "Prev. month (hold for menu)";
-Calendar._TT["GO_TODAY"] = "Go To Today";
-Calendar._TT["NEXT_MONTH"] = "Next month (hold for menu)";
-Calendar._TT["NEXT_YEAR"] = "Next year (hold for menu)";
-Calendar._TT["SEL_DATE"] = "Select date";
-Calendar._TT["DRAG_TO_MOVE"] = "Drag to move";
+Calendar._TT["PREV_YEAR"] = "Пред. год (держать для вывода меню)";
+Calendar._TT["PREV_MONTH"] = "Пред. месяц (держать для вывода меню)";
+Calendar._TT["GO_TODAY"] = "Сегодня";
+Calendar._TT["NEXT_MONTH"] = "След. месяц (держать для вывода меню)";
+Calendar._TT["NEXT_YEAR"] = "След год (держать для вывода меню)";
+Calendar._TT["SEL_DATE"] = "Выбрать дату";
+Calendar._TT["DRAG_TO_MOVE"] = "Перетащить для изменения";
 Calendar._TT["PART_TODAY"] = " (today)";
 
 // the following is to inform that "%s" is to be the first day of week
 // %s will be replaced with the day name.
-Calendar._TT["DAY_FIRST"] = "Display %s first";
+Calendar._TT["DAY_FIRST"] = "Отображать %(у/ы) первыми";
 
 // This may be locale-dependent.  It specifies the week-end days, as an array
 // of comma-separated numbers.  The numbers are from 0 to 6: 0 means Sunday, 1
 // means Monday, etc.
 Calendar._TT["WEEKEND"] = "0,6";
 
-Calendar._TT["CLOSE"] = "Close";
-Calendar._TT["TODAY"] = "Today";
-Calendar._TT["TIME_PART"] = "(Shift-)Click or drag to change value";
+Calendar._TT["CLOSE"] = "Закрыть";
+Calendar._TT["TODAY"] = "Сегодня";
+Calendar._TT["TIME_PART"] = "(Shift-)Click или перетащите для изменения меню";
 
 // date formats
 Calendar._TT["DEF_DATE_FORMAT"] = "%Y-%m-%d";
 Calendar._TT["TT_DATE_FORMAT"] = "%a, %b %e";
 
-Calendar._TT["WK"] = "wk";
-Calendar._TT["TIME"] = "Time:";
+Calendar._TT["WK"] = "нед";
+Calendar._TT["TIME"] = "Время:";

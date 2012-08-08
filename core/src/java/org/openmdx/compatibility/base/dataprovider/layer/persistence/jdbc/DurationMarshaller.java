@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DurationMarshaller.java,v 1.10 2008/09/25 16:48:40 hburger Exp $
+ * Name:        $Id: DurationMarshaller.java,v 1.11 2009/01/04 21:16:11 wfro Exp $
  * Description: DurationMarshaller 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/25 16:48:40 $
+ * Date:        $Date: 2009/01/04 21:16:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,7 +64,7 @@ import javax.xml.datatype.Duration;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.spi.DatatypeFactories;
 

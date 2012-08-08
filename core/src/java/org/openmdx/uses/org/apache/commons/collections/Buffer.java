@@ -18,6 +18,9 @@ package org.openmdx.uses.org.apache.commons.collections;
 
 import java.util.Collection;
 
+import org.openmdx.uses.org.apache.commons.collections.Bag;
+import org.openmdx.uses.org.apache.commons.collections.BufferUnderflowException;
+
 /**
  * Defines a collection that allows objects to be removed in some well-defined order.
  * <p>
@@ -34,9 +37,14 @@ import java.util.Collection;
  * is therefore possible for a <code>Buffer</code> implementation to also
  * also implement {@link java.util.List}, {@link java.util.Set} or 
  * {@link Bag}.
+ * <p>
+ * <strong>Note:</strong> this class should be bytecode-identical to the 
+ * version in commons collections. This is required to allow backwards 
+ * compability with both previous versions of BeanUtils and also allow 
+ * coexistance with both collections 2.1 and 3.0.
  *
  * @since Commons Collections 2.1
- * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:23 $
+ * @version $Revision: 1.5 $ $Date: 2009/03/03 14:59:14 $
  * 
  * @author Avalon
  * @author Berin Loritsch

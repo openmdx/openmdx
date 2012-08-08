@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry exported="true" kind="lib" path="lib/catalina-optional.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/catalina.jar"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 1.4"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>

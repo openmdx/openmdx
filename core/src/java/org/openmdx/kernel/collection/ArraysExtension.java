@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ArraysExtension.java,v 1.7 2008/06/27 16:59:28 hburger Exp $
+ * Name:        $Id: ArraysExtension.java,v 1.8 2009/01/12 16:46:09 wfro Exp $
  * Description: Arrays Extension 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/27 16:59:28 $
+ * Date:        $Date: 2009/01/12 16:46:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -505,7 +505,6 @@ public class ArraysExtension {
                     null;
             } 
         
-            @SuppressWarnings("unchecked")
             public boolean equals(
                 Object other
             ){

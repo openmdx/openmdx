@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestImmutableDatatypes.java,v 1.1 2008/09/26 15:42:59 hburger Exp $
+ * Name:        $Id: TestImmutableDatatypes.java,v 1.2 2009/03/05 17:51:35 hburger Exp $
  * Description: TestImmutableDatatypes 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/26 15:42:59 $
+ * Date:        $Date: 2009/03/05 17:51:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -89,8 +89,8 @@ public class TestImmutableDatatypes {
         immutableDate02 = immutableDatatypeFactory().newDate("20000229"); 
         immutableDate03 = immutableDatatypeFactory().newDate("20000301");
         oneDay = immutableDatatypeFactory().newDuration("P1D");
-        oneAndHalfAYear = immutableDatatypeFactory().newDuration("P1Y6M");
-        oneHour = immutableDatatypeFactory().newDuration("PT1H");
+        oneAndHalfAYear = immutableDatatypeFactory().newDuration("P18M");
+        oneHour = immutableDatatypeFactory().newDuration("PT3600S");
         immutableDateTime02 = immutableDatatypeFactory().newDateTime("20000229T120000.000Z");
         immutableDateTime03 = immutableDatatypeFactory().newDateTime("20000301T120000.000Z");
     }
@@ -148,11 +148,11 @@ public class TestImmutableDatatypes {
 
     @Test
     public void durationValues(){
-        assertEquals("Normalize year/month duration", "P18M", immutableDatatypeFactory().toNormalizedDuration(oneAndHalfAYear).toString());
-        assertEquals("Normalize day/time duration", "PT3600S", immutableDatatypeFactory().toNormalizedDuration(oneHour).toString());
+        assertEquals("Normalize year/month duration", "P1Y6M", immutableDatatypeFactory().toNormalizedDuration(oneAndHalfAYear).toString());
+        assertEquals("Normalize day/time duration", "PT1H0M0S", immutableDatatypeFactory().toNormalizedDuration(oneHour).toString());
         Duration d = oneAndHalfAYear.add(oneHour);
-        assertEquals("Non-normalized duration", "P1Y6MT1H", d.toString());
-        assertEquals("Normalized duration", "P18MT3600S", immutableDatatypeFactory().toNormalizedDuration(d).toString());
+        assertEquals("Non-normalized duration", "P18MT3600S", d.toString());
+        assertEquals("Normalized duration", "P1Y6MT1H0M0S", immutableDatatypeFactory().toNormalizedDuration(d).toString());
     }
     
     @Test
@@ -174,7 +174,7 @@ public class TestImmutableDatatypes {
         assertEquals("mutableDate02.toExtendedFormat()", "2000-02-29T12:00:00.000Z", immutableDatatypeFactory().toExtendedFormat(mutableDateTime02));
         assertEquals("immutableDate02.toBasicFormat()", "20000229T120000.000Z", immutableDatatypeFactory().toBasicFormat(immutableDateTime02));
         assertEquals("mutableDate02.toBasicFormat()", "20000229T120000.000Z", immutableDatatypeFactory().toBasicFormat(mutableDateTime02));
-        mutableDateTime03 = new Date(mutableDateTime02.getTime() + 1000L * immutableDatatypeFactory().toNormalizedDuration(oneDay).getSeconds());
+        mutableDateTime03 = new Date(mutableDateTime02.getTime() + 1000L * 60 * 60 * 24);
         assertEquals("mutableDateTime02 += P1D", immutableDateTime03, mutableDateTime03);
         try {
             immutableDateTime02.setTime(System.currentTimeMillis());

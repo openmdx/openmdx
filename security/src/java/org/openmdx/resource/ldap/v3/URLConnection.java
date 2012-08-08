@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: URLConnection.java,v 1.2 2007/12/04 18:45:52 hburger Exp $
+ * Name:        $Id: URLConnection.java,v 1.5 2009/03/08 18:52:20 wfro Exp $
  * Description: URL Connection 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/04 18:45:52 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -85,8 +85,7 @@ import org.openmdx.resource.ldap.cci.Connection;
  * URL Connection
  */
 class URLConnection
-    implements Connection
-{
+    implements Connection {
 
 	/**
 	 * Constructor
@@ -124,9 +123,10 @@ class URLConnection
 						String name = matcher.group(1).trim();
 						entry = new LDAPEntry(name);
 						this.directory.put(
-							toKey(name), entry
+							this.toKey(name), entry
 						);
-					} else if (entry != null) {
+					} 
+					else if (entry != null) {
 						matcher = attributePattern.matcher(line);
 						if(matcher.matches()) {
 							String name = matcher.group(1).trim();
@@ -135,14 +135,16 @@ class URLConnection
 							if(attribute == null) {
 								attribute = new LDAPAttribute(name, value);
 								entry.getAttributeSet().add(attribute);
-							} else {
+							} 
+							else {
 								attribute.addValue(value);
 							}
 						}
 					}
 				}
 			}
-		} catch (IOException exception) {
+		} 
+		catch (IOException exception) {
 			throw new CommException(
 				"Population failed",
 				exception
@@ -156,17 +158,20 @@ class URLConnection
     ){
     	if(left == null) {
     		return right == null || right.isEmpty();
-    	} else if (right == null) {
+    	} 
+    	else if (right == null) {
     		return left == null || left.isEmpty();
-    	} else {
+    	} 
+    	else {
 			if(left.size() < right.size()) {
 				return false;
-			} else {
+			} 
+			else {
 				for(
 					int i = right.size(), j = left.size();
 					i > 0;
 				){
-					if(!equals(left.get(--j), right.get(--i))) {
+					if(!this.equals(left.get(--j), right.get(--i))) {
 						return false;
 					}
 				}
@@ -320,16 +325,16 @@ class URLConnection
 	public LDAPEntry read(String arg0, String[] arg1, LDAPSearchConstraints arg2)
 			throws LDAPException {
 		// TODO check whether the constraints can be ignored or not
-    	return read(arg0, arg1);
+    	return this.read(arg0, arg1);
 	}
 
 	public LDAPEntry read(String arg0, String[] arg1) throws LDAPException {
 		// TODO remove attributes in excess
-		return read(arg0);
+		return this.read(arg0);
 	}
 
 	public LDAPEntry read(String arg0) throws LDAPException {
-		return this.directory.get(toKey(arg0));
+		return this.directory.get(this.toKey(arg0));
 	}
 
 	public void rename(String arg0, String arg1, boolean arg2,
@@ -361,7 +366,7 @@ class URLConnection
 		LDAPSearchConstraints constraints
 	) throws LDAPException {
 		// TODO check whether the constraints can be ignored 
-		return search(
+		return this.search(
 			base, 
 			scope, 
 			filter,
@@ -380,12 +385,12 @@ class URLConnection
 	) throws LDAPException {
 		// TODO remove attributes or attribute values in excess
 		List<LDAPEntry> entries = new ArrayList<LDAPEntry>();
-		Map<String,List<String>> baseFilter = toKey(base);
-		String[][] attributeFilter = toFilter(filter);
+		Map<String,List<String>> baseFilter = this.toKey(base);
+		String[][] attributeFilter = this.toFilter(filter);
 		Entries: for(Map.Entry<Map<String,List<String>>, LDAPEntry> entry : this.directory.entrySet()) {
 			for(Map.Entry<String,List<String>> predicate : baseFilter.entrySet()) {
 				List<String> values = entry.getKey().get(predicate.getKey());
-				if(!endsWith(values, predicate.getValue())) continue Entries;
+				if(!this.endsWith(values, predicate.getValue())) continue Entries;
 			}
 			LDAPAttributeSet attributes = entry.getValue().getAttributeSet();
 			AttributeFilter: for(String[] predicate : attributeFilter) {
@@ -395,7 +400,7 @@ class URLConnection
 						Enumeration<String> e = a.getStringValues();
 						e.hasMoreElements();
 					){
-						if(equals(e.nextElement(),predicate[1])) continue AttributeFilter;
+						if(this.equals(e.nextElement(),predicate[1])) continue AttributeFilter;
 					}
 				}
 				continue Entries;
@@ -410,7 +415,8 @@ class URLConnection
 	){
 		if(filter == null) {
 			return new String[][]{};
-		} else if(
+		} 
+		else if(
 			filter.startsWith("(&(") &&
 			filter.endsWith("))")
 		){
@@ -428,7 +434,8 @@ class URLConnection
 				target[1] = source.substring(e + 1);
 			}
 			return reply;
-		} else {
+		} 
+		else {
 			String[][] reply = new String[1][];
 			String source = filter;
 			String[] target = reply[0] = new String[2];
@@ -483,8 +490,9 @@ class URLConnection
 		@Override
 		public Object nextElement() {
 			try {
-				return next();
-			} catch (LDAPException e) {
+				return this.next();
+			} 
+			catch (LDAPException e) {
 				return e;
 			}
 		}

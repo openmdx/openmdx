@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JdbcIterator.java,v 1.10 2008/03/21 18:47:37 hburger Exp $
+ * Name:        $Id: JdbcIterator.java,v 1.11 2009/01/06 13:14:44 wfro Exp $
  * Description: JDBC Iterator for find requests
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:47:37 $
+ * Date:        $Date: 2009/01/06 13:14:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,8 +54,8 @@ package org.openmdx.compatibility.base.dataprovider.layer.persistence.jdbc;
 import java.util.Arrays;
 import java.util.List;
 
+import org.openmdx.base.naming.Path;
 import org.openmdx.compatibility.base.dataprovider.layer.persistence.common.AbstractIterator;
-import org.openmdx.compatibility.base.naming.Path;
 
 /**
  * JdbcIterator

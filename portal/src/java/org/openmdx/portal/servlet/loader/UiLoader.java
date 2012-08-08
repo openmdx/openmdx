@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiLoader.java,v 1.25 2008/12/08 15:30:39 wfro Exp $
+ * Name:        $Id: UiLoader.java,v 1.33 2009/03/08 18:03:21 wfro Exp $
  * Description: UiLoader
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.33 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/08 15:30:39 $
+ * Date:        $Date: 2009/03/08 18:03:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,27 +71,24 @@ import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.servlet.ServletContext;
 
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.accessor.Connection_1;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.application.log.AppLog;
-import org.openmdx.base.accessor.generic.view.Manager_1;
 import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
+import org.openmdx.base.accessor.view.Manager_1;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.base.mof.cci.Model_1_3;
+import org.openmdx.base.naming.Path;
 import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.dataprovider.transport.adapter.Provider_1;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Provider_1_0;
-import org.openmdx.compatibility.base.dataprovider.transport.delegation.Connection_1;
-import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
-import org.openmdx.model1.accessor.basic.cci.Model_1_3;
-import org.openmdx.model1.mapping.Names;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
@@ -111,7 +108,7 @@ public class UiLoader
         );
         this.model = model;
         this.providerPath = providerPath;
-        this.uiRepository = createUiRepository(model);      
+        this.uiRepository = UiLoader.createUiRepository(model);      
     }
   
     //-------------------------------------------------------------------------
@@ -214,24 +211,17 @@ public class UiLoader
     public PersistenceManager getRepository(
     ) throws ServiceException {
         if(this.pm == null) {
-            Provider_1_0 dataprovider = new Provider_1(
+            Connection_1 connection = new Connection_1(
                 new RequestCollection(
                     new ServiceHeader(),
                     this.uiRepository
                 ),
-                false
+                false, // transactionPolicyIsNew
+                false // containerManagedUnitOfWork
             );
-            Connection_1 connection = new Connection_1(
-                dataprovider,
-                false
-            );
-            connection.setModel(this.model);
             Manager_1 manager = new Manager_1(connection);
             RefRootPackage_1 rootPkg = new RefRootPackage_1(
-                manager,
-                null,
-                null,
-                Names.JMI1_PACKAGE_SUFFIX
+                manager
             );
             this.pm = rootPkg.refPersistenceManager();
         }
@@ -415,7 +405,7 @@ public class UiLoader
               // Store ui elements. First remove existing elements
               try {
                   PersistenceManager pm = this.getRepository();
-                  org.openmdx.ui1.jmi1.Ui1Package uiPkg = getUiPackage(pm);
+                  org.openmdx.ui1.jmi1.Ui1Package uiPkg = UiLoader.getUiPackage(pm);
                   
                   String[] segmentName = this.getSegmentName(dir);
                   // Remove existing ui config
@@ -430,7 +420,8 @@ public class UiLoader
                   catch(Exception e) {
                       try {
                           pm.currentTransaction().rollback();
-                      } catch(Exception e0) {}
+                      } 
+                      catch(Exception e0) {}
                   }    
                   // Re-create segment
                   try {
@@ -448,7 +439,8 @@ public class UiLoader
                   catch(Exception e) {
                       try {
                           pm.currentTransaction().rollback();
-                      } catch(Exception e0) {}
+                      } 
+                      catch(Exception e0) {}
                   }    
                   // Store ui elements
                   System.out.println("Storing " + mergedUiElements.size() + " ui elements");

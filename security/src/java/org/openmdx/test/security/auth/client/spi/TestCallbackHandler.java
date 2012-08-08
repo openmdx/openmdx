@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: TestCallbackHandler.java,v 1.2 2008/01/18 16:38:33 hburger Exp $
+ * Name:        $Id: TestCallbackHandler.java,v 1.3 2009/03/08 18:52:19 wfro Exp $
  * Description: Test Callback Handler
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/18 16:38:33 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -77,7 +77,7 @@ public class TestCallbackHandler extends AbstractLoginClient {
 	 * 
 	 */
 	private AmendingCallbackHandler callbackHandler = new AmendingCallbackHandler(
-		SWING ? newCallbackHandler() : new TerminalCallbackHandler()
+		TestCallbackHandler.SWING ? this.newCallbackHandler() : new TerminalCallbackHandler()
 	);
 	
 	/**
@@ -133,7 +133,8 @@ public class TestCallbackHandler extends AbstractLoginClient {
 					)	
 				}
 			);
-		} else {
+		} 
+		else {
 			this.callbackHandler.setEpilog(null);
 			super.handle(exception);
 		}

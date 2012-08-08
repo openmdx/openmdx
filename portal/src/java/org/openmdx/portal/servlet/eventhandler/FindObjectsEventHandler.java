@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsEventHandler.java,v 1.18 2008/09/11 10:50:16 hburger Exp $
+ * Name:        $Id: FindObjectsEventHandler.java,v 1.24 2009/03/08 18:03:21 wfro Exp $
  * Description: FindObjectsEventHandler 
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/11 10:50:16 $
+ * Date:        $Date: 2009/03/08 18:03:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,18 +67,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.application.dataprovider.cci.Orders;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.dataprovider.cci.Orders;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.compatibility.base.query.Quantors;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Quantors;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 
@@ -154,12 +154,12 @@ public class FindObjectsEventHandler {
                 // Is filter feature numeric?
                 ModelElement_1_0 parentDef = ((RefMetaObject_1)parent.refMetaObject()).getElementDef();                
                 ModelElement_1_0 referenceDef = 
-                    (ModelElement_1_0)((Map)parentDef.values("reference").get(0)).get(referenceName);
+                    (ModelElement_1_0)((Map)parentDef.objGetValue("reference")).get(referenceName);
                 if(referenceDef != null) {
-                    ModelElement_1_0 referencedType = model.getElement(referenceDef.values("type").get(0));
+                    ModelElement_1_0 referencedType = model.getElement(referenceDef.objGetValue("type"));
                     ModelElement_1_0 filterFeatureDef = model.getFeatureDef(referencedType, filterByFeature, true);
                     if(filterFeatureDef != null) {
-                        boolean filterFeatureIsNumeric = model.isNumericType(filterFeatureDef.values("type").get(0));
+                        boolean filterFeatureIsNumeric = model.isNumericType(filterFeatureDef.objGetValue("type"));
                         String filterValue = filterValues[0];
                         filterProperties.add(
                             new FilterProperty(
@@ -221,7 +221,8 @@ public class FindObjectsEventHandler {
                 if(filterByFeature.length() > 0) {
                     try {
                         title += " [" + obj.refGetValue(filterByFeature) + "]";
-                    } catch(Exception e) {}
+                    } 
+                    catch(Exception e) {}
                 }
                 pw.write(
                     application.getHtmlEncoder().encode(title, false)

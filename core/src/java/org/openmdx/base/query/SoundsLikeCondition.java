@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SoundsLikeCondition.java,v 1.6 2008/09/09 01:05:33 wfro Exp $
+ * Name:        $Id: SoundsLikeCondition.java,v 1.7 2009/01/06 10:21:19 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/09 01:05:33 $
+ * Date:        $Date: 2009/01/06 10:21:19 $
  * ====================================================================
  *
  * This software is published under the BSD license

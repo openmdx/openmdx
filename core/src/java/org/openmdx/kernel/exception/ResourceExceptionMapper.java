@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ResourceExceptionMapper.java,v 1.5 2008/03/21 18:35:32 hburger Exp $
+ * Name:        $Id: ResourceExceptionMapper.java,v 1.7 2009/02/24 16:23:39 hburger Exp $
  * Description: Resource Exception Mapper
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:35:32 $
+ * Date:        $Date: 2009/02/24 16:23:39 $
  * ====================================================================
  *
  * This software is published under the BSD license

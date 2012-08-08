@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataTypes.java,v 1.2 2007/05/11 23:31:28 wfro Exp $
+ * Name:        $Id: DataTypes.java,v 1.3 2008/12/26 21:49:47 wfro Exp $
  * Description: Data Types
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/05/11 23:31:28 $
+ * Date:        $Date: 2008/12/26 21:49:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,7 +58,7 @@ import org.openmdx.base.exception.ServiceException;
 /**
  * DateTimeProvider
  */
-interface DataTypes {
+public interface DataTypes {
 
     /**
      * Retrieves the configured date time type

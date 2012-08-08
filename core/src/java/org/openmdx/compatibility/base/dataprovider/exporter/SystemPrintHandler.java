@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SystemPrintHandler.java,v 1.6 2008/05/12 10:45:50 wfro Exp $
+ * Name:        $Id: SystemPrintHandler.java,v 1.8 2009/01/06 13:14:45 wfro Exp $
  * Description: SystemPrintHandler class
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/12 10:45:50 $
+ * Date:        $Date: 2009/01/06 13:14:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,10 +55,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 @SuppressWarnings("unchecked")
 public class SystemPrintHandler extends DelegatingHandler {

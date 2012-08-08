@@ -26,10 +26,12 @@ package org.openmdx.uses.org.apache.commons.beanutils;
  * </p>
  *
  * @see BeanUtilsBean2
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:14 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:43 $
  * @since 1.8.0
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked"
+})
 public class ConvertUtilsBean2 extends ConvertUtilsBean {
 
     /**

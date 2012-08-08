@@ -12,7 +12,7 @@
  * Read the entire license text here: http://www.gnu.org/licenses/lgpl.html
  */
 
-// $Id: calendar.js,v 1.2 2008/05/31 12:31:25 cmu Exp $
+// $Id: calendar.js,v 1.4 2009/01/22 07:45:21 cmu Exp $
 
 /** The Calendar object constructor. */
 Calendar = function (firstDayOfWeek, dateStr, onSelected, onClose) {
@@ -1695,6 +1695,7 @@ Date.prototype.getDayOfYear = function() {
 };
 
 /** Returns the number of the week in year, as defined in ISO 8601.
+BUT: does not seem to work correctly...
 Date.prototype.getWeekNumber = function() {
 	var d = new Date(this.getFullYear(), this.getMonth(), this.getDate(), 0, 0, 0);
 	var DoW = d.getDay();
@@ -1705,24 +1706,22 @@ Date.prototype.getWeekNumber = function() {
 	return Math.round((ms - d.valueOf()) / (7 * 864e5)) + 1;
 };
 */
-/** this code works fine - available from http://www.quirksmode.org/js/week.html */
+
+function getThursday(d) {
+  var Do=new Date();
+  Do.setTime(d.getTime() + (3-((d.getDay()+6) % 7)) * 86400000);
+  return Do;
+}
 Date.prototype.getWeekNumber = function() {
-	var today = new Date(this.getFullYear(), this.getMonth(), this.getDate(), 0, 0, 0);
-	Year = this.getFullYear();
-	Month = this.getMonth();
-	Day = this.getDate();
-	now = Date.UTC(Year,Month,Day+1,0,0,0);
-	var Firstday = new Date();
-	Firstday.setYear(Year);
-	Firstday.setMonth(0);
-	Firstday.setDate(1);
-	then = Date.UTC(Year,0,1,0,0,0);
-	var Compensation = Firstday.getDay();
-	if (Compensation > 3) Compensation -= 4;
-	else Compensation += 3;
-	NumberOfWeek =  Math.round((((now-then)/86400000)+Compensation)/7);
-	return NumberOfWeek;
-};
+  // calculates week number based on DIN 1355 / ISO 8601
+  // see http://de.wikipedia.org/wiki/Kalenderwoche#Z.C3.A4hlweise_nach_DIN_1355_.2F_ISO_8601
+  ThursdayDate=getThursday(this);
+  wnYear=ThursdayDate.getFullYear();
+  ThursdayWn1=getThursday(new Date(wnYear,0,4));
+  wn = Math.floor(1.5+(ThursdayDate.getTime()-ThursdayWn1.getTime())/86400000/7);
+  return wn;
+}
+
 /** Checks date and time equality */
 Date.prototype.equalsTo = function(date) {
 	return ((this.getFullYear() == date.getFullYear()) &&

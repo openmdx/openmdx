@@ -5,5 +5,3 @@ import org.openmdx.portal.servlet.control.*;
 
 RootMenuControl.paintQuickAccessors(p);
 p.write("<li>&nbsp;</li>");
-RootMenuControl.paintRootObjects(p);
-RootMenuControl.paintHistory(p);

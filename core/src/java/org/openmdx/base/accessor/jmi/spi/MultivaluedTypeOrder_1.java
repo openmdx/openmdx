@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MultivaluedTypeOrder_1.java,v 1.4 2008/06/28 00:21:32 hburger Exp $
+ * Name:        $Id: MultivaluedTypeOrder_1.java,v 1.6 2009/01/13 02:10:32 wfro Exp $
  * Description: MultivaluedTypeOrder_1 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:32 $
+ * Date:        $Date: 2009/01/13 02:10:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,9 @@
 
 package org.openmdx.base.accessor.jmi.spi;
 
+import org.openmdx.application.dataprovider.cci.Directions;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.w3c.cci2.MultivaluedTypeOrder;
 
 /**

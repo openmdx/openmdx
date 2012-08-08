@@ -29,9 +29,12 @@ package org.openmdx.uses.org.apache.commons.beanutils.converters;
  * <code>ConversionException</code> if a conversion error occurs.
  *
  * @author Craig R. McClanahan
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:16 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:58 $
  * @since 1.3
  */
+@SuppressWarnings({
+    "unchecked"
+})
 public final class ByteConverter extends NumberConverter {
 
     /**
@@ -39,7 +42,7 @@ public final class ByteConverter extends NumberConverter {
      * a <code>ConversionException</code> if an error occurs.
      */
     public ByteConverter() {
-        super(Byte.class, false);
+        super(false);
     }
 
     /**
@@ -51,7 +54,16 @@ public final class ByteConverter extends NumberConverter {
      * occurs converting the value.
      */
     public ByteConverter(Object defaultValue) {
-        super(Byte.class, false, defaultValue);
+        super(false, defaultValue);
+    }
+
+    /**
+     * Return the default type this <code>Converter</code> handles.
+     *
+     * @return The default type this <code>Converter</code> handles.
+     */
+    protected Class getDefaultType() {
+        return Byte.class;
     }
 
 }

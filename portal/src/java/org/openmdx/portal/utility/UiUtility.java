@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiUtility.java,v 1.5 2008/08/12 16:38:08 wfro Exp $
+ * Name:        $Id: UiUtility.java,v 1.9 2009/03/08 18:03:26 wfro Exp $
  * Description: UiUtility
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2008/08/12 16:38:08 $
+ * Date:        $Date: 2009/03/08 18:03:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,15 +73,15 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.openmdx.base.application.control.Application;
-import org.openmdx.base.application.control.ApplicationController;
-import org.openmdx.base.application.control.CmdLineOption;
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.shell.Application;
+import org.openmdx.application.shell.ApplicationController;
+import org.openmdx.application.shell.CmdLineOption;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.base.naming.Path;
 import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
-import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.portal.text.conversion.XMLWriter;
 import org.openmdx.uses.org.apache.commons.collections.map.ListOrderedMap;
 import org.w3c.dom.Document;
@@ -110,7 +110,7 @@ public class UiUtility
       APP_NAME, 
       VERSION, 
       HELP_TEXT, 
-      createCmdLineOptions()
+      UiUtility.createCmdLineOptions()
     );        
   }
         
@@ -126,32 +126,32 @@ public class UiUtility
   ) throws Exception {
       // locales. get locale and assert en_US to be the first in the list
       this.locales = new ArrayList();
-      if(getCmdLineArgs().hasArg("locale")) {
-        this.locales.addAll(getCmdLineArgs().getValues("locale"));   
+      if(this.getCmdLineArgs().hasArg("locale")) {
+        this.locales.addAll(this.getCmdLineArgs().getValues("locale"));   
       }
       if((this.locales.size() == 0) || !"en_US".equals(this.locales.get(0))) {
           this.locales.add(0, "en_US");
       }
       // sourceDir
       this.sourceDir = null;
-      if(getCmdLineArgs().hasArg("sourceDir")) {
-          this.sourceDir = new File(getCmdLineArgs().getFirstValue("sourceDir"));
+      if(this.getCmdLineArgs().hasArg("sourceDir")) {
+          this.sourceDir = new File(this.getCmdLineArgs().getFirstValue("sourceDir"));
       }
       else {
           this.sourceDir = new File(".");
       }  
       // targetDir
       this.targetDir = null;
-      if(getCmdLineArgs().hasArg("targetDir")) {
-          this.targetDir = new File(getCmdLineArgs().getFirstValue("targetDir"));
+      if(this.getCmdLineArgs().hasArg("targetDir")) {
+          this.targetDir = new File(this.getCmdLineArgs().getFirstValue("targetDir"));
       }
       else {
           this.targetDir = new File(".");
       }
       // format
       this.format = "table";
-      if(getCmdLineArgs().hasArg("format")) {
-          this.format = getCmdLineArgs().getFirstValue("format");
+      if(this.getCmdLineArgs().hasArg("format")) {
+          this.format = this.getCmdLineArgs().getFirstValue("format");
       }
   }
 
@@ -895,10 +895,10 @@ public class UiUtility
   protected void run(
   ) throws Exception {
       String command = "merge";
-      if (getCmdLineArgs().hasArg("merge")) {
+      if (this.getCmdLineArgs().hasArg("merge")) {
           command = "merge";
       }
-      if (getCmdLineArgs().hasArg("split")) {
+      if (this.getCmdLineArgs().hasArg("split")) {
           command = "split";
       }
       if("merge".equals(command)){
@@ -990,7 +990,7 @@ public class UiUtility
   //-------------------------------------------------------------------------    
 
   // The version gets set by CVS
-  private static final String VERSION = "$Revision: 1.5 $";
+  private static final String VERSION = "$Revision: 1.9 $";
   
   // The application name
   private static final String APP_NAME = "UiMapper";
@@ -999,7 +999,7 @@ public class UiUtility
   private static final String LOG_CONFIG_NAME = "UiMapper";
   
   // The logging log source name
-  private static final String LOG_SOURCE = APP_NAME;
+  private static final String LOG_SOURCE = UiUtility.APP_NAME;
   
   // Application help
   private static final String HELP_TEXT = "UiMapper splits and merges ui definitions";

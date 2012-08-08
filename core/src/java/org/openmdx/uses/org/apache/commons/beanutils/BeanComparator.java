@@ -40,7 +40,9 @@ import org.openmdx.uses.org.apache.commons.collections.comparators.ComparableCom
  * @author     <a href"mailto:epugh@upstate.com">Eric Pugh</a>
  * @author Tim O'Brien 
  */
-@SuppressWarnings({"unchecked", "serial"})
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public class BeanComparator implements Comparator, Serializable {
 
     private String property;

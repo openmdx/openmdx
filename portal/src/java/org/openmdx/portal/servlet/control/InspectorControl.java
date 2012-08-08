@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: InspectorControl.java,v 1.11 2008/11/10 10:20:11 wfro Exp $
+ * Name:        $Id: InspectorControl.java,v 1.13 2009/01/13 23:48:41 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
+ * Date:        $Date: 2009/01/13 23:48:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,10 +66,9 @@ import java.util.Set;
 import javax.jmi.reflect.RefStruct;
 
 import org.openmdx.application.log.AppLog;
-import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.portal.servlet.Action;
 
 //---------------------------------------------------------------------------
@@ -168,7 +167,7 @@ public abstract class InspectorControl
         Model_1_0 model = ofType.getModel();
         
         // add ofType to hierarchy
-        String currentTypeName = (String)ofType.values("qualifiedName").get(0);
+        String currentTypeName = (String)ofType.objGetValue("qualifiedName");
         if(hierarchy.get(currentTypeName) == null) {
           hierarchy.put(
             currentTypeName,
@@ -178,15 +177,15 @@ public abstract class InspectorControl
     
         // get all types which are involved in composition hierarchy
         List<ModelElement_1_0> typesToCheck = new ArrayList<ModelElement_1_0>();
-        if(ofType.values("compositeReference").size() > 0) {
+        if(!ofType.objGetList("compositeReference").isEmpty()) {
           typesToCheck.add(ofType);
         }
         else {
-          for(Iterator i = ofType.values("allSubtype").iterator(); i.hasNext(); ) {
+          for(Iterator i = ofType.objGetList("allSubtype").iterator(); i.hasNext(); ) {
             ModelElement_1_0 subtype = model.getElement(i.next());
             if(
-              !ofType.values("qualifiedName").get(0).equals(subtype.values("qualifiedName").get(0)) &&
-              subtype.values("compositeReference").size() > 0
+              !ofType.objGetValue("qualifiedName").equals(subtype.objGetValue("qualifiedName")) &&
+              !subtype.objGetList("compositeReference").isEmpty()
              ) {
               typesToCheck.add(subtype);
             }
@@ -195,16 +194,16 @@ public abstract class InspectorControl
         
         for(Iterator i = typesToCheck.iterator(); i.hasNext(); ) {
           ModelElement_1_0 type = (ModelElement_1_0)i.next();
-          ModelElement_1_0 compositeReference = model.getElement(type.values("compositeReference").get(0));
-          ModelElement_1_0 exposingType = model.getElement(compositeReference.values("container").get(0));
+          ModelElement_1_0 compositeReference = model.getElement(type.objGetValue("compositeReference"));
+          ModelElement_1_0 exposingType = model.getElement(compositeReference.objGetValue("container"));
           this.createCompositionHierarchy(
             exposingType,
             hierarchy
           );
           ((Set)hierarchy.get(
-            exposingType.values("qualifiedName").get(0)
+            exposingType.objGetValue("qualifiedName")
           )).add(
-            compositeReference.values("name").get(0)
+            compositeReference.objGetValue("name")
           );
         }
     }
@@ -215,10 +214,10 @@ public abstract class InspectorControl
         RefStruct from,
         Map to,
         ModelElement_1_0 structDef
-    ) throws JmiServiceException {
-        for(Iterator i = ((Map)structDef.values("field").get(0)).values().iterator(); i.hasNext(); ) {
+    ) throws ServiceException {
+        for(Iterator i = ((Map)structDef.objGetValue("field")).values().iterator(); i.hasNext(); ) {
           ModelElement_1_0 field = (ModelElement_1_0)i.next();
-          String fieldName = (String)field.values("qualifiedName").get(0);
+          String fieldName = (String)field.objGetValue("qualifiedName");
           try {
             to.put(
               fieldName,

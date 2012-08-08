@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DBOSlicedWithParentAndIdAsKey.java,v 1.2 2008/11/14 10:03:52 hburger Exp $
+ * Name:        $Id: DBOSlicedWithParentAndIdAsKey.java,v 1.3 2009/01/06 13:14:45 wfro Exp $
  * Description: DBOSlicedWithParentAndIdAsKey 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/14 10:03:52 $
+ * Date:        $Date: 2009/01/06 13:14:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,7 +56,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 /**
  * DBOSlicedWithParentAndIdAsKey

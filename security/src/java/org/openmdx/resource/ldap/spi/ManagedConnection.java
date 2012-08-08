@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ManagedConnection.java,v 1.2 2008/07/24 17:24:03 hburger Exp $
+ * Name:        $Id: ManagedConnection.java,v 1.3 2009/03/08 18:52:19 wfro Exp $
  * Description: Managed LDAP Connection 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/24 17:24:03 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,8 +75,7 @@ import netscape.ldap.LDAPv3;
  * Managed LDAP Connection
  */
 public class ManagedConnection 
-    implements javax.resource.spi.ManagedConnection
-{
+    implements javax.resource.spi.ManagedConnection {
 
     /**
      * Constructor 
@@ -186,7 +185,8 @@ public class ManagedConnection
         	Connection ldapConnection = (Connection) connection;
         	ldapConnection.setManagedConnection(this);
         	this.connections.add(ldapConnection);
-        } catch (ClassCastException exception){
+        } 
+        catch (ClassCastException exception){
             throw new ResourceException(
                 "Managed connection class and connection class do not match",
                 exception
@@ -206,14 +206,16 @@ public class ManagedConnection
     ) throws ResourceException {
     	try {
 			this.ldapConnection.disconnect();
-		} catch (LDAPException exception) {
-			throw log(
+		} 
+    	catch (LDAPException exception) {
+			throw this.log(
 				new EISSystemException(
 					"LDAP disconnection failure",
 					exception
 				)
 			);
-		} finally {
+		} 
+    	finally {
 	        this.credential = null;
 	        this.ldapConnection = null;
 		}
@@ -230,7 +232,7 @@ public class ManagedConnection
 
     public LocalTransaction getLocalTransaction(
     ) throws ResourceException {
-        throw log(new NotSupportedException(NON_TRANSACTIONAL));
+        throw this.log(new NotSupportedException(ManagedConnection.NON_TRANSACTIONAL));
     }
 
     public PrintWriter getLogWriter(
@@ -247,7 +249,7 @@ public class ManagedConnection
 
     public XAResource getXAResource(
     ) throws ResourceException {
-        throw log(new NotSupportedException(NON_TRANSACTIONAL));
+        throw this.log(new NotSupportedException(ManagedConnection.NON_TRANSACTIONAL));
     }
 
     public void removeConnectionEventListener(
@@ -273,9 +275,10 @@ public class ManagedConnection
         ResourceException exception
     ){
         try {
-            PrintWriter logWriter = getLogWriter();
+            PrintWriter logWriter = this.getLogWriter();
             if(logWriter != null) exception.printStackTrace(logWriter);
-        } catch (Exception ignore) {
+        } 
+        catch (Exception ignore) {
             // Ensure that the original exception will be available
         }
         return exception;
@@ -302,8 +305,7 @@ public class ManagedConnection
      * ManagedConnectionMetaData implementation
      */
     class MetaData
-        implements ManagedConnectionMetaData
-    {
+        implements ManagedConnectionMetaData {
 
         /**
          * Constructor 
@@ -331,7 +333,7 @@ public class ManagedConnection
 
         public String getUserName(
         ) throws ResourceException {
-            return credential.getUserName();
+            return ManagedConnection.this.credential.getUserName();
         }
 
     }

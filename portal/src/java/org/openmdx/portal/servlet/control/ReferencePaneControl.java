@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePaneControl.java,v 1.153 2008/12/12 13:59:46 wfro Exp $
+ * Name:        $Id: ReferencePaneControl.java,v 1.158 2009/03/08 18:03:24 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.153 $
+ * Revision:    $Revision: 1.158 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/12 13:59:46 $
+ * Date:        $Date: 2009/03/08 18:03:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,11 +65,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
+import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -300,9 +300,9 @@ public class ReferencePaneControl
                 org.openmdx.portal.servlet.Filter[] filters = grid.getFilters();
 
                 // Non-composite, multi-valued reference
-                if(grid.getAddObjectAction() != null) {
-                    // Grid operations only for grids in non-embedded views
-                    if(view.getContainerElementId() == null) {                    
+                if(!grid.isComposite()) {
+                    // Grid operations only if changeable and not embedded
+                    if(grid.isChangeable() && (view.getContainerElementId() == null)) {                    
                         Action addObjectAction = grid.getAddObjectAction();
                         Action removeObjectAction = grid.getRemoveObjectAction();
                         String lookupId = org.openmdx.kernel.id.UUIDs.getGenerator().next().toString();
@@ -658,7 +658,7 @@ public class ReferencePaneControl
 
                     // ordering
                     if(columnOrderSetAction.getEvent() != Action.EVENT_NONE) {
-                        p.write("<td>", p.getImg("class=\"borderedimg\" src=\"", p.getResourcePath("images/"), columnOrderSetAction.getIconKey(), "\" title=\"", htmlEncoder.encode(columnOrderSetAction.getTitle(), false), "\" align=\"bottom\" onclick=\"javascript:if($('filteradd", tabId, "') && ($('filteradd", tabId, "').checked)) {", updateTabScriptletPre, p.getEvalHRef(columnOrderAddAction), updateTabScriptletPost, "} else {", updateTabScriptletPre, p.getEvalHRef(columnOrderSetAction), updateTabScriptletPost, "};\"", p.getOnMouseOver("javascript:this.className='borderedimghover';"), p.getOnMouseOut("javascript:this.className='borderedimg';"), " alt=\"\""), "</td>");
+                        p.write("<td>&nbsp;", p.getImg("class=\"borderedimg\" src=\"", p.getResourcePath("images/"), columnOrderSetAction.getIconKey(), "\" title=\"", htmlEncoder.encode(columnOrderSetAction.getTitle(), false), "\" align=\"bottom\" onclick=\"javascript:if($('filteradd", tabId, "') && ($('filteradd", tabId, "').checked)) {", updateTabScriptletPre, p.getEvalHRef(columnOrderAddAction), updateTabScriptletPost, "} else {", updateTabScriptletPre, p.getEvalHRef(columnOrderSetAction), updateTabScriptletPost, "};\"", p.getOnMouseOver("javascript:this.className='borderedimghover';"), p.getOnMouseOut("javascript:this.className='borderedimg';"), " alt=\"\""), "</td>");
                     }                      
                     p.write("    </tr>");
                     p.write("  </table>");
@@ -795,6 +795,10 @@ public class ReferencePaneControl
                                             toolTip = title;                                     
                                             title = title.substring(0, ObjectReference.TITLE_PREFIX_NOT_ACCESSIBLE.length());
                                         }
+                                        // Remove html tags. They will be escaped by html encoder anyway
+                                        while(title.startsWith("<") && title.indexOf("/>") > 0) {
+                                            title = title.substring(title.indexOf("/>") + 2);
+                                        }
                                         p.write("<a href=\"\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\" title=\"", htmlEncoder.encode(toolTip, false), "\">", htmlEncoder.encode(title, false), "</a>");
                                         isFirst = false;
                                     }
@@ -839,6 +843,10 @@ public class ReferencePaneControl
                                     else if(title.startsWith(ObjectReference.TITLE_PREFIX_NOT_ACCESSIBLE)) {
                                         toolTip = title;                                     
                                         title = title.substring(0, ObjectReference.TITLE_PREFIX_NOT_ACCESSIBLE.length());
+                                    }
+                                    // Remove html tags. They will be escaped by html encoder anyway
+                                    while(title.startsWith("<") && title.indexOf("/>") > 0) {
+                                        title = title.substring(title.indexOf("/>") + 2);
                                     }
                                     if(action.getEvent() == Action.EVENT_NONE) {
                                         p.write("<td><div title=\"", htmlEncoder.encode(toolTip, false), "\">");
@@ -1187,7 +1195,8 @@ public class ReferencePaneControl
                               false, 
                               true
                           );
-                      } catch(Exception e) {}
+                      } 
+                      catch(Exception e) {}
                       boolean rowIsChangeable = false;
                         
                       for(int k = 0; k < gridControl.getShowMaxMember(); k++) {

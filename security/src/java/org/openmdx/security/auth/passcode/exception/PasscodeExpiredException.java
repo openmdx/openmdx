@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: PasscodeExpiredException.java,v 1.1 2007/11/26 14:04:35 hburger Exp $
+ * Name:        $Id: PasscodeExpiredException.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
  * Description: Passcode Expired Exception
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:35 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,8 +57,7 @@ import javax.security.auth.login.CredentialExpiredException;
  * Passcode Expired Exception
  */
 public abstract class PasscodeExpiredException 
-	extends CredentialExpiredException 
-{
+	extends CredentialExpiredException {
 
     /**
      * Constructor for <code>Serialization</code>

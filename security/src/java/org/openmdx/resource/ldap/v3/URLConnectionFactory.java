@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: URLConnectionFactory.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: URLConnectionFactory.java,v 1.4 2009/03/08 18:52:19 wfro Exp $
  * Description: Managed LDAP Connection Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,8 +70,7 @@ import org.openmdx.resource.ldap.spi.ManagedConnection;
  * Managed LDAP Connection Factory
  */
 public class URLConnectionFactory
-    extends AbstractConnectionFactory
-{
+    extends AbstractConnectionFactory {
 
 	/**
 	 * Implements <code>Serializable</code>
@@ -106,7 +105,7 @@ public class URLConnectionFactory
 	/**
 	 * Tells whether string comparison is case sensitive or not
 	 */
-	private boolean caseSensitive = DEFAULT_CASE_SENSITIVE;
+	private boolean caseSensitive = URLConnectionFactory.DEFAULT_CASE_SENSITIVE;
 
 	/**
 	 * The regular expression's groups are<ol>
@@ -114,7 +113,7 @@ public class URLConnectionFactory
 	 * <li>the attribute's value
 	 * </ol>
 	 */
-	private String commentPattern = DEFAULT_COMMENT_PATTERN;
+	private String commentPattern = URLConnectionFactory.DEFAULT_COMMENT_PATTERN;
 	
 	/**
 	 * The LDAP cache
@@ -127,10 +126,10 @@ public class URLConnectionFactory
     ) throws ResourceException {
     	if(this.physicalConnection == null) {
 			this.physicalConnection = new URLConnection(
-				toURL("ConnectionURL", getConnectionURL()),
-				toPattern("DistinguishedNamePattern", getDistinguishedNamePattern()),
-				toPattern("AttributePattern", getAttributePattern()),
-				toPattern("CommentPattern", getCommentPattern()), this.caseSensitive
+				this.toURL("ConnectionURL", this.getConnectionURL()),
+				this.toPattern("DistinguishedNamePattern", this.getDistinguishedNamePattern()),
+				this.toPattern("AttributePattern", this.getAttributePattern()),
+				this.toPattern("CommentPattern", this.getCommentPattern()), this.caseSensitive
 			);
     	}
         return new ManagedConnection(
@@ -148,7 +147,8 @@ public class URLConnectionFactory
     	);
     	try {
 	    	return Pattern.compile(pattern);
-    	} catch (PatternSyntaxException exception) {
+    	} 
+    	catch (PatternSyntaxException exception) {
 			throw new InvalidPropertyException(
 				"Invalid " + property + ": " + pattern,
 				exception
@@ -165,7 +165,8 @@ public class URLConnectionFactory
     	);
     	try {
 	    	return new URL(value);
-		} catch (MalformedURLException exception) {
+		} 
+    	catch (MalformedURLException exception) {
 			throw new InvalidPropertyException(
 				"Invalid " + property + ": " + value,
 				exception
@@ -177,7 +178,7 @@ public class URLConnectionFactory
 	 * @return the distinguishedNamePattern
 	 */
 	public String getDistinguishedNamePattern() {
-		return distinguishedNamePattern;
+		return this.distinguishedNamePattern;
 	}
 
 
@@ -193,7 +194,7 @@ public class URLConnectionFactory
 	 * @return the attributePattern
 	 */
 	public String getAttributePattern() {
-		return attributePattern;
+		return this.attributePattern;
 	}
 
 
@@ -208,7 +209,7 @@ public class URLConnectionFactory
 	 * @return the commentPattern
 	 */
 	public String getCommentPattern() {
-		return commentPattern;
+		return this.commentPattern;
 	}
 
 	/**
@@ -222,7 +223,7 @@ public class URLConnectionFactory
 	 * @return the caseSensitive
 	 */
 	public Boolean getCaseSensitive() {
-		return caseSensitive;
+		return this.caseSensitive;
 	}
 
 	/**

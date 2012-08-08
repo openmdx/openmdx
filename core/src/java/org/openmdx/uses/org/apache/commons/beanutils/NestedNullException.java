@@ -24,7 +24,10 @@ package org.openmdx.uses.org.apache.commons.beanutils;
  * @author Robert Burrell Donkin
  * @since 1.7
  */
-@SuppressWarnings({"unchecked", "serial"})
+
+@SuppressWarnings({
+    "serial"
+})
 public class NestedNullException extends BeanAccessLanguageException {
     
     // --------------------------------------------------------- Constuctors

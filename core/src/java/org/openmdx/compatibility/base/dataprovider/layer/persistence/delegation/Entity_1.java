@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Entity_1.java,v 1.16 2008/11/08 00:24:20 wfro Exp $
+ * Name:        $Id: Entity_1.java,v 1.31 2009/03/02 13:38:15 wfro Exp $
  * Description: Entity_1 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/08 00:24:20 $
+ * Date:        $Date: 2009/03/02 13:38:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,18 +52,13 @@ package org.openmdx.compatibility.base.dataprovider.layer.persistence.delegation
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.jdo.JDOObjectNotFoundException;
@@ -73,52 +68,44 @@ import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
 import org.oasisopen.jmi1.RefContainer;
+import org.omg.mof.spi.Identifier;
+import org.omg.mof.spi.Names;
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.dataprovider.cci.DataproviderOperations;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderReplyContexts;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.Directions;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkReply;
+import org.openmdx.application.dataprovider.cci.UnitOfWorkRequest;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.application.dataprovider.spi.OperationAwareLayer_1;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
+import org.openmdx.base.accessor.jmi.cci.RefPackage_1_2;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.collection.FetchSize;
 import org.openmdx.base.collection.Reconstructable;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.persistence.spi.ManagerFactory_2_0;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReplyContexts;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
-import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.persistence.cci.EntityManagerFactory;
 import org.openmdx.compatibility.base.dataprovider.layer.application.CommonConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.naming.PathComponent;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.mapping.Names;
-import org.openmdx.model1.mapping.java.Identifier;
 
 /**
  * Entity_1
  */
 public class Entity_1
-    extends StreamOperationAwareLayer_1
+    extends OperationAwareLayer_1
 {
-
-    //---------------------------------------------------------------------------
-    protected Set<Path> getDirectAccessPaths(
-    ) throws ServiceException {
-        return new HashSet<Path>(
-                DEFAULT_DIRECT_ACCESS_PATHS
-        );
-    }
 
     //---------------------------------------------------------------------------
     /* (non-Javadoc)
@@ -129,7 +116,7 @@ public class Entity_1
         short id,
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception, ServiceException {
+    ) throws ServiceException {
         super.activate(id, configuration, delegation);
         this.objectCache = new HashMap<Path, RefObject_1_0>();
         this.objectIsNew = new HashMap<Path, Boolean>();
@@ -137,13 +124,8 @@ public class Entity_1
         //
         // Keep local references
         //
-        this.entityManagerFactory = (ManagerFactory_2_0) configuration.values(
+        this.entityManagerFactory = (EntityManagerFactory) configuration.values(
             SharedConfigurationEntries.DATAPROVIDER_CONNECTION
-        ).get(
-            0
-        );
-        this.model = (Model_1_0) configuration.values(
-            SharedConfigurationEntries.MODEL
         ).get(
             0
         );
@@ -186,7 +168,6 @@ public class Entity_1
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#prolog(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest[])
      */
-    @SuppressWarnings("unchecked")
     @Override
     public void prolog(
         ServiceHeader header, 
@@ -264,7 +245,7 @@ public class Entity_1
             )
         );
         try {
-            this.entityManager = this.entityManagerFactory.createManager(subject);
+            this.entityManager = this.entityManagerFactory.getEntityManager(subject);
         } catch (ResourceException exception) {
             throw new ServiceException(
                 exception,
@@ -310,6 +291,22 @@ public class Entity_1
 
     //---------------------------------------------------------------------------
     protected RefContainer getContainer(
+        Path referenceId
+    ) throws ServiceException{
+        String feature = referenceId.getBase();
+        return feature.indexOf(':') < 0 ? (
+            (RefPackage_1_2) this.retrieveObject(referenceId.getPrefix(1), true).refOutermostPackage()
+        ).refContainer(
+            referenceId,
+            null
+        ) : this.getContainer(
+            this.retrieveObject(referenceId.getParent(), true),
+            feature
+        );
+    }
+    
+    //---------------------------------------------------------------------------
+    protected RefContainer getContainer(
         RefObject_1_0 _object,
         String _featureName
     ){
@@ -336,35 +333,10 @@ public class Entity_1
         Path identity,
         boolean mandatory
     ) throws ServiceException {
-        if(this.directAccessPaths == null) {
-            this.directAccessPaths = this.getDirectAccessPaths();
-        }
-        // startFrom
-        int startFrom = 0;
-        for(Path path : this.directAccessPaths){
-            if(identity.size() >= path.size()) {
-                if(identity.getPrefix(path.size()).isLike(path)) {
-                    startFrom = java.lang.Math.max(startFrom, path.size());
-                }
-            }
-        }
-        // getting objects starting from 'startFrom'
         RefObject_1_0 object = this.getObject(
-            identity.getPrefix(startFrom),
+            identity,
             mandatory
         );
-        for(
-                int i = startFrom;
-                object != null && i < identity.size(); 
-                i+=2
-        ) { 
-            object = (RefObject_1_0)this.getContainer(
-                object,
-                identity.get(i)
-            ).refGet(
-                toSelector(identity.get(i+1))
-            );
-        }
         if(!mandatory || object != null) {
             return object;
         } 
@@ -395,7 +367,7 @@ public class Entity_1
                     request.path(),        
                     this.retrieveObject(request.path(), true),
                     request,
-                    this.model,
+                    getModel(),
                     batch, 
                     this.retrievalSize
                 )        
@@ -412,7 +384,7 @@ public class Entity_1
                             path,        
                             this.retrieveObject(path, true),
                             Collections.EMPTY_SET,
-                            this.model,
+                            getModel(),
                             batch, 
                             this.retrievalSize
                         )        
@@ -431,7 +403,7 @@ public class Entity_1
                     request.path(),        
                     retrieveObject(request.path(), true),
                     request,
-                    this.model,
+                    getModel(),
                     null, 
                     this.retrievalSize
                 )
@@ -446,13 +418,7 @@ public class Entity_1
         DataproviderRequest request
     ) throws ServiceException {
         List paths = null;
-        RefContainer container = this.getContainer(
-            this.retrieveObject(
-                request.path().getParent(),
-                true
-            ),
-            request.path().getBase()
-        );
+        RefContainer container = this.getContainer(request.path());
         switch(request.operation()) {
             case DataproviderOperations.ITERATION_START:
                 paths = container.refGetAll(
@@ -516,7 +482,7 @@ public class Entity_1
                     path,
                     source,
                     request,
-                    this.model
+                    getModel()
                 )
             );
         }
@@ -689,7 +655,7 @@ public class Entity_1
             target,
             this.objectCache,
             this.entityManager,
-            this.model, true
+            getModel(), true
         );
         RefContainer container = (RefContainer) parent.refGetValue(identity.get(parentPath.size()));
         Object[] selector = toSelector(identity.get(parentPath.size() + 1));
@@ -705,7 +671,6 @@ public class Entity_1
     }
 
     //---------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public DataproviderReply modify(
         ServiceHeader header,
         DataproviderRequest    request
@@ -718,7 +683,7 @@ public class Entity_1
             target,
             this.objectCache,
             this.entityManager,
-            this.model, 
+            getModel(), 
             false
         );
         if(request.attributeSelector() == AttributeSelectors.NO_ATTRIBUTES) {
@@ -739,7 +704,6 @@ public class Entity_1
     }
 
     //---------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public DataproviderReply replace(
         ServiceHeader header,
         DataproviderRequest    request
@@ -752,7 +716,7 @@ public class Entity_1
             target,
             this.objectCache,
             this.entityManager,
-            this.model, 
+            getModel(), 
             true
         );        
         if(request.attributeSelector() == AttributeSelectors.NO_ATTRIBUTES) {
@@ -770,14 +734,13 @@ public class Entity_1
                     request.path(),
                     target,
                     request,
-                    this.model
+                    getModel()
                 )
             );
         }
     }
 
     //---------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public DataproviderReply set(
         ServiceHeader header,
         DataproviderRequest request
@@ -862,7 +825,7 @@ public class Entity_1
                                 request.object(),
                                 this.objectCache,
                                 this.entityManager,
-                                this.model
+                                getModel()
                             )
                         )
                     )
@@ -875,45 +838,11 @@ public class Entity_1
         }
     }
 
-    //---------------------------------------------------------------------------  
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.OutputStream, long)
-     */
-    @Override
-    protected DataproviderObject getStreamOperation(
-        ServiceHeader header,
-        Path objectPath,
-        String feature,
-        OutputStream value, 
-        long position, 
-        Path replyPath
-    ) throws ServiceException {
-        return null;
-    }
-
-    //---------------------------------------------------------------------------  
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.Writer, long)
-     */
-    @Override
-    protected DataproviderObject getStreamOperation(
-        ServiceHeader header,
-        Path objectPath,
-        String feature,
-        Writer value, 
-        long position, 
-        Path replyPath
-    ) throws ServiceException {
-        return null;
-    }
-
     //---------------------------------------------------------------------------
     // Members
     //---------------------------------------------------------------------------
     private int retrievalSize = 1;
-    protected Set<Path> directAccessPaths = null;
-    private ManagerFactory_2_0 entityManagerFactory;
-    private Model_1_0 model;
+    private EntityManagerFactory entityManagerFactory;
     protected Map<Path,Boolean> objectIsNew = null;
     protected Map<Path,RefObject_1_0> objectCache = null;
     protected Map<String,Class<?>> classCache = null;
@@ -926,12 +855,7 @@ public class Entity_1
         Collections.EMPTY_SET
     );    
     private static final char[] NO_PASSWORD = new char[]{};    
-    private static final Collection<Path> DEFAULT_DIRECT_ACCESS_PATHS = Arrays.asList(
-        new Path("xri:@openmdx:*"),
-        new Path("xri:@openmdx:*/provider/:*"),
-        new Path("xri:@openmdx:*/provider/:*/segment/:*")
-    );
-
+    
     /**
      * This value means that potentially expensive counting has been avoided.
      */

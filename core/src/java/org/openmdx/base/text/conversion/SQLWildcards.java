@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SQLWildcards.java,v 1.4 2008/03/21 18:32:18 hburger Exp $
+ * Name:        $Id: SQLWildcards.java,v 1.5 2009/01/15 21:12:11 hburger Exp $
  * Description: SQL Wildcards 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:32:18 $
+ * Date:        $Date: 2009/01/15 21:12:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -210,7 +210,7 @@ public class SQLWildcards {
                         '.'
                     );
                     break;
-                case '.': case '*':
+                case '.': // case '*':
                     jdoExpression.append(
                         '\\'
                     ).append(

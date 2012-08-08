@@ -18,11 +18,11 @@
 package org.openmdx.uses.org.apache.commons.beanutils;
 
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-
-import java.util.WeakHashMap;
 
 import org.openmdx.uses.org.apache.commons.logging.Log;
 import org.openmdx.uses.org.apache.commons.logging.LogFactory;
@@ -51,7 +51,10 @@ import org.openmdx.uses.org.apache.commons.logging.LogFactory;
  * @author Jan Sorensen
  * @author Robert Burrell Donkin
  */
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings({
+    "unchecked","synthetic-access"
+})
 public class MethodUtils {
 
     // --------------------------------------------------------- Private Methods
@@ -68,9 +71,19 @@ public class MethodUtils {
      * will get the warning in its logs but that should be good enough.
      */
     private static boolean loggedAccessibleWarning = false;
+    
+    /** 
+     * Indicates whether methods should be cached for improved performance.
+     * <p>
+     * Note that when this class is deployed via a shared classloader in
+     * a container, this will affect all webapps. However making this
+     * configurable per webapp would mean having a map keyed by context classloader
+     * which may introduce memory-leak problems.
+     */
+    private static boolean CACHE_METHODS = true;
 
     /** An empty class array */
-    static final Class[] EMPTY_CLASS_PARAMETERS = new Class[0];
+    private static final Class[] EMPTY_CLASS_PARAMETERS = new Class[0];
     /** An empty object array */
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
@@ -94,9 +107,37 @@ public class MethodUtils {
      * class via different classloaders will generate non-equal MethodDescriptor
      * objects and hence end up with different entries in the map.
      */
-    private static WeakHashMap cache = new WeakHashMap();
+    private static final WeakFastHashMap cache = new WeakFastHashMap();
     
     // --------------------------------------------------------- Public Methods
+
+    static {
+        cache.setFast(true);
+    }
+
+    /**
+     * Set whether methods should be cached for greater performance or not,
+     * default is <code>true</code>.
+     *
+     * @param cacheMethods <code>true</code> if methods should be
+     * cached for greater performance, otherwise <code>false</code>
+     */
+    public static synchronized void setCacheMethods(boolean cacheMethods) {
+        CACHE_METHODS = cacheMethods;
+        if (!CACHE_METHODS) {
+            clearCache();
+        }
+    }
+
+    /**
+     * Clear the method cache.
+     * @return the number of cached methods cleared
+     */
+    public static synchronized int clearCache() {
+        int size = cache.size();
+        cache.clear();
+        return size;
+    }
     
     /**
      * <p>Invoke a named method whose parameter type matches the object type.</p>
@@ -677,14 +718,14 @@ public class MethodUtils {
         try {
             MethodDescriptor md = new MethodDescriptor(clazz, methodName, parameterTypes, true);
             // Check the cache first
-            Method method = (Method)cache.get(md);
+            Method method = getCachedMethod(md);
             if (method != null) {
                 return method;
             }
             
             method =  getAccessibleMethod
-                    (clazz.getMethod(methodName, parameterTypes));
-            cache.put(md, method);
+                    (clazz, clazz.getMethod(methodName, parameterTypes));
+            cacheMethod(md, method);
             return method;
         } catch (NoSuchMethodException e) {
             return (null);
@@ -708,14 +749,49 @@ public class MethodUtils {
             return (null);
         }
 
+        return getAccessibleMethod(method.getDeclaringClass(), method);
+
+    }
+
+
+
+    /**
+     * <p>Return an accessible method (that is, one that can be invoked via
+     * reflection) that implements the specified Method.  If no such method
+     * can be found, return <code>null</code>.</p>
+     *
+     * @param clazz The class of the object
+     * @param method The method that we wish to call
+     * @return The accessible method
+     */
+    public static Method getAccessibleMethod(Class clazz, Method method) {
+
+        // Make sure we have a method to check
+        if (method == null) {
+            return (null);
+        }
+
         // If the requested method is not public we cannot call it
         if (!Modifier.isPublic(method.getModifiers())) {
             return (null);
         }
 
-        // If the declaring class is public, we are done
-        Class clazz = method.getDeclaringClass();
+        boolean sameClass = true;
+        if (clazz == null) {
+            clazz = method.getDeclaringClass();
+        } else {
+            sameClass = clazz.equals(method.getDeclaringClass());
+            if (!method.getDeclaringClass().isAssignableFrom(clazz)) {
+                throw new IllegalArgumentException(clazz.getName() +
+                        " is not assignable from " + method.getDeclaringClass().getName());
+            }
+        }
+
+        // If the class is public, we are done
         if (Modifier.isPublic(clazz.getModifiers())) {
+            if (!sameClass && !Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+                setMethodAccessible(method); // Default access superclass workaround
+            }
             return (method);
         }
 
@@ -809,7 +885,7 @@ public class MethodUtils {
                      */
                 }
                 if (method != null) {
-                    break;
+                    return method;
                 }
 
                 // Recursively check our parent interfaces
@@ -818,7 +894,7 @@ public class MethodUtils {
                                 methodName,
                                 parameterTypes);
                 if (method != null) {
-                    break;
+                    return method;
                 }
 
             }
@@ -873,7 +949,7 @@ public class MethodUtils {
         // most of the time this works and it's much faster
         try {
             // Check the cache first
-            Method method = (Method)cache.get(md);
+            Method method = getCachedMethod(md);
             if (method != null) {
                 return method;
             }
@@ -884,55 +960,9 @@ public class MethodUtils {
                 log.trace("isPublic:" + Modifier.isPublic(method.getModifiers()));
             }
             
-            try {
-                //
-                // XXX Default access superclass workaround
-                //
-                // When a public class has a default access superclass
-                // with public methods, these methods are accessible.
-                // Calling them from compiled code works fine.
-                //
-                // Unfortunately, using reflection to invoke these methods
-                // seems to (wrongly) to prevent access even when the method
-                // modifer is public.
-                //
-                // The following workaround solves the problem but will only
-                // work from sufficiently privilages code. 
-                //
-                // Better workarounds would be greatfully accepted.
-                //
-                method.setAccessible(true);
-                
-            } catch (SecurityException se) {
-                // log but continue just in case the method.invoke works anyway
-                if (!loggedAccessibleWarning) {
-                    boolean vulnerableJVM = false;
-                    try {
-                        String specVersion = System.getProperty("java.specification.version");
-                        if (specVersion.charAt(0) == '1' && 
-                                (specVersion.charAt(2) == '0' ||
-                                 specVersion.charAt(2) == '1' ||
-                                 specVersion.charAt(2) == '2' ||
-                                 specVersion.charAt(2) == '3')) {
-                                 
-                            vulnerableJVM = true;
-                        }
-                    } catch (SecurityException e) {
-                        // don't know - so display warning
-                        vulnerableJVM = true;
-                    }
-                    if (vulnerableJVM) {
-                        log.warn(
-                            "Current Security Manager restricts use of workarounds for reflection bugs "
-                            + " in pre-1.4 JVMs.");
-                    }
-                    loggedAccessibleWarning = true;
-                }
-                log.debug(
-                        "Cannot setAccessible on method. Therefore cannot use jvm access bug workaround.", 
-                        se);
-            }
-            cache.put(md, method);
+            setMethodAccessible(method); // Default access superclass workaround
+
+            cacheMethod(md, method);
             return method;
             
         } catch (NoSuchMethodException e) { /* SWALLOW */ }
@@ -973,30 +1003,13 @@ public class MethodUtils {
                     
                     if (match) {
                         // get accessible version of method
-                        Method method = getAccessibleMethod(methods[i]);
+                        Method method = getAccessibleMethod(clazz, methods[i]);
                         if (method != null) {
                             if (log.isTraceEnabled()) {
                                 log.trace(method + " accessible version of " 
                                             + methods[i]);
                             }
-                            try {
-                                //
-                                // XXX Default access superclass workaround
-                                // (See above for more details.)
-                                //
-                                method.setAccessible(true);
-                                
-                            } catch (SecurityException se) {
-                                // log but continue just in case the method.invoke works anyway
-                                if (!loggedAccessibleWarning) {
-                                    log.warn(
-            "Cannot use JVM pre-1.4 access bug workaround due to restrictive security manager.");
-                                    loggedAccessibleWarning = true;
-                                }
-                                log.debug(
-            "Cannot setAccessible on method. Therefore cannot use jvm access bug workaround.", 
-                                        se);
-                            }
+                            setMethodAccessible(method); // Default access superclass workaround
                             myCost = getTotalTransformationCost(parameterTypes,method.getParameterTypes());
                             if ( myCost < bestMatchCost ) {
                                bestMatch = method;
@@ -1010,13 +1023,67 @@ public class MethodUtils {
             }
         }
         if ( bestMatch != null ){
-                 cache.put(md, bestMatch);  
+                 cacheMethod(md, bestMatch);
         } else {
         // didn't find a match
                log.trace("No match found.");
         }
         
         return bestMatch;                                        
+    }
+
+    /**
+     * Try to make the method accessible
+     * @param method The source arguments
+     */
+    private static void setMethodAccessible(Method method) {
+        try {
+            //
+            // XXX Default access superclass workaround
+            //
+            // When a public class has a default access superclass
+            // with public methods, these methods are accessible.
+            // Calling them from compiled code works fine.
+            //
+            // Unfortunately, using reflection to invoke these methods
+            // seems to (wrongly) to prevent access even when the method
+            // modifer is public.
+            //
+            // The following workaround solves the problem but will only
+            // work from sufficiently privilages code. 
+            //
+            // Better workarounds would be greatfully accepted.
+            //
+            method.setAccessible(true);
+            
+        } catch (SecurityException se) {
+            // log but continue just in case the method.invoke works anyway
+            Log log = LogFactory.getLog(MethodUtils.class);
+            if (!loggedAccessibleWarning) {
+                boolean vulnerableJVM = false;
+                try {
+                    String specVersion = System.getProperty("java.specification.version");
+                    if (specVersion.charAt(0) == '1' && 
+                            (specVersion.charAt(2) == '0' ||
+                             specVersion.charAt(2) == '1' ||
+                             specVersion.charAt(2) == '2' ||
+                             specVersion.charAt(2) == '3')) {
+                             
+                        vulnerableJVM = true;
+                    }
+                } catch (SecurityException e) {
+                    // don't know - so display warning
+                    vulnerableJVM = true;
+                }
+                if (vulnerableJVM) {
+                    log.warn(
+                        "Current Security Manager restricts use of workarounds for reflection bugs "
+                        + " in pre-1.4 JVMs.");
+                }
+                loggedAccessibleWarning = true;
+            }
+            log.debug("Cannot setAccessible on method. Therefore cannot use jvm access bug workaround.", se);
+        }
     }
 
     /**
@@ -1194,6 +1261,36 @@ public class MethodUtils {
         }
     }
     
+
+    /**
+     * Return the method from the cache, if present.
+     *
+     * @param md The method descriptor
+     * @return The cached method
+     */
+    private static Method getCachedMethod(MethodDescriptor md) {
+        if (CACHE_METHODS) {
+            Reference methodRef = (Reference)cache.get(md);
+            if (methodRef != null) {
+                return (Method)methodRef.get();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Add a method to the cache.
+     *
+     * @param md The method descriptor
+     * @param method The method to cache
+     */
+    private static void cacheMethod(MethodDescriptor md, Method method) {
+        if (CACHE_METHODS) {
+            if (method != null) {
+                cache.put(md, new WeakReference(method));
+            }
+        }
+    }
 
     /**
      * Represents the key to looking up a Method by reflection.

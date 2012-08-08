@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusPacket.java,v 1.6 2008/04/04 17:55:32 hburger Exp $
+ * Name:        $Id: RadiusPacket.java,v 1.7 2009/02/06 16:43:49 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:55:32 $
+ * Date:        $Date: 2009/02/06 16:43:49 $
  * ====================================================================
  *
  * Copyright (C) 2004  OMEX AG
@@ -68,7 +68,7 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException;
 /**
  * Released under the LGPL<BR>
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 public class RadiusPacket {
     public static final int MIN_PACKET_LENGTH       = 20;
@@ -276,7 +276,7 @@ public class RadiusPacket {
      * @return a byte array of the raw bytes for all of the RadiusAttributes assigned to this RadiusPacket
      * @throws RadiusException If there is any error assembling the bytes into a byte array
      */
-    protected final byte[] getAttributeBytes(
+    public final byte[] getAttributeBytes(
         int[] order
     ) throws RadiusException{
         try {

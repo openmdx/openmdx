@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.25 2008/11/24 10:17:07 wfro Exp $
+ * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.29 2009/01/13 17:33:49 wfro Exp $
  * Description: Jmi1StructInvocationHandler 
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/24 10:17:07 $
+ * Date:        $Date: 2009/01/13 17:33:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,6 +65,8 @@ import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.omg.mof.spi.AbstractNames;
+import org.omg.mof.spi.Identifier;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
@@ -72,13 +74,11 @@ import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.persistence.spi.Marshaller;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.mapping.AbstractNames;
-import org.openmdx.model1.mapping.java.Identifier;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.SortedMaps;
@@ -131,7 +131,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler {
             Model_1_0 model = this.delegation.getModel();
             ModelElement_1_0 structDef = model.getElement(structName);
             for(
-                Iterator<String> i = ((Map)structDef.values("field").get(0)).keySet().iterator(); 
+                Iterator<String> i = ((Map)structDef.objGetValue("field")).keySet().iterator(); 
                 i.hasNext(); 
             ) {
                 String name = i.next();

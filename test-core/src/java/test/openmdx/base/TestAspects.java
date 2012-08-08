@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestAspects.java,v 1.1 2008/09/17 16:04:32 hburger Exp $
+ * Name:        $Id: TestAspects.java,v 1.2 2009/02/04 11:06:38 hburger Exp $
  * Description: Test Aspects 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/17 16:04:32 $
+ * Date:        $Date: 2009/02/04 11:06:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -74,9 +74,9 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openmdx.application.dataprovider.deployment.Deployment_1;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
-import org.openmdx.compatibility.base.application.cci.Deployment_1;
 
 import test.openmdx.base.cci2.AnAspectQuery;
 import test.openmdx.base.jmi1.AnAspect;
@@ -122,8 +122,8 @@ public class TestAspects {
     
     @Before
     public void acquirePersistenceManager() throws ResourceException{
-        this.persistenceManager = principalName == null ? accessorFactory.createManager(
-        ) : accessorFactory.createManager(
+        this.persistenceManager = principalName == null ? accessorFactory.getEntityManager(
+        ) : accessorFactory.getEntityManager(
             new Subject(
                 true,
                 Collections.EMPTY_SET,

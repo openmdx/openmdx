@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingHandler.java,v 1.7 2008/05/12 10:45:51 wfro Exp $
+ * Name:        $Id: DelegatingHandler.java,v 1.9 2009/01/06 13:14:45 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/12 10:45:51 $
+ * Date:        $Date: 2009/01/06 13:14:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,9 +55,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 /**
  * Default implementation of a intermediate handler, which delegates all 
@@ -142,7 +142,7 @@ public class DelegatingHandler implements TraversalHandler {
     /**
      * Delegate call.
      * 
-     * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#featureComplete(org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0)
+     * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#featureComplete(org.openmdx.application.dataprovider.cci.DataproviderObject_1_0)
      */
     public boolean featureComplete(
         Path reference,
@@ -157,7 +157,7 @@ public class DelegatingHandler implements TraversalHandler {
     /**
      * Delegate call.
      * 
-     * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#contentComplete(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.util.List)
+     * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#contentComplete(org.openmdx.base.naming.Path, java.lang.String, java.util.List)
      */
     public void contentComplete(
         Path objectPath, 
@@ -170,7 +170,7 @@ public class DelegatingHandler implements TraversalHandler {
     /**
      * Delegate call.
      * 
-     * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#referenceComplete(org.openmdx.compatibility.base.naming.Path, java.util.Collection)
+     * @see org.openmdx.compatibility.base.dataprovider.exporter.TraversalHandler#referenceComplete(org.openmdx.base.naming.Path, java.util.Collection)
      */
     public void referenceComplete(
         Path reference, 

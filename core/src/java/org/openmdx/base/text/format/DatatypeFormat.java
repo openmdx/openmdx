@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatatypeFormat.java,v 1.8 2008/09/25 16:55:17 hburger Exp $
+ * Name:        $Id: DatatypeFormat.java,v 1.9 2009/01/04 21:16:13 wfro Exp $
  * Description: DatatypeFormat 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/25 16:55:17 $
+ * Date:        $Date: 2009/01/04 21:16:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,7 +56,7 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.spi.DatatypeFactories;
 

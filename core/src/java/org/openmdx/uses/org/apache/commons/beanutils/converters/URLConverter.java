@@ -25,10 +25,12 @@ import java.net.URL;
  * Can be configured to either return a <i>default value</i> or throw a
  * <code>ConversionException</code> if a conversion error occurs.
  *
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:17 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:58 $
  * @since 1.3
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked"
+})
 public final class URLConverter extends AbstractConverter {
 
     /**
@@ -36,7 +38,7 @@ public final class URLConverter extends AbstractConverter {
      * a <code>ConversionException</code> if an error occurs.
      */
     public URLConverter() {
-        super(URL.class);
+        super();
     }
 
     /**
@@ -48,7 +50,16 @@ public final class URLConverter extends AbstractConverter {
      * occurs converting the value.
      */
     public URLConverter(Object defaultValue) {
-        super(URL.class, defaultValue);
+        super(defaultValue);
+    }
+
+    /**
+     * Return the default type this <code>Converter</code> handles.
+     *
+     * @return The default type this <code>Converter</code> handles.
+     */
+    protected Class getDefaultType() {
+        return URL.class;
     }
 
     /**

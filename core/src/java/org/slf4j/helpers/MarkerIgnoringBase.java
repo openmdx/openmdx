@@ -41,6 +41,7 @@ import org.slf4j.Marker;
  * 
  * @author Ceki Gulcu
  */
+@SuppressWarnings("serial")
 public abstract class MarkerIgnoringBase extends NamedLoggerBase implements Logger {
 
   public boolean isTraceEnabled(Marker marker) {

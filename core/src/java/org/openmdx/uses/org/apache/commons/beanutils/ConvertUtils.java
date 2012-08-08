@@ -28,10 +28,13 @@ package org.openmdx.uses.org.apache.commons.beanutils;
  * @author Craig R. McClanahan
  * @author Ralph Schaer
  * @author Chris Audley
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:14 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:43 $
  * @see ConvertUtilsBean
  */
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings({
+    "unchecked"
+})
 public class ConvertUtils {
 
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValue.java,v 1.68 2008/12/09 14:40:06 wfro Exp $
+ * Name:        $Id: AttributeValue.java,v 1.73 2009/03/08 18:03:22 wfro Exp $
  * Description: AttributeValue
- * Revision:    $Revision: 1.68 $
+ * Revision:    $Revision: 1.73 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/09 14:40:06 $
+ * Date:        $Date: 2009/03/08 18:03:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,13 +65,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.openmdx.application.log.AppLog;
+import org.openmdx.application.mof.cci.Multiplicities;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
 import org.openmdx.portal.servlet.DataBinding_1_0;
@@ -175,10 +175,15 @@ implements Serializable {
     public boolean isOptionalValued(
     ) {
         String multiplicity = this.fieldDef.multiplicity;
-        return 
-        Multiplicities.OPTIONAL_VALUE.equals(multiplicity);
+        return Multiplicities.OPTIONAL_VALUE.equals(multiplicity);
     }
 
+    //-------------------------------------------------------------------------
+    public boolean isMandatory(
+    ) {
+        return this.fieldDef.isMandatory;
+    }
+    
     //-------------------------------------------------------------------------
     public String getMultiplicity(
     ) {
@@ -230,11 +235,16 @@ implements Serializable {
                     refObj,
                     feature
                 );
+                Object defaultValue = this.getDefaultValue();
                 if(
                     !refObj.refIsPersistent() &&
-                    ((value == null) || ((value instanceof Number) && ((Number)value).intValue() == 0))
+                    (defaultValue != null) && 
+                    ((value == null) || 
+                        ((value instanceof Number) && ((Number)value).intValue() == 0) ||
+                        ((value instanceof Boolean) && !((Boolean)value).booleanValue())
+                    )
                 ) {
-                    return this.getDefaultValue();
+                    return defaultValue;
                 }
                 else {
                     return value;
@@ -495,7 +505,8 @@ implements Serializable {
             try {
                 Integer.parseInt(this.getMultiplicity());
                 upperBound = this.getMultiplicity();
-            } catch(Exception e) {}                    
+            } 
+            catch(Exception e) {}                    
         }
         return upperBound;        
     }
@@ -561,7 +572,10 @@ implements Serializable {
                         if(attribute.getSpanRow() > 4) {
                             p.write("  <div onclick=\"javascript:loadHTMLedit('", id, "');\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/html"), p.getImgType(), "\" border=\"0\" alt=\"o\" title=\"\""), "</div>");
                         }
-                        p.write("  <textarea id=\"", id, "\" name=\"", id, "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"30\" style=\"width:100%;\" class=\"string\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
+                        String classModifier = this.isMandatory() ?
+                            "mandatory" :
+                            "";                        
+                        p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"", classModifier, "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"30\" style=\"width:100%;\" class=\"string\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
                     }
                     else {
                         p.write("  <textarea id=\"", id, "\" name=\"", id, "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"30\" class=\"multiStringLocked\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
@@ -588,16 +602,19 @@ implements Serializable {
                         );
                     }
                     else {
-                        String inputType = this instanceof TextValue
-                        ? ((TextValue)this).isPassword() ? "password" : "text"
-                            : "text";
-                        int maxLength = this instanceof TextValue
-                        ? ((TextValue)this).getMaxLength()
-                            : Integer.MAX_VALUE;
-                        String maxLengthModifier = (maxLength == Integer.MAX_VALUE)
-                        ? ""
-                            : "maxlength=\"" + maxLength + "\"";
-                        p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"", inputType, "\" class=\"valueL", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" ", maxLengthModifier, " value=\"", stringifiedValue, "\"");
+                        String inputType = this instanceof TextValue ? 
+                            ((TextValue)this).isPassword() ? "password" : "text" : 
+                            "text";
+                        int maxLength = this instanceof TextValue ? 
+                            ((TextValue)this).getMaxLength() : 
+                            Integer.MAX_VALUE;
+                        String maxLengthModifier = (maxLength == Integer.MAX_VALUE) ? 
+                            "" : 
+                            "maxlength=\"" + maxLength + "\"";
+                        String classModifier = this.isMandatory() ?
+                            "valueL mandatory" :
+                            "valueL";
+                        p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"", inputType, "\" class=\"", classModifier, "\"", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" ", maxLengthModifier, " value=\"", stringifiedValue, "\"");
                         p.writeEventHandlers("    ", attribute.getEventHandler());
                         p.write("  >");
                     }

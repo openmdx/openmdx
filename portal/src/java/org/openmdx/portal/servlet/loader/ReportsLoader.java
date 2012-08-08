@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportsLoader.java,v 1.13 2008/08/12 16:38:07 wfro Exp $
+ * Name:        $Id: ReportsLoader.java,v 1.14 2009/01/13 02:16:10 wfro Exp $
  * Description: ReportsLoader
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:07 $
+ * Date:        $Date: 2009/01/13 02:16:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,8 +66,8 @@ import java.util.Set;
 import javax.servlet.ServletContext;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 import org.openmdx.portal.servlet.reports.ReportDefinition;
 import org.openmdx.portal.servlet.reports.ReportDefinitionFactory;

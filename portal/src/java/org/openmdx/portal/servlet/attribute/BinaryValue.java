@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BinaryValue.java,v 1.38 2008/11/12 10:36:53 wfro Exp $
+ * Name:        $Id: BinaryValue.java,v 1.41 2009/03/08 18:03:22 wfro Exp $
  * Description: BinaryValue
- * Revision:    $Revision: 1.38 $
+ * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 10:36:53 $
+ * Date:        $Date: 2009/03/08 18:03:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,12 +72,12 @@ import java.util.StringTokenizer;
 import javax.servlet.http.HttpServletRequest;
 
 import org.openmdx.application.log.AppLog;
+import org.openmdx.application.mof.cci.Multiplicities;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.kernel.id.UUIDs;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
@@ -133,7 +133,7 @@ public class BinaryValue
         Object object, 
         FieldDef fieldDef,
         ApplicationContext application
-    ) {
+    ) throws ServiceException {
         String mimeType = BinaryValue.getMimeType(
             object,
             fieldDef.qualifiedFeatureName,
@@ -169,7 +169,7 @@ public class BinaryValue
         Object object, 
         FieldDef fieldDef,
         ApplicationContext application
-    ) {
+    ) throws ServiceException {
         super(
             object, 
             fieldDef,
@@ -203,7 +203,7 @@ public class BinaryValue
             (featureDef != null)
         ) {
             // <<stream>> org:w3c:binary can not be optional
-            if(Multiplicities.STREAM.equals(featureDef.values("multiplicity").get(0))) {
+            if(Multiplicities.STREAM.equals(featureDef.objGetValue("multiplicity"))) {
                 this.isNull = false;
             }
             // Check whether binary value is empty
@@ -218,7 +218,8 @@ public class BinaryValue
                 String encodedName = this.name;
                 try {
                     encodedName = URLEncoder.encode(this.name, "UTF-8");
-                } catch(Exception e) {}
+                } 
+                catch(Exception e) {}
                 this.downloadAction = 
                     new Action(
                         Action.EVENT_DOWNLOAD_FROM_FEATURE,

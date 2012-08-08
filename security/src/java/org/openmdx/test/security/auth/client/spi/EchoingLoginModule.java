@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: EchoingLoginModule.java,v 1.1 2007/11/26 14:04:35 hburger Exp $
+ * Name:        $Id: EchoingLoginModule.java,v 1.2 2009/03/08 18:52:19 wfro Exp $
  * Description: Echoing Login Module
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:35 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -113,13 +113,16 @@ public class EchoingLoginModule implements LoginModule {
 						usernameCallback.getName() == null ? usernameCallback.getDefaultName() : usernameCallback.getName()
 					)
 				);
-			} else if (callback instanceof PasswordCallback) {
+			} 
+			else if (callback instanceof PasswordCallback) {
 				PasswordCallback passwordCallback = (PasswordCallback) callback;
 				System.out.println('\t' + passwordCallback.getPrompt() + ": " + new String(passwordCallback.getPassword()));
-			} else if (callback instanceof TextInputCallback) {
+			} 
+			else if (callback instanceof TextInputCallback) {
 				TextInputCallback passcodeCallback = (TextInputCallback) callback;
 				System.out.println('\t' + passcodeCallback.getPrompt() + ": " + passcodeCallback.getText());
-			} else {
+			} 
+			else {
 				System.out.println('\t' + callback.getClass().getName() + " not supported");
 			}
 		}
@@ -130,22 +133,25 @@ public class EchoingLoginModule implements LoginModule {
 		System.out.println("\nLoggging in...");
 		try {
 			this.callbackHandler.handle(this.callbacks);
-		} catch (IOException exception) {
+		} 
+		catch (IOException exception) {
 			throw (LoginException) (
 				CallbackActions.CANCEL.equals(exception.getMessage()) ?
 					new CancelledCallbackException("Authentication Cancelled").initCause(exception) :
 					new LoginException("Callback Failure").initCause(exception)
 			);
-		} catch (UnsupportedCallbackException exception) {
+		} 
+		catch (UnsupportedCallbackException exception) {
 			throw (LoginException )new LoginException("Inappropriate Callback Handler").initCause(exception);
 		}
 		this.accepted = Arrays.equals(
 			PASSWORD, 
-			((PasswordCallback)callbacks[1]).getPassword()
+			((PasswordCallback)this.callbacks[1]).getPassword()
 		);
 		if(this.accepted) {
 			return true; // Login module is relevant
-		} else {
+		} 
+		else {
 			throw new FailedLoginException(
 				"Invalid Password"
 			);

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DbObjectConfiguration.java,v 1.13 2008/09/09 14:49:28 hburger Exp $
+ * Name:        $Id: DbObjectConfiguration.java,v 1.15 2009/01/13 23:51:12 wfro Exp $
  * Description: TypeConfigurationEntry class
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/09 14:49:28 $
+ * Date:        $Date: 2009/01/13 23:51:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,14 +53,13 @@
 package org.openmdx.compatibility.base.dataprovider.layer.persistence.jdbc;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.resource.ResourceException;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
-import org.openmdx.base.text.pattern.RegularExpression;
-import org.openmdx.base.text.pattern.cci.Pattern_1_0;
-import org.openmdx.compatibility.base.naming.Path;
 
 //---------------------------------------------------------------------------
 /**
@@ -125,7 +124,7 @@ public class DbObjectConfiguration {
         : new String[]{joinTable, joinColumnEnd1, joinColumnEnd2};
     this.objectIdComponents = 0;
     if(objectIdPattern != null) {
-      this.objectIdPatternMatcher = RegularExpression.compile(objectIdPattern);
+      this.objectIdPatternMatcher = Pattern.compile(objectIdPattern);
       for(int i = 0; i < objectIdPattern.length(); i++) {
         if('(' == objectIdPattern.charAt(i)) {
           this.objectIdComponents++;
@@ -196,7 +195,7 @@ public class DbObjectConfiguration {
   }
 
   //---------------------------------------------------------------------------
-  public Pattern_1_0 getObjectIdPatternMatcher(
+  public Pattern getObjectIdPatternMatcher(
   ) {
     return this.objectIdPatternMatcher;
   }
@@ -264,7 +263,7 @@ public class DbObjectConfiguration {
   private final int pathNormalizeLevel;
   private final String dbObjectHint;
   private final String objectIdPattern;
-  private final Pattern_1_0 objectIdPatternMatcher;
+  private final Pattern objectIdPatternMatcher;
   private int objectIdComponents;
   private final List autonumColumns;
   private final String[] joinCriteria;

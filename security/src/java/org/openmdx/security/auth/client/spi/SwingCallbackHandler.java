@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: SwingCallbackHandler.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: SwingCallbackHandler.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
  * Description: Swing Based Callback Handler
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,8 +68,7 @@ import javax.swing.SwingUtilities;
  * Swing Based Callback Handler
  */
 public class SwingCallbackHandler 
-	implements Runnable, CallbackHandler, SwingCallbackContext 
-{
+	implements Runnable, CallbackHandler, SwingCallbackContext {
 	
 	/**
 	 * Constructor 
@@ -105,10 +104,12 @@ public class SwingCallbackHandler
 			this.handled.awaitUninterruptibly();
 			if(this.exception instanceof UnsupportedCallbackException) {
 				throw (UnsupportedCallbackException)this.exception;
-			} else if (this.exception instanceof IOException) {
+			} 
+			else if (this.exception instanceof IOException) {
 				throw (IOException)this.exception;
 			}
-		} finally {
+		} 
+    	finally {
 			this.callbacks = null;
         	this.handler.unlock();
 		}
@@ -122,11 +123,13 @@ public class SwingCallbackHandler
 	public void run() {
     	this.handler.lock();
         try {
-			this.frame = new JFrame(toLocalizedString("LOGIN_WINDOW"));
+			this.frame = new JFrame(this.toLocalizedString("LOGIN_WINDOW"));
 			new SwingCallbackPanel(this);
-		} catch (UnsupportedCallbackException exception) {
-			signalFailure(exception);
-        } finally {
+		} 
+        catch (UnsupportedCallbackException exception) {
+        	this.signalFailure(exception);
+        } 
+        finally {
         	this.handler.unlock();
         }
 	}
@@ -148,7 +151,8 @@ public class SwingCallbackHandler
 			this.exception = exception;
 			this.frame.dispatchEvent(new WindowEvent(this.frame, WindowEvent.WINDOW_CLOSING));
             this.handled.signal();
-		} finally {
+		} 
+		finally {
         	this.handler.unlock();
 		}
 	}
@@ -158,7 +162,7 @@ public class SwingCallbackHandler
 	 */
 	public void signalReturn(
 	){
-		signalHandled(null);
+		this.signalHandled(null);
 	}
 
 	/**
@@ -169,7 +173,7 @@ public class SwingCallbackHandler
 	public void signalFailure(
 		UnsupportedCallbackException exception
 	){
-		signalHandled(exception);
+		this.signalHandled(exception);
 	}
 	
 	/**
@@ -180,7 +184,7 @@ public class SwingCallbackHandler
 	public void signalFailure(
 		IOException exception
 	){
-		signalHandled(exception);
+		this.signalHandled(exception);
 	}
 	
 	/**
@@ -216,9 +220,11 @@ public class SwingCallbackHandler
 	){
 		if(this.resourceBundle == null) {
 			return string;
-		} else try {
+		} 
+		else try {
 			return this.resourceBundle.getString(string);
-		} catch (MissingResourceException exception) {
+		} 
+		catch (MissingResourceException exception) {
 			return string;
 		}
 	}

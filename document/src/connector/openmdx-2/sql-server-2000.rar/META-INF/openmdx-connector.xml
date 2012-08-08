@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE openmdx-connector PUBLIC "-//openMDX//DTD Connector Extension 1.0//EN" "xri:+resource/org/openmdx/kernel/application/deploy/openmdx-connector_1_0.dtd">
-<openmdx-connector>
-	<resourceadapter>
-		<connectionfactory-jndi-name>jdbc/openMDX_test</connectionfactory-jndi-name>
-	</resourceadapter>
-</openmdx-connector>

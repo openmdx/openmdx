@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1PackageInvocationHandler.java,v 1.19 2008/12/17 13:54:47 wfro Exp $
+ * Name:        $Id: Jmi1PackageInvocationHandler.java,v 1.25 2009/01/27 00:10:59 wfro Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/17 13:54:47 $
+ * Date:        $Date: 2009/01/27 00:10:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,14 +59,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.omg.mof.spi.Identifier;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_4;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.mapping.java.Identifier;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.ComparableTypePredicate;
 import org.w3c.cci2.MatchableTypePredicate;
@@ -148,7 +147,6 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
     }
 
     //-----------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public String getQualifiedMofName(
         String qualifiedPackageName,
         String cciName
@@ -162,8 +160,8 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                 i.hasNext(); 
             ) {
                 ModelElement_1_0 e = i.next();
-                String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier((String)e.values("name").get(0));
-                String qualifiedElementName = (String)e.values("qualifiedName").get(0);
+                String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier((String)e.objGetValue("name"));
+                String qualifiedElementName = (String)e.objGetValue("qualifiedName");
                 if(
                     (model.isClassType(e) || model.isStructureType(e)) &&
                     elementName.equals(cciName) &&
@@ -234,7 +232,7 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
             );
         } 
         else if(
-            declaringClass == RefPackage_1_4.class ||    
+            declaringClass == Jmi1Package_1_0.class ||    
             methodName.startsWith("ref") && 
             (method.getName().length() > 3) &&
             Character.isUpperCase(methodName.charAt(3))

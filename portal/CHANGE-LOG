@@ -4,11 +4,180 @@
                     =====================================
 
 ==============================================================================
-Version 2.2.1+                                                      2008-11-27
+Version 2.4.0                                                       2009-02-28
 ==============================================================================
 
 1.    NEW FEATURES
       
+      CR10008368
+      Mandatory optional attributes. The tag <mandatory> allows to customize
+      mandatory input fields. Example:
+      
+			<org.openmdx.ui1.ElementDefinition name="org:openmdx:example:workshop1:Member:name">
+				<_object>
+					<active>true</active>
+					<mandatory>true</mandatory>
+					<toolTip>
+						<_item>Member name</_item>
+					</toolTip>
+					<label>
+						<_item>Member name</_item>
+					</label>
+					<order>
+						<_item>0</_item>
+						<_item>0</_item>
+						<_item>40</_item>
+					</order>
+				</_object>
+				<_content/>
+			</org.openmdx.ui1.ElementDefinition>      
+      
+      CR10008309
+      Forms: allow to define forms which are composed from customized fields.
+      A form consists of a set of field groups and a field group of a set
+      of fields. A field definition is specified by the class name and
+      feature name of a modeled, customized field and a field order. Below
+      is a sample definition:
+      
+			<?xml version="1.0" encoding="UTF-8"?>
+			<org.openmdx.base.Authority xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="org:openmdx:ui1" xsi:noNamespaceSchemaLocation="xri:+resource/org/openmdx/ui1/xmi/ui1.xsd">
+			  <_object/>
+			  <_content>
+			    <provider>
+			      <org.openmdx.base.Provider qualifiedName="MDX" _operation="null">
+			        <_object/>
+			        <_content>
+			          <segment>
+			            <org.openmdx.ui1.Segment qualifiedName="Root" _operation="null">
+			              <_object/>
+			              <_content>
+						            <org.openmdx.ui1.FormDefinition name="ProductBasePriceForm">
+						              <_object>
+						                <title>
+						                  <_item>Product Price</_item>
+						                </title>
+						                <toolTip>
+						                  <_item>Product Price</_item>
+						                </toolTip>
+						              </_object>
+						              <_content>
+						                <formFieldGroupDefinition>
+						                  <org.openmdx.ui1.FormFieldGroupDefinition name="ProductBasePriceInformation">
+						                    <_object>
+						                      <label>
+						                        <_item>Product Price</_item>
+						                      </label>
+						                      <order>10</order>
+						                      <columnBreakAtElement>
+						                        <_item>4</_item>
+						                        <_item>8</_item>
+						                      </columnBreakAtElement>
+						                    </_object>
+						                    <_content>
+						                      <formFieldDefinition>
+						                        <org.openmdx.ui1.FormFieldDefinition id="usage">
+						                          <_object>
+						                            <forClass>org:opencrx:kernel:product1:AbstractProductPrice</forClass>
+						                            <featureName>usage</featureName>
+						                            <order>100</order>                            
+						                          </_object>
+						                          <_content />
+						                        </org.openmdx.ui1.FormFieldDefinition>
+						                        <org.openmdx.ui1.FormFieldDefinition id="priceLevel">
+						                          <_object>
+						                            <forClass>org:opencrx:kernel:product1:AbstractPriceLevel</forClass>
+						                            <featureName>basedOn</featureName>
+						                            <order>200</order>                            
+						                          </_object>
+						                          <_content />
+						                        </org.openmdx.ui1.FormFieldDefinition>
+						                        <org.openmdx.ui1.FormFieldDefinition id="price">
+						                          <_object>
+						                            <forClass>org:opencrx:kernel:product1:AbstractProductPrice</forClass>
+						                            <featureName>price</featureName>
+						                            <order>300</order>                            
+						                          </_object>
+						                          <_content />
+						                        </org.openmdx.ui1.FormFieldDefinition>
+						                        <org.openmdx.ui1.FormFieldDefinition id="quantityFrom">
+						                          <_object>
+						                            <forClass>org:opencrx:kernel:product1:AbstractProductPrice</forClass>
+						                            <featureName>quantityFrom</featureName>
+						                            <order>400</order>                            
+						                          </_object>
+						                          <_content />
+						                        </org.openmdx.ui1.FormFieldDefinition>
+						                        <org.openmdx.ui1.FormFieldDefinition id="quantityTo">
+						                          <_object>
+						                            <forClass>org:opencrx:kernel:product1:AbstractProductPrice</forClass>
+						                            <featureName>quantityTo</featureName>
+						                            <order>500</order>                            
+						                          </_object>
+						                          <_content />
+						                        </org.openmdx.ui1.FormFieldDefinition>
+						                        <org.openmdx.ui1.FormFieldDefinition id="discountIsPercentage">
+						                          <_object>
+						                            <forClass>org:opencrx:kernel:product1:AbstractProductPrice</forClass>
+						                            <featureName>discountIsPercentage</featureName>
+						                            <order>600</order>                            
+						                          </_object>
+						                          <_content />
+						                        </org.openmdx.ui1.FormFieldDefinition>
+						                        <org.openmdx.ui1.FormFieldDefinition id="discount">
+						                          <_object>
+						                            <forClass>org:opencrx:kernel:product1:AbstractProductPrice</forClass>
+						                            <featureName>discount</featureName>
+						                            <order>700</order>                            
+						                          </_object>
+						                          <_content />
+						                        </org.openmdx.ui1.FormFieldDefinition>
+						                      </formFieldDefinition>
+						                    </_content>
+						                  </org.openmdx.ui1.FormFieldGroupDefinition>
+						                </formFieldGroupDefinition>
+						              </_content>
+						            </org.openmdx.ui1.FormDefinition>                       
+						          </formDefinition>
+			              </_content>
+			            </org.openmdx.ui1.Segment>
+			          </segment>
+			        </_content>
+			      </org.openmdx.base.Provider>
+			    </provider>
+			  </_content>
+			</org.openmdx.base.Authority>
+      
+      The form can then be used in a wizard as follows:
+      
+			1. Get the form
+			org.openmdx.ui1.jmi1.FormDefinition productBasePriceFormDefinition = app.getUiFormDefinition("ProductBasePriceForm");
+			org.openmdx.portal.servlet.control.FormControl productBasePriceForm = new org.openmdx.portal.servlet.control.FormControl(
+				formDefinition.refGetPath().getBase(),
+				app.getCurrentLocaleAsString(),
+				app.getCurrentLocaleAsIndex(),
+				app.getUiContext(),
+				productBasePriceFormDefinition
+			);
+			
+			2. Read the fields from an HttpRequest into a field value map
+			Map formValues = new HashMap();
+			productBasePriceForm.updateObject(
+				request.getParameterMap(),
+				formValues,
+				app,
+				pm
+			);
+			
+			3. Paint the form
+			form.paint(
+				p,
+				null, // frame
+				true // forEditing
+			);
+			p.flush();
+
+			For more information and samples see the project www.opencrx.org.
+						
       CR10006304
       Support for base and AdditionalElementDefinition in different grid panes.
       The order definition of an additional element definition allows to

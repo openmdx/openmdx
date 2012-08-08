@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CutDerivedFeaturesXmlExporter.java,v 1.9 2008/05/14 09:47:42 hburger Exp $
+ * Name:        $Id: CutDerivedFeaturesXmlExporter.java,v 1.15 2009/01/13 02:09:34 wfro Exp $
  * Description: Cut Derived Features XML Exporter
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/14 09:47:42 $
+ * Date:        $Date: 2009/01/13 02:09:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,12 +55,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.query.Filter;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterProperty;
 
 
 //------------------------------------------------------------------------
@@ -75,7 +75,6 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
  * 
  * @author anyff
  */
-@SuppressWarnings("unchecked")
 public class CutDerivedFeaturesXmlExporter {
 
     /**
@@ -94,12 +93,11 @@ public class CutDerivedFeaturesXmlExporter {
         RequestCollection reader, 
         List<Path> startPoints,
         Set<String> referenceFilters,
-        Map<String,Filter> attributeFilters,
+        Map<String,FilterProperty[]> attributeFilters,
         PrintStream exportStream,
         String schemaString,
         Model_1_0 model        
     ) {
-//      this.header = header;
         this.reader = reader;
         this.startPoints = startPoints;
         this.referenceFilters = referenceFilters;
@@ -281,7 +279,7 @@ public class CutDerivedFeaturesXmlExporter {
     
     private final RequestCollection reader;
     private final Set<String> referenceFilters;
-    private final Map<String,Filter> attributeFilters;
+    private final Map<String,FilterProperty[]> attributeFilters;
     
 }
 

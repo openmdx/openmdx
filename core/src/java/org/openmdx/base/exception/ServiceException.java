@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ServiceException.java,v 1.14 2008/10/06 17:34:52 hburger Exp $
+ * Name:        $Id: ServiceException.java,v 1.18 2009/03/05 13:53:30 hburger Exp $
  * Description: ServiceException class
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/06 17:34:52 $
+ * Date:        $Date: 2009/03/05 13:53:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,17 +55,11 @@ import java.io.PrintWriter;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.BasicException.Parameter;
-import org.openmdx.kernel.log.SysLog;
 
 public final class ServiceException
     extends Exception
-    implements BasicException.Wrapper
+    implements BasicException.Holder
 {
-
-    /**
-     * Implements <code>Serializable</code>
-     */
-//    private static final long serialVersionUID = 4120847750670858549L;
 
     /**
      * Constructor  
@@ -76,7 +70,7 @@ public final class ServiceException
         BasicException exception
     ){
         super.initCause(
-            exception == null ? BasicException.toStackedException(this) : exception
+            exception == null ? BasicException.toExceptionStack(this) : exception
         );
     }
 
@@ -86,39 +80,12 @@ public final class ServiceException
      * @param exception the Exception to be wrapped 
      */
     public ServiceException (
-        Exception exception
+        Exception exception,
+        Parameter... parameters
     ){
         super.initCause(
-            BasicException.toStackedException(exception, this)
+            BasicException.toStackedException(exception, this, parameters)
         );
-    }
-
-    /**
-     * Creates a new <code>ServiceException</code>.
-     *
-     * @param   cause
-     *          The exception cause.
-     * @param   exceptionDomain
-     *          The exception domain or <code>null</code> for the
-     *          default exception domain containing negative exception codes
-     *          only.
-     * @param   exceptionCode
-     *          The exception code. Negative codes are shared by all exception
-     *          domains, while positive ones are (non-default) exception
-     *          domain specific.
-     * @param   parameters
-     *          The exception specific parameters.
-     * @param   description
-     *          A readable description usually not including the parameters.
-     */
-    public ServiceException(
-        Exception cause,
-        String exceptionDomain,
-        int exceptionCode,
-        BasicException.Parameter[] parameters,
-        String description
-    ){
-        this(cause, exceptionDomain, exceptionCode, description, parameters);
     }
 
     /**
@@ -177,31 +144,6 @@ public final class ServiceException
     public ServiceException(
         String exceptionDomain,
         int exceptionCode,
-        BasicException.Parameter[] parameters,
-        String description
-    ) {
-        this(exceptionDomain, exceptionCode, description, parameters);
-    }
-
-    /**
-     * Creates a new <code>ServiceException</code>.
-     *
-     * @param   exceptionDomain
-     *          The exception domain or <code>null</code> for the
-     *          default exception domain containing negative exception codes
-     *          only.
-     * @param   exceptionCode
-     *          The exception code. Negative codes are shared by all exception
-     *          domains, while positive ones are (non-default) exception
-     *          domain specific.
-     * @param   parameters
-     *          The exception specific parameters.
-     * @param   message
-     *          A readable description not including the parameters.
-     */
-    public ServiceException(
-        String exceptionDomain,
-        int exceptionCode,
         String description,
         Parameter... parameters
     ) {
@@ -213,7 +155,6 @@ public final class ServiceException
             parameters
         );
     }
-
 
     /**
      * Implements <code>Serializable</code>
@@ -227,36 +168,24 @@ public final class ServiceException
      */
     public ServiceException log(
     ) {
-        SysLog.warning(this);
-        return this;
+        return BasicException.log(this);
     }
 
-
     /**
-     * 
+     * Returns the cause of an exception. The cause actually is the wrapped exception.
+     *
+     * @return Throwable  The exception cause.
      */
-    public ServiceException appendCause(
-        Throwable cause
+    public final BasicException getCause(
     ){
-        getCause().appendCause(cause);
-        return this;
+        return (BasicException) super.getCause();
     }
 
-
-    //------------------------------------------------------------------------
-    // Implements StackedException.Wrapper
-    //------------------------------------------------------------------------
-
-    /**
-     * Return a StackedException, this exception object's cause.
-     * 
-     * @return the BasicException wrapped by this object.
-     * 
-     * @deprecated use getCause()
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.exception.BasicException.Holder#getCause(java.lang.String)
      */
-    public BasicException getExceptionStack (
-    ) {
-        return getCause();
+    public BasicException getCause(String exceptionDomain) {
+        return getCause().getCause(exceptionDomain);
     }
 
     /**
@@ -264,12 +193,9 @@ public final class ServiceException
      *
      * @return the exception domain
      */
-    public String getExceptionDomain()
-    {
-        BasicException exceptionStack = getCause();
-        return exceptionStack == null ? 
-            BasicException.Code.DEFAULT_DOMAIN : 
-                exceptionStack.getExceptionDomain();
+    public String getExceptionDomain(
+    ){
+        return getCause().getExceptionDomain();
     }
 
     /**
@@ -277,102 +203,25 @@ public final class ServiceException
      *
      * @return the exception code
      */
-    public int getExceptionCode()
-    {
-        BasicException exceptionStack = getCause();
-        return exceptionStack == null ? 
-            BasicException.Code.GENERIC : 
-                exceptionStack.getExceptionCode();
-    }
-
-    /**
-     * Returns the cause belonging to a specific exception domain.
-     * 
-     * @param 	exceptionDomain
-     * 			the desired exception domain,
-     *          or <code>null</code> to retrieve the initial cause.
-     *
-     * @return  Either the cause belonging to a specific exception domain
-     *          or the initial cause if <code>exceptionDomain</code> is
-     * 			<code>null</code>.  
-     */
-    public BasicException getCause(
-        String exceptionDomain
+    public int getExceptionCode(
     ){
-        BasicException exceptionStack = getCause();
-        return exceptionStack == null ? 
-            null : 
-                exceptionStack.getCause(exceptionDomain);
+        return getCause().getExceptionCode();
     }
-
-
-    //------------------------------------------------------------------------
-    // Extends Throwable
-    //------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see java.lang.Throwable#getCause()
-     */
-    @Override
-    public final BasicException getCause() {
-        return (BasicException) super.getCause();
-    }
-    
-    /**
-     * Returns the detail message string of this RuntimeServiceException.  
-     */
-    public String getMessage(
-    ){
-        BasicException exceptionStack = getCause();
-        return exceptionStack == null ?
-            super.getMessage() : 
-                exceptionStack.getMessage() + ": " +
-                exceptionStack.getDescription();
-    }
-
-    /**
-     * A String consisting of the class of this exception, the exception 
-     * domain, the exception code, the exception description and the exception
-     * stack.
-     * 
-     * @return a multiline representation of this exception.
-     */     
-    public String toString(){
-        BasicException exceptionStack = getCause();
-        return 
-        exceptionStack == null ?
-            super.toString() : 
-                super.toString() + '\n' + exceptionStack;
-    }
-
-    
-    //----------------------------------------------------------------------------
-    // Deprecated
-    //----------------------------------------------------------------------------
 
     /* (non-Javadoc)
      * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
      */
+    @Override
     public void printStackTrace(PrintStream s) {
-        BasicException exceptionStack = getCause();
-        if(exceptionStack == null){
-            super.printStackTrace(s);
-        } else {
-            exceptionStack.printStack(this, s, true);
-        }
+        getCause().printStackTrace(s);
     }
 
     /* (non-Javadoc)
      * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
      */
+    @Override
     public void printStackTrace(PrintWriter s) {
-        BasicException exceptionStack = getCause();
-        if(exceptionStack == null){
-            super.printStackTrace(s);
-        } else {
-            exceptionStack.printStack(this, s, true);
-        }
+        getCause().printStackTrace(s);
     }
 
 }
-

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AppLog.java,v 1.1 2008/03/21 18:21:52 hburger Exp $
+ * Name:        $Id: AppLog.java,v 1.3 2009/02/20 23:29:42 hburger Exp $
  * Description: Logging
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:21:52 $
+ * Date:        $Date: 2009/02/20 23:29:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,10 +52,11 @@ package org.openmdx.compatibility.application.log;
 
 import java.util.Properties;
 
+import javax.management.RuntimeErrorException;
+
 import org.openmdx.application.Dependencies;
 import org.openmdx.compatibility.kernel.log.Config;
 import org.openmdx.compatibility.kernel.log.LogLevel;
-import org.openmdx.kernel.exception.VersionMismatchException;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.log.impl.Log;
 
@@ -910,8 +911,7 @@ public class AppLog extends Log {
                 // openmdx jar version dependeny check
                 try {
                     Dependencies.checkDependencies();
-                } 
-                catch (VersionMismatchException exception) {
+                } catch (RuntimeErrorException exception) {
                     AppLog.error("Dependency check failed", exception); 
                     throw exception;       
                 }

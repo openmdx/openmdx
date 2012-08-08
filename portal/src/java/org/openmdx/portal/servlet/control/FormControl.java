@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FormControl.java,v 1.3 2008/12/08 23:51:00 wfro Exp $
+ * Name:        $Id: FormControl.java,v 1.4 2009/03/08 18:03:26 wfro Exp $
  * Description: TabControl
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/08 23:51:00 $
+ * Date:        $Date: 2009/03/08 18:03:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -87,7 +87,7 @@ public class FormControl
             locale,
             localeAsIndex,
             formDefinition,
-            getFieldGroupControls(
+            FormControl.getFieldGroupControls(
                 id,
                 locale,
                 localeAsIndex,

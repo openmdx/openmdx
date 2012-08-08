@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DBOSlicedWithIdAsKey.java,v 1.35 2008/12/03 18:26:03 wfro Exp $
+ * Name:        $Id: DBOSlicedWithIdAsKey.java,v 1.43 2009/03/03 17:23:08 hburger Exp $
  * Description: SlicedDbObjectParentRidOnly class
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.43 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/03 18:26:03 $
+ * Date:        $Date: 2009/03/03 17:23:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,15 +59,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.code.Multiplicities;
 
 /**
  * Rows of this type do not contain the column object_rid. Instead, the rows
@@ -328,8 +328,7 @@ extends SlicedDbObject
                             statementParameters.get(j)
                         );
                     }
-                    SysLog.detail("statement", currentStatement);
-                    ps.executeUpdate();
+                    this.database.executeUpdate(ps, currentStatement, statementParameters);
                     ps.close(); ps = null;
                 }
                 // Composite objects (only if dbObject (=table) is configured)
@@ -381,9 +380,7 @@ extends SlicedDbObject
                             statementParameters.get(j)
                         );
                     }
-                    SysLog.detail("statement", currentStatement);
-                    SysLog.detail("parameters", statementParameters);
-                    ps.executeUpdate();
+                    this.database.executeUpdate(ps, currentStatement, statementParameters);
                     ps.close(); ps = null;
                 }
             }
@@ -428,34 +425,43 @@ extends SlicedDbObject
         DbObjectConfiguration dbObjectConfiguration = this.getConfiguration();    
         DataproviderObject normalizedObject = new DataproviderObject(new Path(""));
         int pathNormalizeLevel = dbObjectConfiguration.getPathNormalizeLevel();
-
+        Model_1_0 model = this.getModel();
+        
         // Add size attributes
         if(this.database.isSetSizeColumns()) {
-            ModelElement_1_0 classDef = this.database.model.getElement(
+            ModelElement_1_0 classDef = model.getElement(
                 object.values(SystemAttributes.OBJECT_CLASS).get(0)
             );
-            for(ModelElement_1_0 feature : this.database.model.getAttributeDefs(classDef, false, false).values()) {
-                String featureName = (String)feature.values("name").get(0);
-                String featureQualifiedName = (String)feature.values("qualifiedName").get(0);                
+            for(ModelElement_1_0 feature : model.getAttributeDefs(classDef, false, false).values()) {
+                String featureName = (String)feature.objGetValue("name");
+                String featureQualifiedName = (String)feature.objGetValue("qualifiedName");                
                 if(
-                        !this.database.embeddedFeatures.containsKey(featureName) &&
-                        !this.database.nonPersistentFeatures.contains(featureQualifiedName)
+                    !this.database.embeddedFeatures.containsKey(featureName) &&
+                    !this.database.nonPersistentFeatures.contains(featureQualifiedName)
                 ) {                
-                    String multiplicity = (String)feature.values("multiplicity").get(0);
+                    String multiplicity = (String)feature.objGetValue("multiplicity");
+                    boolean isChangeable = true;
                     // multi-valued reference?
-                    if(this.database.model.isReferenceType(feature)) {                    
-                        ModelElement_1_0 end = this.database.model.getElement(
-                            feature.values("referencedEnd").get(0)
+                    if(model.isReferenceType(feature)) {
+                        isChangeable = !model.referenceIsDerived(feature);
+                        ModelElement_1_0 end = model.getElement(
+                            feature.objGetValue("referencedEnd")
                         );
-                        if(!end.values("qualifierName").isEmpty()) {
+                        if(!end.objGetList("qualifierName").isEmpty()) {
                             multiplicity = Multiplicities.LIST;
                         }
                     }
-                    if(                    
-                            Multiplicities.MULTI_VALUE.equals(multiplicity) ||
-                            Multiplicities.LIST.equals(multiplicity) ||
-                            Multiplicities.SET.equals(multiplicity) ||
-                            Multiplicities.SPARSEARRAY.equals(multiplicity)                    
+                    else {
+                        isChangeable = 
+                            !((Boolean)feature.objGetValue("isDerived")).booleanValue() && 
+                            ((Boolean)feature.objGetValue("isChangeable")).booleanValue();
+                    }
+                    if(
+                        isChangeable &&
+                        (Multiplicities.MULTI_VALUE.equals(multiplicity) ||
+                        Multiplicities.LIST.equals(multiplicity) ||
+                        Multiplicities.SET.equals(multiplicity) ||
+                        Multiplicities.SPARSEARRAY.equals(multiplicity))                    
                     ) {
                         SparseList<?> source = object.getValues(featureName); 
                         SparseList target = object.clearValues(
@@ -470,7 +476,7 @@ extends SlicedDbObject
                 }
             }
             // created_by, modified_by are derived and persistent
-            if(this.database.model.isSubtypeOf(classDef, "org:openmdx:base:BasicObject")) {
+            if(model.isSubtypeOf(classDef, "org:openmdx:base:BasicObject")) {
                 String featureName = SystemAttributes.CREATED_BY;
                 object.clearValues(featureName + "_").add(
                     Integer.valueOf(object.getValues(featureName) == null ? 0 : object.values(featureName).size())

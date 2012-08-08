@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: SwingCallbackPanel.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: SwingCallbackPanel.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
  * Description: Swing Callback Panel
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -82,8 +82,7 @@ import org.openmdx.uses.layout.SpringUtilities;
  * Swing Callback Panel
  */
 public class SwingCallbackPanel extends JPanel
-	implements ActionListener 
-{
+	implements ActionListener {
 	
     /**
 	 * Implements <code>Serializable</code>
@@ -105,11 +104,11 @@ public class SwingCallbackPanel extends JPanel
     	SwingCallbackContext callbackContext
     ) throws UnsupportedCallbackException {
     	super();
-        setOpaque(true); //content panes must be opaque
+    	this.setOpaque(true); //content panes must be opaque
         this.callbackContext = callbackContext;
-        addHeaderPane();
-        this.fields = addCallbackPane(callbackContext.getCallbacks());
-        addCompletionPane();
+        this.addHeaderPane();
+        this.fields = this.addCallbackPane(callbackContext.getCallbacks());
+        this.addCompletionPane();
         // 
         // Propagate
         //
@@ -152,7 +151,7 @@ public class SwingCallbackPanel extends JPanel
 			i < target.length;
 			i++
 		){
-			propagateValue(target[i], source[i]);
+			this.propagateValue(target[i], source[i]);
 		}
 	}
 	
@@ -161,14 +160,18 @@ public class SwingCallbackPanel extends JPanel
 		JComponent source
 	) throws UnsupportedCallbackException{
     	if(target instanceof NameCallback) {
-    		propagatValue((NameCallback)target, (JTextField)source);
-    	} else if(target instanceof PasswordCallback) {
-    		propagatValue((PasswordCallback)target, (JPasswordField)source);
-    	} else if (target instanceof TextInputCallback) {
-    		propagatValue((TextInputCallback)target, (JTextField)source);
-    	} else if (target instanceof TextOutputCallback) {
+    		this.propagatValue((NameCallback)target, (JTextField)source);
+    	} 
+    	else if(target instanceof PasswordCallback) {
+    		this.propagatValue((PasswordCallback)target, (JPasswordField)source);
+    	} 
+    	else if (target instanceof TextInputCallback) {
+    		this.propagatValue((TextInputCallback)target, (JTextField)source);
+    	} 
+    	else if (target instanceof TextOutputCallback) {
     		// nothing to be done
-    	} else throw new UnsupportedCallbackException(
+    	} 
+    	else throw new UnsupportedCallbackException(
     		target,
         	"Unsupported callback class " + target.getClass().getName()
         );
@@ -218,7 +221,7 @@ public class SwingCallbackPanel extends JPanel
 				)
 			);
 			pane.add(image);
-			add(pane);
+			this.add(pane);
     	}
     }
 	
@@ -229,7 +232,7 @@ public class SwingCallbackPanel extends JPanel
         JPanel pane = new JPanel(new SpringLayout());
     	int i = 0;
     	for(Callback callback : callbacks) {
-    		fields[i++] = addCallback(pane, callback); 
+    		fields[i++] = this.addCallback(pane, callback); 
     	}
         SpringUtilities.makeCompactGrid(
         	pane,
@@ -237,7 +240,7 @@ public class SwingCallbackPanel extends JPanel
             6, 6,   // initX, initY
             6, 6    // xPad, yPad
         );
-        add(pane);
+        this.add(pane);
         return fields;
     }
 
@@ -245,14 +248,18 @@ public class SwingCallbackPanel extends JPanel
 		JPanel pane, Callback callback
 	) throws UnsupportedCallbackException{
     	if(callback instanceof NameCallback) {
-    		return addCallback(pane, (NameCallback) callback);
-    	} else if(callback instanceof PasswordCallback) {
-    		return addCallback(pane, (PasswordCallback) callback);
-    	} else if (callback instanceof TextInputCallback) {
-    		return addCallback(pane, (TextInputCallback) callback);
-    	} else if (callback instanceof TextOutputCallback) {
-    		return addCallback(pane, (TextOutputCallback) callback);
-    	} else throw new UnsupportedCallbackException(
+    		return this.addCallback(pane, (NameCallback) callback);
+    	} 
+    	else if(callback instanceof PasswordCallback) {
+    		return this.addCallback(pane, (PasswordCallback) callback);
+    	} 
+    	else if (callback instanceof TextInputCallback) {
+    		return this.addCallback(pane, (TextInputCallback) callback);
+    	} 
+    	else if (callback instanceof TextOutputCallback) {
+    		return this.addCallback(pane, (TextOutputCallback) callback);
+    	} 
+    	else throw new UnsupportedCallbackException(
     		callback,
         	"Unsupported callback class " + callback.getClass().getName()
         );
@@ -260,7 +267,7 @@ public class SwingCallbackPanel extends JPanel
 
 	protected int getPasswordFieldLength(
 	){
-		return DEFAULT_FIELD_LENGTH;
+		return SwingCallbackPanel.DEFAULT_FIELD_LENGTH;
 	}
 	
 	protected JPasswordField addCallback(
@@ -270,7 +277,7 @@ public class SwingCallbackPanel extends JPanel
         //
         // Field
         //
-		JPasswordField field = new JPasswordField(getPasswordFieldLength());
+		JPasswordField field = new JPasswordField(this.getPasswordFieldLength());
 		field.setActionCommand(CallbackActions.LOGIN);
 		field.addActionListener(this);
         pane.add(field);
@@ -293,7 +300,7 @@ public class SwingCallbackPanel extends JPanel
 
 	protected int getNameFieldLength(
 	){
-		return DEFAULT_FIELD_LENGTH;
+		return SwingCallbackPanel.DEFAULT_FIELD_LENGTH;
 	}
 	
 	protected JTextField addCallback(
@@ -305,7 +312,7 @@ public class SwingCallbackPanel extends JPanel
         //
 		JTextField field = new JTextField(
 			callback.getDefaultName(), 
-			getNameFieldLength()
+			this.getNameFieldLength()
 		);
 		field.setActionCommand(CallbackActions.LOGIN);
 		field.addActionListener(this);
@@ -327,7 +334,7 @@ public class SwingCallbackPanel extends JPanel
 
 	protected int getTextFieldLength(
 	){
-		return DEFAULT_FIELD_LENGTH;
+		return SwingCallbackPanel.DEFAULT_FIELD_LENGTH;
 	}
 	
 	protected JTextField addCallback(
@@ -339,7 +346,7 @@ public class SwingCallbackPanel extends JPanel
         //
 		JTextField field = new JTextField(
 			callback.getDefaultText(), 
-			getTextFieldLength()
+			this.getTextFieldLength()
 		);
 		field.setActionCommand(CallbackActions.LOGIN);
 		field.addActionListener(this);
@@ -407,7 +414,7 @@ public class SwingCallbackPanel extends JPanel
         // 
         pane.add(loginButton);
         pane.add(cancelButton);
-        add(pane);
+        this.add(pane);
 	}
 	
     public void actionPerformed(
@@ -420,15 +427,17 @@ public class SwingCallbackPanel extends JPanel
         	// Login
         	//
         	try {
-				propagateValues(
+        		this.propagateValues(
 					this.callbackContext.getCallbacks(),
 					this.fields
 				);
 	            this.callbackContext.signalReturn();
-			} catch (UnsupportedCallbackException exception) {
+			} 
+        	catch (UnsupportedCallbackException exception) {
 	            this.callbackContext.signalFailure(exception);
 			}
-        } else if (CallbackActions.CANCEL.equals(cmd)) {
+        } 
+        else if (CallbackActions.CANCEL.equals(cmd)) {
         	//
         	// Cancel
         	//
@@ -453,7 +462,7 @@ public class SwingCallbackPanel extends JPanel
     	if(callbacks != null) {
 	    	int i = 0;
 	    	for(Callback callback : callbacks) {
-	    		if(isEnabled(callback)) {
+	    		if(this.isEnabled(callback)) {
 	    			this.fields[i].requestFocusInWindow();
 	    			return;
 	    		}

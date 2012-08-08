@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestClientCertificate.java,v 1.3 2007/08/13 17:33:08 hburger Exp $
+ * Name:        $Id: TestClientCertificate.java,v 1.6 2009/01/22 18:36:05 wfro Exp $
  * Description: Test Key Store Resources
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/13 17:33:08 $
+ * Date:        $Date: 2009/01/22 18:36:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,15 +62,15 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.openmdx.base.accessor.jmi.spi.PersistenceManagerFactory_1;
-import org.openmdx.base.application.deploy.Deployment;
+import org.openmdx.application.cci.Model_1Deployment;
+import org.openmdx.application.dataprovider.accessor.Jmi1AccessorFactory_1;
+import org.openmdx.application.dataprovider.deployment.Dataprovider_1Deployment;
+import org.openmdx.application.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
 import org.openmdx.base.application.deploy.InProcessDeployment;
 import org.openmdx.base.cci.Authority;
 import org.openmdx.base.cci.Provider;
+import org.openmdx.base.deploy.Deployment;
 import org.openmdx.base.object.jdo.ConfigurableProperties_2_0;
-import org.openmdx.compatibility.base.application.cci.Dataprovider_1Deployment;
-import org.openmdx.compatibility.base.application.cci.Model_1Deployment;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
 import org.openmdx.preferences1.cci.Preferences;
 import org.openmdx.preferences1.cci.Segment;
 import org.openmdx.preferences1.jmi.Preferences1Package;
@@ -120,7 +120,7 @@ public class TestClientCertificate extends TestCase {
         );
         configuration.put(
             ConfigurableProperties_2_0.FACTORY_CLASS,
-            PersistenceManagerFactory_1.class.getName()
+            Jmi1AccessorFactory_1.class.getName()
         );
         configuration.put(
             ConfigurableProperties_2_0.OPTIMISTIC,

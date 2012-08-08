@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ConnectionFactory_2.java,v 1.5 2008/06/09 17:31:27 hburger Exp $
+ * Name:        $Id: ConnectionFactory_2.java,v 1.7 2009/02/02 15:52:58 hburger Exp $
  * Description: Accessor Factory
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/09 17:31:27 $
+ * Date:        $Date: 2009/02/02 15:52:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.

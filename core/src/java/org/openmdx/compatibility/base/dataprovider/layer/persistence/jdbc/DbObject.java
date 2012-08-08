@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DbObject.java,v 1.27 2008/12/01 10:50:16 hburger Exp $
+ * Name:        $Id: DbObject.java,v 1.33 2009/02/10 10:23:25 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.33 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/01 10:50:16 $
+ * Date:        $Date: 2009/02/10 10:23:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,11 +58,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.query.FilterProperty;
+import org.openmdx.base.mof.cci.Model_1_6;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterProperty;
 
 /**
  * DbObject provides methods for type-specific object access.
@@ -106,7 +107,9 @@ import org.openmdx.compatibility.base.query.FilterProperty;
  * </org.openmdx.deployment1.DataproviderTypeStringProperty>
  * </pre>
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked", "serial"
+})
 public abstract class DbObject
   implements Serializable {
 
@@ -163,6 +166,11 @@ public abstract class DbObject
   // of DbObjecType.
   //---------------------------------------------------------------------------  
 
+  //---------------------------------------------------------------------------
+  protected Model_1_6 getModel(){
+      return this.database.getModel();
+  }
+  
   //---------------------------------------------------------------------------
   public DbObjectConfiguration getConfiguration(
   ) throws ServiceException {

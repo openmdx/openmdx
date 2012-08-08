@@ -39,10 +39,12 @@ package org.openmdx.uses.org.apache.commons.beanutils.converters;
  *  
  *
  * @author Craig R. McClanahan
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:17 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:59 $
  * @since 1.3
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked"
+})
 public final class StringConverter extends AbstractConverter {
 
 
@@ -51,7 +53,7 @@ public final class StringConverter extends AbstractConverter {
      * a <code>ConversionException</code> if an error occurs.
      */
     public StringConverter() {
-        super(String.class);
+        super();
     }
 
     /**
@@ -63,7 +65,16 @@ public final class StringConverter extends AbstractConverter {
      * occurs converting the value.
      */
     public StringConverter(Object defaultValue) {
-        super(String.class, defaultValue);
+        super(defaultValue);
+    }
+
+    /**
+     * Return the default type this <code>Converter</code> handles.
+     *
+     * @return The default type this <code>Converter</code> handles.
+     */
+    protected Class getDefaultType() {
+        return String.class;
     }
 
     /**

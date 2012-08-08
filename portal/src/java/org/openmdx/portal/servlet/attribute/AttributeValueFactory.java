@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValueFactory.java,v 1.22 2008/08/12 16:38:05 wfro Exp $
+ * Name:        $Id: AttributeValueFactory.java,v 1.27 2009/03/08 18:03:22 wfro Exp $
  * Description: AttributeMapper
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:05 $
+ * Date:        $Date: 2009/03/08 18:03:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,14 +62,15 @@ import java.util.Map;
 
 import javax.jmi.reflect.RefObject;
 
+import org.openmdx.application.cci.SystemAttributes;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.accessor.jmi.spi.RefPackage_1;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.portal.servlet.ApplicationContext;
 
 public final class AttributeValueFactory
@@ -97,7 +98,7 @@ public final class AttributeValueFactory
       org.openmdx.ui1.jmi1.ValuedField field,
       Object object,
       ApplicationContext application
-  ) {
+  ) throws ServiceException {
 
     Path fieldIdentity = null;
     try {
@@ -111,7 +112,10 @@ public final class AttributeValueFactory
     // and b) because ui objects are updated very rarely (typically 
     // only the first time a control is initialized)
     catch(ConcurrentModificationException e) {
-        try { Thread.sleep(10); } catch(Exception e0) {}
+        try { 
+        	Thread.sleep(10); 
+        } 
+        catch(Exception e0) {}
         fieldIdentity = field.refGetPath();
     }
     
@@ -130,7 +134,8 @@ public final class AttributeValueFactory
         model = application.getModel();
         try {
             classDef = model.getElement(((Map)object).get(SystemAttributes.OBJECT_CLASS));
-        } catch(Exception e) {}
+        } 
+        catch(Exception e) {}
     }
 
     AttributeValue value = NullValue.createNullValue();
@@ -147,10 +152,11 @@ public final class AttributeValueFactory
               : null;
       if(qualifiedClassName != null) {
           try {
-              ModelElement_1_0 compositeReference = model.getElement(classDef.values("compositeReference").get(0));
-              ModelElement_1_0 typeDef = model.getElement(compositeReference.values("type").get(0));
-              qualifiedTypeName = (String)typeDef.values("qualifiedName").get(0);
-          } catch(Exception e) {}
+              ModelElement_1_0 compositeReference = model.getElement(classDef.objGetValue("compositeReference"));
+              ModelElement_1_0 typeDef = model.getElement(compositeReference.objGetValue("type"));
+              qualifiedTypeName = (String)typeDef.objGetValue("qualifiedName");
+          } 
+          catch(Exception e) {}
       }
       // return code value in case a code table is defined for feature for the instance-level class
       if(

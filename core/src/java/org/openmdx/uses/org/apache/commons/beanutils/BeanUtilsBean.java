@@ -30,9 +30,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.openmdx.uses.org.apache.commons.beanutils.expression.Resolver;
 import org.openmdx.uses.org.apache.commons.logging.Log;
 import org.openmdx.uses.org.apache.commons.logging.LogFactory;
+import org.openmdx.uses.org.apache.commons.beanutils.expression.Resolver;
 
 
 /**
@@ -48,11 +48,14 @@ import org.openmdx.uses.org.apache.commons.logging.LogFactory;
  * @author Chris Audley
  * @author Rey Francois
  * @author Gregor Rayman
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:13 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:44 $
  * @see BeanUtils
  * @since 1.7
  */
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings({
+    "unchecked"
+})
 public class BeanUtilsBean {
 
 
@@ -262,12 +265,12 @@ public class BeanUtilsBean {
                 }
             }
         } else if (orig instanceof Map) {
-            Iterator names = ((Map) orig).keySet().iterator();
-            while (names.hasNext()) {
-                String name = (String) names.next();
+            Iterator entries = ((Map) orig).entrySet().iterator();
+            while (entries.hasNext()) {
+                Map.Entry entry = (Map.Entry) entries.next();
+                String name = (String)entry.getKey();
                 if (getPropertyUtils().isWriteable(dest, name)) {
-                    Object value = ((Map) orig).get(name);
-                    copyProperty(dest, name, value);
+                    copyProperty(dest, name, entry.getValue());
                 }
             }
         } else /* if (orig is a standard JavaBean) */ {
@@ -507,9 +510,10 @@ public class BeanUtilsBean {
         } else {
             PropertyDescriptor[] descriptors =
                 getPropertyUtils().getPropertyDescriptors(bean);
+            Class clazz = bean.getClass();
             for (int i = 0; i < descriptors.length; i++) {
                 String name = descriptors[i].getName();
-                if (getPropertyUtils().getReadMethod(descriptors[i]) != null) {
+                if (getPropertyUtils().getReadMethod(clazz, descriptors[i]) != null) {
                     description.put(name, getProperty(bean, name));
                 }
             }
@@ -815,18 +819,18 @@ public class BeanUtilsBean {
         }
 
         // Loop through the property name/value pairs to be set
-        Iterator names = properties.keySet().iterator();
-        while (names.hasNext()) {
+        Iterator entries = properties.entrySet().iterator();
+        while (entries.hasNext()) {
 
             // Identify the property name and value(s) to be assigned
-            String name = (String) names.next();
+            Map.Entry entry = (Map.Entry)entries.next();
+            String name = (String) entry.getKey();
             if (name == null) {
                 continue;
             }
-            Object value = properties.get(name);
 
             // Perform the assignment for this property
-            setProperty(bean, name, value);
+            setProperty(bean, name, entry.getValue());
 
         }
 
@@ -924,6 +928,8 @@ public class BeanUtilsBean {
                 return; // Skip this property setter
             }
             type = dynaProperty.getType();
+        } else if (target instanceof Map) {
+            type = Object.class;
         } else {
             PropertyDescriptor descriptor = null;
             try {
@@ -1009,15 +1015,7 @@ public class BeanUtilsBean {
 
         // Invoke the setter method
         try {
-            if (index >= 0) {
-                getPropertyUtils().setIndexedProperty(target, propName,
-                                                 index, newValue);
-            } else if (key != null) {
-                getPropertyUtils().setMappedProperty(target, propName,
-                                                key, newValue);
-            } else {
-                getPropertyUtils().setProperty(target, propName, newValue);
-            }
+          getPropertyUtils().setProperty(target, name, newValue);
         } catch (NoSuchMethodException e) {
             throw new InvocationTargetException
                 (e, "Cannot set " + propName);

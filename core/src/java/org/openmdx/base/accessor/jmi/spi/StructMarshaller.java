@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StructMarshaller.java,v 1.8 2008/09/25 23:38:10 hburger Exp $
+ * Name:        $Id: StructMarshaller.java,v 1.9 2009/01/04 21:17:19 wfro Exp $
  * Description: StructMarshaller class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/25 23:38:10 $
+ * Date:        $Date: 2009/01/04 21:17:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,7 +54,7 @@ package org.openmdx.base.accessor.jmi.spi;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
 
 

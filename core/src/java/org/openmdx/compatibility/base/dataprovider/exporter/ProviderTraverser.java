@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ProviderTraverser.java,v 1.51 2008/11/11 15:38:42 wfro Exp $
+ * Name:        $Id: ProviderTraverser.java,v 1.60 2009/02/24 15:48:54 hburger Exp $
  * Description: Traversing a provider
- * Revision:    $Revision: 1.51 $
+ * Revision:    $Revision: 1.60 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/11 15:38:42 $
+ * Date:        $Date: 2009/02/24 15:48:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,31 +57,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
+import org.openmdx.application.dataprovider.cci.Directions;
+import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.mof.cci.AggregationKind;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.Filter;
-import org.openmdx.base.query.OrderSpecifier;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.layer.model.State_1_Attributes;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.naming.PathComponent;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.compatibility.base.query.Quantors;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Quantors;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.BasicException.Parameter;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.code.AggregationKind;
 
 /**
  * Class which traverses a provider and invokes a TraversalHandler in the 
@@ -112,7 +107,7 @@ implements Traverser {
         Model_1_0 model,
         List<Path> startPoints,
         Set<String> referenceFilter,
-        Map<String,Filter> attributeFilter
+        Map<String,FilterProperty[]> attributeFilter
     ) throws java.lang.NullPointerException {
         this(
             new RequestCollection(header, provider),
@@ -129,7 +124,7 @@ implements Traverser {
         Model_1_0 model,
         List<Path> startPoints,
         Set<String> referenceFilter,
-        Map<String,Filter> attributeFilter
+        Map<String,FilterProperty[]> attributeFilter
     ) throws NullPointerException {
         if (reader == null) {
             throw new NullPointerException("reader must not be null");
@@ -290,7 +285,8 @@ implements Traverser {
             if(!ending) try {
                 this.traversalHandler.endTraversal();
             } catch (ServiceException ee) {
-                se = ee.appendCause(se);
+                ee.getCause(null).initCause(se);
+                se = ee;
             }
             throw se;
         }        
@@ -351,11 +347,11 @@ implements Traverser {
             try {
                 ModelElement_1_0 referenceDef = this.model.getReferenceType(reference);
                 if(referenceDef != null) {
-                    String referenceName = (String)referenceDef.values("name").get(0);
-                    String qualifiedReferenceName = (String)referenceDef.values("qualifiedName").get(0);
+                    String referenceName = (String)referenceDef.objGetValue("name");
+                    String qualifiedReferenceName = (String)referenceDef.objGetValue("qualifiedName");
                     if(
-                            this.referenceFilter.contains(referenceName) ||
-                            this.referenceFilter.contains(qualifiedReferenceName)
+                        this.referenceFilter.contains(referenceName) ||
+                        this.referenceFilter.contains(qualifiedReferenceName)
                     ) {
                         matches = true;
                     }            
@@ -364,34 +360,15 @@ implements Traverser {
         }
         if(matches) {
             try {            
-                Filter filter = this.attributeFilter == null 
-                ? null 
-                    : (Filter)this.attributeFilter.get(reference);
-                if(filter != null) {
-                    FilterProperty[] filterProperties = new FilterProperty[filter.getCondition().length];
-                    for(int i = 0; i < filterProperties.length; i++) {
-                        Condition condition = filter.getCondition()[i];
-                        filterProperties[i] = new FilterProperty(
-                            condition.getQuantor(),
-                            condition.getFeature(),
-                            (short)FilterOperators.fromString(condition.getName()),
-                            condition.getValue()
-                        );
-                    }                
-                    AttributeSpecifier[] attributeSpecifiers = new AttributeSpecifier[filter.getOrderSpecifier().length];
-                    for(int i = 0; i < attributeSpecifiers.length; i++) {
-                        OrderSpecifier specifier = filter.getOrderSpecifier()[i];
-                        attributeSpecifiers[i] = new AttributeSpecifier(
-                            specifier.getFeature(),
-                            0,
-                            specifier.getOrder()
-                        );
-                    }
+                FilterProperty[] filterProperties = this.attributeFilter == null ? 
+                    null : 
+                    this.attributeFilter.get(reference);
+                if(filterProperties != null) {
                     objects = this.reader.addFindRequest(
                         reference,
                         filterProperties,
                         AttributeSelectors.ALL_ATTRIBUTES,
-                        attributeSpecifiers,
+                        null,
                         0,
                         Integer.MAX_VALUE,
                         Directions.ASCENDING
@@ -406,7 +383,7 @@ implements Traverser {
                 else {
                     ModelElement_1_0 referenceType = this.model.getReferenceType(reference);
                     if(referenceType != null) {
-                        ModelElement_1_0 referencedEnd = this.model.getElement(referenceType.values("referencedEnd").get(0));
+                        ModelElement_1_0 referencedEnd = this.model.getElement(referenceType.objGetValue("referencedEnd"));
                         if(referencedEnd != null) {
                             ModelElement_1_0 objectClass = this.model.getElementType(
                                 referencedEnd
@@ -414,14 +391,18 @@ implements Traverser {
                             boolean stated = this.model.isSubtypeOf(objectClass, BASIC_STATE); 
                             objects = this.reader.addFindRequest(
                                 reference,
-                                stated ? new FilterProperty[]{
+                                !stated ? null : 
+                                identity == null ? new FilterProperty[]{
+                                    IS_STATE
+                                } : new FilterProperty[]{
+                                    IS_STATE,
                                     new FilterProperty(
                                         Quantors.THERE_EXISTS,
-                                        State_1_Attributes.STATED_OBJECT,
-                                        identity == null ? FilterOperators.IS_NOT_IN : FilterOperators.IS_IN,
-                                            identity == null ? NO_VALUES : new Object[] {identity}
+                                        SystemAttributes.OBJECT_IDENTITY,
+                                        FilterOperators.IS_IN,
+                                        identity
                                     )
-                                } : null,
+                                },
                                 AttributeSelectors.ALL_ATTRIBUTES,
                                 0,
                                 Integer.MAX_VALUE,
@@ -551,7 +532,7 @@ implements Traverser {
                 }
                 // it is a stated object, the id of the object must be provided in the first state
                 boolean continueTraversal = true;
-                if(this.model.isSubtypeOf(object, BASIC_STATE)) {
+                if(this.model.objectIsSubtypeOf(object, BASIC_STATE)) {
                     Path objectPath = getStatelessPath(object.path());
                     if (!containedIds.contains(objectPath)) {
                         containedIds.add(objectPath);
@@ -560,7 +541,7 @@ implements Traverser {
                             objectPath, 
                             objects, 
                             objectClass, 
-                            IS_STATE 
+                            true // isState 
                         );
                     }
                     // else nothing, object and all its states already treated
@@ -574,7 +555,7 @@ implements Traverser {
                         object.path(), 
                         nonStatedObjects, 
                         objectClass, 
-                        !IS_STATE 
+                        false // isState 
                     );
                 }
                 if(!continueTraversal) break;
@@ -621,14 +602,14 @@ implements Traverser {
             // if it is a state of the object treated right now
             if (state.path().toString().startsWith(objectPath.toString())) {                
                 int pos = -1; 
-                if (state.getValues(State_1_Attributes.VALID_FROM) != null &&
-                        !state.getValues(State_1_Attributes.VALID_FROM).isEmpty()
+                if (state.getValues("object_validFrom") != null &&
+                        !state.getValues("object_validFrom").isEmpty()
                 ) {
                     String validFrom = 
-                        (String) state.getValues(State_1_Attributes.VALID_FROM).get(0);                    
+                        (String) state.getValues("object_validFrom").get(0);                    
                     for (int i = 0; i < validFromSorted.size() && pos == -1; i++) {
                         List<Object> current = 
-                            validFromSorted.get(i).getValues(State_1_Attributes.VALID_FROM);                                        
+                            validFromSorted.get(i).getValues("object_validFrom");                                        
                         if (current != null 
                                 && current.get(0) != null
                                 && validFrom.compareTo((String) current.get(0)) < 0
@@ -720,7 +701,7 @@ implements Traverser {
                     );
                     empty.values(SystemAttributes.OBJECT_CLASS).set(
                         0, 
-                        objectClass.getValues("qualifiedName").get(0)
+                        objectClass.objGetValue("qualifiedName")
                     );                    
                     continueTraversal = this.completeFeatures(
                         reference,
@@ -792,7 +773,7 @@ implements Traverser {
         Path objectPath,
         ModelElement_1_0 objectClass
     ) throws Exception {
-        List<?> features = objectClass.getValues("feature");
+        List<?> features = objectClass.objGetList("feature");
         List<Path> existingReferences = new ArrayList<Path>();
         for (int roleTypesFirst = 0; roleTypesFirst < 2; roleTypesFirst++) {
             for (int j = 0; j < features.size(); j++) {
@@ -801,15 +782,17 @@ implements Traverser {
                 if (this.model.isReferenceType(featureDef)) {
                     // Navigate composite references only in case there is no reference filter specified
                     if(
-                            (this.isCompositeReference(featureDef) || (this.isSharedReference(featureDef) && (this.referenceFilter != null))) && 
-                            ((roleTypesFirst == 0 && this.isReferencedEndARoleType(featureDef)) || (roleTypesFirst == 1 && !isReferencedEndARoleType(featureDef)))  
+                        (this.isCompositeReference(featureDef) || (this.isSharedReference(featureDef) && (this.referenceFilter != null))) && 
+                        ((roleTypesFirst == 0 && this.isReferencedEndARoleType(featureDef)) || (roleTypesFirst == 1 && !isReferencedEndARoleType(featureDef)))  
                     ) {
-                        String referenceName = (String) featureDef.getValues("name").get(0);
-                        // do not navigate object views, new
-                        if(!"view".equals(referenceName)) {
+                        String referenceName = (String) featureDef.objGetValue("name");
+//                      if(!"context".equals(referenceName)) { 
+//                          //  
+//                          // do not navigate object views
+//                          //  
                             boolean matches = this.referenceFilter == null;
                             if(!matches) {
-                                String qualifiedReferenceName = (String) featureDef.getValues("qualifiedName").get(0);
+                                String qualifiedReferenceName = (String) featureDef.objGetValue("qualifiedName");
                                 matches = 
                                     this.referenceFilter.contains(referenceName) || 
                                     this.referenceFilter.contains(qualifiedReferenceName);
@@ -825,7 +808,7 @@ implements Traverser {
                                         objectPath.getChild(referenceName));
                                 }
                             }
-                        }
+//                      }
                     }
                 }
             }
@@ -874,15 +857,13 @@ implements Traverser {
         if (elementType != null) {
             // attribute
             if (elementType
-                    .getValues(SystemAttributes.OBJECT_CLASS)
-                    .get(0)
+                    .objGetValue(SystemAttributes.OBJECT_CLASS)
                     .equals("org:omg:model1:Attribute")) {
                 isAttribute = true;
             }
             // reference, only non contained references are valid 
             else if (
-                    elementType.getValues(SystemAttributes.OBJECT_CLASS).get(
-                        0).equals(
+                    elementType.objGetValue(SystemAttributes.OBJECT_CLASS).equals(
                         "org:omg:model1:Reference")) {
                 // also derived references are exported. 
                 // they have to be treated in the import.
@@ -937,12 +918,12 @@ implements Traverser {
     protected boolean startObject(
         Path reference,
         Path objectPath,
-        DataproviderObject_1_0 objectClass,
+        ModelElement_1_0 objectClass,
         short operation
     ) throws ServiceException {        
         boolean result = this.getTraversalHandler().startObject(
             reference,
-            (String) objectClass.getValues("qualifiedName").get(0),
+            (String) objectClass.objGetValue("qualifiedName"),
             getQualifierLeadingToClass(objectClass),
             objectPath.getBase(),
             operation
@@ -958,16 +939,16 @@ implements Traverser {
      * @throws ServiceException  
      */
     protected void endObject(
-        DataproviderObject_1_0 objectClass
+        ModelElement_1_0 objectClass
     ) throws ServiceException {
         logIndent(
             -1,
             "endObject:"
-            + (String) objectClass.getValues("qualifiedName").get(0)
+            + (String) objectClass.objGetValue("qualifiedName")
         );
 
         this.getTraversalHandler().endObject(
-            (String) objectClass.getValues("qualifiedName").get(0)
+            (String) objectClass.objGetValue("qualifiedName")
         );
     }
 
@@ -1002,12 +983,12 @@ implements Traverser {
      */
     protected void completeContent(
         Path objectPath,
-        DataproviderObject_1_0 objectClass,
+        ModelElement_1_0 objectClass,
         List<Path> containedReferences
     ) throws ServiceException {
         getTraversalHandler().contentComplete(
             objectPath,
-            (String) objectClass.getValues("qualifiedName").get(0),
+            (String) objectClass.objGetValue("qualifiedName"),
             containedReferences
         );
     }
@@ -1035,16 +1016,16 @@ implements Traverser {
      * @return boolean
      */
     protected boolean startReference(
-        DataproviderObject_1_0 referenceType
+        ModelElement_1_0 referenceType
     ) throws ServiceException {
 
         if (referenceType != null) {
             logIndent(
                 1,
                 "startReference: "
-                + (String) referenceType.getValues("qualifiedName").get(0));
+                + (String) referenceType.objGetValue("qualifiedName"));
             return getTraversalHandler().startReference(
-                (String) referenceType.getValues("qualifiedName").get(0));
+                (String) referenceType.objGetValue("qualifiedName"));
         }
         else {
             return getTraversalHandler().startReference(null);
@@ -1057,16 +1038,16 @@ implements Traverser {
      * 
      */
     protected void endReference(
-        DataproviderObject_1_0 referenceType
+        ModelElement_1_0 referenceType
     ) throws ServiceException {
 
         if (referenceType != null) {
             logIndent(
                 -1,
                 "endReference: "
-                + (String) referenceType.getValues("qualifiedName").get(0));
+                + (String) referenceType.objGetValue("qualifiedName"));
             getTraversalHandler().endReference(
-                (String) referenceType.getValues("qualifiedName").get(0));
+                (String) referenceType.objGetValue("qualifiedName"));
         }
         else {
             getTraversalHandler().endReference(null);
@@ -1104,24 +1085,23 @@ implements Traverser {
         Path path
     ) throws ServiceException {
         ArrayList<ModelElement_1_0> classes = new ArrayList<ModelElement_1_0>();
-        DataproviderObject_1_0 objectClass =
+        ModelElement_1_0 objectClass =
             this.model.getDereferencedType(AUTHORITY);
-
         for (int i = 1; i < path.size(); i = i + 2) {
             //classes.add(objectClass);
 
             String referenceName = path.get(i);
             String fullReferenceName = null;
             // the feature may also be in one of the subclasses:
-            for (Iterator<Object> subIter = objectClass.getValues("allSubtype").iterator();
+            for (Iterator<Object> subIter = objectClass.objGetList("allSubtype").iterator();
             subIter.hasNext() && fullReferenceName == null;
             ) {
                 ModelElement_1_0 subClass = this.model.getDereferencedType(
                     subIter.next()
                 );
                 for (
-                        Iterator<?> refIter = subClass.getValues("feature").iterator(); 
-                        refIter.hasNext() && fullReferenceName == null;
+                    Iterator<?> refIter = subClass.objGetList("feature").iterator(); 
+                    refIter.hasNext() && fullReferenceName == null;
                 ) {
                     String feature = ((Path)refIter.next()).getBase();
                     if (feature.endsWith(
@@ -1141,7 +1121,7 @@ implements Traverser {
                         new Parameter("reference", referenceName),
                         new Parameter(
                             "objectClass",
-                            objectClass.getValues("qualifiedName"))});
+                            objectClass.objGetList("qualifiedName"))});
             }
             ModelElement_1_0 assocEnd = this.model.getElement(fullReferenceName);
             classes.add(assocEnd);
@@ -1180,7 +1160,7 @@ implements Traverser {
             DataproviderObject object = new DataproviderObject(path.getPrefix(pos + 1));
             object.values(SystemAttributes.OBJECT_CLASS).set(
                 0,
-                classes.get(pos).getValues("qualifiedName").get(0)
+                classes.get(pos).objGetValue("qualifiedName")
             );
             this.startObject(
                 object.path().getParent(),
@@ -1305,16 +1285,16 @@ implements Traverser {
     private boolean isCompositeReference(
         ModelElement_1_0 referenceDef
     ) throws ServiceException {
-        ModelElement_1_0 referencedEnd = this.model.getElement(referenceDef.getValues("referencedEnd").get(0));
-        return AggregationKind.COMPOSITE.equals(referencedEnd.getValues("aggregation").get(0));
+        ModelElement_1_0 referencedEnd = this.model.getElement(referenceDef.objGetValue("referencedEnd"));
+        return AggregationKind.COMPOSITE.equals(referencedEnd.objGetValue("aggregation"));
     }
 
     //-----------------------------------------------------------------------
     private boolean isSharedReference(
         ModelElement_1_0 referenceDef
     ) throws ServiceException {
-        ModelElement_1_0 referencedEnd = this.model.getElement(referenceDef.getValues("referencedEnd").get(0));
-        return AggregationKind.SHARED.equals(referencedEnd.getValues("aggregation").get(0));
+        ModelElement_1_0 referencedEnd = this.model.getElement(referenceDef.objGetValue("referencedEnd"));
+        return AggregationKind.SHARED.equals(referencedEnd.objGetValue("aggregation"));
     }
 
     //-----------------------------------------------------------------------
@@ -1326,26 +1306,25 @@ implements Traverser {
      * @throws ServiceException
      */
     protected String getQualifierLeadingToClass(
-        DataproviderObject_1_0 objectClass
+        ModelElement_1_0 objectClass
     ) throws ServiceException {
         String qualifierName = null;
-        if (objectClass.values("compositeReference").size() > 0) {
+        if (!objectClass.objGetList("compositeReference").isEmpty()) {
             ModelElement_1_0 compReference =
                 this.model.getElement(
-                    ((Path) objectClass.getValues("compositeReference").get(0))
+                    ((Path) objectClass.objGetValue("compositeReference"))
                     .getBase());
-
             ModelElement_1_0 associationEnd =
                 this.model.getElement(
-                    ((Path) compReference.getValues("referencedEnd").get(0))
+                    ((Path) compReference.objGetValue("referencedEnd"))
                     .getBase());
 
             qualifierName =
-                (String) associationEnd.getValues("qualifierName").get(0);
+                (String) associationEnd.objGetValue("qualifierName");
         }
         else if (
                 AUTHORITY.equals(
-                    objectClass.getValues("qualifiedName").get(0))) {
+                    objectClass.objGetValue("qualifiedName"))) {
             qualifierName = "name";
         }
         else {
@@ -1403,20 +1382,22 @@ implements Traverser {
     private Model_1_0 model = null;
     private final List<Path> startPoints;
     private final Set<String> referenceFilter;
-    private final Map<String,Filter> attributeFilter;
+    private final Map<String,FilterProperty[]> attributeFilter;
 
     /** The source paths which have already been traversed */
     private List<Path> traversedPaths = new ArrayList<Path>();
 
-    // some constants to ease reading
-    private final static boolean IS_STATE = true;
     //
     // Model Classes
     //
     protected final static String BASIC_STATE = "org:openmdx:compatibility:state1:BasicState";
     protected final static String AUTHORITY = "org:openmdx:base:Authority";
-    private static final Object[] NO_VALUES = {};
-
+    protected final static FilterProperty IS_STATE = new FilterProperty(
+        Quantors.THERE_EXISTS,
+        "core",
+        FilterOperators.IS_NOT_IN
+    );
+    
 }
 
 //--- End of File -----------------------------------------------------------

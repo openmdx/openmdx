@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.45 2008/03/13 22:22:45 hburger Exp $
+= Name:        $Id: build.xml,v 1.46 2009/01/12 17:58:13 wfro Exp $
 = Description: openmdx project raw
-= Revision:    $Revision: 1.45 $
-= Date:        $Date: 2008/03/13 22:22:45 $
+= Revision:    $Revision: 1.46 $
+= Date:        $Date: 2009/01/12 17:58:13 $
 = Copyright:   (c) 2003-2004 OMEX AG
 =======================================================================
  *
@@ -74,6 +74,7 @@
 		<path refid="openmdx.core.bin"/>
 		<path refid="microsoft.sql-server.lib"/>
 		<path refid="oracle.jdbc.lib"/>
+		<pathelement location="../${build.target.platform}/ejb/lib/openmdx-ejb.jar"/>
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath"/>

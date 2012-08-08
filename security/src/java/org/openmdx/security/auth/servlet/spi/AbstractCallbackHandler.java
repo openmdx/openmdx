@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractCallbackHandler.java,v 1.5 2005/11/15 13:20:41 hburger Exp $
+ * Name:        $Id: AbstractCallbackHandler.java,v 1.6 2009/03/08 18:52:18 wfro Exp $
  * Description: Abstract Callback Handler
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/11/15 13:20:41 $
+ * Date:        $Date: 2009/03/08 18:52:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -76,8 +76,7 @@ import org.openmdx.security.auth.servlet.cci.HttpCallbackHandler;
  */
 public class AbstractCallbackHandler 
     extends AbstractHandler 
-    implements HttpCallbackHandler 
-{
+    implements HttpCallbackHandler {
     
     /**
      * Constructor
@@ -111,24 +110,26 @@ public class AbstractCallbackHandler
     ) throws IOException, UnsupportedCallbackException {
         boolean respond = false;
         StringWriter form = new StringWriter();
-        startForm(request, form);
+        this.startForm(request, form);
         for(
             int i = 0;
             i < callbacks.length;
             i++
-        ) respond |= handle(request, form, i, callbacks[i]);
+        ) {
+        	respond |= this.handle(request, form, i, callbacks[i]);
+        }
         if(respond) {
             TokenCallback tokenCallback = new TokenCallback();
-            tokenCallback.setToken(getToken(callbacks));
-            handle(request, form, callbacks.length, tokenCallback);
-            endForm(request, form);
-            Writer html = startDocument(response);
-            startHead(html);
-            endHead(html);
-            startBody(html);
+            tokenCallback.setToken(this.getToken(callbacks));
+            this.handle(request, form, callbacks.length, tokenCallback);
+            this.endForm(request, form);
+            Writer html = this.startDocument(response);
+            this.startHead(html);
+            this.endHead(html);
+            this.startBody(html);
             html.write(form.getBuffer().toString());
-            endBody(html);
-            endDocument(html);
+            this.endBody(html);
+            this.endDocument(html);
         }
         return respond;
     }
@@ -186,24 +187,33 @@ public class AbstractCallbackHandler
     ) throws IOException, UnsupportedCallbackException {
         synchronized(callback){
             if (callback instanceof TokenCallback) {
-                return handle(request, html, index, (TokenCallback) callback);            
-            } else if (callback instanceof AddressCallback) {
-                return handle(request, html, index, (AddressCallback) callback);            
-            } else if (callback instanceof ChoiceCallback) {
-                return handle(request, html, index, (ChoiceCallback) callback);                        
-            } else if (callback instanceof ConfirmationCallback) {
-                return handle(request, html, index, (ConfirmationCallback) callback);
-            } else if (callback instanceof LanguageCallback) {
-                return handle(request, html, index, (LanguageCallback) callback);
-            } else if (callback instanceof NameCallback) {
-                return handle(request, html, index, (NameCallback) callback);
-            } else if (callback instanceof PasswordCallback) {
-                return handle(request, html, index, (PasswordCallback) callback);
-            } else if (callback instanceof TextInputCallback) {
-                return handle(request, html, index, (TextInputCallback) callback);
-            } else if (callback instanceof TextOutputCallback) {
-                return handle(request, html, index, (TextOutputCallback) callback);
-            } else throw new UnsupportedCallbackException(
+                return this.handle(request, html, index, (TokenCallback) callback);            
+            } 
+            else if (callback instanceof AddressCallback) {
+                return this.handle(request, html, index, (AddressCallback) callback);            
+            } 
+            else if (callback instanceof ChoiceCallback) {
+                return this.handle(request, html, index, (ChoiceCallback) callback);                        
+            } 
+            else if (callback instanceof ConfirmationCallback) {
+                return this.handle(request, html, index, (ConfirmationCallback) callback);
+            } 
+            else if (callback instanceof LanguageCallback) {
+                return this.handle(request, html, index, (LanguageCallback) callback);
+            } 
+            else if (callback instanceof NameCallback) {
+                return this.handle(request, html, index, (NameCallback) callback);
+            } 
+            else if (callback instanceof PasswordCallback) {
+                return this.handle(request, html, index, (PasswordCallback) callback);
+            } 
+            else if (callback instanceof TextInputCallback) {
+                return this.handle(request, html, index, (TextInputCallback) callback);
+            } 
+            else if (callback instanceof TextOutputCallback) {
+                return this.handle(request, html, index, (TextOutputCallback) callback);
+            }
+            else throw new UnsupportedCallbackException(
                 callback
             );
         }
@@ -229,15 +239,17 @@ public class AbstractCallbackHandler
     ) throws IOException, UnsupportedCallbackException {
         String prompt = callback.getPrompt();
         String address = null;
-        if(REMOTE_ADDR.equals(prompt)) {
+        if(AbstractCallbackHandler.REMOTE_ADDR.equals(prompt)) {
             address = request.getRemoteAddr();
-        } else if (LOCAL_ADDR.equals(prompt)) {
+        } 
+        else if(AbstractCallbackHandler.LOCAL_ADDR.equals(prompt)) {
             address = request.getLocalAddr();
-        } else throw new UnsupportedCallbackException(
+        } 
+        else throw new UnsupportedCallbackException(
             callback,
             AbstractCallbackHandler.class.getName() + 
                 " supports the propmpt values {" +
-                REMOTE_ADDR + ", " + LOCAL_ADDR + "} only"
+                AbstractCallbackHandler.REMOTE_ADDR + ", " + AbstractCallbackHandler.LOCAL_ADDR + "} only"
         );
         callback.setAddress(
             address == null ? null : InetAddress.getByName(address)
@@ -434,15 +446,18 @@ public class AbstractCallbackHandler
         Callback[] callbacks
     ) throws IOException, UnsupportedCallbackException {
         TokenCallback tokenCallback = new TokenCallback();
-        handle(request, callbacks.length, tokenCallback);
-        if(getToken(callbacks).equals(tokenCallback.getToken())) {
+        this.handle(request, callbacks.length, tokenCallback);
+        if(this.getToken(callbacks).equals(tokenCallback.getToken())) {
             for(
                 int i = 0;
                 i < callbacks.length;
                 i++
-            ) handle(request, i, callbacks[i]);
+            ) {
+            	this.handle(request, i, callbacks[i]);
+            }
             return true;
-        } else {
+        } 
+        else {
             return false;
         }
     }
@@ -481,24 +496,33 @@ public class AbstractCallbackHandler
     ) throws IOException, UnsupportedCallbackException {
         synchronized(callback){
             if (callback instanceof TokenCallback) {
-                handle(request, index, (TokenCallback) callback);            
-            } else if (callback instanceof AddressCallback) {
-                handle(request, index, (AddressCallback) callback);            
-            } else if (callback instanceof ChoiceCallback) {
-                handle(request, index, (ChoiceCallback) callback);                        
-            } else if (callback instanceof ConfirmationCallback) {
-                handle(request, index, (ConfirmationCallback) callback);
-            } else if (callback instanceof LanguageCallback) {
-                handle(request, index, (LanguageCallback) callback);
-            } else if (callback instanceof NameCallback) {
-                handle(request, index, (NameCallback) callback);
-            } else if (callback instanceof PasswordCallback) {
-                handle(request, index, (PasswordCallback) callback);
-            } else if (callback instanceof TextInputCallback) {
-                handle(request, index, (TextInputCallback) callback);
-            } else if (callback instanceof TextOutputCallback) {
-                handle(request, index, (TextOutputCallback) callback);
-            } else throw new UnsupportedCallbackException(
+            	this.handle(request, index, (TokenCallback) callback);            
+            } 
+            else if (callback instanceof AddressCallback) {
+            	this.handle(request, index, (AddressCallback) callback);            
+            } 
+            else if (callback instanceof ChoiceCallback) {
+            	this.handle(request, index, (ChoiceCallback) callback);                        
+            } 
+            else if (callback instanceof ConfirmationCallback) {
+            	this.handle(request, index, (ConfirmationCallback) callback);
+            } 
+            else if (callback instanceof LanguageCallback) {
+            	this.handle(request, index, (LanguageCallback) callback);
+            } 
+            else if (callback instanceof NameCallback) {
+            	this.handle(request, index, (NameCallback) callback);
+            } 
+            else if (callback instanceof PasswordCallback) {
+            	this.handle(request, index, (PasswordCallback) callback);
+            } 
+            else if (callback instanceof TextInputCallback) {
+            	this.handle(request, index, (TextInputCallback) callback);
+            } 
+            else if (callback instanceof TextOutputCallback) {
+            	this.handle(request, index, (TextOutputCallback) callback);
+            } 
+            else throw new UnsupportedCallbackException(
                 callback
             );
         }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: ResourceBundles.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: ResourceBundles.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
  * Description: Resource Bundles
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -78,7 +78,8 @@ public class ResourceBundles {
 	){
 		try {
 			return ResourceBundle.getBundle(baseName);
-		} catch (MissingResourceException exception) {
+		} 
+		catch (MissingResourceException exception) {
 			System.err.println(exception.toString());
 			return null;
 		}
@@ -95,7 +96,7 @@ public class ResourceBundles {
 	public static <T> ResourceBundle getResourceBundle(
 		Class<T> localizedClass
 	){
-		return getResourceBundle(localizedClass.getName());
+		return ResourceBundles.getResourceBundle(localizedClass.getName());
 	}
 	
 }

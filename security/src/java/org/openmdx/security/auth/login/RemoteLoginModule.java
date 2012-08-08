@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     OMEX/Security, http://www.omex.ch/
- * Name:        $Id: RemoteLoginModule.java,v 1.15 2008/09/26 12:21:45 hburger Exp $
+ * Name:        $Id: RemoteLoginModule.java,v 1.17 2009/03/08 18:52:21 wfro Exp $
  * Description: Remote Login Module
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/26 12:21:45 $
+ * Date:        $Date: 2009/03/08 18:52:21 $
  * ====================================================================
  *
  * Copyright (c) 2004-2006, OMEX AG, Switzerland
@@ -51,8 +51,8 @@ import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
-import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.security.authentication.spi.GenericPrincipal;
 import org.openmdx.kernel.security.authentication.spi.GenericPrincipals;
 import org.openmdx.security.authentication1.jmi1.Authentication1Package;
@@ -258,12 +258,12 @@ public class RemoteLoginModule implements LoginModule {
             AuthenticationContext authenticationContext = null;
             try {
                 nameCallback = new NameCallback(this.namePrompt);
-                String realmInformation = format(
+                String realmInformation = this.format(
                     this.realmInformation,
                     "realm.xri",
                     this.realmId.toXRI()
                 );
-                realmInformation = format(
+                realmInformation = this.format(
                     realmInformation,
                     "realm.id",
                     this.realmId.getBase()
@@ -316,29 +316,34 @@ public class RemoteLoginModule implements LoginModule {
                     int i = 0;
                     i < validationResult.length;
                     i++
-                ) if(validationResult[i].isAccepted()) {
-                    String passwordPrompt = format(
-                        this.passwordPrompt,
-                        "name",
-                        name
-                    );
-                    passwordPrompt = format(
-                        passwordPrompt,
-                        "challenge",
-                        validationResult[i].getChallenge()
-                    );
-                    passwordCallbacks[i] = new PasswordCallback(
-                        passwordPrompt,
-                        isPasswordEchoOn(validationResult[i].getCode())
-                    );
-                } else throw new FailedLoginException(
-                    principal.getName() + " can't be authenticated: " +
-                    validationResult[i].getChallenge()
-                );
+                ) { 
+                	if(validationResult[i].isAccepted()) {
+	                    String passwordPrompt = this.format(
+	                        this.passwordPrompt,
+	                        "name",
+	                        name
+	                    );	                  
+	                    passwordPrompt = this.format(
+	                        passwordPrompt,
+	                        "challenge",
+	                        validationResult[i].getChallenge()
+	                    );
+	                    passwordCallbacks[i] = new PasswordCallback(
+	                        passwordPrompt,
+	                        this.isPasswordEchoOn(validationResult[i].getCode())
+	                    );
+	                } 
+                	else throw new FailedLoginException(
+	                    principal.getName() + " can't be authenticated: " +
+	                    validationResult[i].getChallenge()
+	                );
+                }
                 this.callbackHandler.handle(passwordCallbacks);
-            } catch (LoginException exception) {
+            } 
+            catch (LoginException exception) {
                 throw exception;
-            } catch (Exception exception) {
+            } 
+            catch (Exception exception) {
                 throw (LoginException) new LoginException(
                     "Callback processing failed"
                 ).initCause(
@@ -369,7 +374,8 @@ public class RemoteLoginModule implements LoginModule {
                 }
                 preparing = false;
                 unitOfWork.commit();
-            } catch (JmiServiceException exception){
+            } 
+            catch (JmiServiceException exception){
                 if(preparing) unitOfWork.rollback();
                 throw exception;
             }
@@ -377,12 +383,14 @@ public class RemoteLoginModule implements LoginModule {
                 int i = 0;
                 i < validationResult.length;
                 i++
-            ) if(
-                !validationResult[i].isAccepted()
-            ) throw new FailedLoginException(
-                "Login for principal '" + principal.getName() + "' failed: " +
-                principal.refMofId()
-            );
+            )  {
+            	if(
+            		!validationResult[i].isAccepted()
+	            ) throw new FailedLoginException(
+	                "Login for principal '" + principal.getName() + "' failed: " +
+	                principal.refMofId()
+	            );
+            }
             List<Principal> principals = new ArrayList<Principal>();
             principals.add(principal);
             for(Principal p : principals) {
@@ -403,7 +411,8 @@ public class RemoteLoginModule implements LoginModule {
                     )
                 );
             }
-        } catch (RuntimeException exception) {
+        } 
+        catch (RuntimeException exception) {
             new ServiceException(exception).log();
             throw (LoginException) new LoginException(
                 "Login failed"
@@ -448,8 +457,8 @@ public class RemoteLoginModule implements LoginModule {
   	    // or may be? called (n times) after abort
   	    //
   	    if (this.subjectModified) {
-  	        subject.getPrincipals().removeAll(this.principalsForSubject);
-            subject.getPublicCredentials().removeAll(this.credentialsForSubject);
+  	    	this.subject.getPrincipals().removeAll(this.principalsForSubject);
+  	    	this.subject.getPublicCredentials().removeAll(this.credentialsForSubject);
   	        this.subjectModified = false;
         }
   	    return true;
@@ -466,8 +475,8 @@ public class RemoteLoginModule implements LoginModule {
   	    // should never be called
   	    //
         if (this.subjectModified) {
-            subject.getPrincipals().removeAll(this.principalsForSubject);
-            subject.getPublicCredentials().removeAll(this.credentialsForSubject);
+        	this.subject.getPrincipals().removeAll(this.principalsForSubject);
+        	this.subject.getPublicCredentials().removeAll(this.credentialsForSubject);
             this.subjectModified = false;
         }
     	return true;
@@ -480,7 +489,6 @@ public class RemoteLoginModule implements LoginModule {
      * 
      * @return <code>true</code> if the <code>PasswordCallback</code>'s echo should be switched on
      */
-    @SuppressWarnings("unchecked")
 	private boolean isPasswordEchoOn(
         Short code
     ){

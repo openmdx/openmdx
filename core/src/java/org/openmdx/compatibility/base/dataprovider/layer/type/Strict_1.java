@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Strict_1.java,v 1.22 2008/11/11 15:39:38 wfro Exp $
+ * Name:        $Id: Strict_1.java,v 1.34 2009/03/02 13:38:15 wfro Exp $
  * Description: Strict_1 class performing type checking of DataproviderRequest/DataproviderReply
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.34 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/11 15:39:38 $
+ * Date:        $Date: 2009/03/02 13:38:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,8 +52,6 @@
 package org.openmdx.compatibility.base.dataprovider.layer.type;
 
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -62,26 +60,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.application.dataprovider.spi.OperationAwareLayer_1;
+import org.openmdx.application.mof.repository.accessor.ModelElement_1;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1;
-import org.openmdx.compatibility.base.dataprovider.spi.SystemOperations;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_1;
-import org.openmdx.model1.accessor.basic.spi.ModelElement_1;
 
 /** 
  * Layer_1 plugin which performs strict type checking on DataproviderReplys.
@@ -96,29 +91,21 @@ import org.openmdx.model1.accessor.basic.spi.ModelElement_1;
  */
 @SuppressWarnings("unchecked")
 public class Strict_1
-extends StreamOperationAwareLayer_1 {
+    extends OperationAwareLayer_1 
+{
 
     //---------------------------------------------------------------------------
     public void activate(
         short id,
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception, ServiceException {
+    ) throws ServiceException {
 
         super.activate(
             id, 
             configuration, 
             delegation
         );
-
-        // get model
-        List models = configuration.values(SharedConfigurationEntries.MODEL);
-        if(models.isEmpty()) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.INVALID_CONFIGURATION, 
-            "missing model. Must be configured with options 'modelPackage' and 'packageImpl'"
-        );
-        this.model = (Model_1_1)models.get(0);
 
         // verifyReply
         this.verifyReply = 
@@ -136,7 +123,7 @@ extends StreamOperationAwareLayer_1 {
         // initialize genericObjectType to BasicObject to ensure that the 
         // system attributes are present.
         this.basicObjectClassDef = new ModelElement_1(
-            this.model.getDereferencedType("org:openmdx:base:BasicObject")
+            getModel().getDereferencedType("org:openmdx:base:BasicObject")
         );
     }
 
@@ -149,8 +136,8 @@ extends StreamOperationAwareLayer_1 {
     ) throws ServiceException {   
 
         // remove derived attributes but not SystemAttributes
-        if(this.model.isClassType(typeDef)) {
-            Map structuralFeatureDefs = this.model.getStructuralFeatureDefs(
+        if(getModel().isClassType(typeDef)) {
+            Map structuralFeatureDefs = getModel().getStructuralFeatureDefs(
                 typeDef, false, true, !this.allowEnumerationOfChildren
             );
             for(
@@ -169,18 +156,21 @@ extends StreamOperationAwareLayer_1 {
 
                     if (featureDef != null) {
                         isDerived = 
-                            (featureDef.values("isDerived").size() > 0) && 
-                            ((Boolean)featureDef.values("isDerived").get(0)).booleanValue();
+                            (!featureDef.objGetList("isDerived").isEmpty()) && 
+                            ((Boolean)featureDef.objGetValue("isDerived")).booleanValue();
                         isChangeable = 
-                            (featureDef.values("isChangeable").size() > 0) && 
-                            ((Boolean)featureDef.values("isChangeable").get(0)).booleanValue();          
+                            (!featureDef.objGetList("isChangeable").isEmpty()) && 
+                            ((Boolean)featureDef.objGetValue("isChangeable")).booleanValue();          
                         isForeign = false;
                     }
                     boolean isSystemAttribute = 
                         SystemAttributes.CREATED_AT.equals(featureName)
                         || SystemAttributes.MODIFIED_AT.equals(featureName)
+                        || SystemAttributes.REMOVED_AT.equals(featureName)
                         || SystemAttributes.CREATED_BY.equals(featureName)
-                        || SystemAttributes.MODIFIED_BY.equals(featureName);
+                        || SystemAttributes.MODIFIED_BY.equals(featureName)
+                        || SystemAttributes.REMOVED_BY.equals(featureName)
+                        || SystemAttributes.VERSION.equals(featureName);
 
                     // Authority, Provider, Segment
                     boolean isBaseObject = object.path().size() <= 5;
@@ -282,7 +272,7 @@ extends StreamOperationAwareLayer_1 {
         );
 
         if(this.verifyReply) {
-            this.model.verifyObject(
+            getModel().verifyObject(
                 object, 
                 object.values(SystemAttributes.OBJECT_CLASS).get(0),
                 null,
@@ -314,7 +304,7 @@ extends StreamOperationAwareLayer_1 {
             typeDef = this.basicObjectClassDef; 
         }
         else {        
-            typeDef = this.model.getDereferencedType(
+            typeDef = getModel().getDereferencedType(
                 object.values(SystemAttributes.OBJECT_CLASS).get(0)
             );
         }
@@ -385,7 +375,7 @@ extends StreamOperationAwareLayer_1 {
         ModelElement_1_0 objClassDef = this.getObjectClass(object);
 
         SysLog.trace("create object", object);
-        SysLog.trace("create objClass", objClassDef.values("qualifiedName"));
+        SysLog.trace("create objClass", objClassDef.objGetValue("qualifiedName"));
 
         // remove all attributes with empty value list
         Set attributeNames = object.attributeNames();
@@ -402,15 +392,23 @@ extends StreamOperationAwareLayer_1 {
         object.attributeNames().removeAll(attributesToBeRemoved);
 
         // check whether referenced type matches objClass
-        ModelElement_1_0 typeDef = this.model.getTypes(object.path())[2];
-        if(!this.model.isSubtypeOf(object, typeDef)) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE, 
-                "object not instance of type",
-                new BasicException.Parameter("object class", objClassDef),
-                new BasicException.Parameter("type", typeDef)
-            );      
+        if(!STATE1_CAPABLE_CLASS.equals(objClassDef.objGetValue("qualifiedName"))) {    
+            ModelElement_1_0 typeDef = getModel().getTypes(object.path())[2];
+            if(!getModel().objectIsSubtypeOf(object, typeDef)) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE, 
+                    "object not instance of type",
+                    new BasicException.Parameter(
+                        "object class", 
+                        objClassDef == null ? null : objClassDef.jdoGetObjectId()
+                    ),
+                    new BasicException.Parameter(
+                        "type", 
+                        typeDef == null ? null : typeDef.jdoGetObjectId()
+                    )
+                );      
+            }
         }
         this.removeForeignAndDerivedAttributes(
             object, 
@@ -418,7 +416,7 @@ extends StreamOperationAwareLayer_1 {
             true, 
             true
         );
-        this.model.verifyObject(
+        getModel().verifyObject(
             object, 
             objClassDef,
             null,
@@ -443,16 +441,20 @@ extends StreamOperationAwareLayer_1 {
         DataproviderObject object = request.object();
         ModelElement_1_0 objClassDef = this.getObjectClass(object);
 
-        // check whether referenced type matches objClass
-        ModelElement_1_0 typeDef = this.model.getTypes(object.path())[2];
-        if(!this.model.isSubtypeOf(object, typeDef)) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE, 
-                "object not instance of type",
-                new BasicException.Parameter("object class", objClassDef),
-                new BasicException.Parameter("type", typeDef)
-            );      
+        if(!STATE1_CAPABLE_CLASS.equals(objClassDef.objGetValue("qualifiedName"))) {    
+            //
+            // check whether referenced type matches objClass
+            //
+            ModelElement_1_0 typeDef = getModel().getTypes(object.path())[2];
+            if(!getModel().objectIsSubtypeOf(object, typeDef)) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE, 
+                    "object not instance of type",
+                    new BasicException.Parameter("object class", objClassDef),
+                    new BasicException.Parameter("type", typeDef)
+                );      
+            }
         }
         this.removeForeignAndDerivedAttributes(
             object, 
@@ -460,7 +462,7 @@ extends StreamOperationAwareLayer_1 {
             true, 
             false
         );
-        this.model.verifyObject(
+        getModel().verifyObject(
             object, 
             objClassDef,
             null,
@@ -486,8 +488,8 @@ extends StreamOperationAwareLayer_1 {
         ModelElement_1_0 objClassDef = this.getObjectClass(object);
 
         // check whether referenced type matches objClass
-        ModelElement_1_0 typeDef = this.model.getTypes(object.path())[2];
-        if(!this.model.isSubtypeOf(object, typeDef)) {
+        ModelElement_1_0 typeDef = getModel().getTypes(object.path())[2];
+        if(!getModel().objectIsSubtypeOf(object, typeDef)) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
@@ -502,7 +504,7 @@ extends StreamOperationAwareLayer_1 {
             true, 
             false
         );
-        this.model.verifyObject(
+        getModel().verifyObject(
             object, 
             objClassDef,
             null,
@@ -526,16 +528,20 @@ extends StreamOperationAwareLayer_1 {
         DataproviderObject object = request.object();
         ModelElement_1_0 objClassDef = getObjectClass(object);
 
-        // check whether referenced type matches objClass
-        ModelElement_1_0 typeDef = this.model.getTypes(object.path())[2];
-        if(!this.model.isSubtypeOf(object, typeDef)) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE, 
-                "object not instance of type",
-                new BasicException.Parameter("object class", objClassDef),
-                new BasicException.Parameter("type", typeDef)
-            );      
+        if(!STATE1_CAPABLE_CLASS.equals(objClassDef.objGetValue("qualifiedName"))) {    
+            //
+            // check whether referenced type matches objClass
+            //
+            ModelElement_1_0 typeDef = getModel().getTypes(object.path())[2];
+            if(!getModel().objectIsSubtypeOf(object, typeDef)) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE, 
+                    "object not instance of type",
+                    new BasicException.Parameter("object class", objClassDef),
+                    new BasicException.Parameter("type", typeDef)
+                );      
+            }
         }
         this.removeForeignAndDerivedAttributes(
             object, 
@@ -543,7 +549,7 @@ extends StreamOperationAwareLayer_1 {
             true, 
             false
         );
-        this.model.verifyObject(
+        getModel().verifyObject(
             object, 
             objClassDef,
             null,
@@ -568,72 +574,6 @@ extends StreamOperationAwareLayer_1 {
             header,
             request
         );
-    }
-
-    //---------------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.OutputStream, long)
-     */
-    protected DataproviderObject getStreamOperation(
-        ServiceHeader header,
-        Path objectPath,
-        String feature,
-        OutputStream value, long position, Path replyPath
-    ) throws ServiceException {
-        try {
-            if(feature == null) throw new NullPointerException(
-                SystemOperations.GET_STREAM_FEATURE + " must not be null"
-            );
-            if(value == null) throw new NullPointerException(
-                SystemOperations.GET_STREAM_VALUE + " must not be null"
-            );
-            if(position < 0L) throw new IndexOutOfBoundsException(
-                SystemOperations.GET_STREAM_POSITION + "must not be negative"
-            );
-        } catch (RuntimeException exception) {
-            throw new ServiceException(
-                exception, 
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "Invalid binary stream retrieval arguments",
-                new BasicException.Parameter(SystemAttributes.OBJECT_IDENTITY, objectPath),
-                new BasicException.Parameter(SystemOperations.GET_STREAM_FEATURE, feature),
-                new BasicException.Parameter(SystemOperations.GET_STREAM_POSITION, position)
-            );	
-        }
-        return null;
-    }
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.Writer, long)
-     */
-    protected DataproviderObject getStreamOperation(
-        ServiceHeader header,
-        Path objectPath,
-        String feature,
-        Writer value, long position, Path replyPath
-    ) throws ServiceException {
-        try {
-            if(feature == null) throw new NullPointerException(
-                SystemOperations.GET_STREAM_FEATURE + " must not be null"
-            );
-            if(value == null) throw new NullPointerException(
-                SystemOperations.GET_STREAM_VALUE + " must not be null"
-            );
-            if(position < 0L) throw new IndexOutOfBoundsException(
-                SystemOperations.GET_STREAM_POSITION + "must not be negative"
-            );
-        } catch (RuntimeException exception) {
-            throw new ServiceException(
-                exception, 
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "Invalid character stream retrieval arguments",
-                new BasicException.Parameter(SystemAttributes.OBJECT_IDENTITY, objectPath),
-                new BasicException.Parameter(SystemOperations.GET_STREAM_FEATURE, feature),
-                new BasicException.Parameter(SystemOperations.GET_STREAM_POSITION, position)
-            );	
-        }
-        return null;
     }
 
     /* (non-Javadoc)
@@ -661,7 +601,7 @@ extends StreamOperationAwareLayer_1 {
         // which is to be invoked. The lookup is made based on the type name
         // of the parameter and the operation name.
         //  
-        ModelElement_1_0 targetClassDef = this.model.getTypes(
+        ModelElement_1_0 targetClassDef = getModel().getTypes(
             operationPath.getPrefix(operationPath.size()-2
             ))[2];
         ModelElement_1_0 inParamDef = null;
@@ -669,10 +609,10 @@ extends StreamOperationAwareLayer_1 {
         // collect all types which could contain operation
         //
         Collection allTypes = new HashSet();
-        for(Iterator i = targetClassDef.values("allSubtype").iterator(); i.hasNext(); ) {
-            ModelElement_1_0 subtype = this.model.getElement(i.next());
+        for(Iterator i = targetClassDef.objGetList("allSubtype").iterator(); i.hasNext(); ) {
+            ModelElement_1_0 subtype = getModel().getElement(i.next());
             allTypes.addAll(
-                subtype.values("allSupertype")
+                subtype.objGetList("allSupertype")
             );
         }
         //  
@@ -682,11 +622,11 @@ extends StreamOperationAwareLayer_1 {
                 Iterator i = allTypes.iterator();
                 i.hasNext();
         ) {
-            ModelElement_1_0 classDef = this.model.getDereferencedType(i.next());
+            ModelElement_1_0 classDef = getModel().getDereferencedType(i.next());
             ModelElement_1_0 operationDef = null;
             try {
-                operationDef = this.model.getElement(
-                    classDef.values("qualifiedName").get(0) + ":" + operationName
+                operationDef = getModel().getElement(
+                    classDef.objGetValue("qualifiedName") + ":" + operationName
                 );
             }
             catch(Exception e) {
@@ -694,20 +634,20 @@ extends StreamOperationAwareLayer_1 {
             }
             if(
                     (operationDef != null) &&
-                    this.model.isOperationType(operationDef)
+                    getModel().isOperationType(operationDef)
             ) {
                 // lookup parameters definition
                 for(
-                        Iterator j = operationDef.values("content").iterator();
+                        Iterator j = operationDef.objGetList("content").iterator();
                         j.hasNext();
                 ) {
-                    ModelElement_1_0 e = this.model.getElement(j.next());
-                    if("in".equals(e.values("name").get(0))) {
+                    ModelElement_1_0 e = getModel().getElement(j.next());
+                    if("in".equals(e.objGetValue("name"))) {
                         inParamDef = e;
                     }
                 }
                 // operation found where type in parameter matches the request's in parameter
-                if(this.model.getElementType(inParamDef) == inParamTypeDef) {
+                if(getModel().getElementType(inParamDef) == inParamTypeDef) {
                     break;
                 }
             }  
@@ -727,7 +667,7 @@ extends StreamOperationAwareLayer_1 {
         //
         // validate parameter
         //
-        this.model.verifyObject(
+        getModel().verifyObject(
             object, 
             inParamTypeDef,
             null,
@@ -736,24 +676,15 @@ extends StreamOperationAwareLayer_1 {
         return null;
     }
 
-    /**
-     * Retrieve model.
-     *
-     * @return Returns the model.
-     */
-    protected final Model_1_1 getModel() {
-        return this.model;
-    }
 
     //---------------------------------------------------------------------------
     // Variables
     //---------------------------------------------------------------------------
-    private Model_1_1 model = null;
     private List genericTypes = null;
     private ModelElement_1_0 basicObjectClassDef = null;
     private boolean verifyReply = true;
     private boolean allowEnumerationOfChildren = false;
-
+    public static String STATE1_CAPABLE_CLASS = "org:openmdx:compatibility:state1:StateCapable";
 
 }
 

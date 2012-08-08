@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JavaClock_1.java,v 1.2 2008/03/07 22:22:07 hburger Exp $
+ * Name:        $Id: JavaClock_1.java,v 1.6 2009/02/04 11:06:38 hburger Exp $
  * Description: Java Clock Provider
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/07 22:22:07 $
+ * Date:        $Date: 2009/02/04 11:06:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,17 +51,22 @@
  */
 package org.openmdx.test.clock1.layer.application;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Date;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.format.DateFormat;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Java Clock Provider
@@ -80,7 +85,32 @@ public class JavaClock_1 extends Layer_1 {
 		DataproviderObject segment = new DataproviderObject(request.path());
 	    segment.values(
 	      SystemAttributes.OBJECT_CLASS
-	    ).set(0, "org:openmdx:test:clock1:Segment");
+	    ).set(
+	        0, 
+	        "org:openmdx:test:clock1:Segment"
+	    );
+        InputStream stream = Thread.currentThread(
+        ).getContextClassLoader(
+        ).getResourceAsStream(
+            "org/openmdx/test/clock1/segment.txt"
+        );
+        String description;
+        if(stream == null) {
+            description = "n/a";
+        } else try {
+            BufferedReader in = new BufferedReader(
+                new InputStreamReader(stream)
+            );
+            description = in.readLine();
+        } catch (IOException exception) {
+            throw new ServiceException(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.MEDIA_ACCESS_FAILURE,
+                "Segment description acquisition failure"
+            );
+        }
+        segment.values("description").set(0, description);
 	    return new DataproviderReply(segment);
 	}
 

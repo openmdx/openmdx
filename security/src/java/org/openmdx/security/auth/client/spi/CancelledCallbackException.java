@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: CancelledCallbackException.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: CancelledCallbackException.java,v 1.2 2009/03/08 18:52:20 wfro Exp $
  * Description: Cancelled Callback Exception
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,8 +57,7 @@ import javax.security.auth.login.LoginException;
  *
  */
 public class CancelledCallbackException 
-	extends LoginException 
-{
+	extends LoginException {
 
 	/**
 	 * Implements <code>Serializable</code>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: OperationAwarePlugin_1.java,v 1.5 2008/04/29 14:53:32 hburger Exp $
+ * Name:        $Id: OperationAwarePlugin_1.java,v 1.11 2009/03/02 13:38:15 wfro Exp $
  * Description: OperationAwarePlugin_1
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/29 14:53:32 $
+ * Date:        $Date: 2009/03/02 13:38:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,16 +50,14 @@
  */
 package org.openmdx.compatibility.base.dataprovider.transport.dispatching;
 
-import java.io.OutputStream;
-import java.io.Writer;
 import java.util.StringTokenizer;
 
-import org.openmdx.base.accessor.generic.cci.Object_1_0;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 //-----------------------------------------------------------------------------
 /**
@@ -82,7 +80,7 @@ abstract public class OperationAwarePlugin_1
         String operation,
         Path replyPath
     ) throws ServiceException {
-        Object_1_0 target = this.retrieveObject(request.path().getPrefix(
+        DataObject_1_0 target = this.retrieveObject(request.path().getPrefix(
             request.path().size() - 2)
         );
         String featureName = this.getFeatureName(request);
@@ -109,44 +107,12 @@ abstract public class OperationAwarePlugin_1
                     request.object(),
                     this.objectCache,
                     this.objectFactory,
-                    this.model
+                    getModel()
                 )
             )
         );
     }
 
-    //---------------------------------------------------------------------------  
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.OutputStream, long)
-     */
-    @Override
-    protected DataproviderObject getStreamOperation(
-        ServiceHeader header,
-        Path objectPath,
-        String feature,
-        OutputStream value, 
-        long position, 
-        Path replyPath
-    ) throws ServiceException {
-        return null;
-    }
-
-    //---------------------------------------------------------------------------  
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.spi.StreamOperationAwareLayer_1#getStreamOperation(org.openmdx.compatibility.base.naming.Path, java.lang.String, java.io.Writer, long)
-     */
-    @Override
-    protected DataproviderObject getStreamOperation(
-        ServiceHeader header,
-        Path objectPath,
-        String feature,
-        Writer value, 
-        long position, 
-        Path replyPath
-    ) throws ServiceException {
-        return null;
-    }
-            
     // -------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------

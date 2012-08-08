@@ -31,9 +31,12 @@ import java.sql.Date;
  * <code>ConversionException</code> if a conversion error occurs.
  *
  * @author Craig R. McClanahan
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:17 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:58 $
  * @since 1.3
  */
+@SuppressWarnings({
+    "unchecked"
+})
 public final class SqlDateConverter extends DateTimeConverter {
 
     /**
@@ -41,7 +44,7 @@ public final class SqlDateConverter extends DateTimeConverter {
      * a <code>ConversionException</code> if an error occurs.
      */
     public SqlDateConverter() {
-        super(Date.class);
+        super();
     }
 
     /**
@@ -53,7 +56,16 @@ public final class SqlDateConverter extends DateTimeConverter {
      * occurs converting the value.
      */
     public SqlDateConverter(Object defaultValue) {
-        super(Date.class, defaultValue);
+        super(defaultValue);
+    }
+
+    /**
+     * Return the default type this <code>Converter</code> handles.
+     *
+     * @return The default type this <code>Converter</code> handles.
+     */
+    protected Class getDefaultType() {
+        return Date.class;
     }
 
 }

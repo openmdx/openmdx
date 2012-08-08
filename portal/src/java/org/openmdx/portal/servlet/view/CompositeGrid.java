@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: CompositeGrid.java,v 1.19 2008/09/19 20:54:23 wfro Exp $
+ * Name:        $Id: CompositeGrid.java,v 1.21 2009/02/20 22:05:43 wfro Exp $
  * Description: CompositeGrid
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2008/09/19 20:54:23 $
+ * Date:        $Date: 2009/02/20 22:05:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -133,13 +133,11 @@ implements Serializable {
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.PROCESSING_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("object", this.view.getObject()),
-                        new BasicException.Parameter("reference", this.getGridControl().getQualifiedReferenceName()),
-                        new BasicException.Parameter("filter", filter),
-                        new BasicException.Parameter("principal", this.view.getApplicationContext().getLoginPrincipalId())
-                    },
-                    "error getting filtered objects"
+                    "error getting filtered objects",
+                    new BasicException.Parameter("object", this.view.getObject()),
+                    new BasicException.Parameter("reference", this.getGridControl().getQualifiedReferenceName()),
+                    new BasicException.Parameter("filter", filter),
+                    new BasicException.Parameter("principal", this.view.getApplicationContext().getLoginPrincipalId())
                 );
                 AppLog.warning(e0.getMessage(), e0.getCause());
             }

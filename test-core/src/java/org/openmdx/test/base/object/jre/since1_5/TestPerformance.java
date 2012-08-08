@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestPerformance.java,v 1.3 2006/03/08 14:53:21 hburger Exp $
+ * Name:        $Id: TestPerformance.java,v 1.7 2009/03/05 17:51:35 hburger Exp $
  * Description: TestPerformance 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/03/08 14:53:21 $
+ * Date:        $Date: 2009/03/05 17:51:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,7 +66,6 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -82,11 +81,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.format.DateFormat;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.naming.Path;
 
 /**
  * Test Performance
@@ -1326,111 +1323,6 @@ public class TestPerformance
                     v.put("field5", in.readInt());
                     v.put("field6", in.readUTF());
                     v.put("field7", in.readUTF());                
-                }
-//              in.close();
-            }
-            storage.close();
-            logReceive(begin);
-        }
-    }
-
-    /**
-     * Test JSON mapping
-     * 
-     * @throws Exception
-     */
-    public void testJsonValueObjectsNatively(
-    ) throws Exception {
-        DateFormat dateFormat = DateFormat.getInstance();
-        {
-            OutputStream storage = newOutputStream();
-            long begin = System.currentTimeMillis();
-            for(
-                int i = 0;
-                i < RUNS;
-                i++
-            ) {
-                if(IN_MEMORY) ((ByteArrayOutputStream)storage).reset();
-                DataOutputStream out = new DataOutputStream(storage);
-                for (
-                     Iterator<Map.Entry<Path, ValueObject>> j = this.valueObjects.entrySet().iterator();
-                     j.hasNext();
-                ){
-                    Entry<Path, ValueObject> sourceEntry = j.next();
-                    JSONArray targetEntry = new JSONArray();
-                    targetEntry.put(
-                        new JSONArray(
-                            Arrays.asList(sourceEntry.getKey().getSuffix(0))
-                        )
-                    );
-                    targetEntry.put(ValueObject.class.getName());
-                    ValueObject sourceValue = sourceEntry.getValue();
-                    JSONObject targetValue = new JSONObject();
-                    targetValue.put("identity", sourceValue.identity);
-                    targetValue.put("field1", dateFormat.format(sourceValue.field1));
-                    targetValue.put("field2", new JSONArray(sourceValue.field2));
-                    targetValue.put("field3", dateFormat.format(sourceValue.field3));
-                    targetValue.put("field4", new JSONArray(sourceValue.field4));
-                    targetValue.put("field5", sourceValue.field5);
-                    targetValue.put("field6", sourceValue.field6);
-                    targetValue.put("field7", sourceValue.field7);
-                    targetEntry.put(targetValue);
-                    out.writeUTF(targetEntry.toString());
-                }
-                out.flush();
-            }
-            storage.close();
-            logSend(begin);
-        }
-        {
-            InputStream storage = newInputStream();
-            long begin = System.currentTimeMillis();
-            for(
-                int i = 0;
-                i < RUNS;
-                i++
-            ){
-                if(IN_MEMORY) ((ByteArrayInputStream)storage).reset();
-                DataInputStream in = new DataInputStream(storage);
-                this.valueObjects = new HashMap<Path, ValueObject>();
-                for(
-                     int j = 0;
-                     j < OBJECTS;
-                     j++
-                ){
-                    JSONArray sourceEntry = new JSONArray(in.readUTF());
-                    JSONArray sourceKey = sourceEntry.getJSONArray(0);
-                    assertEquals(ValueObject.class.getName(), sourceEntry.getString(1));
-                    JSONObject sourceValue = sourceEntry.getJSONObject(2);
-                    ValueObject targetValue = new ValueObject();                    
-                    int s = sourceKey.length();
-                    String[] p = new String[s];
-                    for(
-                       int k = 0;
-                       k < s;
-                       k++
-                    ) p[k] = sourceKey.getString(k);
-                    this.valueObjects.put(new Path(p), targetValue);
-                    targetValue.identity = sourceValue.getString("identity");
-                    targetValue.field1 = dateFormat.parse(sourceValue.getString("field1"));
-                    JSONArray f2 = sourceValue.getJSONArray("field2");
-                    targetValue.field2 = new HashSet<String>();                    
-                    for(
-                       int k = 0, l = f2.length();
-                       k < l;
-                       k++
-                    ) targetValue.field2.add(f2.getString(k));
-                    targetValue.field3 = dateFormat.parse(sourceValue.getString("field3"));
-                    JSONArray f4 = sourceValue.getJSONArray("field4");
-                    targetValue.field4 = new HashSet<String>();                    
-                    for(
-                       int k = 0, l = f4.length();
-                       k < l;
-                       k++
-                    ) targetValue.field4.add(f4.getString(k));
-                    targetValue.field5 = sourceValue.getInt("field5");
-                    targetValue.field6 = sourceValue.getString("field6");
-                    targetValue.field7 = sourceValue.getString("field7");
                 }
 //              in.close();
             }

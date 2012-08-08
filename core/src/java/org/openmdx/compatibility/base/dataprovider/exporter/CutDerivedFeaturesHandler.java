@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CutDerivedFeaturesHandler.java,v 1.5 2008/11/11 15:38:42 wfro Exp $
+ * Name:        $Id: CutDerivedFeaturesHandler.java,v 1.9 2009/01/13 17:34:50 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/11 15:38:42 $
+ * Date:        $Date: 2009/01/13 17:34:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,13 +54,13 @@ package org.openmdx.compatibility.base.dataprovider.exporter;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 
 /**
  * Delegating handler which cuts the derived features of the objects 
@@ -116,7 +116,7 @@ public class CutDerivedFeaturesHandler extends DelegatingHandler {
       }
       if (objectClass != null) {
          // get a map containing model-information for the features of this class
-         Map classFeatures = (Map) objectClass.getValues("allFeature").get(0);
+         Map classFeatures = (Map) objectClass.objGetValue("allFeature");
 
          for (Iterator attr = object.attributeNames().iterator(); 
             attr.hasNext();

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Audit_1.java,v 1.3 2004/04/02 16:59:00 wfro Exp $
+ * Name:        $Id: Audit_1.java,v 1.5 2009/01/05 13:46:30 wfro Exp $
  * Description: provider.Audit_1 class
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:00 $
+ * Date:        $Date: 2009/01/05 13:46:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,13 +51,13 @@
  */
 package org.openmdx.audit1.provider.layer.application;
 
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.spi.Layer_1;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 
 public class Audit_1
 	extends Layer_1 {
@@ -67,7 +67,7 @@ public class Audit_1
     short id,
     Configuration configuration,
     Layer_1_0 delegation
-  ) throws Exception, ServiceException {
+  ) throws ServiceException {
 
     super.activate(
       id, 

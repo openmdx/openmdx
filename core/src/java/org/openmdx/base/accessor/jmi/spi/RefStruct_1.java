@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefStruct_1.java,v 1.10 2008/11/11 15:37:52 wfro Exp $
+ * Name:        $Id: RefStruct_1.java,v 1.19 2009/01/27 00:10:57 wfro Exp $
  * Description: RefStruct_1 class
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/11 15:37:52 $
+ * Date:        $Date: 2009/01/27 00:10:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,25 +66,24 @@ import java.util.TreeMap;
 
 import javax.jmi.reflect.RefObject;
 
-import org.openmdx.base.accessor.generic.cci.StructureFactory_1_0;
-import org.openmdx.base.accessor.generic.cci.Structure_1_0;
+import org.openmdx.application.mof.cci.ModelAttributes;
+import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.application.mof.cci.PrimitiveTypes;
+import org.openmdx.base.accessor.cci.Structure_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_4;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
+import org.openmdx.base.accessor.spi.StructureFactory_1_0;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.code.ModelAttributes;
-import org.openmdx.model1.code.Multiplicities;
-import org.openmdx.model1.code.PrimitiveTypes;
 
 //---------------------------------------------------------------------------
 /**
@@ -213,24 +212,23 @@ implements RefStruct_1_0, Serializable {
             // unmarshal values (JMI types -> object layer types)
             int ee = 0;
             for(
-                    Iterator<?> e = structDef.values("content").iterator();
-                    e.hasNext();
-                    ee++
+                Iterator<?> e = structDef.objGetList("content").iterator();
+                e.hasNext();
+                ee++
             ) {
                 ModelElement_1_0 fieldDef = model.getElement(e.next());
                 ModelElement_1_0 fieldType = model.getElementType(
                     fieldDef
                 );
                 fieldNames.add(
-                    (String)fieldDef.values("name").get(0)
+                    (String)fieldDef.objGetValue("name")
                 );
-                String qualifiedTypeName = (String)fieldType.values("qualifiedName").get(0);
-                String multiplicity = (String)fieldDef.values("multiplicity").get(0);
+                String qualifiedTypeName = (String)fieldType.objGetValue("qualifiedName");
+                String multiplicity = (String)fieldDef.objGetValue("multiplicity");
                 Object v = structValues.get(ee);
-
                 if(
-                        Multiplicities.LIST.equals(multiplicity) ||
-                        Multiplicities.MULTI_VALUE.equals(multiplicity)
+                    Multiplicities.LIST.equals(multiplicity) ||
+                    Multiplicities.MULTI_VALUE.equals(multiplicity)
                 ) {
                     List<?> values = (List<?>)v;
                     if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
@@ -597,7 +595,7 @@ implements RefStruct_1_0, Serializable {
             }
             StructureFactory_1_0 structureFactory = hasLegacyDelegate() ?
                 this.refPackage.refObjectFactory() :
-                    (StructureFactory_1_0) ((RefPackage_1_4)this.refPackage).getDelegate();
+                    (StructureFactory_1_0) ((Jmi1Package_1_0)this.refPackage).getDelegate();
                 return structureFactory.createStructure(
                     typeName,
                     fieldNames,
@@ -611,8 +609,8 @@ implements RefStruct_1_0, Serializable {
     protected boolean hasLegacyDelegate(
     ){
         return 
-        !(this.refPackage instanceof RefPackage_1_4) ||
-        ((RefPackage_1_4)this.refPackage).hasLegacyDelegate();
+        !(this.refPackage instanceof Jmi1Package_1_0) ||
+        ((Jmi1Package_1_0)this.refPackage).hasLegacyDelegate();
     }
 
     //-------------------------------------------------------------------------
@@ -674,14 +672,14 @@ implements RefStruct_1_0, Serializable {
         this.assertStructureField(fieldDef);
 
         ModelElement_1_0 type = this.getType(fieldDef);
-        String qualifiedTypeName = (String)type.values("qualifiedName").get(0);
-        String multiplicity = (String)fieldDef.values("multiplicity").get(0);
+        String qualifiedTypeName = (String)type.objGetValue("qualifiedName");
+        String multiplicity = (String)fieldDef.objGetValue("multiplicity");
         Object v = this.structure.objGetValue(
-            (String)fieldDef.values("name").get(0)
+            (String)fieldDef.objGetValue("name")
         );
         if(
-                Multiplicities.LIST.equals(multiplicity) ||
-                Multiplicities.MULTI_VALUE.equals(multiplicity)
+            Multiplicities.LIST.equals(multiplicity) ||
+            Multiplicities.MULTI_VALUE.equals(multiplicity)
         ) {
             List<?> values = (List<?>)v;
             if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
@@ -1125,6 +1123,8 @@ implements RefStruct_1_0, Serializable {
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
+    private static final long serialVersionUID = 1490017890417480747L;
+    
     private RefPackage_1_0 refPackage;
     private Structure_1_0 structure;
 

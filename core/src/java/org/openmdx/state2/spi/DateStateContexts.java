@@ -1,9 +1,9 @@
 /*
  * ====================================================================
  * Description: Date State Contexts
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/27 16:46:56 $
+ * Date:        $Date: 2009/02/16 11:55:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,7 +55,6 @@ import java.util.GregorianCalendar;
 
 import javax.resource.cci.InteractionSpec;
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.ServiceException;
@@ -172,77 +171,4 @@ public class DateStateContexts {
         );
     }
 
-    /**
-     * Tells whether two dates are adjacent
-     * 
-     * @param date1
-     * @param date2
-     * 
-     * @return <code>true</code> if two dates are adjacent
-     * @throws ServiceException  
-     */
-    public static boolean adjacent (
-        String date1,
-        String date2
-    ) throws ServiceException {
-        XMLGregorianCalendar value1 = fromBasicFormat(date1);
-        XMLGregorianCalendar value2 = fromBasicFormat(date2);
-        value1.add(ONE_DAY);
-        return value1.equals(value2);
-    }
-
-    /**
-     * Retrieve the previous day
-     * 
-     * @param date
-     * 
-     * @return the previous day
-     */
-    public static XMLGregorianCalendar predecessor(
-        XMLGregorianCalendar date
-    ){
-        XMLGregorianCalendar predecessor = (XMLGregorianCalendar) date.clone();
-        predecessor.add(MINUS_ONE_DAY);
-        return predecessor;
-    }
-
-    /**
-     * Retrieve the next day
-     * 
-     * @param date
-     * 
-     * @return the next day
-     */
-    public static XMLGregorianCalendar successor(
-        XMLGregorianCalendar date
-    ){
-        XMLGregorianCalendar successor = (XMLGregorianCalendar) date.clone();
-        successor.add(ONE_DAY);
-        return successor;
-    }
-    
-    /**
-     * Plus one day
-     */
-    public static final Duration ONE_DAY = DatatypeFactories.xmlDatatypeFactory(
-    ).newDurationDayTime(
-        true, // isPositive
-        1, // day
-        0, // hour
-        0, // minute
-        0 // second
-    );
-
-    /**
-     * Minus one day
-     */
-    public static final Duration MINUS_ONE_DAY = DatatypeFactories.xmlDatatypeFactory(
-    ).newDurationDayTime(
-        false, // isPositive
-        1, // day
-        0, // hour
-        0, // minute
-        0 // second
-    );
-    
 }

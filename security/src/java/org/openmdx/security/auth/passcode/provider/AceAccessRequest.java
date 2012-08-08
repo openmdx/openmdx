@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AceAccessRequest.java,v 1.2 2007/11/26 16:22:16 hburger Exp $
+ * Name:        $Id: AceAccessRequest.java,v 1.3 2009/03/08 18:52:18 wfro Exp $
  * Description: ACE Access Request
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 16:22:16 $
+ * Date:        $Date: 2009/03/08 18:52:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -84,7 +84,7 @@ public class AceAccessRequest extends PapAccessRequest {
     ) throws InvalidParameterException {
     	this(
             userName, 
-            getPassword(passcode, SecurIDState.getTag(context), tokenCodeLength),
+            AceAccessRequest.getPassword(passcode, SecurIDState.getTag(context), tokenCodeLength),
             context
         );        
     }
@@ -107,7 +107,7 @@ public class AceAccessRequest extends PapAccessRequest {
     ) throws InvalidParameterException {
     	this(
             userName, 
-            getPassword(pin, tokenCode, SecurIDState.getTag(context)),
+            AceAccessRequest.getPassword(pin, tokenCode, SecurIDState.getTag(context)),
             context
         );        
     }
@@ -131,20 +131,20 @@ public class AceAccessRequest extends PapAccessRequest {
             password
         );        
 		if(context != null){
-		    setAttribute(
+		    this.setAttribute(
 				new RadiusAttribute(
 					RadiusAttributeValues.STATE,
 					SecurIDState.getState(context)
 				)
 			);
-		    setSocketIndex(
+		    this.setSocketIndex(
 		        SecurIDState.getProvider(context)
 		    );
 		}
-        setAttribute(
+		this.setAttribute(
             new RadiusAttribute(
                 RadiusAttributeValues.NAS_PORT_TYPE, 
-                ASYNC
+                AceAccessRequest.ASYNC
             )
         );
     }
@@ -173,7 +173,8 @@ public class AceAccessRequest extends PapAccessRequest {
 		        default: 
 		            return passcode;
 	        }
-        } catch (IndexOutOfBoundsException exception) {
+        } 
+        catch (IndexOutOfBoundsException exception) {
             return EMPTYSTRING;
         }
     }

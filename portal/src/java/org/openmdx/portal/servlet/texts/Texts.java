@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Texts.java,v 1.15 2008/11/14 17:26:24 wfro Exp $
+ * Name:        $Id: Texts.java,v 1.16 2009/02/27 15:52:52 wfro Exp $
  * Description: Texts
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/14 17:26:24 $
+ * Date:        $Date: 2009/02/27 15:52:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -211,6 +211,11 @@ public Texts(
   public String getErrorTextCanNotEditNumber(
   ) {
     return this.properties.getProperty("ErrorTextCanNotEditNumber");
+  }
+  
+  public String getErrorTextMandatoryField(
+  ) {
+    return this.properties.getProperty("ErrorTextMandatoryField");
   }
   
   public String getErrorTextCanNotEditDate(

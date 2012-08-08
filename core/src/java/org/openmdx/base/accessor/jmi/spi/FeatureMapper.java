@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: FeatureMapper.java,v 1.8 2008/11/11 15:37:51 wfro Exp $
+ * Name:        $Id: FeatureMapper.java,v 1.10 2009/01/13 17:33:49 wfro Exp $
  * Description: FeatureMapper
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/11 15:37:51 $
+ * Date:        $Date: 2009/01/13 17:33:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,15 +58,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.omg.mof.spi.AbstractNames;
+import org.omg.mof.spi.Identifier;
+import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.application.mof.cci.PrimitiveTypes;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.code.Multiplicities;
-import org.openmdx.model1.code.PrimitiveTypes;
-import org.openmdx.model1.mapping.AbstractNames;
-import org.openmdx.model1.mapping.java.Identifier;
 
 /**
  * Class FeatureMapper
@@ -117,7 +117,7 @@ public class FeatureMapper {
     //------------------------------------------------------------------------
     Method getAccessor(
         Object feature
-    ) {
+    ) throws ServiceException {
         String featureName;
         ModelElement_1_0 featureDef = null;
         if(feature instanceof String) {
@@ -128,7 +128,7 @@ public class FeatureMapper {
         } 
         else {
             featureDef = ((RefMetaObject_1) feature).getElementDef();
-            featureName = (String)featureDef.values("name").get(0);
+            featureName = (String)featureDef.objGetValue("name");
         }
         Method accessor = this.accessors.get(featureName);
         if(accessor == null) { 
@@ -144,13 +144,13 @@ public class FeatureMapper {
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.BAD_MEMBER_NAME,
                         "Feature not found in model repository",
-                        new BasicException.Parameter ("className", this.classDef.path().getBase()),
+                        new BasicException.Parameter ("className", this.classDef.jdoGetObjectId()),
                         new BasicException.Parameter ("featureName", featureName)
                     );
                 }                    
-                String multiplicity = (String)featureDef.values("multiplicity").get(0);
+                String multiplicity = (String)featureDef.objGetValue("multiplicity");
                 boolean isBoolean =
-                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).values("qualifiedName").get(0));
+                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).objGetValue("qualifiedName"));
                 boolean isSingleValued = 
                     (Multiplicities.SINGLE_VALUE.equals(multiplicity) || Multiplicities.OPTIONAL_VALUE.equals(multiplicity)); 
                 String beanGetterName = AbstractNames.openmdx2AccessorName(
@@ -184,7 +184,7 @@ public class FeatureMapper {
     //------------------------------------------------------------------------
     Method getMutator(
         Object feature
-    ){
+    ) throws ServiceException {
         String featureName;
         ModelElement_1_0 featureDef = null;
         if(feature instanceof String) {
@@ -194,7 +194,7 @@ public class FeatureMapper {
             }                
         } else {
             featureDef = ((RefMetaObject_1) feature).getElementDef();
-            featureName = (String) featureDef.values("name").get(0);
+            featureName = (String) featureDef.objGetValue("name");
         }
         Method mutator = this.mutators.get(featureName);
         if(mutator == null) {
@@ -207,9 +207,9 @@ public class FeatureMapper {
                         false
                     );
                 }                                    
-                String multiplicity = (String)featureDef.values("multiplicity").get(0);
+                String multiplicity = (String)featureDef.objGetValue("multiplicity");
                 boolean isBoolean =
-                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).values("qualifiedName").get(0));
+                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).objGetValue("qualifiedName"));
                 boolean isSingleValued = 
                     (Multiplicities.SINGLE_VALUE.equals(multiplicity) || Multiplicities.OPTIONAL_VALUE.equals(multiplicity));                
                 String beanSetterName = AbstractNames.openmdx2AccessorName(
@@ -242,7 +242,7 @@ public class FeatureMapper {
     //------------------------------------------------------------------------
     Method getOperation(
         Object feature
-    ){
+    ) throws ServiceException {
         String featureName;
         if(feature instanceof String) {
             featureName = (String) feature;
@@ -251,7 +251,7 @@ public class FeatureMapper {
             }                
         } else {
             ModelElement_1_0 featureDef = ((RefMetaObject_1) feature).getElementDef();
-            featureName = (String) featureDef.values("name").get(0);
+            featureName = (String) featureDef.objGetValue("name");
         }
         Method operation = this.mutators.get(featureName);
         if(operation == null) {
@@ -312,7 +312,7 @@ public class FeatureMapper {
         String methodName,
         MethodSignature mode
     ) throws ServiceException {
-        String className = (String)this.classDef.values("qualifiedName").get(0);
+        String className = (String)this.classDef.objGetValue("qualifiedName");
         ConcurrentMap<String,ModelElement_1_0> features = allFeatures.get(className);
         if(features == null) {
             ConcurrentMap<String,ModelElement_1_0> concurrent = allFeatures.putIfAbsent(
@@ -335,7 +335,7 @@ public class FeatureMapper {
             Model_1_0 model = this.classDef.getModel();
             ModelElement_1_0 classDef = model.getElement(className);
             List<ModelElement_1_0> operations = new ArrayList<ModelElement_1_0>();
-            for(Iterator i = ((Map)classDef.values("allFeature").get(0)).values().iterator(); i.hasNext(); ) {
+            for(Iterator i = ((Map)classDef.objGetValue("allFeature")).values().iterator(); i.hasNext(); ) {
                 feature = (ModelElement_1_0)i.next();
                 // Operation
                 if(model.isOperationType(feature)) {
@@ -343,7 +343,7 @@ public class FeatureMapper {
                 }
                 // Structural feature
                 else {
-                    String featureName = (String)feature.values("name").get(0);
+                    String featureName = (String)feature.objGetValue("name");
                     // non-boolean getter
                     features.putIfAbsent(
                         Identifier.OPERATION_NAME.toIdentifier(
@@ -422,7 +422,7 @@ public class FeatureMapper {
             }
             // Postprocess operations
             for(ModelElement_1_0 operation: operations) {
-                String operationName = (String)operation.values("name").get(0);                
+                String operationName = (String)operation.objGetValue("name");                
                 // In case a feature accessor with the same name as an operation exists
                 // it is overriden, i.e. operations have precedence
                 features.put(

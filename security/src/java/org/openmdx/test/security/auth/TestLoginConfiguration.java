@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestLoginConfiguration.java,v 1.7 2008/04/04 17:55:31 hburger Exp $
+ * Name:        $Id: TestLoginConfiguration.java,v 1.8 2009/03/08 18:52:19 wfro Exp $
  * Description: Test Login Configuration
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:55:31 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -90,7 +90,7 @@ public class TestLoginConfiguration extends TestCase {
      * To start the batch runner from your main you can write: 
      */
     public static void main (String[] args) {
-        junit.textui.TestRunner.run(suite());
+        junit.textui.TestRunner.run(TestLoginConfiguration.suite());
     }
 
     /**
@@ -125,17 +125,17 @@ public class TestLoginConfiguration extends TestCase {
 		AppConfigurationEntry expected,
 		AppConfigurationEntry actual
 	){
-		assertEquals(
+		TestLoginConfiguration.assertEquals(
 			message + ".loginModuleName",
 			expected.getLoginModuleName(),
 			actual.getLoginModuleName()
 	    );
-		assertEquals(
+		TestLoginConfiguration.assertEquals(
 			message + ".loginModuleName",
 			expected.getControlFlag(),
 			actual.getControlFlag()
 	    );
-		assertEquals(
+		TestLoginConfiguration.assertEquals(
 			message + ".options",
 			expected.getOptions(),
 			actual.getOptions()
@@ -143,10 +143,10 @@ public class TestLoginConfiguration extends TestCase {
 	}
 
 	public void testEncoding() throws MalformedURLException, IOException{
-		for(int i = 0; i < urls.length; i++){
-			URL url = new URL(urls[i]);
+		for(int i = 0; i < TestLoginConfiguration.urls.length; i++){
+			URL url = new URL(TestLoginConfiguration.urls[i]);
 			URLReader urlReader = new URLReader(url);
-			assertEquals(urls[i], historicalNames[i], urlReader.getEncoding());
+			TestLoginConfiguration.assertEquals(TestLoginConfiguration.urls[i], TestLoginConfiguration.historicalNames[i], urlReader.getEncoding());
 			urlReader.close();
 		}
 	}
@@ -194,11 +194,13 @@ public class TestLoginConfiguration extends TestCase {
 			int i = 0;
 			i < expected.length;
 			i++
-		) assertEquals(
-			"Login[" + i + "]",
-			expected[i],
-			actual[i]
-	    );
+		) {
+			TestLoginConfiguration.assertEquals(
+				"Login[" + i + "]",
+				expected[i],
+				actual[i]
+		    );
+		}
 	}
 	
 }

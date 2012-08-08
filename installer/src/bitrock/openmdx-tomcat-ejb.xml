@@ -1,0 +1,351 @@
+<project>
+    <shortName>openmdxTomcatEjb</shortName>
+    <fullName>openMDX Tomcat+EJB</fullName>
+    <version>2.4.0</version>
+    <installerFilename></installerFilename>
+    <readmeFile>../../image/openmdx-tomcat-ejb/README</readmeFile>
+    <licenseFile>../../image/openmdx-tomcat-ejb/LICENSE</licenseFile>
+    <logoImage>../../image/openmdx-tomcat-ejb/logo.png</logoImage>
+    <splashImage>../../image/openmdx-tomcat-ejb/splash.gif</splashImage>
+    <postInstallationScript>${installdir}/installer/openmdx-tomcat-ejb/bin/postinstallation.sh</postInstallationScript>
+    <showPostInstallationScriptResult>1</showPostInstallationScriptResult>
+    <enableRollback>1</enableRollback>
+    <uninstallerDirectory>${installdir}/installer/openmdx-tomcat-ejb</uninstallerDirectory>
+    <componentList>
+        <component>
+            <name>default</name>
+            <description>Default Component</description>
+            <canBeEdited>1</canBeEdited>
+            <selected>1</selected>
+            <show>1</show>
+            <desktopShortcutList>
+                <shortcut>
+                    <comment>Start Tomcat+EJB ${product_version} (${tomcat_http_port})</comment>
+                    <exec>${installdir}/bin/tomcat.sh START</exec>
+                    <icon>${installdir}/tomcat-openejb.ico</icon>
+                    <name>Start Tomcat+EJB ${product_version} (${tomcat_http_port})</name>
+                    <path>${installdir}/bin</path>
+                    <platforms>all</platforms>
+                    <runInTerminal>1</runInTerminal>
+                    <windowsExec>${installdir}/bin/tomcat.bat</windowsExec>
+                    <windowsExecArgs>START</windowsExecArgs>
+                    <windowsIcon>${installdir}/tomcat-openejb.ico</windowsIcon>
+                    <windowsPath>${installdir}/bin</windowsPath>
+                </shortcut>
+                <shortcut>
+                    <comment>Stop Tomcat+EJB ${product_version} (${tomcat_http_port})</comment>
+                    <exec>${installdir}/bin/tomcat.sh STOP</exec>
+                    <icon>${installdir}/tomcat-openejb.ico</icon>
+                    <name>Stop Tomcat+EJB ${product_version} (${tomcat_http_port})</name>
+                    <path>${installdir}/bin</path>
+                    <platforms>all</platforms>
+                    <runInTerminal>1</runInTerminal>
+                    <windowsExec>${installdir}/bin/tomcat.bat</windowsExec>
+                    <windowsExecArgs>STOP</windowsExecArgs>
+                    <windowsIcon>${installdir}/tomcat-openejb.ico</windowsIcon>
+                    <windowsPath>${installdir}/bin</windowsPath>
+                </shortcut>
+                <linkShortcut>
+                    <comment>Login Tomcat+EJB ${product_version} (${tomcat_http_port})</comment>
+                    <icon>${installdir}/tomcat-openejb.ico</icon>
+                    <name>Login Tomcat+EJB ${product_version} (${tomcat_http_port})</name>
+                    <platforms>all</platforms>
+                    <runInTerminal>0</runInTerminal>
+                    <url>http://localhost:${tomcat_http_port}</url>
+                    <windowsIcon>${installdir}/tomcat-openejb.ico</windowsIcon>
+                </linkShortcut>
+            </desktopShortcutList>
+            <folderList>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
+                    <name>programfiles</name>
+                    <platforms>all</platforms>
+                    <actionList>
+                        <substitute>
+                            <files>*/*.bat; */*.sh; */*.xml</files>
+                            <type>regexp</type>
+                            <substitutionList>
+                                <substitution>
+                                    <pattern>@@INSTALLDIR@@</pattern>
+                                    <value>${installdir}</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>@@JAVA_HOME@@</pattern>
+                                    <value>${java_home}</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>@@ANT_HOME@@</pattern>
+                                    <value>${ant_home}</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>@@VERSION@@</pattern>
+                                    <value>${product_version}</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>@@TOMCAT_HTTP_PORT@@</pattern>
+                                    <value>${tomcat_http_port}</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>@@TOMCAT_SERVER_PORT@@</pattern>
+                                    <value>${tomcat_server_port}</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>port="8080"</pattern>
+                                    <value>port="${tomcat_http_port}"</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>port="8443"</pattern>
+                                    <value>port="${tomcat_https_port}"</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>port="8005"</pattern>
+                                    <value>port="${tomcat_server_port}"</value>
+                                </substitution>
+                                <substitution>
+                                    <pattern>port="8009"</pattern>
+                                    <value>port="${tomcat_ajp_port}"</value>
+                                </substitution>
+                            </substitutionList>
+                        </substitute>
+                        <changePermissions>
+                            <files>*/*.sh;*/*.bin</files>
+                            <permissions>755</permissions>
+                        </changePermissions>
+                    </actionList>
+                    <distributionFileList>
+                        <distributionDirectory>
+                            <origin>../../image/openmdx-tomcat-ejb/apache-tomcat-6</origin>
+                        </distributionDirectory>
+                        <distributionDirectory>
+                            <origin>../../image/openmdx-tomcat-ejb/bin</origin>
+                        </distributionDirectory>
+                        <distributionFile>
+                            <origin>../../image/openmdx-tomcat-ejb/favicon.ico</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../image/openmdx-tomcat-ejb/README</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../image/openmdx-tomcat-ejb/LICENSE</origin>
+                        </distributionFile>
+                        <distributionDirectory>
+                            <origin>../../image/openmdx-tomcat-ejb/installer</origin>
+                        </distributionDirectory>
+                        <distributionFile>
+                            <origin>../../image/openmdx-tomcat-ejb/tomcat-openejb.ico</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                    <shortcutList>
+                        <shortcut>
+                            <comment>Uninstall</comment>
+                            <exec>${installdir}/installer/openmdx-tomcat-ejb/${uninstallerName}</exec>
+                            <icon></icon>
+                            <name>Uninstall ${product_fullname} (${tomcat_http_port})</name>
+                            <path>${installdir}/installer/openmdx-tomcat-ejb/</path>
+                            <platforms>all</platforms>
+                            <runInTerminal>0</runInTerminal>
+                            <windowsExec>${installdir}/installer/openmdx-tomcat-ejb/${uninstallerName}.exe</windowsExec>
+                            <windowsExecArgs></windowsExecArgs>
+                            <windowsIcon></windowsIcon>
+                            <windowsPath>${installdir}/installer/openmdx-tomcat-ejb/</windowsPath>
+                        </shortcut>
+                    </shortcutList>
+                </folder>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
+                    <name>programfileslinux</name>
+                    <platforms>linux</platforms>
+                </folder>
+                <folder>
+                    <description>Program Files</description>
+                    <destination>${installdir}</destination>
+                    <name>programfileswindows</name>
+                    <platforms>windows</platforms>
+                </folder>
+                <folder>
+                    <description>tomcat-bin</description>
+                    <destination>${installdir}/apache-tomcat-6/bin</destination>
+                    <name>tomcat-bin</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>../../../jre-1.5/core/lib/tomcat-juli.jar</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+                <folder>
+                    <description>tomcat-lib</description>
+                    <destination>${installdir}/apache-tomcat-6/lib</destination>
+                    <name>tomcat-lib</name>
+                    <platforms>all</platforms>
+                    <distributionFileList>
+                        <distributionFile>
+                            <origin>../../../opt/mysql/jre-1.5/mysql-5/lib/mysql-connector-java-bin.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../opt/postgresql/jre-1.5/postgresql-8/lib/postgresql-8.3.jdbc3.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../opt/hsqldb/jre-1.5/hsqldb-1/lib/hsqldb.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../planetj/jre-1.5/compfilter/lib/pjl-comp-filter.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../jre-1.5/log/lib/slf4j-openmdx1.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../jre-1.5/core/lib/openmdx-base.jar</origin>
+                        </distributionFile>
+                        <distributionFile>
+                            <origin>../../../jre-1.5/core/lib/openmdx-base-ext.jar</origin>
+                        </distributionFile>
+                    </distributionFileList>
+                </folder>
+            </folderList>
+            <startMenuShortcutList>
+                <startMenuShortcut>
+                    <comment>Start Tomcat+EJB ${product_version} (${tomcat_http_port})</comment>
+                    <name>Start Tomcat+EJB ${product_version} (${tomcat_http_port})</name>
+                    <runInTerminal>1</runInTerminal>
+                    <windowsExec>${installdir}/bin/tomcat.bat</windowsExec>
+                    <windowsExecArgs>START</windowsExecArgs>
+                    <windowsIcon>${installdir}/tomcat-openejb.ico</windowsIcon>
+                    <windowsPath>${installdir}/bin</windowsPath>
+                </startMenuShortcut>
+                <startMenuShortcut>
+                    <comment>Uninstall ${product_fullname} (${tomcat_http_port})</comment>
+                    <name>Uninstall ${product_fullname} (${tomcat_http_port})</name>
+                    <runInTerminal>0</runInTerminal>
+                    <windowsExec>${installdir}/installer/openmdx-tomcat-ejb/${uninstallerName}.exe</windowsExec>
+                    <windowsExecArgs></windowsExecArgs>
+                    <windowsIcon></windowsIcon>
+                    <windowsPath>${installdir}/installer/openmdx-tomcat-ejb/</windowsPath>
+                </startMenuShortcut>
+                <startMenuShortcut>
+                    <comment>Stop Tomcat+EJB ${product_version} (${tomcat_http_port})</comment>
+                    <name>Stop Tomcat+EJB ${product_version} (${tomcat_http_port})</name>
+                    <runInTerminal>1</runInTerminal>
+                    <windowsExec>${installdir}/bin/tomcat.bat</windowsExec>
+                    <windowsExecArgs>STOP</windowsExecArgs>
+                    <windowsIcon>${installdir}/tomcat-openejb.ico</windowsIcon>
+                    <windowsPath>${installdir}/bin</windowsPath>
+                </startMenuShortcut>
+                <startMenuLinkShortcut>
+                    <comment>Launch Tomcat+EJB ${product_version} (${tomcat_http_port})</comment>
+                    <name>Login Tomcat+EJB ${product_version} (${tomcat_http_port})</name>
+                    <runInTerminal>0</runInTerminal>
+                    <url>http://localhost:${tomcat_http_port}</url>
+                    <windowsIcon>${installdir}/tomcat-openejb.ico</windowsIcon>
+                </startMenuLinkShortcut>
+            </startMenuShortcutList>
+        </component>
+    </componentList>
+    <parameterList>
+        <infoParameter>
+            <name>important</name>
+            <title>IMPORTANT</title>
+            <description></description>
+            <explanation>Installation instructions</explanation>
+            <value>This installer creates a Tomcat 6.0.18 instance extended with Apache OpenEJB 3.1. The lib directory of the Tomcat instance contains the openMDX libraries and is therefore ready to run openMDX based applications. The installer does NOT include the JDK 1.5 binaries. Make sure you have these packages installed before continuing.</value>
+            <default></default>
+            <trimMarginNumChars>0</trimMarginNumChars>
+        </infoParameter>
+        <directoryParameter>
+            <name>installdir</name>
+            <description>Installer.Parameter.installdir.description</description>
+            <explanation>Installer.Parameter.installdir.explanation</explanation>
+            <value>${platform_install_prefix}/${product_shortname}-${product_version}</value>
+            <default>${platform_install_prefix}/${product_shortname}-${product_version}</default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <ask>yes</ask>
+            <cliOptionName>prefix</cliOptionName>
+            <mustBeWritable>yes</mustBeWritable>
+            <mustExist>0</mustExist>
+            <width>40</width>
+        </directoryParameter>
+        <directoryParameter>
+            <name>java_home</name>
+            <description>JDK 1.5 home directory</description>
+            <explanation>Select home directory of an existing JDK 1.5, e.g. C:\pgm\Java\jdk1.5.0 on Windows or /usr/lib/jvm/jdk1.5.0 on Linux platforms.</explanation>
+            <value></value>
+            <default></default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <ask>yes</ask>
+            <cliOptionName>prefix</cliOptionName>
+            <mustBeWritable>no</mustBeWritable>
+            <mustExist>1</mustExist>
+            <width>40</width>
+        </directoryParameter>
+        <directoryParameter>
+            <name>ant_home</name>
+            <description>Ant 1.7.0 home directory</description>
+            <explanation>Select home directory of an existing Ant 1.7.0 installation, e.g. C:\pgm\apache-ant-1.7.0 on Windows or /opt/apache-ant-1.7.0 on Linux platforms.</explanation>
+            <value></value>
+            <default>/opt/apache-ant-1.7.0</default>
+            <allowEmptyValue>0</allowEmptyValue>
+            <ask>yes</ask>
+            <cliOptionName>prefix</cliOptionName>
+            <mustBeWritable>no</mustBeWritable>
+            <mustExist>1</mustExist>
+            <width>40</width>
+        </directoryParameter>
+        <parameterGroup>
+            <name>tomcat_settings</name>
+            <explanation>Tomcat configuration settings</explanation>
+            <value></value>
+            <default></default>
+            <parameterList>
+                <stringParameter>
+                    <name>tomcat_http_port</name>
+                    <description>Tomcat HTTP port</description>
+                    <explanation></explanation>
+                    <value></value>
+                    <default>8080</default>
+                    <allowEmptyValue>0</allowEmptyValue>
+                    <width>40</width>
+                </stringParameter>
+                <stringParameter>
+                    <name>tomcat_https_port</name>
+                    <description>Tomcat HTTPS port</description>
+                    <explanation></explanation>
+                    <value></value>
+                    <default>8443</default>
+                    <allowEmptyValue>0</allowEmptyValue>
+                    <width>40</width>
+                </stringParameter>
+                <stringParameter>
+                    <name>tomcat_server_port</name>
+                    <description>Tomcat server port</description>
+                    <explanation></explanation>
+                    <value></value>
+                    <default>8005</default>
+                    <allowEmptyValue>0</allowEmptyValue>
+                    <width>40</width>
+                </stringParameter>
+                <stringParameter>
+                    <name>tomcat_ajp_port</name>
+                    <description>Tomcat AJP port</description>
+                    <explanation></explanation>
+                    <value></value>
+                    <default>8009</default>
+                    <allowEmptyValue>0</allowEmptyValue>
+                    <width>40</width>
+                </stringParameter>
+            </parameterList>
+        </parameterGroup>
+    </parameterList>
+    <platformOptionsList>
+        <platformOptions>
+            <postInstallationScript>${installdir}/installer/openmdx-tomcat-ejb/bin/postinstallation.bat</postInstallationScript>
+            <postInstallationScriptArguments></postInstallationScriptArguments>
+            <platform>windows</platform>
+        </platformOptions>
+        <platformOptions>
+            <platform>linux</platform>
+        </platformOptions>
+    </platformOptionsList>
+</project>
+

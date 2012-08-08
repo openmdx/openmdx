@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LayerConfigurationEntries.java,v 1.1 2008/11/27 16:46:56 hburger Exp $
+ * Name:        $Id: LayerConfigurationEntries.java,v 1.3 2009/02/17 10:06:22 hburger Exp $
  * Description: Layer Configuration Entries
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/27 16:46:56 $
+ * Date:        $Date: 2009/02/17 10:06:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,7 @@
  */
 package org.openmdx.compatibility.state1.layer.type;
 
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 
 /**
  * The <code>LayerConfigurationEntries</code> class contains
@@ -64,13 +64,6 @@ public class LayerConfigurationEntries extends SharedConfigurationEntries {
     protected LayerConfigurationEntries() {
         // Avoid instantiation
     }
-
-    /**
-     * The <code>stateCapable<code> configuration field.
-     * <p>
-     * It's values consist of the string representation of path patterns.
-     */
-    static public final String STATE_CAPABLE = "stateCapable";
 
     /**
      * The <code>transactionTimeUnique<code> configuration field  

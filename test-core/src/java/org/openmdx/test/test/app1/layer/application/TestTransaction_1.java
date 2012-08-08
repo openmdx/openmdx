@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestTransaction_1.java,v 1.4 2008/11/21 16:46:31 hburger Exp $
+ * Name:        $Id: TestTransaction_1.java,v 1.8 2009/02/04 11:06:38 hburger Exp $
  * Description: TestTransaction_1
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/21 16:46:31 $
+ * Date:        $Date: 2009/02/04 11:06:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,17 +55,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.DataproviderOperations;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
+import org.openmdx.base.naming.Path;
 import org.openmdx.compatibility.base.dataprovider.layer.application.ProvidingUid_1;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
-import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.test.kernel.application.container.ejb.cci.Runnable_1LocalHome;
 
@@ -102,11 +103,15 @@ public class TestTransaction_1 extends ProvidingUid_1 {
     public void activate(
         short id, Configuration configuration, 
         Layer_1_0 delegation
-    ) throws Exception, ServiceException {
+    ) throws ServiceException {
         super.activate(id, configuration, delegation);
-        this.rollbackOnly = ((Runnable_1LocalHome)
-                new InitialContext().lookup("java:comp/env/ejb/RollbackOnly")
-        ).create();
+        try {
+            this.rollbackOnly = ((Runnable_1LocalHome)
+                    new InitialContext().lookup("java:comp/env/ejb/RollbackOnly")
+            ).create();
+        } catch (NamingException exception) {
+            throw new ServiceException(exception);
+        }
     }
 
     /* (non-Javadoc)

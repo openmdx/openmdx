@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PaintScope.java,v 1.1 2008/05/31 23:40:09 wfro Exp $
+ * Name:        $Id: PaintScope.java,v 1.2 2009/03/08 18:03:20 wfro Exp $
  * Description: PaintMode 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/31 23:40:09 $
+ * Date:        $Date: 2009/03/08 18:03:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,7 +56,6 @@ package org.openmdx.portal.servlet;
  * PaintScope
  *
  */
-public enum PaintScope
-{
+public enum PaintScope {
     FULL, ATTRIBUTE_PANE
 }

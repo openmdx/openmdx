@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AbstractLoginClient.java,v 1.3 2007/12/10 16:59:07 hburger Exp $
+ * Name:        $Id: AbstractLoginClient.java,v 1.4 2009/03/08 18:52:20 wfro Exp $
  * Description: Abstract Login Client
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/10 16:59:07 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,8 +63,7 @@ import javax.security.auth.login.LoginException;
  * Abstract Login Client
  */
 public abstract class AbstractLoginClient 
-	implements Runnable
-{
+	implements Runnable {
 	
 	/**
 	 * Constructor
@@ -109,7 +108,7 @@ public abstract class AbstractLoginClient
 	){
 		return new SwingCallbackHandler(
 			ResourceBundle.getBundle(
-				getClass().getName()
+				this.getClass().getName()
 			)				
 		);
 	}
@@ -133,13 +132,14 @@ public abstract class AbstractLoginClient
 	){
 		try {
 			return new LoginContext(
-				getName(),
+				this.getName(),
 				null, // subject 
-				getCallbackHandler(),
-				getLoginConfiguration()
+				this.getCallbackHandler(),
+				this.getLoginConfiguration()
 			);
-		} catch (LoginException exception) {
-			return abort("Login context acquisition", exception);
+		} 
+		catch (LoginException exception) {
+			return this.abort("Login context acquisition", exception);
 		}
 	}
 	
@@ -149,7 +149,7 @@ public abstract class AbstractLoginClient
 	 * @return the client name
 	 */
 	protected String getName(){
-		String qualifiedName = getClass().getName();
+		String qualifiedName = this.getClass().getName();
 		return qualifiedName.substring(
 			qualifiedName.lastIndexOf('.') + 1
 		);
@@ -176,17 +176,19 @@ public abstract class AbstractLoginClient
 		LoginContext loginContext
 	){
 		for(
-			int attempts = getLoginLimit();
+			int attempts = this.getLoginLimit();
 			attempts > 0;
 			attempts--
 		){
 			try {
 				loginContext.login();
 				return true;
-			} catch (CancelledCallbackException exception) {
+			} 
+			catch (CancelledCallbackException exception) {
 				return false;
-			} catch (LoginException exception) {
-				handle(exception);
+			} 
+			catch (LoginException exception) {
+				this.handle(exception);
 			}
 		}
 		return false;
@@ -217,18 +219,21 @@ public abstract class AbstractLoginClient
 	 */
 	public void run(
 	) {
-		LoginContext loginContext = getLoginContext();
+		LoginContext loginContext = this.getLoginContext();
 		if(loginContext == null) {
 			System.exit(FAILED);
-		} else if(login(loginContext)) {
-			run(loginContext.getSubject());
+		} 
+		else if(this.login(loginContext)) {
+			this.run(loginContext.getSubject());
 			try {
 				loginContext.logout();
-			} catch (LoginException logoutException) {
+			} 
+			catch (LoginException logoutException) {
 				// ignore logoutException
 			}
 			System.exit(SUCCESS);
-		} else {
+		} 
+		else {
 			System.exit(CANCELLED);
 		}
 	}
@@ -250,7 +255,8 @@ public abstract class AbstractLoginClient
 		int size = set.size();
 		if(size == 1) {
 			return set.iterator().next();
-		} else throw new IllegalArgumentException(
+		} 
+		else throw new IllegalArgumentException(
 			"Expected exactly one element of type " + elementClass.getName() +
 			" in the subject, but found " + size
 		);

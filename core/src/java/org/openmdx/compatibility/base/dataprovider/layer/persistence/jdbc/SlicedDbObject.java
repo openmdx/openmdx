@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObject.java,v 1.54 2008/12/01 10:50:16 hburger Exp $
- * Description: 
- * Revision:    $Revision: 1.54 $
+ * Project:     openMDX/Core, http://www.openmdx.org/
+ * Name:        $Id: SlicedDbObject.java,v 1.61 2009/03/05 12:57:43 wfro Exp $
+ * Description: SlicedDbObject
+ * Revision:    $Revision: 1.61 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/01 10:50:16 $
+ * Date:        $Date: 2009/03/05 12:57:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -56,6 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -64,15 +65,14 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.code.Multiplicities;
 
 @SuppressWarnings("unchecked")
 public class SlicedDbObject 
@@ -98,8 +98,8 @@ extends StandardDbObject {
         // Automatically switch to non-indexed in case a secondary
         // db object is specified. 
         if(
-                (dbObjectConfiguration.getDbObjectForQuery2() != null) ||
-                (dbObjectConfiguration.getDbObjectForUpdate2() != null)
+            (dbObjectConfiguration.getDbObjectForQuery2() != null) ||
+            (dbObjectConfiguration.getDbObjectForUpdate2() != null)
         ) {
             this.indexColumn = null;
             this.excludeAttributes.add("objectIdx");                
@@ -280,9 +280,9 @@ extends StandardDbObject {
             }
             // Process all db objects
             for(
-                    Iterator d = dbObjects.iterator();
-                    d.hasNext();
-                    processAsSecondary = true
+                Iterator d = dbObjects.iterator();
+                d.hasNext();
+                processAsSecondary = true
             ) {
                 String dbObject = (String)d.next();            
                 Set dbObjectColumns = this.getDbObjectColumns(dbObject);
@@ -291,8 +291,8 @@ extends StandardDbObject {
                 int k = 0;      
                 // All attributes for dbObject
                 for(
-                        Iterator i = object.attributeNames().iterator(); 
-                        i.hasNext();
+                    Iterator i = object.attributeNames().iterator(); 
+                    i.hasNext();
                 ) {
                     String attributeName = (String)i.next();
                     if((excludeAttributes == null || !excludeAttributes.contains(attributeName)) && (attributeName.indexOf(':') < 0)) {
@@ -363,21 +363,23 @@ extends StandardDbObject {
                 List autonumColumns = null;
                 List autonumValues = null;
                 if(               
-                        (index == 0) &&
-                        !processAsSecondary
+                    (index == 0) &&
+                    !processAsSecondary
                 ) {
                     for(
-                            Iterator i = this.getConfiguration().getAutonumColumns().iterator();
-                            i.hasNext();
+                        Iterator i = this.getConfiguration().getAutonumColumns().iterator();
+                        i.hasNext();
                     ) {
                         String autonumColumn = (String)i.next();  
                         String autonumColumnName = autonumColumn;
+                        // USETYPE allows to include type in sequence name
+                        int posTyped = autonumColumn.indexOf(" TYPED ");
                         // AS <format> allows to cast/format the sequence number
                         int posAs = autonumColumn.indexOf(" AS ");
-                        if(posAs > 0) {
-                            autonumColumnName = autonumColumn.substring(0, posAs).trim();
-                        }
-                        // Only add if not supplied explicitely as attribute
+                        autonumColumnName = autonumColumnName.indexOf(" ") > 0 ?
+                            autonumColumnName.substring(0, autonumColumnName.indexOf(" ")).trim() :
+                            autonumColumnName.trim();
+                        // Only add if not supplied explicitly as attribute
                         if(!processedColumns.contains(autonumColumnName)) {
                             if(autonumColumns == null) {
                                 autonumColumns = new ArrayList();
@@ -386,13 +388,15 @@ extends StandardDbObject {
                                 autonumColumnName
                             );
                             String sequenceName = this.database.namespaceId + "_" + autonumColumnName;
+                            if(posTyped > 0) {
+                                sequenceName += "_" + this.getConfiguration().getTypeName();
+                            }
                             String autonumValue = this.database.getAutonumValue(
                                 this.conn,
                                 sequenceName,
-                                dbObject,
-                                posAs > 0 
-                                ? autonumColumn.substring(posAs)
-                                    : null
+                                posAs > 0 ? 
+                                    autonumColumn.substring(posAs) : 
+                                    null
                             );
                             // Emulate SQL sequence
                             if(autonumValue == null) {
@@ -409,7 +413,7 @@ extends StandardDbObject {
                                         this.conn,
                                         currentStatement = "UPDATE " + sequenceName + "_SEQ SET nextval = nextval + 1"
                                     );
-                                    ps.executeUpdate();
+                                    this.database.executeUpdate(ps, currentStatement, Collections.EMPTY_LIST);
                                     ps.close();
                                 }
                                 else {
@@ -418,7 +422,7 @@ extends StandardDbObject {
                                         this.conn,
                                         currentStatement = "INSERT INTO " + sequenceName + "_SEQ (nextval) VALUES (0)"
                                     );                          
-                                    ps.executeUpdate();
+                                    this.database.executeUpdate(ps, currentStatement, Collections.EMPTY_LIST);
                                     ps.close();
                                 }
                             }
@@ -545,9 +549,7 @@ extends StandardDbObject {
                         value
                     );    
                 }    
-                SysLog.detail("statement", currentStatement);
-                SysLog.detail("values", statementParameters);
-                ps.executeUpdate();
+                this.database.executeUpdate(ps, currentStatement, statementParameters);
                 ps.close(); ps = null;
             }
             if(!processedAttributes.containsAll(object.attributeNames())) {
@@ -843,9 +845,7 @@ extends StandardDbObject {
                             i.next()
                         );               
                     }
-                    SysLog.detail("statement", currentStatement);
-                    SysLog.detail("values", statementParameters);
-                    ps.executeUpdate();
+                    this.database.executeUpdate(ps, currentStatement, statementParameters);
                     ps.close(); ps = null;
                 }
             }
@@ -908,31 +908,31 @@ extends StandardDbObject {
 
         // Add size attributes
         if(this.database.isSetSizeColumns()) {
-            ModelElement_1_0 classDef = this.database.model.getElement(
+            ModelElement_1_0 classDef = getModel().getElement(
                 object.values(SystemAttributes.OBJECT_CLASS).get(0)
             );
-            for(ModelElement_1_0 feature : this.database.model.getAttributeDefs(classDef, false, false).values()) {
-                String featureName = (String)feature.values("name").get(0);                
-                String featureQualifiedName = (String)feature.values("qualifiedName").get(0);
+            for(ModelElement_1_0 feature : getModel().getAttributeDefs(classDef, false, false).values()) {
+                String featureName = (String)feature.objGetValue("name");                
+                String featureQualifiedName = (String)feature.objGetValue("qualifiedName");
                 if(
-                        !this.database.embeddedFeatures.containsKey(featureName) &&
-                        !this.database.nonPersistentFeatures.contains(featureQualifiedName)
+                    !this.database.embeddedFeatures.containsKey(featureName) &&
+                    !this.database.nonPersistentFeatures.contains(featureQualifiedName)
                 ) {
-                    String multiplicity = (String)feature.values("multiplicity").get(0);
+                    String multiplicity = (String)feature.objGetValue("multiplicity");
                     // multi-valued reference?
-                    if(this.database.model.isReferenceType(feature)) {                    
-                        ModelElement_1_0 end = this.database.model.getElement(
-                            feature.values("referencedEnd").get(0)
+                    if(getModel().isReferenceType(feature)) {                    
+                        ModelElement_1_0 end = getModel().getElement(
+                            feature.objGetValue("referencedEnd")
                         );
-                        if(!end.values("qualifierName").isEmpty()) {
+                        if(!end.objGetList("qualifierName").isEmpty()) {
                             multiplicity = Multiplicities.LIST;
                         }
                     }
                     if(                    
-                            Multiplicities.MULTI_VALUE.equals(multiplicity) ||
-                            Multiplicities.LIST.equals(multiplicity) ||
-                            Multiplicities.SET.equals(multiplicity) ||
-                            Multiplicities.SPARSEARRAY.equals(multiplicity)                    
+                        Multiplicities.MULTI_VALUE.equals(multiplicity) ||
+                        Multiplicities.LIST.equals(multiplicity) ||
+                        Multiplicities.SET.equals(multiplicity) ||
+                        Multiplicities.SPARSEARRAY.equals(multiplicity)                    
                     ) {
                         object.clearValues(featureName + "_").add(
                             object.getValues(featureName) == null
@@ -943,7 +943,7 @@ extends StandardDbObject {
                 }
             }
             // created_by, modified_by are derived and persistent
-            if(this.database.model.isSubtypeOf(classDef, "org:openmdx:base:BasicObject")) {            
+            if(getModel().isSubtypeOf(classDef, "org:openmdx:base:BasicObject")) {            
                 String featureName = SystemAttributes.CREATED_BY;
                 object.clearValues(featureName + "_").add(
                     object.getValues(featureName) == null

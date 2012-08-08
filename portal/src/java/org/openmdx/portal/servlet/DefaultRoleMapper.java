@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultRoleMapper.java,v 1.17 2008/08/12 16:38:05 wfro Exp $
+ * Name:        $Id: DefaultRoleMapper.java,v 1.19 2009/03/08 18:03:19 wfro Exp $
  * Description: DefaultRoleMapper 
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/08/12 16:38:05 $
+ * Date:        $Date: 2009/03/08 18:03:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,7 +66,7 @@ import javax.jdo.PersistenceManager;
 import org.oasisopen.cci2.QualifierType;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 
 public class DefaultRoleMapper
     implements Serializable, RoleMapper_1_0 {
@@ -112,7 +112,8 @@ public class DefaultRoleMapper
             boolean disabled = false;
             try {
                 disabled = loginPrincipal.isDisabled();
-            } catch(NullPointerException e) {}
+            } 
+            catch(NullPointerException e) {}
             return !disabled
                 ? loginPrincipal
                 : null;
@@ -175,7 +176,8 @@ public class DefaultRoleMapper
                                         if(at != null) {
                                             lastLoginAt = at.getTime();
                                         }
-                                    } catch(Exception e) {}
+                                    } 
+                                    catch(Exception e) {}
                                     String roleId = principalId + "@" + realmName;
                                     AppLog.detail("Checking role", roleId);
                                     if(
@@ -241,7 +243,7 @@ public class DefaultRoleMapper
     
     private static final String ADMIN_PRINCIPAL_PREFIX = "admin-";
     private static final String ROOT_REALM_NAME = "Root";
-    private static final String ROOT_PRINCIPAL_NAME = ADMIN_PRINCIPAL_PREFIX + ROOT_REALM_NAME;
+    private static final String ROOT_PRINCIPAL_NAME = DefaultRoleMapper.ADMIN_PRINCIPAL_PREFIX + DefaultRoleMapper.ROOT_REALM_NAME;
     private static final String USER_GROUP_ADMINISTRATORS = "Administrators";
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     OMEX/Security, http://www.omex.ch/
- * Name:        $Id: IdentityAssertionProvider.java,v 1.17 2007/08/13 17:33:08 hburger Exp $
+ * Name:        $Id: IdentityAssertionProvider.java,v 1.18 2009/01/22 18:36:05 wfro Exp $
  * Description: Perimeter Authentication Provider
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/08/13 17:33:08 $
+ * Date:        $Date: 2009/01/22 18:36:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -288,7 +288,7 @@ public final class IdentityAssertionProvider
         } try {
             return new IdentityAssertionCallbackHandler(
                 type,
-                (Principal[]) this.tokenValidator.getValue((byte[])token)
+                (Principal[]) this.tokenValidator.objGetValue((byte[])token)
             );
         } catch (TokenException exception) {
             throw (IdentityAssertionException) new IdentityAssertionException(

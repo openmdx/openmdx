@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LDAPConnectionFactory.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: LDAPConnectionFactory.java,v 1.4 2009/03/08 18:52:20 wfro Exp $
  * Description: Managed LDAP Connection Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,8 +68,7 @@ import org.openmdx.resource.ldap.spi.ManagedConnection;
  * Managed LDAP Connection Factory
  */
 public class LDAPConnectionFactory
-    extends AbstractConnectionFactory
-{
+    extends AbstractConnectionFactory {
 
 	/**
 	 * Implements <code>Serializable</code>
@@ -80,21 +79,22 @@ public class LDAPConnectionFactory
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
-        PasswordCredential credential = getCredential(subject);
-        String hosts = getConnectionURL();
+        PasswordCredential credential = this.getCredential(subject);
+        String hosts = this.getConnectionURL();
     	try {
         	LDAPv3 physicalConnection = new LDAPConnection();
         	if(credential == null) {
     			physicalConnection.connect(
-    				getProtocolVersion(),
+    				this.getProtocolVersion(),
 					hosts, 
 					LDAPConnection.DEFAULT_PORT,
 					null,
 					null
 				);
-        	} else {
+        	} 
+        	else {
     			physicalConnection.connect(
-    				getProtocolVersion(),
+    				this.getProtocolVersion(),
 					hosts, 
 					LDAPConnection.DEFAULT_PORT, 
 					credential.getUserName(), 
@@ -105,7 +105,8 @@ public class LDAPConnectionFactory
                 physicalConnection,
                 credential
              );
-		} catch (LDAPException exception) {
+		} 
+    	catch (LDAPException exception) {
 			 String message = "Could not connect to LDAP host(s) \"" + hosts + "\".";
 		     switch( exception.getLDAPResultCode() ) {
 		         case LDAPException.NO_SUCH_OBJECT:
@@ -116,7 +117,7 @@ public class LDAPConnectionFactory
 		             System.out.println( "Invalid password." );
 		             break;
 		     }
-			 throw log(
+			 throw this.log(
 				new EISSystemException(
 					message,
 					exception

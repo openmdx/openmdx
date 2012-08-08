@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SysLog.java,v 1.15 2008/10/09 09:34:26 hburger Exp $
+ * Name:        $Id: SysLog.java,v 1.16 2009/03/05 13:53:30 hburger Exp $
  * Description: Former Log API
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/09 09:34:26 $
+ * Date:        $Date: 2009/03/05 13:53:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -382,31 +382,6 @@ public class SysLog {
         }
     }
 
-    /**
-     * Log an exception
-     * 
-     * @param exception
-     */
-    public static void warning(
-        Exception exception
-    ){
-        if (logger.isWarnEnabled()) {
-            String message = format(exception.getMessage(), null);
-            Throwable throwable = exception.getCause();
-            if(locationAware) {
-                locationAwareLogger.log(
-                    null, // marker
-                    throwable.getClass().getName(), 
-                    LocationAwareLogger.WARN_INT, 
-                    message, 
-                    throwable
-                 );
-            } else {
-                logger.warn(message, throwable);
-            }
-        }
-    }
-    
     /**
      * Logs a text string at INFO_LEVEL.
      *

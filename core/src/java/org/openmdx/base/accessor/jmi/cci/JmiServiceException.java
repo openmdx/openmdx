@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: JmiServiceException.java,v 1.20 2008/10/07 08:40:31 hburger Exp $
+ * Name:        $Id: JmiServiceException.java,v 1.22 2009/03/05 13:53:30 hburger Exp $
  * Description: JmiServiceException class
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/07 08:40:31 $
+ * Date:        $Date: 2009/03/05 13:53:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,7 +58,6 @@ import javax.jmi.reflect.RefClass;
 import javax.jmi.reflect.RefObject;
 
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
 
 
 /**
@@ -66,7 +65,7 @@ import org.openmdx.kernel.log.SysLog;
  * embeds a ServiceExeption and is thrown by the openMDX implementation.
  */
 public class JmiServiceException extends JmiException 
-    implements BasicException.Wrapper
+    implements BasicException.Holder
 {
 
     /**
@@ -82,7 +81,7 @@ public class JmiServiceException extends JmiException
     public JmiServiceException(
         Throwable cause 
     ){
-        super(null, null, cause.getMessage());
+        super(cause.getMessage());
         super.initCause(
             BasicException.toStackedException(
                 cause,
@@ -154,118 +153,11 @@ public class JmiServiceException extends JmiException
      * @return this RuntimeServiceException
      */
     public JmiServiceException log() {
-        SysLog.warning(this);
-        return this;
+        return BasicException.log(this);
     }
 
     /**
-     * 
-     */
-    public JmiServiceException appendCause(
-        Throwable cause
-    ){
-        getCause().appendCause(cause);
-        return this;
-    }
-
-
-    //------------------------------------------------------------------------
-    // Implements StackedException.Wrapper
-    //------------------------------------------------------------------------
-
-    /**
-     * Return a StackedException, this exception object's cause.
-     * 
-     * @return the BasicException wrapped by this object.
-     * 
-     * @deprecated use getCause()
-     */
-    public BasicException getExceptionStack (
-    ) {
-        return getCause();
-    }
-
-    /**
-     * Retrieves the exception domain of this <code>ServiceException</code>.
-     *
-     * @return the exception domain
-     */
-    public String getExceptionDomain()
-    {
-        BasicException exceptionStack = getCause();
-        return exceptionStack == null ? 
-            BasicException.Code.DEFAULT_DOMAIN : 
-                exceptionStack.getExceptionDomain();
-    }
-
-    /**
-     * Retrieves the exception code of this <code>ServiceException</code>.
-     *
-     * @return the exception code
-     */
-    public int getExceptionCode()
-    {
-        BasicException exceptionStack = getCause();
-        return exceptionStack == null ? 
-            BasicException.Code.GENERIC : 
-                exceptionStack.getExceptionCode();
-    }
-
-    /**
-     * Returns the cause belonging to a specific exception domain.
-     * 
-     * @param 	exceptionDomain
-     * 			the desired exception domain,
-     *          or <code>null</code> to retrieve the initial cause.
-     *
-     * @return  Either the cause belonging to a specific exception domain
-     *          or the initial cause if <code>exceptionDomain</code> is
-     * 			<code>null</code>.  
-     */
-    public BasicException getCause(
-        String exceptionDomain
-    ){
-        BasicException exceptionStack = getCause();
-        return exceptionStack == null ? 
-            null : 
-                exceptionStack.getCause(exceptionDomain);
-    }
-
-
-    //------------------------------------------------------------------------
-    // Extends Throwable
-    //------------------------------------------------------------------------
-
-    /**
-     * Returns the detail message string of this RuntimeServiceException.  
-     */
-    public String getMessage(
-    ){
-        BasicException exceptionStack = getCause();
-        return exceptionStack == null ?
-            super.getMessage() : 
-                exceptionStack.getMessage() + ": " +
-                exceptionStack.getDescription();
-    }
-
-    /**
-     * A String consisting of the class of this exception, the exception 
-     * domain, the exception code, the exception description and the exception
-     * stack.
-     * 
-     * @return a multiline representation of this exception.
-     */     
-    public String toString(){
-        BasicException exceptionStack = getCause();
-        return 
-        exceptionStack == null ?
-            super.toString() : 
-                super.toString() + '\n' + exceptionStack;
-    }
-
-    /**
-     * Returns the cause of an exception. The cause actually is the wrapped
-     * exception.
+     * Returns the cause of an exception. The cause actually is the wrapped exception.
      *
      * @return Throwable  The exception cause.
      */
@@ -275,29 +167,47 @@ public class JmiServiceException extends JmiException
     }
 
     /* (non-Javadoc)
+     * @see org.openmdx.kernel.exception.BasicException.Holder#getCause(java.lang.String)
+     */
+    public BasicException getCause(String exceptionDomain) {
+        return getCause().getCause(exceptionDomain);
+    }
+
+    /**
+     * Retrieves the exception domain of this <code>ServiceException</code>.
+     *
+     * @return the exception domain
+     */
+    public String getExceptionDomain(
+    ){
+        return getCause().getExceptionDomain();
+    }
+
+    /**
+     * Retrieves the exception code of this <code>ServiceException</code>.
+     *
+     * @return the exception code
+     */
+    public int getExceptionCode(
+    ){
+        return getCause().getExceptionCode();
+    }
+
+    /* (non-Javadoc)
      * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
      */
+    @Override
     public void printStackTrace(PrintStream s) {
-        BasicException exceptionStack = getCause();
-        if(exceptionStack == null){
-            super.printStackTrace(s);
-        } else {
-            exceptionStack.printStack(this, s, true);
-        }
+        getCause().printStackTrace(s);
     }
 
     /* (non-Javadoc)
      * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
      */
+    @Override
     public void printStackTrace(PrintWriter s) {
-        BasicException exceptionStack = getCause();
-        if(exceptionStack == null){
-            super.printStackTrace(s);
-        } else {
-            exceptionStack.printStack(this, s, true);
-        }
+        getCause().printStackTrace(s);
     }
-
 
 }
 

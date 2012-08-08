@@ -33,16 +33,23 @@ import java.util.EmptyStackException;
  * them from the top down.
  * <p>
  * Unlike <code>Stack</code>, <code>ArrayStack</code> accepts null entries.
+ * <p>
+ * <strong>Note:</strong> this class should be bytecode-identical to the 
+ * version in commons collections. This is required to allow backwards 
+ * compability with both previous versions of BeanUtils and also allow 
+ * coexistance with both collections 2.1 and 3.0.
  *
  * @see java.util.Stack
  * @since Commons Collections 1.0
- * @version $Revision: 1.4 $ $Date: 2008/04/25 14:32:22 $
+ * @version $Revision: 1.6 $ $Date: 2009/03/03 15:24:12 $
  * 
  * @author Craig R. McClanahan
  * @author Paul Jack
  * @author Stephen Colebourne
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked"
+})
 public class ArrayStack extends ArrayList implements Buffer {
 
     /** Ensure serialization compatibility */    

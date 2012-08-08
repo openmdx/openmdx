@@ -79,11 +79,11 @@ import org.openmdx.uses.org.apache.commons.beanutils.ConversionException;
  * For example to cater for number styles used in Germany such as <code>0.000,00</code> the pattern
  * is specified in the normal form <code>0,000.00</code> and the locale set to <code>Locale.GERMANY</code>.
  *
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:16 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:59 $
  * @since 1.8.0
  */
 @SuppressWarnings("unchecked")
-public class NumberConverter extends AbstractConverter {
+public abstract class NumberConverter extends AbstractConverter {
 
     private static final Integer ZERO = new Integer(0);
     private static final Integer ONE  = new Integer(1);
@@ -99,12 +99,10 @@ public class NumberConverter extends AbstractConverter {
      * Construct a <b>java.lang.Number</b> <i>Converter</i>
      * that throws a <code>ConversionException</code> if a error occurs.
      *
-     * @param defaultType The default type this <code>Converter</code>
-     * handles
      * @param allowDecimals Indicates whether decimals are allowed
      */
-    public NumberConverter(Class defaultType, boolean allowDecimals) {
-        super(defaultType);
+    public NumberConverter(boolean allowDecimals) {
+        super();
         this.allowDecimals = allowDecimals;
     }
 
@@ -112,13 +110,11 @@ public class NumberConverter extends AbstractConverter {
      * Construct a <code>java.lang.Number</code> <i>Converter</i> that returns
      * a default value if an error occurs.
      *
-     * @param defaultType The default type this <code>Converter</code>
-     * handles
      * @param allowDecimals Indicates whether decimals are allowed
      * @param defaultValue The default value to be returned
      */
-    public NumberConverter(Class defaultType, boolean allowDecimals, Object defaultValue) {
-        super(defaultType);
+    public NumberConverter(boolean allowDecimals, Object defaultValue) {
+        super();
         this.allowDecimals = allowDecimals;
         setDefaultValue(defaultValue);
     }

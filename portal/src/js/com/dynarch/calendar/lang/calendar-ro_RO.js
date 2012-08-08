@@ -1,4 +1,4 @@
-﻿
+
 // Author: Mihai Bazon, <mihai_bazon@yahoo.com>
 // Encoding: any
 // Distributed under the same terms as the calendar itself.
@@ -48,7 +48,7 @@ Calendar._SDN = new Array
 
 // First day of the week. "0" means display Sunday first, "1" means display
 // Monday first, etc.
-Calendar._FD = 0;
+Calendar._FD = 1;
 
 // full month names
 Calendar._MN = new Array
@@ -100,13 +100,13 @@ Calendar._TT["ABOUT_TIME"] = "\n\n" +
 "- or Shift-click to decrease it\n" +
 "- or click and drag for faster selection.";
 
-Calendar._TT["PREV_YEAR"] = "An anterior (hold for menu)";
-Calendar._TT["PREV_MONTH"] = "Lună anterioară (hold for menu)";
+Calendar._TT["PREV_YEAR"] = "An anterior (ţine apăsat pentru meniu)";
+Calendar._TT["PREV_MONTH"] = "Lună anterioară (ţine apăsat pentru meniu)";
 Calendar._TT["GO_TODAY"] = "Du-te La zi";
-Calendar._TT["NEXT_MONTH"] = "Luna viitoare (hold for menu)";
-Calendar._TT["NEXT_YEAR"] = "Anul viitor (hold for menu)";
+Calendar._TT["NEXT_MONTH"] = "Luna viitoare (ţine apăsat pentru meniu)";
+Calendar._TT["NEXT_YEAR"] = "Anul viitor (ţine apăsat pentru meniu)";
 Calendar._TT["SEL_DATE"] = "Selectează data";
-Calendar._TT["DRAG_TO_MOVE"] = "Trage cu şoricelul pentru a muta";
+Calendar._TT["DRAG_TO_MOVE"] = "Foloseşte cu şoricelul pentru a muta";
 Calendar._TT["PART_TODAY"] = " (azi)";
 
 // the following is to inform that "%s" is to be the first day of week
@@ -116,7 +116,7 @@ Calendar._TT["DAY_FIRST"] = "Săptămâna începe %s ";
 // This may be locale-dependent.  It specifies the week-end days, as an array
 // of comma-separated numbers.  The numbers are from 0 to 6: 0 means Sunday, 1
 // means Monday, etc.
-Calendar._TT["WEEKEND"] = "0,6";
+Calendar._TT["WEEKEND"] = "6,0";
 
 Calendar._TT["CLOSE"] = "Închis";
 Calendar._TT["TODAY"] = "Azi";
@@ -126,5 +126,5 @@ Calendar._TT["TIME_PART"] = "(Shift-)Clic sau trage pentru a schimba valoarea";
 Calendar._TT["DEF_DATE_FORMAT"] = "%Y-%m-%d";
 Calendar._TT["TT_DATE_FORMAT"] = "%a, %b %e";
 
-Calendar._TT["WK"] = "Săpt";
+Calendar._TT["WK"] = "Săpt.";
 Calendar._TT["TIME"] = "Ora:";

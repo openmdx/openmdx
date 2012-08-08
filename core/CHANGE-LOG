@@ -1,14 +1,62 @@
-
+﻿
                     =====================================
                              CHANGE LOG openMDX
                     =====================================
 
 ==============================================================================
-Version 2.3.0+                                                      2008-12-08
+Version 2.4.0+                                                      2009-03-09
 ==============================================================================
 
 1.    NEW FEATURES
       
+      none
+       
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+     
+      none
+      
+2.1.  FIXED BUGS
+
+      CR20018622	
+      Rollback of persistent-new instances 
+      
+      Persistent new instances must become transient on rollback.  
+
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+      
+      
+==============================================================================
+Version 2.4.0                                                       2009-02-28
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20018509
+      Optimistic Locking
+      
+      The MODEL/optimisticLocking configuration entry has now three possible
+      values:
+      * false
+        disables optimistic locking
+      * whenModified
+        enables optimistic locking for modified objects
+      * true
+        enables optimistic locking even for unmodified objects
+      
+      CR20018534
+      Replace JPOX by OpenJPA. The model mapper now generates JPA compliant
+      persistence classes and a default persistence mapping (orm.xml). The
+      JDO2 mapping is not supported anymore. The ant build-library provides
+      the following targets:
+      * enhance: enhances the classes listed in orm.xml
+      * create-schema: orm.xml --> openjpa-schema.xml
+      * create-sql: openjpa-schema --> sql build and upgrade script
       CR20018528
       library-directory 
                 
@@ -25,6 +73,27 @@ Version 2.3.0+                                                      2008-12-08
      
 2.0.  CHANGED FEATURES
      
+			CR10008387
+			Migrate models to RSM 7.5.
+
+      CR20018576
+      JMI 1 v/s Standard Mapping
+      
+      The standard mapping differs in the following aspects from the 
+      strict JMI 1 mapping:
+      * Each upper case letter starts a new word
+      * Underscores do not start a new word
+      * Dollar signs behave the same way as digits
+      
+      CR20018534
+      Replace JPOX by OpenJPA. The model mapper now generates JPA compliant
+      persistence classes and a default persistence mapping (orm.xml). The
+      JDO2 mapping is not supported anymore. The ant build-library provides
+      the following targets:
+      * enhance: enhances the classes listed in orm.xml
+      * create-schema: orm.xml --> openjpa-schema.xml
+      * create-sql: openjpa-schema --> sql build and upgrade script
+
       CR20018521
       NoClassDefFoundError in BasicException
       
@@ -32,7 +101,12 @@ Version 2.3.0+                                                      2008-12-08
       exception classes it refers to are not bundled with a client for example. 
       
 2.1.  FIXED BUGS
-      none
+
+      CR20018536
+      Filter values for persistent-new objects
+      
+      Filter values (Path) are now able to match their persistent-new object's
+      representation (Object_1_0) 
 
 2.2.  DEPRECATED FEATURES
       none

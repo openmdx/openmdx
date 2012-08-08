@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Synchronization_1_0.java,v 1.4 2007/10/23 10:27:23 hburger Exp $
+ * Name:        $Id: Synchronization_1_0.java,v 1.5 2009/01/11 16:25:47 wfro Exp $
  * Description: Synchronization callback interface
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/23 10:27:23 $
+ * Date:        $Date: 2009/01/11 16:25:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,7 +56,7 @@ import org.openmdx.base.exception.ServiceException;
  * openMDX Synchronization callback interface
  */
 public interface Synchronization_1_0 
-{
+    extends javax.transaction.Synchronization {
 
 	/**
 	 * The afterBegin method notifies a provider or plug-in that a new
@@ -66,20 +66,4 @@ public interface Synchronization_1_0
 	void afterBegin(
 	) throws ServiceException; 
        
-	/**
-	 * The beforeCompletion method notifies a provider or plug-in that a
-	 * unit of work is about to be committed.
-	 */
-	void beforeCompletion(
-	) throws ServiceException; 
-         	    
-    /**
-     * The afterCompletion method notifies a a provider or plug-in that a
-     * unit of work commit protocol has completed, and tells the instance
-     * whether the unit of work has been committed or rolled back. 
-     */
-    void afterCompletion(
-    	boolean committed
-	) throws ServiceException; 
-
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectView.java,v 1.37 2008/11/10 10:20:11 wfro Exp $
+ * Name:        $Id: EditObjectView.java,v 1.39 2009/02/27 15:52:52 wfro Exp $
  * Description: EditObjectView
- * Revision:    $Revision: 1.37 $
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/10 10:20:11 $
+ * Date:        $Date: 2009/02/27 15:52:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,8 +64,8 @@ import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.UUIDConversion;
-import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -210,9 +210,9 @@ public class EditObjectView
           }
         }
       }
-      RefObject_1_0 target = this.editObjectIdentity == null
-          ? this.getRefObject()
-          : (RefObject_1_0)pm.getObjectById(this.editObjectIdentity);
+      RefObject_1_0 target = this.editObjectIdentity == null ? 
+          this.getRefObject() : 
+          (RefObject_1_0)pm.getObjectById(this.editObjectIdentity);
       this.editObjectIdentity = target.refGetPath();
       this.application.getPortalExtension().updateObject(
           target,
@@ -221,23 +221,25 @@ public class EditObjectView
           this.application,
           this.getPersistenceManager()
       );
-      if(!this.isEditMode()) {
-          Object[] qualifiers = (Object[])parameterMap.get("qualifier");
-          if(qualifiers == null) {
-              qualifiers = new String[]{
-                  UUIDConversion.toUID(UUIDs.getGenerator().next())
-              };    
+      if(this.application.getErrorMessages().isEmpty()) {
+          if(!this.isEditMode()) {
+              Object[] qualifiers = (Object[])parameterMap.get("qualifier");
+              if(qualifiers == null) {
+                  qualifiers = new String[]{
+                      UUIDConversion.toUID(UUIDs.getGenerator().next())
+                  };    
+              }
+              // Assert that this.parent is retrieved from the same persistence manager as this.object
+              // A reload during edit can change the package which would lead to an exception
+              // when adding the object with refAddValue
+              this.parent = (RefObject_1_0)this.getPersistenceManager().getObjectById(this.parent.refGetPath());
+              Object container = this.parent.refGetValue(this.forReference);
+              ((RefContainer)container).refAdd(
+                  org.oasisopen.cci2.QualifierType.REASSIGNABLE,
+                  qualifiers.length > 0 ? (String)qualifiers[0] : "",
+                  (RefObject_1_0)this.object
+              );
           }
-          // Assert that this.parent is retrieved from the same persistence manager as this.object
-          // A reload during edit can change the package which would lead to an exception
-          // when adding the object with refAddValue
-          this.parent = (RefObject_1_0)this.getPersistenceManager().getObjectById(this.parent.refGetPath());
-          Object container = this.parent.refGetValue(this.forReference);
-          ((RefContainer)container).refAdd(
-              org.oasisopen.cci2.QualifierType.REASSIGNABLE,
-              qualifiers.length > 0 ? (String)qualifiers[0] : "",
-              (RefObject_1_0)this.object
-          );
       }
   }
   
@@ -304,9 +306,11 @@ public class EditObjectView
     //-------------------------------------------------------------------------
     public RefObject_1_0 getLookupObject(
     ) {
-        return this.isEditMode()
-            ? this.getObjectReference().getObject()
-            : this.getParent();
+        return this.isEditMode() ? 
+            this.getEditObjectIdentity() != null ?
+                (RefObject_1_0)this.application.getPmData().getObjectById(this.getEditObjectIdentity()) : 
+                this.getObjectReference().getObject() :
+            this.getParent();
     }
     
     //-------------------------------------------------------------------------

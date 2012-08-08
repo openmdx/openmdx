@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractHandler.java,v 1.6 2008/04/04 17:55:30 hburger Exp $
+ * Name:        $Id: AbstractHandler.java,v 1.7 2009/03/08 18:52:18 wfro Exp $
  * Description: Abstract Handler
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:55:30 $
+ * Date:        $Date: 2009/03/08 18:52:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -102,11 +102,11 @@ public abstract class AbstractHandler implements HttpHandler, ServletConfig {
        ServletConfig configuration
     ) throws ServletException {
         this.configuration = configuration;
-        this.debug = getInitParameter(
+        this.debug = this.getInitParameter(
             "debug",
-            debugDefault()
+            this.debugDefault()
         );
-        init();
+        this.init();
     }
 
     /**

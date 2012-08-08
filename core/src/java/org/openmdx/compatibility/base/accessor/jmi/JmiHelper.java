@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: JmiHelper.java,v 1.12 2008/11/11 15:38:23 wfro Exp $
+ * Name:        $Id: JmiHelper.java,v 1.19 2009/01/17 10:17:04 wfro Exp $
  * Description: JmiHelper class
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/11 15:38:23 $
+ * Date:        $Date: 2009/01/17 10:17:04 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,24 +71,24 @@ import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefObject;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.application.mof.cci.PrimitiveTypes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
+import org.openmdx.base.collection.MarshallingSparseArray;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.collection.MarshallingSparseArray;
-import org.openmdx.compatibility.base.collection.SparseArray;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.code.Multiplicities;
-import org.openmdx.model1.code.PrimitiveTypes;
-import org.w3c.cci2.Datatypes;
+import org.w3c.cci2.SparseArray;
+import org.w3c.spi2.Datatypes;
 
 //---------------------------------------------------------------------------
 @SuppressWarnings("unchecked")
@@ -226,7 +226,7 @@ public class JmiHelper {
                         ListIterator j = sourceValues.populationIterator();
                         j.hasNext();
                 ) {
-                    ((SparseArray)targetValues).set(
+                    ((SparseArray)targetValues).put(
                         j.nextIndex(),
                         marshaller.marshal(j.next())
                     );
@@ -286,14 +286,14 @@ public class JmiHelper {
                 objectCache, 
                 pm, 
                 model,
-                (String)featureType.values("qualifiedName").get(0)
+                (String)featureType.objGetValue("qualifiedName")
             );
-            String multiplicity = (String)featureDef.values("multiplicity").get(0);
+            String multiplicity = (String)featureDef.objGetValue("multiplicity");
             if(model.isReferenceType(featureDef)) {
                 ModelElement_1_0 referencedEnd = model.getElement(
-                    featureDef.values("referencedEnd").get(0)
+                    featureDef.objGetValue("referencedEnd")
                 );
-                if(!referencedEnd.values("qualifierType").isEmpty()) {
+                if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
                     multiplicity = Multiplicities.LIST;
                 }
                 // Map aggregation none, multiplicity 0..n, no qualifier to <<set>>

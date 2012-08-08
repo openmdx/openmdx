@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Grid.java,v 1.55 2008/12/17 15:10:13 wfro Exp $
+ * Name:        $Id: Grid.java,v 1.63 2009/03/08 18:03:23 wfro Exp $
  * Description: GridControl
- * Revision:    $Revision: 1.55 $
+ * Revision:    $Revision: 1.63 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/17 15:10:13 $
+ * Date:        $Date: 2009/03/08 18:03:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -79,10 +79,15 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.Orders;
 import org.openmdx.application.log.AppLog;
+import org.openmdx.application.mof.cci.Multiplicities;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.IsBetweenCondition;
 import org.openmdx.base.query.IsGreaterCondition;
@@ -91,18 +96,13 @@ import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.PiggyBackCondition;
+import org.openmdx.base.query.Quantors;
 import org.openmdx.base.query.SoundsLikeCondition;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.base.text.format.DateFormat;
-import org.openmdx.compatibility.base.dataprovider.cci.Orders;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.layer.persistence.jdbc.Database_1_Attributes;
-import org.openmdx.compatibility.base.query.Quantors;
 import org.openmdx.kernel.id.UUIDs;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.DataBinding_1_0;
@@ -208,15 +208,17 @@ public abstract class Grid
         // Creators and template rows
         Model_1_0 model = application.getModel();
         org.openmdx.ui1.jmi1.ObjectContainer objectContainer = control.getObjectContainer();
+        this.isComposite = !objectContainer.isReferenceIsStoredAsAttribute();
+        this.isChangeable = objectContainer.isChangeable();
+
         Map objectCreators = null;
-        List templateRows = null;
-        
-        if(!objectContainer.isChangeable()) {
+        List templateRows = null;                
+        if(!this.isChangeable) {
             objectCreators = null;
             this.addObjectAction = null;
             this.removeObjectAction = null;
         }
-        else if(objectContainer.isReferenceIsStoredAsAttribute()) {
+        else if(!this.isComposite) {
           Action addObjectAction = null;
           Action removeObjectAction = null;
           objectCreators = null;
@@ -234,7 +236,7 @@ public abstract class Grid
                     new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
                     new Action.Parameter(Action.PARAMETER_NAME, "+"),
                     new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
-                    new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.values("qualifiedName").get(0))
+                    new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.objGetValue("qualifiedName"))
                 },
                 "add object",
                 true
@@ -245,7 +247,7 @@ public abstract class Grid
                     new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
                     new Action.Parameter(Action.PARAMETER_NAME, "-"),
                     new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
-                    new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.values("qualifiedName").get(0))
+                    new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.objGetValue("qualifiedName"))
                 },
                 "remove object",
                 true
@@ -266,13 +268,13 @@ public abstract class Grid
                 ModelElement_1_0 referencedType = model.getElement(objectContainer.getReferencedTypeName());
                 int ii = 0;
                 for(
-                    Iterator i = referencedType.values("allSubtype").iterator(); 
+                    Iterator i = referencedType.objGetList("allSubtype").iterator(); 
                     i.hasNext();
                     ii++
                 ) {
                     ModelElement_1_0 subtype = model.getElement(i.next());
-                    if(!((Boolean)subtype.values("isAbstract").get(0)).booleanValue()) {
-                        String forClass = (String)subtype.values("qualifiedName").get(0);
+                    if(!((Boolean)subtype.objGetValue("isAbstract")).booleanValue()) {
+                        String forClass = (String)subtype.objGetValue("qualifiedName");
                         org.openmdx.ui1.jmi1.AssertableInspector assertableInspector = application.getAssertableInspector(forClass);
                         if(assertableInspector.isChangeable()) {
                             
@@ -311,6 +313,7 @@ public abstract class Grid
                                     "org:openmdx:base:ExtentCapable:identity",
                                     Multiplicities.SINGLE_VALUE,
                                     false,
+                                    true,
                                     application.getIconKey(forClass),
                                     null, null, null,
                                     application.getPortalExtension().getDataBinding(null, application)
@@ -329,6 +332,7 @@ public abstract class Grid
                                             "org:openmdx:base:ExtentCapable:identity",
                                             Multiplicities.SINGLE_VALUE,
                                             false,
+                                            true,
                                             null, null, null, null,
                                             application.getPortalExtension().getDataBinding(null, application)
                                         ),
@@ -350,20 +354,18 @@ public abstract class Grid
             catch(ServiceException e) {
                 AppLog.warning(e.getMessage(), e.getCause());
             }
-        }
-    
-        this.objectCreators = objectCreators == null
-            ? null
-            : (Action[])objectCreators.values().toArray(new Action[objectCreators.size()]);     
-        this.templateRows = templateRows == null
-            ? null
-            : templateRows.toArray(new Object[templateRows.size()]);
-        
+        }    
+        this.objectCreators = objectCreators == null ? 
+            null : 
+            (Action[])objectCreators.values().toArray(new Action[objectCreators.size()]);     
+        this.templateRows = templateRows == null ? 
+            null : 
+            templateRows.toArray(new Object[templateRows.size()]);        
         
         // return no action in case of non changeable grids
-        this.multiDeleteAction = (this.getObjectCreator() == null) || (this.getAddObjectAction() != null)
-            ? null
-            : new Action(
+        this.multiDeleteAction = (this.getObjectCreator() == null) || (this.getAddObjectAction() != null) ? 
+            null : 
+            new Action(
                 Action.EVENT_MULTI_DELETE, 
                 new Action.Parameter[]{
                     new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                                                  
@@ -441,10 +443,23 @@ public abstract class Grid
     }
 
     //-----------------------------------------------------------------------
+    public boolean isComposite(
+    ) {
+        return this.isComposite;
+    }
+
+    //-----------------------------------------------------------------------
+    public boolean isChangeable(
+    ) {
+        return this.isChangeable;
+    }    
+    
+    //-----------------------------------------------------------------------
     /**
      * @return Returns the objectCreators.
      */
-    public Action[] getObjectCreators() {
+    public Action[] getObjectCreators(
+    ) {
         return objectCreators;
     }
 
@@ -572,7 +587,8 @@ public abstract class Grid
                   model.getElement(gridControl.getObjectContainer().getReferencedTypeName()),
                   model
               );
-          } catch(Exception e) {}          
+          } 
+          catch(Exception e) {}          
       }
       if(this.currentFilter == null) {
           this.selectFilter(
@@ -696,7 +712,7 @@ public abstract class Grid
                       i = filteredObjects.listIterator(firstRow);
                       hasNext = i.hasNext();
                   }
-                  catch(IndexOutOfBoundsException e) {
+                  catch(Exception e) {
                       hasNext = false;
                   }
                   if(hasNext || (newPage == 0)) {
@@ -736,6 +752,7 @@ public abstract class Grid
                       "org:openmdx:base:ExtentCapable:identity",
                       Multiplicities.SINGLE_VALUE,
                       false,
+                      true,
                       null, null, null, null,
                       application.getPortalExtension().getDataBinding(null, application)
                   ),
@@ -753,6 +770,7 @@ public abstract class Grid
                               "org:openmdx:base:ExtentCapable:identity",
                               Multiplicities.SINGLE_VALUE,
                               false,
+                              true,
                               null, null, null, null,
                               application.getPortalExtension().getDataBinding(null, application)
                           ),
@@ -760,10 +778,15 @@ public abstract class Grid
                       );
                   }
                   else {
-                      row[j] = application.createAttributeValue(
-                          fieldDef, 
-                          rowObject
-                      );
+                      try {
+                          row[j] = application.createAttributeValue(
+                              fieldDef, 
+                              rowObject
+                          );
+                      }
+                      catch(Exception e) {
+                          row[j] = null;
+                      }
                   }
               }
               rows.add(row);
@@ -1129,7 +1152,8 @@ public abstract class Grid
                     if(code == null) {
                       try {
                         code = new Short(trimmedToken);
-                      } catch(Exception e) {}
+                      } 
+                      catch(Exception e) {}
                     }
                     if(code == null) {
                       AppLog.detail("can not map token " + trimmedToken + " to code");
@@ -1243,7 +1267,8 @@ public abstract class Grid
                       day = values.size() == 0
                           ? new Date()
                           : DateFormat.getInstance().parse((String)values.get(0));
-                  } catch(ParseException e) {}
+                  } 
+                  catch(ParseException e) {}
                   Calendar nextDay = new GregorianCalendar();
                   nextDay.setTime(day);
                   nextDay.add(Calendar.DAY_OF_MONTH, 1);
@@ -1852,6 +1877,8 @@ public abstract class Grid
     private final Action saveAction;
     private final Action setCurrentFilterAsDefaultAction;
     protected final DataBinding_1_0 dataBinding;
+    private final boolean isComposite;
+    private final boolean isChangeable;
   
     // holders for setPage() request
     private int setPageRequestNewPage = 0;

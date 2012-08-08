@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.3 2008/04/29 15:26:00 hburger Exp $
+= Name:        $Id: build.xml,v 1.4 2009/03/09 14:24:54 wfro Exp $
 = Description: openMDX/Log Build File
-= Revision:    $Revision: 1.3 $
-= Date:        $Date: 2008/04/29 15:26:00 $
+= Revision:    $Revision: 1.4 $
+= Date:        $Date: 2009/03/09 14:24:54 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -198,6 +198,7 @@
 				<include name="*.properties"/>
 				<include name="*.xml"/>
 				<include name=".cvsignore"/>
+				<include name="*.checkstyle"/>				
 				<include name="etc/**"/>
 			</openmdx:archivefileset>
 			<openmdx:archivefileset 

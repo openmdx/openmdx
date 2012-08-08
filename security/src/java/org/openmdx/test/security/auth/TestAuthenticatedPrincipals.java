@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestAuthenticatedPrincipals.java,v 1.7 2006/08/11 09:45:21 hburger Exp $
+ * Name:        $Id: TestAuthenticatedPrincipals.java,v 1.8 2009/03/08 18:52:19 wfro Exp $
  * Description: Signed Token
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:45:21 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -106,7 +106,7 @@ public class TestAuthenticatedPrincipals extends TestCase {
      * To start the batch runner from your main you can write: 
      */
     public static void main (String[] args) {
-        junit.textui.TestRunner.run(suite());
+        junit.textui.TestRunner.run(TestAuthenticatedPrincipals.suite());
     }
 
     /**
@@ -147,20 +147,20 @@ public class TestAuthenticatedPrincipals extends TestCase {
 	}
 	
 	protected void setUp() throws Exception {		
-		KeyStore keyStore = getKeyStore(
-		    getKeyStoreType(),
-		    getKeyStoreFileName(),
-		    getKeyStorePassPhrase()				
+		KeyStore keyStore = this.getKeyStore(
+			this.getKeyStoreType(),
+			this.getKeyStoreFileName(),
+			this.getKeyStorePassPhrase()				
 		);
 		this.tokenValidator = new TokenValidator(
-			keyStore.getCertificate(getAlias()).getPublicKey()
+			keyStore.getCertificate(this.getAlias()).getPublicKey()
 		);
 		this.tokenFactory = new TokenFactory(
-			getAlgorithm(), 
-			(PrivateKey) getKey(
+			this.getAlgorithm(), 
+			(PrivateKey) this.getKey(
 				keyStore,
-				getAlias(), 
-				getPrivateKeyPassPhrase()
+				this.getAlias(), 
+				this.getPrivateKeyPassPhrase()
 			)
 		);
 		super.setUp();
@@ -218,7 +218,7 @@ public class TestAuthenticatedPrincipals extends TestCase {
 	 * @throws Throwable
 	 */
 	public void testCookie() throws Throwable {
-		consume(produce());
+		this.consume(this.produce());
 	}
 
 	public String produce(		
@@ -281,52 +281,52 @@ public class TestAuthenticatedPrincipals extends TestCase {
 
 	protected static final Principal[] PRINCIPAL_SET = new Principal[]{
 		new GenericPrincipal(
-			PRINCIPAL_TYPE,
+			TestAuthenticatedPrincipals.PRINCIPAL_TYPE,
 			"ch::omex::mdx::compatibility::security1/provider/ch::omex/segment/ch::omex::mdx::test/subject/bdb32db0-1043-11d9-8761-31bbe4eeae10/role/SingleSignOn",	
 			"myName"
 		),
 		new GenericPrincipal(
-			GROUP_TYPE,
+			TestAuthenticatedPrincipals.GROUP_TYPE,
 			"ch::omex::mdx::compatibility::security1/provider/ch::omex/segment/ch::omex::mdx::test/subject/bdb32db0-1043-11d9-8761-31bbe4eeae11/role/SingleSignOn", 
 			"myFirstRole"
 		),
 		new GenericPrincipal(
-			GROUP_TYPE,
+			TestAuthenticatedPrincipals.GROUP_TYPE,
 			"ch::omex::mdx::compatibility::security1/provider/ch::omex/segment/ch::omex::mdx::test/subject/bdb32db0-1043-11d9-8761-31bbe4eeae12/role/SingleSignOn", 
 			"mySecondRole"
 		),
 		new GenericPrincipal(
-			GROUP_TYPE,
+			TestAuthenticatedPrincipals.GROUP_TYPE,
 			"ch::omex::mdx::compatibility::security1/provider/ch::omex/segment/ch::omex::mdx::test/subject/bdb32db0-1043-11d9-8761-31bbe4eeae13/role/SingleSignOn", 
 			"myThirdRole"
 		),
 		new GenericPrincipal(
-			GROUP_TYPE,
+			TestAuthenticatedPrincipals.GROUP_TYPE,
 			"ch::omex::mdx::compatibility::security1/provider/ch::omex/segment/ch::omex::mdx::test/subject/bdb32db0-1043-11d9-8761-31bbe4eeae14/role/SingleSignOn", 
 			"myFourthRole"
 		),
 		new GenericPrincipal(
-			GROUP_TYPE,
+			TestAuthenticatedPrincipals.GROUP_TYPE,
 			"ch::omex::mdx::compatibility::security1/provider/ch::omex/segment/ch::omex::mdx::test/subject/bdb32db0-1043-11d9-8761-31bbe4eeae15/role/SingleSignOn", 
 			"myFifthRole"
 		),
 		new GenericPrincipal(
-			GROUP_TYPE,
+			TestAuthenticatedPrincipals.GROUP_TYPE,
 			"ch::omex::mdx::compatibility::security1/provider/ch::omex/segment/ch::omex::mdx::test/subject/bdb32db0-1043-11d9-8761-31bbe4eeae16/role/SingleSignOn", 
 			"mySixthRole"
 		),
 		new GenericPrincipal(
-			GROUP_TYPE,
+			TestAuthenticatedPrincipals.GROUP_TYPE,
 			"ch::omex::mdx::compatibility::security1/provider/ch::omex/segment/ch::omex::mdx::test/subject/bdb32db0-1043-11d9-8761-31bbe4eeae17/role/SingleSignOn", 
 			"mySeventhRole"
 		),
 		new GenericPrincipal(
-			GROUP_TYPE,
+			TestAuthenticatedPrincipals.GROUP_TYPE,
 			"ch::omex::mdx::compatibility::security1/provider/ch::omex/segment/ch::omex::mdx::test/subject/bdb32db0-1043-11d9-8761-31bbe4eeae18/role/SingleSignOn", 
 			"myEighthRole"
 		),
 		new GenericPrincipal(
-			GROUP_TYPE,
+			TestAuthenticatedPrincipals.GROUP_TYPE,
 			"ch::omex::mdx::compatibility::security1/provider/ch::omex/segment/ch::omex::mdx::test/subject/bdb32db0-1043-11d9-8761-31bbe4eeae19/role/SingleSignOn", 
 			"myNinethRole"
 		)

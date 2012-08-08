@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateCapables.java,v 1.1 2008/12/15 03:15:37 hburger Exp $
+ * Name:        $Id: StateCapables.java,v 1.6 2009/01/17 02:37:25 hburger Exp $
  * Description: StateCapables 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/15 03:15:37 $
+ * Date:        $Date: 2009/01/17 02:37:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,8 @@ import javax.jmi.reflect.RefBaseObject;
 import javax.jmi.reflect.RefObject;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.naming.PathComponent;
 
 /**
  * StateCapables
@@ -69,19 +70,39 @@ public class StateCapables {
     }
 
     /**
-     * The container for the virtual core objects
+     * The the virtual core objects' container's parent
      */
-    private static final Path CORE_CONTAINER = new Path(
-        "xri://@openmdx*org.openmdx.compatibility.state1/provider/-/segment/-/state1Core"
+    public static final Path CORE_SEGMENT = new Path(
+        "xri://@openmdx*org.openmdx.compatibility.state1/provider/-/segment/-"
     );
     
-    private static final Path CORE_OBJECT = CORE_CONTAINER.getChild(":*");
-    private static final Path CORE_REFERENCE = CORE_OBJECT.getChild(":*");
+    /**
+     * The container for the virtual core objects
+     */
+    public static String CORE_REFERENCE = "state1Core";
     
-    private static final int OBJECT_ID_POSITION = CORE_OBJECT.size() - 1;
-    private static final int REFRERENCE_NAME_POSITION = CORE_REFERENCE.size() - 1;
+    /**
+     * The container for the virtual core objects
+     */
+    private static final Path CORE_CONTAINER = CORE_SEGMENT.getChild(CORE_REFERENCE);
+    
+    /**
+     * The container for transient object id's
+     */
+    public static final Path TRANSIENT_CONTAINER = CORE_SEGMENT.getChild("extent");
+
+    private  static final Path CORE_OBJECT = CORE_CONTAINER.getChild(":*");
+
+    public static final Path TRANSIENT_OBJECT = TRANSIENT_CONTAINER.getChild(":*");
     
     private static boolean XRI2 = false;
+    
+    public static String getResourceIdentifier(
+        RefBaseObject refContainer,
+        String qualifier
+    ){
+        return new Path(refContainer.refMofId()).add(qualifier).toString();
+    }
     
     /**
      * Calculate the virtual core object's id
@@ -96,7 +117,7 @@ public class StateCapables {
         String qualifier
     ){
         return CORE_CONTAINER.getChild(
-            new Path(refContainer.refMofId()).add(qualifier).toString()
+            getResourceIdentifier(refContainer, qualifier)
         );
     }
 
@@ -127,9 +148,22 @@ public class StateCapables {
     public static Path getStateCapable(
         Path resourceIdentifier
     ){
-        return CORE_CONTAINER.getChild(
+        return resourceIdentifier.isLike(CORE_OBJECT) ? resourceIdentifier : CORE_CONTAINER.getChild(
             resourceIdentifier.toString()
         );
+    }
+
+    /**
+     * Calculate the virtual core object's id
+     * 
+     * @param resourceIdentifier
+     *  
+     * @return the virtual core object's id
+     */
+    public static Path getResourceIdentifier(
+        Path resourceIdentifier
+    ){
+        return resourceIdentifier.isLike(CORE_OBJECT) ? new Path(resourceIdentifier.getBase()) : resourceIdentifier;
     }
     
     /**
@@ -145,6 +179,10 @@ public class StateCapables {
     ){
         Path coreId = core instanceof RefObject_1_0 ? ((RefObject_1_0)core).refGetPath() :  new Path(core.refMofId());
         return toString(new Path(coreId.getBase()));
+    }
+
+    public static Path newTransientObjectId(){
+        return TRANSIENT_CONTAINER.getChild(PathComponent.createPlaceHolder());
     }
     
     /**
@@ -163,25 +201,16 @@ public class StateCapables {
             id.toXri();
     }
     
-    /**
-     * "Normalize" the container reference
-     * 
-     * @param reference
-     * 
-     * @return the normalized container reference
-     */
-    public static Path toContainerId (
-        Path reference
-    ){
-        return reference.isLike(CORE_REFERENCE) ?
-            new Path(reference.get(OBJECT_ID_POSITION)).add(reference.get(REFRERENCE_NAME_POSITION)) :
-            reference;
-    }
-    
     public static boolean isCoreObject(
         Path path
     ){
-        return path.isLike(CORE_OBJECT);
+        return path != null && path.isLike(CORE_OBJECT);
     }
     
+    public static boolean isTransientObject(
+        Path path
+    ){
+        return path != null && path.isLike(TRANSIENT_OBJECT);
+    }
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Structures.java,v 1.19 2008/09/09 12:00:28 hburger Exp $
+ * Name:        $Id: Structures.java,v 1.22 2009/03/03 17:23:08 hburger Exp $
  * Description: Structures 
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/09 12:00:28 $
+ * Date:        $Date: 2009/03/03 17:23:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -82,12 +82,12 @@ import javax.jdo.spi.PersistenceCapable;
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
+import org.omg.mof.spi.Identifier;
+import org.omg.mof.spi.Names;
 import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.resource.Records;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.collection.ArraysExtension;
-import org.openmdx.model1.mapping.Names;
-import org.openmdx.model1.mapping.java.Identifier;
 import org.w3c.cci2.SortedMaps;
 import org.w3c.cci2.SparseArray;
 
@@ -460,7 +460,6 @@ public class Structures {
          * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object,
          *      java.lang.reflect.Method, java.lang.Object[])
          */
-        @SuppressWarnings("unchecked")
         public Object invoke(Object proxy, Method method, Object[] args)
             throws Throwable {
             Class<?> declaringClass = method.getDeclaringClass();
@@ -558,7 +557,6 @@ public class Structures {
             }
         }
         
-        @SuppressWarnings("unchecked")
         Object[] toNestedArrays(
             Object[] source
         ) {
@@ -838,7 +836,6 @@ public class Structures {
                         return i < size();
                     }
         
-                    @SuppressWarnings("unchecked")
                     public Object next() {
                         if (hasNext()) {
                             return UnmodifiableSet.this.values[i++];
@@ -1097,7 +1094,6 @@ public class Structures {
                                     return UnmodifiableSortedMap.this.indices[this.position];
                                 }
         
-                                @SuppressWarnings("unchecked")
                                 public Object getValue() {
                                     return UnmodifiableSortedMap.this.values[this.position];
                                 }

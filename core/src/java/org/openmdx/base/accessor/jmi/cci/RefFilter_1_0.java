@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefFilter_1_0.java,v 1.6 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: RefFilter_1_0.java,v 1.9 2009/01/06 10:21:20 wfro Exp $
  * Description: RefFilter_1_0 interface
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2009/01/06 10:21:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,8 +53,8 @@ package org.openmdx.base.accessor.jmi.cci;
 import java.io.Serializable;
 import java.util.Collection;
 
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.query.FilterProperty;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.base.query.FilterProperty;
 
 /**
  * The RefFilter is an extension to JMI and allows to filter the Collections

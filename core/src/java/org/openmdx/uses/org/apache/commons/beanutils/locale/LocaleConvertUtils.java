@@ -32,7 +32,9 @@ import java.util.Locale;
  *
  * @author Yauheny Mikulski
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked"
+})
 public class LocaleConvertUtils {
 
     // ----------------------------------------------------- Instance Variables

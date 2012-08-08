@@ -45,17 +45,20 @@ import org.openmdx.uses.org.apache.commons.collections.Transformer;
  * If an exception occurs during attempts to get or set a property then the
  * property is considered non existent in the Map
  *
- * @version $Revision: 1.2 $ $Date: 2008/06/28 00:21:29 $
+ * @version $Revision: 1.4 $ $Date: 2009/03/03 15:23:44 $
  * 
  * @author James Strachan
  * @author Stephen Colebourne
  */
-@SuppressWarnings({"unchecked", "serial"})
+@SuppressWarnings({
+    "unchecked", "serial","synthetic-access"
+    
+})
 public class BeanMap extends AbstractMap implements Cloneable {
 
     private transient Object bean;
 
-    transient HashMap readMethods = new HashMap();
+    private transient HashMap readMethods = new HashMap();
     private transient HashMap writeMethods = new HashMap();
     private transient HashMap types = new HashMap();
 
@@ -70,7 +73,7 @@ public class BeanMap extends AbstractMap implements Cloneable {
      *
      * N.B. private & unmodifiable replacement for the (public & static) defaultTransformers instance.
      */
-    static Map typeTransformers = Collections.unmodifiableMap(createTypeTransformers());
+    private static Map typeTransformers = Collections.unmodifiableMap(createTypeTransformers());
 
     /**
      * This HashMap has been made unmodifiable to prevent issues when

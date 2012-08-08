@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RadiusException.java,v 1.8 2008/10/07 08:51:13 hburger Exp $
+ * Name:        $Id: RadiusException.java,v 1.11 2009/03/05 16:29:53 hburger Exp $
  * Description: Radius Exception 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/07 08:51:13 $
+ * Date:        $Date: 2009/03/05 16:29:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,7 +61,7 @@ import org.openmdx.kernel.exception.BasicException.Parameter;
  */
 public class RadiusException
     extends Exception 
-    implements BasicException.Wrapper
+    implements BasicException.Holder
 {
 
 	/**
@@ -117,107 +117,12 @@ public class RadiusException
 	 * Implements <code>Serializable</code>.
 	 */
 	private static final long serialVersionUID = 5014284731661341777L;
-
 	
-    //------------------------------------------------------------------------
-    // Implements StackedException.Wrapper
-    //------------------------------------------------------------------------
 
     /**
-     * Return a StackedException, this exception object's cause.
-     * 
-     * @return the StackedException wrapped by this object.
-     * 
-     * @deprecated use getCause()
-     */
-    public BasicException getExceptionStack (
-    ) {
-        return getCause();
-    }
-
-    /**
-     * Retrieves the exception domain of this <code>ServiceException</code>.
+     * Returns the cause of an exception. The cause actually is the wrapped exception.
      *
-     * @return the exception domain
-     */
-    public String getExceptionDomain()
-    {
-    	BasicException exceptionStack = getCause();
-        return exceptionStack == null ? 
-            BasicException.Code.DEFAULT_DOMAIN : 
-            exceptionStack.getExceptionDomain();
-    }
-
-    /**
-     * Retrieves the exception code of this <code>ServiceException</code>.
-     *
-     * @return the exception code
-     */
-    public int getExceptionCode()
-    {
-    	BasicException exceptionStack = getCause();
-        return exceptionStack == null ? 
-            BasicException.Code.GENERIC : 
-            exceptionStack.getExceptionCode();
-    }
-
-	/**
-	 * Returns the cause belonging to a specific exception domain.
-	 * 
-	 * @param 	exceptionDomain
-	 * 			the desired exception domain,
-	 *          or <code>null</code> to retrieve the initial cause.
-	 *
-	 * @return  Either the cause belonging to a specific exception domain
-	 *          or the initial cause if <code>exceptionDomain</code> is
-	 * 			<code>null</code>.  
-	 */
-	public BasicException getCause(
-	    String exceptionDomain
-	){
-    	BasicException exceptionStack = getCause();
-        return exceptionStack == null ? 
-            null : 
-            exceptionStack.getCause(exceptionDomain);
-	}
-
-
-    //------------------------------------------------------------------------
-    // Extends Throwable
-    //------------------------------------------------------------------------
-
-    /**
-     * Returns the detail message string of this RuntimeServiceException.  
-     */
-    public String getMessage(
-    ){
-    	BasicException exceptionStack = getCause();
-        return exceptionStack == null ?
-            super.getMessage() : 
-            exceptionStack.getMessage() + ": " +
-            exceptionStack.getDescription();
-    }
-    
-    /**
-     * A String consisting of the class of this exception, the exception 
-     * domain, the exception code, the exception description and the exception
-     * stack.
-     * 
-     * @return a multiline representation of this exception.
-     */     
-    public String toString(){
-    	BasicException exceptionStack = getCause();
-        return 
-            exceptionStack == null ?
-            super.toString() : 
-            super.toString() + '\n' + exceptionStack;
-    }
-
-    /**
-     * Returns the cause of an exception. The cause actually is the wrapped
-     * exception.
-     *
-     * @return BasicException  The exception cause.
+     * @return Throwable  The exception cause.
      */
     public final BasicException getCause(
     ){
@@ -225,27 +130,50 @@ public class RadiusException
     }
 
     /* (non-Javadoc)
+     * @see org.openmdx.kernel.exception.BasicException.Holder#getCause(java.lang.String)
+     */
+    public BasicException getCause(String exceptionDomain) {
+        return getCause().getCause(exceptionDomain);
+    }
+
+    /**
+     * Retrieves the exception domain of this <code>ServiceException</code>.
+     *
+     * @return the exception domain
+     */
+    public String getExceptionDomain(
+    ){
+        return getCause().getExceptionDomain();
+    }
+
+    /**
+     * Retrieves the exception code of this <code>ServiceException</code>.
+     *
+     * @return the exception code
+     */
+    public int getExceptionCode(
+    ){
+        return getCause().getExceptionCode();
+    }
+
+    /* (non-Javadoc)
      * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
      */
+    @Override
     public void printStackTrace(PrintStream s) {
-    	BasicException exceptionStack = getCause();
-        if(exceptionStack == null){
-            super.printStackTrace(s);
-        } else {
-            exceptionStack.printStack(this, s, true);
-        }
+        getCause().printStackTrace(s);
     }
 
     /* (non-Javadoc)
      * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
      */
+    @Override
     public void printStackTrace(PrintWriter s) {
-    	BasicException exceptionStack = getCause();
-        if(exceptionStack == null){
-            super.printStackTrace(s);
-        } else {
-            exceptionStack.printStack(this, s, true);
-        }
+        getCause().printStackTrace(s);
     }
+
+	public RadiusException log() {
+		return BasicException.log(this);
+	}
 
 }

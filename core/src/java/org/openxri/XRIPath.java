@@ -44,9 +44,7 @@ public abstract class XRIPath
     */ /**
     *
     */
-    XRIPath() {
-     // Constructor()
-    } 
+    XRIPath() {} // Constructor()
 
     /*
     ****************************************************************************

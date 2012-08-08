@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LayerConfigurationEntries.java,v 1.16 2007/12/14 15:45:52 hburger Exp $
+ * Name:        $Id: LayerConfigurationEntries.java,v 1.18 2009/01/12 02:41:46 hburger Exp $
  * Description: Generated constants for LayerConfigurationEntries
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/14 15:45:52 $
+ * Date:        $Date: 2009/01/12 02:41:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,7 +59,7 @@ package org.openmdx.compatibility.base.dataprovider.layer.model;
 
 
 
-public class LayerConfigurationEntries extends org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries {
+public class LayerConfigurationEntries extends org.openmdx.application.dataprovider.cci.SharedConfigurationEntries {
 
   
   protected LayerConfigurationEntries() {
@@ -189,7 +189,14 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
    */
   static public final String SINGLE_STATE_MODE = "SingleStateMode";
 
-  
+  /**
+   * Posssible entry values are<ul>
+   * <li><code>false</code> disables optimistic locking
+   * <li><code>whenModified</code> enables optimistic locking for modified objects
+   * <li><code>true</code> enables optimistic locking even for unmodified objects
+   * </ul>
+   */
+  static public final String OPTIMISTIC_LOCKING = "optimisticLocking";
   
   /**
    * Returns the smallest defined integer constant or
@@ -199,7 +206,7 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
    */
   static public int min()
   {
-  return org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries.min();  // delegate
+  return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.min();  // delegate
   }
 
 
@@ -212,7 +219,7 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
    */
   static public int max()
   {
-  return org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries.max();  // delegate
+  return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.max();  // delegate
   }
 
 
@@ -225,7 +232,7 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
    */
   static public String toString(int code)
   {
-      return org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries.toString(code);  // delegate
+      return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.toString(code);  // delegate
   }
 
 
@@ -242,7 +249,7 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
   static public int fromString(String code)
   {  
 
-    return org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries.fromString(code);  // delegate
+    return org.openmdx.application.dataprovider.cci.SharedConfigurationEntries.fromString(code);  // delegate
   }
 
 

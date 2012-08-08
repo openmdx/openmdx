@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationPaneControl.java,v 1.79 2008/11/12 10:36:53 wfro Exp $
+ * Name:        $Id: OperationPaneControl.java,v 1.80 2009/02/11 12:57:04 wfro Exp $
  * Description: UiBasedOperationPaneControl class
- * Revision:    $Revision: 1.79 $
+ * Revision:    $Revision: 1.80 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 10:36:53 $
+ * Date:        $Date: 2009/02/11 12:57:04 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -120,7 +120,9 @@ public class OperationPaneControl
             WizardDefinition[] wizardDefinitions = wizardFactory.findWizardDefinitions(
                 forClass, 
                 locale, 
-                tab.getOperationName()
+                tab.getOperationName().indexOf("?") > 0 ? 
+                    tab.getOperationName().substring(0, tab.getOperationName().indexOf("?")) :
+                    tab.getOperationName()
             );
             // Wizard implements operation
             if(wizardDefinitions.length > 0) {

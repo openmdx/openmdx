@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Action.java,v 1.38 2008/11/12 01:05:06 wfro Exp $
+ * Name:        $Id: Action.java,v 1.39 2009/03/08 18:03:20 wfro Exp $
  * Description: Action
- * Revision:    $Revision: 1.38 $
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 01:05:06 $
+ * Date:        $Date: 2009/03/08 18:03:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -92,7 +92,7 @@ public final class Action
   //-------------------------------------------------------------------------
   public Action(
       int event,
-      Parameter[] parameters,
+      Action.Parameter[] parameters,
       String title,
       boolean isEnabled
   ) {
@@ -108,7 +108,7 @@ public final class Action
   //-------------------------------------------------------------------------
   public Action(
     int event,
-    Parameter[] parameters,
+    Action.Parameter[] parameters,
     String title,
     String iconKey,
     boolean isEnabled
@@ -126,7 +126,7 @@ public final class Action
   //-------------------------------------------------------------------------
   public Action(
     int event,
-    Parameter[] parameters,
+    Action.Parameter[] parameters,
     String title,
     String toolTip,
     String iconKey,
@@ -303,7 +303,7 @@ public final class Action
     }
   
     //-------------------------------------------------------------------------
-    public Parameter[] getParameters(
+    public Action.Parameter[] getParameters(
     ) {
         return this.parameters;
     }
@@ -347,17 +347,20 @@ public final class Action
             requestId
         );
         StringBuilder href = new StringBuilder(components[0]);
-        for(int i = 1; i < components.length; i+=2) try {
-            href.append(
-                i == 1 ? "?" : "&"
-            ).append(
-                components[i]
-            ).append(
-                "="
-            ).append(
-                URLEncoder.encode(components[i+1], "UTF-8")
-            );
-        } catch(UnsupportedEncodingException e) {}
+        for(int i = 1; i < components.length; i+=2) {
+        	try {
+	            href.append(
+	                i == 1 ? "?" : "&"
+	            ).append(
+	                components[i]
+	            ).append(
+	                "="
+	            ).append(
+	                URLEncoder.encode(components[i+1], "UTF-8")
+	            );
+	        } 
+	        catch(UnsupportedEncodingException e) {}
+        }
         return href.toString();
     }
         
@@ -446,7 +449,7 @@ public final class Action
     private String title = "N/A";
     private String toolTip = "N/A";
     private String parameter = null;
-    private final Parameter[] parameters;
+    private final Action.Parameter[] parameters;
     private String iconKey = WebKeys.ICON_DEFAULT;
     private final boolean isEnabled;
 

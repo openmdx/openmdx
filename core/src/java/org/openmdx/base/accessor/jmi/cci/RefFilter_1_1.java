@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefFilter_1_1.java,v 1.3 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: RefFilter_1_1.java,v 1.4 2009/01/13 02:10:44 wfro Exp $
  * Description: RefFilter_1_1 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2009/01/13 02:10:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,7 +52,7 @@ package org.openmdx.base.accessor.jmi.cci;
 
 import java.util.Collection;
 
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 /**
  * RefFilter_1_1

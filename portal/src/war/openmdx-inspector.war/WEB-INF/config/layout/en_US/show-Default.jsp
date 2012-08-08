@@ -2,17 +2,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: show-Default.jsp,v 1.74 2008/11/18 11:57:01 wfro Exp $
+ * Name:        $Id: show-Default.jsp,v 1.78 2009/03/06 10:49:40 wfro Exp $
  * Description: Default.jsp
- * Revision:    $Revision: 1.74 $
+ * Revision:    $Revision: 1.78 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/18 11:57:01 $
+ * Date:        $Date: 2009/03/06 10:49:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -55,7 +55,7 @@
  * license.
  */
 %><%@ page session="true" import="
-org.openmdx.compatibility.base.naming.*,
+org.openmdx.base.naming.*,
 org.openmdx.portal.servlet.*,
 org.openmdx.portal.servlet.control.*,
 org.openmdx.portal.servlet.view.*,
@@ -174,7 +174,18 @@ org.openmdx.portal.servlet.texts.*
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html dir="<%= texts.getDir() %>">
 <head>
-  <title><%= app.getApplicationName() + " - " + view.getObjectReference().getTitle() + (view.getObjectReference().getTitle().length() == 0 ? "" : " - ") + view.getObjectReference().getLabel() %></title>
+<%
+	String title = view.getObjectReference().getTitle();
+	if(title == null) {
+	    title = "#ERR";
+	}
+	else {
+	    while(title.startsWith("<") && title.indexOf("/>") > 0) {
+	        title = title.substring(title.indexOf("/>") + 2);
+	    }
+	}
+%>
+  <title><%= app.getApplicationName() + " - " + title + (title.length() == 0 ? "" : " - ") + view.getObjectReference().getLabel() %></title>
 <%
 	prolog.paint(p, PagePrologControl.FRAME_PRE_PROLOG, false);
 	p.flush();
@@ -254,16 +265,6 @@ org.openmdx.portal.servlet.texts.*
 				search.paint(p, false);
 				p.flush();
 %>
-				<ul id="nav" class="nav" onmouseover="sfinit(this);" >
-					<li><a href="#" onclick="javascript:return false;"><img id="rootMenuAnchor" src="./images/mlogo.png" border="0"/></a>
-						<ul onclick="this.style.left='-999em';" onmouseout="this.style.left='';">
-<%
-							RootMenuControl.paintQuickAccessors(p);
-							p.flush();
-%>
-						</ul>
-					</li>
-				</ul>
 				<ul id="navigation" class="navigation" onmouseover="sfinit(this);">
 <%
 					RootMenuControl.paintTopNavigation(p);
@@ -279,6 +280,7 @@ org.openmdx.portal.servlet.texts.*
 		</div> <!-- header -->
 		<div id="content-wrap">
 			<div id="<%= app.getPanelState("Header") == 0 ? "content" : "contentNH" %>">
+				<div id="UserDialog"></div>
 <%@ include file="../../../../show-header.html" %>
 <%
 				errors.paint(p, false);

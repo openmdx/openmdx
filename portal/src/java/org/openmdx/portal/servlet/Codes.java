@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Codes.java,v 1.12 2008/09/19 20:54:22 wfro Exp $
+ * Name:        $Id: Codes.java,v 1.15 2009/03/08 18:03:19 wfro Exp $
  * Description: Codes
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/19 20:54:22 $
+ * Date:        $Date: 2009/03/08 18:03:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,7 +71,7 @@ import javax.jmi.reflect.RefObject;
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 
 @SuppressWarnings("unchecked")
@@ -151,7 +151,8 @@ implements Serializable {
                 Short code = new Short((short)0);
                 try {
                     code = new Short(new Path(entry.refMofId()).getBase());
-                } catch(Exception e) {}
+                } 
+                catch(Exception e) {}
                 List texts = (List)entry.refGetValue("shortText");
                 Object text = texts.size() > locale
                 ? texts.get(locale)
@@ -191,7 +192,8 @@ implements Serializable {
                 Short code = new Short((short)0);
                 try {
                     code = new Short(new Path(entry.refMofId()).getBase());
-                } catch(Exception e) {}
+                } 
+                catch(Exception e) {}
                 List texts = (List)entry.refGetValue("longText");
                 Object text = texts.size() > locale
                 ? texts.get(locale)
@@ -204,14 +206,12 @@ implements Serializable {
                         throw new RuntimeServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.INVALID_CONFIGURATION, 
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("container name", valueContainerName),
-                                new BasicException.Parameter("locale", locale),
-                                new BasicException.Parameter("lookup id", longTextId),
-                                new BasicException.Parameter("entry", entry.refMofId()),                            
-                                new BasicException.Parameter("texts", texts)
-                            },
-                            "text of code value entry can not be null"
+                            "text of code value entry can not be null",
+                            new BasicException.Parameter("container name", valueContainerName),
+                            new BasicException.Parameter("locale", locale),
+                            new BasicException.Parameter("lookup id", longTextId),
+                            new BasicException.Parameter("entry", entry.refMofId()),                            
+                            new BasicException.Parameter("texts", texts)
                         );
                     }
                     longTexts.put(text, code);
@@ -286,7 +286,8 @@ implements Serializable {
                     Short code = new Short((short)0);
                     try {
                         code = new Short(new Path(entry.refMofId()).getBase());
-                    } catch(Exception e) {}
+                    } 
+                    catch(Exception e) {}
                     iconKeys.put(
                         code, 
                         entry.refGetValue("iconKey")
@@ -320,7 +321,8 @@ implements Serializable {
                     Short code = new Short((short)0);
                     try {
                         code = new Short(new Path(entry.refMofId()).getBase());
-                    } catch(Exception e) {}
+                    } 
+                    catch(Exception e) {}
                     colors.put(
                         code, 
                         entry.refGetValue("color")
@@ -354,7 +356,8 @@ implements Serializable {
                     Short code = new Short((short)0);
                     try {
                         code = new Short(new Path(entry.refMofId()).getBase());
-                    } catch(Exception e) {}
+                    } 
+                    catch(Exception e) {}
                     backColors.put(
                         code, 
                         entry.refGetValue("backColor")

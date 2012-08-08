@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Classes.java,v 1.17 2008/11/25 17:47:50 hburger Exp $
+ * Name:        $Id: Classes.java,v 1.19 2009/03/03 17:23:08 hburger Exp $
  * Description: Application Framework: Classes 
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/25 17:47:50 $
+ * Date:        $Date: 2009/03/03 17:23:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2009, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,15 +50,23 @@
  */
 package org.openmdx.compatibility.kernel.application.cci;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
+
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 
 /**
  * Generic class loader access
@@ -66,14 +74,18 @@ import java.util.Set;
 public class Classes
 { 
 
+    /**
+     * Constructor 
+     */
     private Classes(
     ){
         // Avoid instantiation
     }
     
     /**
+     * Retrieve the context class loader
      * 
-     * @return
+     * @return the context class loader
      */
     private static ClassLoader getClassLoader(
     ){
@@ -86,10 +98,49 @@ public class Classes
     //------------------------------------------------------------------------
     
     /**
+     * Retrieve information about the the class loaders failing to provide the given class
+     *  
+     * @param className
+     * @param classLoader
+     * 
+     * @return <code>BasicException.Parameter</code>s
+     */
+    private static final BasicException.Parameter[] getInfo(
+        String className,
+        ClassLoader classLoader
+    ){
+        List<BasicException.Parameter> info = new ArrayList<BasicException.Parameter>();
+        info.add(new BasicException.Parameter("class", className));
+        try {
+            int i = 0;
+            for(
+                ClassLoader current = classLoader;
+                current != null;
+                current = current.getParent(), i++
+            ){
+                info.add(new BasicException.Parameter("classLoader[" + i + "]", current.getClass().getName()));
+                if(current instanceof URLClassLoader) {
+                    int j = 0;
+                    for(URL url : ((URLClassLoader)current).getURLs()) {
+                        info.add(new BasicException.Parameter("url[" + i + "," + j++ + "]", url));
+                    }
+                }
+            }
+        } catch (RuntimeException ignore) {
+            // just end info generation
+        }
+        return info.toArray(
+            new BasicException.Parameter[info.size()]
+        );
+    }
+    
+    /**
      * This method may be overridden by a specific Classes instance.
      *
      * @param     name
      *            fully qualified name of the desired class
+     * @param     classLoader
+     *            the classLoader ot be used           
      *
      * @exception LinkageError
      *            if the linkage fails 
@@ -99,33 +150,49 @@ public class Classes
      *            if the class cannot be located by the kernel class loader
      */
     @SuppressWarnings("unchecked")
-    private static <T> Class<T>  findApplicationClass(
-        String name
+    private static <T> Class<T>  getClass(
+        String name,
+        ClassLoader classLoader
     ) throws ClassNotFoundException {
-		ClassLoader classloader = getClassLoader(); 
     	try {
 	        return (Class<T>) Class.forName(
 	            name,
 	            true,
-				classloader
+				classLoader
 	        );
     	} catch (NoClassDefFoundError error) {
-    		throw new NoClassDefFoundError(
-    			"An error occured when attempting to load '" + name + 
-				"' from " + classloader + ",\nhint=\"Maybe '" + name +
-				"' depends on another class which is either missing " +
-				"or to be found in a child class loader\",\ncause=" +
- 				error   
+    	    throw Throwables.initCause(
+    	        new NoClassDefFoundError(
+        			"Could not load " + name + 
+        			"; maybe it depends on another class which is " +
+        			"either missing or to be found in a child class loader"
+        		),
+        		error,
+        		BasicException.Code.DEFAULT_DOMAIN,
+        		BasicException.Code.INITIALIZATION_FAILURE,
+        		getInfo(
+        		    name,
+        		    classLoader
+        		)
     		);
     	} catch (ClassNotFoundException exception) {
-    		throw new ClassNotFoundException(
-    			"An error occured when attempting to load '" + name + 
-				"' from " + classloader + ",\ncause=" +
- 				exception   
-    		);
+            throw BasicException.initHolder(
+                new ClassNotFoundException(
+                    "Could not load " + name,
+                    BasicException.newEmbeddedExceptionStack(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NO_RESOURCE,
+                        getInfo(
+                            name,
+                            classLoader
+                        )
+                    )
+                )
+            );
     	}
     }
-    
+
     /**
      * Load a system class
      *
@@ -141,13 +208,11 @@ public class Classes
      * @exception ClassNotFoundException
      *            if the class cannot be located by the kernel class loader
      */
-    @SuppressWarnings("unchecked")
     public static <T> Class<T> getSystemClass(
         String name
     ) throws ClassNotFoundException {
-        return (Class<T>) Class.forName(
+        return getClass(
             name,
-            true,
             ClassLoader.getSystemClassLoader()
         );
     }
@@ -167,11 +232,13 @@ public class Classes
      * @exception ClassNotFoundException
      *            if the class cannot be located by the kernel class loader
      */
-    @SuppressWarnings("unchecked")
     public static <T> Class<T> getKernelClass(
         String name
     ) throws ClassNotFoundException {
-        return (Class<T>) Class.forName(name);
+        return getClass(
+            name,
+            Classes.class.getClassLoader()
+        );
     }
     
     /**
@@ -192,29 +259,10 @@ public class Classes
     public static <T> Class<T>  getApplicationClass(
         String name
     ) throws ClassNotFoundException {
-        return findApplicationClass(name);
-    }
-    
-    
-    //------------------------------------------------------------------------
-    // Resource loading
-    //------------------------------------------------------------------------
-    
-    /**
-     * This method may be overridden by a specific Classes instance.
-     *
-     * @param     name
-     *            fully qualified name of the desired resource
-     *
-     * @return    a URL for reading the resource,
-     *            or <code>null</code> if the resource could not be found or
-     *            the caller doesn't have adequate privileges to get the
-     *            resource.
-     */
-    private static URL findApplicationResource(
-        String name
-    ){
-        return getClassLoader().getResource(name);
+        return getClass(
+            name,
+            getClassLoader()
+        );
     }
     
     /**
@@ -266,8 +314,34 @@ public class Classes
     public static URL getApplicationResource(
         String name
     ){
-        URL resource = findApplicationResource(name);
+        URL resource = getClassLoader().getResource(name);
         return resource == null ? getKernelResource(name) : resource;
+    }
+
+    /**
+     * Finds all the resources with the given name. A resource is some data
+     * (images, audio, text, etc) that can be accessed by class code in a way
+     * that is independent of the location of the code.
+     *
+     * <p>The name of a resource is a <tt>/</tt>-separated path name that
+     * identifies the resource.
+     *
+     * <p> The search order is described in the documentation for {@link
+     * #getResource(String)}.  </p>
+     *
+     * @param  name
+     *         The resource name
+     *
+     * @return  An enumeration of {@link java.net.URL <tt>URL</tt>} objects for
+     *          the resource.  If no resources could  be found, the enumeration
+     *          will be empty.  Resources that the class loader doesn't have
+     *          access to will not be in the enumeration.
+     *
+     * @throws  IOException
+     *          If I/O errors occur
+     */
+    public static Enumeration<URL> getResources(String name) throws IOException {
+        return getClassLoader().getResources(name);
     }
 
     

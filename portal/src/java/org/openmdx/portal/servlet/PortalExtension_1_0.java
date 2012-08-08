@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PortalExtension_1_0.java,v 1.22 2008/11/12 13:58:29 wfro Exp $
+ * Name:        $Id: PortalExtension_1_0.java,v 1.26 2009/02/27 15:52:52 wfro Exp $
  * Description: Evaluator_1_0
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/12 13:58:29 $
+ * Date:        $Date: 2009/02/27 15:52:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,9 +63,9 @@ import javax.jmi.reflect.RefStruct;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.control.Control;
-import org.openmdx.portal.servlet.control.ControlFactory;
 import org.openmdx.portal.servlet.control.GridControl;
 import org.openmdx.portal.servlet.view.ObjectView;
 
@@ -181,7 +181,7 @@ public interface PortalExtension_1_0 {
      */
     public boolean isLookupType(
         ModelElement_1_0 classDef
-    );
+    ) throws ServiceException;
     
     /**
      * Returns a list of <code>FilterProperty</code>s which are added to the query
@@ -209,7 +209,7 @@ public interface PortalExtension_1_0 {
     public void updateObject(
         Object target,
         Map parameterMap,
-        Map fieldMap,
+        Map<String,Attribute> fieldMap,
         ApplicationContext application,
         PersistenceManager pm
     );

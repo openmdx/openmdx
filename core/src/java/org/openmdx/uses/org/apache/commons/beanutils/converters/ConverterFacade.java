@@ -27,10 +27,12 @@ import org.openmdx.uses.org.apache.commons.beanutils.Converter;
  * implementations that provide configuration options from being
  * retrieved and modified.
  *
- * @version $Revision: 1.1 $ $Date: 2008/04/25 14:31:16 $
+ * @version $Revision: 1.3 $ $Date: 2009/03/03 15:23:58 $
  * @since 1.8.0
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked"
+})
 public final class ConverterFacade implements Converter {
 
     private final Converter converter;

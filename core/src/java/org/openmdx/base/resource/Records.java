@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Records.java,v 1.8 2008/03/21 18:31:20 hburger Exp $
+ * Name:        $Id: Records.java,v 1.9 2009/02/19 16:30:58 hburger Exp $
  * Description: JCA: Utility methods for records
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:31:20 $
+ * Date:        $Date: 2009/02/19 16:30:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -154,8 +154,6 @@ public class Records
 	 *
 	 * @exception ResourceException
 	 *            Failed to create an n-dimensional array.
-	 * @exception NotSupportedException
-	 *            Operation not supported
 	 */
 	public static Object nDimensionalArray(
 		IndexedRecord source

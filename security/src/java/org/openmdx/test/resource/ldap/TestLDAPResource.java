@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestLDAPResource.java,v 1.1 2007/11/26 14:04:35 hburger Exp $
+ * Name:        $Id: TestLDAPResource.java,v 1.4 2009/03/08 18:52:19 wfro Exp $
  * Description: Class Loading Test
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:35 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,8 @@
  */
 package org.openmdx.test.resource.ldap;
 
+import javax.naming.spi.InitialContextFactory;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -57,8 +59,7 @@ import junit.textui.TestRunner;
 import netscape.ldap.LDAPSearchResults;
 import netscape.ldap.LDAPv3;
 
-import org.openmdx.base.application.deploy.Deployment;
-import org.openmdx.base.application.deploy.InProcessDeployment;
+import org.openmdx.base.deploy.LazyDeployment;
 import org.openmdx.resource.ldap.cci.ConnectionFactory;
 
 /**
@@ -84,7 +85,7 @@ public class TestLDAPResource extends TestCase {
 	public static void main(
 		String[] args
 	){
-		TestRunner.run(suite());
+		TestRunner.run(TestLDAPResource.suite());
 	}
 
 	/**
@@ -106,18 +107,12 @@ public class TestLDAPResource extends TestCase {
 	 */
 	protected synchronized void setUp(
 	) throws Exception {  
-		this.ldapConnectionFactory = (ConnectionFactory) deployment.context().lookup(
-			"ldap/" + getName()
+		this.ldapConnectionFactory = (ConnectionFactory) deployment.getInitialContext(
+			null
+		).lookup(
+			"ldap/" + this.getName()
 		);
     }
-
-	/**
-	 * 
-	 */
-	protected void tearDown(
-	) {
-		deployment.destroy();
-	}
 
 	/**
 	 * 
@@ -125,13 +120,15 @@ public class TestLDAPResource extends TestCase {
 	 */
 	public void runTest(
 	) throws Exception {
-		System.out.println("Test " + getName() + " started");
+		System.out.println("Test " + this.getName() + " started");
 		for(
 			int i = 0;
 			i < 3;
 			i++
-		) ldapTest(i);
-		System.out.println("Test " + getName() + " completed");
+		) {
+			this.ldapTest(i);
+		}
+		System.out.println("Test " + this.getName() + " completed");
 	}
 	
 	private void ldapTest(
@@ -155,28 +152,19 @@ public class TestLDAPResource extends TestCase {
 			){
 				System.out.println("" + iteration + "." + i + ": " + result.next());
 			}
-		} finally {
+		} 
+		finally {
 			ldap.disconnect();
 		}
 	}
 	
     /**
-     * Define whether deployment details should logged to the console
-     */
-    final private static boolean LOG_DEPLOYMENT_DETAIL = true;
-        
-    /**
      * 
      */
-    protected final static Deployment deployment = 
-        new InProcessDeployment(
-    		new String[]{
-				"file:src/connector/openldap.rar",
-				"file:src/connector/fake-ldap.rar"
-    		},
-            null,
-            LOG_DEPLOYMENT_DETAIL ? System.out : null,
-            System.err
+    protected final static InitialContextFactory deployment = new LazyDeployment(
+		"file:src/connector/openldap.rar file:src/connector/fake-ldap.rar",
+		null,
+		"xri://@openmdx*(+lightweight)*ENTERPRISE_APPLICATION_CONTAINER"
     );
 
 }

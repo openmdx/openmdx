@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderObjectMarshaller.java,v 1.25 2008/11/11 15:39:52 wfro Exp $
+ * Name:        $Id: DataproviderObjectMarshaller.java,v 1.38 2009/01/13 17:35:15 wfro Exp $
  * Description: DataproviderObjectMarshaller
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.38 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/11 15:39:52 $
+ * Date:        $Date: 2009/01/13 17:35:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,32 +66,31 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-import org.openmdx.base.accessor.generic.cci.LargeObject_1_0;
-import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0;
-import org.openmdx.base.accessor.generic.cci.Object_1_0;
-import org.openmdx.base.accessor.generic.cci.Object_1_1;
-import org.openmdx.base.accessor.generic.cci.Structure_1_0;
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.mof.cci.ModelAttributes;
+import org.openmdx.application.mof.cci.Multiplicities;
+import org.openmdx.application.mof.cci.PrimitiveTypes;
+import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.LargeObject_1_0;
+import org.openmdx.base.accessor.cci.PersistenceManager_1_0;
+import org.openmdx.base.accessor.cci.Structure_1_0;
+import org.openmdx.base.accessor.spi.ListStructure_1;
 import org.openmdx.base.collection.FilterableMap;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
+import org.openmdx.base.collection.SparseList;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.collection.PopulationIterator;
-import org.openmdx.compatibility.base.collection.SparseArray;
-import org.openmdx.compatibility.base.collection.SparseList;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
-import org.openmdx.model1.accessor.basic.cci.Model_1_0;
-import org.openmdx.model1.code.ModelAttributes;
-import org.openmdx.model1.code.Multiplicities;
-import org.openmdx.model1.code.PrimitiveTypes;
+import org.w3c.cci2.SparseArray;
 
 //---------------------------------------------------------------------------
 @SuppressWarnings("unchecked")
@@ -113,13 +112,13 @@ public class DataproviderObjectMarshaller {
         Object source,
         Collection bag
     ) throws ServiceException{
-        if(source instanceof Object_1_0){
-            Path path = ((Object_1_0)source).objGetPath();
+        if(source instanceof DataObject_1_0){
+            Path path = (Path)((DataObject_1_0)source).jdoGetObjectId();
             if(
-                    bag != null &&
-                    source instanceof Object_1_1 &&
-                    !((Object_1_1)source).objIsHollow() &&
-                    !bag.contains(path)
+                bag != null &&
+                source instanceof DataObject_1_0 &&
+//                !((Object_1_0)source).objIsHollow() &&
+                !bag.contains(path)
             ) bag.add(path);
             return path;
         } else {
@@ -162,7 +161,7 @@ public class DataproviderObjectMarshaller {
 
         ToObjectMarshaller(
             Map objectCache,
-            ObjectFactory_1_0 objectFactory
+            PersistenceManager_1_0 objectFactory
         ){
             this.objectCache = objectCache;
             this.objectFactory = objectFactory;
@@ -174,21 +173,21 @@ public class DataproviderObjectMarshaller {
             return source instanceof Path ? (
                     this.objectCache.containsKey(source) ? 
                         this.objectCache.get(source) :
-                            this.objectFactory.getObject(source)
+                            this.objectFactory.getObjectById(source)
             ) : source;
         }
 
         public Object unmarshal(
             Object source
         ) throws ServiceException {
-            return source instanceof Object_1_0 ?
-                ((Object_1_0)source).objGetPath() :
+            return source instanceof DataObject_1_0 ?
+                ((DataObject_1_0)source).jdoGetObjectId() :
                     source;
         }
 
         private final Map objectCache;
 
-        private final ObjectFactory_1_0 objectFactory;
+        private final PersistenceManager_1_0 objectFactory;
 
     }
 
@@ -242,7 +241,7 @@ public class DataproviderObjectMarshaller {
                     ListIterator j = sourceValue.populationIterator();
                     j.hasNext();
             ) {
-                ((SparseArray)targetValue).set(
+                ((SparseArray)targetValue).put(
                     j.nextIndex(),
                     marshaller.marshal(j.next())
                 );
@@ -268,7 +267,7 @@ public class DataproviderObjectMarshaller {
     //------------------------------------------------------------------------
     private static Set requiredAttributes(
         DataproviderRequest request,
-        Object_1_0 source,
+        DataObject_1_0 source,
         Model_1_0 model
     ) throws ServiceException{
         switch(request.attributeSelector()) {
@@ -278,14 +277,14 @@ public class DataproviderObjectMarshaller {
                 Set attributes = new HashSet();
                 String className = source.objGetClass();
                 ModelElement_1_0 classDef = model.getElement(className);
-                SparseList allFeatures = classDef.getValues("feature");
+                List allFeatures = classDef.objGetList("feature");
                 for(
-                        Iterator f = allFeatures.populationIterator();
-                        f.hasNext();
+                    Iterator f = allFeatures.listIterator();
+                    f.hasNext();
                 ){
                     ModelElement_1_0 feature = model.getElement(f.next());
                     if(isAttribute(feature, model)) {
-                        attributes.add(feature.values("name").get(0));
+                        attributes.add(feature.objGetValue("name"));
                     }
                 }
                 return attributes;
@@ -299,16 +298,16 @@ public class DataproviderObjectMarshaller {
         ModelElement_1_0 feature,
         Model_1_0 model
     ) throws ServiceException{
-        return !ModelAttributes.REFERENCE.equals(feature.values(SystemAttributes.OBJECT_CLASS).get(0)) || (
-                "none".equals(model.getElement(feature.values("exposedEnd").get(0)).values("aggregation").get(0)) &&
-                "none".equals(model.getElement(feature.values("referencedEnd").get(0)).values("aggregation").get(0))
+        return !ModelAttributes.REFERENCE.equals(feature.objGetValue(SystemAttributes.OBJECT_CLASS)) || (
+                "none".equals(model.getElement(feature.objGetValue("exposedEnd")).objGetValue("aggregation")) &&
+                "none".equals(model.getElement(feature.objGetValue("referencedEnd")).objGetValue("aggregation"))
         );
     }
 
     //------------------------------------------------------------------------
     public static DataproviderObject toDataproviderObject(
         Path path,
-        Object_1_0 source,
+        DataObject_1_0 source,
         DataproviderRequest request,
         Model_1_0 model 
     ) throws ServiceException {
@@ -322,7 +321,7 @@ public class DataproviderObjectMarshaller {
 
     static DataproviderObject toDataproviderObject(
         Path path,
-        Object_1_0 source,
+        DataObject_1_0 source,
         Set requiredSet,
         Model_1_0 model 
     ) throws ServiceException {
@@ -340,7 +339,7 @@ public class DataproviderObjectMarshaller {
     //------------------------------------------------------------------------
     static DataproviderObject toDataproviderObject(
         Path path,
-        Object_1_0 source,
+        DataObject_1_0 source,
         DataproviderRequest request,
         Model_1_0 model, 
         Collection bag, 
@@ -359,7 +358,7 @@ public class DataproviderObjectMarshaller {
 
     static DataproviderObject toDataproviderObject(
         Path path,
-        Object_1_0 source,
+        DataObject_1_0 source,
         Set requiredSet,
         Model_1_0 model, 
         Collection bag, 
@@ -379,7 +378,7 @@ public class DataproviderObjectMarshaller {
     //------------------------------------------------------------------------
     static DataproviderObject toDataproviderObject(
         Path path,
-        Object_1_0 source,
+        DataObject_1_0 source,
         boolean sourceIsView,
         Set requiredSet,
         Model_1_0 model,
@@ -407,9 +406,9 @@ public class DataproviderObjectMarshaller {
             if(
                     featureDef != null &&
                     model.referenceIsStoredAsAttribute(featureDef) && 
-                    Multiplicities.MAP.equals(featureDef.values("multiplicity").get(0))
+                    Multiplicities.MAP.equals(featureDef.objGetValue("multiplicity"))
             ){
-                Object_1_0 lock = source.objGetContainer(
+                DataObject_1_0 lock = source.objGetContainer(
                     SystemAttributes.CONTEXT_CAPABLE_CONTEXT
                 ).get(
                     SystemAttributes.LOCK_CONTEXT
@@ -452,12 +451,12 @@ public class DataproviderObjectMarshaller {
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_FOUND, 
                             "feature not member of classifier",
-                            new BasicException.Parameter("class", classDef.values("qualifiedName").get(0)),
+                            new BasicException.Parameter("class", classDef.objGetValue("qualifiedName")),
                             new BasicException.Parameter("feature", feature)
                         );
                         if(
-                            ModelAttributes.REFERENCE.equals(featureDef.values(SystemAttributes.OBJECT_CLASS).get(0)) && ( // isReference
-                                model.referenceIsStoredAsAttribute(featureDef) && Multiplicities.MAP.equals(featureDef.values("multiplicity").get(0))
+                            ModelAttributes.REFERENCE.equals(featureDef.objGetValue(SystemAttributes.OBJECT_CLASS)) && ( // isReference
+                                model.referenceIsStoredAsAttribute(featureDef) && Multiplicities.MAP.equals(featureDef.objGetValue("multiplicity"))
                             )
                         ){ 
                             namespaceType = feature;
@@ -483,7 +482,7 @@ public class DataproviderObjectMarshaller {
                     ) {
                         Map.Entry namespace = (Entry) j.next();
                         String namespaceId = (String) namespace.getKey();
-                        Object_1_0 namespaceObject = (Object_1_0)namespace.getValue();
+                        DataObject_1_0 namespaceObject = (DataObject_1_0)namespace.getValue();
                         DataproviderObject view = toDataproviderObject(
                             path,
                             namespaceObject,
@@ -495,8 +494,8 @@ public class DataproviderObjectMarshaller {
                         );
                         // move attribute values of view to target
                         for(
-                                Iterator k = view.attributeNames().iterator();
-                                k.hasNext();
+                            Iterator k = view.attributeNames().iterator();
+                            k.hasNext();
                         ) {
                             String attributeName = (String)k.next();
                             target.clearValues(namespaceType + ':' + namespaceId + ":" + attributeName).addAll(
@@ -522,12 +521,12 @@ public class DataproviderObjectMarshaller {
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.NOT_FOUND, 
                             "feature not member of classifier",
-                            new BasicException.Parameter("class", classDef.values("qualifiedName").get(0)),
+                            new BasicException.Parameter("class", classDef.objGetValue("qualifiedName")),
                             new BasicException.Parameter("feature", feature)
                         );
                     }
-                    boolean isAttribute = ModelAttributes.ATTRIBUTE.equals(featureDef.values(SystemAttributes.OBJECT_CLASS).get(0));
-                    boolean isReference = ModelAttributes.REFERENCE.equals(featureDef.values(SystemAttributes.OBJECT_CLASS).get(0));
+                    boolean isAttribute = ModelAttributes.ATTRIBUTE.equals(featureDef.objGetValue(SystemAttributes.OBJECT_CLASS));
+                    boolean isReference = ModelAttributes.REFERENCE.equals(featureDef.objGetValue(SystemAttributes.OBJECT_CLASS));
                     boolean isReferenceStoredAsAttribute = isReference && model.referenceIsStoredAsAttribute(featureDef);
 
                     // attributes and references stored as attributes
@@ -537,7 +536,7 @@ public class DataproviderObjectMarshaller {
                         ModelElement_1_0 featureType = model.getElementType(
                             featureDef
                         );
-                        if(ModelAttributes.STRUCTURE_TYPE.equals(featureType.values(SystemAttributes.OBJECT_CLASS).get(0))) {
+                        if(ModelAttributes.STRUCTURE_TYPE.equals(featureType.objGetValue(SystemAttributes.OBJECT_CLASS))) {
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.INVALID_CONFIGURATION, 
@@ -553,13 +552,13 @@ public class DataproviderObjectMarshaller {
                          * is the modeled multiplicity. In case of a reference with a qualifier
                          * the multiplicity is <<list>> else the modeled multiplicity.
                          */
-                        String multiplicity = (String)featureDef.values("multiplicity").get(0);
+                        String multiplicity = (String)featureDef.objGetValue("multiplicity");
                         if(isReference) {
                             ModelElement_1_0 referencedEnd = model.getElement(
-                                featureDef.values("referencedEnd").get(0)
+                                featureDef.objGetValue("referencedEnd")
                             );
-                            if(referencedEnd.values("qualifierType").size() > 0) {
-                                ModelElement_1_0 qualifierType = model.getDereferencedType(referencedEnd.values("qualifierType").get(0));
+                            if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
+                                ModelElement_1_0 qualifierType = model.getDereferencedType(referencedEnd.objGetValue("qualifierType"));
                                 if(model.isNumericType(qualifierType)) {
                                     multiplicity = Multiplicities.LIST;
                                 }
@@ -569,7 +568,7 @@ public class DataproviderObjectMarshaller {
                             }
                             // map aggregation none, multiplicity 0..n, no qualifier to <<set>>
                             // in case <<list>> semantic is required it must be modeled as 
-                            // aggregation none, multiplicita 0..1, numeric qualifier
+                            // aggregation none, multiplicity 0..1, numeric qualifier
                             else if(Multiplicities.MULTI_VALUE.equals(multiplicity)) {
                                 multiplicity = Multiplicities.SET;
                             }
@@ -644,7 +643,7 @@ public class DataproviderObjectMarshaller {
                         }
                         else if(Multiplicities.STREAM.equals(multiplicity)){
                             LargeObject_1_0 sourceValue = source.objGetLargeObject(feature);
-                            String streamType = (String)featureType.values("qualifiedName").get(0);
+                            String streamType = (String)featureType.objGetValue("qualifiedName");
                             if(PrimitiveTypes.BINARY.equals(streamType)){
                                 targetValues.add(sourceValue.getBinaryStream());                  
                             } else if (PrimitiveTypes.STRING.equals(streamType)){
@@ -704,8 +703,8 @@ public class DataproviderObjectMarshaller {
                 SparseList targetValue = target.values(fieldName);  
                 if(fieldValue instanceof SparseArray){
                     for(
-                            PopulationIterator j = ((SparseArray)fieldValue).populationIterator();
-                            j.hasNext();
+                        ListIterator j = ((SparseArray)fieldValue).populationIterator();
+                        j.hasNext();
                     ) {
                         targetValue.set(
                             j.nextIndex(), 
@@ -715,8 +714,8 @@ public class DataproviderObjectMarshaller {
                 } 
                 else if(fieldValue instanceof SortedMap){
                     for(
-                            Iterator j = ((SortedMap)fieldValue).entrySet().iterator();
-                            j.hasNext();
+                        Iterator j = ((SortedMap)fieldValue).entrySet().iterator();
+                        j.hasNext();
                     ) {
                         Map.Entry k = (Entry)j.next();
                         targetValue.set(
@@ -740,9 +739,9 @@ public class DataproviderObjectMarshaller {
     public static void toObject(
         String _namespacePrefix,
         DataproviderObject source,
-        Object_1_0 target,
+        DataObject_1_0 target,
         Map objectCache,
-        ObjectFactory_1_0 objectFactory,
+        PersistenceManager_1_0 objectFactory,
         Model_1_0 model, boolean replace
     ) throws ServiceException {
         String namespacePrefix = _namespacePrefix == null ? "" : _namespacePrefix;
@@ -787,17 +786,17 @@ public class DataproviderObjectMarshaller {
                     new BasicException.Parameter("class", classDef),
                     new BasicException.Parameter("attribute name", featureName)
                 );        
-                String multiplicity = (String)featureDef.values("multiplicity").get(0);
+                String multiplicity = (String)featureDef.objGetValue("multiplicity");
                 if(model.isReferenceType(featureDef)) {
                     ModelElement_1_0 referencedEnd = model.getElement(
-                        featureDef.values("referencedEnd").get(0)
+                        featureDef.objGetValue("referencedEnd")
                     );
-                    if(referencedEnd.values("qualifierType").size() > 0) {
+                    if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
                         multiplicity = Multiplicities.LIST;
                     }
                     // map aggregation none, multiplicity 0..n, no qualifier to <<set>>
                     // in case <<list>> semantic is required it must be modeled as 
-                    // aggregation none, multiplicita 0..1, numeric qualifier
+                    // aggregation none, multiplicity 0..1, numeric qualifier
                     else if(Multiplicities.MULTI_VALUE.equals(multiplicity)) {
                         multiplicity = Multiplicities.SET;
                     }
@@ -906,7 +905,7 @@ public class DataproviderObjectMarshaller {
                     i.hasNext();
             ){
                 String name = (String)i.next();
-                Object_1_0 object = (Object_1_0)container.get(name); 
+                DataObject_1_0 object = (DataObject_1_0)container.get(name); 
                 if(object == null) throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED,
@@ -934,7 +933,7 @@ public class DataproviderObjectMarshaller {
     public static Structure_1_0 toStructure(
         DataproviderObject source,
         Map objectCache,
-        ObjectFactory_1_0 objectFactory,
+        PersistenceManager_1_0 objectFactory,
         Model_1_0 model
     ) throws ServiceException {
         List targetFields = new ArrayList();
@@ -968,17 +967,17 @@ public class DataproviderObjectMarshaller {
                         new BasicException.Parameter("attribute name", fieldName)
                     );        
                 }
-                String multiplicity = (String)fieldDef.values("multiplicity").get(0);
+                String multiplicity = (String)fieldDef.objGetValue("multiplicity");
                 if(model.isReferenceType(fieldDef)) {
                     ModelElement_1_0 referencedEnd = model.getElement(
-                        fieldDef.values("referencedEnd").get(0)
+                        fieldDef.objGetValue("referencedEnd")
                     );
-                    if(referencedEnd.values("qualifierType").size() > 0) {
+                    if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
                         multiplicity = Multiplicities.LIST;
                     }
                     // map aggregation none, multiplicity 0..n, no qualifier to <<set>>
                     // in case <<list>> semantic is required it must be modeled as 
-                    // aggregation none, multiplicita 0..1, numeric qualifier
+                    // aggregation none, multiplicity 0..1, numeric qualifier
                     else if(Multiplicities.MULTI_VALUE.equals(multiplicity)) {
                         multiplicity = Multiplicities.SET;
                     }
@@ -1057,7 +1056,7 @@ public class DataproviderObjectMarshaller {
                 }
             }
         }
-        return objectFactory.createStructure(
+        return new ListStructure_1(
             typeName,
             targetFields,
             targetValues

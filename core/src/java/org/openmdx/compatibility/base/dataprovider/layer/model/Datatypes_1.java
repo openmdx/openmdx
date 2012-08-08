@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Datatypes_1.java,v 1.1 2008/10/14 00:30:45 hburger Exp $
+ * Name:        $Id: Datatypes_1.java,v 1.6 2009/02/11 19:05:25 hburger Exp $
  * Description: Lenient Model Plug-In
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/10/14 00:30:45 $
+ * Date:        $Date: 2009/02/11 19:05:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,16 +50,21 @@
  */
 package org.openmdx.compatibility.base.dataprovider.layer.model;
 
+import org.openmdx.application.configuration.Configuration;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderOperations;
+import org.openmdx.application.dataprovider.cci.DataproviderReply;
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
+import org.openmdx.application.dataprovider.spi.Layer_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
-import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Quantors;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 
 /**
  * Lenient Model Plug-In
@@ -76,7 +81,7 @@ public class Datatypes_1
         short id,
         Configuration configuration,
         Layer_1_0 delegation
-    ) throws Exception {
+    ) throws ServiceException {
         super.activate(id, configuration, delegation);
         //
         // Assertion
@@ -133,7 +138,7 @@ public class Datatypes_1
         switch(request.operation()) {
             case DataproviderOperations.OBJECT_MODIFICATION:
             case DataproviderOperations.OBJECT_REPLACEMENT:
-            case DataproviderOperations.OBJECT_REMOVAL:
+//          case DataproviderOperations.OBJECT_REMOVAL:
                 super.verifyDigest(header, request);
         }
         return super.prepareDatatypes(request);
@@ -255,4 +260,48 @@ public class Datatypes_1
         );
     }
 
+    /**
+     * Map an <code>OBJECT_INSTANCE_OF</code> filter property
+     * 
+     * @param request the original request
+     * @param classDef the class' model element
+     * 
+     * @return the mapped filter property; 
+     * or <code>null</code> if the filter property should be ignored
+     * 
+     * @throws ServiceException
+     */
+    protected FilterProperty mapInstanceOfFilterProperty(
+        DataproviderRequest request,
+        ModelElement_1_0 classDef
+    ) throws ServiceException {
+        String qualifiedName = (String) classDef.objGetValue("qualifiedName");
+        if(
+            "org:openmdx:state2:DateState".equals(qualifiedName) ||
+            "org:openmdx:state2:DateTimeState".equals(qualifiedName) ||
+            "org:openmdx:compatibility:state1:DateState".equals(qualifiedName)
+        ){
+            for(FilterProperty filterProperty : request.attributeFilter()) {
+                if("core".equals(filterProperty.name())) {
+                    SysLog.trace(
+                        "Skipping 'object_instanceof' predicate because a 'core' predicate is supplied as well", 
+                        qualifiedName
+                    );
+                    return null;
+                } 
+            }
+            SysLog.trace(
+                "Replacing 'object_instanceof' predicate by a 'core' predicate", 
+                qualifiedName
+            );
+            return new FilterProperty(
+                Quantors.THERE_EXISTS ,
+                "core",  
+                FilterOperators.IS_NOT_IN
+            );
+        }
+        return super.mapInstanceOfFilterProperty(request, classDef);
+    };
+    
+    
 }

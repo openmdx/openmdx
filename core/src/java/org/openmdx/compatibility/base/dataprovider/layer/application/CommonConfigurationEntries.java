@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CommonConfigurationEntries.java,v 1.2 2007/10/10 16:05:59 hburger Exp $
+ * Name:        $Id: CommonConfigurationEntries.java,v 1.3 2009/01/05 13:48:10 wfro Exp $
  * Description: Generated constants for LayerConfigurationEntries
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:59 $
+ * Date:        $Date: 2009/01/05 13:48:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,7 +56,7 @@ package org.openmdx.compatibility.base.dataprovider.layer.application;
  * constants identifying the configuration entries of the
  * dataprovider's application layer.
  */
-public class CommonConfigurationEntries extends org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries {
+public class CommonConfigurationEntries extends org.openmdx.application.dataprovider.cci.SharedConfigurationEntries {
 
     /**
      * Avoid instantiation

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardTabControl.java,v 1.9 2008/12/07 23:44:22 wfro Exp $
+ * Name:        $Id: WizardTabControl.java,v 1.11 2009/02/11 12:57:20 wfro Exp $
  * Description: WizardTabControl
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/12/07 23:44:22 $
+ * Date:        $Date: 2009/02/11 12:57:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -137,7 +137,18 @@ public class WizardTabControl
                     p.write("    <li><a href=\"#\" onclick=\"javascript:window.open('.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');\" id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");                    
                 }
                 else {
-                    p.write("    <li><a href=\".", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "\" target=\"", this.wizardDefinition.getTargetType(), "\" id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");
+                    String targetType = this.wizardDefinition.getTargetType();
+                    String parameters = null;
+                    String operationName = super.getOperationName();
+                    if((operationName != null) && operationName.indexOf("?") > 0) {
+                        parameters = operationName.substring(operationName.indexOf("?") + 1);
+                    }                    
+                    if("_inplace".equals(targetType)) {
+                        p.write("    <li><a href=\"#\" onclick=\"javascript:new Ajax.Updater('UserDialog', '.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "', {evalScripts: true});\" id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");
+                    }
+                    else {
+                        p.write("    <li><a href=\".", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), (parameters == null ? "" : "&" + parameters), "\" target=\"", this.wizardDefinition.getTargetType(), "\" id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");                        
+                    }
                 }
             }
             else {

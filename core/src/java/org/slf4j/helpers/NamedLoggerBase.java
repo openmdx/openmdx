@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
  * @author Ceki Gulcu
  * @since 1.5.3
  */
+@SuppressWarnings("serial")
 abstract class NamedLoggerBase implements Logger, Serializable {
 
   protected String name;

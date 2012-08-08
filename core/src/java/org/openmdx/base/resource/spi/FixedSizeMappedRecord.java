@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FixedSizeMappedRecord.java,v 1.14 2008/02/28 13:59:08 hburger Exp $
+ * Name:        $Id: FixedSizeMappedRecord.java,v 1.15 2009/01/12 16:41:58 wfro Exp $
  * Description: JCA: Fixed-size MappedRecord implementation
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/28 13:59:08 $
+ * Date:        $Date: 2009/01/12 16:41:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,6 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
  * Java Connector Architecture:
  * A fixed-size MappedRecord implementation.
  */
-@SuppressWarnings("unchecked")
 final class FixedSizeMappedRecord 
     extends ArraysExtension.AsMap
     implements MappedRecord, MultiLineStringRepresentation

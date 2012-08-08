@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AuthenticationContextThread.java,v 1.15 2008/03/17 16:29:18 hburger Exp $
+ * Name:        $Id: AuthenticationContextThread.java,v 1.17 2009/03/08 18:52:19 wfro Exp $
  * Description: Authentication Context Thread
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/17 16:29:18 $
+ * Date:        $Date: 2009/03/08 18:52:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,7 +63,7 @@ import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.openmdx.base.concurrent.locks.StateTransitions;
+import org.openmdx.base.concurrent.StateTransitions;
 import org.openmdx.security.auth.context.spi.AuthenticationContext;
 import org.openmdx.security.auth.context.spi.Invalidator;
 import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
@@ -75,8 +75,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AuthenticationContextThread
 	extends Thread
-	implements AuthenticationContext
-{
+	implements AuthenticationContext {
 
 	/**
 	 * Constructor 
@@ -92,18 +91,18 @@ public class AuthenticationContextThread
 		this.callbackHandler = new SuspendingCallbackHandler(
 			configuration.getSuspendTimeout(),
 			configuration.getMaximumWait(),
-			getName(),
+			this.getName(),
 			configuration.isDebug()
 		);
 		this.status = new StateTransitions<Status>(
 			null,
-			"Authenticator " + getName(),
+			"Authenticator " + this.getName(),
 			configuration.isDebug()
 		);
 		this.lock = new ReentrantLock();
 		this.activate = this.lock.newCondition();
 		this.iterate = this.lock.newCondition();
-		setDaemon(true);
+		this.setDaemon(true);
 	}
 
 	/**
@@ -174,7 +173,8 @@ public class AuthenticationContextThread
 			this.lock.lock();
 			try {
 				this.status.transition(Status.COMPLETED, this.iterate, Status.PASSIVE);
-			} finally {
+			} 
+			finally {
 				this.lock.unlock();
 			}
 		}
@@ -253,8 +253,9 @@ public class AuthenticationContextThread
 			) {
 				pool.addObject();
 			}
-		} catch (Exception exception) {
-			logger.warn("Authenticator pool population failed", exception);
+		} 
+		catch (Exception exception) {
+			AuthenticationContextThread.logger.warn("Authenticator pool population failed", exception);
 		}
 		return pool;
 	}
@@ -277,7 +278,7 @@ public class AuthenticationContextThread
 	 * @see java.lang.Thread#run()
 	 */
 	public void run() {
-		AuthenticationContextFactory configuration = (AuthenticationContextFactory)getThreadGroup();
+		AuthenticationContextFactory configuration = (AuthenticationContextFactory)this.getThreadGroup();
 		this.lock.lock();
 		try {
 			this.status.transition(null, this.iterate, Status.PASSIVE);
@@ -286,9 +287,10 @@ public class AuthenticationContextThread
 				this.attempts = 0;
 				try {
 					if(
-							!this.status.awaitState(ACTIVE, this.activate, configuration.getIdleTimeout())
+							!this.status.awaitState(AuthenticationContextThread.ACTIVE, this.activate, configuration.getIdleTimeout())
 					) break reUse;
-				} catch (InterruptedException exception) {
+				} 
+				catch (InterruptedException exception) {
 					break reUse;
 				}
 				//
@@ -297,7 +299,7 @@ public class AuthenticationContextThread
 				for(
 					LoginContext loginContext = new LoginContext(
 							configuration.getApplicationName(),
-							getSubject(),
+							this.getSubject(),
 							this.callbackHandler,
 							configuration.getLoginConfiguration()
 					);
@@ -306,37 +308,43 @@ public class AuthenticationContextThread
 					try {
 						this.attempts++;
 						loginContext.login();
-						setSubject(loginContext.getSubject());
-						setException(null);
-					} catch (LoginException exception) {
-						setException(exception);
-					} finally {
+						this.setSubject(loginContext.getSubject());
+						this.setException(null);
+					} 
+					catch (LoginException exception) {
+						this.setException(exception);
+					} 
+					finally {
 						this.status.transition(Status.ACTIVE, null, Status.COMPLETED);
 					}
 					try {
 						if(
-							!this.status.awaitState(ACTIVE_OR_PASSIVE, this.iterate, configuration.getSuspendTimeout())
+							!this.status.awaitState(AuthenticationContextThread.ACTIVE_OR_PASSIVE, this.iterate, configuration.getSuspendTimeout())
 						) {
-							logger.debug("Authentication context thread has timed out and will be terminated", getName());
+							AuthenticationContextThread.logger.debug("Authentication context thread has timed out and will be terminated", this.getName());
 							break reUse;
 						}
-					} catch (InterruptedException exception) {
-						logger.debug("Authentication context thread has been interrupted and will be terminated", getName());
+					} 
+					catch (InterruptedException exception) {
+						AuthenticationContextThread.logger.debug("Authentication context thread has been interrupted and will be terminated", this.getName());
 						break reUse;
 					}
 				}
 			}
-		} catch (LoginException exception){
-			logger.warn("LoginContext acquisition failed", exception);
-		} finally {
+		} 
+		catch (LoginException exception){
+			AuthenticationContextThread.logger.warn("LoginContext acquisition failed", exception);
+		} 
+		finally {
 			this.status.setState(Status.FINALIZABLE);
 			this.lock.unlock();
 		}
-		logger.debug("Terminating authentication context thread", getName());
+		AuthenticationContextThread.logger.debug("Terminating authentication context thread", this.getName());
 		try {
 			configuration.invalidateObject(this);
-		} catch (Exception exception) {
-			logger.warn("Authentication context invalidation failed", exception);
+		} 
+		catch (Exception exception) {
+			AuthenticationContextThread.logger.warn("Authentication context invalidation failed", exception);
 		}
 	}
 
@@ -355,9 +363,10 @@ public class AuthenticationContextThread
 			this.lock.lock();
 			try {
 				this.status.assertState(Status.PASSIVE);
-				setSubject(subject);
+				this.setSubject(subject);
 				this.status.transition(Status.PASSIVE, this.activate, Status.ACTIVE);
-			} finally {
+			} 
+			finally {
 				this.lock.unlock();
 			}
 		}
@@ -379,10 +388,11 @@ public class AuthenticationContextThread
 		this.lock.lock();
 		try {
 			this.status.transition(Status.COMPLETED, this.iterate, Status.ACTIVE);
-		} finally {
+		} 
+		finally {
 			this.lock.unlock();
 		}
-		return continueLogin();
+		return this.continueLogin();
 	}
 
 	/* (non-Javadoc)
@@ -390,7 +400,7 @@ public class AuthenticationContextThread
 	 */
 	public boolean resumeLogin() throws LoginException, IOException {
 		this.callbackHandler.resume(null);
-		return continueLogin();
+		return this.continueLogin();
 	}
 
 	/* (non-Javadoc)
@@ -398,7 +408,7 @@ public class AuthenticationContextThread
 	 */
 	public boolean resumeLogin(IOException exception) throws LoginException, IOException {
 		this.callbackHandler.resume(exception);
-		return continueLogin();
+		return this.continueLogin();
 	}
 
 	/* (non-Javadoc)
@@ -406,7 +416,7 @@ public class AuthenticationContextThread
 	 */
 	public boolean resumeLogin(UnsupportedCallbackException exception) throws LoginException, IOException {
 		this.callbackHandler.resume(exception);
-		return continueLogin();
+		return this.continueLogin();
 	}
 
 	/* (non-Javadoc)

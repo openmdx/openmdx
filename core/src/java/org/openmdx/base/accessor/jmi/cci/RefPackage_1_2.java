@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1_2.java,v 1.9 2008/11/07 17:45:04 hburger Exp $
+ * Name:        $Id: RefPackage_1_2.java,v 1.11 2009/01/06 13:14:46 wfro Exp $
  * Description: RefPackage_1_2 interface
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/07 17:45:04 $
+ * Date:        $Date: 2009/01/06 13:14:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,12 @@
  */
 package org.openmdx.base.accessor.jmi.cci;
 
+import javax.jmi.reflect.RefObject;
 import javax.resource.cci.InteractionSpec;
+
+import org.oasisopen.jmi1.RefContainer;
+import org.openmdx.base.naming.Path;
+import org.w3c.cci2.Container;
 
 /**
  * View capable refPackage 
@@ -65,4 +70,17 @@ public interface RefPackage_1_2 extends RefPackage_1_1 {
      */
     InteractionSpec refInteractionSpec();
 
+    /**
+     * Retrieve a container specified by its resource identifier
+     * 
+     * @param resourceIdentifier
+     * @param containerClass
+     * 
+     * @return
+     */
+    RefContainer refContainer(
+        Path resourceIdentifier,
+        Class<Container<RefObject>> containerClass
+    );
+    
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestJdbc_1.java,v 1.17 2008/11/04 10:19:09 hburger Exp $
+ * Name:        $Id: TestJdbc_1.java,v 1.20 2009/02/04 11:06:38 hburger Exp $
  * Description: junit for jdbc persistence
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/11/04 10:19:09 $
+ * Date:        $Date: 2009/02/04 11:06:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,25 +60,22 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
+import org.openmdx.application.cci.SystemAttributes;
+import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.application.dataprovider.cci.DataproviderObject_1_0;
+import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
+import org.openmdx.application.dataprovider.cci.Directions;
+import org.openmdx.application.dataprovider.cci.Orders;
+import org.openmdx.application.dataprovider.cci.RequestCollection;
+import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.log.AppLog;
-import org.openmdx.base.application.deploy.InProcessDeployment;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.cci.Dataprovider_1Deployment;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.Orders;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
-import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
-import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.compatibility.base.query.FilterProperty;
-import org.openmdx.compatibility.base.query.Quantors;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Quantors;
 import org.openmdx.kernel.exception.BasicException;
 
 //---------------------------------------------------------------------------  
@@ -115,7 +112,8 @@ public class TestJdbc_1
   ) throws Exception {  
     System.out.println(">>>> **** Start Test: " + this.getName());
     providerPath = new Path("xri:@openmdx:org.openmdx.test/provider/" + this.getName());
-    provider = dataproviderConnectionfactory.createConnection();
+    provider = null;
+//  dataproviderConnectionfactory.createConnection();
   }
 
   //---------------------------------------------------------------------------  
@@ -199,7 +197,7 @@ public class TestJdbc_1
           }
   
           // modify object
-          DataproviderObject_1_0 modifyReply = requests.addModifyRequest(
+          DataproviderObject_1_0 modifyReply = requests.addReplaceRequest(
             o,
             AttributeSelectors.ALL_ATTRIBUTES,
             new AttributeSpecifier[]{}
@@ -674,7 +672,7 @@ public class TestJdbc_1
           o0.values("cbType").add("99");
           o0.values("cancelsCB").add(new Path(providerPath.toXri() + "/segment/" + segmentName + "/cb/" + (i + 1)));
           o0.values("adviceText").add("replace XML string");  
-          requests.addModifyRequest(o0);
+          requests.addReplaceRequest(o0);
   
           for(int j = 0; j < 10; j++) {
             Path p1 = new Path(providerPath.toXri() + "/segment/" + segmentName + "/cb/" + i + "/slb/" + j);
@@ -698,7 +696,7 @@ public class TestJdbc_1
             if(this.getName().endsWith("Sliced")) {
               o1.values("credValue").add(new byte[]{0x75, 0x76, 0x77});
             }
-            requests.addModifyRequest(o1);
+            requests.addReplaceRequest(o1);
           }
         }
       }
@@ -955,18 +953,18 @@ public class TestJdbc_1
    */
   final private static boolean LOG_DEPLOYMENT_DETAIL = false;
 
-  /**
-   * 
-   */
-  protected final static Dataprovider_1ConnectionFactory dataproviderConnectionfactory = new Dataprovider_1Deployment(
-      new InProcessDeployment(
-          CONNECTOR_URL,
-          PROVIDER_URL,
-          LOG_DEPLOYMENT_DETAIL ? System.out : null,
-          System.err
-      ),
-      null, "org/openmdx/test/gateway1/NoOrNew"  
-  );
+//  /**
+//   * 
+//   */
+//  protected final static Dataprovider_1ConnectionFactory dataproviderConnectionfactory = new Dataprovider_1Deployment(
+//      new LazyDeployment(
+//          CONNECTOR_URL,
+//          PROVIDER_URL,
+//          LOG_DEPLOYMENT_DETAIL ? System.out : null,
+//          System.err
+//      ),
+//      null, "org/openmdx/test/gateway1/NoOrNew"  
+//  );
 
 }
 

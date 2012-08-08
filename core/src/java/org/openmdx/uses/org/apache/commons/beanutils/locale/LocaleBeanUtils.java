@@ -39,7 +39,10 @@ import java.util.Locale;
  * @author Gregor Rayman
  * @author Yauheny Mikulski
  */
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings({
+    "unchecked"
+})
 public class LocaleBeanUtils extends BeanUtils {
 
 

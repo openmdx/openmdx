@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackageFactory_1_0.java,v 1.2 2007/10/04 22:54:11 hburger Exp $
+ * Name:        $Id: RefPackageFactory_1_0.java,v 1.4 2009/01/09 17:47:24 wfro Exp $
  * Description: RefPackage Factory
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/04 22:54:11 $
+ * Date:        $Date: 2009/01/09 17:47:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,6 +52,11 @@
 
 package org.openmdx.base.accessor.jmi.cci;
 
+import java.util.Map;
+
+import javax.resource.cci.InteractionSpec;
+
+
 /**
  * RefPackage Factory
  * <p>
@@ -66,4 +71,23 @@ public interface RefPackageFactory_1_0 {
      */
     public RefPackage_1_1 createRefPackage();
     
+    /**
+     * Create a context specific RefPackage
+     * 
+     * @param viewContext
+     * 
+     * @return a context specific RefPackage
+     */
+    RefPackage_1_2 getRefPackage(
+        InteractionSpec viewContext
+    );
+      
+    /**
+     * These user objects shall be propagated to each persistence manager
+     * 
+     * @return the user objects to be propagated
+     */
+    Map<String,Object> getUserObjects();
+    
+   
 }

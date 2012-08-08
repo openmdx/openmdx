@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractConnectionFactory.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: AbstractConnectionFactory.java,v 1.6 2009/03/08 18:52:20 wfro Exp $
  * Description: Managed LDAP Connection Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2009/03/08 18:52:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,8 +64,6 @@ import javax.resource.spi.SecurityException;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
-import org.openmdx.kernel.application.container.lightweight.ShareableConnectionManager;
-import org.openmdx.kernel.text.StringBuilders;
 import org.openmdx.resource.ldap.spi.ConnectionFactory;
 import org.openmdx.resource.ldap.spi.ManagedConnection;
 
@@ -73,8 +71,7 @@ import org.openmdx.resource.ldap.spi.ManagedConnection;
  * Managed LDAP Connection Factory
  */
 public abstract class AbstractConnectionFactory
-    implements ManagedConnectionFactory
-{
+    implements ManagedConnectionFactory {
 
 	/**
 	 * Default LDAP protocol version
@@ -113,7 +110,7 @@ public abstract class AbstractConnectionFactory
     /**
      * The LDAP protocol version
      */
-    private int protocolVersion = DEFAULT_PROTOCOL_VERSION;
+    private int protocolVersion = AbstractConnectionFactory.DEFAULT_PROTOCOL_VERSION;
     
     /**
      * The resource adapter's internal connection manager
@@ -125,17 +122,19 @@ public abstract class AbstractConnectionFactory
      */
     public final Object createConnectionFactory(
     ) throws ResourceException {
-        if(this.connectionManager == null) {
-            this.connectionManager = new ShareableConnectionManager(
-                Collections.singleton(
-                    new PasswordCredential(
-                        this.userName,
-                        (this.password == null ? "" : this.password).toCharArray()
-                    )
-                )
-            );
-        }
-        return createConnectionFactory(this.connectionManager);
+        throw new UnsupportedOperationException();
+//        throw new UnsupportedOperationException();
+//        if(this.connectionManager == null) {
+//            this.connectionManager = new ShareableConnectionManager(
+//                Collections.singleton(
+//                    new PasswordCredential(
+//                        this.userName,
+//                        (this.password == null ? "" : this.password).toCharArray()
+//                    )
+//                )
+//            );
+//        }
+//        return createConnectionFactory(this.connectionManager);
     }
 
     /* (non-Javadoc)
@@ -145,7 +144,7 @@ public abstract class AbstractConnectionFactory
         ConnectionManager connectionManager
     ) throws ResourceException {
         return connectionManager == null ?
-            createConnectionFactory() :
+        	this.createConnectionFactory() :
             new ConnectionFactory(this, connectionManager);
     }
 
@@ -166,7 +165,7 @@ public abstract class AbstractConnectionFactory
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
-        PasswordCredential credential = getCredential(subject);
+        PasswordCredential credential = this.getCredential(subject);
         for(Object managedConnection : managedConnections) {
             if(managedConnection instanceof ManagedConnection) {
             	ManagedConnection candidate = (ManagedConnection) managedConnection;
@@ -196,7 +195,7 @@ public abstract class AbstractConnectionFactory
             case 1:
             	return (PasswordCredential) credentials.iterator().next();
            default:
-               throw log(
+               throw this.log(
                    new SecurityException(
                        "There is more than one " +   
                        PasswordCredential.class.getName() +
@@ -255,9 +254,10 @@ public abstract class AbstractConnectionFactory
         ResourceException exception
     ){
         try {
-            PrintWriter logWriter = getLogWriter();
+            PrintWriter logWriter = this.getLogWriter();
             if(logWriter != null) exception.printStackTrace(logWriter);
-        } catch (Exception ignore) {
+        } 
+        catch (Exception ignore) {
             // Ensure that the original exception will be available
         }
         return exception;
@@ -316,8 +316,7 @@ public abstract class AbstractConnectionFactory
         if(this.identity == null) this.identity = this.connectionURL == null ?
             new Object() :
         this.userName == null && this.password == null ?
-            this.connectionURL :
-            StringBuilders.newStringBuilder(
+            this.connectionURL : new StringBuilder(
                 this.connectionURL
             ).append(
                 '|'
@@ -350,7 +349,7 @@ public abstract class AbstractConnectionFactory
      */
     public int hashCode(
     ) {
-        return getIdentity().hashCode();
+        return this.getIdentity().hashCode();
     }
 
 }

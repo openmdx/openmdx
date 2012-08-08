@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CompareWithWebsphereOnSun.java,v 1.1 2005/11/01 18:30:23 hburger Exp $
+ * Name:        $Id: CompareWithWebsphereOnSun.java,v 1.5 2009/02/04 11:06:38 hburger Exp $
  * Description: Test Transport
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/11/01 18:30:23 $
+ * Date:        $Date: 2009/02/04 11:06:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,9 +60,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.openmdx.application.dataprovider.cci.DataproviderObject;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.format.DateFormat;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.naming.Path;
 
 /**
  * Test Transport
@@ -104,7 +104,7 @@ public class CompareWithWebsphereOnSun extends TestCase {
         for(int k = 0; k < TESTS; k++) {
             long start = System.currentTimeMillis();
             for(int j = 0; j < UNITS_OF_WORK; j++) {
-                Map manager = new HashMap();
+                Map<Path,Object> manager = new HashMap<Path,Object>();
                 for(int i = 0; i < OBJECTS; i++) {
                     DataproviderObject o = new DataproviderObject(
                         PARENT.getChild(String.valueOf(i))
@@ -176,7 +176,7 @@ public class CompareWithWebsphereOnSun extends TestCase {
         for(int k = 0; k < TESTS; k++) {
             long start = System.currentTimeMillis();
             for(int j = 0; j < UNITS_OF_WORK; j++) {
-                Map manager = new HashMap();
+                Map<Path,Object> manager = new HashMap<Path,Object>();
                 for(int i = 0; i < OBJECTS; i++) {
                     TypedObject o = new TypedObject(
                         PARENT.getChild(String.valueOf(i))
@@ -228,7 +228,7 @@ public class CompareWithWebsphereOnSun extends TestCase {
         for(int k = 0; k < TESTS; k++) {
             long start = System.currentTimeMillis();
             for(int j = 0; j < UNITS_OF_WORK; j++) {
-                Map manager = new HashMap();
+                Map<Path,Object> manager = new HashMap<Path,Object>();
                 for(int i = 0; i < OBJECTS; i++) {
                     GenericObject o = new GenericObject(
                         PARENT.getChild(String.valueOf(i))

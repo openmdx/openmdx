@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StringTypePredicate_1.java,v 1.2 2008/03/19 17:22:02 hburger Exp $
+ * Name:        $Id: StringTypePredicate_1.java,v 1.8 2009/02/18 12:54:32 hburger Exp $
  * Description: String Type Predicate implementation
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:22:02 $
+ * Date:        $Date: 2009/02/18 12:54:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,9 +57,8 @@ import java.util.Collections;
 import java.util.Iterator;
 
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
-import org.openmdx.base.text.conversion.SQLWildcards;
-import org.openmdx.compatibility.base.query.FilterOperators;
-import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.FilterOperators;
 import org.w3c.cci2.StringTypePredicate;
 
 /**
@@ -132,7 +131,7 @@ class StringTypePredicate_1
         refAddValue(
             super.quantor,
             FilterOperators.IS_LIKE,
-            sqlWildcards.fromJDO(operand)
+            operand
         );
     }
 
@@ -170,16 +169,12 @@ class StringTypePredicate_1
      * @see org.w3c.cci2.StringTypePredicate#unlike(Collection<String>)
      */
     public void unlike(
-
         Collection<String> operand
-
-
-
     ) {
         refAddValue(
             super.quantor,
             FilterOperators.IS_UNLIKE,
-            sqlWildcards.fromJDO(operand)
+            operand
         );
     }
 
@@ -201,11 +196,7 @@ class StringTypePredicate_1
      */
     public void like(
         int flags,
-
         String... operand
-
-
-
     ) {
         like(
             flags,
@@ -218,27 +209,25 @@ class StringTypePredicate_1
      */
     public void like(
         int flags,
-
         Collection<String> operand
-
-
-
     ) {
         if(flags == 0) {
-                refAddValue(
-                    super.quantor,
-                    FilterOperators.IS_LIKE,
-                    sqlWildcards.fromJDO(operand)
-                );
-        } else if(flags == SOUNDS) {
-                refAddValue(
-                    super.quantor,
-                    FilterOperators.SOUNDS_LIKE,
-                    operand
-                );
-        } else throw new IllegalArgumentException(
-                        "No other flag than SOUNDS is supported in compatibility mode"
-                );
+            refAddValue(
+                super.quantor,
+                FilterOperators.IS_LIKE,
+                operand
+            );
+        } 
+        else if(flags == SOUNDS) {
+            refAddValue(
+                super.quantor,
+                FilterOperators.SOUNDS_LIKE,
+                operand
+            );
+        } 
+        else throw new IllegalArgumentException(
+            "No other flag than SOUNDS is supported in compatibility mode"
+        );
     }
 
     /* (non-Javadoc)
@@ -259,11 +248,7 @@ class StringTypePredicate_1
      */
     public void unlike(
         int flags,
-
         String... operand
-
-
-
     ) {
         unlike(
             flags,
@@ -276,38 +261,32 @@ class StringTypePredicate_1
      */
     public void unlike(
         int flags,
-
         Collection<String> operand
-
-
-
     ) {
         if(flags == 0) {
-                refAddValue(
-                    super.quantor,
-                    FilterOperators.IS_UNLIKE,
-                    sqlWildcards.fromJDO(operand)
-                );
-        } else if(flags == SOUNDS) {
-                refAddValue(
-                    super.quantor,
-                    FilterOperators.SOUNDS_UNLIKE,
-                    operand
-                );
-        } else throw new IllegalArgumentException(
-                        "No other flag than SOUNDS is supported in compatibility mode"
-                );
+            refAddValue(
+                super.quantor,
+                FilterOperators.IS_UNLIKE,
+                operand
+            );
+        } 
+        else if(flags == SOUNDS) {
+            refAddValue(
+                super.quantor,
+                FilterOperators.SOUNDS_UNLIKE,
+                operand
+            );
+        } 
+        else throw new IllegalArgumentException(
+            "No other flag than SOUNDS is supported in compatibility mode"
+        );
     }
 
     /* (non-Javadoc)
      * @see org.w3c.cci2.MatchableTypePredicate#endsWith(java.lang.Object)
      */
     public void endsWith(
-
         String operand
-
-
-
     ) {
         endsWith(
             Collections.singleton(operand)
@@ -318,11 +297,7 @@ class StringTypePredicate_1
      * @see org.w3c.cci2.MatchableTypePredicate#endsWith(V[])
      */
     public void endsWith(
-
         String... operand
-
-
-
     ) {
         endsWith(
             Arrays.asList(operand)
@@ -333,16 +308,12 @@ class StringTypePredicate_1
      * @see org.w3c.cci2.MatchableTypePredicate#endsWith(java.util.Collection)
      */
     public void endsWith(
-
         Collection<String> operand
-
-
-
     ) {
         refAddValue(
             super.quantor,
             FilterOperators.IS_LIKE,
-            sqlWildcard(operand, true)
+            jdoWildcard(operand, true)
         );
     }
 
@@ -350,11 +321,7 @@ class StringTypePredicate_1
      * @see org.w3c.cci2.MatchableTypePredicate#startsWith(java.lang.Object)
      */
     public void startsWith(
-
         String operand
-
-
-
     ) {
         startsWith(
             Collections.singleton(operand)
@@ -365,11 +332,7 @@ class StringTypePredicate_1
      * @see org.w3c.cci2.MatchableTypePredicate#startsWith(V[])
      */
     public void startsWith(
-
         String... operand
-
-
-
     ) {
         startsWith(
             Arrays.asList(operand)
@@ -380,16 +343,12 @@ class StringTypePredicate_1
      * @see org.w3c.cci2.MatchableTypePredicate#startsWith(java.util.Collection)
      */
     public void startsWith(
-
         Collection<String> operand
-
-
-
     ) {
         refAddValue(
             super.quantor,
             FilterOperators.IS_LIKE,
-            StringTypePredicate_1.sqlWildcard(operand, false)
+            StringTypePredicate_1.jdoWildcard(operand, false)
         );
     }
 
@@ -397,11 +356,7 @@ class StringTypePredicate_1
      * @see org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.lang.Object)
      */
     public void endsNotWith(
-
         String operand
-
-
-
     ) {
         endsNotWith(
             Collections.singleton(operand)
@@ -412,11 +367,7 @@ class StringTypePredicate_1
      * @see org.w3c.cci2.MatchableTypePredicate#endsNotWith(V[])
      */
     public void endsNotWith(
-
         String... operand
-
-
-
     ) {
         endsNotWith(
             Arrays.asList(operand)
@@ -427,16 +378,12 @@ class StringTypePredicate_1
      * @see org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.util.Collection)
      */
     public void endsNotWith(
-
         Collection<String> operand
-
-
-
     ) {
         refAddValue(
             super.quantor,
             FilterOperators.IS_UNLIKE,
-            StringTypePredicate_1.sqlWildcard(operand, true)
+            StringTypePredicate_1.jdoWildcard(operand, true)
         );
     }
 
@@ -444,11 +391,7 @@ class StringTypePredicate_1
      * @see org.w3c.cci2.MatchableTypePredicate#startsNotWith(java.lang.Object)
      */
     public void startsNotWith(
-
         String operand
-
-
-
     ) {
         startsNotWith(
             Collections.singleton(operand)
@@ -459,11 +402,7 @@ class StringTypePredicate_1
      * @see org.w3c.cci2.MatchableTypePredicate#startsNotWith(V[])
      */
     public void startsNotWith(
-
         String... operand
-
-
-
     ) {
         startsNotWith(
             Arrays.asList(operand)
@@ -474,16 +413,12 @@ class StringTypePredicate_1
      * @see org.w3c.cci2.MatchableTypePredicate#startsNotWith(java.util.Collection)
      */
     public void startsNotWith(
-
         Collection<String> operand
-
-
-
     ) {
         refAddValue(
             super.quantor,
             FilterOperators.IS_UNLIKE,
-            StringTypePredicate_1.sqlWildcard(operand, false)
+            StringTypePredicate_1.jdoWildcard(operand, false)
         );
     }
 
@@ -496,29 +431,25 @@ class StringTypePredicate_1
      * @return the modified operands
      */
     @SuppressWarnings("unchecked")
-    static Collection sqlWildcard (
+    static Collection jdoWildcard (
         Collection source,
         boolean prefix
     ){
         if (source == null) {
-                return Collections.EMPTY_SET;
-        } else {
-                Collection target = new ArrayList();
-                for(
-                    Iterator i = source.iterator();
-                    i.hasNext();
-                ){
-                    target.add(
-                        prefix ? "%" + i.next() : i.next().toString() + '%'
-                    );
-                }
-                return target;
+            return Collections.EMPTY_SET;
+        } 
+        else {
+            Collection target = new ArrayList();
+            for(
+                Iterator i = source.iterator();
+                i.hasNext();
+            ){
+                target.add(
+                    prefix ? ".*" + i.next() : i.next().toString() + ".*"
+                );
             }
+            return target;
+        }
     }
-
-        /**
-	 * The wildcard mapper
-	 */
-        protected final static SQLWildcards sqlWildcards = new SQLWildcards('\\');
 
 }

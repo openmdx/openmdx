@@ -21,6 +21,7 @@ package org.openmdx.uses.org.apache.commons.beanutils.locale;
 import org.openmdx.uses.org.apache.commons.collections.FastHashMap;
 import org.openmdx.uses.org.apache.commons.logging.Log;
 import org.openmdx.uses.org.apache.commons.logging.LogFactory;
+import org.openmdx.uses.org.apache.commons.beanutils.BeanUtils;
 import org.openmdx.uses.org.apache.commons.beanutils.locale.converters.BigDecimalLocaleConverter;
 import org.openmdx.uses.org.apache.commons.beanutils.locale.converters.BigIntegerLocaleConverter;
 import org.openmdx.uses.org.apache.commons.beanutils.locale.converters.ByteLocaleConverter;
@@ -37,7 +38,10 @@ import org.openmdx.uses.org.apache.commons.beanutils.locale.converters.StringLoc
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>Utility methods for converting locale-sensitive String scalar values to objects of the
@@ -79,7 +83,9 @@ import java.util.Locale;
  * @author Yauheny Mikulski
  * @since 1.7
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({
+    "unchecked", "serial","synthetic-access"
+})
 public class LocaleConvertUtilsBean {
     
     /** 
@@ -106,7 +112,7 @@ public class LocaleConvertUtilsBean {
      *  key = locale
      *  value = FastHashMap of converters for the certain locale.
      */
-    private FastHashMap mapConverters = new FastHashMap();
+    private FastHashMap mapConverters = new DelegateFastHashMap(BeanUtils.createCache());
 
     // --------------------------------------------------------- Constructors
 
@@ -115,7 +121,9 @@ public class LocaleConvertUtilsBean {
      *  and then registers default locale converters.
      */
     public LocaleConvertUtilsBean() {
+        mapConverters.setFast(false);
         deregister();
+        mapConverters.setFast(true);
     }
     
     // --------------------------------------------------------- Properties
@@ -264,7 +272,7 @@ public class LocaleConvertUtilsBean {
 
         if (log.isDebugEnabled()) {
             log.debug("Convert string " + value + " to class " +
-                    clazz.getName() + " using " + locale.toString() +
+                    clazz.getName() + " using " + locale +
                     " locale and " + pattern + " pattern");
         }
 
@@ -334,7 +342,7 @@ public class LocaleConvertUtilsBean {
         }
         if (log.isDebugEnabled()) {
             log.debug("Convert String[" + values.length + "] to class " +
-                    type.getName() + "[] using " + locale.toString() +
+                    type.getName() + "[] using " + locale +
                     " locale and " + pattern + " pattern");
         }
 
@@ -455,7 +463,7 @@ public class LocaleConvertUtilsBean {
      */
     protected FastHashMap create(Locale locale) {
 
-        FastHashMap converter = new FastHashMap();
+        FastHashMap converter = new DelegateFastHashMap(BeanUtils.createCache());
         converter.setFast(false);
 
         converter.put(BigDecimal.class, new BigDecimalLocaleConverter(locale, applyLocalized));
@@ -492,5 +500,70 @@ public class LocaleConvertUtilsBean {
         converter.setFast(true);
 
         return converter;
+    }
+
+    /**
+     * FastHashMap implementation that uses WeakReferences to overcome
+     * memory leak problems.
+     *
+     * This is a hack to retain binary compatibility with previous
+     * releases (where FastHashMap is exposed in the API), but
+     * use WeakHashMap to resolve memory leaks.
+     */
+    private static class DelegateFastHashMap extends FastHashMap {
+
+        private final Map map;
+
+        private DelegateFastHashMap(Map map) {
+            this.map = map;
+        }
+        public void clear() {
+            map.clear();
+        }
+        public boolean containsKey(Object key) {
+            return map.containsKey(key);
+        }
+        public boolean containsValue(Object value) {
+            return map.containsValue(value);
+        }
+        public Set entrySet() {
+            return map.entrySet();
+        }
+        public boolean equals(Object o) {
+            return map.equals(o);
+        }
+        public Object get(Object key) {
+            return map.get(key);
+        }
+        public int hashCode() {
+            return map.hashCode();
+        }
+        public boolean isEmpty() {
+            return map.isEmpty();
+        }
+        public Set keySet() {
+            return map.keySet();
+        }
+        public Object put(Object key, Object value) {
+            return map.put(key, value);
+        }
+        public void putAll(Map m) {
+            map.putAll(m);
+        }
+        public Object remove(Object key) {
+            return map.remove(key);
+        }
+        public int size() {
+            return map.size();
+        }
+        public Collection values() {
+            return map.values();
+        }
+        public boolean getFast() {
+            return BeanUtils.getCacheFast(map);
+        }
+        public void setFast(boolean fast) {
+            BeanUtils.setCacheFast(map, fast);
+        }
     }
 }
