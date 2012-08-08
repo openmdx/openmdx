@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExceptionListenerMarshaller.java,v 1.3 2009/03/31 17:05:17 hburger Exp $
+ * Name:        $Id: ExceptionListenerMarshaller.java,v 1.4 2010/06/06 12:55:45 hburger Exp $
  * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:05:17 $
+ * Date:        $Date: 2010/06/06 12:55:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,30 +62,8 @@ import org.openmdx.kernel.log.LoggerFactory;
 /**
 * This class signals marshal exceptions.
 */
-public class ExceptionListenerMarshaller
-    implements Marshaller, Serializable
-{
+public class ExceptionListenerMarshaller implements Marshaller, Serializable {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3977302131193624624L;
-
-    /**
-     * @serial
-     */
-    protected final Marshaller marshaller;
-
-    /**
-     * @serial
-     */
-    protected final ExceptionListener exceptionListener;
-
-    /**
-     * 
-     */
-    private transient Logger logger;
-    
     /**
      * Constructor
      * 
@@ -114,6 +92,27 @@ public class ExceptionListenerMarshaller
         );
     }
 
+
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3977302131193624624L;
+
+    /**
+     * @serial
+     */
+    protected final Marshaller marshaller;
+
+    /**
+     * @serial
+     */
+    protected final ExceptionListener exceptionListener;
+
+    /**
+     * 
+     */
+    private transient Logger logger;
+    
     /**
      * Marshals an object
      *
@@ -128,17 +127,7 @@ public class ExceptionListenerMarshaller
         try {
             return this.marshaller.marshal(source);
         } catch (ServiceException exception) {
-            if(this.exceptionListener == null){
-                (
-                    this.logger == null ? this.logger = LoggerFactory.getLogger() : this.logger
-                ).log(
-                    Level.WARNING,
-                    this.marshaller.getClass().getName(),
-                    exception
-                );
-            } else {
-                this.exceptionListener.exceptionThrown(exception);
-            }
+            this.exceptionThrown(exception);
             return null;
         }
     }
@@ -171,6 +160,37 @@ public class ExceptionListenerMarshaller
     public Marshaller getDelegate(
     ){
         return this.marshaller;
+    }
+
+    /**
+     * Retrieve the logger
+     * 
+     * @return the logger
+     */
+    private Logger getLogger(){
+        if(this.logger == null) {
+            this.logger = LoggerFactory.getLogger();
+        }
+        return this.logger;
+    }
+    
+    /**
+     * Signal a marshal exception
+     * 
+     * @param exception the exception to be signaled
+     */
+    public void exceptionThrown(
+        Exception exception
+    ) {
+        if(this.exceptionListener == null){
+            getLogger().log(
+                Level.WARNING,
+                this.marshaller.getClass().getName(),
+                exception
+            );
+        } else {
+            this.exceptionListener.exceptionThrown(exception);
+        }
     }
 
 }

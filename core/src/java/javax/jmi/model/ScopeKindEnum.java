@@ -7,15 +7,11 @@ public final class ScopeKindEnum implements ScopeKind {
     public static final ScopeKindEnum INSTANCE_LEVEL = new ScopeKindEnum("instance_level");
     public static final ScopeKindEnum CLASSIFIER_LEVEL = new ScopeKindEnum("classifier_level");
 
-    private static final java.util.List typeName;
+    private static final java.util.List typeName = java.util.Collections.unmodifiableList(
+        java.util.Arrays.asList("Model","ScopeKind")
+    );
+    
     private final String literalName;
-
-    static {
-        java.util.ArrayList temp = new java.util.ArrayList();
-        temp.add("Model");
-        temp.add("ScopeKind");
-        typeName = java.util.Collections.unmodifiableList(temp);
-    }
 
     private ScopeKindEnum(String literalName) {
         this.literalName = literalName;
@@ -25,14 +21,17 @@ public final class ScopeKindEnum implements ScopeKind {
         return typeName;
     }
 
+    @Override
     public String toString() {
         return literalName;
     }
 
+    @Override
     public int hashCode() {
         return literalName.hashCode();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof ScopeKindEnum) return (o == this);
         else if (o instanceof ScopeKind) return (o.toString().equals(literalName));

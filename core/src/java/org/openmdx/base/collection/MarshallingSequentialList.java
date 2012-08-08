@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSequentialList.java,v 1.25 2009/02/09 15:29:44 hburger Exp $
- * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.25 $
+ * Name:        $Id: MarshallingSequentialList.java,v 1.29 2010/07/01 16:24:13 hburger Exp $
+ * Description: Marshalling Sequential List
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/09 15:29:44 $
+ * Date:        $Date: 2010/07/01 16:24:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,10 +57,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import javax.jdo.FetchPlan;
+import javax.jdo.PersistenceManager;
+
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.ExceptionListenerMarshaller;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
+import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -68,14 +74,8 @@ import org.openmdx.kernel.exception.BasicException;
  */
 public class MarshallingSequentialList<E>
     extends AbstractSequentialList<E>
-    implements Reconstructable, Serializable
+    implements PersistenceCapableCollection, Reconstructable, Serializable
 {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3257852069179110709L;
-
 
     /**
      * Deserializer
@@ -101,6 +101,21 @@ public class MarshallingSequentialList<E>
     }
 
     /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3257852069179110709L;
+
+    /**
+     * 
+     */
+    protected transient List<Object> list;
+
+    /**
+     * @serial
+     */
+    protected Marshaller marshaller;
+
+    /**
      * Make the marshaller dynamically selectable
      * 
      * @return the marshalle prvided upon construction
@@ -112,6 +127,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see java.util.List#add(int, java.lang.Object)
      */
+    @Override
     public void add(
         int index, 
         E element
@@ -127,6 +143,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see java.util.Collection#add(java.lang.Object)
      */
+    @Override
     public boolean add(
         E element
     ) {
@@ -141,6 +158,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see java.util.Collection#clear()
      */
+    @Override
     public void clear() {
         getDelegate().clear();
     }
@@ -148,6 +166,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see java.util.Collection#contains(java.lang.Object)
      */
+    @Override
     public boolean contains(
         Object element
     ) {
@@ -163,6 +182,7 @@ public class MarshallingSequentialList<E>
      * @see java.util.List#get(int)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public E get(
         int index
     ) {
@@ -186,6 +206,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see java.util.List#indexOf(java.lang.Object)
      */
+    @Override
     public int indexOf(
         Object arg0
     ) {
@@ -200,6 +221,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see java.util.Collection#isEmpty()
      */
+    @Override
     public boolean isEmpty(
     ) {
         return getDelegate().isEmpty();
@@ -208,6 +230,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see java.util.Collection#iterator()
      */
+    @Override
     public Iterator<E> iterator() {
         return listIterator();
     }
@@ -215,6 +238,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see java.util.List#lastIndexOf(java.lang.Object)
      */
+    @Override
     public int lastIndexOf(
         Object arg0
     ) {
@@ -226,6 +250,7 @@ public class MarshallingSequentialList<E>
         }        
     }
 
+    @Override
     public ListIterator<E> listIterator(
     ) {
         return new MarshallingIterator<E>(
@@ -234,6 +259,7 @@ public class MarshallingSequentialList<E>
         );
     }
 
+    @Override
     public ListIterator<E> listIterator(
         int index
     ) {
@@ -247,6 +273,7 @@ public class MarshallingSequentialList<E>
      * @see java.util.List#remove(int)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public E remove(
         int index
     ) {
@@ -263,6 +290,7 @@ public class MarshallingSequentialList<E>
     /* (non-Javadoc)
      * @see java.util.Collection#remove(java.lang.Object)
      */
+    @Override
     public boolean remove(
         Object element
     ) {
@@ -278,6 +306,7 @@ public class MarshallingSequentialList<E>
      * @see java.util.List#set(int, java.lang.Object)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public E set(
         int index, 
         E arg1
@@ -292,17 +321,120 @@ public class MarshallingSequentialList<E>
         }        
     }
 
+    /* (non-Javadoc)
+     * @see java.util.AbstractCollection#toString()
+     */
+    @Override
+    public String toString() {
+        return getDelegate().toString();
+    }
+
 
     //------------------------------------------------------------------------
     // Extends AbstractSequentialList 
     //------------------------------------------------------------------------
 
+    @Override
     public int size(
     ) {
         return getDelegate().size();
     }
 
+    
+    //------------------------------------------------------------------------
+    // Implements PersistenceCapableCollection
+    //------------------------------------------------------------------------
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoEvict(boolean)
+     */
+//  @Override
+    public void openmdxjdoEvict(
+        boolean allMembers, 
+        boolean allSubSets
+    ) {
+        if(this.list instanceof PersistenceCapableCollection){
+            ((PersistenceCapableCollection)this.list).openmdxjdoEvict(allMembers, allSubSets);
+        } else {
+            throw new UnsupportedOperationException("The delegate is not a PersistenceCapableCollection");
+        }
+    }
 
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetContainerId()
+     */
+//  @Override
+    public Path openmdxjdoGetContainerId() {
+        if(this.list instanceof PersistenceCapableCollection){
+            return ((PersistenceCapableCollection)this.list).openmdxjdoGetContainerId();
+        } else {
+            throw new UnsupportedOperationException("The delegate is not a PersistenceCapableCollection");
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetPersistenceManager()
+     */
+//  @Override
+    public PersistenceManager openmdxjdoGetPersistenceManager() {
+        if(this.list instanceof PersistenceCapableCollection){
+            return ((PersistenceCapableCollection)this.list).openmdxjdoGetPersistenceManager();
+        } else {
+            throw new UnsupportedOperationException("The delegate is not a PersistenceCapableCollection");
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetTransientContainerId()
+     */
+//  @Override
+    public TransientContainerId openmdxjdoGetTransientContainerId() {
+        if(this.list instanceof PersistenceCapableCollection){
+            return ((PersistenceCapableCollection)this.list).openmdxjdoGetTransientContainerId();
+        } else {
+            throw new UnsupportedOperationException("The delegate is not a PersistenceCapableCollection");
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoIsPersistent()
+     */
+//  @Override
+    public boolean openmdxjdoIsPersistent() {
+        if(this.list instanceof PersistenceCapableCollection){
+            return ((PersistenceCapableCollection)this.list).openmdxjdoIsPersistent();
+        } else {
+            throw new UnsupportedOperationException("The delegate is not a PersistenceCapableCollection");
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRefresh()
+     */
+//  @Override
+    public void openmdxjdoRefresh() {
+        if(this.list instanceof PersistenceCapableCollection){
+            ((PersistenceCapableCollection)this.list).openmdxjdoRefresh();
+        } else {
+            throw new UnsupportedOperationException("The delegate is not a PersistenceCapableCollection");
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoRetrieve(javax.jdo.FetchPlan)
+     */
+//  @Override
+    public void openmdxjdoRetrieve(
+        FetchPlan fetchPlan
+    ) {
+        if(this.list instanceof PersistenceCapableCollection){
+            ((PersistenceCapableCollection)this.list).openmdxjdoRetrieve(fetchPlan);
+        } else {
+            throw new UnsupportedOperationException("The delegate is not a PersistenceCapableCollection");
+        }
+    }
+    
+    
     //------------------------------------------------------------------------
     // Implements Reconstructable
     //------------------------------------------------------------------------
@@ -335,21 +467,6 @@ public class MarshallingSequentialList<E>
             );
         }
     }
-
-    /**
-     * 
-     */
-    protected transient List<Object> list;
-
-
-    //------------------------------------------------------------------------
-    // Instance members
-    //------------------------------------------------------------------------
-
-    /**
-     * @serial
-     */
-    protected Marshaller marshaller;
 
 
     //------------------------------------------------------------------------

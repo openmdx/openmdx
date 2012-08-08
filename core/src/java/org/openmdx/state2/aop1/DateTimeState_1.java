@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateTimeState_1.java,v 1.11 2009/11/04 16:00:14 hburger Exp $
+ * Name:        $Id: DateTimeState_1.java,v 1.14 2010/07/13 10:03:24 hburger Exp $
  * Description: Date State
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/04 16:00:14 $
+ * Date:        $Date: 2010/07/13 10:03:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,8 +57,8 @@ import java.util.Map;
 import javax.jdo.JDOHelper;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.accessor.view.Interceptor_1;
+import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.state2.cci.DateTimeStateContext;
@@ -202,7 +202,6 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
         );
     }
 
-
     /* (non-Javadoc)
      * @see org.openmdx.state2.aop1.AbstractState_1#isInvolved()
      */
@@ -210,9 +209,10 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
     protected boolean isInvolved(
         DataObject_1_0 candidate, 
         DateTimeStateContext context, 
+        boolean exact, 
         boolean includeRemoved
      ) throws ServiceException {
-        if(super.isInvolved(candidate, context, includeRemoved)) {
+        if(super.isInvolved(candidate, context, exact, includeRemoved)) {
             //
             // Valid Time Test
             // 
@@ -226,13 +226,31 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
                         (Date) candidate.objGetValue("stateInvalidFrom")
                     ) <= 0;
                 case TIME_RANGE_VIEW:
-                    return Order.compareValidFrom(
-                        context.getValidFrom(), 
-                        (Date) candidate.objGetValue("stateInvalidFrom")
-                    ) <= 0 && Order.compareInvalidFrom(
-                        (Date) candidate.objGetValue("stateValidFrom"), 
-                        context.getInvalidFrom()
-                    ) <= 0;
+                    return !exact? (
+                        Order.compareValidFromToValidTo(
+                            context.getValidFrom(), 
+                            (Date) candidate.objGetValue("stateInvalidFrom")
+                        ) <= 0 && Order.compareValidFromToValidTo(
+                            (Date) candidate.objGetValue("stateValidFrom"),
+                            context.getInvalidFrom()
+                        ) <= 0 
+                    ) : candidate.jdoIsNew() ? (
+                        Order.compareValidFrom(
+                            context.getValidFrom(), 
+                            (Date) candidate.objGetValue("stateInvalidFrom")
+                        ) >= 0 && Order.compareInvalidFrom(
+                            (Date) candidate.objGetValue("stateValidFrom"), 
+                            context.getInvalidFrom()
+                        ) >= 0
+                    ) : (
+                        Order.compareValidFrom(
+                            context.getValidFrom(),
+                            (Date) candidate.objGetValue("stateValidFrom")
+                        ) == 0 && Order.compareInvalidFrom(
+                            context.getInvalidFrom(),
+                            (Date) candidate.objGetValue("stateInvalidFrom")
+                        ) == 0
+                    );
             }
         }
         return false;

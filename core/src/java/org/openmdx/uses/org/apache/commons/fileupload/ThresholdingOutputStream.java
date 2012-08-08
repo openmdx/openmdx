@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/ThresholdingOutputStream.java,v 1.3 2004/06/29 07:40:54 wfro Exp $
- * $Revision: 1.3 $
- * $Date: 2004/06/29 07:40:54 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/ThresholdingOutputStream.java,v 1.4 2010/06/02 13:46:30 hburger Exp $
+ * $Revision: 1.4 $
+ * $Date: 2010/06/02 13:46:30 $
  *
  * ====================================================================
  *
@@ -82,7 +82,7 @@ import java.io.OutputStream;
  *
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  *
- * @version $Id: ThresholdingOutputStream.java,v 1.3 2004/06/29 07:40:54 wfro Exp $
+ * @version $Id: ThresholdingOutputStream.java,v 1.4 2010/06/02 13:46:30 hburger Exp $
  */
 public abstract class ThresholdingOutputStream
     extends OutputStream
@@ -134,6 +134,7 @@ public abstract class ThresholdingOutputStream
      *
      * @exception IOException if an error occurs.
      */
+    @Override
     public void write(int b) throws IOException
     {
         checkThreshold(1);
@@ -150,6 +151,7 @@ public abstract class ThresholdingOutputStream
      *
      * @exception IOException if an error occurs.
      */
+    @Override
     public void write(byte b[]) throws IOException
     {
         checkThreshold(b.length);
@@ -168,6 +170,7 @@ public abstract class ThresholdingOutputStream
      *
      * @exception IOException if an error occurs.
      */
+    @Override
     public void write(byte b[], int off, int len) throws IOException
     {
         checkThreshold(len);
@@ -182,6 +185,7 @@ public abstract class ThresholdingOutputStream
      *
      * @exception IOException if an error occurs.
      */
+    @Override
     public void flush() throws IOException
     {
         getStream().flush();
@@ -194,6 +198,7 @@ public abstract class ThresholdingOutputStream
      *
      * @exception IOException if an error occurs.
      */
+    @Override
     public void close() throws IOException
     {
         try

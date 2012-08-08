@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractTransaction_1.java,v 1.2 2009/06/12 00:18:35 wfro Exp $
+ * Name:        $Id: AbstractTransaction_1.java,v 1.3 2010/08/09 13:13:35 hburger Exp $
  * Description: AbstractTransaction_1 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/12 00:18:35 $
+ * Date:        $Date: 2010/08/09 13:13:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,13 +57,14 @@ import javax.jdo.Transaction;
 import javax.jdo.spi.PersistenceCapable;
 import javax.transaction.Synchronization;
 
+import org.openmdx.base.accessor.rest.spi.Synchronization_2_0;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * AbstractTransaction_1
  */
 public abstract class AbstractTransaction_1
-    implements Transaction, Synchronization {
+    implements Transaction, Synchronization_2_0 {
 
     /**
      * Provide the delegate
@@ -236,9 +237,11 @@ public abstract class AbstractTransaction_1
         this.getDelegate().setSynchronization(sync);
     }
 
+    
     //-----------------------------------------------------------------------
     // Synchronization
     //-----------------------------------------------------------------------
+    
     public void afterCompletion(
         int status
     ) {
@@ -248,6 +251,19 @@ public abstract class AbstractTransaction_1
     public void beforeCompletion(
     ) {
         ((Synchronization)this.getDelegate()).beforeCompletion();                
+    }
+
+    
+    //-----------------------------------------------------------------------
+    // Synchronization_2_0
+    //-----------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.rest.spi.Synchronization_2_0#afterBegin()
+     */
+    @Override
+    public void afterBegin() {
+        ((Synchronization_2_0)this.getDelegate()).afterBegin();                
     }
 
 }

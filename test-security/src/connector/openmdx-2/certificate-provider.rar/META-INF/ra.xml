@@ -11,9 +11,9 @@
 	<eis-type>JKS</eis-type>
 	<version>2.0</version>
 	<resourceadapter>
-		<managedconnectionfactory-class>org.openmdx.resource.pki.keystore.ManagedKeyStoreConnectionFactory</managedconnectionfactory-class>
-		<connectionfactory-interface>org.openmdx.kernel.security.resource.ConnectionFactory</connectionfactory-interface>
-		<connectionfactory-impl-class>org.openmdx.resource.pki.keystore.KeyStoreConnectionFactory</connectionfactory-impl-class>
+		<managedconnectionfactory-class>org.openmdx.resource.pki.keystore.ManagedConnectionFactory</managedconnectionfactory-class>
+		<connectionfactory-interface>org.openmdx.resource.cci.ConnectionFactory</connectionfactory-interface>
+		<connectionfactory-impl-class>org.openmdx.resource.pki.keystore.ConnectionFactory</connectionfactory-impl-class>
 		<connection-interface>org.openmdx.resource.pki.cci.CertificateProvider</connection-interface>
 		<connection-impl-class>org.openmdx.resource.pki.keystore.CertificateConnection</connection-impl-class>
 		<transaction-support>NoTransaction</transaction-support>

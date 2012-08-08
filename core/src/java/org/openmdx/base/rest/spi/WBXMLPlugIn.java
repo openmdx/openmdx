@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: WBXMLPlugIn.java,v 1.2 2010/04/08 11:35:33 hburger Exp $
+ * Name:        $Id: WBXMLPlugIn.java,v 1.3 2010/06/02 15:34:32 hburger Exp $
  * Description: REST Plug-In
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/08 11:35:33 $
+ * Date:        $Date: 2010/06/02 15:34:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,39 +71,39 @@ public class WBXMLPlugIn extends DynamicPlugIn {
     private static final Page page0 = newPage();
     
     static {
-        addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.UnitOfWork");
-        addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.Object");
-        addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.Query");
-        addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.ResultSet");
-        addTo(page0, CodeSpace.TAG, "org.openmdx.kernel.Exception");
-        addTo(page0, CodeSpace.TAG, "_item");
-        addTo(page0, CodeSpace.TAG, "path");
-        addTo(page0, CodeSpace.TAG, "queryType");
-        addTo(page0, CodeSpace.TAG, "query");
-        addTo(page0, CodeSpace.TAG, "position");
-        addTo(page0, CodeSpace.TAG, "size");
-        addTo(page0, CodeSpace.TAG, "groups");
-        addTo(page0, CodeSpace.TAG, "group");
-        addTo(page0, CodeSpace.TAG, "parameters");
-        addTo(page0, CodeSpace.TAG, "element");
-        addTo(page0, CodeSpace.TAG, "description");
-        addTo(page0, CodeSpace.TAG, "parameter");
-        addTo(page0, CodeSpace.TAG, "stackTraceElements");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "id");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "href");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "version");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "index");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "hasMore");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "total");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "exceptionDomain");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "exceptionCode");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "exceptionTime");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "exceptionClass");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "declaringClass");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "methodName");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "lineNumber");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "fileName");
-        addTo(page0, CodeSpace.ATTRIBUTE_NAME, "more");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "org.openmdx.kernel.UnitOfWork");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "org.openmdx.kernel.Object");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "org.openmdx.kernel.Query");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "org.openmdx.kernel.ResultSet");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "org.openmdx.kernel.Exception");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "_item");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "path");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "queryType");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "query");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "position");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "size");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "groups");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "group");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "parameters");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "element");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "description");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "parameter");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.TAG, "stackTraceElements");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "id");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "href");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "version");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "index");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "hasMore");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "total");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "exceptionDomain");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "exceptionCode");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "exceptionTime");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "exceptionClass");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "declaringClass");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "methodName");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "lineNumber");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "fileName");
+        DynamicPlugIn.addTo(WBXMLPlugIn.page0, CodeSpace.ATTRIBUTE_NAME, "more");
     }
 
     /*

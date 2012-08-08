@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Registry.java,v 1.2 2010/04/15 10:21:28 hburger Exp $
+ * Name:        $Id: Registry.java,v 1.3 2010/08/06 12:01:03 hburger Exp $
  * Description: Registry interface 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/15 10:21:28 $
+ * Date:        $Date: 2010/08/06 12:01:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,9 +65,9 @@ public interface Registry<K,V> {
      * @param   value
      *          the value
      *
-     * @return  <code>null</code> unless there is already another object registered with the given key
+     * @return  either the old value if it was present or the new one if it was absent 
      */
-    V putIfAbsent(
+    V putUnlessPresent(
         K key,
         V value
     );

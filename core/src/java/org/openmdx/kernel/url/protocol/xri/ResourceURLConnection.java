@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ResourceURLConnection.java,v 1.7 2009/03/16 16:47:13 hburger Exp $
+ * Name:        $Id: ResourceURLConnection.java,v 1.8 2010/06/02 13:46:30 hburger Exp $
  * Description: Resource URL Connection
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/16 16:47:13 $
+ * Date:        $Date: 2010/06/02 13:46:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,6 +81,7 @@ public class ResourceURLConnection
      * @param url
      * @throws IOException
      */
+     @Override
     protected URL makeDelegateUrl(
         final URL url
     ) throws IOException {     

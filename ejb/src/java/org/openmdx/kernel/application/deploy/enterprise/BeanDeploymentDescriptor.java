@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BeanDeploymentDescriptor.java,v 1.2 2009/09/07 13:03:03 hburger Exp $
+ * Name:        $Id: BeanDeploymentDescriptor.java,v 1.3 2010/06/04 22:45:00 hburger Exp $
  * Description: Bean Deplyment Descriptor
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 13:03:03 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -86,7 +86,8 @@ implements Bean
         this.owner = owner;
     }
 
-    public void parseXml(
+    @Override
+	public void parseXml(
         Element element,
         Report report
     ) {
@@ -162,7 +163,8 @@ implements Bean
         }
     }
 
-    public void parseOpenMdxXml(
+    @Override
+	public void parseOpenMdxXml(
         Element element,
         Report report
     ) {
@@ -263,7 +265,8 @@ implements Bean
         }
     }
 
-    public void verify(
+    @Override
+	public void verify(
         Report report
     ) {
         super.verify(report);
@@ -313,7 +316,8 @@ implements Bean
         }
     }
 
-    public void populate(
+    @Override
+	public void populate(
         Context componentContext
     ) throws NamingException{
         Context envContext = Contexts.getSubcontext(componentContext, "env");

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ArchiveFileSet.java,v 1.9 2006/02/19 15:28:08 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ArchiveFileSet.java,v 1.10 2010/06/04 22:24:36 hburger Exp $
  * Description: Archive File Set
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/02/19 15:28:08 $
+ * Date:        $Date: 2010/06/04 22:24:36 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes or is based on software developed by other
+ * organizations as listed in the NOTICE file.
  */
 package org.openmdx.tools.ant.types;
 
@@ -279,7 +278,8 @@ public class ArchiveFileSet
     /* (non-Javadoc)
      * @see org.apache.tools.ant.types.AbstractFileSet#getDirectoryScanner(org.apache.tools.ant.Project)
      */
-    public DirectoryScanner getDirectoryScanner(Project project) {
+    @Override
+	public DirectoryScanner getDirectoryScanner(Project project) {
         if (isReference()) {
         	return getRef(project).getDirectoryScanner(project);
         } else {
@@ -350,7 +350,8 @@ public class ArchiveFileSet
         /**
          * @return the values as an array of strings
          */
-        public String[] getValues() {
+        @Override
+		public String[] getValues() {
             return new String[]{"fail", "skip"};
         }
     }

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.16 2010/01/06 17:16:36 wfro Exp $
+ * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.19 2010/08/06 12:23:42 hburger Exp $
  * Description: ContainerInvocationHandler 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/06 17:16:36 $
+ * Date:        $Date: 2010/08/06 12:23:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,13 +57,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
+import javax.jmi.reflect.InvalidCallException;
 import javax.jmi.reflect.RefBaseObject;
-
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.LoggerFactory;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.Container;
@@ -82,7 +86,8 @@ public class Jmi1ContainerInvocationHandler
      * @param delegate
      */
     public Jmi1ContainerInvocationHandler(
-        Marshaller marshaller, RefContainer delegate
+        Marshaller marshaller, 
+        RefContainer<?> delegate
     ) {
         this.marshaller = marshaller == null ? IdentityMarshaller.INSTANCE : marshaller;
         this.refDelegate = delegate;
@@ -111,7 +116,7 @@ public class Jmi1ContainerInvocationHandler
     /**
      * 
      */
-    private final RefContainer refDelegate;
+    private final RefContainer<?> refDelegate;
 
     /**
      * 
@@ -184,19 +189,21 @@ public class Jmi1ContainerInvocationHandler
             } 
             else {
                 if(declaringClass == RefBaseObject.class) {
-                        if(
-                            "refOutermostPackage".equals(methodName) && 
-                            this.marshaller instanceof Jmi1ObjectInvocationHandler.StandardMarshaller
-                         ) {
-                            return ((Jmi1ObjectInvocationHandler.StandardMarshaller)this.marshaller).getOutermostPackage();
-                        } else if(
-                            "refMofId".equals(methodName) && 
-                            this.cciDelegate instanceof RefBaseObject
-                        ){
+                    if(
+                        "refOutermostPackage".equals(methodName) && 
+                        this.marshaller instanceof Jmi1ObjectInvocationHandler.StandardMarshaller
+                     ) {
+                        return ((Jmi1ObjectInvocationHandler.StandardMarshaller)this.marshaller).getOutermostPackage();
+                    } else if("refMofId".equals(methodName)) {
+                        if(this.cciDelegate instanceof RefBaseObject) {
                             return ((RefBaseObject)this.cciDelegate).refMofId();
-                        } else throw new UnsupportedOperationException(
-                            declaringClass + ": " + methodName
-                        );
+                        } else {
+                            Object xri = PersistenceHelper.getContainerId(this.cciDelegate);
+                            return xri == null ? null : xri.toString();
+                        }
+                    } else throw new UnsupportedOperationException(
+                        declaringClass + ": " + methodName
+                    );
                 } 
                 else if(declaringClass == RefContainer.class) {
                     if("refAdd".equals(methodName)) {
@@ -230,11 +237,11 @@ public class Jmi1ContainerInvocationHandler
                                 predicate
                             ); 
                         } else if (predicate instanceof RefQuery_1_0) {
-                            value = ((RefContainer)this.cciDelegate).refGetAll(
+                            value = ((RefContainer<?>)this.cciDelegate).refGetAll(
                                 ((RefQuery_1_0)predicate).refGetFilter()
                             );
-                        } else if (this.cciDelegate instanceof RefContainer) {
-                            value = ((RefContainer)this.cciDelegate).refGetAll(
+                        } else if (this.cciDelegate instanceof RefContainer<?>) {
+                            value = ((RefContainer<?>)this.cciDelegate).refGetAll(
                                 predicate
                             );
                         } else {
@@ -252,7 +259,7 @@ public class Jmi1ContainerInvocationHandler
                                 predicate
                             );
                         } else {
-                            ((RefContainer)this.cciDelegate).refRemoveAll(
+                            ((RefContainer<?>)this.cciDelegate).refRemoveAll(
                                 predicate
                             );
                         }
@@ -271,19 +278,25 @@ public class Jmi1ContainerInvocationHandler
             }
         } catch (InvocationTargetException exception) {
             Throwable throwable = exception.getTargetException();
-            throw throwable instanceof RuntimeServiceException ?
-                new JmiServiceException(throwable.getCause()) :
-                throwable;
+            throw throwable instanceof RuntimeServiceException ? new JmiServiceException(
+                throwable.getCause()
+            ) : throwable instanceof UnsupportedOperationException ? Throwables.initCause(
+                new InvalidCallException(null, null, throwable.getMessage()), 
+                throwable, 
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED
+            ) : throwable;
         }
     }
 
     /**
      * Provide the container's add() arguments
      * 
-     * @param containerClass
+     * @param containerClass the RefContainer sub-class
      * 
      * @return the container's add() arguments
      */
+    @SuppressWarnings("unchecked")
     public static Class<?>[] getAddArguments(
         Class<? extends RefContainer> containerClass
     ){
@@ -346,17 +359,12 @@ public class Jmi1ContainerInvocationHandler
             Class<?> referenceClass
         ){
             ReferenceDef instance = instances.get(referenceClass);
-            if(instance == null) {
-                ReferenceDef concurrent = instances.putIfAbsent(
-                    referenceClass, 
-                    instance = new ReferenceDef(referenceClass.getInterfaces()[0])
-                );
-                if(concurrent != null) {
-                    instance = concurrent;
-                }
-            }
-            return instance;
-        };
+            return instance == null ? Maps.putUnlessPresent(
+                instances,
+                referenceClass, 
+                new ReferenceDef(referenceClass.getInterfaces()[0])
+            ) : instance;
+        }
                 
         /**
          * Retrieve a bulk method

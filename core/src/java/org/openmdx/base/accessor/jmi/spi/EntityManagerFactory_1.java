@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: EntityManagerFactory_1.java,v 1.17 2010/04/27 17:09:12 hburger Exp $
+ * Name:        $Id: EntityManagerFactory_1.java,v 1.22 2010/08/09 13:12:05 hburger Exp $
  * Description: Entity Manager Factory
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 17:09:12 $
+ * Date:        $Date: 2010/08/09 13:12:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,6 +53,7 @@ package org.openmdx.base.accessor.jmi.spi;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -61,27 +62,34 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.jdo.Constants;
 import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.JDOHelper;
+import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.datastore.DataStoreCache;
 import javax.naming.InitialContext;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.spi.PropertiesConfigurationProvider;
+import org.openmdx.base.accessor.rest.DataManagerFactory_1;
+import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.accessor.view.ViewManagerFactory_1;
 import org.openmdx.base.aop1.PlugIn_1;
 import org.openmdx.base.aop1.PlugIn_1_0;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.BasicException.Parameter;
 import org.openmdx.kernel.loading.BeanFactory;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Factory;
-import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
+import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.SparseArray;
 
 
@@ -193,6 +201,8 @@ public class EntityManagerFactory_1
                     )
                 )
             );
+        } else {
+            this.dataStoreCache = DataManagerFactory_1.getDataStoreCache(dataManagerFactory);
         }
         //
         // Plug-In Configurations
@@ -270,7 +280,10 @@ public class EntityManagerFactory_1
                     );
                 }
             }
-            this.delegate = layerManagerFactory;
+            this.mapping = LayerManagerFactory_2.newPlugInMapping(
+                this.delegate = layerManagerFactory, 
+                null
+            );
         } catch (Exception exception) {
             throw BasicException.initHolder(
                 new JDOFatalDataStoreException(
@@ -309,6 +322,11 @@ public class EntityManagerFactory_1
     private final PersistenceManagerFactory delegate;
     
     /**
+     * The entity manager factory's mapping
+     */
+    private final Mapping_1_0 mapping;
+    
+    /**
      * Implements <code>Serializable</code>
      */
     private static final long serialVersionUID = -3043695082264242663L;
@@ -322,6 +340,18 @@ public class EntityManagerFactory_1
 
     // Configuration overrides propagated to persistence manager
     private final Map<?,?> overrides;
+
+    /**
+     * 
+     */
+    private final DataStoreCache_2_0 dataStoreCache;
+    
+    static {
+        EntityManagerFactory_1.DEFAULT_CONFIGURATION.put(
+            ConfigurableProperty.TransactionType.qualifiedName(),
+            Constants.RESOURCE_LOCAL
+        );
+    }
     
     /**
      * The method is used by JDOHelper to construct an instance of 
@@ -343,13 +373,12 @@ public class EntityManagerFactory_1
     }
 
     /**
-     * The method is used by JDOHelper to construct an instance of 
-     * <code>PersistenceManagerFactory</code> based on user-specified 
-     * properties.
-     *     /**
-     * Get the delegate
+     * Retrieve an entity manager factory specified by the given properties
+     *
+     * @param overrides
+     * @param props
      * 
-     * @return the delegate
+     * @return a new entity manager factory
      */
     @SuppressWarnings("unchecked")
     public static PersistenceManagerFactory getPersistenceManagerFactory (
@@ -371,8 +400,9 @@ public class EntityManagerFactory_1
                     configuration.putAll(properties);
                 }
             }
+        } catch(Exception exception) {
+            SysLog.warning("Unable to retrieve the entity manager configuration", exception);
         }
-        catch(Exception e) {}
         configuration.putAll(overrides);
         return new EntityManagerFactory_1(overrides, configuration);
     }
@@ -390,9 +420,10 @@ public class EntityManagerFactory_1
         return new RefRootPackage_1(
           this, // persistenceManagerFactory
           delegate,
-          LayerManagerFactory_2.newPlugInMapping(this.delegate, null),
+          this.mapping,
           this.userObjects
-        ).refPersistenceManager();
+        ).refPersistenceManager(
+        );
     }
     
     /* (non-Javadoc)
@@ -529,6 +560,238 @@ public class EntityManagerFactory_1
             );
         }
         return plugInConfiguration;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory#newDataStoreCache()
+     */
+    @Override
+    protected DataStoreCache newDataStoreCache() {
+        return this.dataStoreCache == null ? new DataStoreCache.EmptyDataStoreCache(
+        ) : new CacheAdapter(
+            this.dataStoreCache, 
+            this.mapping
+        );
+    }
+
+    
+
+    //------------------------------------------------------------------------
+    // Class CacheAdapter
+    //------------------------------------------------------------------------
+
+    /**
+     * Cache Adapter
+     */
+    class CacheAdapter implements DataStoreCache {
+
+        /**
+         * Constructor 
+         *
+         * @param delegate
+         */
+        CacheAdapter(
+            DataStoreCache_2_0 delegate,
+            Mapping_1_0 mapping
+        ) {
+            this.delegate = delegate;
+            this.mapping = mapping;
+        }
+
+        /**
+         * The datastore cache REST adapter 
+         */
+        private final DataStoreCache_2_0 delegate;
+        
+        /**
+         * 
+         */
+        private final Mapping_1_0 mapping;
+        
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#evict(java.lang.Object)
+         */
+    //  @Override
+        public void evict(Object oid) {
+            if(oid instanceof Path) try {
+                this.delegate.evict((Path) oid);
+            } catch (ServiceException exception) {
+                throw new JDOUserException("DataStoreCache access failure", exception);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#evictAll()
+         */
+    //  @Override
+        public void evictAll(
+        ) {
+            try {
+                this.delegate.evictAll();
+            } catch (ServiceException exception) {
+                throw new JDOUserException("DataStoreCache access failure", exception);
+            }
+       }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#evictAll(java.lang.Object[])
+         */
+    //  @Override
+        public void evictAll(Object... oids) {
+            for(Object oid : oids){
+                evict(oid);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#evictAll(java.util.Collection)
+         */
+        @SuppressWarnings("unchecked")
+    //  @Override
+        public void evictAll(Collection oids) {
+            try {
+                this.delegate.evictAll(oids);
+            } catch (ServiceException exception) {
+                throw new JDOUserException("DataStoreCache access failure", exception);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#evictAll(java.lang.Class, boolean)
+         */
+        @SuppressWarnings("unchecked")
+    //  @Override
+        public void evictAll(Class pcClass, boolean subclasses) {
+            evictAll(subclasses, pcClass);
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#evictAll(boolean, java.lang.Class)
+         */
+        @SuppressWarnings("unchecked")
+    //  @Override
+        public void evictAll(boolean subclasses, Class pcClass) {
+            try {
+                this.delegate.evictAll(subclasses, this.mapping.getModelClassName(pcClass));
+            } catch (ServiceException exception) {
+                throw new JDOUserException("DataStoreCache access failure", exception);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#pin(java.lang.Object)
+         */
+    //  @Override
+        public void pin(Object oid) {
+            if(oid instanceof Path) try {
+                this.delegate.pin((Path) oid);
+            } catch (ServiceException exception) {
+                throw new JDOUserException("DataStoreCache access failure", exception);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#pinAll(java.util.Collection)
+         */
+        @SuppressWarnings("unchecked")
+    //  @Override
+        public void pinAll(Collection oids) {
+            try {
+                this.delegate.pinAll(oids);
+            } catch (ServiceException exception) {
+                throw new JDOUserException("DataStoreCache access failure", exception);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#pinAll(java.lang.Object[])
+         */
+    //  @Override
+        public void pinAll(Object... oids) {
+            for(Object oid : oids){
+                pin(oid);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#pinAll(java.lang.Class, boolean)
+         */
+        @SuppressWarnings("unchecked")
+    //  @Override
+        public void pinAll(Class pcClass, boolean subclasses) {
+            pinAll(subclasses, pcClass);
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#pinAll(boolean, java.lang.Class)
+         */
+        @SuppressWarnings("unchecked")
+    //  @Override
+        public void pinAll(boolean subclasses, Class pcClass) {
+            try {
+                this.delegate.pinAll(subclasses, this.mapping.getModelClassName(pcClass));
+            } catch (ServiceException exception) {
+                throw new JDOUserException("DataStoreCache access failure", exception);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#unpin(java.lang.Object)
+         */
+    //  @Override
+        public void unpin(Object oid) {
+            if(oid instanceof Path) try {
+                this.delegate.unpin((Path) oid);
+            } catch (ServiceException exception) {
+                throw new JDOUserException("DataStoreCache access failure", exception);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#unpinAll(java.util.Collection)
+         */
+        @SuppressWarnings("unchecked")
+    //  @Override
+        public void unpinAll(Collection oids) {
+            try {
+                this.delegate.unpinAll(oids);
+            } catch (ServiceException exception) {
+                throw new JDOUserException("DataStoreCache access failure", exception);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#unpinAll(java.lang.Object[])
+         */
+    //  @Override
+        public void unpinAll(Object... oids) {
+            for(Object oid : oids){
+                unpin(oid);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#unpinAll(java.lang.Class, boolean)
+         */
+        @SuppressWarnings("unchecked")
+    //  @Override
+        public void unpinAll(Class pcClass, boolean subclasses) {
+            unpinAll(subclasses, pcClass);
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.datastore.DataStoreCache#unpinAll(boolean, java.lang.Class)
+         */
+        @SuppressWarnings("unchecked")
+    //  @Override
+        public void unpinAll(boolean subclasses, Class pcClass) {
+            try {
+                this.delegate.unpinAll(subclasses, this.mapping.getModelClassName(pcClass));
+            } catch (ServiceException exception) {
+                throw new JDOUserException("DataStoreCache access failure", exception);
+            }
+        }
+        
     }
 
 }

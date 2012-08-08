@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Object_2Facade.java,v 1.10 2010/03/19 12:32:54 hburger Exp $
+ * Name:        $Id: Object_2Facade.java,v 1.13 2010/06/02 13:45:10 hburger Exp $
  * Description: Object Facade
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:32:54 $
+ * Date:        $Date: 2010/06/02 13:45:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -159,7 +159,7 @@ public class Object_2Facade {
     public static Object_2Facade newInstance(
         Path objectId
     ) throws ResourceException {
-        return newInstance(objectId, "org:openmdx:base:Void");
+        return newInstance(objectId, null);
     }
     
     /**
@@ -176,9 +176,11 @@ public class Object_2Facade {
         String objectClass
     ) throws ResourceException {
         Object_2Facade object = newInstance();
-        MappedRecord value = Records.getRecordFactory().createMappedRecord(objectClass);
         object.setPath(objectId);
-        object.setValue(value);
+        if(objectClass != null) {
+            MappedRecord value = Records.getRecordFactory().createMappedRecord(objectClass);
+            object.setValue(value);
+        }
         return object;
     }
     
@@ -634,6 +636,7 @@ public class Object_2Facade {
          * @see java.util.List#equals(java.lang.Object)
          */
         @SuppressWarnings("unchecked")
+    @Override
         public boolean equals(
             Object o
         ) {
@@ -679,6 +682,7 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#hashCode()
          */
+        @Override
         public int hashCode(
         ) {
             switch(this.size()) {
@@ -1007,6 +1011,7 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.lang.Object#clone()
          */
+        @Override
         protected Object clone(
         ) {
             throw new UnsupportedOperationException("clone not supported for delegating sparse lists");
@@ -1019,6 +1024,7 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
+        @Override
         public String toString() {
             return getList().toString();
         }
@@ -1208,6 +1214,7 @@ public class Object_2Facade {
          * @see java.util.List#equals(java.lang.Object)
          */
         @SuppressWarnings("unchecked")
+    @Override
         public boolean equals(
             Object o
         ) {
@@ -1253,6 +1260,7 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#hashCode()
          */
+        @Override
         public int hashCode(
         ) {
             switch(this.size()) {
@@ -1554,6 +1562,7 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.lang.Object#clone()
          */
+        @Override
         protected Object clone(
         ) {
             throw new UnsupportedOperationException("clone not supported for delegating sparse arrays");
@@ -1566,6 +1575,7 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.lang.Object#toString()
          */
+        @Override
         public String toString(
         ) {
             return this.attributeValues().toString();

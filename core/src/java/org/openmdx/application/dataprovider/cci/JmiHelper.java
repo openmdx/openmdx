@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: JmiHelper.java,v 1.14 2010/01/26 15:37:29 hburger Exp $
+ * Name:        $Id: JmiHelper.java,v 1.15 2010/07/13 10:30:27 hburger Exp $
  * Description: JmiHelper class
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:37:29 $
+ * Date:        $Date: 2010/07/13 10:30:27 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,15 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
- *
- * This product includes yui, the Yahoo! UI Library
- * (License - based on BSD).
- *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
  */
 package org.openmdx.application.dataprovider.cci;
 
@@ -89,6 +81,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.LenientPathComparator;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.state2.spi.Parameters;
 import org.w3c.cci2.SparseArray;
 import org.w3c.spi2.Datatypes;
 
@@ -182,10 +175,10 @@ public class JmiHelper {
         Object sourceValues,
         Marshaller marshaller,
         Object targetValues,
-        ModelElement_1_0 featureDef
+        ModelElement_1_0 featureDef, boolean compareWithBeforeImage
     ) throws ServiceException {
         if(targetValues instanceof List) {
-            if(!areEqual(targetValues, new MarshallingList(marshaller, (List)sourceValues))) {
+            if(!compareWithBeforeImage || !areEqual(targetValues, new MarshallingList(marshaller, (List)sourceValues))) {
                 ((List)targetValues).clear();
                 for(
                     ListIterator j = ((List)sourceValues).listIterator();
@@ -207,7 +200,7 @@ public class JmiHelper {
             }
         }
         else if(targetValues instanceof Set) {
-            if(!areEqual(targetValues, new MarshallingSet(marshaller, (Collection)sourceValues))) {
+            if(!compareWithBeforeImage || !areEqual(targetValues, new MarshallingSet(marshaller, (Collection)sourceValues))) {
                 ((Set)targetValues).clear();
                 for(
                     Iterator j = ((Collection)sourceValues).iterator();
@@ -220,7 +213,7 @@ public class JmiHelper {
             }
         }
         else if(targetValues instanceof SparseArray) {
-            if(!areEqual(new MarshallingSparseArray(marshaller, (SparseArray)sourceValues), targetValues)) {
+            if(!compareWithBeforeImage || !areEqual(new MarshallingSparseArray(marshaller, (SparseArray)sourceValues), targetValues)) {
                 ((SparseArray)targetValues).clear();
                 for(
                     ListIterator j = ((SparseArray)sourceValues).populationIterator();
@@ -261,6 +254,7 @@ public class JmiHelper {
         }
         Model_1_0 model = ((RefPackage_1_0)target.refImmediatePackage()).refModel();
         ModelElement_1_0 classDef = model.getElement(typeName);
+        boolean compareWithBeforeImage = !Parameters.STRICT_QUERY || !model.isSubtypeOf(classDef, "org:openmdx:state2:BasicState");
         if(ignorableFeatures == null) {
             ignorableFeatures = DEFAULT_SET_OF_IGNORABLE_FEATURES;
         }
@@ -302,8 +296,15 @@ public class JmiHelper {
             // OPTIONAL_VALUE
             if(Multiplicities.OPTIONAL_VALUE.equals(multiplicity)) {
                 Object sourceValue = facade.attributeValue(featureName);                
-                Object targetValue = target.refGetValue(featureName);
-                if(!areEqual(targetValue, sourceValue)) {
+                if(compareWithBeforeImage){
+                    Object targetValue = target.refGetValue(featureName);
+                    if(!areEqual(targetValue, sourceValue)) {
+                        target.refSetValue(
+                            featureName,
+                            marshaller.marshal(sourceValue)
+                        );
+                    }
+                } else {
                     target.refSetValue(
                         featureName,
                         marshaller.marshal(sourceValue)
@@ -343,7 +344,8 @@ public class JmiHelper {
                     sourceValues,
                     marshaller,
                     target.refGetValue(featureName),
-                    featureDef
+                    featureDef, 
+                    compareWithBeforeImage
                 );
             }
             else {

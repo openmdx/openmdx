@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiLoader.java,v 1.79 2010/04/28 13:40:33 wfro Exp $
+ * Name:        $Id: UiLoader.java,v 1.80 2010/08/09 13:18:11 hburger Exp $
  * Description: UiLoader
- * Revision:    $Revision: 1.79 $
+ * Revision:    $Revision: 1.80 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/28 13:40:33 $
+ * Date:        $Date: 2010/08/09 13:18:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -90,11 +90,11 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 import org.openmdx.portal.servlet.RoleMapper_1_0;
 
 public class UiLoader

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: GridEventHandler.java,v 1.56 2010/04/22 11:40:46 wfro Exp $
+ * Name:        $Id: GridEventHandler.java,v 1.57 2010/05/21 16:59:53 hburger Exp $
  * Description: GridEventHandler 
- * Revision:    $Revision: 1.56 $
+ * Revision:    $Revision: 1.57 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/22 11:40:46 $
+ * Date:        $Date: 2010/05/21 16:59:53 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,7 +72,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.Orders;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -334,7 +334,7 @@ public class GridEventHandler {
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
-                                grid.setOrder(featureName, Orders.ASCENDING);
+                                grid.setOrder(featureName, SortOrder.ASCENDING.code());
                                 referencePanes[paneIndex].getReferencePaneControl().paint(
                                     p,
                                     ReferencePaneControl.FRAME_CONTENT,
@@ -361,7 +361,7 @@ public class GridEventHandler {
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
-                                grid.setOrder(featureName, Orders.DESCENDING);
+                                grid.setOrder(featureName, SortOrder.DESCENDING.code());
                                 referencePanes[paneIndex].getReferencePaneControl().paint(
                                     p,
                                     ReferencePaneControl.FRAME_CONTENT,
@@ -388,7 +388,7 @@ public class GridEventHandler {
                             referencePanes[paneIndex].selectReference(referenceIndex);
                             Grid grid = referencePanes[paneIndex].getGrid();
                             if (grid != null) {
-                                grid.setOrder(featureName, Orders.ANY);
+                                grid.setOrder(featureName, SortOrder.UNSORTED.code());
                                 referencePanes[paneIndex].getReferencePaneControl().paint(
                                     p,
                                     ReferencePaneControl.FRAME_CONTENT,

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: VersionNumber.java,v 1.1 2010/03/05 16:40:37 hburger Exp $
+ * Name:        $Id: VersionNumber.java,v 1.2 2010/06/04 22:45:00 hburger Exp $
  * Description: openMDX: Version Number Class
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/05 16:40:37 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -355,7 +355,8 @@ public final class VersionNumber
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
-    public Object clone() throws CloneNotSupportedException {
+    @Override
+	public Object clone() throws CloneNotSupportedException {
         return new VersionNumber(this.external, this.internal);
     }
 
@@ -387,7 +388,8 @@ public final class VersionNumber
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
-    public boolean equals(Object that) {
+    @Override
+	public boolean equals(Object that) {
         return
             that instanceof VersionNumber &&
             this.external.equals(((VersionNumber)that).external);
@@ -396,14 +398,16 @@ public final class VersionNumber
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return this.external.hashCode();
     }
 
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
-    public String toString() {
+    @Override
+	public String toString() {
         return this.external;
     }
 

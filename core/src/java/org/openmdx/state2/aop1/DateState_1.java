@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateState_1.java,v 1.14 2009/11/04 16:00:14 hburger Exp $
+ * Name:        $Id: DateState_1.java,v 1.17 2010/07/13 10:03:24 hburger Exp $
  * Description: Date State
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/04 16:00:14 $
+ * Date:        $Date: 2010/07/13 10:03:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -278,9 +278,10 @@ public class DateState_1
     protected boolean isInvolved(
         DataObject_1_0 candidate, 
         DateStateContext context, 
+        boolean exact, 
         boolean removed
     ) throws ServiceException {
-        if(super.isInvolved(candidate, context, removed)) {
+        if(super.isInvolved(candidate, context, exact, removed)) {
             //
             // Valid Time Test
             // 
@@ -295,13 +296,31 @@ public class DateState_1
                         (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")
                     ) <= 0;
                 case TIME_RANGE_VIEW:
-                    return Order.compareValidFromToValidTo(
-                        context.getValidFrom(), 
-                        (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")
-                    ) <= 0 && Order.compareValidFromToValidTo(
-                        (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom"),
-                        context.getValidTo()
-                    ) <= 0;
+                    return !exact ? (
+                        Order.compareValidFromToValidTo(
+                            context.getValidFrom(), 
+                            (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")
+                        ) <= 0 && Order.compareValidFromToValidTo(
+                            (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom"),
+                            context.getValidTo()
+                        ) <= 0 
+                    ) : candidate.jdoIsNew() ? (
+                        Order.compareValidFrom(
+                            context.getValidFrom(), 
+                            (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom")
+                        ) >= 0 && Order.compareValidTo(
+                            (XMLGregorianCalendar) candidate.objGetValue("stateValidTo"),
+                            context.getValidTo()
+                        ) >= 0 
+                    ) : (
+                        Order.equal(
+                            context.getValidFrom(),
+                            (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom")
+                        ) && Order.equal(
+                            context.getValidTo(),
+                            (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")
+                        )
+                    );
             }
         }
         return false;

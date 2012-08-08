@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DBOSlicedWithIdAsKey.java,v 1.10 2009/12/31 10:33:25 wfro Exp $
+ * Name:        $Id: DBOSlicedWithIdAsKey.java,v 1.12 2010/08/23 10:44:43 wfro Exp $
  * Description: SlicedDbObjectParentRidOnly class
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/31 10:33:25 $
+ * Date:        $Date: 2010/08/23 10:44:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -183,7 +183,7 @@ extends SlicedDbObject
                     )
                 );
                 // Default join with composite parent. Otherwise use configured join column
-                this.referenceClause = "(vj." + this.getJoinCriteria()[1] + " = ?)";            
+                this.referenceClause = "(vj." + this.database.getDatabaseSpecificColumnName(conn, this.getJoinCriteria()[1], false) + " = ?)";            
             }
         }
         this.referenceColumn.clear();
@@ -435,7 +435,10 @@ extends SlicedDbObject
         Object_2Facade normalizedObjectFacade = null;
         try {
             facade = Object_2Facade.newInstance(object);
-            normalizedObject = Object_2Facade.newInstance(new Path("")).getDelegate();
+            normalizedObject = Object_2Facade.newInstance(
+                new Path(""),
+                facade.getObjectClass()
+            ).getDelegate();
             normalizedObjectFacade = Object_2Facade.newInstance(normalizedObject);
         } 
         catch (ResourceException e) {
@@ -605,8 +608,11 @@ extends SlicedDbObject
             ) {
                 if(slices[j] == null) {
                     try {
-                        slices[j] = Object_2Facade.newInstance(facade.getPath()).getDelegate();
-                    } 
+                        slices[j] = Object_2Facade.newInstance(
+                            facade.getPath(),
+                            facade.getObjectClass()
+                        ).getDelegate();
+                    }
                     catch (ResourceException e) {
                         throw new ServiceException(e);
                     }

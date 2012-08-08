@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusPrincipal.java,v 1.2 2004/10/14 19:28:23 hburger Exp $
+ * Name:        $Id: RadiusPrincipal.java,v 1.3 2010/06/04 22:41:44 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/10/14 19:28:23 $
+ * Date:        $Date: 2010/06/04 22:41:44 $
  * ====================================================================
  *
  * Copyright (C) 2004  OMEX AG
@@ -59,7 +59,7 @@ import java.security.Principal;
 /**
  *
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class RadiusPrincipal implements Principal{
     private String principalName;
@@ -86,6 +86,7 @@ public class RadiusPrincipal implements Principal{
      *
      * @return a string representation of this <code>RadiusPrincipal</code>.
      */
+    @Override
     public String toString(){
         return this.getName();
     }
@@ -100,6 +101,7 @@ public class RadiusPrincipal implements Principal{
      * @return true if the specified Object is equal to this
      *		<code>RadiusPrincipal</code>.
      */
+    @Override
     public boolean equals(Object object){
         if (object == null){
             return false;
@@ -119,6 +121,7 @@ public class RadiusPrincipal implements Principal{
     /**
      * @return int the hashCode for this <code>RadiusPrincipal</code>
      */
+    @Override
     public int hashCode(){
         return this.principalName.hashCode();
     }

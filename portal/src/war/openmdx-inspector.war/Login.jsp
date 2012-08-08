@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Login.jsp,v 1.68 2009/11/16 06:14:31 cmu Exp $
+ * Name:        $Id: Login.jsp,v 1.69 2010/06/09 08:53:07 cmu Exp $
  * Description: Login.jsp
- * Revision:    $Revision: 1.68 $
+ * Revision:    $Revision: 1.69 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/16 06:14:31 $
+ * Date:        $Date: 2010/06/09 08:53:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -257,7 +257,7 @@ org.openmdx.portal.servlet.*
 	        <input type="password" name="j_password" title="<%= textsPassword.get(localeStr) %>">
 	      </td>
 	      <td nowrap style="vertical-align: middle;padding-right:8px;">
-	        <span style="vertical-align: bottom;"><input class="submit" type="submit" name="button" value="<%= textsLogin.get(localeStr) %>" onclick="if(checkRedirect()){return false;}else{$('flyout').style.display='none';$('wait').style.visibility='visible';this.disabled=true;this.form.submit();};" >&nbsp;<img id="wait" src="<%=request.getContextPath()%>/images/wait.gif" alt="" title="" style="visibility:hidden;" /></span>
+	        <span style="vertical-align: bottom;"><input class="submit" type="submit" name="button" value="<%= textsLogin.get(localeStr) %>" onclick="if($('loginFailedHint')){$('loginFailedHint').style.display='none'};if(checkRedirect()){return false;}else{$('flyout').style.display='none';$('wait').style.visibility='visible';this.disabled=true;this.form.submit();};" >&nbsp;<img id="wait" src="<%=request.getContextPath()%>/images/wait.gif" alt="" title="" style="visibility:hidden;" /></span>
 	      </td>
       </tr>
       <tr>
@@ -266,7 +266,7 @@ org.openmdx.portal.servlet.*
 <%
       if(loginFailed) {
 %>
-	      <tr>
+	      <tr id="loginFailedHint">
 	        <td colspan="3" class="cellErrorRight" style="padding:5px;">
 	          &nbsp;<b><%= textsLoginFailed.get(localeStr) %></b>
 	        </td>

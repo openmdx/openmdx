@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PrimitiveArrayRecord.java,v 1.1 2010/03/17 16:31:08 hburger Exp $
+ * Name:        $Id: PrimitiveArrayRecord.java,v 1.2 2010/06/02 13:45:10 hburger Exp $
  * Description: PrimitiveArrayIndexedRecord 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/17 16:31:08 $
+ * Date:        $Date: 2010/06/02 13:45:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -200,6 +200,7 @@ final class PrimitiveArrayRecord
      *
      * @return   a multi-line String representation of this Record.
      */
+    @Override
     public String toString(
     ){
         return IndentingFormatter.toString(this);

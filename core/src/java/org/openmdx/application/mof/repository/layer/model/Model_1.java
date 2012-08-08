@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.19 2010/01/03 15:02:04 wfro Exp $
+ * Name:        $Id: Model_1.java,v 1.20 2010/06/02 13:42:52 hburger Exp $
  * Description: model1 application plugin
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 15:02:04 $
+ * Date:        $Date: 2010/06/02 13:42:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -82,6 +82,7 @@ public class Model_1 extends Layer_1 {
     }
     
     //---------------------------------------------------------------------------
+    @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {

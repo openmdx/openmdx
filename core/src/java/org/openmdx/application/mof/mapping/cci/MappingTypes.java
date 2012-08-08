@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MappingTypes.java,v 1.1 2009/01/13 02:10:41 wfro Exp $
+ * Name:        $Id: MappingTypes.java,v 1.2 2010/06/21 09:49:15 hburger Exp $
  * Description: MappingTypes 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:41 $
+ * Date:        $Date: 2010/06/21 09:49:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,6 +67,7 @@ public class MappingTypes {
     /**
      * @deprecated use {@link MappingTypes#XMI1}
      */
+    @Deprecated
     public static final String XMI_OPENMDX_1 = "xmi.openmdx-1";
     
     //------------------------------------------------------------------------

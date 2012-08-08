@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightContainer.java,v 1.20 2010/04/16 10:02:59 hburger Exp $
+ * Name:        $Id: LightweightContainer.java,v 1.22 2010/08/09 13:16:16 hburger Exp $
  * Description: Lightweight Container
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 10:02:59 $
+ * Date:        $Date: 2010/08/09 13:16:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -1628,6 +1628,7 @@ public class LightweightContainer {
 	                xaDataSource,
 	                connectionRequestInfo
 	            );
+	            assignCredentials(credentials, managedConnectionFactory);
 	            try {
 					connectionFactory = managedConnectionFactory.createConnectionFactory(
 					    connectionManager
@@ -1669,11 +1670,13 @@ public class LightweightContainer {
                         ("as '" + passwordCredential.getUserName() + "'")
             );
             try {
-                connectionFactory = new ManagedDataproviderConnectionFactory(
+                ManagedConnectionFactory managedConnectionFactory = new ManagedDataproviderConnectionFactory(
                     resourceAdapter.getConnectionFactoryImplClass(),
                     new URL (connectionURL),
                     passwordCredential
-                ).createConnectionFactory();
+                );
+                assignCredentials(credentials, managedConnectionFactory);
+                connectionFactory = managedConnectionFactory.createConnectionFactory();
             } catch (MalformedURLException exception){
                 report.addError(
                     "Connection URL '" + connectionURL + "' could not be parsed",
@@ -1694,6 +1697,7 @@ public class LightweightContainer {
                     configuration
                 );
                 ManagedConnectionFactory managedConnectionFactory = managedConnectionFactoryBuilder.instantiate();
+                assignCredentials(credentials, managedConnectionFactory);
                 connectionFactory = credentials.isEmpty() ? managedConnectionFactory.createConnectionFactory(
                 ) : managedConnectionFactory.createConnectionFactory(
                     new ShareableConnectionManager(credentials)
@@ -1731,7 +1735,26 @@ public class LightweightContainer {
         }
         resourceAdapter.deploy(containerContext, applicationContext, reference);
     }
+    
 
+    /**
+     * Assign the credentials to a managed connection factory
+     * 
+     * @param credentials
+     * @param to the managed connection factory to which the credentials shall be assigned
+     */
+    private static void assignCredentials(
+        Set<?> credentials,
+        ManagedConnectionFactory to
+    ){
+        for(Object credential : credentials){
+            if(credential instanceof PasswordCredential) {
+                PasswordCredential passwordCredential = (PasswordCredential) credential; 
+                passwordCredential.setManagedConnectionFactory(to);
+            }
+        }
+    }
+    
     /**
      * Convert the transaction isolation's string representation
      * 
@@ -1818,7 +1841,6 @@ public class LightweightContainer {
     /**
      * Create a module id to be included in a report.
      * 
-     * @param type
      * @param module
      * 
      * @return module type, URI and display name if any
@@ -1902,7 +1924,8 @@ public class LightweightContainer {
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
-    public String toString(){
+    @Override
+	public String toString(){
         return this.mode.toString();
     }
 

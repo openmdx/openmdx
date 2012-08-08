@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefException_1.java,v 1.8 2009/03/05 13:53:30 hburger Exp $
+ * Name:        $Id: RefException_1.java,v 1.9 2010/06/02 13:43:29 hburger Exp $
  * Description: RefException_1 class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/05 13:53:30 $
+ * Date:        $Date: 2010/06/02 13:43:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -187,6 +187,7 @@ public class RefException_1
    *
    * @return Throwable  The exception cause.
    */
+  @Override
   public final BasicException getCause(
   ){
       return (BasicException) super.getCause();

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ResultRecord.java,v 1.2 2010/03/19 13:30:01 hburger Exp $
+ * Name:        $Id: ResultRecord.java,v 1.3 2010/06/02 10:50:06 hburger Exp $
  * Description: Result Record
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 13:30:01 $
+ * Date:        $Date: 2010/06/02 10:50:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -100,7 +100,7 @@ public class ResultRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.ResultRecord#setMore(boolean)
      */
-    @Override
+//  @Override
     public void setHasMore(boolean hasMore) {
         this.hasMore = Boolean.valueOf(hasMore);
     }
@@ -108,7 +108,7 @@ public class ResultRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.ResultRecord#getMore()
      */
-    @Override
+//  @Override
     public Boolean getHasMore() {
         return this.hasMore;
     }
@@ -116,7 +116,7 @@ public class ResultRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.ResultRecord#setTotal(long)
      */
-    @Override
+//  @Override
     public void setTotal(long total) {
         this.total = Long.valueOf(total);
     }
@@ -124,7 +124,7 @@ public class ResultRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.ResultRecordd#getTotal()
      */
-    @Override
+//  @Override
     public Long getTotal() {
         return this.total;
     }
@@ -137,7 +137,7 @@ public class ResultRecord
     /* (non-Javadoc)
      * @see java.io.Externalizable#readExternal(java.io.ObjectInput)
      */
-    @Override
+//  @Override
     public void readExternal(
         ObjectInput in
     ) throws IOException, ClassNotFoundException {
@@ -158,7 +158,7 @@ public class ResultRecord
     /* (non-Javadoc)
      * @see java.io.Externalizable#writeExternal(java.io.ObjectOutput)
      */
-    @Override
+//  @Override
     public void writeExternal(
         ObjectOutput out
     ) throws IOException {

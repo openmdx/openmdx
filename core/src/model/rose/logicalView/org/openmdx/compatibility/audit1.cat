@@ -1,7 +1,7 @@
 
 (object Petal
-    version    	45
-    _written   	"Rose 7.6.0109.2314"
+    version    	50
+    _written   	"Rose 8.3.0407.2800"
     charSet    	0)
 
 (object Class_Category "audit1"
@@ -14,106 +14,24 @@
 	    quid       	"3EC39E03013F"
 	    superclasses 	(list inheritance_relationship_list
 		(object Inheritance_Relationship
-		    quid       	"400DCC10005C"
-		    supplier   	"Logical View::org::openmdx::base::BasicObject"
-		    quidu      	"3FB3D6450214"))
-	    class_attributes 	(list class_attribute_list
-		(object ClassAttribute "unitOfWorkId"
-		    attributes 	(list Attribute_Set
-			(object Attribute
-			    tool       	"SPICE"
-			    name       	"isChangeable"
-			    value      	(value Text "false")))
-		    quid       	"3EC4EF2503D2"
-		    type       	"org::w3c::string"
-		    exportControl 	"Public"
-		    derived    	TRUE)
-		(object ClassAttribute "taskId"
-		    quid       	"3EC39E5C011F"
-		    stereotype 	"0..1"
-		    type       	"org::w3c::string"
-		    exportControl 	"Public")))
-	(object Class "Auditable"
-	    quid       	"3EC0A9F40299"
-	    stereotype 	"root"
-	    superclasses 	(list inheritance_relationship_list
-		(object Inheritance_Relationship
-		    quid       	"403E0F760027"
-		    supplier   	"Logical View::org::openmdx::base::Context"
-		    quidu      	"403F322B0061")))
-	(object Class "Involved"
-	    quid       	"3EC2223F024F"
-	    class_attributes 	(list class_attribute_list
-		(object ClassAttribute "unitOfWorkId"
-		    attributes 	(list Attribute_Set
-			(object Attribute
-			    tool       	"SPICE"
-			    name       	"isChangeable"
-			    value      	(value Text "false")))
-		    quid       	"3EC222950054"
-		    type       	"org::w3c::string"
-		    exportControl 	"Public"
-		    derived    	TRUE)
-		(object ClassAttribute "modifiedFeature"
-		    attributes 	(list Attribute_Set
-			(object Attribute
-			    tool       	"SPICE"
-			    name       	"isChangeable"
-			    value      	(value Text "false")))
-		    quid       	"3EC2228602DD"
-		    stereotype 	"set"
-		    type       	"org::w3c::string"
-		    exportControl 	"Public"
-		    derived    	TRUE)
-		(object ClassAttribute "taskId"
-		    attributes 	(list Attribute_Set
-			(object Attribute
-			    tool       	"SPICE"
-			    name       	"isChangeable"
-			    value      	(value Text "false")))
-		    quid       	"3EC222A0005A"
-		    stereotype 	"0..1"
-		    type       	"org::w3c::string"
-		    exportControl 	"Public"
-		    derived    	TRUE)))
+		    quid       	"4C234EBA0274"
+		    supplier   	"Logical View::org::openmdx::audit2::UnitOfWork"
+		    quidu      	"403E07F103D6")))
 	(object Class "Segment"
 	    quid       	"3EC0A99F012E"
 	    superclasses 	(list inheritance_relationship_list
 		(object Inheritance_Relationship
 		    quid       	"3EC4E56A0182"
-		    supplier   	"Logical View::org::openmdx::base::Segment"
-		    quidu      	"3FC487C80099")))
-	(object Association "SegmentContainsUnitOfWork"
-	    quid       	"3EC39E12024F"
-	    roles      	(list role_list
-		(object Role "unitOfWork"
-		    quid       	"3EC39E13005C"
-		    label      	"unitOfWork"
-		    supplier   	"Logical View::org::openmdx::compatibility::audit1::UnitOfWork"
-		    quidu      	"3EC39E03013F"
-		    keys       	(list class_attribute_list
-			(object ClassAttribute "id"
-			    quid       	"3EC39E1A0084"
-			    type       	"org::w3c::string"))
-		    client_cardinality 	(value cardinality "0..1")
-		    Constraints 	"isFrozen"
-		    Containment 	"By Value"
-		    is_navigable 	TRUE)
-		(object Role "segment"
-		    quid       	"3EC39E130066"
-		    label      	"segment"
-		    supplier   	"Logical View::org::openmdx::compatibility::audit1::Segment"
-		    quidu      	"3EC0A99F012E"
-		    client_cardinality 	(value cardinality "1..1")
-		    is_aggregate 	TRUE)))
+		    supplier   	"Logical View::org::openmdx::audit2::Segment"
+		    quidu      	"4AC1CCD4002E")))
 	(object Association "UnitOfWorkInvolvesObject"
 	    quid       	"3EC39EA40353"
 	    roles      	(list role_list
 		(object Role "involved"
 		    quid       	"3EC39EA501A6"
 		    label      	"involved"
-		    supplier   	"Logical View::org::openmdx::compatibility::audit1::Involved"
-		    quidu      	"3EC2223F024F"
+		    supplier   	"Logical View::org::openmdx::audit2::Involvement"
+		    quidu      	"3FE1675B01C3"
 		    keys       	(list class_attribute_list
 			(object ClassAttribute "index"
 			    quid       	"3EC4E7560310"
@@ -125,56 +43,7 @@
 		    label      	"unitOfWork"
 		    supplier   	"Logical View::org::openmdx::compatibility::audit1::UnitOfWork"
 		    quidu      	"3EC39E03013F"
-		    client_cardinality 	(value cardinality "1..1"))))
-	(object Association "ObjectInvolvedInUnitOfWork"
-	    quid       	"3EC222CC0220"
-	    roles      	(list role_list
-		(object Role "involved"
-		    quid       	"3EC222CD0087"
-		    label      	"involved"
-		    supplier   	"Logical View::org::openmdx::compatibility::audit1::Involved"
-		    quidu      	"3EC2223F024F"
-		    keys       	(list class_attribute_list
-			(object ClassAttribute "unitOfWorkId"
-			    quid       	"3EC222FE0005"
-			    type       	"org::w3c::string"))
-		    client_cardinality 	(value cardinality "0..1")
-		    Constraints 	"isFrozen"
-		    Containment 	"By Value"
-		    is_navigable 	TRUE)
-		(object Role "auditable"
-		    quid       	"3EC222CD0089"
-		    label      	"auditable"
-		    supplier   	"Logical View::org::openmdx::compatibility::audit1::Auditable"
-		    quidu      	"3EC0A9F40299"
-		    client_cardinality 	(value cardinality "1..1")
-		    Constraints 	"isFrozen"
-		    is_aggregate 	TRUE))
-	    derived    	TRUE)
-	(object Association "InvolvedHasView"
-	    quid       	"400DC7BC01A3"
-	    roles      	(list role_list
-		(object Role "view"
-		    quid       	"400DC7BD0386"
-		    label      	"view"
-		    supplier   	"Logical View::org::openmdx::base::BasicObject"
-		    quidu      	"3FB3D6450214"
-		    keys       	(list class_attribute_list
-			(object ClassAttribute "namespace"
-			    quid       	"400DC7E3036C"
-			    type       	"org::w3c::string"))
-		    client_cardinality 	(value cardinality "0..1")
-		    Containment 	"By Reference"
-		    is_navigable 	TRUE)
-		(object Role "involved"
-		    quid       	"400DC7BE0034"
-		    label      	"involved"
-		    supplier   	"Logical View::org::openmdx::compatibility::audit1::Involved"
-		    quidu      	"3EC2223F024F"
-		    client_cardinality 	(value cardinality "1..1")
-		    Constraints 	"isFrozen"
-		    is_aggregate 	TRUE))
-	    derived    	TRUE))
+		    client_cardinality 	(value cardinality "1")))))
     logical_presentations 	(list unit_reference_list
 	(object ClassDiagram "Main"
 	    quid       	"3EC4B0260301"
@@ -182,13 +51,14 @@
 	    zoom       	100
 	    max_height 	28350
 	    max_width  	21600
-	    origin_x   	984
+	    origin_x   	0
 	    origin_y   	0
 	    items      	(list diagram_item_list
-		(object ClassView "Class" "Logical View::org::openmdx::base::Segment" @1
+		(object ClassView "Class" "Logical View::org::openmdx::compatibility::audit1::Segment" @1
 		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
 		    IncludeOperation 	TRUE
-		    location   	(1897, 188)
+		    location   	(343, 153)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -200,24 +70,24 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@1
-			location   	(1628, 98)
+			location   	(62, 72)
 			fill_color 	13434879
 			nlines     	1
-			max_width  	539
+			max_width  	563
 			justify    	0
 			label      	"Segment")
 		    icon_style 	"Icon"
 		    line_color 	3342489
-		    fill_color 	10337791
-		    quidu      	"3FC487C80099"
-		    width      	557
-		    height     	200
+		    fill_color 	13434879
+		    quidu      	"3EC0A99F012E"
+		    width      	581
+		    height     	182
 		    annotation 	8)
-		(object ClassView "Class" "Logical View::org::openmdx::compatibility::audit1::Segment" @2
+		(object ClassView "Class" "Logical View::org::openmdx::audit2::Segment" @2
 		    ShowCompartmentStereotypes 	TRUE
 		    IncludeAttribute 	TRUE
 		    IncludeOperation 	TRUE
-		    location   	(1902, 435)
+		    location   	(1625, 153)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -229,62 +99,36 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@2
-			location   	(1633, 389)
+			location   	(1281, 72)
 			fill_color 	13434879
 			nlines     	1
-			max_width  	538
+			max_width  	688
 			justify    	0
 			label      	"Segment")
 		    icon_style 	"Icon"
 		    line_color 	3342489
-		    fill_color 	13434879
-		    quidu      	"3EC0A99F012E"
-		    width      	556
-		    height     	112
+		    fill_color 	11777023
+		    quidu      	"4AC1CCD4002E"
+		    width      	706
+		    height     	182
 		    annotation 	8)
-		(object ClassView "Class" "Logical View::org::openmdx::compatibility::audit1::Auditable" @3
-		    ShowCompartmentStereotypes 	TRUE
-		    IncludeAttribute 	TRUE
-		    IncludeOperation 	TRUE
-		    location   	(1066, 951)
-		    font       	(object Font
-			size       	8
-			face       	"Arial"
-			bold       	FALSE
-			italics    	FALSE
-			underline  	FALSE
-			strike     	FALSE
-			color      	0
-			default_color 	TRUE)
-		    label      	(object ItemLabel
-			Parent_View 	@3
-			location   	(753, 915)
-			fill_color 	13434879
-			nlines     	1
-			max_width  	626
-			justify    	0
-			label      	"Auditable")
-		    stereotype 	(object ItemLabel
-			Parent_View 	@3
-			location   	(753, 874)
-			fill_color 	13434879
-			anchor     	10
-			nlines     	1
-			max_width  	626
-			justify    	0
-			label      	"<<root>>")
-		    icon_style 	"Icon"
+		(object InheritView "" @3
+		    stereotype 	TRUE
 		    line_color 	3342489
-		    fill_color 	13434879
-		    quidu      	"3EC0A9F40299"
-		    width      	644
-		    height     	175
-		    annotation 	8)
-		(object ClassView "Class" "Logical View::org::openmdx::compatibility::audit1::UnitOfWork" @4
+		    quidu      	"3EC4E56A0182"
+		    client     	@1
+		    supplier   	@2
+		    vertices   	(list Points
+			(633, 150)
+			(1272, 150))
+		    line_style 	3
+		    origin_attachment 	(633, 150)
+		    terminal_attachment 	(1272, 150))
+		(object ClassView "Class" "Logical View::org::openmdx::audit2::UnitOfWork" @4
 		    ShowCompartmentStereotypes 	TRUE
 		    IncludeAttribute 	TRUE
 		    IncludeOperation 	TRUE
-		    location   	(1918, 969)
+		    location   	(1625, 694)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -296,19 +140,19 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@4
-			location   	(1643, 882)
+			location   	(1287, 582)
 			fill_color 	13434879
 			nlines     	1
-			max_width  	551
+			max_width  	676
 			justify    	0
 			label      	"UnitOfWork")
 		    icon_style 	"Icon"
 		    line_color 	3342489
-		    fill_color 	13434879
-		    quidu      	"3EC39E03013F"
+		    fill_color 	11777023
+		    quidu      	"403E07F103D6"
 		    compartment 	(object Compartment
 			Parent_View 	@4
-			location   	(1643, 934)
+			location   	(1287, 668)
 			font       	(object Font
 			    size       	8
 			    face       	"Arial"
@@ -319,15 +163,15 @@
 			    color      	0
 			    default_color 	TRUE)
 			icon_style 	"Icon"
-			fill_color 	16777215
+			fill_color 	13434879
 			anchor     	2
 			nlines     	3
 			max_width  	528)
-		    width      	569
-		    height     	194
+		    width      	694
+		    height     	244
 		    annotation 	8)
 		(object AssociationViewNew "SegmentContainsUnitOfWork" @5
-		    location   	(1924, 681)
+		    location   	(1628, 407)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -339,7 +183,7 @@
 			default_color 	TRUE)
 		    label      	(object SegLabel @6
 			Parent_View 	@5
-			location   	(1924, 664)
+			location   	(1606, 451)
 			font       	(object Font
 			    size       	8
 			    face       	"Arial"
@@ -355,16 +199,16 @@
 			max_width  	450
 			justify    	0
 			label      	"SegmentContainsUnitOfWork"
-			pctDist    	0.500000
-			height     	18
-			orientation 	0)
+			pctDist    	0.133333
+			height     	44
+			orientation 	1)
 		    stereotype 	TRUE
 		    line_color 	3342489
-		    quidu      	"3EC39E12024F"
+		    quidu      	"4AC1CDB40280"
 		    roleview_list 	(list RoleViews
 			(object RoleView "segment" @7
 			    Parent_View 	@5
-			    location   	(-251, -456)
+			    location   	(34, -193)
 			    font       	(object Font
 				size       	8
 				face       	"Arial"
@@ -376,7 +220,7 @@
 				default_color 	TRUE)
 			    label      	(object SegLabel @8
 				Parent_View 	@7
-				location   	(2021, 580)
+				location   	(1730, 348)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -392,20 +236,23 @@
 				max_width  	152
 				justify    	0
 				label      	"+segment"
-				pctDist    	0.531579
-				height     	97
+				pctDist    	0.358108
+				height     	102
 				orientation 	1)
 			    stereotype 	TRUE
 			    line_color 	3342489
-			    quidu      	"3EC39E130066"
+			    quidu      	"4AC1CDB50021"
 			    client     	@5
 			    supplier   	@2
+			    vertices   	(list Points
+				(1628, 407)
+				(1628, 243))
 			    line_style 	3
-			    origin_attachment 	(1924, 681)
-			    terminal_attachment 	(1924, 490)
+			    origin_attachment 	(1628, 407)
+			    terminal_attachment 	(1628, 243)
 			    label      	(object SegLabel @9
 				Parent_View 	@7
-				location   	(1877, 578)
+				location   	(1598, 344)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -420,15 +267,15 @@
 				nlines     	1
 				max_width  	15
 				justify    	0
-				label      	"1..1"
-				pctDist    	0.542105
-				height     	48
+				label      	"1"
+				pctDist    	0.391892
+				height     	31
 				orientation 	0)
 			    label      	(object SegLabel @10
 				Parent_View 	@7
-				location   	(1924, 519)
+				location   	(1628, 277)
 				font       	(object Font
-				    size       	6
+				    size       	8
 				    face       	"Arial"
 				    bold       	FALSE
 				    italics    	FALSE
@@ -439,7 +286,7 @@
 				anchor     	5
 				anchor_loc 	1
 				nlines     	1
-				max_width  	200
+				max_width  	275
 				justify    	0
 				label      	"id : org::w3c::string"
 				pctDist    	0.900000
@@ -447,7 +294,7 @@
 				orientation 	0))
 			(object RoleView "unitOfWork" @11
 			    Parent_View 	@5
-			    location   	(-251, -456)
+			    location   	(34, -193)
 			    font       	(object Font
 				size       	8
 				face       	"Arial"
@@ -459,7 +306,7 @@
 				default_color 	TRUE)
 			    label      	(object SegLabel @12
 				Parent_View 	@11
-				location   	(2040, 850)
+				location   	(1759, 537)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -472,23 +319,26 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	187
+				max_width  	179
 				justify    	0
 				label      	"+unitOfWork"
-				pctDist    	0.884817
-				height     	116
+				pctDist    	0.785235
+				height     	131
 				orientation 	0)
 			    stereotype 	TRUE
 			    line_color 	3342489
-			    quidu      	"3EC39E13005C"
+			    quidu      	"4AC1CDB5001F"
 			    client     	@5
 			    supplier   	@4
+			    vertices   	(list Points
+				(1628, 407)
+				(1628, 572))
 			    line_style 	3
-			    origin_attachment 	(1924, 681)
-			    terminal_attachment 	(1924, 872)
+			    origin_attachment 	(1628, 407)
+			    terminal_attachment 	(1628, 572)
 			    label      	(object SegLabel @13
 				Parent_View 	@11
-				location   	(1874, 850)
+				location   	(1564, 544)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -504,72 +354,14 @@
 				max_width  	15
 				justify    	0
 				label      	"0..1"
-				pctDist    	0.884817
-				height     	51
-				orientation 	1)
-			    label      	(object SegLabel @14
-				Parent_View 	@11
-				location   	(1924, 798)
-				font       	(object Font
-				    size       	8
-				    face       	"Arial"
-				    bold       	FALSE
-				    italics    	FALSE
-				    underline  	FALSE
-				    strike     	FALSE
-				    color      	0
-				    default_color 	TRUE)
-				anchor     	3
-				anchor_loc 	1
-				nlines     	1
-				max_width  	149
-				justify    	0
-				label      	"{isFrozen}"
-				pctDist    	0.612565
-				height     	0
-				orientation 	0))))
-		(object ClassView "Class" "Logical View::org::openmdx::base::BasicObject" @15
-		    ShowCompartmentStereotypes 	TRUE
-		    IncludeOperation 	TRUE
-		    location   	(328, 1090)
-		    font       	(object Font
-			size       	8
-			face       	"Arial"
-			bold       	FALSE
-			italics    	TRUE
-			underline  	FALSE
-			strike     	FALSE
-			color      	0
-			default_color 	TRUE)
-		    label      	(object ItemLabel
-			Parent_View 	@15
-			location   	(84, 1047)
-			fill_color 	13434879
-			nlines     	1
-			max_width  	488
-			justify    	0
-			label      	"BasicObject")
-		    stereotype 	(object ItemLabel
-			Parent_View 	@15
-			location   	(84, 1006)
-			fill_color 	13434879
-			anchor     	10
-			nlines     	1
-			max_width  	488
-			justify    	0
-			label      	"<<root>>")
-		    icon_style 	"Icon"
-		    line_color 	3342489
-		    fill_color 	10337791
-		    quidu      	"3FB3D6450214"
-		    width      	506
-		    height     	188
-		    annotation 	8)
-		(object ClassView "Class" "Logical View::org::openmdx::compatibility::audit1::Involved" @16
+				pctDist    	0.838926
+				height     	65
+				orientation 	1))))
+		(object ClassView "Class" "Logical View::org::openmdx::compatibility::audit1::UnitOfWork" @14
 		    ShowCompartmentStereotypes 	TRUE
 		    IncludeAttribute 	TRUE
 		    IncludeOperation 	TRUE
-		    location   	(1156, 1758)
+		    location   	(350, 668)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -580,20 +372,49 @@
 			color      	0
 			default_color 	TRUE)
 		    label      	(object ItemLabel
-			Parent_View 	@16
-			location   	(93, 1643)
+			Parent_View 	@14
+			location   	(59, 563)
 			fill_color 	13434879
 			nlines     	1
-			max_width  	2127
+			max_width  	582
 			justify    	0
-			label      	"Involved")
+			label      	"UnitOfWork")
 		    icon_style 	"Icon"
 		    line_color 	3342489
 		    fill_color 	13434879
-		    quidu      	"3EC2223F024F"
+		    quidu      	"3EC39E03013F"
+		    width      	600
+		    height     	231
+		    annotation 	8)
+		(object ClassView "Class" "Logical View::org::openmdx::audit2::Involvement" @15
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1025, 1391)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@15
+			location   	(65, 1223)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	1921
+			justify    	0
+			label      	"Involvement")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	11777023
+		    quidu      	"3FE1675B01C3"
 		    compartment 	(object Compartment
-			Parent_View 	@16
-			location   	(93, 1695)
+			Parent_View 	@15
+			location   	(65, 1309)
 			font       	(object Font
 			    size       	8
 			    face       	"Arial"
@@ -604,15 +425,15 @@
 			    color      	0
 			    default_color 	TRUE)
 			icon_style 	"Icon"
-			fill_color 	16777215
+			fill_color 	13434879
 			anchor     	2
-			nlines     	4
+			nlines     	5
 			max_width  	693)
-		    width      	2145
-		    height     	251
+		    width      	1939
+		    height     	356
 		    annotation 	8)
-		(object AssociationViewNew "ObjectInvolvedInUnitOfWork" @17
-		    location   	(1081, 1334)
+		(object AssociationViewNew "UnitOfWorkInvolvesObject" @16
+		    location   	(1635, 1014)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -622,9 +443,9 @@
 			strike     	FALSE
 			color      	0
 			default_color 	TRUE)
-		    label      	(object SegLabel @18
-			Parent_View 	@17
-			location   	(1109, 1423)
+		    label      	(object SegLabel @17
+			Parent_View 	@16
+			location   	(1625, 1057)
 			font       	(object Font
 			    size       	8
 			    face       	"Arial"
@@ -637,19 +458,19 @@
 			anchor     	1
 			anchor_loc 	1
 			nlines     	1
-			max_width  	415
+			max_width  	450
 			justify    	0
-			label      	"/ObjectInvolvedInUnitOfWork"
-			pctDist    	0.983333
-			height     	89
+			label      	"/UnitOfWorkInvolvesObject"
+			pctDist    	0.350000
+			height     	43
 			orientation 	1)
 		    stereotype 	TRUE
 		    line_color 	3342489
-		    quidu      	"3EC222CC0220"
+		    quidu      	"4AC1CB7D02FD"
 		    roleview_list 	(list RoleViews
-			(object RoleView "auditable" @19
-			    Parent_View 	@17
-			    location   	(-1168, -513)
+			(object RoleView "unitOfWork" @18
+			    Parent_View 	@16
+			    location   	(744, -492)
 			    font       	(object Font
 				size       	8
 				face       	"Arial"
@@ -659,9 +480,9 @@
 				strike     	FALSE
 				color      	0
 				default_color 	TRUE)
-			    label      	(object SegLabel @20
-				Parent_View 	@19
-				location   	(1184, 1124)
+			    label      	(object SegLabel @19
+				Parent_View 	@18
+				location   	(1594, 856)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -674,23 +495,26 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	160
+				max_width  	179
 				justify    	0
-				label      	"+auditable"
-				pctDist    	0.707071
-				height     	103
-				orientation 	1)
+				label      	"+unitOfWork"
+				pctDist    	0.800000
+				height     	42
+				orientation 	0)
 			    stereotype 	TRUE
 			    line_color 	3342489
-			    quidu      	"3EC222CD0089"
-			    client     	@17
-			    supplier   	@3
+			    quidu      	"4AC1CB7E0282"
+			    client     	@16
+			    supplier   	@4
+			    vertices   	(list Points
+				(1635, 1014)
+				(1635, 815))
 			    line_style 	3
-			    origin_attachment 	(1081, 1334)
-			    terminal_attachment 	(1081, 1037)
-			    label      	(object SegLabel @21
-				Parent_View 	@19
-				location   	(1033, 1121)
+			    origin_attachment 	(1635, 1014)
+			    terminal_attachment 	(1635, 815)
+			    label      	(object SegLabel @20
+				Parent_View 	@18
+				location   	(1593, 916)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -705,36 +529,15 @@
 				nlines     	1
 				max_width  	15
 				justify    	0
-				label      	"1..1"
-				pctDist    	0.717172
-				height     	49
+				label      	"1"
+				pctDist    	0.497537
+				height     	43
 				orientation 	0)
-			    label      	(object SegLabel @22
-				Parent_View 	@19
-				location   	(1090, 1179)
+			    label      	(object SegLabel @21
+				Parent_View 	@18
+				location   	(1635, 849)
 				font       	(object Font
 				    size       	8
-				    face       	"Arial"
-				    bold       	FALSE
-				    italics    	FALSE
-				    underline  	FALSE
-				    strike     	FALSE
-				    color      	0
-				    default_color 	TRUE)
-				anchor     	3
-				anchor_loc 	1
-				nlines     	1
-				max_width  	149
-				justify    	0
-				label      	"{isFrozen}"
-				pctDist    	0.525253
-				height     	9
-				orientation 	1)
-			    label      	(object SegLabel @23
-				Parent_View 	@19
-				location   	(1081, 1066)
-				font       	(object Font
-				    size       	6
 				    face       	"Arial"
 				    bold       	FALSE
 				    italics    	FALSE
@@ -745,15 +548,15 @@
 				anchor     	5
 				anchor_loc 	1
 				nlines     	1
-				max_width  	316
+				max_width  	275
 				justify    	0
-				label      	"unitOfWorkId : org::w3c::string"
+				label      	"id : org::w3c::string"
 				pctDist    	0.900000
 				height     	12
-				orientation 	1))
-			(object RoleView "involved" @24
-			    Parent_View 	@17
-			    location   	(-1168, -513)
+				orientation 	0))
+			(object RoleView "involvement" @22
+			    Parent_View 	@16
+			    location   	(744, -492)
 			    font       	(object Font
 				size       	8
 				face       	"Arial"
@@ -763,9 +566,9 @@
 				strike     	FALSE
 				color      	0
 				default_color 	TRUE)
-			    label      	(object SegLabel @25
-				Parent_View 	@24
-				location   	(1180, 1614)
+			    label      	(object SegLabel @23
+				Parent_View 	@22
+				location   	(1753, 1188)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -778,23 +581,26 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	156
+				max_width  	204
 				justify    	0
-				label      	"+involved"
-				pctDist    	0.942761
-				height     	99
+				label      	"+involvement"
+				pctDist    	0.872549
+				height     	118
 				orientation 	0)
 			    stereotype 	TRUE
 			    line_color 	3342489
-			    quidu      	"3EC222CD0087"
-			    client     	@17
-			    supplier   	@16
+			    quidu      	"4AC1CB7E0280"
+			    client     	@16
+			    supplier   	@15
+			    vertices   	(list Points
+				(1635, 1014)
+				(1635, 1213))
 			    line_style 	3
-			    origin_attachment 	(1081, 1334)
-			    terminal_attachment 	(1081, 1632)
-			    label      	(object SegLabel @26
-				Parent_View 	@24
-				location   	(1037, 1616)
+			    origin_attachment 	(1635, 1014)
+			    terminal_attachment 	(1635, 1213)
+			    label      	(object SegLabel @24
+				Parent_View 	@22
+				location   	(1593, 1185)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -807,35 +613,14 @@
 				anchor     	2
 				anchor_loc 	1
 				nlines     	1
-				max_width  	112
+				max_width  	15
 				justify    	0
 				label      	"0..1"
-				pctDist    	0.949495
-				height     	45
-				orientation 	1)
-			    label      	(object SegLabel @27
-				Parent_View 	@24
-				location   	(1090, 1561)
-				font       	(object Font
-				    size       	8
-				    face       	"Arial"
-				    bold       	FALSE
-				    italics    	FALSE
-				    underline  	FALSE
-				    strike     	FALSE
-				    color      	0
-				    default_color 	TRUE)
-				anchor     	3
-				anchor_loc 	1
-				nlines     	1
-				max_width  	149
-				justify    	0
-				label      	"{isFrozen}"
-				pctDist    	0.764310
-				height     	9
-				orientation 	0))))
-		(object AssociationViewNew "UnitOfWorkInvolvesObject" @28
-		    location   	(1934, 1349)
+				pctDist    	0.862745
+				height     	43
+				orientation 	1))))
+		(object AssociationViewNew "UnitOfWorkInvolvesObject" @25
+		    location   	(366, 998)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -845,9 +630,9 @@
 			strike     	FALSE
 			color      	0
 			default_color 	TRUE)
-		    label      	(object SegLabel @29
-			Parent_View 	@28
-			location   	(1900, 1354)
+		    label      	(object SegLabel @26
+			Parent_View 	@25
+			location   	(332, 1003)
 			font       	(object Font
 			    size       	8
 			    face       	"Arial"
@@ -870,9 +655,9 @@
 		    line_color 	3342489
 		    quidu      	"3EC39EA40353"
 		    roleview_list 	(list RoleViews
-			(object RoleView "unitOfWork" @30
-			    Parent_View 	@28
-			    location   	(-315, -498)
+			(object RoleView "unitOfWork" @27
+			    Parent_View 	@25
+			    location   	(-1883, -849)
 			    font       	(object Font
 				size       	8
 				face       	"Arial"
@@ -882,9 +667,9 @@
 				strike     	FALSE
 				color      	0
 				default_color 	TRUE)
-			    label      	(object SegLabel @31
-				Parent_View 	@30
-				location   	(2032, 1202)
+			    label      	(object SegLabel @28
+				Parent_View 	@27
+				location   	(476, 863)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -900,20 +685,23 @@
 				max_width  	187
 				justify    	0
 				label      	"+unitOfWork"
-				pctDist    	0.522988
-				height     	98
+				pctDist    	0.628319
+				height     	110
 				orientation 	1)
 			    stereotype 	TRUE
 			    line_color 	3342489
 			    quidu      	"3EC39EA501A8"
-			    client     	@28
-			    supplier   	@4
+			    client     	@25
+			    supplier   	@14
+			    vertices   	(list Points
+				(366, 998)
+				(366, 783))
 			    line_style 	3
-			    origin_attachment 	(1934, 1349)
-			    terminal_attachment 	(1934, 1066)
-			    label      	(object SegLabel @32
-				Parent_View 	@30
-				location   	(1898, 1202)
+			    origin_attachment 	(366, 998)
+			    terminal_attachment 	(366, 783)
+			    label      	(object SegLabel @29
+				Parent_View 	@27
+				location   	(337, 863)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -928,13 +716,13 @@
 				nlines     	1
 				max_width  	15
 				justify    	0
-				label      	"1..1"
-				pctDist    	0.522988
-				height     	37
+				label      	"1"
+				pctDist    	0.628319
+				height     	30
 				orientation 	0)
-			    label      	(object SegLabel @33
-				Parent_View 	@30
-				location   	(1934, 1095)
+			    label      	(object SegLabel @30
+				Parent_View 	@27
+				location   	(366, 812)
 				font       	(object Font
 				    size       	6
 				    face       	"Arial"
@@ -947,15 +735,15 @@
 				anchor     	5
 				anchor_loc 	1
 				nlines     	1
-				max_width  	247
+				max_width  	250
 				justify    	0
 				label      	"index : org::w3c::integer"
 				pctDist    	0.900000
 				height     	12
 				orientation 	0))
-			(object RoleView "involved" @34
-			    Parent_View 	@28
-			    location   	(-315, -498)
+			(object RoleView "involved" @31
+			    Parent_View 	@25
+			    location   	(-1883, -849)
 			    font       	(object Font
 				size       	8
 				face       	"Arial"
@@ -965,9 +753,9 @@
 				strike     	FALSE
 				color      	0
 				default_color 	TRUE)
-			    label      	(object SegLabel @35
-				Parent_View 	@34
-				location   	(2032, 1592)
+			    label      	(object SegLabel @32
+				Parent_View 	@31
+				location   	(479, 1182)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -983,20 +771,23 @@
 				max_width  	156
 				justify    	0
 				label      	"+involved"
-				pctDist    	0.862857
-				height     	98
+				pctDist    	0.858407
+				height     	113
 				orientation 	0)
 			    stereotype 	TRUE
 			    line_color 	3342489
 			    quidu      	"3EC39EA501A6"
-			    client     	@28
-			    supplier   	@16
+			    client     	@25
+			    supplier   	@15
+			    vertices   	(list Points
+				(366, 998)
+				(366, 1213))
 			    line_style 	3
-			    origin_attachment 	(1934, 1349)
-			    terminal_attachment 	(1934, 1632)
-			    label      	(object SegLabel @36
-				Parent_View 	@34
-				location   	(1886, 1592)
+			    origin_attachment 	(366, 998)
+			    terminal_attachment 	(366, 1213)
+			    label      	(object SegLabel @33
+				Parent_View 	@31
+				location   	(318, 1184)
 				font       	(object Font
 				    size       	8
 				    face       	"Arial"
@@ -1015,264 +806,18 @@
 				pctDist    	0.862857
 				height     	49
 				orientation 	1))))
-		(object AssociationViewNew "InvolvedHasView" @37
-		    location   	(328, 1408)
-		    font       	(object Font
-			size       	8
-			face       	"Arial"
-			bold       	FALSE
-			italics    	FALSE
-			underline  	FALSE
-			strike     	FALSE
-			color      	0
-			default_color 	TRUE)
-		    label      	(object SegLabel @38
-			Parent_View 	@37
-			location   	(339, 1367)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	TRUE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			anchor     	1
-			anchor_loc 	1
-			nlines     	1
-			max_width  	450
-			justify    	0
-			label      	"/InvolvedHasView"
-			pctDist    	0.700000
-			height     	42
-			orientation 	0)
+		(object InheritView "" @34
 		    stereotype 	TRUE
 		    line_color 	3342489
-		    quidu      	"400DC7BC01A3"
-		    roleview_list 	(list RoleViews
-			(object RoleView "view" @39
-			    Parent_View 	@37
-			    location   	(-1206, -293)
-			    font       	(object Font
-				size       	8
-				face       	"Arial"
-				bold       	FALSE
-				italics    	FALSE
-				underline  	FALSE
-				strike     	FALSE
-				color      	0
-				default_color 	TRUE)
-			    label      	(object SegLabel @40
-				Parent_View 	@39
-				location   	(324, 1282)
-				font       	(object Font
-				    size       	8
-				    face       	"Arial"
-				    bold       	FALSE
-				    italics    	FALSE
-				    underline  	FALSE
-				    strike     	FALSE
-				    color      	0
-				    default_color 	TRUE)
-				anchor     	1
-				anchor_loc 	1
-				nlines     	1
-				max_width  	84
-				justify    	0
-				label      	"+view"
-				pctDist    	0.564220
-				height     	5
-				orientation 	0)
-			    stereotype 	TRUE
-			    line_color 	3342489
-			    quidu      	"400DC7BD0386"
-			    client     	@37
-			    supplier   	@15
-			    line_style 	3
-			    origin_attachment 	(328, 1408)
-			    terminal_attachment 	(328, 1184)
-			    label      	(object SegLabel @41
-				Parent_View 	@39
-				location   	(291, 1210)
-				font       	(object Font
-				    size       	8
-				    face       	"Arial"
-				    bold       	FALSE
-				    italics    	FALSE
-				    underline  	FALSE
-				    strike     	FALSE
-				    color      	0
-				    default_color 	TRUE)
-				anchor     	2
-				anchor_loc 	1
-				nlines     	1
-				max_width  	15
-				justify    	0
-				label      	"0..1"
-				pctDist    	0.885321
-				height     	38
-				orientation 	0))
-			(object RoleView "involved" @42
-			    Parent_View 	@37
-			    location   	(-1206, -293)
-			    font       	(object Font
-				size       	8
-				face       	"Arial"
-				bold       	FALSE
-				italics    	FALSE
-				underline  	FALSE
-				strike     	FALSE
-				color      	0
-				default_color 	TRUE)
-			    label      	(object SegLabel @43
-				Parent_View 	@42
-				location   	(362, 1444)
-				font       	(object Font
-				    size       	8
-				    face       	"Arial"
-				    bold       	FALSE
-				    italics    	FALSE
-				    underline  	FALSE
-				    strike     	FALSE
-				    color      	0
-				    default_color 	TRUE)
-				anchor     	1
-				anchor_loc 	1
-				nlines     	1
-				max_width  	156
-				justify    	0
-				label      	"+involved"
-				pctDist    	0.165138
-				height     	34
-				orientation 	0)
-			    stereotype 	TRUE
-			    line_color 	3342489
-			    quidu      	"400DC7BE0034"
-			    client     	@37
-			    supplier   	@16
-			    line_style 	3
-			    origin_attachment 	(328, 1408)
-			    terminal_attachment 	(328, 1632)
-			    label      	(object SegLabel @44
-				Parent_View 	@42
-				location   	(275, 1524)
-				font       	(object Font
-				    size       	8
-				    face       	"Arial"
-				    bold       	FALSE
-				    italics    	FALSE
-				    underline  	FALSE
-				    strike     	FALSE
-				    color      	0
-				    default_color 	TRUE)
-				anchor     	2
-				anchor_loc 	1
-				nlines     	1
-				max_width  	15
-				justify    	0
-				label      	"1..1"
-				pctDist    	0.522936
-				height     	54
-				orientation 	1)
-			    label      	(object SegLabel @45
-				Parent_View 	@42
-				location   	(448, 1523)
-				font       	(object Font
-				    size       	8
-				    face       	"Arial"
-				    bold       	FALSE
-				    italics    	FALSE
-				    underline  	FALSE
-				    strike     	FALSE
-				    color      	0
-				    default_color 	TRUE)
-				anchor     	3
-				anchor_loc 	1
-				nlines     	1
-				max_width  	141
-				justify    	0
-				label      	"{isFrozen}"
-				pctDist    	0.518349
-				height     	120
-				orientation 	0)
-			    label      	(object SegLabel @46
-				Parent_View 	@42
-				location   	(328, 1602)
-				font       	(object Font
-				    size       	6
-				    face       	"Arial"
-				    bold       	FALSE
-				    italics    	FALSE
-				    underline  	FALSE
-				    strike     	FALSE
-				    color      	0
-				    default_color 	TRUE)
-				anchor     	5
-				anchor_loc 	1
-				nlines     	1
-				max_width  	300
-				justify    	0
-				label      	"namespace : org::w3c::string"
-				pctDist    	0.900000
-				height     	12
-				orientation 	1))))
-		(object InheritView "" @47
-		    stereotype 	TRUE
-		    line_color 	3342489
-		    quidu      	"3EC4E56A0182"
-		    client     	@2
-		    supplier   	@1
+		    quidu      	"4C234EBA0274"
+		    client     	@14
+		    supplier   	@4
+		    vertices   	(list Points
+			(650, 681)
+			(1278, 681))
 		    line_style 	3
-		    origin_attachment 	(1900, 379)
-		    terminal_attachment 	(1900, 287))
-		(object ClassView "Class" "Logical View::org::openmdx::base::Context" @48
-		    ShowCompartmentStereotypes 	TRUE
-		    IncludeAttribute 	TRUE
-		    IncludeOperation 	TRUE
-		    location   	(1078, 678)
-		    font       	(object Font
-			size       	8
-			face       	"Arial"
-			bold       	FALSE
-			italics    	TRUE
-			underline  	FALSE
-			strike     	FALSE
-			color      	0
-			default_color 	TRUE)
-		    label      	(object ItemLabel
-			Parent_View 	@48
-			location   	(900, 639)
-			fill_color 	13434879
-			nlines     	1
-			max_width  	357
-			justify    	0
-			label      	"Context")
-		    stereotype 	(object ItemLabel
-			Parent_View 	@48
-			location   	(900, 598)
-			fill_color 	13434879
-			anchor     	10
-			nlines     	1
-			max_width  	357
-			justify    	0
-			label      	"<<root>>")
-		    icon_style 	"Icon"
-		    line_color 	3342489
-		    fill_color 	10337791
-		    quidu      	"403F322B0061"
-		    width      	375
-		    height     	181
-		    annotation 	8)
-		(object InheritView "" @49
-		    stereotype 	TRUE
-		    line_color 	3342489
-		    quidu      	"403E0F760027"
-		    client     	@3
-		    supplier   	@48
-		    line_style 	3
-		    origin_attachment 	(1066, 864)
-		    terminal_attachment 	(1066, 768))))
+		    origin_attachment 	(650, 681)
+		    terminal_attachment 	(1278, 681))))
 	(object ClassDiagram "_LICENSE"
 	    quid       	"410407050009"
 	    title      	"_LICENSE"
@@ -1282,7 +827,7 @@
 	    origin_x   	0
 	    origin_y   	0
 	    items      	(list diagram_item_list
-		(object NoteView @50
+		(object NoteView @35
 		    location   	(742, 1022)
 		    font       	(object Font
 			size       	8
@@ -1294,7 +839,7 @@
 			color      	0
 			default_color 	TRUE)
 		    label      	(object ItemLabel
-			Parent_View 	@50
+			Parent_View 	@35
 			location   	(61, 68)
 			fill_color 	13434879
 			nlines     	46

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefQuery_1.java,v 1.36 2010/04/16 18:24:20 hburger Exp $
+ * Name:        $Id: RefQuery_1.java,v 1.46 2010/08/25 14:44:18 hburger Exp $
  * Description: RefQuery_1 class
- * Revision:    $Revision: 1.36 $
+ * Revision:    $Revision: 1.46 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 18:24:20 $
+ * Date:        $Date: 2010/08/25 14:44:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -58,18 +58,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
 import javax.jdo.Extent;
 import javax.jdo.FetchPlan;
-import javax.jdo.JDOFatalUserException;
 import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
@@ -80,7 +76,6 @@ import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.oasisopen.jmi1.RefContainer;
-import org.omg.mof.spi.Names;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
@@ -93,33 +88,29 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
+import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.Queries;
 import org.openmdx.base.persistence.spi.ExtentCollection;
 import org.openmdx.base.persistence.spi.StandardFetchPlan;
 import org.openmdx.base.query.AnyTypeCondition;
 import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.Directions;
+import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.Filter;
-import org.openmdx.base.query.FilterOperators;
-import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.query.IsInCondition;
+import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.OrderSpecifier;
-import org.openmdx.base.query.Orders;
-import org.openmdx.base.query.PiggyBackCondition;
 import org.openmdx.base.query.Quantifier;
-import org.openmdx.base.query.Quantors;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.id.UUIDs;
-import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.BooleanTypePredicate;
 import org.w3c.cci2.ComparableTypePredicate;
 import org.w3c.cci2.MatchableTypePredicate;
 import org.w3c.cci2.MultivaluedFeaturePredicate;
-import org.w3c.cci2.MultivaluedTypeOrder;
 import org.w3c.cci2.OptionalFeaturePredicate;
 import org.w3c.cci2.PartiallyOrderedTypePredicate;
 import org.w3c.cci2.SimpleTypeOrder;
@@ -141,11 +132,9 @@ public class RefQuery_1 implements RefQuery_1_0 {
     ) {
         this.filter = filter == null ? new Filter() : filter;
         this.filterType = filterType;
-        this.filter.addCondition(
-            this.filterTypeCondition = new IsInCondition(
-                Quantors.THERE_EXISTS,
-                subclasses ? SystemAttributes.OBJECT_INSTANCE_OF : SystemAttributes.OBJECT_CLASS,
-                true,
+        this.filter.getCondition().add(
+            this.filterTypeCondition = new IsInstanceOfCondition(
+                subclasses,
                 filterType
             )
         );
@@ -156,40 +145,43 @@ public class RefQuery_1 implements RefQuery_1_0 {
     public abstract class RefPredicate implements AnyTypePredicate {
 
         public RefPredicate(
-            Short quantor,
+            Quantifier quantifier,
             String featureName
         ) {
-            this.quantor = quantor;
+            this.quantifier = quantifier;
             this.featureName = featureName;
         }
 
-        public void refAddValue(
-            int index,
-            short direction
-        ) {
-            RefQuery_1.this.refAddValue(
-                this.featureName,
-                0,
-                direction
-            );
-        }
-        
         /**
          * Adding value to the filter
          * 
-         * @param operator
+         * @param sortOrder
+         */
+        protected void refAddValue(
+            SortOrder sortOrder
+        ){
+            RefQuery_1.this.refAddValue(
+                this.featureName,
+                sortOrder
+            );
+        }
+
+        /**
+         * Adding value to the filter
+         * 
+         * @param conditionType
          * @param operand
          */
         public void refAddValue(
-            short quantor,
-            short operator,
+            Quantifier quantifier,
+            ConditionType conditionType,
             Collection<?> operand
         ){
             try {
                 RefQuery_1.this.refAddValue(
                     this.featureName,
-                    quantor,
-                    operator,
+                    quantifier,
+                    conditionType,
                     operand
                 );
             } catch (NullPointerException exception) {
@@ -200,16 +192,16 @@ public class RefQuery_1 implements RefQuery_1_0 {
                         BasicException.Code.BAD_PARAMETER,
                         "Either 'null operand' or 'candidate collection support not implemented for openMDX 1 compatibility mode'",
                         new BasicException.Parameter(
-                            "quantor", 
-                            Quantors.toString(quantor)
+                            "quantifier", 
+                            quantifier
                         ),
                         new BasicException.Parameter(
                             "name", 
                             this.featureName
                         ),
                         new BasicException.Parameter(
-                            "operator",
-                            FilterOperators.toString(operator)
+                            "conditionType",
+                            conditionType
                         ),
                         operand == null ? new BasicException.Parameter(
                             "operand", 
@@ -227,7 +219,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
         ) {
             return RefQuery_1.this;
         }
-        
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.AnyTypePredicate#equalTo(V)
          */
@@ -259,14 +251,14 @@ public class RefQuery_1 implements RefQuery_1_0 {
             if(operand instanceof ExtentCollection<?>) {
                 Path pattern = ((ExtentCollection<?>)operand).getPattern();
                 this.refAddValue(
-                    this.quantor,
-                    pattern.containsWildcard() ? FilterOperators.IS_LIKE : FilterOperators.IS_IN,
+                    this.quantifier,
+                    pattern.containsWildcard() ? ConditionType.IS_LIKE : ConditionType.IS_IN,
                     Collections.singleton(pattern)
                 );
             } else {
                 this.refAddValue(
-                    this.quantor,
-                    FilterOperators.IS_IN,
+                    this.quantifier,
+                    ConditionType.IS_IN,
                     operand
                 );
             }
@@ -303,14 +295,14 @@ public class RefQuery_1 implements RefQuery_1_0 {
             if(operand instanceof ExtentCollection<?>) {
                 Path pattern = ((ExtentCollection<?>)operand).getPattern();
                 this.refAddValue(
-                    this.quantor,
-                    pattern.containsWildcard() ? FilterOperators.IS_UNLIKE : FilterOperators.IS_NOT_IN,
+                    this.quantifier,
+                    pattern.containsWildcard() ? ConditionType.IS_UNLIKE : ConditionType.IS_NOT_IN,
                     Collections.singleton(pattern)
                 );
             } else {
                 this.refAddValue(
-                    this.quantor,
-                    FilterOperators.IS_NOT_IN,
+                    this.quantifier,
+                    ConditionType.IS_NOT_IN,
                     operand
                 );
             }
@@ -345,45 +337,43 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 return target;
             }
         }
-        
+
         //-----------------------------------------------------------------------
         public String getFeatureName(
         ) {
             return this.featureName;
         }
-        
+
         //-----------------------------------------------------------------------
         // Members
         //-----------------------------------------------------------------------
         private static final long serialVersionUID = -5668618898901781191L;
 
-        protected final Short quantor;
+        protected final Quantifier quantifier;
         protected final String featureName;
 
     }
 
     //-------------------------------------------------------------------------
     public class RefObjectTypePredicate extends RefPredicate {
-        
+
         public RefObjectTypePredicate(
-            short quantor,
+            Quantifier quantifier,
             String featureName
         ) {
-            super(quantor, featureName);
+            super(quantifier, featureName);
         }
-        
+
     }
-    
+
     //-------------------------------------------------------------------------
-    public class RefBooleanTypePredicate
-        extends RefPredicate
-        implements BooleanTypePredicate {
+    public class RefBooleanTypePredicate extends RefPredicate implements BooleanTypePredicate {
 
         public RefBooleanTypePredicate(
-            short quantor,
+            Quantifier quantifier,
             String featureName
         ) {
-            super(quantor, featureName);
+            super(quantifier, featureName);
         }
 
         /* (non-Javadoc)
@@ -393,8 +383,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             boolean operand
         ) {
             super.refAddValue(
-                this.quantor,
-                FilterOperators.IS_IN,
+                this.quantifier,
+                ConditionType.IS_IN,
                 operand ? TRUE : FALSE
             );
         }
@@ -403,68 +393,70 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * @see org.w3c.cci2.BooleanTypePredicate#isFalse()
          */
         public void isFalse() {
-            equalTo(false);
+            this.equalTo(false);
         }
 
         /* (non-Javadoc)
          * @see org.w3c.cci2.BooleanTypePredicate#isTrue()
          */
         public void isTrue() {
-            equalTo(true);
+            this.equalTo(true);
         }
 
     }
-    
+
     //-------------------------------------------------------------------------
-    public class RefSimpleTypePredicate
-        extends RefPredicate
-        implements AnyTypePredicate {
+    public class RefSimpleTypePredicate extends RefPredicate implements AnyTypePredicate {
 
         public RefSimpleTypePredicate (
-            short quantor,
+            Quantifier quantifier,
             String featureName
         ){
-            super(quantor, featureName);
+            super(quantifier, featureName);
         }
 
         /* (non-Javadoc)
          * @see org.w3c.cci2.AnyTypePredicate#equalTo(V)
          */
+        @Override
         public void equalTo(
             Object operand
         ) {
-            elementOf(
+            this.elementOf(
                 Collections.singleton(operand)
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.AnyTypePredicate#elementOf(V...)
          */
+        @Override
         public void elementOf(
             Object... operand
         ) {
-            elementOf(
+            this.elementOf(
                 Arrays.asList(operand)
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.AnyTypePredicate#elementOf(Collection<V>)
          */
+        @Override
         public void elementOf(
             Collection<?> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_IN,
+                this.quantifier,
+                ConditionType.IS_IN,
                 operand
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.AnyTypePredicate#notEqual(V)
          */
+        @Override
         public void notEqualTo(
             Object operand
         ) {
@@ -472,10 +464,11 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand)
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(V...)
          */
+        @Override
         public void notAnElementOf(
             Object... operand
         ) {
@@ -483,34 +476,36 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand)
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.AnyTypePredicate#notAnElementOf(Collection<V>)
          */
+        @Override
         public void notAnElementOf(
             Collection<?> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_NOT_IN,
+                this.quantifier,
+                ConditionType.IS_NOT_IN,
                 operand
             );
         }
-    
+
     }
 
     //-------------------------------------------------------------------------
     public class RefComparableTypePredicate<V extends Comparable<?>> 
         extends RefSimpleTypePredicate 
-        implements ComparableTypePredicate<V> {
-    
+        implements ComparableTypePredicate<V> 
+    {
+
         public RefComparableTypePredicate (
-            short quantor,
+            Quantifier quantifier,
             String featureName
         ) {
-            super(quantor, featureName);
+            super(quantifier, featureName);
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.ComparableTypePredicate#between(V, V)
          */
@@ -519,14 +514,14 @@ public class RefQuery_1 implements RefQuery_1_0 {
             V upperBound
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_BETWEEN,
+                this.quantifier,
+                ConditionType.IS_BETWEEN,
                 Arrays.asList(
                     new Comparable[]{lowerBound, upperBound}
                 )
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.ComparableTypePredicate#outside(V, V)
          */
@@ -535,14 +530,14 @@ public class RefQuery_1 implements RefQuery_1_0 {
             V upperBound
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_OUTSIDE,
+                this.quantifier,
+                ConditionType.IS_OUTSIDE,
                 Arrays.asList(
                     new Comparable[]{lowerBound, upperBound}
                 )
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.ComparableTypePredicate#lessThan(V)
          */
@@ -550,12 +545,12 @@ public class RefQuery_1 implements RefQuery_1_0 {
             V operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_LESS,
+                this.quantifier,
+                ConditionType.IS_LESS,
                 Collections.singleton(operand)
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.ComparableTypePredicate#lessThanOrEqual(V)
          */
@@ -563,12 +558,12 @@ public class RefQuery_1 implements RefQuery_1_0 {
             V operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_LESS_OR_EQUAL,
+                this.quantifier,
+                ConditionType.IS_LESS_OR_EQUAL,
                 Collections.singleton(operand)
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.ComparableTypePredicate#greaterThanOrEqual(V)
          */
@@ -576,12 +571,12 @@ public class RefQuery_1 implements RefQuery_1_0 {
             V operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_GREATER_OR_EQUAL,
+                this.quantifier,
+                ConditionType.IS_GREATER_OR_EQUAL,
                 Collections.singleton(operand)
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.ComparableTypePredicate#greaterThan(V)
          */
@@ -589,24 +584,25 @@ public class RefQuery_1 implements RefQuery_1_0 {
             V operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_GREATER,
+                this.quantifier,
+                ConditionType.IS_GREATER,
                 Collections.singleton(operand)
             );
         }
-    
+
     }
-    
+
     //-------------------------------------------------------------------------
     public class RefStringTypePredicate
         extends RefComparableTypePredicate<String>
-        implements StringTypePredicate {
+        implements StringTypePredicate 
+    {
 
         RefStringTypePredicate (
-            short quantor,
+            Quantifier quantifier,
             String featureName
         ) {
-            super(quantor, featureName);
+            super(quantifier, featureName);
         }
 
         /* (non-Javadoc)
@@ -638,8 +634,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             Collection<String> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_LIKE,
+                this.quantifier,
+                ConditionType.IS_LIKE,
                 operand
             );
         }
@@ -661,7 +657,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
         public void unlike(
             String... operand
         ) {
-            unlike(
+            this.unlike(
                 Arrays.asList(operand)
             );
         }
@@ -673,8 +669,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             Collection<String> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_UNLIKE,
+                this.quantifier,
+                ConditionType.IS_UNLIKE,
                 operand
             );
         }
@@ -712,22 +708,10 @@ public class RefQuery_1 implements RefQuery_1_0 {
             int flags,
             Collection<String> operand
         ) {
-            if(flags == 0) {
-                this.refAddValue(
-                    this.quantor,                    
-                    FilterOperators.IS_LIKE,
-                    operand
-                );
-            } 
-            else if(flags == SOUNDS) {
-                this.refAddValue(
-                    this.quantor,
-                    FilterOperators.SOUNDS_LIKE,
-                    operand
-                );
-            } 
-            else throw new IllegalArgumentException(
-                "No other flag than SOUNDS is supported in compatibility mode"
+            this.refAddValue(
+                this.quantifier,                    
+                RefQuery_1.toConditionType(flags, true),
+                operand
             );
         }
 
@@ -737,7 +721,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
         public void unlike(
             int flags,
             String operand
-         ) {
+        ) {
             this.unlike(
                 flags,
                 Collections.singleton(operand)
@@ -764,22 +748,10 @@ public class RefQuery_1 implements RefQuery_1_0 {
             int flags,
             Collection<String> operand
         ) {
-            if(flags == 0) {
-                this.refAddValue(
-                    this.quantor,
-                    FilterOperators.IS_UNLIKE,
-                    operand
-                );
-            } 
-            else if(flags == SOUNDS) {
-                this.refAddValue(
-                    this.quantor,
-                    FilterOperators.SOUNDS_UNLIKE,
-                    operand
-                );
-            } 
-            else throw new IllegalArgumentException(
-                "No other flag than SOUNDS is supported in compatibility mode"
+            this.refAddValue(
+                this.quantifier,
+                RefQuery_1.toConditionType(flags, false),
+                operand
             );
         }
 
@@ -812,9 +784,9 @@ public class RefQuery_1 implements RefQuery_1_0 {
             Collection<String> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_LIKE,
-                jdoWildcard(operand, true)
+                this.quantifier,
+                ConditionType.IS_LIKE,
+                this.jdoWildcard(operand, true)
             );
         }
 
@@ -847,12 +819,12 @@ public class RefQuery_1 implements RefQuery_1_0 {
             Collection<String> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_LIKE,
+                this.quantifier,
+                ConditionType.IS_LIKE,
                 this.jdoWildcard(operand, false)
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.lang.Object)
          */
@@ -874,7 +846,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand)
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.util.Collection)
          */
@@ -882,8 +854,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             Collection<String> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_UNLIKE,
+                this.quantifier,
+                ConditionType.IS_UNLIKE,
                 this.jdoWildcard(operand, true)
             );
         }
@@ -917,14 +889,14 @@ public class RefQuery_1 implements RefQuery_1_0 {
             Collection<String> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_UNLIKE,
+                this.quantifier,
+                ConditionType.IS_UNLIKE,
                 this.jdoWildcard(operand, false)
             );
         }
 
     }
-    
+
     //-------------------------------------------------------------------------
     public class RefPartiallyOrderedTypePredicate<V>
         extends RefSimpleTypePredicate
@@ -932,10 +904,10 @@ public class RefQuery_1 implements RefQuery_1_0 {
     {
 
         public RefPartiallyOrderedTypePredicate (
-            short quantor,
+            Quantifier quantifier,
             String featureName
         ){
-            super(quantor, featureName);
+            super(quantifier, featureName);
         }
 
         /* (non-Javadoc)
@@ -947,8 +919,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             V upperBound
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_BETWEEN,
+                this.quantifier,
+                ConditionType.IS_BETWEEN,
                 Arrays.asList(
                     lowerBound, 
                     upperBound
@@ -965,8 +937,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             V upperBound
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_OUTSIDE,
+                this.quantifier,
+                ConditionType.IS_OUTSIDE,
                 Arrays.asList(
                     lowerBound, 
                     upperBound
@@ -981,8 +953,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             V operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_LESS,
+                this.quantifier,
+                ConditionType.IS_LESS,
                 Collections.singleton(operand)
             );
         }
@@ -994,8 +966,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             V operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_LESS_OR_EQUAL,
+                this.quantifier,
+                ConditionType.IS_LESS_OR_EQUAL,
                 Collections.singleton(operand)
             );
         }
@@ -1007,8 +979,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             V operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_GREATER_OR_EQUAL,
+                this.quantifier,
+                ConditionType.IS_GREATER_OR_EQUAL,
                 Collections.singleton(operand)
             );
         }
@@ -1020,24 +992,25 @@ public class RefQuery_1 implements RefQuery_1_0 {
             V operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_GREATER,
+                this.quantifier,
+                ConditionType.IS_GREATER,
                 Collections.singleton(operand)
             );
         }
 
     }
-    
+
     //-------------------------------------------------------------------------
     public class RefOptionalFeaturePredicate
         extends RefPredicate
-        implements OptionalFeaturePredicate {
+        implements OptionalFeaturePredicate 
+    {
 
         public RefOptionalFeaturePredicate (
-            short quantor,
+            Quantifier quantifier,
             String featureName
         ) {
-            super(quantor, featureName);
+            super(quantifier, featureName);
         }
 
         /* (non-Javadoc)
@@ -1046,8 +1019,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
         public void isNull(
         ) {
             this.refAddValue(
-                Quantors.FOR_ALL,
-                FilterOperators.IS_IN,
+                Quantifier.FOR_ALL,
+                ConditionType.IS_IN,
                 Collections.EMPTY_SET
             );
         }
@@ -1058,24 +1031,25 @@ public class RefQuery_1 implements RefQuery_1_0 {
         public void isNonNull(
         ) {
             this.refAddValue(
-                Quantors.THERE_EXISTS,
-                FilterOperators.IS_NOT_IN,
+                Quantifier.THERE_EXISTS,
+                ConditionType.IS_NOT_IN,
                 Collections.EMPTY_SET
             );
         }
 
     }
-    
+
     //-------------------------------------------------------------------------
     public class RefMultiValuedAttributePredicate 
         extends RefPredicate
-        implements MultivaluedFeaturePredicate {
+        implements MultivaluedFeaturePredicate 
+   {
 
         public RefMultiValuedAttributePredicate (
-            Short quantor,
+            Quantifier quantifier,
             String featureName
         ) {
-            super(quantor, featureName);
+            super(quantifier, featureName);
         }
 
         /* (non-Javadoc)
@@ -1084,8 +1058,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
         public void isEmpty(
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_IN,
+                Quantifier.FOR_ALL,
+                ConditionType.IS_IN,
                 Collections.EMPTY_SET
             );
         }
@@ -1095,8 +1069,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
          */
         public void isNonEmpty() {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_NOT_IN,
+                Quantifier.THERE_EXISTS,
+                ConditionType.IS_NOT_IN,
                 Collections.EMPTY_SET
             );
         }
@@ -1111,19 +1085,20 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
 
     }
-    
+
     //-------------------------------------------------------------------------
     public class RefResourceIdentifierTypePredicate<V extends Comparable<?>>
         extends RefComparableTypePredicate<V>
-        implements MatchableTypePredicate<V> {
+        implements MatchableTypePredicate<V> 
+    {
 
         public RefResourceIdentifierTypePredicate (
-            short quantor,
+            Quantifier quantifier,
             String featureName
         ) {
-            super(quantor, featureName);
+            super(quantifier, featureName);
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.query.ResourceIdentifierTypePredicate#like(V)
          */
@@ -1153,8 +1128,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             Collection<V> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_LIKE,
+                this.quantifier,
+                ConditionType.IS_LIKE,
                 operand
             );
         }
@@ -1188,8 +1163,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             Collection<V> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_UNLIKE,
+                this.quantifier,
+                ConditionType.IS_UNLIKE,
                 operand
             );
         }
@@ -1223,8 +1198,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             Collection<V> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_LIKE,
+                this.quantifier,
+                ConditionType.IS_LIKE,
                 this.jdoWildcard(operand, true)
             );
         }
@@ -1258,8 +1233,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             Collection<V> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_LIKE,
+                this.quantifier,
+                ConditionType.IS_LIKE,
                 this.jdoWildcard(operand, false)
             );
         }
@@ -1274,7 +1249,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Collections.singleton(operand)
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.MatchableTypePredicate#endsNotWith(V[])
          */
@@ -1285,7 +1260,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 Arrays.asList(operand)
             );
         }
-    
+
         /* (non-Javadoc)
          * @see org.w3c.cci2.MatchableTypePredicate#endsNotWith(java.util.Collection)
          */
@@ -1293,8 +1268,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             Collection<V> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_UNLIKE,
+                this.quantifier,
+                ConditionType.IS_UNLIKE,
                 this.jdoWildcard(operand, true)
             );
         }
@@ -1328,21 +1303,22 @@ public class RefQuery_1 implements RefQuery_1_0 {
             Collection<V> operand
         ) {
             this.refAddValue(
-                this.quantor,
-                FilterOperators.IS_UNLIKE,
+                this.quantifier,
+                ConditionType.IS_UNLIKE,
                 this.jdoWildcard(operand, false)
             );
         }
 
     }
-    
+
     //-------------------------------------------------------------------------
     /**
      * SimpleTypeOrder_1
      */
     public class RefSimpleTypeOrder
         extends RefPredicate
-        implements SimpleTypeOrder {
+        implements SimpleTypeOrder 
+    {
 
         public RefSimpleTypeOrder(
             String featureName
@@ -1356,8 +1332,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
         public void ascending(
         ) {
             this.refAddValue(
-                0,
-                Directions.ASCENDING
+                SortOrder.ASCENDING
             );
         }
 
@@ -1367,50 +1342,12 @@ public class RefQuery_1 implements RefQuery_1_0 {
         public void descending(
         ) {
             this.refAddValue(
-                0,
-                Directions.DESCENDING
+                SortOrder.DESCENDING
             );
         }
 
     }
-    
-    //-------------------------------------------------------------------------
-    public class RefMultivaluedTypeOrder
-        extends RefPredicate
-        implements MultivaluedTypeOrder {
 
-        public RefMultivaluedTypeOrder(
-            String featureName
-        ) {
-            super(null, featureName);
-        }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.MultivaluedTypeOrder#ascending(int)
-         */
-        public void ascending(
-            int index
-        ) {
-            this.refAddValue(
-                index,
-                Directions.ASCENDING
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see org.w3c.cci2.MultivaluedTypeOrder#descending(int)
-         */
-        public void descending(
-            int index
-        ) {
-            this.refAddValue(
-                index,
-                Directions.DESCENDING
-            );
-        }
-        
-    }
-    
     //-------------------------------------------------------------------------
     protected final Model_1_0 getModel(
     ) {
@@ -1421,15 +1358,15 @@ public class RefQuery_1 implements RefQuery_1_0 {
     final protected ModelElement_1_0 getFeature(
         String featureName
     ) throws ServiceException {
-
+        Model_1_0 model = this.getModel();
         // full-qualified feature name. Lookup in model
         if (featureName.indexOf(':') >= 0) {
-            return this.getModel().getElement(featureName);
+            return model.getElement(featureName);
         }
         // get all features of class and find feature with featureName
         else {
-            ModelElement_1_0 feature = this.getModel().getFeatureDef(
-                this.getModel().getElement(this.filterType),
+            ModelElement_1_0 feature = model.getFeatureDef(
+                model.getElement(this.filterType),
                 featureName,
                 false
             );
@@ -1452,7 +1389,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     ) throws ServiceException {
         if(
             !elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE) &&
-            !this.getModel().referenceIsStoredAsAttribute(elementDef)
+            !elementDef.getModel().referenceIsStoredAsAttribute(elementDef)
         ) {
             throw new ServiceException (
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -1464,145 +1401,76 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    //  @Override
     public void refAddValue(
         ModelElement_1_0 featureDef,
-        short quantor,
-        short operator,
+        Quantifier quantifier,
+        ConditionType conditionType,
         Collection<?> value
     ) {
         try {
             this.assertModifiable();
             this.assertAttributeOrReferenceStoredAsAttribute(featureDef);
             String featureName = (String)featureDef.objGetValue("name");
-
-            SysLog.trace("feature", featureName);
-            SysLog.trace("quantor", Quantors.toString(quantor));
-            SysLog.trace("operator", FilterOperators.toString(operator));
-            SysLog.trace("value", value);
-
-            if(this.getModel().isReferenceType(featureDef)) {
-                if("org:openmdx:base:ContextCapable:context".equals(featureDef.objGetValue("qualifiedName"))) {
-                    if(
-                        quantor == Quantors.THERE_EXISTS &&
-                        operator == FilterOperators.IS_IN 
-                    ){
-                        Model_1_0 m = getModel();
-                        int ii = 0;
-                        for(
-                            Iterator<?> i = value.iterator();
-                            i.hasNext();
-                            ii++
-                        ) {
-                            Object c = i.next();
-                            if(c instanceof RefObject_1_0){
-                                RefObject_1_0 e = (RefObject_1_0) c;
-                                String objectClass = e.refClass().refMofId();
-                                String namespace = featureName + ':' + UUIDs.newUUID() + ':';
-                                if(m.isSubtypeOf(objectClass, "org:openmdx:base:Context")) {
-                                    this.filter.addCondition(
-                                        new PiggyBackCondition(
-                                            namespace + SystemAttributes.OBJECT_CLASS,
-                                            objectClass
-                                        )
-                                    );
-                                    for(
-                                        Iterator<String> j = e.refDefaultFetchGroup().iterator();
-                                        j.hasNext();
-                                    ){
-                                        String attribute = j.next();
-                                        Object v = e.refGetValue(attribute);
-                                        this.filter.addCondition(
-                                            new PiggyBackCondition(
-                                                namespace + attribute,
-                                                v instanceof Collection<?> ? ((Collection<?>)v).toArray() : new Object[]{v}
-                                            )
-                                        );
-                                    }
-                                } else throw new ServiceException (
-                                    BasicException.Code.DEFAULT_DOMAIN,
-                                    BasicException.Code.ASSERTION_FAILURE,
-                                    "Object can't be piggy backed as context unless it is an instance of org::openmdx::base::Context",
-                                    new BasicException.Parameter("quantor", Quantors.toString(quantor)),
-                                    new BasicException.Parameter("feature", featureName),
-                                    new BasicException.Parameter("operator", FilterOperators.toString(operator)),
-                                    new BasicException.Parameter("index", ii),
-                                    new BasicException.Parameter("class", objectClass)
-                                );
-                            }
-                        }
-                    } else throw new ServiceException (
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.NOT_SUPPORTED,
-                        "The context feature supports piggy backing with 'THERE EXISTS context EQUAL TO' clauses only",
-                        new BasicException.Parameter("quantor", Quantors.toString(quantor)),
-                        new BasicException.Parameter("feature", featureName),
-                        new BasicException.Parameter("operator", FilterOperators.toString(operator))
-                    );
-                } else {
-                    List<Path> paths = new ArrayList<Path>();
-                    for(
-                        Iterator<?> i = value.iterator();
-                        i.hasNext();
-                    ) {
-                        Object v = i.next();
-                        if(v instanceof RefObject_1_0){
-                            RefObject_1_0 e = (RefObject_1_0) v;
-                            String objectClass = e.refClass().refMofId();
-                            Model_1_0 m = getModel();
-                            if(
-                                m.isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") &&
-                                m.isSubtypeOf(objectClass, "org:openmdx:state2:BasicState") &&
-                                JDOHelper.isPersistent(e) &&
-                                !JDOHelper.isNew(e) &&
-                                !JDOHelper.isDeleted(e)
-                            ) try {
-                                paths.add(new Path((String)e.refGetValue(SystemAttributes.OBJECT_IDENTITY)));
-                            } catch (Exception exception) {
-                                paths.add(e.refGetPath());
-                            } else {
-                                paths.add(e.refGetPath());
-                            }
-                        } else if (v instanceof Path){
-                            paths.add((Path)v);
+            SysLog.log(
+                Level.FINEST, 
+                "{0}|quantifier={1}, feature={2}, conditionType={3}, value={4}", 
+                "Sys", quantifier, featureName, conditionType, value
+            );
+            Model_1_0 model = featureDef.getModel();
+            if(model.isReferenceType(featureDef)) {
+                List<Path> paths = new ArrayList<Path>();
+                for(
+                    Iterator<?> i = value.iterator();
+                    i.hasNext();
+                ) {
+                    Object v = i.next();
+                    if(v instanceof RefObject_1_0){
+                        RefObject_1_0 e = (RefObject_1_0) v;
+                        String objectClass = e.refClass().refMofId();
+                        if(
+                            model.isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") &&
+                            model.isSubtypeOf(objectClass, "org:openmdx:state2:BasicState") &&
+                            JDOHelper.isPersistent(e) &&
+                            !JDOHelper.isNew(e) &&
+                            !JDOHelper.isDeleted(e)
+                        ) try {
+                            paths.add(new Path((String)e.refGetValue(SystemAttributes.OBJECT_IDENTITY)));
+                        } catch (Exception exception) {
+                            paths.add(e.refGetPath());
                         } else {
-                            paths.add(new Path((String)v));
+                            paths.add(e.refGetPath());
                         }
+                    } else if (v instanceof Path){
+                        paths.add((Path)v);
+                    } else {
+                        paths.add(new Path((String)v));
                     }
-                    this.filter.addCondition(
-                        new AnyTypeCondition(
-                            new FilterProperty(
-                                quantor,
-                                featureName,
-                                operator,
-                                paths.toArray()
-                            )
+                }
+                this.filter.getCondition().add(
+                    new AnyTypeCondition(
+                        quantifier,
+                        featureName,
+                        conditionType,
+                        paths.toArray()
+                    )
+                );
+            } else if(model.isAttributeType(featureDef)) {
+                this.filter.getCondition().add(
+                    new AnyTypeCondition(
+                        quantifier,
+                        featureName,
+                        conditionType,
+                        PrimitiveTypes.ANYURI.equals(
+                            model.getElement(featureDef.objGetValue("type")).objGetValue("qualifiedName")
+                        ) ? RefQuery_1.unmarshalValues(
+                            // anyURIs have to be unmarshalled
+                            URIMarshaller.STRING_TO_URI, 
+                            value
+                        ) : value.toArray(
+                            // other primitive types require no unmarshalling
                         )
-                    );
-                }   
-            } else if(this.getModel().isAttributeType(featureDef)) {
-                Object featureType = this.getModel().getElement(featureDef.objGetValue("type")).objGetValue("qualifiedName");
-                FilterProperty p = null;
-                // anyURI
-                if(PrimitiveTypes.ANYURI.equals(featureType)) {
-                    p = new FilterProperty(
-                        quantor,
-                        featureName,
-                        operator,
-                        unmarshalValues(URIMarshaller.STRING_TO_URI, value)
-                    );
-                }
-
-                // other primitive types require no unmarshalling
-                else {
-                    p = new FilterProperty(
-                        quantor,
-                        featureName,
-                        operator,
-                        value.toArray()
-                    );
-                }
-                this.filter.addCondition(
-                    new AnyTypeCondition(p)
+                    )
                 );
             }
 
@@ -1622,17 +1490,17 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    //  @Override
     public void refAddValue(
         ModelElement_1_0 featureDef,
-        int index, 
-        short order
+        SortOrder order
     ) {
         try {
             this.assertModifiable();            
             this.assertAttributeOrReferenceStoredAsAttribute(featureDef);
             String name = (String)featureDef.objGetValue("name"); 
-            SysLog.log(Level.FINEST, "Order by {0} {1}", name, Orders.toString(order));
-            this.filter.addOrderSpecifier(
+            SysLog.log(Level.FINEST, "Order by {0} {1}", name, order);
+            this.filter.getOrderSpecifier().add(
                 new OrderSpecifier(
                     name,
                     order
@@ -1645,48 +1513,26 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    //  @Override
     public void refAddValue(
         String featureName,
-        int index, 
-        short order
-   ) {
-        try {
-            this.refAddValue(
-                this.getFeature(featureName), 
-                index,
-                order
-            );
-        } catch (ServiceException e) {
-            throw new JmiServiceException(e);
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    public void refAddValue(
-        String featureName,
-        short quantor,
-        short operator,
+        Quantifier quantifier,
+        ConditionType conditionType,
         Collection<?> value
     ) {
         try {
             if(SystemAttributes.OBJECT_INSTANCE_OF.equals(featureName)) {
                 if(
-                    quantor != Quantifier.THERE_EXISTS.code() ||
-                    operator != FilterOperators.IS_IN
+                    quantifier != Quantifier.THERE_EXISTS ||
+                    conditionType != ConditionType.IS_IN
                 ){
                     throw new JmiServiceException(
                         null,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ILLEGAL_STATE,
-                        SystemAttributes.OBJECT_INSTANCE_OF + "implies FOR_ALL/IS_IN",
-                        new BasicException.Parameter(
-                            "quantifier", 
-                            Quantifier.valueOf(quantor)
-                        ),
-                        new BasicException.Parameter(
-                            "operator",
-                            FilterOperators.toString(operator)
-                        )
+                        SystemAttributes.OBJECT_INSTANCE_OF + "implies THERE_EXISTS/IS_IN",
+                        new BasicException.Parameter("quantifier", quantifier),
+                        new BasicException.Parameter("conditionType", conditionType)
                     );
                 } else if(featureName.equals(filterTypeCondition.getFeature())) {
                     Object[] instanceOf = new Object[value.size()];
@@ -1713,8 +1559,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
             } else {
                 this.refAddValue(
                     this.getFeature(featureName), 
-                    quantor, 
-                    operator, 
+                    quantifier, 
+                    conditionType, 
                     value
                 );
             }
@@ -1727,21 +1573,21 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefFilter_1_0#refAddValue(java.lang.String, short)
      */
+    //  @Override
     public void refAddValue(
         String featureName, 
-        short order
+        SortOrder order
     ) throws JmiException {
         try {
             this.refAddValue(
                 this.getFeature(featureName), 
-                0,
                 order
             );
         } catch (ServiceException e) {
             throw new JmiServiceException(e);
         }
     }
-    
+
     //-------------------------------------------------------------------------
     protected static Object[] unmarshalValues(
         Marshaller marshaller,
@@ -1754,13 +1600,13 @@ public class RefQuery_1 implements RefQuery_1_0 {
         }
         return target;
     }
-    
+
     //-------------------------------------------------------------------------
-    public Object refGetOrder(
+    Object refGetOrder(
         String featureName
     ){
         try {
-            return refGetOrder(
+            return this.refGetOrder(
                 this.getFeature(featureName)
             );
         } 
@@ -1770,24 +1616,31 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    public Object refGetOrder(
+    private Object refGetOrder(
         ModelElement_1_0 featureDef
     ) throws ServiceException {
         String multiplicity = (String)featureDef.objGetValue("multiplicity");
         String featureName = (String)featureDef.objGetValue("qualifiedName");
-        return 
+        if(
             Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
-            Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ? 
-                (Object)new RefSimpleTypeOrder(featureName) : 
-                    new RefMultivaluedTypeOrder(featureName);
+            Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
+        ) {
+            return new RefSimpleTypeOrder(featureName);
+        } else throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.NOT_SUPPORTED,
+            "Ordering on multivalued attributes is no longer supported",
+            new BasicException.Parameter("feature", featureName),
+            new BasicException.Parameter("multiplicity", multiplicity)
+        );
     }
 
     //-------------------------------------------------------------------------
-    public Object refGetPredicate(
+    Object refGetPredicate(
         String featureName
     ){
         try {
-            return refGetPredicate(
+            return this.refGetPredicate(
                 this.getFeature(featureName)
             );
         } 
@@ -1797,31 +1650,31 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    public Object refGetPredicate(
+    private Object refGetPredicate(
         ModelElement_1_0 featureDef
     ) throws ServiceException {
-        String multiplicity = (String)featureDef.objGetValue("multiplicity");
+        String multiplicity = ModelUtils.getMultiplicity(featureDef);
         String name = (String)featureDef.objGetValue("qualifiedName");
-        return Multiplicities.SINGLE_VALUE.equals(multiplicity) ? refGetPredicate(
-            Quantors.THERE_EXISTS, // Quantors.FOR_ALL would give the same result but is very inefficient
+        return Multiplicities.SINGLE_VALUE.equals(multiplicity) ? this.refGetPredicate(
+            Quantifier.THERE_EXISTS, // Quantors.FOR_ALL would give the same result but is very inefficient
             featureDef
         ) : Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ? (Object) new RefOptionalFeaturePredicate(
-            Quantors.THERE_EXISTS,
+            Quantifier.THERE_EXISTS,
             name
         ) : new RefMultiValuedAttributePredicate(
-            Quantors.THERE_EXISTS,
+            Quantifier.THERE_EXISTS,
             name
         );
     }
 
     //-------------------------------------------------------------------------
-    public Object refGetPredicate(
-        short quantor,
+    Object refGetPredicate(
+        Quantifier quantifier,
         String featureName
     ) {
         try {
             return this.refGetPredicate(
-                quantor,
+                quantifier,
                 this.getFeature(featureName)
             );
         } 
@@ -1831,50 +1684,51 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    public Object refGetPredicate(
-        short quantor,
+    private Object refGetPredicate(
+        Quantifier quantifier,
         ModelElement_1_0 featureDef
     ){
         try {
             String qualifiedName = (String) featureDef.objGetValue("qualifiedName");
             String name = (String) featureDef.objGetValue("name");
-            ModelElement_1_0 typeDef = this.getModel().getElementType(
+            Model_1_0 model = featureDef.getModel();
+            ModelElement_1_0 typeDef = model.getElementType(
                 featureDef
             );
             String typeName = (String) typeDef.objGetValue("qualifiedName");
-            if(this.getModel().isPrimitiveType(typeDef)) {
+            if(model.isPrimitiveType(typeDef)) {
                 return PrimitiveTypes.BOOLEAN.equals(typeName) ? new RefBooleanTypePredicate(
-                    quantor,
+                    quantifier,
                     qualifiedName
                 ) : PrimitiveTypes.STRING.equals(typeName) ? new RefStringTypePredicate(
-                    quantor,
+                    quantifier,
                     qualifiedName
                 ) : PrimitiveTypes.DATETIME.equals(typeName) ? new RefComparableTypePredicate<Date>(
-                    quantor,
+                    quantifier,
                     qualifiedName
                 ) : PrimitiveTypes.DECIMAL.equals(typeName) ? new RefComparableTypePredicate<BigDecimal>(
-                    quantor,
+                    quantifier,
                     qualifiedName
                 ) : PrimitiveTypes.INTEGER.equals(typeName) ? new RefComparableTypePredicate<BigInteger>(
-                    quantor,
+                    quantifier,
                     qualifiedName
                 ) : PrimitiveTypes.LONG.equals(typeName) ? new RefComparableTypePredicate<Long>(
-                    quantor,
+                    quantifier,
                     qualifiedName
                 ) : PrimitiveTypes.SHORT.equals(typeName) ? new RefComparableTypePredicate<Short>(
-                    quantor,
+                    quantifier,
                     qualifiedName
                 ) : PrimitiveTypes.DATE.equals(typeName) ? new RefPartiallyOrderedTypePredicate<XMLGregorianCalendar>(
-                    quantor,
+                    quantifier,
                     qualifiedName
                 ) : PrimitiveTypes.ANYURI.equals(typeName) ? new RefResourceIdentifierTypePredicate<URI>(
-                    quantor,
+                    quantifier,
                     qualifiedName
                 ) : PrimitiveTypes.DURATION.equals(typeName) ? new RefPartiallyOrderedTypePredicate<Duration>(
-                    quantor,
+                    quantifier,
                     qualifiedName
                 ) : new RefSimpleTypePredicate(
-                    quantor,
+                    quantifier,
                     qualifiedName
                 ); 
             } else {
@@ -1894,7 +1748,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                 ).newQuery(
                     new Jmi1ObjectPredicateInvocationHandler(
                         new RefObjectTypePredicate(
-                            quantor,
+                            quantifier,
                             name
                         ),
                         new RefQuery_1(
@@ -1930,6 +1784,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public String toString(
     ) {
         return "filter=" + this.filter;
@@ -1937,62 +1792,40 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     //------------------------------------------------------------------------
     public FeatureMapper getFeatureMapper(
-    ) {
-        try {
-            ModelElement_1_0 classDef = getModel().getElement(this.filterType);   
-            String qualifiedClassName = (String)classDef.objGetValue("qualifiedName");
-            FeatureMapper featureMapper = featureMappers.get(qualifiedClassName);
-            if(featureMapper == null) {
-                Class<?> queryIntf = Classes.getApplicationClass(
-                    Names.toClassName(qualifiedClassName, Names.CCI2_PACKAGE_SUFFIX) + "Query"
-                );
-                FeatureMapper concurrent = featureMappers.putIfAbsent(
-                    qualifiedClassName,
-                    featureMapper = new FeatureMapper(
-                        classDef,
-                        queryIntf
-                    )
-                );
-                if(concurrent != null) {
-                    featureMapper = concurrent;
-                }
-            }
-            return featureMapper;
-        }
-        catch(Exception e) {
-            throw new JmiServiceException(e);
-        }
+    ) throws ServiceException {
+        return this.mapping.getFeatureMapper(
+            this.filterType, 
+            FeatureMapper.Type.QUERY
+        );
     }
 
+
     //-------------------------------------------------------------------------
-    // javax.jdo.Query
+    // Implements javax.jdo.Query
     //-------------------------------------------------------------------------
 
+    /**
+     * Assert that the query is modifiable
+     * 
+     * @exception JDOUserException if the query is unmodifiable
+     */
     protected void assertModifiable(){
-        if(isUnmodifiable()) {
+        if(this.isUnmodifiable()) {
             throw new JDOUserException("The query is unmodifiable");
         }
     }
-    
+
     /* (non-Javadoc)
      * @see javax.jdo.Query#addExtension(java.lang.String, java.lang.Object)
      */
     public void addExtension(String key, Object value) {
-        assertModifiable();
-        if(key.startsWith("org.openmdx.")) {
-            throw BasicException.initHolder(
-                new JDOFatalUserException(
-                    "Invalid openMDX extension",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        new BasicException.Parameter("key", key),
-                        new BasicException.Parameter("value", value),
-                        new BasicException.Parameter("supported")
-                    )
-                )
-            );
-        } 
+        this.assertModifiable();
+        //
+        // JDO implementations shall ignore unsupported extensions
+        //
+        if(Queries.QUERY_EXTENSION.equals(key)) {
+            this.filter.setExtension((Extension) value);
+        }
     }
 
     /* (non-Javadoc)
@@ -2042,8 +1875,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
      */
     public long deletePersistentAll(
     ) {
-        if(this.pcs instanceof RefContainer) {
-            RefContainer refContainer = (RefContainer) this.pcs;
+        if(this.pcs instanceof RefContainer<?>) {
+            RefContainer<?> refContainer = (RefContainer<?>) this.pcs;
             return refContainer.refRemoveAll(this);
         } 
         else if (this.pcs == null) {
@@ -2078,8 +1911,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
      */
     public Object execute(
     ) {
-        if(this.pcs instanceof RefContainer) {
-            RefContainer refContainer = (RefContainer) this.pcs;
+        if(this.pcs instanceof RefContainer<?>) {
+            RefContainer<?> refContainer = (RefContainer<?>) this.pcs;
             List<?> result = refContainer.refGetAll(this);
             if(this.unique) {
                 Iterator<?> i = result.iterator();
@@ -2134,7 +1967,9 @@ public class RefQuery_1 implements RefQuery_1_0 {
      */
     public FetchPlan getFetchPlan() {
         if(this.fetchPlan == null) {
-            this.fetchPlan = StandardFetchPlan.newInstance(getPersistenceManager());
+            this.fetchPlan = StandardFetchPlan.newInstance(
+                this.getPersistenceManager()
+            );
         }
         return this.fetchPlan;
     }
@@ -2174,9 +2009,9 @@ public class RefQuery_1 implements RefQuery_1_0 {
             this.pcs = (Collection<?>) extentCollection.getExtent().getPersistenceManager().getObjectById(
                 pattern.getPrefix(5).getChild("extent")
             );
-            this.filter.addCondition(
+            this.filter.getCondition().add(
                 new IsLikeCondition(
-                    Quantifier.THERE_EXISTS.code(),
+                    Quantifier.THERE_EXISTS,
                     SystemAttributes.OBJECT_IDENTITY,
                     true,
                     ExtentCollection.toIdentityPattern(pattern)
@@ -2195,13 +2030,13 @@ public class RefQuery_1 implements RefQuery_1_0 {
         throw new UnsupportedOperationException(
             "Extent can't be set via JDO query yet"
         );
-        
+
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.Query#setClass(java.lang.Class)
      */
-    @Override
+    //  @Override
     @SuppressWarnings("unchecked")
     public void setClass(Class cls) {
         if(
@@ -2231,16 +2066,13 @@ public class RefQuery_1 implements RefQuery_1_0 {
     public void setExtensions(
         Map extensions
     ) {
-        assertModifiable();
-        this.extensions.clear();
-        for(Map.Entry extension : (Set<Map.Entry<?,?>>)extensions.entrySet()) {
-            Object key = extension.getKey();
-            if(key instanceof String) {
-                addExtension((String) key, extension.getValue());
-            } else {
-                throw new JDOUserException("The extension key must be a non-null String");
-            }
-        }
+        this.assertModifiable();
+        this.filter.setExtension(
+            //
+            // JDO implementations shall ignore unsupported extensions
+            //
+            (Extension) extensions.get(Queries.QUERY_EXTENSION)
+        );
     }
 
     /* (non-Javadoc)
@@ -2315,7 +2147,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
      * @see javax.jdo.Query#setUnique(boolean)
      */
     public void setUnique(boolean unique) {
-        assertModifiable();
+        this.assertModifiable();
         this.unique = unique;
     }
 
@@ -2359,7 +2191,30 @@ public class RefQuery_1 implements RefQuery_1_0 {
     public void addSubquery(Query arg0, String arg1, String arg2, Map arg3) {
         throw new UnsupportedOperationException("Operation not supported by RefQuery_1");        
     }
-    
+
+    /**
+     * Convert flags to the corresponding condition type
+     * 
+     * @param flags
+     * @param fulfils
+     * 
+     * @return the corresponding condition type
+     * 
+     * @throws IllegalArgumentException
+     */
+    protected static ConditionType toConditionType(
+        int flags,
+        boolean fulfils
+    ) throws IllegalArgumentException {
+        if(flags == 0) {
+            return fulfils ? ConditionType.IS_LIKE : ConditionType.IS_UNLIKE;
+        } else if(flags == StringTypePredicate.SOUNDS) {
+            return fulfils ? ConditionType.SOUNDS_LIKE : ConditionType.IS_UNLIKE;
+        } else throw new IllegalArgumentException(
+            "No other flag than SOUNDS is supported"
+        );
+    }
+
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
@@ -2367,21 +2222,15 @@ public class RefQuery_1 implements RefQuery_1_0 {
 
     protected static final Set<Boolean> TRUE =  Collections.singleton(Boolean.TRUE);    
     protected static final Set<Boolean> FALSE =  Collections.singleton(Boolean.FALSE);
-
     protected boolean unique = false;
     protected boolean unmodifiable = false;
-    protected Map<String,Object> extensions = new HashMap<String,Object>();
     protected transient Collection<?> pcs = null;
     protected FetchPlan fetchPlan = null;
-
-    protected final static ConcurrentMap<String,FeatureMapper> featureMappers = 
-        new ConcurrentHashMap<String,FeatureMapper>();
-
     protected final String filterType;
     protected final Condition filterTypeCondition;
     protected final Filter filter;
     protected final Mapping_1_0 mapping;
-    
+
 }
 
 //--- End of File -----------------------------------------------------------

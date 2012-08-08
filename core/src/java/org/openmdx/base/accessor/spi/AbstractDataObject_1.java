@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractDataObject_1.java,v 1.6 2010/01/21 17:25:17 hburger Exp $
+ * Name:        $Id: AbstractDataObject_1.java,v 1.8 2010/06/30 13:08:14 hburger Exp $
  * Description: SPICE Object Layer: Abstract Object_1_0 Implementation
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/21 17:25:17 $
+ * Date:        $Date: 2010/06/30 13:08:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -105,7 +105,7 @@ public abstract class AbstractDataObject_1
      * @see org.openmdx.base.accessor.generic.cci.Object_1_2#objIsInaccessible()
      */
     public boolean objIsInaccessible(
-    ) throws ServiceException {
+    ){
         return this.inaccessibilityReason != null;
     }
 
@@ -229,6 +229,7 @@ public abstract class AbstractDataObject_1
         }
     }
 
+    @Override
     public String toString(
     ){
         return toString(this, null);

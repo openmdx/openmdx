@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.62 2010/04/12 09:11:55 wfro Exp $
+= Name:        $Id: build.xml,v 1.65 2010/06/07 15:42:04 hburger Exp $
 = Description: openMDX/Test Core
-= Revision:    $Revision: 1.62 $
-= Date:        $Date: 2010/04/12 09:11:55 $
+= Revision:    $Revision: 1.65 $
+= Date:        $Date: 2010/06/07 15:42:04 $
 = Copyright:   (c) 2003-2010 OMEX AG
 =======================================================================
  *
@@ -73,6 +73,7 @@
 		<path refid="openmdx.core.bin"/>
 		<path refid="postgresql.jdbc.lib"/>
 		<path refid="oracle.jdbc.lib"/>
+		<pathelement location="${project.home}/java2/${build.java.platform}/extension/lib/concurrent.jar"/>
 	</path>
 	<path id="project.bin.classpath">
 		<path refid="project.lib.classpath"/>

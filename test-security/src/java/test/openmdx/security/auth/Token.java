@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     OMEX/Security, http://www.omex.ch/
- * Name:        $Id: Token.java,v 1.1 2010/03/05 13:21:20 hburger Exp $
+ * Name:        $Id: Token.java,v 1.2 2010/06/04 22:38:01 hburger Exp $
  * Description: Token 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/05 13:21:20 $
+ * Date:        $Date: 2010/06/04 22:38:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -176,6 +176,7 @@ final class Token
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
         return IndentingFormatter.toString(
             this.getClass().getName() + 

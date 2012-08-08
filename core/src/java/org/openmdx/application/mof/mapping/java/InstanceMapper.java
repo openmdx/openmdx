@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: InstanceMapper.java,v 1.12 2010/02/09 13:03:09 wfro Exp $
+ * Name:        $Id: InstanceMapper.java,v 1.14 2010/08/30 15:39:35 wfro Exp $
  * Description: Instance Mapper 
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/09 13:03:09 $
+ * Date:        $Date: 2010/08/30 15:39:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -181,7 +181,7 @@ extends AbstractClassMapper {
                     "   * ",
                     "<em>Note: This is an extension to the JMI 1 standard.</em>"
                 ));
-                if (referenceDef.getAnnotation() != null) {
+                if(referenceDef.getAnnotation() != null) {
                     this.pw.println("   * <p>");
                     this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
                 }
@@ -206,7 +206,7 @@ extends AbstractClassMapper {
                     "   * ",
                     "<em>Note: This is an extension to the JMI 1 standard.</em>"
                 ));
-                if (referenceDef.getAnnotation() != null) {
+                if(referenceDef.getAnnotation() != null) {
                     this.pw.println("   * <p>");
                     this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
                 }
@@ -215,6 +215,27 @@ extends AbstractClassMapper {
                 this.pw.println("   */");
                 this.pw.println("  public void " + this.getMethodName("add" + referenceDef.getBeanGenericName()) + " (");
                 this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName()) + " " + referenceDef.getQualifierName() + ",");
+                this.pw.println("    " + referenceType + " " + valueHolder);        
+                this.pw.println("  );");
+                this.pw.println();
+                this.pw.println("  /**");
+                this.pw.println(MapperUtils.wrapText(
+                    "   * ",
+                    "Adds the specified element to the set of the values for the reference " +
+                    "<code>" + referenceDef.getName() + "</code> using an implementation-specific, reassignable qualifier."
+                ));
+                this.pw.println("   * <p>");
+                this.pw.println(MapperUtils.wrapText(
+                    "   * ",
+                    "<em>Note: This is an extension to the JMI 1 standard.</em>"
+                ));
+                if(referenceDef.getAnnotation() != null) {
+                    this.pw.println("   * <p>");
+                    this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
+                }
+                this.pw.println("   * @param " + valueHolder + " The element to be appended.");
+                this.pw.println("   */");
+                this.pw.println("  public void " + this.getMethodName("add" + referenceDef.getBeanGenericName()) + " (");
                 this.pw.println("    " + referenceType + " " + valueHolder);        
                 this.pw.println("  );");
                 this.pw.println();
@@ -1254,6 +1275,7 @@ extends AbstractClassMapper {
                 this.pw.println("   * Retrieve the object's JDO identity key");
                 this.pw.println("   * @return the value of the object's JDO identity key");
                 this.pw.println("   */");
+                this.pw.println("  @Override");
                 this.pw.println("  protected java.lang.String getOpenmdxjdoIdentity(");
                 this.pw.println("  ){");
                 this.pw.println("     return this." + JDO_IDENTITY_MEMBER + ';');
@@ -1262,6 +1284,7 @@ extends AbstractClassMapper {
                 this.pw.println("  /**");
                 this.pw.println("   * Set the object's JDO identity key");
                 this.pw.println("   */");
+                this.pw.println("  @Override");
                 this.pw.println("  protected void setOpenmdxjdoIdentity(");
                 this.pw.println("    String value");
                 this.pw.println("  ){");

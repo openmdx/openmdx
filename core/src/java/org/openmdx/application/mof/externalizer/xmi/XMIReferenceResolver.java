@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     opencrx, http://www.opencrx.org/
- * Name:        $Id: XMIReferenceResolver.java,v 1.1 2009/01/13 02:10:41 wfro Exp $
+ * Name:        $Id: XMIReferenceResolver.java,v 1.2 2010/06/18 12:58:44 hburger Exp $
  * Description: openCRX application plugin
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2009/01/13 02:10:41 $
+ * Date:        $Date: 2010/06/18 12:58:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,6 +55,7 @@
  */
 package org.openmdx.application.mof.externalizer.xmi;
 
+import org.openmdx.application.mof.externalizer.xmi.uml1.UML1AssociationEnd;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1Comment;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1Generalization;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1TagDefinition;
@@ -103,6 +104,17 @@ public interface XMIReferenceResolver {
     String xmiId
   );
 
+  /**
+   * Retrieve the association end for a given xmiId
+   *  
+   * @param xmiId
+   * 
+   * @return the association end for a given xmiId
+   */
+  public UML1AssociationEnd lookupAssociationEnd(
+    String xmiId
+  );
+		  
   /**
    * Retrieves the project containing the given model package.
    * @param packageName model package name

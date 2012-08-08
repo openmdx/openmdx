@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ExtentCollection.java,v 1.2 2010/02/11 14:30:44 hburger Exp $
+ * Name:        $Id: ExtentCollection.java,v 1.3 2010/06/30 13:11:07 hburger Exp $
  * Description: ExtentCollection 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/11 14:30:44 $
+ * Date:        $Date: 2010/06/30 13:11:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,7 +68,7 @@ public final class ExtentCollection<E> extends AbstractCollection<E> {
      * Constructor 
      *
      * @param extent
-     * @param pattern
+     * @param xriPattern
      */
     public ExtentCollection(
         Extent<E> extent,

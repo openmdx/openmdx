@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SessionBeanDecorator.java,v 1.2 2009/09/07 13:03:04 hburger Exp $
+ * Name:        $Id: SessionBeanDecorator.java,v 1.3 2010/06/04 22:45:00 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 13:03:04 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -107,7 +107,8 @@ public class SessionBeanDecorator
     return this.localHomeClass;
   }
 
-  public Report validate(
+  @Override
+public Report validate(
   ) {
     if (!this.isValidated())
     {

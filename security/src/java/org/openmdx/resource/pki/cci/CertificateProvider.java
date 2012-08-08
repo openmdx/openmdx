@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CertificateProvider.java,v 1.2 2010/03/05 13:24:13 hburger Exp $
+ * Name:        $Id: CertificateProvider.java,v 1.3 2010/07/15 16:38:53 hburger Exp $
  * Description: KeyStoreProvider
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/05 13:24:13 $
+ * Date:        $Date: 2010/07/15 16:38:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,6 +51,7 @@
 
 package org.openmdx.resource.pki.cci;
 
+import java.io.Closeable;
 import java.security.GeneralSecurityException;
 import java.security.cert.Certificate;
 
@@ -58,7 +59,7 @@ import java.security.cert.Certificate;
 /**
  * <code>Certificate</code> Provider
  */
-public interface CertificateProvider extends Connection {
+public interface CertificateProvider extends Closeable {
     
     /**
      * Retrieve the <code>Certificate</code>'s alias

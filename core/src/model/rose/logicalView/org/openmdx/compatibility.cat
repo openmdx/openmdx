@@ -14,17 +14,7 @@
 	    is_unit    	TRUE
 	    is_loaded  	FALSE
 	    file_name  	"$curdir\\compatibility\\audit1.cat"
-	    quid       	"3EC4B01F0206")
-	(object Class_Category "datastore1"
-	    is_unit    	TRUE
-	    is_loaded  	FALSE
-	    file_name  	"$curdir\\compatibility\\datastore1.cat"
-	    quid       	"3FF0C394039D")
-	(object Class_Category "sequence1"
-	    is_unit    	TRUE
-	    is_loaded  	FALSE
-	    file_name  	"$curdir\\compatibility\\sequence1.cat"
-	    quid       	"41C3075B0029"))
+	    quid       	"3EC4B01F0206"))
     logical_presentations 	(list unit_reference_list
 	(object ClassDiagram "Contains"
 	    quid       	"400E55C40281"
@@ -58,55 +48,5 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3EC4B01F0206"
-		    width      	300
-		    height     	180)
-		(object CategoryView "Logical View::org::openmdx::compatibility::datastore1" @2
-		    location   	(1071, 225)
-		    font       	(object Font
-			size       	8
-			face       	"Arial"
-			bold       	FALSE
-			italics    	FALSE
-			underline  	FALSE
-			strike     	FALSE
-			color      	0
-			default_color 	TRUE)
-		    label      	(object ItemLabel
-			Parent_View 	@2
-			location   	(927, 141)
-			fill_color 	13434879
-			nlines     	2
-			max_width  	288
-			justify    	0
-			label      	"datastore1")
-		    icon_style 	"Icon"
-		    line_color 	3342489
-		    fill_color 	13434879
-		    quidu      	"3FF0C394039D"
-		    width      	300
-		    height     	180)
-		(object CategoryView "Logical View::org::openmdx::compatibility::sequence1" @3
-		    location   	(1868, 237)
-		    font       	(object Font
-			size       	8
-			face       	"Arial"
-			bold       	FALSE
-			italics    	FALSE
-			underline  	FALSE
-			strike     	FALSE
-			color      	0
-			default_color 	TRUE)
-		    label      	(object ItemLabel
-			Parent_View 	@3
-			location   	(1724, 153)
-			fill_color 	13434879
-			nlines     	2
-			max_width  	288
-			justify    	0
-			label      	"sequence1")
-		    icon_style 	"Icon"
-		    line_color 	3342489
-		    fill_color 	13434879
-		    quidu      	"41C3075B0029"
 		    width      	300
 		    height     	180)))))

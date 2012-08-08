@@ -1,10 +1,10 @@
 /*
  * ==================================================================== 
  * Project: openMDX, http://www.openmdx.org
- * Name: $Id: AbstractClassMapper.java,v 1.4 2009/07/12 17:23:09 hburger Exp $ 
- * Description: JMIClassLevelTemplate Revision: $Revision: 1.4 $ 
+ * Name: $Id: AbstractClassMapper.java,v 1.6 2010/06/08 12:54:19 hburger Exp $ 
+ * Description: JMIClassLevelTemplate Revision: $Revision: 1.6 $ 
  * Owner: OMEX AG, Switzerland, http://www.omex.ch 
- * Date: $Date: 2009/07/12 17:23:09 $
+ * Date: $Date: 2010/06/08 12:54:19 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -43,7 +43,7 @@ package org.openmdx.application.mof.mapping.java;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -195,6 +195,7 @@ public class AbstractClassMapper
     /**
      * 
      */
+    @Override
     protected ClassDef getClassDef(
         String qualifiedName
     ) throws ServiceException {
@@ -307,11 +308,8 @@ public class AbstractClassMapper
     /**
      * References to the following object types are considered to be transient
      */
-    private static final Set<String> TRANSIENT_REFERENCES = new HashSet<String>(
-        Arrays.asList(
-            "org:openmdx:base:Context",
-            "org:openmdx:base:ExtentCapable"
-        )
+    private static final Set<String> TRANSIENT_REFERENCES = Collections.singleton(
+        "org:openmdx:base:ExtentCapable"
     );
 
 }

@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build-library.xml,v 1.162 2010/04/22 08:45:09 wfro Exp $
+= Name:        $Id: build-library.xml,v 1.168 2010/08/04 19:51:10 hburger Exp $
 = Description: openMDX Build Library
-= Revision:    $Revision: 1.162 $
-= Date:        $Date: 2010/04/22 08:45:09 $
+= Revision:    $Revision: 1.168 $
+= Date:        $Date: 2010/08/04 19:51:10 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
-= This software is published under the BSD license
-= as listed below.
+= This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2004-2008, OMEX AG, Switzerland
+= Copyright (c) 2004-2010, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -60,6 +59,7 @@
 			<pathelement location="${openmdx.home}/apache/jre-1.2/contribution/lib/ant-contrib.jar"/>
 		</classpath>
 	</taskdef>
+	
 	<!--*******************************************************************
 	* openMDX Ant tasks
 	********************************************************************-->
@@ -79,11 +79,21 @@
 			</antcontrib:if>
 		</antcontrib:then>
 		<antcontrib:else>
-			<taskdef resource="org/openmdx/tools/ant/antlib.xml" uri="xri://(antlib:org.openmdx.tools.ant)">
-				<classpath>
+			<componentdef 
+				classname="org.openmdx.tools.ant.componentdefs.PropertyOperations"
+			    name="propertyoperations"
+			>
+				<classpath id="openmdx.ant">
 					<pathelement location="${openmdx.home}/${build.java.platform}/ant/lib/openmdx-ant.jar"/>
 				</classpath>
-			</taskdef>
+			</componentdef>
+			<propertyhelper>
+			  	<propertyoperations/>
+			</propertyhelper>
+			<taskdef 
+				resource="org/openmdx/tools/ant/antlib.xml" uri="xri://(antlib:org.openmdx.tools.ant)"
+				classpathref="openmdx.ant"
+			/>
 			<property name="org.openmdx.tools.ant.is.available" value="true"/>
 		</antcontrib:else>
 	</antcontrib:if>
@@ -91,17 +101,20 @@
 	* Project Help
 	********************************************************************-->
 	<target name="-projecthelp" description="Print project help information">
-		<condition property="ant.since1_7" value="">
-		  <contains string="${ant.version}" substring="Apache Ant version 1.7."/>
-		</condition>
-		<property name="ant.since1_7" value="-Dignore=" />
-		<java classname="org.apache.tools.ant.launch.Launcher">
-			<arg value="${ant.since1_7}-lib"/>
-				<arg value="${ant.since1_7}${openmdx.home}/${build.java.platform}/ant/lib/openmdx-ant.jar"/>
-			<arg value="${ant.since1_7}-main"/>
-				<arg value="${ant.since1_7}org.openmdx.tools.ant.Main"/>
-			<arg value="-projecthelp"/>
-			<arg value="${ant.file}"/>
+		<java
+	        classname="org.apache.tools.ant.launch.Launcher"
+	        fork="true"
+	        failonerror="true"
+	        dir="${basedir}"
+	        timeout="4000000"
+	        taskname="help"
+		>
+		    <classpath>
+		        <pathelement location="${ant.home}/lib/ant-launcher.jar"/>
+		    </classpath>
+		    <arg value="-buildfile"/>
+		    <arg file="${ant.file}"/>
+		    <arg value="-projecthelp"/>
 		</java>
 	</target>
 	<!--*******************************************************************
@@ -633,7 +646,6 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 	</target>
 	<target name="-preprocess-rose-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-rose">
 		<echo>Transforming Rose models ${basedir}/src/model/rose/models.mdl to ${build.dir}/model/models.zip...</echo>
-		<!-- Externalizes the model metadata from a rose model file -->
 		<echo/>
 		<echo>Externalizing Rose models to ${build.dir}/model/models.zip ...</echo>
 		<java 
@@ -664,8 +676,9 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 		</java>
 	</target>
 	<target name="-preprocess-rsm-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-rsm">
-		<echo>Transforming RSM models ${basedir}/src/model/rsm/models.emx to ${build.dir}/model/models.zip...</echo>
-		<!-- Externalizes the model metadata from a rose model file -->
+		<property name="model.transformation.rsm.url" value="file:src/model/rsm/models.emx"/>
+		<echo>Transforming RSM models ${model.transformation.rsm.url} to ${build.dir}/model/models.zip...</echo>
+		<!-- Externalizes the model metadata from an RSM model file -->
 		<echo/>
 		<echo>Externalizing RSM models to ${build.dir}/model/models.zip ...</echo>
 		<java 
@@ -685,7 +698,7 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 			<arg value="--pathMapPath=file:${openmdx.home}/security/src/model/rsm/"/>
 			<arg value="--pathMapSymbol=${thirdparty.model.name}"/>
 			<arg value="--pathMapPath=file:${thirdparty.model.home}"/>
-			<arg value="--url=file:src/model/rsm/models.emx"/>
+			<arg value="--url=${model.transformation.rsm.url}"/>
 			<arg value="--xmi=rsm"/>
 			<arg value="--out=${build.dir}/model/models.zip"/>
 			<arg value="--openmdxjdo=${basedir}/src/resource"/>
@@ -974,7 +987,7 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 							target="${build.target.version}" 
 							bootclasspath="${build.target.jre}/lib/rt.jar" 
 							extdirs="${build.target.jre}/ext"
-							includeantruntime="true"
+							includeantruntime="false"
 						>
 							<src>
 								<pathelement location="${build.dir}/src/java"/>
@@ -1315,7 +1328,7 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 			<param name="build.target.platform" value="${build.target.platform}"/>
 		</antcall>
 	</target>
-	<target name="-src-for-platform" depends="-exclude-platform-" unless="build.exclude.platform">
+	<target name="-src-for-platform" depends="-init-platform" unless="build.exclude.platform">
 		<antcontrib:foreach target="-src-for-jar-" param="jar.file">
 			<path>
 				<fileset dir="${deliver.dir}/lib">
@@ -1467,21 +1480,49 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 	<!--*******************************************************************
 	* All
 	********************************************************************-->
-	<target name="all" description="Processes all the project's platforms" depends="clean">
-		<antcontrib:foreach list="${project.platform.list}" target="-platform-" param="build.target.platform" delimiter="/"/>
+	<target 
+		name="all" 
+		description="Processes all the project's platforms" 
+		depends="clean"
+	>
+		<antcontrib:foreach 
+			list="${project.platform.list}" 
+			target="-platform-" 
+			param="build.target.platform" 
+			delimiter="/"
+		/>
 	</target>
 	<target name="-platform-" unless="build.exclude.${build.target.platform}">
 		<antcall target="platform" inheritAll="false">
 			<param name="build.target.platform" value="${build.target.platform}"/>
 		</antcall>
 	</target>
-	<target name="platform" description="Builds, tests and distributes the platform specified by -Dbuild.target.platform" depends="-exclude-platform-" unless="build.exclude.platform">
-		<antcall target="-include-platform-"/>
+	<target 
+		name="platform" 
+		description="Builds, tests and distributes the platform specified by -Dbuild.target.platform" 
+		depends="-init-platform" 
+	>
+		<antcontrib:if>
+			<isset property="build.exclude.platform"/>
+			<antcontrib:then>
+				<echo>Platform ${build.target.platform} is excluded from the build process</echo>
+			</antcontrib:then>
+			<antcontrib:else>
+				<antcall target="-include-platform-"/>
+			</antcontrib:else>
+		</antcontrib:if>
 	</target>
 	<target name="-include-platform-" depends="init,test,distribution"/>
-	<target name="-exclude-platform-" if="build.exclude.platform">
-		<echo>Platform ${build.target.platform} is excluded from the build process because some prerequites are missing!</echo>
-	</target>
+	<target name="-init-platform">
+		<condition property="build.exclude.platform">
+			<and>
+				<equals arg1="${build.target.platform}" arg2="jre-1.5" />
+				<not>
+					<available file="${env.JRE_15}/lib/rt.jar"/>
+				</not>
+			</and>
+		</condition>
+	</target>	
 	<!-- ******************************************************************* -->
 	<!-- * -validate-war- -->
 	<!-- ******************************************************************* -->

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightTransaction.java,v 1.2 2009/09/07 15:14:13 hburger Exp $
+ * Name:        $Id: LightweightTransaction.java,v 1.3 2010/06/02 13:46:07 hburger Exp $
  * Description: Lightweight Transaction
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 15:14:13 $
+ * Date:        $Date: 2010/06/02 13:46:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -773,6 +773,7 @@ final class LightweightTransaction implements Transaction {
     /**
      * Print the Transaction object in a debugger friendly manner
      */
+    @Override
     public String toString() {
         return "Transaction " + xid;
     }

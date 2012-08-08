@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HashMapContext.java,v 1.1 2009/09/11 13:16:23 hburger Exp $
+ * Name:        $Id: HashMapContext.java,v 1.2 2010/06/02 13:45:39 hburger Exp $
  * Description: Hashtable Based Context
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/11 13:16:23 $
+ * Date:        $Date: 2010/06/02 13:45:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -128,6 +128,7 @@ public class HashMapContext extends NameBasedContext {
      * 
      * @throws NamingException
      */
+    @Override
     protected Object resolveLink(
         String nameComponent
     ) throws NamingException {
@@ -150,6 +151,7 @@ public class HashMapContext extends NameBasedContext {
      * 
      * @throws NamingException
      */
+    @Override
     protected NamingEnumeration<Binding> listBindings(
     ) throws NamingException {
     	synchronized (this.bindings){
@@ -160,6 +162,7 @@ public class HashMapContext extends NameBasedContext {
     /* (non-Javadoc)
      * @see javax.naming.Context#bind(java.lang.String, java.lang.Object)
      */
+    @Override
     public void bind(Name name, Object obj) throws NamingException {
         if(name.size() == 1) synchronized (this.bindings){
             String nameComponent = name.get(0);
@@ -197,6 +200,7 @@ public class HashMapContext extends NameBasedContext {
     /* (non-Javadoc)
      * @see javax.naming.Context#unbind(java.lang.String)
      */
+    @Override
     public void unbind(
         Name name
     ) throws NamingException {
@@ -211,6 +215,7 @@ public class HashMapContext extends NameBasedContext {
     /* (non-Javadoc)
      * @see javax.naming.Context#createSubcontext(java.lang.String)
      */
+    @Override
     public Context createSubcontext(
          Name name
     ) throws NamingException {
@@ -227,6 +232,7 @@ public class HashMapContext extends NameBasedContext {
     /* (non-Javadoc)
      * @see javax.naming.Context#destroySubcontext(java.lang.String)
      */
+    @Override
     public void destroySubcontext(
         Name name
     ) throws NamingException {
@@ -250,6 +256,7 @@ public class HashMapContext extends NameBasedContext {
     /* (non-Javadoc)
      * @see javax.naming.Context#rebind(java.lang.String, java.lang.Object)
      */
+    @Override
     public void rebind(
         Name name, 
         Object obj
@@ -277,6 +284,7 @@ public class HashMapContext extends NameBasedContext {
     /* (non-Javadoc)
      * @see javax.naming.Context#close()
      */
+    @Override
     public void close() throws NamingException {
         //
     }

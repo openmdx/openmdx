@@ -1,13 +1,12 @@
-Release Name: openMDX/EJB 2.2.1
-Release Date: 2008-10-14
+Release Name: openMDX/EJB 2.7.0
+Release Date: 2009-08-20
 
 ---------------------------------------------------------------------
 Notes:
 
-  This software is published under the BSD license
-  as listed below.
+  This software is published under the BSD license as listed below.
   
-  Copyright (c) 2006-2008, OMEX AG, Switzerland
+  Copyright (c) 2006-2010, OMEX AG, Switzerland
   All rights reserved.
   
   Redistribution and use in source and binary forms, with or without 
@@ -49,18 +48,46 @@ Notes:
 Changes:
 
 0.    SUMMARY
-      * UI enhancements
       * Bug fixes
+      * JRE 5.0 / 6.0 support
                         
+==============================================================================
+Version 2.7.0                                                       2010-08-20
+==============================================================================
+
 1.    NEW FEATURES
-      none      
-            
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES      
+             
+      CR20019195
+      JCA Authentication 
+      
+      PasswordCredential instance is accepted only by its assigned
+      persistence manager factory.  
+      
+2.1.  FIXED BUGS
+      none
+
+
+==============================================================================
+Version 2.6.1                                                       2010-06-04
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019195
+      JRE 5.0
+      
+      openMDX 2.6 is now JRE 5.0 enabled. 
+      
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
       none
-      
-            
+                  
 2.1.  FIXED BUGS
       none
 
@@ -70,4 +97,6 @@ Changes:
 2.3   REMOVED FEATURES
       none
 
----------------------------------------------------------------------
+--
+      
+

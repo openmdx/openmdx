@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: InvolvedMembers.java,v 1.3 2009/08/17 13:08:46 hburger Exp $
+ * Name:        $Id: InvolvedMembers.java,v 1.4 2010/07/08 16:58:59 hburger Exp $
  * Description: Involved Members
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/08/17 13:08:46 $
+ * Date:        $Date: 2010/07/08 16:58:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -72,6 +72,8 @@ abstract class InvolvedMembers<O,M> implements Involved<M> {
     ){
         this.involvedStates = involvedStates;
         this.feature = feature;
+        this.accessorForQueries = new Accessor(involvedStates.getQueryAccessMode());
+        this.accessorForUpdates = new Accessor(AccessMode.FOR_UPDATE);
     }
     
     /**
@@ -84,16 +86,24 @@ abstract class InvolvedMembers<O,M> implements Involved<M> {
      */
     final String feature;
 
-    /**
+    /**InvolvedMembers
      * A readable state iterator
      */
-    private final Iterable<M> accessorForQueries = new Accessor(AccessMode.FOR_QUERY);
+    private final Iterable<M> accessorForQueries;
         
     /**
      * A modifiable state iterator
      */
-    private final Iterable<M> accessorForUpdates = new Accessor(AccessMode.FOR_UPDATE);
+    private final Iterable<M> accessorForUpdates;
     
+    /* (non-Javadoc)
+     * @see org.openmdx.state2.aop1.Involved#getQueryAccess()
+     */
+//  @Override
+    public AccessMode getQueryAccessMode() {
+        return this.involvedStates.getQueryAccessMode();
+    }
+
     /**
      * Retrieve a state's member
      * 
@@ -111,11 +121,7 @@ abstract class InvolvedMembers<O,M> implements Involved<M> {
      * @see org.openmdx.state2.plugin.Involved#getInvolved(Access)
      */
     public Iterable<M> getInvolved(AccessMode access) {
-        switch(access) {
-            case FOR_UPDATE: return this.accessorForUpdates;
-            case FOR_QUERY: return this.accessorForQueries;
-            default: return null;
-        }
+        return access == AccessMode.FOR_UPDATE ? this.accessorForUpdates : this.accessorForQueries;
     }
 
     
@@ -128,8 +134,13 @@ abstract class InvolvedMembers<O,M> implements Involved<M> {
      */
     private class Accessor implements Iterable<M> {
         
+        /**
+         * Constructor 
+         *
+         * @param access the access mode
+         */
         Accessor(
-            AccessMode access
+            AccessMode access 
         ){
             this.access = access;
         }
@@ -151,7 +162,7 @@ abstract class InvolvedMembers<O,M> implements Involved<M> {
                  * Involved States Iterator
                  */
                 private final Iterator<O> states = involvedStates.getInvolved(
-                    access
+                    Accessor.this.access
                 ).iterator(
                 );
                 

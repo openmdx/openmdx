@@ -4,6 +4,128 @@
                     =====================================
        
 
+==============================================================================
+Version 2.7.0                                                       2010-08-27
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019273
+      Key Store Resource Adapter
+      
+      Setting the ManagedConnectionFactory's 'ConnectionType' property to 
+      'VALIDATOR_CONNECTION' has the following effect:
+      * The 'UserName' attribute is not treated as key store entry alias but 
+        as certificate path validation algorithm (usually "PKIX").
+      * The connections are instances of ValidatorConnection and implement
+        CertificateValidator
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES      
+
+      CR20019273
+      Key Store Resource Adapter
+      
+      Setting the ManagedConnectionFactory's 'ConnectionType' property to 
+      'KEY_CONNECTION' is now mandatory in order to retrieve instances of
+      KeyConnection.
+             
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+
+==============================================================================
+Version 2.6.4                                                       2010-08-10
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019276
+      Connection Factory Unification
+      
+      org.openmdx.resource.cci.ConnectionFactory is unified the generic version
+      of the former connection type specific factory interfaces.
+
+      CR20019295
+      openmdx-resource.jar
+      
+      The Java archive openmdx-resource.jar contains classes required by 
+      different resource adapters. 
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES      
+             
+      CR20019276
+      JCA Naming Normalization
+      
+      The following classes have been renamed:
+      * org.openmdx.resource.pki.keystore.ManagedKeyStoreConnectionFactory to
+        org.openmdx.resource.pki.keystore.ManagedConnectionFactory
+      * org.openmdx.resource.pki.keystore.KeyStoreConnectionFactory to
+        org.openmdx.resource.pki.keystore.ConnectionFactory
+      * org.openmdx.resource.ldap.v3.LDAPConnectionFactory to
+        org.openmdx.resource.ldap.v3.ManagedConnectionFactory
+      * org.openmdx.resource.ldap.v3.URLConnectionFactory to
+        org.openmdx.resource.ldap.ldif.ManagedConnectionFactory
+             
+      CR20019195
+      JCA Authentication 
+      
+      PasswordCredential instance is accepted only by its assigned
+      persistence manager factory.  
+      
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      
+      CR20019276
+      Connection Factory Unification
+      
+      The following interfaces have been removed in favour of
+      org.openmdx.resource.cci.ConnectionFactory:
+      * org.openmdx.resource.ldap.cci.ConnectionFactory
+      * org.openmdx.resource.pki.cci.ConnectionFactory
+      
+      The following interfaces has been removed in favour of its native API:
+      * org.openmdx.resource.ldap.cci.Connection
+
+
+==============================================================================
+Version 2.6.1                                                       2010-06-04
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019195
+      JRE 5.0
+      
+      openMDX 2.6 is now JRE 5.0 enabled. 
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES      
+             
+      CR20019195
+      JRE 5.0
+      
+      The JRadius client's default logger name has changed from "global"
+      to "org.openmdx.uses.net.sourceforge.jradiusclient".
+      
+2.1.  FIXED BUGS
+      none
+
 
 ==============================================================================
 Version 2.5.4                                                       2010-93-11

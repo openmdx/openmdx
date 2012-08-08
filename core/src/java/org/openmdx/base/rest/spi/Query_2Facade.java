@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Query_2Facade.java,v 1.10 2010/03/19 12:32:54 hburger Exp $
+ * Name:        $Id: Query_2Facade.java,v 1.11 2010/07/09 13:52:03 hburger Exp $
  * Description: Query Facade
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:32:54 $
+ * Date:        $Date: 2010/07/09 13:52:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,7 @@ package org.openmdx.base.rest.spi;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
@@ -130,12 +131,38 @@ public class Query_2Facade {
         return new Query_2Facade(record);
     }
     
+    /**
+     * Create a facade for the given object id
+     * 
+     * @param transientObjectId
+     * 
+     * @return a facade for the given object id
+     * 
+     * @throws ResourceException
+     */
     public static Query_2Facade newInstance(
         Path path
     ) throws ResourceException {
         Query_2Facade facade = newInstance();
         facade.setPath(path);
         return facade;
+    }
+    
+    /**
+     * Create a facade for the given transient object id
+     * 
+     * @param transientObjectId
+     * 
+     * @return a facade for the given transient object id
+     * 
+     * @throws ResourceException
+     */
+    public static Query_2Facade newInstance(
+        UUID transientObjectId
+    ) throws ResourceException{
+        return Query_2Facade.newInstance(
+            new Path(transientObjectId)
+        );
     }
     
     /**

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ClassLoaderContext.java,v 1.3 2009/09/11 13:39:20 hburger Exp $
+ * Name:        $Id: ClassLoaderContext.java,v 1.4 2010/06/04 22:45:00 hburger Exp $
  * Description: Java URL Context
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/11 13:39:20 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -146,7 +146,8 @@ public class ClassLoaderContext extends NameBasedContext {
     /* (non-Javadoc)
      * @see org.openmdx.kernel.naming.spi.AbstractContext#resolve(java.lang.String, boolean)
      */
-    protected Object resolveLink(
+    @Override
+	protected Object resolveLink(
         String nameComponent
     ) throws NamingException {
         String contextName = nameComponent.startsWith(urlPrefix) ?
@@ -163,7 +164,8 @@ public class ClassLoaderContext extends NameBasedContext {
     /* (non-Javadoc)
      * @see org.openmdx.kernel.naming.spi.AbstractContext#listBindings()
      */
-    protected NamingEnumeration<Binding> listBindings() throws NamingException {
+    @Override
+	protected NamingEnumeration<Binding> listBindings() throws NamingException {
         return new Bindings(classLoaderContexts.keys());
     }
 

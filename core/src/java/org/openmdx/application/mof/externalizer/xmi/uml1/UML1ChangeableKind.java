@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UML1ChangeableKind.java,v 1.1 2009/01/13 02:10:39 wfro Exp $
+ * Name:        $Id: UML1ChangeableKind.java,v 1.2 2010/06/02 13:42:16 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:39 $
+ * Date:        $Date: 2010/06/02 13:42:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,6 +57,7 @@ public final class UML1ChangeableKind {
   // Avoid instantiation
   private UML1ChangeableKind(String label) { this.label = label; }
 
+  @Override
   public String toString()
   {
     return this.label;

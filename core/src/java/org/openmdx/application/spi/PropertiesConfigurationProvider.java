@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PropertiesConfigurationProvider.java,v 1.3 2009/09/18 12:34:31 hburger Exp $
+ * Name:        $Id: PropertiesConfigurationProvider.java,v 1.5 2010/08/16 13:36:47 hburger Exp $
  * Description: Standard Configuration Provider
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/18 12:34:31 $
+ * Date:        $Date: 2010/08/16 13:36:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,10 +50,14 @@
  */
 package org.openmdx.application.spi;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.jdo.Constants;
 
@@ -104,15 +108,19 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider_1_
     ) throws ServiceException{
         try {
             if(this.url.startsWith("xri://+resource/")) {
+                Set<URL> fragments = new HashSet<URL>();
                 for(
                     Enumeration<URL> resources = Classes.getResources(this.url.substring(16));
                     resources.hasMoreElements();
                 ) {
-                    amendConfiguration(
-                        resources.nextElement(),
-                        configuration,
-                        section
-                    );
+                    URL fragment = resources.nextElement(); 
+                    if(fragments.add(fragment)) {
+                        amendConfiguration(
+                            fragment,
+                            configuration,
+                            section
+                        );
+                    }
                 }
             } else {
                 amendConfiguration(
@@ -214,6 +222,12 @@ public class PropertiesConfigurationProvider implements ConfigurationProvider_1_
                     }
                     else if(propertyValue.startsWith("(java.lang.String)")) {
                         value = propertyValue.substring(18);
+                    }
+                    else if(propertyValue.startsWith("(java.math.BigInteger)")) {
+                        value = new BigInteger(propertyValue.substring(22));
+                    }
+                    else if(propertyValue.startsWith("(java.math.BigDecimal)")) {
+                        value = new BigDecimal(propertyValue.substring(22));
                     }
                     else {
                         value = propertyValue;

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.6-properties.xml,v 1.3 2010/01/08 15:53:21 wfro Exp $
+= Name:        $Id: jre-1.6-properties.xml,v 1.4 2010/06/05 21:42:00 hburger Exp $
 = Description: openMDX/Test Core jre-1.6 Platform Properties
-= Revision:    $Revision: 1.3 $
-= Date:        $Date: 2010/01/08 15:53:21 $
+= Revision:    $Revision: 1.4 $
+= Date:        $Date: 2010/06/05 21:42:00 $
 = Copyright:   (c) 2006 OMEX AG
 =======================================================================
 =
@@ -44,5 +44,4 @@
 = POSSIBILITY OF SUCH DAMAGE.
 = 
 -->
-<project name="openmdx-test-core-jre-1.6-properties">
-</project>
+<project name="openmdx-test-core-jre-1.6-properties"/>

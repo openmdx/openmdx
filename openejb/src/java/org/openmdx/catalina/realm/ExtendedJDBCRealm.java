@@ -2,11 +2,11 @@ package org.openmdx.catalina.realm;
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExtendedJDBCRealm.java,v 1.2 2009/11/13 17:05:34 wfro Exp $
+ * Name:        $Id: ExtendedJDBCRealm.java,v 1.3 2010/06/05 00:29:22 hburger Exp $
  * Description: Extended Context Bindings
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/13 17:05:34 $
+ * Date:        $Date: 2010/06/05 00:29:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -109,7 +109,8 @@ public class ExtendedJDBCRealm extends JDBCRealm {
      * @param credentials Password or other credentials to use in
      *        authenticating this username
      */
-    protected String digest(
+    @Override
+	protected String digest(
         String credentials
     )  {
         super.getContainer().getRealm();

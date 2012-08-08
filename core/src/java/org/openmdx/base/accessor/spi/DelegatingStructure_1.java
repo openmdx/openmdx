@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DelegatingStructure_1.java,v 1.3 2009/03/10 16:52:07 hburger Exp $
+ * Name:        $Id: DelegatingStructure_1.java,v 1.4 2010/06/02 13:43:52 hburger Exp $
  * Description: Delegating Structure_1_0 Implementation
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/10 16:52:07 $
+ * Date:        $Date: 2010/06/02 13:43:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -116,6 +116,7 @@ public abstract class DelegatingStructure_1
      * @return a string representation of its delegate amended by the
      * object's class name.
      */
+    @Override
     public String toString(
     ) {
         return Delegating_1.toString(this);
@@ -152,6 +153,7 @@ public abstract class DelegatingStructure_1
      * @return  true if this object is the same as the obj argument;
      *          false otherwise.
      */
+    @Override
     public boolean equals(
         Object that
     ){
@@ -166,6 +168,7 @@ public abstract class DelegatingStructure_1
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
+    @Override
     public int hashCode(
     ) {
         try {

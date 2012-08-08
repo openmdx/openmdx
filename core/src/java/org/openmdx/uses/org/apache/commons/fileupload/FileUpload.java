@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/FileUpload.java,v 1.3 2004/06/29 07:40:54 wfro Exp $
- * $Revision: 1.3 $
- * $Date: 2004/06/29 07:40:54 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/FileUpload.java,v 1.4 2010/06/02 13:46:30 hburger Exp $
+ * $Revision: 1.4 $
+ * $Date: 2010/06/02 13:46:30 $
  *
  * ====================================================================
  *
@@ -84,7 +84,7 @@ package org.openmdx.uses.org.apache.commons.fileupload;
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * @author Sean C. Sullivan
  *
- * @version $Id: FileUpload.java,v 1.3 2004/06/29 07:40:54 wfro Exp $
+ * @version $Id: FileUpload.java,v 1.4 2010/06/02 13:46:30 hburger Exp $
  */
 public class FileUpload
     extends FileUploadBase
@@ -135,6 +135,7 @@ public class FileUpload
      *
      * @return The factory class for new file items.
      */
+    @Override
     public FileItemFactory getFileItemFactory()
     {
         return fileItemFactory;
@@ -146,6 +147,7 @@ public class FileUpload
      *
      * @param factory The factory class for new file items.
      */
+    @Override
     public void setFileItemFactory(FileItemFactory factory)
     {
         this.fileItemFactory = factory;

@@ -20,29 +20,30 @@ set JAVA_HOME=%JAVA_HOME:/=\%
 set JAVA_OPTS=%JAVA_OPTS% -Xmx800M 
 set JAVA_OPTS=%JAVA_OPTS% -XX:MaxPermSize=128m
 set JAVA_OPTS=%JAVA_OPTS% -Djava.protocol.handler.pkgs=org.openmdx.kernel.url.protocol
+set LOGGING_MANAGER=-Djava.util.logging.manager=java.util.logging.LogManager
 cd %CATALINA_HOME%
 rmdir /s /q temp
 rmdir /s /q work
 mkdir temp
 
 if exist "@@INSTALLDIR@@\bin\webapp01.bat" (
-  start "WebApp01 @@VERSION@@ (@@TOMCAT_HTTP_PORT@@)" "@@INSTALLDIR@@\bin\webapp01.bat" START
+  call "@@INSTALLDIR@@\bin\webapp01.bat" START
   ping 127.0.0.1 > nul  
 )
 if exist "@@INSTALLDIR@@\bin\webapp02.bat" (
-  start "WebApp02 @@VERSION@@ (@@TOMCAT_HTTP_PORT@@)" "@@INSTALLDIR@@\bin\webapp02.bat" START
+  call "@@INSTALLDIR@@\bin\webapp02.bat" START
   ping 127.0.0.1 > nul  
 )
 if exist "@@INSTALLDIR@@\bin\webapp03.bat" (
-  start "WebApp03 @@VERSION@@ (@@TOMCAT_HTTP_PORT@@)" "@@INSTALLDIR@@\bin\webapp03.bat" START
+  call "@@INSTALLDIR@@\bin\webapp03.bat" START
   ping 127.0.0.1 > nul  
 )
 if exist "@@INSTALLDIR@@\bin\webapp04.bat" (
-  start "WebApp04 @@VERSION@@ (@@TOMCAT_HTTP_PORT@@)" "@@INSTALLDIR@@\bin\webapp04.bat" START
+  call "@@INSTALLDIR@@\bin\webapp04.bat" START
   ping 127.0.0.1 > nul  
 )
 if exist "@@INSTALLDIR@@\bin\webapp05.bat" (
-  start "WebApp05 @@VERSION@@ (@@TOMCAT_HTTP_PORT@@)" "@@INSTALLDIR@@\bin\webapp05.bat" START
+  call "@@INSTALLDIR@@\bin\webapp05.bat" START
   ping 127.0.0.1 > nul  
 )
 
@@ -51,23 +52,23 @@ goto end
 
 :stop
 if exist "@@INSTALLDIR@@\bin\webapp01.bat" (
-  start "WebApp01 @@VERSION@@ (@@TOMCAT_HTTP_PORT@@)" "@@INSTALLDIR@@\bin\webapp01.bat" STOP
+  call "@@INSTALLDIR@@\bin\webapp01.bat" STOP
   ping 127.0.0.1 > nul  
 )
 if exist "@@INSTALLDIR@@\bin\webapp02.bat" (
-  start "WebApp02 @@VERSION@@ (@@TOMCAT_HTTP_PORT@@)" "@@INSTALLDIR@@\bin\webapp02.bat" STOP
+  call "@@INSTALLDIR@@\bin\webapp02.bat" STOP
   ping 127.0.0.1 > nul  
 )
 if exist "@@INSTALLDIR@@\bin\webapp03.bat" (
-  start "WebApp03 @@VERSION@@ (@@TOMCAT_HTTP_PORT@@)" "@@INSTALLDIR@@\bin\webapp03.bat" STOP
+  call "@@INSTALLDIR@@\bin\webapp03.bat" STOP
   ping 127.0.0.1 > nul  
 )
 if exist "@@INSTALLDIR@@\bin\webapp04.bat" (
-  start "WebApp04 @@VERSION@@ (@@TOMCAT_HTTP_PORT@@)" "@@INSTALLDIR@@\bin\webapp04.bat" STOP
+  call "@@INSTALLDIR@@\bin\webapp04.bat" STOP
   ping 127.0.0.1 > nul  
 )
 if exist "@@INSTALLDIR@@\bin\webapp05.bat" (
-  start "WebApp05 @@VERSION@@ (@@TOMCAT_HTTP_PORT@@)" "@@INSTALLDIR@@\bin\webapp05.bat" STOP
+  call "@@INSTALLDIR@@\bin\webapp05.bat" STOP
   ping 127.0.0.1 > nul  
 )
 taskkill -FI "WINDOWTITLE eq Tomcat EJB @@VERSION@@ (@@TOMCAT_HTTP_PORT@@)*"

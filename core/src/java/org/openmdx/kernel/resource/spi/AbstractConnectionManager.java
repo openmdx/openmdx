@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractConnectionManager.java,v 1.2 2009/08/25 13:42:54 hburger Exp $
+ * Name:        $Id: AbstractConnectionManager.java,v 1.4 2010/08/03 14:03:07 hburger Exp $
  * Description: Abstract Connection Manager
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/08/25 13:42:54 $
+ * Date:        $Date: 2010/08/03 14:03:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,7 +65,6 @@ import org.openmdx.kernel.loading.Classes;
 /**
  * Abstract Connection Manager
  */
-@SuppressWarnings("serial")
 public abstract class AbstractConnectionManager
     implements ConnectionManager 
 {
@@ -118,6 +117,11 @@ public abstract class AbstractConnectionManager
            getConnectionClass(connectionClass)
         );
     }
+
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 5591933870762949430L;
 
     /**
      * @serial the Subject's private credentials
@@ -239,41 +243,25 @@ public abstract class AbstractConnectionManager
             connectionRequestInfo
         );
     }
-       
+
     /**
      * Allocate a managed connection
      * 
      * @param managedConnections set of managed conections
-     * @param managedConnectionPool pool of unused managed connections
      * @param subject
      * @param managedConnectionFactory
      * @param connectionRequestInfo
-     * @return a (maybe newly created) managed connection
      * 
-     * @throws ResourceException 
+     * @return a (maybe newly created) managed connection
+     *
+     * @throws ResourceException
      */
-    protected ManagedConnection allocateMangedConnection(
+    protected abstract ManagedConnection allocateMangedConnection(
         Set<ManagedConnection> managedConnections,
         Subject subject,
         ManagedConnectionFactory managedConnectionFactory, 
         ConnectionRequestInfo connectionRequestInfo
-    ) throws ResourceException{
-        synchronized(managedConnections){
-            ManagedConnection managedConnection = managedConnectionFactory.matchManagedConnections(
-                managedConnections,
-                subject,
-                connectionRequestInfo
-            );
-            if(managedConnection == null) managedConnections.add(
-                managedConnection = allocateManagedConnection(
-                    subject,
-                    managedConnectionFactory,
-                    connectionRequestInfo
-                )
-            );
-            return managedConnection;        
-        }            
-    }
+    ) throws ResourceException;
 
     /* (non-Javadoc)
      * @see javax.resource.spi.ConnectionManager#allocateConnection(javax.resource.spi.ManagedConnectionFactory, javax.resource.spi.ConnectionRequestInfo)

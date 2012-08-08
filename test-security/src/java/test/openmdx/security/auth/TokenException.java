@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TokenException.java,v 1.1 2010/03/05 13:21:20 hburger Exp $
+ * Name:        $Id: TokenException.java,v 1.2 2010/06/04 22:38:00 hburger Exp $
  * Description: Extended IO Exception 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/05 13:21:20 $
+ * Date:        $Date: 2010/06/04 22:38:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -126,7 +126,8 @@ public class TokenException
      *
      * @return Throwable  The exception cause.
      */
-    public final BasicException getCause(
+    @Override
+	public final BasicException getCause(
     ){
         return (BasicException) super.getCause();
     }

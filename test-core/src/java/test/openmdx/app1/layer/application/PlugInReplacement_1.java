@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PlugInReplacement_1.java,v 1.8 2009/12/31 01:48:16 wfro Exp $
+ * Name:        $Id: PlugInReplacement_1.java,v 1.9 2010/06/03 15:57:09 hburger Exp $
  * Description: TestApp_1's standard stack
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/31 01:48:16 $
+ * Date:        $Date: 2010/06/03 15:57:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -71,6 +71,7 @@ import org.openmdx.kernel.exception.BasicException;
 public class PlugInReplacement_1 extends VirtualObjects_1 {
 
     // --------------------------------------------------------------------------
+    @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {

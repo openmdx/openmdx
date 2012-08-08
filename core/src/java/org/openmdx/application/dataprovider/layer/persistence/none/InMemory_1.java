@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InMemory_1.java,v 1.14 2010/02/19 15:20:51 wfro Exp $
+ * Name:        $Id: InMemory_1.java,v 1.16 2010/06/02 13:41:49 hburger Exp $
  * Description: InMemory_1 class
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/19 15:20:51 $
+ * Date:        $Date: 2010/06/02 13:41:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -77,9 +77,11 @@ import javax.resource.cci.MappedRecord;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.application.dataprovider.layer.persistence.common.AbstractPersistence_1;
 import org.openmdx.application.dataprovider.spi.Layer_1;
@@ -87,10 +89,7 @@ import org.openmdx.application.dataprovider.spi.OperationAwareLayer_1;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.AttributeSpecifier;
-import org.openmdx.base.query.Directions;
-import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.query.Orders;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
@@ -110,6 +109,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
     }
     
     // --------------------------------------------------------------------------
+    @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {
@@ -589,7 +589,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
                 final List sortersList = new ArrayList();
                 for (int i=0; i<specification.getAttributeSpecifier().length; i++) {
                     AttributeSpecifier specifier = specification.getAttributeSpecifier()[i];
-                    if (specifier.order() != Orders.ANY ) {
+                    if (specifier.order() != SortOrder.UNSORTED.code() ) {
                         sortersList.add(specifier);
                     }
                 }
@@ -657,7 +657,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
                     InMemory_1.this.batchSize
                 );
                 int replyPosition = request.position();
-                if(request.direction() == Directions.DESCENDING) {
+                if(request.direction() == SortOrder.DESCENDING.code()) {
                     if(replySize > replyPosition) replySize = replyPosition + 1;
                     replyPosition = replyPosition + 1 - replySize;
                 }
@@ -692,9 +692,9 @@ public class InMemory_1 extends AbstractPersistence_1 {
                                     int diff = 0;
                                     for (int i=0; i<sorters.length && diff == 0 && !added; i++) {
                                         diff = InMemory_1.this.compare(sortedObjects.get(pos), object, sorters[i].name(), sorters[i].position());
-                                        if ((diff > 0 && sorters[i].order() == Directions.ASCENDING)
+                                        if ((diff > 0 && sorters[i].order() == SortOrder.ASCENDING.code())
                                                 ||
-                                                (diff < 0 && sorters[i].order() == Directions.DESCENDING)
+                                                (diff < 0 && sorters[i].order() == SortOrder.DESCENDING.code())
                                         ) {
                                             sortedObjects.add(pos, object); // shifts existing objects
                                             added = true;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Queries.java,v 1.5 2009/05/18 09:06:04 wfro Exp $
+ * Name:        $Id: Queries.java,v 1.6 2010/06/25 09:28:41 wfro Exp $
  * Description: OPENMDXQL Support
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/18 09:06:04 $
+ * Date:        $Date: 2010/06/25 09:28:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -176,6 +176,11 @@ public class Queries {
                             } else if ("duration".equalsIgnoreCase(type)) {
                                 valueClass = Duration.class;
                             }
+                            pos2++;
+                        }
+                        // Skip unknown char
+                        else {
+                            valueClass = null;
                             pos2++;
                         }
                         c = queryString.charAt(pos2);

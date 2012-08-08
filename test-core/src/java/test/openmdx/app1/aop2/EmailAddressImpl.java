@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EmailAddressImpl.java,v 1.1 2009/09/17 16:23:01 hburger Exp $
+ * Name:        $Id: EmailAddressImpl.java,v 1.2 2010/06/03 15:57:01 hburger Exp $
  * Description: E-Mail Address  
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/17 16:23:01 $
+ * Date:        $Date: 2010/06/03 15:57:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -87,7 +87,10 @@ public class EmailAddressImpl extends AddressImpl<test.openmdx.app1.jmi1.EmailAd
      * 
      * @see test.openmdx.app1.cci2.Address#formatAs(test.openmdx.app1.cci2.AddressFormatAsParams)
      */
-    public AddressFormatAsResult formatAs(AddressFormatAsParams in) {
+    @Override
+    public AddressFormatAsResult formatAs(
+        AddressFormatAsParams in
+    ) {
         EmailAddress same = sameObject();
         App1Package app1Package = (App1Package) same.refImmediatePackage();
         if(STANDARD.equals(in.getType())) {

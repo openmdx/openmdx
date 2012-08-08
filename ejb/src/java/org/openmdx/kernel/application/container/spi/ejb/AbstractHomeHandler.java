@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractHomeHandler.java,v 1.4 2009/08/25 17:23:05 hburger Exp $
+ * Name:        $Id: AbstractHomeHandler.java,v 1.5 2010/06/04 22:45:00 hburger Exp $
  * Description: Abstract Enterprise Java Bean Home Invocation Handler
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/08/25 17:23:05 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -200,7 +200,8 @@ implements HomeConfiguration
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
-    public Object invoke(
+    @Override
+	public Object invoke(
         Object proxy, 
         Method method, 
         Object[] args
@@ -315,7 +316,8 @@ implements HomeConfiguration
     /* (non-Javadoc)
      * @see java.rmi.server.RemoteObject#toString()
      */
-    public String toString() {
+    @Override
+	public String toString() {
         return new StringBuilder(
             getClass().getName()
         ).append(

@@ -81,7 +81,7 @@
 		    width      	300
 		    height     	180)
 		(object CategoryView "Logical View::org::openmdx::compatibility" @2
-		    location   	(212, 503)
+		    location   	(222, 1122)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -93,7 +93,7 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@2
-			location   	(68, 419)
+			location   	(78, 1038)
 			fill_color 	13434879
 			nlines     	2
 			max_width  	288
@@ -106,7 +106,7 @@
 		    width      	300
 		    height     	180)
 		(object CategoryView "Logical View::org::openmdx::generic1" @3
-		    location   	(1031, 839)
+		    location   	(609, 491)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -118,7 +118,7 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@3
-			location   	(887, 755)
+			location   	(465, 407)
 			fill_color 	13434879
 			nlines     	2
 			max_width  	288
@@ -131,7 +131,7 @@
 		    width      	300
 		    height     	180)
 		(object CategoryView "Logical View::org::openmdx::audit2" @4
-		    location   	(1432, 842)
+		    location   	(219, 797)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -143,7 +143,7 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@4
-			location   	(1288, 758)
+			location   	(75, 713)
 			fill_color 	13434879
 			nlines     	2
 			max_width  	288
@@ -156,7 +156,7 @@
 		    width      	300
 		    height     	180)
 		(object CategoryView "Logical View::org::openmdx::preferences1" @5
-		    location   	(1320, 234)
+		    location   	(215, 489)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -168,7 +168,7 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@5
-			location   	(1176, 150)
+			location   	(71, 405)
 			fill_color 	13434879
 			nlines     	2
 			max_width  	288
@@ -178,5 +178,55 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"437E024F033F"
+		    width      	300
+		    height     	180)
+		(object CategoryView "Logical View::org::openmdx::state2" @6
+		    location   	(604, 798)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(460, 714)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"state2")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"491C3652001F"
+		    width      	300
+		    height     	180)
+		(object CategoryView "Logical View::org::openmdx::role2" @7
+		    location   	(1013, 797)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@7
+			location   	(869, 713)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"role2")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"491C365801D4"
 		    width      	300
 		    height     	180)))))

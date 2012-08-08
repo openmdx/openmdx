@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SortedMaps.java,v 1.6 2009/04/28 13:58:52 hburger Exp $
+ * Name:        $Id: SortedMaps.java,v 1.7 2010/06/02 13:46:51 hburger Exp $
  * Description: Sorted Maps 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/28 13:58:52 $
+ * Date:        $Date: 2010/06/02 13:46:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -766,6 +766,7 @@ public class SortedMaps {
          * @param fromIndex index of first element to be removed.
          * @param toIndex index after last element to be removed.
          */
+        @Override
         protected void removeRange(int fromIndex, int toIndex) {
             this.delegate.subMap(
                 fromIndex + this.offest,

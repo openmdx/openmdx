@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Path.java,v 1.24 2010/01/21 17:32:35 hburger Exp $
+ * Name:        $Id: Path.java,v 1.26 2010/06/21 17:31:37 hburger Exp $
  * Description: Profile Path 
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/21 17:32:35 $
+ * Date:        $Date: 2010/06/21 17:31:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -91,6 +91,7 @@ public final class Path
      * 
      * @deprecated Do NOT use! 
      */
+    @Deprecated
     public Path(
     ){        
         // Required for Externalizable and XMLEncoder
@@ -489,6 +490,7 @@ public final class Path
      * 
      * @see #toURI()
      */
+    @Deprecated
     public String toUri()
     {
         try {
@@ -533,6 +535,7 @@ public final class Path
      * @deprecated use toXRI()
      * @see toXRI()
      */
+    @Deprecated
     public String toXri()
     {
         try {
@@ -570,6 +573,7 @@ public final class Path
      * 
      * @deprecated will be removed as soon as the identity.isLike() pattern is no longer necessary
      */
+    @Deprecated
     public String toResourcePattern(
     ){
         return toXri().replace(".", "\\."); 
@@ -1265,6 +1269,7 @@ public final class Path
      *
      * @return    a clone of this instance.
      */
+    @Override
     public Object clone(
     ) {   
         return new Path(this);
@@ -1308,6 +1313,7 @@ public final class Path
      *
      * @return   the XRI 2 representation of a path
      */
+    @Override
     public String toString(
     ){
         return LEGACY_STRING_REPRESENTATION ? toComponent() : toXRI(); 
@@ -1321,6 +1327,7 @@ public final class Path
      * @return  true if this object is the same as the object argument;
      *          false otherwise.
      */
+    @Override
     public boolean equals(
         Object that
     ){
@@ -1338,6 +1345,7 @@ public final class Path
      *
      * @return the path's hash code
      */
+    @Override
     public int hashCode(
     ) {
         return this.components.hashCode();

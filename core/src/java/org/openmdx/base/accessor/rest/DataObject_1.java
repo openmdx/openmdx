@@ -1,9 +1,9 @@
 /*
  * ====================================================================
  * Description: Object_1 class
- * Revision:    $Revision: 1.88 $
+ * Revision:    $Revision: 1.108 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 09:11:35 $
+ * Date:        $Date: 2010/08/26 15:53:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,6 +64,7 @@ import java.util.AbstractList;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -82,7 +83,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
+import javax.jdo.JDOFatalInternalException;
 import javax.jdo.JDOUserException;
 import javax.jdo.listener.AttachLifecycleListener;
 import javax.jdo.listener.ClearLifecycleListener;
@@ -106,7 +109,8 @@ import javax.resource.cci.Record;
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.accessor.rest.spi.VirtualObjects_2_0;
+import org.openmdx.base.accessor.rest.spi.ManagedConnectionCache_2_0;
+import org.openmdx.base.accessor.rest.spi.ManagedConnectionCache_2_0.Mode;
 import org.openmdx.base.accessor.spi.AbstractDataObject_1;
 import org.openmdx.base.accessor.spi.DateMarshaller;
 import org.openmdx.base.accessor.spi.DateTimeMarshaller;
@@ -116,6 +120,7 @@ import org.openmdx.base.accessor.spi.IntegerMarshaller;
 import org.openmdx.base.accessor.spi.LongMarshaller;
 import org.openmdx.base.accessor.spi.ShortMarshaller;
 import org.openmdx.base.aop0.PlugIn_1_0;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
@@ -125,6 +130,7 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.spi.ModelUtils;
@@ -132,11 +138,12 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.spi.SharedObjects;
-import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.Filter;
-import org.openmdx.base.query.FilterOperators;
-import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.query.Quantors;
+import org.openmdx.base.query.IsInCondition;
+import org.openmdx.base.query.IsInstanceOfCondition;
+import org.openmdx.base.query.OrderSpecifier;
+import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.MethodInvocationSpec;
@@ -159,7 +166,7 @@ import org.w3c.cci2.SparseArray;
  * DataObject_1_0 implementation
  */
 public class DataObject_1 
-    implements DataObject_1_0, Serializable, Evictable 
+    implements DataObject_1_0, Serializable
 {
 
     /**
@@ -193,7 +200,7 @@ public class DataObject_1
         this.transientObjectId = transientObjectId == null ? UUIDs.newUUID() : transientObjectId;
         this.transientValues = identity == null ? new HashMap<String,Object>() : null;
         this.detached = false;
-        dataObjectManager.putIfAbsent(
+        dataObjectManager.putUnlessPresent(
             this.transientObjectId,  
             this
         );
@@ -227,7 +234,7 @@ public class DataObject_1
         );
         this.transactionalValuesRecordName = objectClass;
         if(identity != null) {
-            manager.putIfAbsent(identity, this);
+            manager.putUnlessPresent(identity, this);
         }
     }
 
@@ -250,13 +257,16 @@ public class DataObject_1
             that.dataObjectManager,
             identity,
             null, // transientObjectId 
-            getRecordName(that)
+            DataObject_1.getRecordName(that)
         );
         this.digest = null;
         // 
         // Persistent Values
         //
         try {
+            if(that.jdoIsPersistent() && !that.jdoIsNew()) {
+                that.objRetrieve(false, null);
+            }
             this.persistentValues = Records.getRecordFactory().createMappedRecord(this.transactionalValuesRecordName);
         } catch (ResourceException exception) {
             throw new ServiceException(exception);
@@ -310,7 +320,18 @@ public class DataObject_1
                 that.transientValues != null &&
                 this.transientValues != null
              ) {
-                this.transientValues.putAll(that.transientValues);
+                for(Map.Entry<String,Object> e : that.transientValues.entrySet()){
+                    String feature = e.getKey();
+                    Object candidate = e.getValue();
+                    this.transientValues.put(feature, candidate);
+                    if(candidate instanceof Set) {
+                        this.objGetSet(feature);
+                    } else if (candidate instanceof List) {
+                        this.objGetList(feature);
+                    } else if (candidate instanceof SortedMap) {
+                        this.objGetSparseArray(feature);
+                    }
+                }
             } 
             //
             // Dirty Features
@@ -321,6 +342,15 @@ public class DataObject_1
             }
             if(this.transientValues != null) {
                 thisDirty.addAll(this.transientValues.keySet());
+            }
+            //
+            // Streams
+            //
+            for(String name : this.getAttributes(true).keySet()) {
+                this.objSetValue(
+                    name,
+                    that.objGetValue(name)
+                );
             }
         }
     }
@@ -430,24 +460,27 @@ public class DataObject_1
     private transient Container_1_0 aspects = null;
         
     /**
-     * The object's classifier
-     */
-    private transient ModelElement_1_0 classifier;
-
-    /**
      * 
      */
     static final Map<String, DataObject_1_0> NO_ASPECT = Collections.emptyMap();
     
     /**
-     * 
-     */
-    private static final FilterProperty[] NO_FILTER = {};
-
-    /**
      * Map a data types's qualified name to its marshaller
      */
     static final Map<String,Marshaller> dataTypeMarshaller = new HashMap<String,Marshaller>();
+    
+    /**
+     * Persistent derived attributes
+     */
+    static final List<String> persistentDerivedAttributes = Arrays.asList(
+        "org:openmdx:base:ExtentCapable:identity",
+        "org:openmdx:base:Creatable.createdAt",
+        "org:openmdx:base:Creatable.createdBy",
+        "org:openmdx:base:Modifiable.modifiedAt",
+        "org:openmdx:base:Modifiable.modifiedBy",
+        "org:openmdx:base:Removable.modifiedAt",
+        "org:openmdx:base:Removable.removededBy"
+    );
     
     /**
      * Valdidate the object's state and retrieve its class
@@ -488,24 +521,21 @@ public class DataObject_1
     }
     
     /**
-     * Add a new value unless it has already been set
+     * Tells whether the given feature name refers to an aspect's core reference
      * 
-     * @param key the feature name
-     * @param value the new value to be used if no previous value is set
-     * @return the previous value if one exists, the new value otherwise
+     * @param feature the feature name
+     * 
+     * @return <code>true</code> if the given feature name refers to an aspect's core reference
+     * 
+     * @throws ServiceException
      */
-    @SuppressWarnings("unchecked")
-    private final <T extends Flushable> T putFlushable(
-        String key,
-        T value
-    ){
-        T concurrent = (T) this.flushableValues.putIfAbsent(
-            key,
-            value
-        );
-        return concurrent == null ? value : concurrent;
+    private boolean isAspectHasCore(
+        String feature
+    ) throws ServiceException {
+        return 
+            "core".equals(feature) && 
+            this.dataObjectManager.getModel().isInstanceof(this, "org:openmdx:base:Aspect");
     }
-    
     /**
      * Retrieve the object's transactional state
      * 
@@ -522,7 +552,7 @@ public class DataObject_1
         ) {
             return null;
         } else {
-            return getUnitOfWork().getState(this,optional);
+            return this.getUnitOfWork().getState(this,optional);
         }        
     }
 
@@ -531,7 +561,7 @@ public class DataObject_1
         Path identity,
         boolean existence
     ) throws ServiceException{
-        UnitOfWork_1 unitOfWork = getUnitOfWork();
+        UnitOfWork_1 unitOfWork = this.getUnitOfWork();
         if(unitOfWork.isActive()) {
             if(!identity.startsWith(this.identity) || identity.size() - this.identity.size() != 2) {
                 throw new ServiceException(
@@ -579,7 +609,10 @@ public class DataObject_1
     ) throws ServiceException {
         if(this.transactionalValuesRecordName == null) {
             try {
-                assertObjectIsAccessible(false);
+                this.objRetrieve(
+                    false, 
+                    this.dataObjectManager.getFetchPlan()
+                );
                 this.transactionalValuesRecordName = this.persistentValues.getRecordName();
             } catch (NullPointerException exception){
                 throw new ServiceException(
@@ -626,7 +659,7 @@ public class DataObject_1
     public Set<String> objDefaultFetchGroup(
     ) throws ServiceException{
         Set<String> result = new HashSet<String>();
-        TransactionalState_1 state = getState(true);
+        TransactionalState_1 state = this.getState(true);
         if(state != null) {
             result.addAll(state.values(true).keySet());
         } else if (this.transientValues != null) {
@@ -638,6 +671,42 @@ public class DataObject_1
         return result;
     }
 
+    /**
+     * Retrieve the attribute definitions
+     * 
+     * @param stream
+     * @return the attribute definitions
+     * @throws ServiceException
+     */
+    private Map<String, ModelElement_1_0> getAttributes(
+        boolean stream
+    ) throws ServiceException{
+        Model_1_0 model = this.dataObjectManager.getModel();
+        Map<String, ModelElement_1_0> result = new HashMap<String, ModelElement_1_0>(
+            model.getAttributeDefs(
+                model.getElement(this.transactionalValuesRecordName),
+                false, // sub-types
+                true // includeDerived
+            )
+        );
+        for(
+            Iterator<Map.Entry<String, ModelElement_1_0>> i = result.entrySet().iterator();
+            i.hasNext();
+        ){
+            Map.Entry<String, ModelElement_1_0> entry = i.next();
+            ModelElement_1_0 feature = entry.getValue();
+            if(
+                stream != Multiplicities.STREAM.equals(ModelUtils.getMultiplicity(feature)) || (
+                    ModelUtils.isDerived(feature) && 
+                    !DataObject_1.persistentDerivedAttributes.contains(feature.objGetValue("qualifiedName"))
+                )
+            ) {
+                i.remove();
+            }
+        }
+        return result;
+    }
+    
     /**
      * Set the default fetch group
      * 
@@ -698,22 +767,24 @@ public class DataObject_1
         boolean makeNonTransactional
     ){
         if(makeNonTransactional) try {
-            getUnitOfWork().remove(this);
+            this.getUnitOfWork().remove(this);
         } catch (Exception ignored) {
             // Just ignore it
         }
-        clear();
+        this.clear();
         this.digest = null;
         this.persistentValues = null;
-        this.dataObjectManager = null;
         this.created = false;
         this.identity = null;
     }
 
     /**
      * Ask the persistence framework for the object's content
+     * 
+     * @param fetchPlan TODO to be taken into account
      */
     DataObject_1 unconditionalLoad(
+        FetchPlan fetchPlan
     ) throws ServiceException {
         try {
             IndexedRecord reply = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
@@ -728,7 +799,7 @@ public class DataObject_1
             this.inaccessabilityReason = null;
             return composite;
         } catch (ResourceException exception) {
-            throw setInaccessibilityReason(new ServiceException(exception));
+            throw this.setInaccessibilityReason(new ServiceException(exception));
         } catch (ServiceException exception){      
             throw setInaccessibilityReason(exception);
         }
@@ -763,9 +834,13 @@ public class DataObject_1
         }
         return inaccessabilityReason;
     }
-    
-    void unconditionalEvict(){
-        TransactionalState_1 state = getState(true);
+
+    /**
+     * Evict the data object
+     */
+    void unconditionalEvict(
+    ){
+        TransactionalState_1 state = this.getState(true);
         if(state != null) {
             state.clear();
         }
@@ -774,34 +849,56 @@ public class DataObject_1
     }
     
     /**
-     * Retrieve this object's container
-     *
-     * @param forEviction 
+     * Refresh the data object 
      * 
-     * @return the container
-     * @throws ServiceException 
-     * 
-     * @throws ServiceException 
+     * @throws ServiceException
      */
-    Container_1 getContainer(
-        boolean forEviction
-    ) throws ServiceException{
+    void unconditionalRefresh(
+    ) throws ServiceException {
+        this.unconditionalEvict();
+        Container_1 container = this.getContainer(true);
+        if(container != null) {
+            container.openmdxjdoEvict(false, true);
+        }
+        this.unconditionalLoad(this.dataObjectManager.getFetchPlan());
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#getContainer(boolean)
+     */
+//  @Override
+    public Container_1 getContainer(
+        boolean lazily
+    ){
         if(this.container == null && this.jdoIsPersistent()) {
-            Path identity = jdoGetObjectId();
+            Path identity = this.jdoGetObjectId();
             int size = identity.size() - 2;
             if(size > 0) {
                 Path parentId = identity.getPrefix(size);
-                if(!forEviction || this.dataObjectManager.containsKey(parentId)) {
+                if(!lazily || this.dataObjectManager.containsKey(parentId)) {
                     DataObject_1_0 parent = this.dataObjectManager.getObjectById(parentId, false); 
-                    if(!parent.objIsInaccessible()) {
+                    if(!parent.objIsInaccessible()) try {
                         this.container = (Container_1) parent.objGetContainer(
                             identity.get(size)
                         );
+                    } catch (ServiceException exception) {
+                        return null; // As if the parent were inaccessible
                     }
                 }
             }
         }
         return this.container;
+    }
+    
+    /**
+     * Let a Container_1 register itself to speed-up "lazy" retrieval
+     * 
+     * @param container
+     */
+    void setContainer(
+        Container_1 container
+    ){
+        this.container = container;
     }
     
     /**
@@ -813,29 +910,41 @@ public class DataObject_1
      */
     Container_1_0 getAspects(
     ) throws ServiceException{
-        if(this.aspects == null) {
-            Container_1 container = getContainer(false);
-            if(container != null) {
-                this.aspects = container.subMap(
-                    new FilterProperty[]{
-                        new FilterProperty(
-                            Quantors.THERE_EXISTS,
-                            "core",
-                            FilterOperators.IS_IN,
-                            this.jdoIsPersistent() ? this.jdoGetObjectId() : this.jdoGetTransactionalObjectId()
-                        )
-                    }
-                );
-            }
+        Container_1 container = this.getContainer(false);
+        if(container != null && (this.aspects == null || container != this.aspects.container())) {
+            this.aspects = container.subMap(
+                new Filter(
+                    new IsInCondition(
+                        Quantifier.THERE_EXISTS,
+                        "core",
+                        true, // IS_IN,
+                        this.jdoIsPersistent() ? this.jdoGetObjectId() : this.jdoGetTransactionalObjectId()
+                    )
+                )
+            );
         }
         return this.aspects;
     }
 
+    boolean isQualified(){
+        return this.jdoIsPersistent() || this.qualifier != null;
+    }
+    
     String getQualifier(
     ){
-        return jdoIsPersistent() ? jdoGetObjectId().getBase() : this.qualifier;
+        return this.jdoIsPersistent() ? this.jdoGetObjectId().getBase() : this.qualifier;
     }
 
+    /**
+     * The transient qualifier is used when an object is added without 
+     * qualifier to a transient container
+     * 
+     * @return the object's transient qualifier
+     */
+    String getPlaceHolder(){
+        return ":" + this.transientObjectId;
+    }
+    
     /**
      * Retrieve the unit of work
      * 
@@ -873,7 +982,7 @@ public class DataObject_1
         String makeDirty
     ) throws ServiceException {
         UnitOfWork_1 unitOfWork = this.getUnitOfWork(); 
-        boolean transactional = makeDirty != null && jdoIsPersistent();
+        boolean transactional = makeDirty != null && this.jdoIsPersistent();
         if(transactional) {
             this.addTo(unitOfWork);
         } else {
@@ -904,7 +1013,7 @@ public class DataObject_1
      */
     void objMakeTransactional(
     ) throws ServiceException {
-        addTo(getUnitOfWork()); 
+        this.addTo(getUnitOfWork()); 
     }
 
     /**
@@ -918,7 +1027,10 @@ public class DataObject_1
     ) throws ServiceException{
         if(unitOfWork.add(this)) {
             if(this.transientValues == null){
-                assertObjectIsAccessible(false);
+                this.objRetrieve(
+                    false, 
+                    this.dataObjectManager.getFetchPlan()
+                );
             } else {
                 unitOfWork.getState(this,false).setValues(this.transientValues);
                 this.transientValues = null;
@@ -939,7 +1051,7 @@ public class DataObject_1
      */
     void objMakeNontransactional(
     ) throws ServiceException {
-        if(jdoIsDirty()) {
+        if(this.jdoIsDirty()) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
@@ -948,13 +1060,11 @@ public class DataObject_1
         }
         getUnitOfWork().remove(this);
     }
-
+    
     /**
-     * This method clones an object
-     * @param original
+     * This method clones this data object
+     *
      * @return the clone
-     * 
-     * @throws ServiceException
      */
     public DataObject_1_0 openmdxjdoClone(
     ) {
@@ -1006,7 +1116,7 @@ public class DataObject_1
                 "The container is null"
             );
         } 
-        if (jdoIsPersistent()) throw new ServiceException(
+        if (this.jdoIsPersistent()) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
             "Attempt to move a persistent object",
@@ -1030,9 +1140,9 @@ public class DataObject_1
                 ExceptionHelper.newObjectIdParameter("id", this),
                 new BasicException.Parameter("criteria", criteria)
             );
-            Path identity = container.openmdxjdoGetContainerId().getChild(qualifier);
+            Path identity = this.container.openmdxjdoGetContainerId().getChild(qualifier);
             if(this.dataObjectManager.containsKey(identity)) {
-                DataObject_1_0 collision = this.dataObjectManager.getObjectById(identity);
+                DataObject_1_0 collision = this.dataObjectManager.getObjectById(identity, false);
                 if(collision != this) {
                     try {
                         collision.objGetClass();
@@ -1040,7 +1150,7 @@ public class DataObject_1
                         // The candidate could be evicted now
                     }
                     if(this.dataObjectManager.containsKey(identity)) {
-                        getState(false).setLifeCycleEventPending(false);
+                        this.getState(false).setLifeCycleEventPending(false);
                         this.container = null;
                         throw new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
@@ -1057,14 +1167,14 @@ public class DataObject_1
             ); 
             parent.objMakeTransactional();
             parent.setExistence(identity, true);
-            makePersistent(identity, true);
+            this.makePersistent(identity, true);
             for(Flushable flushable : this.flushableValues.values()){
                 if(flushable instanceof Container_1){
-                    makePersistent(
+                    this.makePersistent(
                         (Container_1)flushable,
                         false // aspect
                     );
-                    makePersistent(
+                    this.makePersistent(
                         (Container_1)flushable,
                         true // aspect
                     );
@@ -1077,16 +1187,28 @@ public class DataObject_1
                     }
                 }
             }
+            if(this.qualifier == null && this.container.containsObject(this)) {
+                this.container.removeFromChache(this.getPlaceHolder());
+            }
             this.container.addToCache(qualifier, this);
         } else {
             //
             // Add to a transient container
             //
-            this.container.addToCache(criteria, this);
-            this.qualifier = criteria;
-            for(Flushable flushable : this.flushableValues.values()){
-                if(flushable instanceof ManagedAspect) {
-                    ((ManagedAspect) flushable).move();
+            if(criteria == null) {
+                this.container.addToCache(
+                    this.getPlaceHolder(),
+                    this
+                );
+            } else {
+                this.container.addToCache(
+                    this.qualifier = criteria, 
+                    this
+                );
+                for(Flushable flushable : this.flushableValues.values()){
+                    if(flushable instanceof ManagedAspect) {
+                        ((ManagedAspect) flushable).move();
+                    }
                 }
             }
         }
@@ -1104,16 +1226,16 @@ public class DataObject_1
         Path identity, 
         boolean callback
     ) throws ServiceException {
-        TransactionalState_1 state = getState(false);
+        TransactionalState_1 state = this.getState(false);
         state.setLifeCycleEventPending(true);
         this.created = true;
         this.identity = identity;
         if(this.transientObjectId == null) {
-            this.dataObjectManager.putIfAbsent(identity, this);
+            this.dataObjectManager.putUnlessPresent(identity, this);
         }  else {
             this.dataObjectManager.move(this.transientObjectId,identity);
         }
-        objMakeTransactional();
+        this.objMakeTransactional();
         if(callback) {
             this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.CREATE, false);
         }
@@ -1160,7 +1282,6 @@ public class DataObject_1
      * object has been transient.
      * 
      * @param updateCache 
-     *
      * @exception   ServiceException NOT_SUPPORTED
      *              If the object refuses to be removed.
      * @exception   ServiceException
@@ -1169,7 +1290,7 @@ public class DataObject_1
     void objRemove(
         boolean updateCache
     ) throws ServiceException {
-        if(!jdoIsPersistent()) {
+        if(!this.jdoIsPersistent()) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ILLEGAL_STATE,
@@ -1181,10 +1302,22 @@ public class DataObject_1
             this.identity.getPrefix(this.identity.size()-2)
         ).objMakeTransactional();
         this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.DELETE, false);
+        if(this.jdoIsNew()) {
+            for(Flushable flushable : this.flushableValues.values()) {
+                if(flushable instanceof Container_1) {
+                    this.dataObjectManager.deletePersistentAll(
+                        ((Container_1)flushable).values()
+                    );
+                }
+            }
+        }
         this.deleted = true;
         this.getState(false).setLifeCycleEventPending(true);
         if(updateCache) {
-            getContainer(false).removeFromChache(this.identity.getBase());
+            Container_1 container = this.getContainer(true);
+            if(container != null) {
+                container.removeFromChache(this.identity.getBase());
+            }
         }
     }
 
@@ -1195,10 +1328,10 @@ public class DataObject_1
      * @throws ServiceException
      */
     void prepare() throws ServiceException {
-        if(jdoIsDirty() && !jdoIsDeleted()) {
+        if(this.jdoIsDirty() && !this.jdoIsDeleted()) {
             this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.STORE, false);
         }
-        getState(false).setPrepared(true);
+        this.getState(false).setPrepared(true);
     }
 
     /**
@@ -1211,7 +1344,7 @@ public class DataObject_1
     void propagate(
         Interaction interaction
     ) throws ServiceException, ResourceException {
-        TransactionalState_1 state = getState(false);
+        TransactionalState_1 state = this.getState(false);
         if(state.isLifeCycleEventPending()){
             Object_2Facade input = Object_2Facade.newInstance(
                 this.identity,
@@ -1250,7 +1383,7 @@ public class DataObject_1
         Interaction interaction, 
         boolean beforeCompletion
     ) throws ServiceException {
-        TransactionalState_1 state = getState(false);
+        TransactionalState_1 state = this.getState(false);
         try {
             if(!jdoIsPersistent() && state.isLifeCycleEventPending()) {
                 Map<String,Object> transactionalValues = state.values(false);
@@ -1270,7 +1403,7 @@ public class DataObject_1
                     } else {
                         this.persistentValues.put(
                             feature,
-                            source == null ? null : getMarshaller(feature).unmarshal(source)
+                            source == null ? null : this.getMarshaller(feature).unmarshal(source)
                         );                    
                     }
                 }
@@ -1286,12 +1419,12 @@ public class DataObject_1
                 );
                 state.setLifeCycleEventPending(false);
                 state.setFlushed(true);
-            } else if(jdoIsDeleted()){
+            } else if(this.jdoIsDeleted()){
                 if(state.isLifeCycleEventPending()){
-                    if(!jdoIsNew() || state.isFlushed()) {
+                    if(!this.jdoIsNew() || state.isFlushed()) {
                         Object_2Facade input = Object_2Facade.newInstance(
-                            jdoGetObjectId(),
-                            getRecordName(this)
+                            this.jdoGetObjectId(),
+                            DataObject_1.getRecordName(this)
                         );
                         input.setVersion(this.jdoGetVersion());
                         interaction.execute(
@@ -1302,7 +1435,7 @@ public class DataObject_1
                     }
                     state.setLifeCycleEventPending(false);
                 }
-            } else if(jdoIsNew() && state.isLifeCycleEventPending()) {
+            } else if(this.jdoIsNew() && state.isLifeCycleEventPending()) {
                 Map<String,Object> transactionalValues = state.values(false);
                 if(this.persistentValues == null) {
                     this.persistentValues = Records.getRecordFactory().createMappedRecord(this.transactionalValuesRecordName);
@@ -1320,7 +1453,7 @@ public class DataObject_1
                     } else {
                         this.persistentValues.put(
                             feature,
-                            source == null ? null : getMarshaller(feature).unmarshal(source)
+                            source == null ? null : this.getMarshaller(feature).unmarshal(source)
                         );                    
                     }
                 }
@@ -1328,11 +1461,12 @@ public class DataObject_1
                 input.setPath(this.identity);
                 input.setVersion(this.jdoGetVersion());
                 input.setValue(this.persistentValues);
-                if(isProxy()) {
+                if(this.isProxy()) {
                     interaction.execute(
                         this.dataObjectManager.getInteractionSpecs().PUT,
                         input.getDelegate()
                     );
+                    state.setFlushed(true);
                 } else if(state.isFlushed()) {
                     interaction.execute(
                         this.dataObjectManager.getInteractionSpecs().PUT,
@@ -1352,11 +1486,11 @@ public class DataObject_1
                 this.transientOnRollback = true;
                 state.setLifeCycleEventPending(false);
             } else if(
-                (jdoIsDirty() || (jdoIsPersistent() && this.digest != null)) &&
-                jdoGetObjectId().size() > 4 // exclude Authorities and Providers
+                (this.jdoIsDirty() || (this.jdoIsPersistent() && this.digest != null)) &&
+                this.jdoGetObjectId().size() > 4 // exclude Authorities and Providers
             ){
                 MappedRecord beforeImage = this.persistentValues;
-                this.persistentValues = Records.getRecordFactory().createMappedRecord(objGetClass());
+                this.persistentValues = Records.getRecordFactory().createMappedRecord(this.objGetClass());
                 Map<String,Object> transactionalValues = state.values(false);
                 for(String feature : state.dirtyFeatures(true)){
                     Flushable flushable = this.flushableValues.get(feature);
@@ -1377,7 +1511,7 @@ public class DataObject_1
                         } else {
                             this.persistentValues.put(
                                 feature,
-                                getMarshaller(feature).unmarshal(source)
+                                this.getMarshaller(feature).unmarshal(source)
                             );                    
                         }
                     } else if (beforeImage != null) {
@@ -1422,8 +1556,8 @@ public class DataObject_1
     public void addModifiedFeaturesTo(
         Set<Object> to
     ) throws ServiceException {
-        TransactionalState_1 state = getState(false);
-        ModelElement_1_0 classDef = this.dataObjectManager.getModel().findElement(
+        TransactionalState_1 state = this.getState(false);
+        ModelElement_1_0 classDef = this.dataObjectManager.getModel().getElement(
             this.transactionalValuesRecordName
         );
         Map<String,ModelElement_1_0> attributes = (Map<String, ModelElement_1_0>) classDef.objGetValue("attribute");
@@ -1432,7 +1566,7 @@ public class DataObject_1
             i.hasNext();
         ){
             ModelElement_1_0 attribute = attributes.get(i.next());
-            if(isFeatureModified(attribute)) {
+            if(this.isFeatureModified(attribute)) {
                 if(!Boolean.TRUE.equals(attribute.objGetValue("isDerived"))){
                     to.add(attribute.objGetValue("qualifiedName"));
                 }
@@ -1462,9 +1596,6 @@ public class DataObject_1
         );
         String multiplicity = ModelUtils.getMultiplicity(feature);
         String featureName = (String) feature.objGetValue("name");
-        if(SystemAttributes.CONTEXT_CAPABLE_CONTEXT.equals(featureName)) {
-            return false;
-        }
         Object left;
         Object right;
         if(
@@ -1506,7 +1637,7 @@ public class DataObject_1
     public DataObject_1 getBeforeImage(
         Path beforeImageId
     ) throws ServiceException {
-        if((this.beforeImage == null || this.beforeImage.objIsInaccessible()) && !jdoIsNew()) {
+        if((this.beforeImage == null || this.beforeImage.objIsInaccessible()) && !this.jdoIsNew()) {
             this.beforeImage = new DataObject_1(
                 this, 
                 true, // beforeImage
@@ -1521,25 +1652,27 @@ public class DataObject_1
     ) throws ServiceException {
         switch(status) {
             case javax.transaction.Status.STATUS_COMMITTED:
-                if(jdoIsDeleted()){
-                    this.dataObjectManager.invalidate(
-                        this.identity, 
-                        false // makeNonTransactional
-                    );
+                if(this.jdoIsDeleted()){
+                    if(this.jdoIsPersistent()) {
+                        this.dataObjectManager.invalidate(
+                            this.identity, 
+                            false // makeNonTransactional
+                        );
+                    }
                     this.deleted = false;
                     this.identity = null;
                 } else if(!this.dataObjectManager.isRetainValues()) {
-                    evict(); 
+                    this.evict(); 
                 }
                 break;
             case javax.transaction.Status.STATUS_ROLLEDBACK:
-                getState(false).setLifeCycleEventPending(false);
-                if(jdoIsDeleted()){
+                this.getState(false).setLifeCycleEventPending(false);
+                if(this.jdoIsDeleted()){
                     this.deleted = false;
                 } else if(!this.dataObjectManager.isRetainValues()) {
-                    evict(); //... depending on configuration
+                    this.evict(); //... depending on configuration
                 }
-                if(this.transientOnRollback || jdoIsNew()){
+                if(this.transientOnRollback || this.jdoIsNew()){
                     if(this.dataObjectManager != null) {
                         this.dataObjectManager.makeTransient(this);
                     }
@@ -1552,9 +1685,9 @@ public class DataObject_1
                 }
                 break;
         }
-        Container_1 container = getContainer(true);
+        Container_1 container = this.getContainer(true);
         if(container != null) {
-            container.evict();
+            container.openmdxjdoEvict(false, true);
         }
         this.transientOnRollback = false;
         this.created = false;
@@ -1562,21 +1695,24 @@ public class DataObject_1
     }
 
     /**
-     * 
+     * Evict the data object
      */
-    public void evict(
+    void evict(
     ){
         if(jdoIsPersistent()) {
             try {
                 this.dataObjectManager.fireInstanceCallback(this, InstanceLifecycleEvent.CLEAR, true);
-            } catch (ServiceException unreachable) {
-                // we are unexpectedly here 
+            } catch (ServiceException exception) {
+                throw new JDOFatalInternalException(
+                    "Lenient instance callback exception should have been logged and not propagated",
+                    exception.getCause()
+                );
             }
-            clear();
+            this.clear();
             for(Map.Entry<String, Flushable> entry : this.flushableValues.entrySet()) {
                 Flushable value = entry.getValue();
-                if(value instanceof ManagedAspect || value instanceof Container_1) {
-                    ((Evictable)value).evict();
+                if(value instanceof ManagedAspect) {
+                    ((ManagedAspect)value).evict();
                 }
             }
         }
@@ -1605,7 +1741,7 @@ public class DataObject_1
      * "remote" counterpart
      */
     final boolean isOutOfSync(){
-        TransactionalState_1 state = getState(true);
+        TransactionalState_1 state = this.getState(true);
         return state != null && state.isOutOfSync();
     }
     
@@ -1622,10 +1758,10 @@ public class DataObject_1
      */
     public boolean jdoIsDirty(
     ) {
-        if(jdoIsNew() || jdoIsDeleted()) {
+        if(this.jdoIsNew() || this.jdoIsDeleted()) {
             return true;
-        } else if (jdoIsPersistent()) {
-            TransactionalState_1 state = getState(true);
+        } else if (this.jdoIsPersistent()) {
+            TransactionalState_1 state = this.getState(true);
             return state != null && state.isDirty();
         } else {
             return false;
@@ -1642,9 +1778,15 @@ public class DataObject_1
     ){
         return this.identity != null;
     }
-
+    
+    /**
+     * Tells whether the object is contained in a container
+     * 
+     * @return <code>true</code> if the object is either persistent or has 
+     * already been moved to a container
+     */
     public boolean objIsContained(){
-        return jdoIsPersistent() || this.container != null;
+        return this.jdoIsPersistent() || this.container != null;
     }
     
     /**
@@ -1689,7 +1831,7 @@ public class DataObject_1
     private boolean isVirtual(
     ){
         try {
-            return SharedObjects.getPlugInObject(this.dataObjectManager, VirtualObjects_2_0.class).isVirtual(this.identity);
+            return SharedObjects.getPlugInObject(this.dataObjectManager, ManagedConnectionCache_2_0.class).isAvailable(Mode.BASIC,this.identity);
         } catch (Exception ignore) {
             return false;
         }        
@@ -1725,7 +1867,7 @@ public class DataObject_1
     public boolean jdoIsTransactional(
     ) {
         try {
-            return getUnitOfWork().getMembers().contains(this);
+            return this.getUnitOfWork().getMembers().contains(this);
         } catch(Exception e) {
             throw new JDOUserException(
                 "Unable to get object state",
@@ -1753,34 +1895,89 @@ public class DataObject_1
     public ServiceException getInaccessibilityReason() {
         return this.inaccessabilityReason;
     }
-
+    
     /**
      * Ensure that the object is read enabled
      * 
      * @param reload 
+     * @param fetchPlan TODO take non-null fetch-plan into account
      *
      * @exception   ServiceException    ILLEGAL_STATE
      *                  if the object is deleted
      */
-    DataObject_1 assertObjectIsAccessible(
-        boolean reload
+    @SuppressWarnings("unchecked")
+    DataObject_1 objRetrieve(
+        boolean reload, 
+        FetchPlan fetchPlan
     ) throws ServiceException {
-        if(objIsInaccessible()){
+        if(this.objIsInaccessible()){
             throw new ServiceException(
-                getInaccessibilityReason()
+                this.getInaccessibilityReason()
             );
-        } else if(reload || objIsHollow()) {
-            if(isProxy() && !isVirtual()) {
+        } else if(reload || this.objIsHollow()) {
+            if(this.isProxy() && !isVirtual()) {
                 UnitOfWork_1 unitOfWork = this.dataObjectManager.currentTransaction();
                 if(unitOfWork.isOutOfSync()) {
                     unitOfWork.flush(false);
                 }
-                return unconditionalLoad();
+                return this.unconditionalLoad(fetchPlan);
             } else if (jdoIsPersistent() && !jdoIsNew()) {
-                return unconditionalLoad();
+                return this.unconditionalLoad(fetchPlan);
             } else {
                 return this;
             }
+        } else if (fetchPlan == null){
+            Set<String> missing = new HashSet<String>(
+                getAttributes(false).keySet()
+            );
+            missing.removeAll(objDefaultFetchGroup());
+            if(!missing.isEmpty()) try {
+                MappedRecord persistentValues = Records.getRecordFactory().createMappedRecord(
+                    this.persistentValues.getRecordName()
+                );
+                persistentValues.putAll(this.persistentValues);
+                List<OrderSpecifier> orders = new ArrayList<OrderSpecifier>();
+                for(String feature : missing) {
+                    orders.add(
+                        new OrderSpecifier(feature, SortOrder.UNSORTED)
+                    );
+                }
+                Query_2Facade input = this.jdoIsPersistent() ? Query_2Facade.newInstance(
+                    this.jdoGetObjectId()
+                ) : Query_2Facade.newInstance(
+                    this.jdoGetTransactionalObjectId()
+                );
+                input.setQuery(
+                    JavaBeans.toXML(
+                        new Filter(
+                            null, // condition
+                            orders,
+                            null // extension
+                        )
+                    )
+                );
+                IndexedRecord indexedRecord = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
+                    this.dataObjectManager.getInteractionSpecs().GET,
+                    input.getDelegate()
+                );
+                if(indexedRecord.isEmpty()) throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND,
+                    "Could not fetch missing attributes",
+                    ExceptionHelper.newObjectIdParameter("id", this),
+                    new BasicException.Parameter("feature", missing)
+                );
+                Object_2Facade output = Object_2Facade.newInstance(
+                    (MappedRecord)indexedRecord.get(0)
+                );                
+                persistentValues.putAll(
+                    output.getValue()
+                );
+                this.persistentValues = persistentValues;
+            } catch (ResourceException exception) {
+                throw new ServiceException(exception);
+            }
+            return this;
         } else {
             return this;
         }
@@ -1798,16 +1995,22 @@ public class DataObject_1
     private boolean attributeMustBeLoaded(
         String name
     ) throws ServiceException{
-        if(jdoIsPersistent() && !jdoIsNew()) {
-            assertObjectIsAccessible(false);
+        if(this.jdoIsPersistent() && !this.jdoIsNew()) {
+            this. objRetrieve(
+                false, 
+                this.dataObjectManager.getFetchPlan()
+            );
             return true;
-        } else if (isProxy() && Boolean.TRUE.equals(this.getFeature(name).objGetValue("isDerived"))) {
-            objMakeTransactional();
-            TransactionalState_1 state = getState(false);
+        } else if (this.isProxy() && Boolean.TRUE.equals(this.getFeature(name).objGetValue("isDerived"))) {
+            this.objMakeTransactional();
+            TransactionalState_1 state = this.getState(false);
             if(!state.isFlushed()) {
                 state.setLifeCycleEventPending(true);
             }
-            assertObjectIsAccessible(true);
+            this.objRetrieve(
+                true, 
+                this.dataObjectManager.getFetchPlan()
+            );
             return true;
         } else {
             return false;
@@ -1834,7 +2037,7 @@ public class DataObject_1
         boolean clear
     ) throws ServiceException {
         Object persistentValue;
-        if(!clear && attributeMustBeLoaded(name)) try {
+        if(!clear && this.attributeMustBeLoaded(name)) try {
             persistentValue = this.persistentValues.get(name);
             if(
                 persistentValue == null &&
@@ -1843,13 +2046,17 @@ public class DataObject_1
                 MappedRecord persistentValues = Records.getRecordFactory().createMappedRecord(this.persistentValues.getRecordName());
                 persistentValues.putAll(this.persistentValues);
                 Filter attributeSpecifier = new Filter(
-                    NO_FILTER,
-                    new AttributeSpecifier[]{
-                        new AttributeSpecifier(name)
-                    }
+                    null, // condition
+                    Collections.singletonList(
+                        new OrderSpecifier(name, SortOrder.UNSORTED)
+                    ),
+                    null // extension
                 );
-                Query_2Facade input = Query_2Facade.newInstance();
-                input.setPath(this.jdoIsPersistent() ? this.jdoGetObjectId() : new Path(this.jdoGetTransactionalObjectId()));
+                Query_2Facade input = this.jdoIsPersistent() ? Query_2Facade.newInstance(
+                    this.jdoGetObjectId()
+                ) : Query_2Facade.newInstance(
+                    this.jdoGetTransactionalObjectId()
+                );
                 input.setQuery(JavaBeans.toXML(attributeSpecifier));
                 IndexedRecord indexedRecord = (IndexedRecord) this.dataObjectManager.getInteraction().execute(
                     this.dataObjectManager.getInteractionSpecs().GET,
@@ -2011,8 +2218,8 @@ public class DataObject_1
         String feature,
         Object to
     ) throws ServiceException {
-        assertSingleValued(to);
-        UnitOfWork_1 unitOfWork = getUnitOfWorkIfTransactional(feature);
+        this.assertSingleValued(to);
+        UnitOfWork_1 unitOfWork = this.getUnitOfWorkIfTransactional(feature);
         Object value;
         try {
             value = 
@@ -2028,60 +2235,13 @@ public class DataObject_1
             feature, 
             value
         );
-        if("core".equals(feature) && to instanceof DataObject_1) {
+        if(to != null && this.isAspectHasCore(feature)) {
             for(PlugIn_1_0 plugIn : this.dataObjectManager.getPlugIns()) {
                 plugIn.postSetCore(this, (DataObject_1) to);
             }
         }
     }
 
-    /**
-     * Retrieve the object's classifier
-     * 
-     * @return  the object's classifier
-     * 
-     * @throws ServiceException
-     */
-    protected ModelElement_1_0 getClassifier(
-    ) throws ServiceException{
-        return this.classifier == null ?
-            this.classifier = this.dataObjectManager.getModel().getElement(objGetClass()) :
-            this.classifier;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetIterable(java.lang.String)
-     */
-    Iterable<?> objGetIterable(
-        String featureName
-    ) throws ServiceException {
-        ModelElement_1_0 featureDef = this.dataObjectManager.getModel().getFeatureDef(this.getClassifier(), featureName, false);
-        String multiplicity;
-        if(featureDef == null) {
-            multiplicity = null;
-            new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                "Feature definition not found",
-                new BasicException.Parameter("class.name", this.objGetClass()),
-                new BasicException.Parameter("feature.name", featureName)                
-            ).log();
-        } else {
-            multiplicity = ModelUtils.getMultiplicity(featureDef);
-        }
-        if(Multiplicities.LIST.equals(multiplicity)) {
-            return objGetList(featureName);
-        }
-        if(Multiplicities.SET.equals(multiplicity)) {
-            return objGetSet(featureName);
-        }
-        if(Multiplicities.SPARSEARRAY.equals(multiplicity)){
-            return objGetSparseArray(featureName).values();
-        }
-        Object value = objGetValue(featureName);
-        return value == null ? Collections.emptySet() : Collections.singleton(value);
-    }
-    
     /**
      * Retrieve a large object
      * 
@@ -2095,7 +2255,7 @@ public class DataObject_1
         final ModelElement_1_0 featureDef
     ) throws ServiceException{
         String type = (String) featureDef.getModel().getDereferencedType(featureDef.objGetValue("type")).objGetValue("qualifiedName");
-        Object persistentValue = getPersistentAttribute(
+        Object persistentValue = this.getPersistentAttribute(
             featureName, 
             true, // stream 
             Multiplicities.SINGLE_VALUE, 
@@ -2110,17 +2270,15 @@ public class DataObject_1
                 protected InputStream newContent(
                 ) throws IOException {
                     try {
-                        return (InputStream) getPersistentAttribute(
+                        return (InputStream) DataObject_1.this.getPersistentAttribute(
                             featureName, 
                             true, // stream 
                             Multiplicities.SINGLE_VALUE, 
                             false // clear
                         );
                     } catch (ServiceException exception) {
-                        throw new IOException(
-                            exception.getCause().getDescription(),
-                            exception.getCause()
-                        );
+                    	BasicException cause = exception.getCause();
+                    	throw (IOException) new IOException(cause.getDescription()).initCause(cause);
                     }
                 }
                 
@@ -2134,17 +2292,15 @@ public class DataObject_1
                 protected Reader newContent(
                 ) throws IOException {
                     try {
-                        return (Reader) getPersistentAttribute(
+                        return (Reader) DataObject_1.this.getPersistentAttribute(
                             featureName, 
                             true, // stream 
                             Multiplicities.SINGLE_VALUE, 
                             false // clear
                         );
                     } catch (ServiceException exception) {
-                        throw new IOException(
-                            exception.getCause().getDescription(),
-                            exception.getCause()
-                        );
+                    	BasicException cause = exception.getCause();
+                    	throw (IOException) new IOException(cause.getDescription()).initCause(cause);
                     }
                 }
                 
@@ -2180,9 +2336,9 @@ public class DataObject_1
         final String feature
     ) throws ServiceException {
         if (this.transientValues == null) {
-            UnitOfWork_1 unitOfWork = getUnitOfWork();
+            UnitOfWork_1 unitOfWork = this.getUnitOfWork();
             Map<String,Object> transactionalValues;
-            if(jdoIsTransactional()) { 
+            if(this.jdoIsTransactional()) { 
                 transactionalValues = unitOfWork.getState(DataObject_1.this, false).values(false);
                 Object transactionalValue = transactionalValues.get(feature);
                 if(transactionalValue != null || transactionalValues.containsKey(feature)) {
@@ -2191,12 +2347,12 @@ public class DataObject_1
             } else {
                 transactionalValues = null; 
             }
-            ModelElement_1_0 featureDef = getFeature(feature);
+            ModelElement_1_0 featureDef = this.getFeature(feature);
             Object transactionalValue;
             if(Multiplicities.STREAM.equals(ModelUtils.getMultiplicity(featureDef))){
-                transactionalValue = getLargeObjectValue(feature, featureDef);
+                transactionalValue = this.getLargeObjectValue(feature, featureDef);
             } else {
-                Object nonTransactionalValue = getPersistentAttribute(
+                Object nonTransactionalValue = this.getPersistentAttribute(
                     feature, 
                     false, 
                     Multiplicities.SINGLE_VALUE, 
@@ -2205,7 +2361,7 @@ public class DataObject_1
                 transactionalValue = 
                     nonTransactionalValue == null ? null :  
                     featureDef == null ? nonTransactionalValue : // an embedded object's class
-                    getMarshaller(featureDef).marshal(nonTransactionalValue);
+                        this.getMarshaller(featureDef).marshal(nonTransactionalValue);
             }
             if(transactionalValues != null) {
                 transactionalValues.put(feature, transactionalValue);
@@ -2213,17 +2369,17 @@ public class DataObject_1
             return transactionalValue;
         } else {
             if(
-                (objIsHollow() && !isProxy()) ||
+                (this.objIsHollow() && !this.isProxy()) ||
                 this.transientValues.containsKey(feature)
             ) {
                 return this.transientValues.get(feature);
             } else {
-                ModelElement_1_0 featureDef = getFeature(feature);
+                ModelElement_1_0 featureDef = this.getFeature(feature);
                 Object transientValue;
                 if(Multiplicities.STREAM.equals(ModelUtils.getMultiplicity(featureDef))){
-                    transientValue = getLargeObjectValue(feature, featureDef);
+                    transientValue = this.getLargeObjectValue(feature, featureDef);
                 } else {
-                    Object clonedValue = getPersistentAttribute(
+                    Object clonedValue = this.getPersistentAttribute(
                         feature, 
                         false, // stream
                         Multiplicities.SINGLE_VALUE, // single-valued
@@ -2232,9 +2388,9 @@ public class DataObject_1
                     transientValue = 
                         clonedValue == null ? null :  
                         featureDef == null ? clonedValue : // an embedded object's class
-                        getMarshaller(featureDef).marshal(clonedValue);
+                        this.getMarshaller(featureDef).marshal(clonedValue);
                 }
-                (jdoIsTransactional() ? getState(false).values(false) : this.transientValues).put(
+                (this.jdoIsTransactional() ? this.getState(false).values(false) : this.transientValues).put(
                     feature, 
                     transientValue
                 );
@@ -2266,11 +2422,12 @@ public class DataObject_1
         String feature
     ) throws ServiceException {
         List<Object> flushable = (List<Object>) this.flushableValues.get(feature);
-         return flushable == null ?putFlushable(
+        return flushable == null ? (List<Object>) Maps.putUnlessPresent(
+            this.flushableValues,
             feature,
             new ManagedList(
                 feature,
-                getMarshaller(feature)
+                this.getMarshaller(feature)
             )
         ) : flushable;
     }
@@ -2298,11 +2455,12 @@ public class DataObject_1
         String feature
     ) throws ServiceException {
         Set<Object> flushable = (Set<Object>) this.flushableValues.get(feature);
-        return flushable == null ? putFlushable(
+        return flushable == null ? (Set<Object>) Maps.putUnlessPresent(
+            this.flushableValues,
             feature,
             new ManagedSet(
                 feature,
-                getMarshaller(feature)
+                this.getMarshaller(feature)
             )
         ) :  flushable;
     }
@@ -2330,11 +2488,12 @@ public class DataObject_1
         String feature
     ) throws ServiceException {
         SortedMap<Integer,Object> flushable = (SortedMap<Integer, Object>) this.flushableValues.get(feature);
-        return flushable == null ? putFlushable(
+        return flushable == null ? (SortedMap<Integer,Object>) Maps.putUnlessPresent(
+            this.flushableValues,
             feature,
             new ManagedSortedMap(
                 feature,
-                getMarshaller(feature)
+                this.getMarshaller(feature)
             )
         ) : flushable;
     }
@@ -2359,9 +2518,10 @@ public class DataObject_1
      */
     public Container_1_0 objGetContainer(
         String feature
-    ) throws ServiceException{
+    )  throws ServiceException {
         Container_1_0 flushable = (Container_1_0) this.flushableValues.get(feature);
-        return flushable == null ? putFlushable(
+        return flushable == null ? (Container_1_0) Maps.putUnlessPresent(
+            this.flushableValues,
             feature,
             new Container_1(this,feature)
         ) : flushable;
@@ -2387,8 +2547,8 @@ public class DataObject_1
                 if(query) {
                     entry.invoke(this.dataObjectManager.getInteraction());
                 } else {
-                    objMakeTransactional();
-                    getState(false).operations(false).offer(entry);
+                    this.objMakeTransactional();
+                    this.getState(false).operations(false).offer(entry);
                 }
                 return query;
             } catch (ServiceException exception) {
@@ -2433,6 +2593,7 @@ public class DataObject_1
      *
      */
     @SuppressWarnings("unchecked")
+    @Override
     public String toString(
     ){
         if(this.objIsInaccessible()) {
@@ -2440,7 +2601,7 @@ public class DataObject_1
         } else {
             try {
                 Map content = new HashMap();
-                TransactionalState_1 state = getState(true);
+                TransactionalState_1 state = this.getState(true);
                 String description;
                 if(state == null) {
                     description = null;
@@ -2455,7 +2616,7 @@ public class DataObject_1
                                         j.hasNext();
                                 ) {
                                     t.add(
-                                        noContent(j.next())
+                                        this.noContent(j.next())
                                     );
                                 }
                             } else if (v instanceof Set) {
@@ -2465,7 +2626,7 @@ public class DataObject_1
                                         j.hasNext();
                                 ) {
                                     t.add(
-                                        noContent(j.next())
+                                        this.noContent(j.next())
                                     );
                                 }
                             } // else ignore
@@ -2478,11 +2639,11 @@ public class DataObject_1
                                 Map.Entry k = (Map.Entry)j.next();
                                 t.put(
                                     k.getKey(),
-                                    noContent(k.getValue())
+                                    this.noContent(k.getValue())
                                 );
                             }
                         } else {
-                            content.put(e.getKey(), noContent(v));
+                            content.put(e.getKey(), this.noContent(v));
                         }
                     }
                     description = state.isPrepared() ? "prepared" : "not prepared";
@@ -2514,7 +2675,7 @@ public class DataObject_1
         java.io.ObjectOutputStream stream
     ) throws java.io.IOException {
         try {
-            TransactionalState_1 state = getState(true);
+            TransactionalState_1 state = this.getState(true);
             stream.defaultWriteObject();
             if(state == null) {
                 stream.writeInt(0);
@@ -2545,7 +2706,7 @@ public class DataObject_1
         if(count > 0) {
             TransactionalState_1 state;
             try {
-                state = getState(false);
+                state = this.getState(false);
             } catch (JDOException exception) {
                 throw (IOException) new IOException().initCause(exception);
             }
@@ -2557,7 +2718,7 @@ public class DataObject_1
                 target.put(feature, stream.readObject());
             }
         }
-        this.dataObjectManager.putIfAbsent(this.identity, this);
+        this.dataObjectManager.putUnlessPresent(this.identity, this);
     }
 
     @SuppressWarnings("unchecked")
@@ -2584,7 +2745,7 @@ public class DataObject_1
     private final Marshaller getMarshaller(
         ModelElement_1_0 feature
     ) throws ServiceException{
-        Marshaller marshaller = feature == null ? null : dataTypeMarshaller.get(
+        Marshaller marshaller = feature == null ? null : DataObject_1.dataTypeMarshaller.get(
             feature.getModel().getDereferencedType(feature.objGetValue("type")).objGetValue("qualifiedName")
         );
         return marshaller == null ? this.dataObjectManager : marshaller;
@@ -2605,7 +2766,7 @@ public class DataObject_1
         String kind, 
         String feature
     ) throws ServiceException{
-        return getMarshaller(getFeature(featured, kind, feature));
+        return this.getMarshaller(getFeature(featured, kind, feature));
     }
 
     /**
@@ -2622,13 +2783,16 @@ public class DataObject_1
     ) throws ServiceException {
         int i = feature.lastIndexOf(':');
         if(i < 0) {
-            return getFeature(
+            return this.getFeature(
                 objGetClass(), 
                 "attribute", 
                 feature
             );
         } else {
-            this.assertObjectIsAccessible(false);
+            this.objRetrieve(
+                false, 
+                this.dataObjectManager.getFetchPlan()
+            );
             Object raw = this.persistentValues.get(
                 feature.substring(0, ++i) + SystemAttributes.OBJECT_CLASS
             );
@@ -2636,7 +2800,7 @@ public class DataObject_1
                 (String) ((List<?>)raw).get(0) :
                 (String)raw;
             String embeddedFeature = feature.substring(i);
-            return SystemAttributes.OBJECT_CLASS.equals(embeddedFeature) ? null : getFeature(
+            return SystemAttributes.OBJECT_CLASS.equals(embeddedFeature) ? null : this.getFeature(
                 embeddedClass, 
                 "attribute",
                 embeddedFeature
@@ -2656,7 +2820,7 @@ public class DataObject_1
     final Marshaller getMarshaller(
         String feature
     ) throws ServiceException{
-        return getMarshaller(getFeature(feature));
+        return this.getMarshaller(this.getFeature(feature));
     }
 
     /* (non-Javadoc)
@@ -2667,7 +2831,8 @@ public class DataObject_1
         String aspectType
     ){
         Map<String, DataObject_1_0> flushable = (Map<String, DataObject_1_0>) this.flushableValues.get(aspectType);
-        return flushable == null ? putFlushable(
+        return flushable == null ? (Map<String, DataObject_1_0>) Maps.putUnlessPresent(
+            this.flushableValues,
             aspectType,
             new ManagedAspect(aspectType)
         ) : flushable;
@@ -2814,7 +2979,7 @@ public class DataObject_1
      */
     final class ManagedAspect
         extends AbstractMap<String,DataObject_1_0> 
-        implements Flushable, Evictable
+        implements Flushable
     {
 
         ManagedAspect(
@@ -2848,7 +3013,7 @@ public class DataObject_1
         ){
             boolean evicted = this.evicted;
             this.evicted = false;
-            TransactionalState_1 state = getState(false); 
+            TransactionalState_1 state = DataObject_1.this.getState(false); 
             return evicted ? state.transientAspects(
                 this.aspectClass, 
                 this.getStored()
@@ -2860,10 +3025,10 @@ public class DataObject_1
         void move(){
             if(!this.evicted && this.aspect == null) {
                 Map<String,DataObject_1_0> source = new HashMap<String,DataObject_1_0>(
-                    getCache()
+                    this.getCache()
                 );
-                evict();
-                putAll(source);
+                this.evict();
+                this.putAll(source);
             }
         }
         
@@ -2880,16 +3045,11 @@ public class DataObject_1
                 Container_1_0 aspects = DataObject_1.this.getAspects();
                 if(aspects != null) {
                     this.aspect = aspects.subMap(
-                        new FilterProperty[]{
-                            new FilterProperty(
-                                Quantors.THERE_EXISTS,
-                                SystemAttributes.OBJECT_INSTANCE_OF,
-                                FilterOperators.IS_IN,
-                                this.aspectClass
-                            )
-                        }
+                        new Filter(
+                            new IsInstanceOfCondition(this.aspectClass)
+                        )
                     );
-                    this.aspect.retrieveAll(null);
+                    this.aspect.openmdxjdoRetrieve(null);
                 }
             }
             return this.aspect;
@@ -2898,6 +3058,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#clear()
          */
+        @Override
         public void clear() {
             this.evicted = true;
             this.getStored().clear();
@@ -2906,6 +3067,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#containsKey(java.lang.Object)
          */
+        @Override
         public boolean containsKey(
             Object key
         ) {
@@ -2915,15 +3077,17 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#containsValue(java.lang.Object)
          */
+        @Override
         public boolean containsValue(
             Object value
         ) {
-            return getCache().containsValue(value);
+            return this.getCache().containsValue(value);
         }
 
         /* (non-Javadoc)
          * @see java.util.AbstractMap#entrySet()
          */
+        @Override
         public Set<java.util.Map.Entry<String, DataObject_1_0>> entrySet(
         ) {
             return this.getCache().entrySet();
@@ -2932,6 +3096,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#equals(java.lang.Object)
          */
+        @Override
         public boolean equals(
             Object o
         ) {
@@ -2941,6 +3106,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#get(java.lang.Object)
          */
+        @Override
         public DataObject_1_0 get(
             Object key
         ) {
@@ -2950,6 +3116,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#hashCode()
          */
+        @Override
         public int hashCode(
         ) {
             return this.getCache().hashCode();
@@ -2958,6 +3125,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#isEmpty()
          */
+        @Override
         public boolean isEmpty(
         ) {
             return this.getCache().isEmpty();
@@ -2966,6 +3134,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#keySet()
          */
+        @Override
         public Set<String> keySet(
         ) {
             return this.getCache().keySet();
@@ -2974,13 +3143,14 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#put(java.lang.Object, java.lang.Object)
          */
+        @Override
         public DataObject_1_0 put(
             String key, 
             DataObject_1_0 value
         ) {
             try {
-                if(jdoIsPersistent()) {
-                    objMakeTransactional();
+                if(DataObject_1.this.jdoIsPersistent()) {
+                    DataObject_1.this.objMakeTransactional();
                 }
                 //
                 // Move the aspect's containers to the core object
@@ -3003,8 +3173,8 @@ public class DataObject_1
                 //
                 // Save the aspect
                 //
-                return getCache().put(
-                    DataObject_1.this.getAspects() == null ? key : this.toObjectId(getQualifier(), key), 
+                return this.getCache().put(
+                    DataObject_1.this.getAspects() == null || !DataObject_1.this.isQualified() ? key : this.toObjectId(DataObject_1.this.getQualifier(), key), 
                     value
                 );
             } catch (ServiceException exception) {
@@ -3019,6 +3189,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#remove(java.lang.Object)
          */
+        @Override
         public DataObject_1_0 remove(
             Object key
         ) {
@@ -3029,6 +3200,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#size()
          */
+        @Override
         public int size(
         ) {
             return this.getCache().size();
@@ -3037,6 +3209,7 @@ public class DataObject_1
         /* (non-Javadoc)
          * @see java.util.AbstractMap#values()
          */
+        @Override
         public Collection<DataObject_1_0> values(
         ) {
             if(this.values == null) {
@@ -3083,31 +3256,27 @@ public class DataObject_1
         class Values implements Collection<DataObject_1_0> {
 
             private final Collection<DataObject_1_0> getDelegate(){
-                return getCache().values();
+                return ManagedAspect.this.getCache().values();
             }
 
             /**
-             * <em>Note:<br>
-             * Do not call this method if the object is already member of the collection!
-             * </em>
              * @param o
-             * @return <code>true</code>
+             * 
+             * @return <code>true</code> if the collection had to be modified
+             * 
              * @see java.util.Collection#add(java.lang.Object)
              */
             public boolean add(
                 DataObject_1_0 o
             ) {
-                if(containsValue(o)) throw new RuntimeServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE,
-                    "Do not add a member twice!",
-                    ExceptionHelper.newObjectIdParameter("id", o)
-                );
-                put(
-                    PathComponent.createPlaceHolder().toString(),
-                    o
-                );
-                return true;
+                boolean modify = !ManagedAspect.this.containsValue(o);
+                if(modify) {
+                    ManagedAspect.this.put(
+                        PathComponent.createPlaceHolder().toString(),
+                        o
+                    );
+                }
+                return modify;
             }
 
             /**
@@ -3118,7 +3287,7 @@ public class DataObject_1
             public boolean addAll(Collection<? extends DataObject_1_0> c) {
                 boolean modified = false;
                 for(DataObject_1_0 o : c) {
-                    modified |= add(o);
+                    modified |= this.add(o);
                 }
                 return modified;
             }
@@ -3128,7 +3297,7 @@ public class DataObject_1
              * @see java.util.Collection#clear()
              */
             public void clear() {
-                getCache().clear();
+                ManagedAspect.this.getCache().clear();
             }
 
             /**
@@ -3137,7 +3306,7 @@ public class DataObject_1
              * @see java.util.Collection#contains(java.lang.Object)
              */
             public boolean contains(Object o) {
-                return getCache().containsValue(o);
+                return ManagedAspect.this.getCache().containsValue(o);
             }
 
             /**
@@ -3146,7 +3315,7 @@ public class DataObject_1
              * @see java.util.Collection#containsAll(java.util.Collection)
              */
             public boolean containsAll(Collection<?> c) {
-                return getDelegate().containsAll(c);
+                return this.getDelegate().containsAll(c);
             }
 
             /**
@@ -3154,7 +3323,7 @@ public class DataObject_1
              * @see java.util.Collection#isEmpty()
              */
             public boolean isEmpty() {
-                return getCache().isEmpty();
+                return ManagedAspect.this.getCache().isEmpty();
             }
 
             /**
@@ -3162,7 +3331,7 @@ public class DataObject_1
              * @see java.util.Collection#iterator()
              */
             public Iterator<DataObject_1_0> iterator() {
-                return getDelegate().iterator();
+                return this.getDelegate().iterator();
             }
 
             /**
@@ -3171,7 +3340,7 @@ public class DataObject_1
              * @see java.util.Collection#remove(java.lang.Object)
              */
             public boolean remove(Object o) {
-                return getDelegate().remove(o);
+                return this.getDelegate().remove(o);
             }
 
             /**
@@ -3180,7 +3349,7 @@ public class DataObject_1
              * @see java.util.Collection#removeAll(java.util.Collection)
              */
             public boolean removeAll(Collection<?> c) {
-                return getDelegate().removeAll(c);
+                return this.getDelegate().removeAll(c);
             }
 
             /**
@@ -3189,7 +3358,7 @@ public class DataObject_1
              * @see java.util.Collection#retainAll(java.util.Collection)
              */
             public boolean retainAll(Collection<?> c) {
-                return getDelegate().retainAll(c);
+                return this.getDelegate().retainAll(c);
             }
 
             /**
@@ -3197,7 +3366,7 @@ public class DataObject_1
              * @see java.util.Collection#size()
              */
             public int size() {
-                return getCache().size();
+                return ManagedAspect.this.getCache().size();
             }
 
             /**
@@ -3205,7 +3374,7 @@ public class DataObject_1
              * @see java.util.Collection#toArray()
              */
             public Object[] toArray() {
-                return getDelegate().toArray();
+                return this.getDelegate().toArray();
             }
 
             /**
@@ -3215,7 +3384,7 @@ public class DataObject_1
              * @see java.util.Collection#toArray(T[])
              */
             public <T> T[] toArray(T[] a) {
-                return getDelegate().toArray(a);
+                return this.getDelegate().toArray(a);
             }
                         
         }
@@ -3270,7 +3439,7 @@ public class DataObject_1
             boolean clear
         ){
             try {
-                UnitOfWork_1 unitOfWork = getUnitOfWorkIfTransactional(makeDirty ? this.feature : null);
+                UnitOfWork_1 unitOfWork = DataObject_1.this.getUnitOfWorkIfTransactional(makeDirty ? this.feature : null);
                 if(unitOfWork == null) {
                     if(DataObject_1.this.transientValues != null) {
                         List<Object> transientValue = (List<Object>) DataObject_1.this.transientValues.get(this.feature);
@@ -3310,15 +3479,17 @@ public class DataObject_1
             }
         }
 
+        @Override
         public Object get(
             int index
         ) {
-            return getDelegate(false, false).get(index);
+            return this.getDelegate(false, false).get(index);
         }
 
+        @Override
         public int size(
         ){
-            return getDelegate(false, false).size();
+            return this.getDelegate(false, false).size();
         }
 
         /* (non-Javadoc)
@@ -3326,27 +3497,30 @@ public class DataObject_1
          */
         @Override
         public boolean isEmpty() {
-            return getDelegate(false, false).isEmpty();
+            return this.getDelegate(false, false).isEmpty();
         }
 
+        @Override
         public Object set(
             int index,
             Object element
         ){
-            return getDelegate(true, false).set(index, element);
+            return this.getDelegate(true, false).set(index, element);
         }
 
+        @Override
         public void add(
             int index,
             Object element
         ){
-            getDelegate(true, false).add(index, element);
+            this.getDelegate(true, false).add(index, element);
         }
 
+        @Override
         public Object remove(
             int index
         ){
-            return getDelegate(true, false).remove(index);
+            return this.getDelegate(true, false).remove(index);
         }
 
         /* (non-Javadoc)
@@ -3354,14 +3528,14 @@ public class DataObject_1
          */
         @Override
         public void clear() {
-            getDelegate(true, true);
+            this.getDelegate(true, true);
         }
 
         /* (non-Javadoc)
          * @see java.io.Flushable#flush()
          */
         public void flush() throws IOException {
-            List<Object> source = getDelegate(false, false);
+            List<Object> source = this.getDelegate(false, false);
             if(source != this.nonTransactional) {
                 this.nonTransactional.clear();
                 this.nonTransactional.addAll(source);
@@ -3483,7 +3657,7 @@ public class DataObject_1
             boolean clear
         ){
             try {
-                UnitOfWork_1 unitOfWork = getUnitOfWorkIfTransactional(makeDirty ? this.feature : null);
+                UnitOfWork_1 unitOfWork = DataObject_1.this.getUnitOfWorkIfTransactional(makeDirty ? this.feature : null);
                 if(unitOfWork == null) {
                     if(transientValues != null) {
                         Set<Object> transientValue = (Set<Object>) DataObject_1.this.transientValues.get(this.feature);
@@ -3529,7 +3703,7 @@ public class DataObject_1
          */
         @Override
         public Iterator<Object> iterator() {
-            Set<Object> delegate = getDelegate(false, false);
+            Set<Object> delegate = this.getDelegate(false, false);
             return new SetIterator(
                 delegate.iterator(),
                 delegate != this.nonTransactional
@@ -3539,7 +3713,7 @@ public class DataObject_1
         @Override
         public void clear(
         ) {
-            getDelegate(true, true);
+            this.getDelegate(true, true);
         }
 
         /* (non-Javadoc)
@@ -3548,7 +3722,7 @@ public class DataObject_1
         @Override
         public int size(
         ) {
-            return getDelegate(false, false).size();
+            return this.getDelegate(false, false).size();
         }
 
         /* (non-Javadoc)
@@ -3556,7 +3730,7 @@ public class DataObject_1
          */
         @Override
         public boolean isEmpty() {
-            return getDelegate(false, false).isEmpty();
+            return this.getDelegate(false, false).isEmpty();
         }
 
         /* (non-Javadoc)
@@ -3564,14 +3738,14 @@ public class DataObject_1
          */
         @Override
         public boolean add(Object o) {
-            return getDelegate(true, false).add(o);
+            return this.getDelegate(true, false).add(o);
         }
 
         /* (non-Javadoc)
          * @see java.io.Flushable#flush()
          */
         public void flush() throws IOException {
-            Set<Object> source = getDelegate(false, false);
+            Set<Object> source = this.getDelegate(false, false);
             if(source != this.nonTransactional) {
                 this.nonTransactional.clear();
                 this.nonTransactional.addAll(source);
@@ -3699,7 +3873,7 @@ public class DataObject_1
                     );
                 } 
                 else {
-                    getDelegate(true, false).remove(this.current);
+                    ManagedSet.this.getDelegate(true, false).remove(this.current);
                     this.current = null;
                 }
             }
@@ -3817,7 +3991,7 @@ public class DataObject_1
             boolean clear
         ){
             try {
-                UnitOfWork_1 unitOfWork = getUnitOfWorkIfTransactional(makeDirty ? this.feature : null);
+                UnitOfWork_1 unitOfWork = DataObject_1.this.getUnitOfWorkIfTransactional(makeDirty ? this.feature : null);
                 if(unitOfWork == null) {
                     if(DataObject_1.this.transientValues != null) {
                         SortedMap<Integer,Object> transientValue = (SortedMap<Integer,Object>) transientValues.get(this.feature);
@@ -3861,7 +4035,7 @@ public class DataObject_1
          * @see java.io.Flushable#flush()
          */
         public void flush() throws IOException {
-            SortedMap<Integer,Object> source = getDelegate(false, false);
+            SortedMap<Integer,Object> source = ManagedSortedMap.this.getDelegate(false, false);
             if(source != this.nonTransactional) {
                 this.nonTransactional.clear();
                 this.nonTransactional.putAll(source);
@@ -3886,7 +4060,7 @@ public class DataObject_1
          * @see java.util.SortedMap#firstKey()
          */
         public Integer firstKey() {
-            return getDelegate(false,false).firstKey();
+            return ManagedSortedMap.this.getDelegate(false,false).firstKey();
         }
 
         /* (non-Javadoc)
@@ -3900,7 +4074,7 @@ public class DataObject_1
          * @see java.util.SortedMap#lastKey()
          */
         public Integer lastKey() {
-            return getDelegate(false,false).lastKey();
+            return ManagedSortedMap.this.getDelegate(false,false).lastKey();
         }
 
         /* (non-Javadoc)
@@ -3921,77 +4095,77 @@ public class DataObject_1
          * @see java.util.AbstractMap#clear()
          */
         public void clear() {
-            getDelegate(true,true);
+            ManagedSortedMap.this.getDelegate(true,true);
         }
 
         /* (non-Javadoc)
          * @see java.util.AbstractMap#containsKey(java.lang.Object)
          */
         public boolean containsKey(Object key) {
-            return getDelegate(false,false).containsKey(key);
+            return ManagedSortedMap.this.getDelegate(false,false).containsKey(key);
         }
 
         /* (non-Javadoc)
          * @see java.util.AbstractMap#containsValue(java.lang.Object)
          */
         public boolean containsValue(Object value) {
-            return getDelegate(false,false).containsValue(value);
+            return ManagedSortedMap.this.getDelegate(false,false).containsValue(value);
         }
 
         /* (non-Javadoc)
          * @see java.util.AbstractMap#get(java.lang.Object)
          */
         public Object get(Object key) {
-            return getDelegate(false,false).get(key);
+            return ManagedSortedMap.this.getDelegate(false,false).get(key);
         }
 
         /* (non-Javadoc)
          * @see java.util.AbstractMap#isEmpty()
          */
         public boolean isEmpty() {
-            return getDelegate(false,false).isEmpty();
+            return ManagedSortedMap.this.getDelegate(false,false).isEmpty();
         }
 
         /* (non-Javadoc)
          * @see java.util.AbstractMap#keySet()
          */
         public Set<Integer> keySet() {
-            return getDelegate(false,false).keySet(); // TOD make it modifiable
+            return ManagedSortedMap.this.getDelegate(false,false).keySet(); // TOD make it modifiable
         }
 
         /* (non-Javadoc)
          * @see java.util.AbstractMap#put(java.lang.Object, java.lang.Object)
          */
         public Object put(Integer key, Object value) {
-            return getDelegate(true,false).put(key, value);
+            return ManagedSortedMap.this.getDelegate(true,false).put(key, value);
         }
 
         /* (non-Javadoc)
          * @see java.util.AbstractMap#putAll(java.util.Map)
          */
         public void putAll(Map<? extends Integer, ? extends Object> t) {
-            getDelegate(true,false).putAll(t);
+            ManagedSortedMap.this.getDelegate(true,false).putAll(t);
         }
 
         /* (non-Javadoc)
          * @see java.util.AbstractMap#remove(java.lang.Object)
          */
         public Object remove(Object key) {
-            return getDelegate(true,false).remove(key);
+            return ManagedSortedMap.this.getDelegate(true,false).remove(key);
         }
 
         /* (non-Javadoc)
          * @see java.util.AbstractMap#size()
          */
         public int size() {
-            return getDelegate(false,false).size();
+            return ManagedSortedMap.this.getDelegate(false,false).size();
         }
 
         /* (non-Javadoc)
          * @see java.util.AbstractMap#values()
          */
         public Collection<Object> values() {
-            return getDelegate(false,false).values();
+            return ManagedSortedMap.this.getDelegate(false,false).values();
         }
 
         /* (non-Javadoc)
@@ -3999,7 +4173,7 @@ public class DataObject_1
          */
         @Override
         public boolean equals(Object obj) {
-            return getDelegate(false,false).equals(obj);
+            return ManagedSortedMap.this.getDelegate(false,false).equals(obj);
         }
 
         /* (non-Javadoc)
@@ -4007,7 +4181,7 @@ public class DataObject_1
          */
         @Override
         public int hashCode() {
-            return getDelegate(false,false).hashCode();
+            return ManagedSortedMap.this.getDelegate(false,false).hashCode();
         }
 
         /* (non-Javadoc)
@@ -4015,7 +4189,7 @@ public class DataObject_1
          */
         @Override
         public String toString() {
-            return getDelegate(false,false).toString();
+            return ManagedSortedMap.this.getDelegate(false,false).toString();
         }
 
         /**
@@ -4088,7 +4262,7 @@ public class DataObject_1
              * @return the delegate sub-map
              */
             protected SortedMap<Integer,Object> getSubMap(){
-                SortedMap<Integer,Object> map = getDelegate(false,false);
+                SortedMap<Integer,Object> map = ManagedSortedMap.this.getDelegate(false,false);
                 if(from == null) {
                     if(to == null) {
                         return map;
@@ -4106,7 +4280,7 @@ public class DataObject_1
             
             @Override
             public int size() {
-                return getSubMap().size();
+                return this.getSubMap().size();
             }
 
             /* (non-Javadoc)
@@ -4114,7 +4288,7 @@ public class DataObject_1
              */
             @Override
             public Set<java.util.Map.Entry<Integer, Object>> entrySet() {
-                return getSubMap().entrySet();
+                return this.getSubMap().entrySet();
             }
 
             /* (non-Javadoc)
@@ -4128,14 +4302,14 @@ public class DataObject_1
              * @see java.util.SortedMap#firstKey()
              */
             public Integer firstKey() {
-                return getSubMap().firstKey();
+                return this.getSubMap().firstKey();
             }
 
             /* (non-Javadoc)
              * @see java.util.SortedMap#headMap(java.lang.Object)
              */
             public SortedMap<Integer, Object> headMap(Integer toKey) {
-                validateKey(toKey);
+                this.validateKey(toKey);
                 return new SubMap(this.from, toKey);
             }
 
@@ -4143,7 +4317,7 @@ public class DataObject_1
              * @see java.util.SortedMap#lastKey()
              */
             public Integer lastKey() {
-                return getSubMap().lastKey();
+                return this.getSubMap().lastKey();
             }
 
             /* (non-Javadoc)
@@ -4153,8 +4327,8 @@ public class DataObject_1
                 Integer fromKey,
                 Integer toKey
             ) {
-                validateKey(fromKey);
-                validateKey(toKey);
+                this.validateKey(fromKey);
+                this.validateKey(toKey);
                 return new SubMap(fromKey, toKey);
             }
 
@@ -4162,7 +4336,7 @@ public class DataObject_1
              * @see java.util.SortedMap#tailMap(java.lang.Object)
              */
             public SortedMap<Integer, Object> tailMap(Integer fromKey) {
-                validateKey(fromKey);
+                this.validateKey(fromKey);
                 return new SubMap(fromKey, null);
             }
             
@@ -4173,7 +4347,7 @@ public class DataObject_1
          */
         class EntryIterator implements Iterator<Map.Entry<Integer, Object>> {
             
-            private SortedMap<Integer,Object> readOnly = getDelegate(false,false);
+            private SortedMap<Integer,Object> readOnly = ManagedSortedMap.this.getDelegate(false,false);
             
             private Iterator<Map.Entry<Integer, Object>> delegate = readOnly.entrySet().iterator();
 
@@ -4181,7 +4355,7 @@ public class DataObject_1
             
             protected void makeDirty(){
                 if(this.readOnly != null) {
-                    SortedMap<Integer,Object> forUpdate = getDelegate(true,false);
+                    SortedMap<Integer,Object> forUpdate = ManagedSortedMap.this.getDelegate(true,false);
                     SortedMap<Integer,Object> readOnly = this.readOnly;
                     this.readOnly = null;
                     if(forUpdate != readOnly) {
@@ -4223,7 +4397,7 @@ public class DataObject_1
                     }
 
                     public Object setValue(Object value) {
-                        makeDirty();
+                        EntryIterator.this.makeDirty();
                         return EntryIterator.this.current.setValue(value);
                     }
                     
@@ -4234,7 +4408,7 @@ public class DataObject_1
              * @see java.util.Iterator#remove()
              */
             public void remove() {
-                makeDirty();
+                EntryIterator.this.makeDirty();
                 this.delegate.remove();
             }
         
@@ -4319,23 +4493,23 @@ public class DataObject_1
         //
         // dataTypeMarshaller initalization
         //
-        dataTypeMarshaller.put(DATE, DateMarshaller.NORMALIZE);
-        dataTypeMarshaller.put(DATETIME, DateTimeMarshaller.NORMALIZE);
-        dataTypeMarshaller.put(DURATION, DurationMarshaller.NORMALIZE);
-        dataTypeMarshaller.put(SHORT, ShortMarshaller.NORMALIZE);
-        dataTypeMarshaller.put(INTEGER, IntegerMarshaller.NORMALIZE);
-        dataTypeMarshaller.put(LONG, LongMarshaller.NORMALIZE);
+        DataObject_1.dataTypeMarshaller.put(DATE, DateMarshaller.NORMALIZE);
+        DataObject_1.dataTypeMarshaller.put(DATETIME, DateTimeMarshaller.NORMALIZE);
+        DataObject_1.dataTypeMarshaller.put(DURATION, DurationMarshaller.NORMALIZE);
+        DataObject_1.dataTypeMarshaller.put(SHORT, ShortMarshaller.NORMALIZE);
+        DataObject_1.dataTypeMarshaller.put(INTEGER, IntegerMarshaller.NORMALIZE);
+        DataObject_1.dataTypeMarshaller.put(LONG, LongMarshaller.NORMALIZE);
         //
         // lifecycleListenerClass initalization
         //
-        lifecycleListenerClass[InstanceLifecycleEvent.CREATE] = CreateLifecycleListener.class;
-        lifecycleListenerClass[InstanceLifecycleEvent.LOAD] = LoadLifecycleListener.class;
-        lifecycleListenerClass[InstanceLifecycleEvent.STORE] = StoreLifecycleListener.class;
-        lifecycleListenerClass[InstanceLifecycleEvent.CLEAR] = ClearLifecycleListener.class;
-        lifecycleListenerClass[InstanceLifecycleEvent.DELETE] = DeleteLifecycleListener.class;
-        lifecycleListenerClass[InstanceLifecycleEvent.DIRTY] = DirtyLifecycleListener.class;
-        lifecycleListenerClass[InstanceLifecycleEvent.DETACH] = DetachLifecycleListener.class;
-        lifecycleListenerClass[InstanceLifecycleEvent.ATTACH] = AttachLifecycleListener.class;
+        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.CREATE] = CreateLifecycleListener.class;
+        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.LOAD] = LoadLifecycleListener.class;
+        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.STORE] = StoreLifecycleListener.class;
+        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.CLEAR] = ClearLifecycleListener.class;
+        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.DELETE] = DeleteLifecycleListener.class;
+        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.DIRTY] = DirtyLifecycleListener.class;
+        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.DETACH] = DetachLifecycleListener.class;
+        DataObject_1.lifecycleListenerClass[InstanceLifecycleEvent.ATTACH] = AttachLifecycleListener.class;
 
     }
 

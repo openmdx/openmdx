@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestHttpHeaderFieldValue.java,v 1.2 2010/02/27 06:52:33 hburger Exp $
+ * Name:        $Id: TestHttpHeaderFieldValue.java,v 1.5 2010/05/18 14:22:12 hburger Exp $
  * Description: Test HTTP Headers
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/27 06:52:33 $
+ * Date:        $Date: 2010/05/18 14:22:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,6 +55,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 
 import org.junit.Test;
 import org.openmdx.base.io.HttpHeaderFieldContent;
@@ -70,54 +71,93 @@ public class TestHttpHeaderFieldValue {
      */
     @Test
     public void testAccept(){
+        List<String> expected = Arrays.asList(
+            "text/html", 
+            "text/x-c", 
+            "text/x-dvi", 
+            "text/plain"
+        );
         HttpHeaderFieldValue fieldValue = newHeaderFieldValue(
-            "text/plain; q=\"0.5\", text/html, text/x-dvi; q=0.8, text/x-c"
+            "text/plain; q=\"0.5\";charset=\"ISO-8859-1\", text/html ; charset=ASCII",
+            "text/x-dvi; q=0.8, text/x-c"
         );
         assertEquals(
             "text/html",
             fieldValue.getPreferredContent("text/xml").getValue()
         );
+        Iterator<String> e = expected.iterator();
+        for(HttpHeaderFieldContent entry : fieldValue) {
+            assertEquals(e.next(), entry.getValue());
+        }
+    }
+
+    /**
+     * Test "Accept-Charset" header
+     */
+    @Test
+    public void testAcceptCharset(){
+        HttpHeaderFieldValue fieldValue = newHeaderFieldValue(
+            "ISO-8859-1,utf-8;q=0.7",
+            "*;q=0.7"
+        );
+        assertEquals(
+            "ISO-8859-1",
+            fieldValue.getPreferredContent("UTF-8").getValue()
+        );
         Iterator<String> expected = Arrays.asList(
-            "text/html", 
-            "text/x-c", 
-            "text/x-dvi", 
-            "text/plain"
+            "ISO-8859-1", 
+            "utf-8", 
+            "*"
         ).iterator();
         for(HttpHeaderFieldContent entry : fieldValue) {
             assertEquals(expected.next(), entry.getValue());
         }
     }
-
+    
     /**
      * Test "Content-Type" header
      */
     @Test
     public void testContentType(){
-        HttpHeaderFieldValue fieldValue = newHeaderFieldValue(
-            "text/xml;charset=\"utf-8\""
-        );
-        HttpHeaderFieldContent fieldContent = fieldValue.getPreferredContent("text/plain;charset=ISO-8859-1"); 
-        assertEquals(
-            "text/xml",
-            fieldContent.getValue()
-        );
-        assertEquals(
-            "utf-8",
-            fieldContent.getParameterValue("charset",null)
-        );
+        {
+            HttpHeaderFieldValue fieldValue = newHeaderFieldValue(
+                "text/xml;charset=\"utf-8\""
+            );
+            HttpHeaderFieldContent fieldContent = fieldValue.getPreferredContent("text/plain;charset=ISO-8859-1"); 
+            assertEquals(
+                "text/xml",
+                fieldContent.getValue()
+            );
+            assertEquals(
+                "utf-8",
+                fieldContent.getParameterValue("charset",null)
+            );
+        }
+        {
+            HttpHeaderFieldContent fieldContent = new HttpHeaderFieldContent(
+                "application/vnd.openmdx.wbxml;charset=UTF-8"
+            ); 
+            assertEquals(
+                "application/vnd.openmdx.wbxml",
+                fieldContent.getValue()
+            );
+            assertEquals(
+                "UTF-8",
+                fieldContent.getParameterValue("charset",null)
+            );
+        }
     }
     
     /**
      * Headers factory
      * 
-     * @param commaSeparatedList
+     * @param headers
      * 
      * @return a new HttpHeaders instance
      */
     private static final HttpHeaderFieldValue newHeaderFieldValue(
-        String commaSeparatedList
+        final String... headers
     ){
-        final String[] headers = commaSeparatedList.split(",");
         return new HttpHeaderFieldValue(
             new Enumeration<String>(){
 
@@ -130,7 +170,7 @@ public class TestHttpHeaderFieldValue {
 
                 @Override
                 public String nextElement() {
-                    return headers[this.cursor++].trim();
+                    return headers[this.cursor++];
                 }
                 
             }

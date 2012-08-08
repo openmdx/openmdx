@@ -42,13 +42,18 @@
     	class="org.openmdx.base.accessor.rest.DataManagerFactory_1"
     	connection-factory-name="java:comp/env/jdbc/DataSource"
     >
+        <property name="org.openmdx.jdo.DataManager.cachePlugIn" value="org.openmdx.cache.PlugIn"/>
         <property name="org.openmdx.jdo.DataManager.plugIn[0]" value="org.openmdx.audit2.PlugIn"/>
         <property name="org.openmdx.jdo.DataManager.plugIn[1]" value="org.openmdx.base.PlugIn"/>
-        <property name="org.openmdx.jdo.DataManager.virtualObjectPlugIn" value="org.openmdx.virtual.PlugIn"/>
         <property name="org.openmdx.jdo.DataManager.xriPattern[0]" value="xri://@openmdx*test.openmdx.app1/($...)"/>
         <property name="org.openmdx.jdo.DataManager.xriPattern[1]" value="xri://@openmdx*org.openmdx.audit2/($...)"/>
         <property name="org.openmdx.jdo.DataManager.restPlugIn[0]" value="test.openmdx.app1.PlugIn"/>
         <property name="org.openmdx.jdo.DataManager.restPlugIn[1]" value="test.openmdx.audit2.PlugIn"/>
+        <property name="org.openmdx.cache.PlugIn.class" value="org.openmdx.base.accessor.rest.spi.PinningCache_2"/>
+        <property name="org.openmdx.cache.PlugIn.sowAllPattern[0]" value="xri://@openmdx*($..)"/>
+        <property name="org.openmdx.cache.PlugIn.sowAllClass[0]" value="org:openmdx:base:Authority"/>
+        <property name="org.openmdx.cache.PlugIn.sowAllPattern[1]" value="xri://@openmdx*($..)/provider/($..)"/>
+        <property name="org.openmdx.cache.PlugIn.sowAllClass[1]" value="org:openmdx:base:Provider"/>
         <property name="test.openmdx.app1.PlugIn.class" value="org.openmdx.application.dataprovider.kernel.EmbeddedDataprovider_1"/>
         <property name="test.openmdx.app1.PlugIn.configuration" value="xri://+resource/META-INF/app1RestPlugIn.properties"/>
         <property name="test.openmdx.audit2.PlugIn.class" value="org.openmdx.application.dataprovider.kernel.EmbeddedDataprovider_1"/>
@@ -60,12 +65,7 @@
         <property name="org.openmdx.audit2.PlugIn.modifiedFeaturePersistent" value="(java.lang.Boolean)false"/>
         <property name="org.openmdx.audit2.PlugIn.audit1Persistence" value="(java.lang.Boolean)true"/>
         <property name="org.openmdx.base.PlugIn.class" value="org.openmdx.base.aop0.PlugIn_1"/>
-        <property name="org.openmdx.virtual.PlugIn.class" value="org.openmdx.base.accessor.rest.spi.VirtualObjects_2"/>
-        <property name="org.openmdx.virtual.PlugIn.finalPattern[0]" value="xri://@openmdx*($..)"/>
-        <property name="org.openmdx.virtual.PlugIn.finalPattern[1]" value="xri://@openmdx*($..)/provider/($..)"/>
-        <property name="org.openmdx.virtual.PlugIn.finalClass[0]" value="org:openmdx:base:Authority"/>
-        <property name="org.openmdx.virtual.PlugIn.finalClass[1]" value="org:openmdx:base:Provider"/>
-    </persistence-manager-factory>
+    </persistence-manager-factory>    
 
 	<!-- Datatypes -->
     <persistence-manager-factory 

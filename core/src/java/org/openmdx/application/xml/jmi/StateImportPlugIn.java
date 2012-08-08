@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StateImportPlugIn.java,v 1.6 2009/12/17 14:40:30 wfro Exp $
+ * Name:        $Id: StateImportPlugIn.java,v 1.7 2010/06/22 07:05:47 hburger Exp $
  * Description: State Import Plug-In
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/17 14:40:30 $
+ * Date:        $Date: 2010/06/22 07:05:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -148,14 +148,14 @@ public class StateImportPlugIn implements ImportPlugIn {
                             refObject = (T) persistenceManager.getObjectById(externalId);
                         } catch (JDOObjectNotFoundException exception) {
                             refObject = persistenceManager.newInstance(objectClass);
-                            initialize(persistenceManager, externalId, refObject);
+                            this.initialize(persistenceManager, externalId, refObject);
                         } catch (JDOException exception) {
                             throw new ServiceException(exception);
                         }
                         break;
                     case CREATE:
                         refObject = persistenceManager.newInstance(objectClass);
-                        initialize(persistenceManager, externalId, refObject);
+                        this.initialize(persistenceManager, externalId, refObject);
                         break;
                 }
                 return refObject;
@@ -273,7 +273,7 @@ public class StateImportPlugIn implements ImportPlugIn {
         //
         Path containerId = objectId.getParent();
         String qualifier = objectId.getBase();
-        RefContainer refContainer = (RefContainer) persistenceManager.getObjectById(containerId);
+        RefContainer<?> refContainer = (RefContainer<?>) persistenceManager.getObjectById(containerId);
         if(qualifier.startsWith("!")) {
             refContainer.refAdd(
                 QualifierType.PERSISTENT,
@@ -320,14 +320,14 @@ public class StateImportPlugIn implements ImportPlugIn {
             if(
                 refObject instanceof DateState && 
                 refObject instanceof StateCapable && 
-                !isValidTimeUnique(objectHolder)
+                !StateImportPlugIn.isValidTimeUnique(objectHolder)
             ) {
                 DateState dateState = (DateState) refObject;
                 JmiHelper.toRefObject(
                     objectHolder, // source
                     dateState, // target
                     cache, // maps externalIds to refObjects
-                    IGNORABLE_FEATURES_FOR_STATE_CAPABLE_INSTANCES
+                    StateImportPlugIn.IGNORABLE_FEATURES_FOR_STATE_CAPABLE_INSTANCES
                 );
                 if(!JDOHelper.isPersistent(refObject)){
                     Object_2Facade facade = Object_2Facade.newInstance(objectHolder);
@@ -342,7 +342,7 @@ public class StateImportPlugIn implements ImportPlugIn {
                             );
                         }
                         dateState.setCore(
-                            getInstance(
+                            this.getInstance(
                                 persistenceManager,
                                 ImportMode.UPDATE,
                                 Object_2Facade.newInstance(objectId).getDelegate(), 

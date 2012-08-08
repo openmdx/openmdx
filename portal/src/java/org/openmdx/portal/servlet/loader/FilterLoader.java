@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FilterLoader.java,v 1.33 2010/01/24 17:38:46 wfro Exp $
+ * Name:        $Id: FilterLoader.java,v 1.35 2010/06/01 09:12:08 hburger Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.33 $
+ * Revision:    $Revision: 1.35 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/24 17:38:46 $
+ * Date:        $Date: 2010/06/01 09:12:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,22 +56,23 @@
 package org.openmdx.portal.servlet.loader;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import javax.servlet.ServletContext;
 
-import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.IsInCondition;
+import org.openmdx.base.query.Extension;
+import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.OrderSpecifier;
-import org.openmdx.base.query.Quantors;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Filter;
@@ -128,9 +129,10 @@ public class FilterLoader
                 FILTER_GROUP_NAME_SYSTEM,
                 WebKeys.ICON_FILTER_ALL,
                 null,
-                new Condition[]{},
-                new OrderSpecifier[]{},
-                new Object[]{this.getClass().getName()}
+                (List<Condition>)null,
+                (List<OrderSpecifier>)null,
+                (Extension)null,
+                this.getClass().getName()
             )
         );
         // DEFAULT filter: Is typically overriden by user settings
@@ -141,9 +143,10 @@ public class FilterLoader
                 FILTER_GROUP_NAME_SYSTEM,
                 WebKeys.ICON_FILTER_DEFAULT,
                 null,
-                new Condition[]{},
-                new OrderSpecifier[]{},
-                new Object[]{this.getClass().getName()}
+                (List<Condition>)null,
+                (List<OrderSpecifier>)null,
+                (Extension)null,
+                this.getClass().getName()
             )
         );
 
@@ -181,16 +184,15 @@ public class FilterLoader
                                     FILTER_GROUP_NAME_CLASSES,
                                     iconKey,
                                     order,
-                                    new Condition[]{
-                                        new IsInCondition(
-                                            Quantors.THERE_EXISTS,
-                                            SystemAttributes.OBJECT_CLASS,
-                                            true,
-                                            new Object[]{subtype.objGetValue("qualifiedName")}
+                                    Collections.singletonList(
+                                        (Condition)new IsInstanceOfCondition(
+                                        	false, // SystemAttributes.OBJECT_CLASS
+                                            (String)subtype.objGetValue("qualifiedName")
                                         )
-                                    },
-                                    new OrderSpecifier[]{},
-                                    new Object[]{this.getClass().getName()}                                                        
+                                    ),
+                                    null, // order
+                                    null, // extension
+                                    this.getClass().getName()                                                        
                                 )
                             );
                         }

@@ -10,7 +10,7 @@
     attributes 	(list Attribute_Set)
     quid       	"3C3238A3033A"
     documentation 	
-|$Id: model1.cat,v 1.15 2008/11/13 16:07:13 wfro Exp $ 
+|$Id: model1.cat,v 1.17 2010/06/24 10:17:37 hburger Exp $ 
 |
 |Name: org::omex::model1
 |
@@ -98,7 +98,7 @@
 			    name       	"isChangeable"
 			    value      	(value Text "false")))
 		    quid       	"3C33754001FB"
-		    documentation 	"Provides a meta-modeler supplied name that uniquely identifies the Element in the context of the ModelElement’s containing Namespace. When choosing an Element’s name, the meta-modeler should consider the rules for translating names into identifiers in the relevant mappings."
+		    documentation 	"Provides a meta-modeler supplied name that uniquely identifies the Element in the context of the ModelElementï¿½s containing Namespace. When choosing an Elementï¿½s name, the meta-modeler should consider the rules for translating names into identifiers in the relevant mappings."
 		    type       	"org::w3c::string"
 		    exportControl 	"Public"
 		    derived    	TRUE)
@@ -111,7 +111,7 @@
 		    quid       	"3C33479300D5"
 		    documentation 	
 |Provides a unique name for the Element within the context of its outermost containing Package. The qualifiedName is a list of NameType values consisting of
-|the names of the Element, its container, its container’s container and so on until a non-contained element is reached. The first member of the list is the name
+|the names of the Element, its container, its containerï¿½s container and so on until a non-contained element is reached. The first member of the list is the name
 |of the non-contained element.
 |
 |The 'qualifiedName' of an Element is of the form <Segment.name>:<Element.name>. <Segment.name> is the full-qualified package name, i.e. org:omg:model1. Samples for 'qualifiedName':
@@ -220,7 +220,7 @@
 	    documentation 	
 |The Namespace Class classifies and characterizes Elements that can contain other Elements. Along with containing the Elements, a Namespace defines a namespace, the allowable set of names and the naming constraints, for these elements.<p>
 |
-|Subclasses of the Namespace Class have mechanisms for effectively extending their namespace, without actually containing additional Elements. Thus Namespace can be viewed in terms of its two roles, as a container and as a namespace mechanism. Because only subclasses extend the namespace, the namespace and contents are coincident in the definition of the Namespace Class. Each Namespace has four collections (the latter three derivable) that are used in the MOF Model’s Constraints. These collections are:
+|Subclasses of the Namespace Class have mechanisms for effectively extending their namespace, without actually containing additional Elements. Thus Namespace can be viewed in terms of its two roles, as a container and as a namespace mechanism. Because only subclasses extend the namespace, the namespace and contents are coincident in the definition of the Namespace Class. Each Namespace has four collections (the latter three derivable) that are used in the MOF Modelï¿½s Constraints. These collections are:
 |<ul>
 |<li>The contents (also called the direct contents), which are defined by the contents
 |reference.</li>
@@ -338,7 +338,7 @@
 		    exportControl 	"Public")
 		(object ClassAttribute "visibility"
 		    quid       	"3C334E3500C3"
-		    documentation 	"In the future, this Attribute will be used to limit the ability of Elements outside of this Feature’s container to make use of it. The rules of visibility of MOF Elements are not currently specified."
+		    documentation 	"In the future, this Attribute will be used to limit the ability of Elements outside of this Feature's container to make use of it. The rules of visibility of MOF Elements are not currently specified."
 		    type       	"org::omg::PrimitiveTypes::VisibilityKind"
 		    exportControl 	"Public"))
 	    abstract   	TRUE)
@@ -396,7 +396,7 @@
 |The isNavigable attribute determines whether or not the AssociationEnd supports link 'navigation'. This has two implications:
 |<ul>
 |<li>A Class defined with an appropriate Reference supports navigation of links from one Class instance to another. If isNavigable is false for an AssociationEnd, no such References may be created.</li>
-|<li>Setting isNavigable to false also suppress a mapping’s mechanisms for indexing links
+|<li>Setting isNavigable to false also suppress a mappingï¿½s mechanisms for indexing links
 |based on this AssociationEnd.</li>
 |</ul>
 		    
@@ -527,7 +527,7 @@
 		    exportControl 	"Public")
 		(object ClassAttribute "visibility"
 		    quid       	"3C3349600377"
-		    documentation 	"In the future, this Attribute will be used to limit the ability of Elements outside of this GeneralizableElement’s container to depend on it. The rules of visibility of MOF Elements are not currently specified."
+		    documentation 	"In the future, this Attribute will be used to limit the ability of Elements outside of this GeneralizableElementï¿½s container to depend on it. The rules of visibility of MOF Elements are not currently specified."
 		    type       	"org::omg::PrimitiveTypes::VisibilityKind"
 		    exportControl 	"Public"))
 	    abstract   	TRUE)
@@ -926,7 +926,7 @@
 	    roles      	(list role_list
 		(object Role "referrer"
 		    quid       	"3CC1F2BE017F"
-		    documentation 	"The Reference that is providing the exposedEnd’s class instances within the Reference’s Classifier."
+		    documentation 	"The Reference that is providing the exposedEndï¿½s class instances within the Referenceï¿½s Classifier."
 		    label      	"referrer"
 		    supplier   	"Logical View::org::omg::model1::Reference"
 		    quidu      	"3C3340050369"
@@ -1195,23 +1195,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333D81006A"
-		    compartment 	(object Compartment
-			Parent_View 	@1
-			location   	(2194, 2048)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	TRUE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	3
-			max_width  	912)
 		    width      	932
 		    height     	204
 		    annotation 	8
@@ -1242,23 +1225,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333DB2031D"
-		    compartment 	(object Compartment
-			Parent_View 	@2
-			location   	(2955, 3508)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	875)
 		    width      	930
 		    height     	202
 		    annotation 	8
@@ -1318,23 +1284,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333DDB0376"
-		    compartment 	(object Compartment
-			Parent_View 	@4
-			location   	(5421, 2139)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	484)
 		    width      	504
 		    height     	204
 		    annotation 	8
@@ -1365,23 +1314,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333E08021D"
-		    compartment 	(object Compartment
-			Parent_View 	@5
-			location   	(5112, 2411)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	3
-			max_width  	912)
 		    width      	932
 		    height     	246
 		    annotation 	8
@@ -1442,23 +1374,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333F8B0147"
-		    compartment 	(object Compartment
-			Parent_View 	@7
-			location   	(1126, 3204)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	500)
 		    width      	522
 		    height     	204
 		    annotation 	8
@@ -1519,23 +1434,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333FB900DF"
-		    compartment 	(object Compartment
-			Parent_View 	@9
-			location   	(2409, 3774)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	521)
 		    width      	560
 		    height     	204
 		    annotation 	8
@@ -1596,23 +1494,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333FFB0007"
-		    compartment 	(object Compartment
-			Parent_View 	@11
-			location   	(2308, 2407)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	3
-			max_width  	514)
 		    width      	534
 		    height     	246
 		    annotation 	8
@@ -1643,23 +1524,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333D52021B"
-		    compartment 	(object Compartment
-			Parent_View 	@12
-			location   	(101, 1299)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	602)
 		    width      	624
 		    height     	160
 		    annotation 	8
@@ -1690,23 +1554,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333D580242"
-		    compartment 	(object Compartment
-			Parent_View 	@13
-			location   	(764, 1297)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	4
-			max_width  	991)
 		    width      	1010
 		    height     	290
 		    annotation 	8
@@ -1737,23 +1584,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C2F3E0A0143"
-		    compartment 	(object Compartment
-			Parent_View 	@14
-			location   	(1719, 3225)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	533)
 		    width      	554
 		    height     	160
 		    annotation 	8
@@ -1820,23 +1650,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333F4F0367"
-		    compartment 	(object Compartment
-			Parent_View 	@18
-			location   	(1208, 2647)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	375)
 		    width      	396
 		    height     	204
 		    annotation 	8
@@ -1867,23 +1680,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333D700188"
-		    compartment 	(object Compartment
-			Parent_View 	@19
-			location   	(3516, 1273)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	TRUE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	3
-			max_width  	819)
 		    width      	840
 		    height     	246
 		    annotation 	8
@@ -1914,23 +1710,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333EF70343"
-		    compartment 	(object Compartment
-			Parent_View 	@20
-			location   	(1246, 2069)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	TRUE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	3
-			max_width  	819)
 		    width      	840
 		    height     	204
 		    annotation 	8
@@ -1998,7 +1777,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	294
+				max_width  	372
 				justify    	0
 				label      	"+allSupertypeEnd"
 				pctDist    	0.306792
@@ -2065,7 +1844,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	188
+				max_width  	252
 				justify    	0
 				label      	"+allSubtype"
 				pctDist    	0.810112
@@ -2124,7 +1903,7 @@
 				label      	"{isFrozen}"
 				pctDist    	0.898219
 				height     	7
-				orientation 	1))))
+				orientation 	0))))
 		(object AssociationViewNew "Generalizes" @30
 		    location   	(800, 2439)
 		    font       	(object Font
@@ -2188,7 +1967,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	220
+				max_width  	278
 				justify    	0
 				label      	"+subtypeEnd"
 				pctDist    	0.266900
@@ -2255,12 +2034,12 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	191
+				max_width  	240
 				justify    	0
 				label      	"+supertype"
 				pctDist    	0.869078
 				height     	10
-				orientation 	1)
+				orientation 	0)
 			    stereotype 	TRUE
 			    line_color 	3342489
 			    quidu      	"3CC28D1502EC"
@@ -2357,12 +2136,12 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	365
+				max_width  	481
 				justify    	0
 				label      	"+generalizableElement"
 				pctDist    	0.858792
 				height     	8
-				orientation 	0)
+				orientation 	1)
 			    stereotype 	TRUE
 			    line_color 	3342489
 			    quidu      	"3D0058BD035F"
@@ -2423,7 +2202,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	147
+				max_width  	177
 				justify    	0
 				label      	"+feature"
 				pctDist    	0.765333
@@ -2546,7 +2325,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	250
+				max_width  	331
 				justify    	0
 				label      	"+allSubtypeEnd"
 				pctDist    	0.335144
@@ -2613,12 +2392,12 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	232
+				max_width  	293
 				justify    	0
 				label      	"+allSupertype"
 				pctDist    	0.807994
 				height     	3
-				orientation 	0)
+				orientation 	1)
 			    stereotype 	TRUE
 			    line_color 	3342489
 			    quidu      	"3D00790F015E"
@@ -2736,7 +2515,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	254
+				max_width  	318
 				justify    	0
 				label      	"+supertypeEnd"
 				pctDist    	0.284469
@@ -2808,7 +2587,7 @@
 				label      	"+subtype"
 				pctDist    	0.861044
 				height     	2
-				orientation 	0)
+				orientation 	1)
 			    stereotype 	TRUE
 			    line_color 	3342489
 			    quidu      	"3D007B8903E0"
@@ -2901,23 +2680,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333D1401B8"
-		    compartment 	(object Compartment
-			Parent_View 	@66
-			location   	(1673, 120)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	3
-			max_width  	260)
 		    width      	1092
 		    height     	250
 		    annotation 	8
@@ -2948,23 +2710,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333D61037B"
-		    compartment 	(object Compartment
-			Parent_View 	@67
-			location   	(345, 966)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	3
-			max_width  	819)
 		    width      	840
 		    height     	246
 		    annotation 	8
@@ -2995,23 +2740,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333D3F03A4"
-		    compartment 	(object Compartment
-			Parent_View 	@68
-			location   	(98, 597)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	TRUE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	5
-			max_width  	629)
 		    width      	5894
 		    height     	283
 		    annotation 	8
@@ -3079,7 +2807,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	148
+				max_width  	200
 				justify    	0
 				label      	"+element"
 				pctDist    	0.849693
@@ -3144,7 +2872,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	167
+				max_width  	212
 				justify    	0
 				label      	"+segment"
 				pctDist    	0.193646
@@ -3229,23 +2957,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333D6701DF"
-		    compartment 	(object Compartment
-			Parent_View 	@78
-			location   	(2015, 1300)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	TRUE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	4
-			max_width  	418)
 		    width      	1414
 		    height     	283
 		    annotation 	8
@@ -3378,7 +3089,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	359
+				max_width  	455
 				justify    	0
 				label      	"+importedNamespace"
 				pctDist    	0.416933
@@ -3481,7 +3192,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	151
+				max_width  	183
 				justify    	0
 				label      	"+content"
 				pctDist    	0.563452
@@ -3567,7 +3278,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	243
+				max_width  	302
 				justify    	0
 				label      	"+containerEnd"
 				pctDist    	0.412322
@@ -3668,7 +3379,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	214
+				max_width  	261
 				justify    	0
 				label      	"+contentEnd"
 				pctDist    	0.591837
@@ -3733,7 +3444,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	182
+				max_width  	224
 				justify    	0
 				label      	"+container"
 				pctDist    	0.526066
@@ -3834,7 +3545,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	341
+				max_width  	425
 				justify    	0
 				label      	"+namespaceContent"
 				pctDist    	0.462882
@@ -3920,7 +3631,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	214
+				max_width  	271
 				justify    	0
 				label      	"+namespace"
 				pctDist    	0.317536
@@ -4042,7 +3753,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	381
+				max_width  	481
 				justify    	0
 				label      	"+allNamespaceContent"
 				pctDist    	0.366667
@@ -4128,7 +3839,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	254
+				max_width  	328
 				justify    	0
 				label      	"+allNamespace"
 				pctDist    	0.350711
@@ -4256,23 +3967,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333F3302B3"
-		    compartment 	(object Compartment
-			Parent_View 	@126
-			location   	(4149, 2675)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	3
-			max_width  	612)
 		    width      	634
 		    height     	204
 		    annotation 	8
@@ -4340,7 +4034,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	183
+				max_width  	234
 				justify    	0
 				label      	"+exception"
 				pctDist    	0.525641
@@ -4405,7 +4099,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	183
+				max_width  	227
 				justify    	0
 				label      	"+operation"
 				pctDist    	0.254777
@@ -4499,23 +4193,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333DD1001F"
-		    compartment 	(object Compartment
-			Parent_View 	@136
-			location   	(4986, 1902)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	3
-			max_width  	925)
 		    width      	946
 		    height     	204
 		    annotation 	8
@@ -4583,7 +4260,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	183
+				max_width  	227
 				justify    	0
 				label      	"+operation"
 				pctDist    	0.726908
@@ -4670,12 +4347,12 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	198
+				max_width  	243
 				justify    	0
 				label      	"+parameter"
 				pctDist    	0.682731
 				height     	4
-				orientation 	1)
+				orientation 	0)
 			    stereotype 	TRUE
 			    line_color 	3342489
 			    quidu      	"3CEC360C02D3"
@@ -4729,7 +4406,7 @@
 				label      	"{isFrozen}"
 				pctDist    	0.831325
 				height     	8
-				orientation 	0))))
+				orientation 	1))))
 		(object InheritView "" @147
 		    stereotype 	TRUE
 		    line_color 	3342489
@@ -4828,11 +4505,11 @@
 		    client     	@4
 		    supplier   	@151
 		    vertices   	(list Points
-			(5916, 2183)
-			(5971, 2183)
+			(5916, 2182)
+			(5971, 2182)
 			(5971, 1431))
 		    line_style 	3
-		    origin_attachment 	(5916, 2183)
+		    origin_attachment 	(5916, 2182)
 		    terminal_attachment 	(5971, 1431))
 		(object InheritView "" @154
 		    stereotype 	TRUE
@@ -4898,23 +4575,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C3340050369"
-		    compartment 	(object Compartment
-			Parent_View 	@157
-			location   	(3020, 2571)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	787)
 		    width      	806
 		    height     	160
 		    annotation 	8
@@ -4957,23 +4617,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333F5A0237"
-		    compartment 	(object Compartment
-			Parent_View 	@159
-			location   	(1781, 2907)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	TRUE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	382)
 		    width      	402
 		    height     	160
 		    annotation 	8
@@ -5041,7 +4684,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	178
+				max_width  	234
 				justify    	0
 				label      	"+classifies"
 				pctDist    	0.932982
@@ -5107,7 +4750,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	100
+				max_width  	125
 				justify    	0
 				label      	"+type"
 				pctDist    	0.930530
@@ -5209,7 +4852,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	174
+				max_width  	224
 				justify    	0
 				label      	"+classifier"
 				pctDist    	0.839286
@@ -5274,7 +4917,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	361
+				max_width  	452
 				justify    	0
 				label      	"+compositeReference"
 				pctDist    	0.704969
@@ -5333,7 +4976,7 @@
 				label      	"{isFrozen}"
 				pctDist    	0.860248
 				height     	8
-				orientation 	1))))
+				orientation 	0))))
 		(object InheritView "" @177
 		    stereotype 	TRUE
 		    line_color 	3342489
@@ -5372,23 +5015,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C333D910334"
-		    compartment 	(object Compartment
-			Parent_View 	@178
-			location   	(3132, 1913)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	6
-			max_width  	941)
 		    width      	962
 		    height     	334
 		    annotation 	8
@@ -5456,7 +5082,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	158
+				max_width  	186
 				justify    	0
 				label      	"+referrer"
 				pctDist    	0.537594
@@ -5521,7 +5147,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	225
+				max_width  	290
 				justify    	0
 				label      	"+exposedEnd"
 				pctDist    	0.344538
@@ -5622,7 +5248,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	162
+				max_width  	193
 				justify    	0
 				label      	"+referent"
 				pctDist    	0.485714
@@ -5687,7 +5313,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	270
+				max_width  	331
 				justify    	0
 				label      	"+referencedEnd"
 				pctDist    	0.334586
@@ -5802,7 +5428,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	229
+				max_width  	302
 				justify    	0
 				label      	"+qualifierType"
 				pctDist    	0.772358
@@ -5867,7 +5493,7 @@
 				anchor     	1
 				anchor_loc 	1
 				nlines     	1
-				max_width  	274
+				max_width  	350
 				justify    	0
 				label      	"+associationEnd"
 				pctDist    	0.854545
@@ -5968,7 +5594,7 @@
 			default_color 	TRUE)
 		    label      	(object ItemLabel
 			Parent_View 	@207
-			location   	(4271, 265)
+			location   	(4271, 263)
 			fill_color 	13434879
 			nlines     	1
 			max_width  	305

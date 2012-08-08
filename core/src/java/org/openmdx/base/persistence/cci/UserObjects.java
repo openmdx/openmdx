@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UserObjects.java,v 1.7 2009/11/03 11:27:18 hburger Exp $
+ * Name:        $Id: UserObjects.java,v 1.10 2010/07/08 15:10:44 hburger Exp $
  * Description: UserObjects 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/03 11:27:18 $
+ * Date:        $Date: 2010/07/08 15:10:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -48,15 +48,16 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.persistence.cci;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.persistence.spi.SharedObjects;
+import org.openmdx.kernel.loading.Factory;
 
 /**
  * User Objects
@@ -66,7 +67,7 @@ public class UserObjects extends SharedObjects {
     /**
      * Constructor 
      */
-    private UserObjects() {
+    protected UserObjects() {
         // Avoid instantiation
     }
 
@@ -80,7 +81,7 @@ public class UserObjects extends SharedObjects {
     public static List<String> getPrincipalChain(
         PersistenceManager persistenceManager
     ){
-        List<String> principalChain = sharedObjects(persistenceManager).getPrincipalChain(); 
+        List<String> principalChain = SharedObjects.sharedObjects(persistenceManager).getPrincipalChain(); 
         return principalChain == null ? Collections.<String>emptyList() : principalChain;
     }
 
@@ -102,22 +103,21 @@ public class UserObjects extends SharedObjects {
         PersistenceManager persistenceManager,
         Object taskIdentifier
     ){
-        sharedObjects(persistenceManager).setTaskIdentifier(taskIdentifier);
+        SharedObjects.sharedObjects(persistenceManager).setTaskIdentifier(taskIdentifier);
     }
     
     /**
-     * Retrieve the current task identifier 
+     * If set the transaction time's <code>instantiate()</code> method is evaluated 
+     * at the beginning of each unit of work.
      * 
      * @param persistenceManager
-     * 
-     * @return the current task identifier 
-     * 
-     * @see UserObjects#setTaskIdentifier(PersistenceManager, Object)
+     * @param taskIdentifier
      */
-    public static Object getTaskIdentifier(
-        PersistenceManager persistenceManager
+    public static void setTransactionTime(
+        PersistenceManager persistenceManager,
+        Factory<Date> transactionTime
     ){
-        return sharedObjects(persistenceManager).getTaskIdentifier();
+        SharedObjects.sharedObjects(persistenceManager).setTransactionTime(transactionTime);
     }
-    
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MappedRecordFilter.java,v 1.6 2010/01/26 15:38:12 hburger Exp $
+ * Name:        $Id: MappedRecordFilter.java,v 1.8 2010/06/02 13:41:49 hburger Exp $
  * Description: Dataprovider Object Filter
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:38:12 $
+ * Date:        $Date: 2010/06/02 13:41:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,10 +57,10 @@ import java.util.List;
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
+import org.openmdx.application.dataprovider.cci.FilterProperty;
+import org.openmdx.application.dataprovider.spi.AbstractFilter;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.query.AbstractFilter;
-import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.w3c.cci2.SparseArray;
 
@@ -93,6 +93,7 @@ public class MappedRecordFilter extends AbstractFilter {
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.query.AbstractFilter#getValues(java.lang.Object, java.lang.String)
      */
+    @Override
     protected Iterator<?> getValuesIterator(
         Object candidate, 
         String attribute

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: XRI_1Marshaller.java,v 1.3 2009/05/29 17:04:11 hburger Exp $
+ * Name:        $Id: XRI_1Marshaller.java,v 1.4 2010/06/25 17:09:28 hburger Exp $
  * Description: Path/XRI Marshaller 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/29 17:04:11 $
+ * Date:        $Date: 2010/06/25 17:09:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -269,7 +269,7 @@ implements Marshaller
         Object charSequence
     ) throws ServiceException {
         if (charSequence == null) return null;
-        String source = charSequence.toString();
+        String source = SpecialResourceIdentifiers.unescapeResourceIdentifier(charSequence.toString());
         if(!source.toLowerCase().startsWith(XRI_1Protocols.OPENMDX_PREFIX)) throw new ServiceException (
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,

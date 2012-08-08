@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSet.java,v 1.16 2009/01/11 21:19:33 wfro Exp $
+ * Name:        $Id: MarshallingSet.java,v 1.17 2010/06/02 13:44:25 hburger Exp $
  * Description: Marshalling Set
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/11 21:19:33 $
+ * Date:        $Date: 2010/06/02 13:44:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -141,6 +141,7 @@ public class MarshallingSet<E>
     /* (non-Javadoc)
      * @see java.util.Collection#add(java.lang.Object)
      */
+    @Override
     public boolean add(E element) {
         return (
             this.delegateIsInstanceOfSet || ! this.contains(element)
@@ -150,6 +151,7 @@ public class MarshallingSet<E>
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object object) {
     	if (object == this) {
     	    return true;

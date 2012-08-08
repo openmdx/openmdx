@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingMap.java,v 1.24 2009/04/28 13:58:52 hburger Exp $
+ * Name:        $Id: MarshallingMap.java,v 1.28 2010/07/01 16:24:13 hburger Exp $
  * Description: Marshalling Map
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/28 13:58:52 $
+ * Date:        $Date: 2010/07/01 16:24:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -56,6 +56,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import javax.jdo.JDOHelper;
+import javax.jdo.spi.PersistenceCapable;
+
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.ExceptionListenerMarshaller;
@@ -73,6 +76,21 @@ public class MarshallingMap<K,V>
   implements Serializable 
 {
 
+    /**
+     * Constructor 
+     *
+     * @param map
+     * @param unmarshalling
+     */
+    protected MarshallingMap(
+        Map<K,V> map, 
+        Unmarshalling unmarshalling 
+    ){
+        this.unmarshalling = unmarshalling;
+        this.map = map;
+        this.marshaller = (Marshaller) this;
+    }
+    
     /**
      * Constructor
      * 
@@ -145,20 +163,23 @@ public class MarshallingMap<K,V>
     /* (non-Javadoc)
      * @see java.util.Map#clear()
      */
+    @Override
     public void clear() {
-        getDelegate().clear();
+        this.getDelegate().clear();
     }
       
     /* (non-Javadoc)
      * @see java.util.Map#containsKey(java.lang.Object)
      */
+    @Override
     public boolean containsKey(Object key) {
-        return getDelegate().containsKey(key);
+        return this.getDelegate().containsKey(key);
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#containsValue(java.lang.Object)
      */
+    @Override
     public boolean containsValue(
         Object value
     ) {
@@ -167,27 +188,27 @@ public class MarshallingMap<K,V>
                 case RELUCTANT:
                     return super.containsValue(value);
                 case EAGER: default: 
-                    return getDelegate().containsValue(
+                    return this.getDelegate().containsValue(
                         this.marshaller.unmarshal(value)
                     );
             }
-        }
-        catch(ServiceException e) {
-            throw new RuntimeServiceException(e);
+        } catch(ServiceException e) {
+            return false;
         }        
     }
 
     /**
      * 
      */
+    @Override
     public Set<Map.Entry<K, V>> entrySet(
     ) {
         try {
-        return new MarshallingSet<Map.Entry<K, V>>(
-            new MapEntryMarshaller<K,V>(this.marshaller),
-            getDelegate().entrySet(),
-            this.unmarshalling
-        );
+            return new MarshallingSet<Map.Entry<K, V>>(
+                new MapEntryMarshaller<K,V>(this.marshaller),
+                this.getDelegate().entrySet(),
+                this.unmarshalling
+            );
         } catch (NullPointerException exception) {
             return null; 
         }
@@ -197,30 +218,36 @@ public class MarshallingMap<K,V>
      * @see java.util.Map#get(java.lang.Object)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public V get(
         Object key
     ) {
-        try {
-            Object value = getDelegate().get(key); 
-            if(this.marshaller instanceof ExceptionListenerMarshaller) {
-                try {
-                    return (V) ((ExceptionListenerMarshaller)this.marshaller).getDelegate().marshal(value);
-                } catch (ServiceException exception) {
-                    if(exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
-                        return null;
-                    }
+        Object value = getDelegate().get(key); 
+        if(value instanceof PersistenceCapable && JDOHelper.getPersistenceManager(value) == null) {
+            return null;
+        } else if(this.marshaller instanceof ExceptionListenerMarshaller) {
+            ExceptionListenerMarshaller marshaller = (ExceptionListenerMarshaller) this.marshaller;
+            try {
+                return (V) marshaller.getDelegate().marshal(value);
+            } catch (ServiceException exception) {
+                if(exception.getExceptionCode() != BasicException.Code.NOT_FOUND) {
+                    marshaller.exceptionThrown(exception);
                 }
+                return null;
             }
-            return (V) this.marshaller.marshal(value);
+        } else {
+            try {
+                return (V) this.marshaller.marshal(value);
+            } catch(ServiceException e) {
+                throw new RuntimeServiceException(e);
+            }        
         }
-        catch(ServiceException e) {
-            throw new RuntimeServiceException(e);
-        }        
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#isEmpty()
      */
+    @Override
     public boolean isEmpty() {
         return getDelegate().isEmpty();
     }
@@ -228,6 +255,7 @@ public class MarshallingMap<K,V>
     /* (non-Javadoc)
      * @see java.util.Map#keySet()
      */
+    @Override
     public Set<K> keySet() {
         return map.keySet();
     }
@@ -236,6 +264,7 @@ public class MarshallingMap<K,V>
      * @see java.util.Map#put(java.lang.Object, java.lang.Object)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public V put(
         K key, 
         V value
@@ -254,6 +283,7 @@ public class MarshallingMap<K,V>
      * @see java.util.Map#remove(java.lang.Object)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public V remove(
         Object key
     ) {
@@ -270,6 +300,7 @@ public class MarshallingMap<K,V>
     /* (non-Javadoc)
      * @see java.util.Map#size()
      */
+    @Override
     public int size() {
         return getDelegate().size();
     }
@@ -277,12 +308,21 @@ public class MarshallingMap<K,V>
     /* (non-Javadoc)
      * @see java.util.Map#values()
      */
+    @Override
     public Collection<V> values() {
         return new MarshallingCollection<V>(
             this.marshaller,
             getDelegate().values(), 
             this.unmarshalling
         );
+    }
+
+    /* (non-Javadoc)
+     * @see java.util.AbstractMap#toString()
+     */
+    @Override
+    public String toString() {
+        return getDelegate().toString();
     }
 
     

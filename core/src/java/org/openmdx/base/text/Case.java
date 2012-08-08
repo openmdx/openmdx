@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Case.java,v 1.2 2009/04/21 16:07:25 hburger Exp $
+ * Name:        $Id: Case.java,v 1.3 2010/06/02 13:45:39 hburger Exp $
  * Description: Case
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/21 16:07:25 $
+ * Date:        $Date: 2010/06/02 13:45:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,6 +62,7 @@ public enum Case {
      */
     LOWER_CASE {
         
+        @Override
         public String toCase(String string) {
             return string == null || string.length() == 0 ? 
                 string : 
@@ -76,6 +77,7 @@ public enum Case {
      */
     TITLE_CASE {
         
+        @Override
         public String toCase(String string) {
             return string == null || string.length() == 0 ? 
                 string :
@@ -89,6 +91,7 @@ public enum Case {
      */
     UPPER_CASE {
         
+        @Override
         public String toCase(String string) {
             return string == null || string.length() == 0 ? 
                 string : 
@@ -102,6 +105,7 @@ public enum Case {
      */
     LOWER_CAMEL_CASE {
         
+        @Override
         public String toCase(String string) {
             return string == null || string.length() == 0 ? 
                 string : 
@@ -115,6 +119,7 @@ public enum Case {
      */
     UPPER_CAMEL_CASE {
         
+        @Override
         public String toCase(String string) {
             return string == null || string.length() == 0 ? 
                 string : 

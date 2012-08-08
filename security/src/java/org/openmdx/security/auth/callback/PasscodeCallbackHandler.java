@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: PasscodeCallbackHandler.java,v 1.3 2010/03/13 20:15:40 hburger Exp $
+ * Name:        $Id: PasscodeCallbackHandler.java,v 1.4 2010/06/04 22:41:44 hburger Exp $
  * Description: Passcode Callback Handler
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/13 20:15:40 $
+ * Date:        $Date: 2010/06/04 22:41:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -225,7 +225,8 @@ public class PasscodeCallbackHandler
 	    	prompt.startsWith(token);
     }
     
-	protected void handle(
+	@Override
+    protected void handle(
 		NameCallback callback
 	) throws IOException, UnsupportedCallbackException {
     	if(PasscodeCallbackHandler.matches(callback.getPrompt(),StandardCallbackPrompts.USERNAME)) {
@@ -235,7 +236,8 @@ public class PasscodeCallbackHandler
     	}
 	}
 
-	protected void handle(
+	@Override
+    protected void handle(
 		PasswordCallback callback
 	) throws IOException, UnsupportedCallbackException {
     	if(PasscodeCallbackHandler.matches(callback.getPrompt(),StandardCallbackPrompts.PASSWORD)) {
@@ -251,7 +253,8 @@ public class PasscodeCallbackHandler
 		}
 	}
 
-	protected void handle(
+	@Override
+    protected void handle(
 		TextInputCallback callback
 	) throws IOException, UnsupportedCallbackException {
         if(StandardCallbackPrompts.PASSCODE.equals(callback.getPrompt())){

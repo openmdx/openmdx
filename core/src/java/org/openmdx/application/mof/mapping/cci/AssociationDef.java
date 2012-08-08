@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AssociationDef.java,v 1.2 2009/01/13 17:34:04 wfro Exp $
+ * Name:        $Id: AssociationDef.java,v 1.3 2010/06/02 13:42:22 hburger Exp $
  * Description: VelocityClassDef class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:34:04 $
+ * Date:        $Date: 2010/06/02 13:42:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -107,6 +107,7 @@ public class AssociationDef extends ElementDef {
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object that) {
         return 
         that instanceof AssociationDef && 
@@ -116,6 +117,7 @@ public class AssociationDef extends ElementDef {
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
+    @Override
     public int hashCode() {
         return this.associationDef.hashCode();
     }

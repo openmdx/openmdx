@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1.java,v 1.100 2010/04/19 11:25:20 hburger Exp $
+ * Name:        $Id: RefPackage_1.java,v 1.103 2010/07/07 21:19:36 hburger Exp $
  * Description: RefPackage_1 class
- * Revision:    $Revision: 1.100 $
+ * Revision:    $Revision: 1.103 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/19 11:25:20 $
+ * Date:        $Date: 2010/07/07 21:19:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -55,7 +55,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
@@ -88,7 +87,6 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.exception.BasicException;
-import org.w3c.cci2.Container;
 import org.w3c.cci2.SparseArray;
 
 //---------------------------------------------------------------------------
@@ -135,7 +133,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_0#refDelegate()
      */
-    @Override
+//  @Override
     public PersistenceManager refDelegate() {
         return this.outermostPackage.refDelegate();
     }
@@ -143,7 +141,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_0#getRefPackage(javax.resource.cci.InteractionSpec)
      */
-    @Override
+//  @Override
     public RefPackage_1_0 refPackage(InteractionSpec viewContext) {
         return this.outermostPackage.refPackage(viewContext);
     }
@@ -152,7 +150,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_4#refLegacyDelegate()
      */
-    @Override
+//  @Override
     public boolean isTerminal() {
         return this.outermostPackage.isTerminal();
     }
@@ -161,7 +159,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_3#refPersistenceManagerFactory()
      */
-    @Override
+//  @Override
     public PersistenceManagerFactory refPersistenceManagerFactory() {
         return this.outermostPackage.refPersistenceManagerFactory();
     }
@@ -170,11 +168,11 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_2#refContainer(org.openmdx.compatibility.base.naming.Path)
      */
-    @Override
-    public RefContainer refContainer(
+//  @Override
+    public <C extends RefContainer<?>> C refContainer(
         Path resourceIdentifier,
-        Class<Container<RefObject>> containerClass
-    ) {
+        Class<C> containerClass
+    ){
         return this.outermostPackage.refContainer(resourceIdentifier,containerClass);
     }
 
@@ -182,7 +180,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_2#refViewContext()
      */
-    @Override
+//  @Override
     public InteractionSpec refInteractionSpec() {
         return this.outermostPackage.refInteractionSpec();
     }
@@ -192,21 +190,21 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
      * 
      * @return the JDO Persistence Manager delegating to this package.
      */
-    @Override
+//  @Override
     public PersistenceManager_1_0 refPersistenceManager(
     ) {
         return this.outermostPackage.refPersistenceManager();
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public final Model_1_0 refModel(
     ) {
         return Model_1Factory.getModel();
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public RefObject refObject(
         Path objectId
     ) {
@@ -214,23 +212,8 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    /**
-     * Get object with the given object id. 
-     *  
-     * @param transientObjectId transient id of RefObject.
-     * 
-     * @return RefObject
-     */
-    @Override
-    public RefObject refObject(
-      UUID transientObjectId
-    ){
-        return this.outermostPackage.refObject(transientObjectId);
-    }
-
-    //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     public RefStruct refCreateStruct(
         String structName,
         List arg
@@ -295,13 +278,13 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
      * 
      * @return the structure proxy based on the record name
      */
-    @Override
+//  @Override
     public RefStruct refCreateStruct(
         Record record
     ) {
         try {
-            return refMapping().newStruct(
-                refOutermostPackage(),
+            return this.refMapping().newStruct(
+                this.refOutermostPackage(),
                 record
             );
         } catch (ServiceException exception) {
@@ -310,14 +293,14 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public RefQuery_1_0 refCreateQuery(
         String type,
         boolean subclasses, 
         Filter filter
     ) throws ServiceException {
         String qualifiedClassName = type.endsWith("Query") ? type.substring(0, type.length() - "Query".length()) : type;
-        Mapping_1_0 mapping = refMapping();
+        Mapping_1_0 mapping = this.refMapping();
         return mapping.getClassMapping(
             qualifiedClassName
         ).newQuery(
@@ -333,7 +316,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public RefObject refMetaObject(
     ) {
         try {
@@ -349,7 +332,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public RefPackage refPackage(
         RefObject nestedPackage
     ) {
@@ -357,7 +340,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public RefPackage refPackage(
         String nestedPackageName
     ) {
@@ -365,14 +348,14 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public Collection<?> refAllPackages(
     ) {
         return this.outermostPackage.refAllPackages();
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public RefClass refClass(
         RefObject type
     ) {
@@ -380,7 +363,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public Jmi1Class_1_0 refClass(
         String qualifiedClassName
     ) {
@@ -401,14 +384,14 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
         Jmi1Package_1_0 immediatePackage
     ) {
         try {
-            return refMapping().getClassMapping(qualifiedClassName).newClass(immediatePackage);
+            return this.refMapping().getClassMapping(qualifiedClassName).newClass(immediatePackage);
         } catch (ServiceException exception) {
             throw new JmiServiceException(exception);
         }
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public Collection<RefClass> refAllClasses(
     ) {
         throw new UnsupportedOperationException("refAllClasses not supported");
@@ -418,7 +401,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /**
      * This implementation does not support association classes.
      */
-    @Override
+//  @Override
     public RefAssociation refAssociation(
         RefObject association
     ) {
@@ -429,7 +412,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /**
      * This implementation does not support association classes.
      */
-    @Override
+//  @Override
     public RefAssociation refAssociation(
         String associationName
     ) {
@@ -440,7 +423,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /**
      * This implementation does not support association classes.
      */
-    @Override
+//  @Override
     public Collection<?> refAllAssociations(
     ) {
         return this.outermostPackage.refAllAssociations();
@@ -448,7 +431,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
 
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     public RefStruct refCreateStruct(
         RefObject structType,
         List args
@@ -481,7 +464,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /**
      * This implementation does not supporte enums.
      */
-    @Override
+//  @Override
     public RefEnum refGetEnum(
         RefObject enumType,
         String literalName
@@ -493,7 +476,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /**
      * This implementation does not supporte enums.
      */
-    @Override
+//  @Override
     public RefEnum refGetEnum(
         String enumName,
         String literalName
@@ -502,7 +485,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public void refDelete(
     ) {
         throw new UnsupportedOperationException();
@@ -513,21 +496,21 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     //-------------------------------------------------------------------------
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public RefPackage refImmediatePackage(
     ) {
         return this.immediatePackage;
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public RefRootPackage_1 refOutermostPackage(
     ) {
         return this.outermostPackage;
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public Collection<?> refVerifyConstraints(
         boolean deepVerify
     ) {
@@ -537,7 +520,7 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.Jmi1Package_1_0#refImplementationMapper()
      */
-    @Override
+//  @Override
     public Mapping_1_0 refMapping() {
         return this.outermostPackage.refMapping();
     }
@@ -565,13 +548,13 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
      */
     @Override
     public String toString() {
-        return "RefPackage " + refMofId();
+        return "RefPackage " + this.refMofId();
     }
 
     /* (non-Javadoc)
      * @see javax.jmi.reflect.RefBaseObject#refMofId()
      */
-    @Override
+//  @Override
     public String refMofId() {
         return this.qualifiedPackageName;
     }

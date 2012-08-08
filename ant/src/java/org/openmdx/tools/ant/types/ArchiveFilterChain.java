@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ArchiveFilterChain.java,v 1.8 2005/12/09 17:19:40 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ArchiveFilterChain.java,v 1.9 2010/06/04 22:24:36 hburger Exp $
  * Description: Archive Filter Chain
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/12/09 17:19:40 $
+ * Date:        $Date: 2010/06/04 22:24:36 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -214,7 +213,8 @@ public class ArchiveFilterChain extends FilterChain {
     /**
      * @see org.apache.tools.ant.ProjectComponent#setProject
      */
-    public void setProject(Project project) {
+    @Override
+	public void setProject(Project project) {
     	this.defaultPatterns.setProject(project);
         super.setProject(project);
     }
@@ -357,6 +357,7 @@ public class ArchiveFilterChain extends FilterChain {
 	/* (non-Javadoc)
 	 * @see org.apache.tools.ant.types.FilterChain#setRefid(org.apache.tools.ant.types.Reference)
 	 */
+	@Override
 	public void setRefid(Reference reference) throws BuildException {
         if (
         	this.hasDefaultPatterns ||
@@ -423,6 +424,7 @@ public class ArchiveFilterChain extends FilterChain {
 		/* (non-Javadoc)
 		 * @see org.apache.tools.ant.types.DataType#setRefid(org.apache.tools.ant.types.Reference)
 		 */
+		@Override
 		public void setRefid(Reference ref) {
 			super.setRefid(ref);
 			getRef(); // verify referenced class

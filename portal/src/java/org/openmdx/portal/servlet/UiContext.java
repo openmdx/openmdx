@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiContext.java,v 1.30 2009/06/16 17:08:26 wfro Exp $
+ * Name:        $Id: UiContext.java,v 1.31 2010/07/08 16:50:38 wfro Exp $
  * Description: UiContext 
- * Revision:    $Revision: 1.30 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/16 17:08:26 $
+ * Date:        $Date: 2010/07/08 16:50:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -171,7 +171,7 @@ public class UiContext
             List label = inspector.getLabel();
             return localeAsIndex < label.size() ? 
                 (String)label.get(localeAsIndex) : 
-                (String)label.get(0);
+                	label.isEmpty() ? "" : (String)label.get(0);
         }
     }
   

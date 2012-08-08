@@ -1,9 +1,9 @@
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.64 2010/04/30 13:05:30 wfro Exp $
+= Name:        $Id: build.xml,v 1.68 2010/09/01 15:08:17 hburger Exp $
 = Description: openMDX/Security Ant Build File
-= Revision:    $Revision: 1.64 $
-= Date:        $Date: 2010/04/30 13:05:30 $
+= Revision:    $Revision: 1.68 $
+= Date:        $Date: 2010/09/01 15:08:17 $
 = Copyright:   (c) 2003-2010 OMEX AG
 =======================================================================
  *
@@ -88,9 +88,14 @@
 		<include name="org/openmdx/security/auth/callback/**" />
 		<include name="org/openmdx/security/auth/passcode/**" />
 	</patternset>
+	<patternset id="openmdx-resource.jar.content">
+		<include name="org/openmdx/resource/cci/**" />
+		<include name="org/openmdx/resource/spi/**" />
+	</patternset>
 	<patternset id="openmdx-radius.jar.content">
 		<include name="org/openmdx/kernel/collection/**" />
 		<include name="org/openmdx/kernel/text/**" />
+		<include name="org/openmdx/resource/radius/**" />
 		<include name="org/openmdx/security/radius/**" />
 		<include name="org/openmdx/uses/net/sourceforge/jradiusclient/**" />
 		<include name="org/openmdx/uses/org/apache/commons/collections/**" />
@@ -209,6 +214,22 @@
 			</openmdx:archivefileset>
 			<openmdx:archivefileset dir="${build.dir}/src/resource" whenmissing="skip">
 				<patternset refid="openmdx-security.jar.content" />
+			</openmdx:archivefileset>
+		</openmdx:archive>
+		<openmdx:archive destfile="${deliver.dir}/lib/openmdx-resource.jar" format="jar" duplicate="preserve">
+			<openmdx:archivemanifest refid="project.manifest" />
+			<openmdx:archivemanifest>
+				<attribute name="Specification-Title" value="${project.specification.title} Resource Adapter Library" />
+				<attribute name="Implementation-Title" value="openmdx-resource for ${build.target.platform}" />
+			</openmdx:archivemanifest>
+			<openmdx:archivefileset dir="${build.dir}/bin">
+				<patternset refid="openmdx-resource.jar.content" />
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${basedir}/src/resource">
+				<patternset refid="openmdx-resource.jar.content" />
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/resource" whenmissing="skip">
+				<patternset refid="openmdx-resource.jar.content" />
 			</openmdx:archivefileset>
 		</openmdx:archive>
 		<openmdx:archive destfile="${deliver.dir}/lib/openmdx-radius.jar" format="jar">

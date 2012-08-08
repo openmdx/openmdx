@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.1 2009/11/12 13:34:36 hburger Exp $
+ * Name:        $Id: PlugIn_1.java,v 1.2 2010/06/08 12:54:19 hburger Exp $
  * Description: StandardPlugIn 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/12 13:34:36 $
+ * Date:        $Date: 2010/06/08 12:54:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -73,15 +73,6 @@ public class PlugIn_1 implements PlugIn_1_0 {
         Interceptor_1 interceptor = next;
         Model_1_0 model = view.getModel();
         ModelElement_1_0 dataObjectType = model.getElement(view.objGetDelegate().objGetClass());
-        if (model.isSubtypeOf(dataObjectType, "org:openmdx:base:ContextCapable")) {
-            //
-            // Context Capability
-            //
-            interceptor = new org.openmdx.base.aop1.ContextCapable_1(
-                view,
-                interceptor
-            );
-        }
         if(model.isSubtypeOf(dataObjectType, "org:openmdx:base:Removable")) {
             //
             // Removable Capability

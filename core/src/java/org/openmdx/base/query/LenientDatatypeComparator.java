@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LenientDatatypeComparator.java,v 1.7 2010/01/26 15:43:30 hburger Exp $
+ * Name:        $Id: LenientDatatypeComparator.java,v 1.8 2010/06/02 13:45:10 hburger Exp $
  * Description: Lenient Datatype Comparator
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:43:30 $
+ * Date:        $Date: 2010/06/02 13:45:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -85,6 +85,7 @@ public class LenientDatatypeComparator extends LenientNumberComparator {
     /* (non-Javadoc)
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
+    @Override
     public int compare(
         Object first, 
         Object second

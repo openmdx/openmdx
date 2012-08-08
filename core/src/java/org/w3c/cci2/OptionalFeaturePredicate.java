@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OptionalFeaturePredicate.java,v 1.2 2008/05/06 09:30:13 hburger Exp $
+ * Name:        $Id: OptionalFeaturePredicate.java,v 1.3 2010/06/21 17:43:30 hburger Exp $
  * Description: Optional Predicate
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/06 09:30:13 $
+ * Date:        $Date: 2010/06/21 17:43:30 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006, OMEX AG, Switzerland
+ * Copyright (c) 2006-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,7 +48,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.w3c.cci2;
 
 /**
@@ -74,6 +72,7 @@ public interface OptionalFeaturePredicate {
      * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Deprecated
     boolean equals(Object obj);
 
 }

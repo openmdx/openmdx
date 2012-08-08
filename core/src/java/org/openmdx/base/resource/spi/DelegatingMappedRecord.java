@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingMappedRecord.java,v 1.12 2009/05/07 14:30:50 hburger Exp $
+ * Name:        $Id: DelegatingMappedRecord.java,v 1.13 2010/06/02 13:45:10 hburger Exp $
  * Description: openMDX JCA: Delegating Mapped Record
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/07 14:30:50 $
+ * Date:        $Date: 2010/06/02 13:45:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -242,6 +242,7 @@ public class DelegatingMappedRecord
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
+    @Override
     public Object clone() {
         return new DelegatingMappedRecord(
             this.recordName,
@@ -267,6 +268,7 @@ public class DelegatingMappedRecord
      *
      * @return   a multi-line String representation of this Record.
      */
+    @Override
     public String toString(
     ){
         return IndentingFormatter.toString(this);
@@ -275,6 +277,7 @@ public class DelegatingMappedRecord
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object that) {
         return this.source.equals(that);
     }
@@ -282,6 +285,7 @@ public class DelegatingMappedRecord
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
+    @Override
     public int hashCode() {
         return this.source.hashCode();
     }

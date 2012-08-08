@@ -39,7 +39,7 @@ import org.openmdx.uses.org.apache.commons.collections.OrderedIterator;
  * is here.
  * 
  * @since Commons Collections 3.0
- * @version $Revision: 1.7 $ $Date: 2008/06/28 00:21:22 $
+ * @version $Revision: 1.8 $ $Date: 2010/06/02 13:46:30 $
  *
  * @author Rich Dougherty
  * @author Phil Steitz
@@ -326,6 +326,7 @@ public abstract class AbstractLinkedList implements List {
     }
 
     //-----------------------------------------------------------------------
+    @Override
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
@@ -348,6 +349,7 @@ public abstract class AbstractLinkedList implements List {
         return !(it1.hasNext() || it2.hasNext());
     }
 
+    @Override
     public int hashCode() {
         int hashCode = 1;
         Iterator it = iterator();
@@ -358,6 +360,7 @@ public abstract class AbstractLinkedList implements List {
         return hashCode;
     }
 
+    @Override
     public String toString() {
         if (size() == 0) {
             return "[]";
@@ -864,24 +867,29 @@ public abstract class AbstractLinkedList implements List {
             this.sub = sub;
         }
 
+        @Override
         public boolean hasNext() {
             return (nextIndex() < sub.size);
         }
 
+        @Override
         public boolean hasPrevious() {
             return (previousIndex() >= 0);
         }
 
+        @Override
         public int nextIndex() {
             return (super.nextIndex() - sub.offset);
         }
 
+        @Override
         public void add(Object obj) {
             super.add(obj);
             sub.expectedModCount = parent.modCount;
             sub.size++;
         }
         
+        @Override
         public void remove() {
             super.remove();
             sub.expectedModCount = parent.modCount;
@@ -919,17 +927,20 @@ public abstract class AbstractLinkedList implements List {
             this.expectedModCount = parent.modCount;
         }
 
+        @Override
         public int size() {
             checkModCount();
             return size;
         }
 
+        @Override
         public Object get(int index) {
             rangeCheck(index, size);
             checkModCount();
             return parent.get(index + offset);
         }
 
+        @Override
         public void add(int index, Object obj) {
             rangeCheck(index, size + 1);
             checkModCount();
@@ -939,6 +950,7 @@ public abstract class AbstractLinkedList implements List {
             LinkedSubList.this.modCount++;
         }
 
+        @Override
         public Object remove(int index) {
             rangeCheck(index, size);
             checkModCount();
@@ -949,10 +961,12 @@ public abstract class AbstractLinkedList implements List {
             return result;
         }
 
+        @Override
         public boolean addAll(Collection coll) {
             return addAll(size, coll);
         }
 
+        @Override
         public boolean addAll(int index, Collection coll) {
             rangeCheck(index, size + 1);
             int cSize = coll.size();
@@ -968,12 +982,14 @@ public abstract class AbstractLinkedList implements List {
             return true;
         }
 
+        @Override
         public Object set(int index, Object obj) {
             rangeCheck(index, size);
             checkModCount();
             return parent.set(index + offset, obj);
         }
 
+        @Override
         public void clear() {
             checkModCount();
             Iterator it = iterator();
@@ -983,17 +999,20 @@ public abstract class AbstractLinkedList implements List {
             }
         }
 
+        @Override
         public Iterator iterator() {
             checkModCount();
             return parent.createSubListIterator(this);
         }
 
+        @Override
         public ListIterator listIterator(final int index) {
             rangeCheck(index, size + 1);
             checkModCount();
             return parent.createSubListListIterator(this, index);
         }
 
+        @Override
         public List subList(int fromIndexInclusive, int toIndexExclusive) {
             return new LinkedSubList(parent, fromIndexInclusive + offset, toIndexExclusive + offset);
         }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: CookieManager.java,v 1.2 2010/03/14 17:19:07 hburger Exp $
+ * Name:        $Id: CookieManager.java,v 1.3 2010/05/21 14:01:10 hburger Exp $
  * Description: Cookie Manager 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/14 17:19:07 $
+ * Date:        $Date: 2010/05/21 14:01:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,9 +55,11 @@ import java.net.CookieHandler;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -76,10 +78,20 @@ public class CookieManager extends CookieHandler {
 	}
 
 	/**
-	 * The cookie store
+	 * The <code>Cookie</code> store
 	 */
-	private SortedSet<HttpCookie> cookies = new TreeSet<HttpCookie>();
+	private SortedSet<HttpCookie> cookies1 = new TreeSet<HttpCookie>();
+
+    /**
+     * The <code>Cookie2</code> store
+     */
+    private SortedSet<HttpCookie> cookies2 = new TreeSet<HttpCookie>();
 	
+    /**
+     * Tells whether a <code>Cookie2: Version="1"</code> hint shall be sent to the server.
+     */
+    private final static boolean INCLUDE_COOKIE2_HINT = false;
+    
 	/* (non-Javadoc)
 	 * @see java.net.CookieHandler#get(java.net.URI, java.util.Map)
 	 */
@@ -88,52 +100,92 @@ public class CookieManager extends CookieHandler {
 		URI uri, 
 		Map<String, List<String>> requestHeaders
 	) throws IOException {
-		List<String> cookies = new ArrayList<String>();
-		for(
-		    Iterator<HttpCookie> i = this.cookies.iterator();
-		    i.hasNext();
-		){
-		    HttpCookie cookie = i.next();
-		    if (cookie.isExpired()) {
-		        i.remove();
-		    } else if(cookie.matches(uri)) {
-                cookies.add(cookie.toString());
-            }
-		}
-		return Collections.singletonMap("Cookie", cookies);
+	    Map<String, List<String>> target = new HashMap<String, List<String>>();
+        get(uri, "Cookie", this.cookies1, target);
+        get(uri, "Cookie2", this.cookies2, target);
+	    return Collections.unmodifiableMap(target);
 	}
 
+	/**
+	 * Put the matching cookies inot the target map
+	 * 
+	 * @param uri
+	 * @param name
+	 * @param store
+	 * @param target
+	 */
+	private static void get(
+        URI uri, 
+        String name,
+        SortedSet<HttpCookie> store,
+        Map<String, List<String>> target
+	){
+        List<String> cookies = new ArrayList<String>();
+        for(
+            Iterator<HttpCookie> i = store.iterator();
+            i.hasNext();
+        ){
+            HttpCookie cookie = i.next();
+            if (cookie.isExpired()) {
+                i.remove();
+            } else if(cookie.matches(uri)) {
+                cookies.add(cookie.toString());
+            }
+        }
+        if(
+            "Cookie2".equals(name) &&
+            (INCLUDE_COOKIE2_HINT || !cookies.isEmpty()) 
+        ) {
+            cookies.add(0, "$Version=\"1\"");
+        }
+	    if(!cookies.isEmpty()) {
+	        target.put(name, cookies);
+	    }
+	}
+	
 	/* (non-Javadoc)
 	 * @see java.net.CookieHandler#put(java.net.URI, java.util.Map)
 	 */
 	@Override
-	public void put(URI uri, Map<String, List<String>> responseHeaders) throws IOException {
-		List<String> cookies = null;
-		for(Map.Entry<String, List<String>> header : responseHeaders.entrySet()) {
-			if("Set-Cookie2".equalsIgnoreCase(header.getKey())) {
-				cookies = header.getValue();
-			}
-		}
-		if(cookies == null) {
-			for(Map.Entry<String, List<String>> header : responseHeaders.entrySet()) {
-				if("Set-Cookie".equalsIgnoreCase(header.getKey())) {
-					cookies = header.getValue();
-				}
-			}
-		}
-		if(cookies != null) {
-			for(String text : cookies) {
-				HttpCookie cookie = new HttpCookie(uri, text);
-				if(cookie.isDiscard()) {
-					this.cookies.remove(cookie);
-				} else {
-					if(this.cookies.contains(cookie)) {
-						this.cookies.remove(cookie);
-					}
-					this.cookies.add(cookie);
-				}
-			}
-		}
+	public void put(
+	    URI uri, Map<String, 
+	    List<String>> responseHeaders
+	) throws IOException {
+	    Set<Map.Entry<String, List<String>>> entries = responseHeaders.entrySet();
+	    put(uri, "Set-Cookie", this.cookies1, entries);
+        put(uri, "Set-Cookie2", this.cookies2, entries);
+	}
+
+	/**
+	 * Put <code>Cookie</code> and <code>Cookie2</code> entries into the store
+	 * 
+	 * @param uri
+	 * @param name
+	 * @param store
+	 * @param source
+	 */
+	private static void put(
+	    URI uri, 
+	    String name,
+	    SortedSet<HttpCookie> store,
+	    Set<Map.Entry<String, List<String>>> source
+	){
+	    for(Map.Entry<String, List<String>> header : source) {
+            if(name.equalsIgnoreCase(header.getKey())) {
+                for(String text : header.getValue()) {
+                    HttpCookie cookie = new HttpCookie(uri, text);
+                    if(cookie.isDiscard()) {
+                        store.remove(cookie);
+                    } else {
+                        if(store.contains(cookie)) {
+                            store.remove(cookie);
+                        }
+                        store.add(cookie);
+                    }
+                }
+                return;
+            }
+        }
 	}
 
 }

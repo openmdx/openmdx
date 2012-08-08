@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: URITransformation.java,v 1.1 2009/09/11 14:29:24 hburger Exp $
+ * Name:        $Id: URITransformation.java,v 1.3 2010/05/21 14:26:50 hburger Exp $
  * Description: URI Transformation 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/11 14:29:24 $
+ * Date:        $Date: 2010/05/21 14:26:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,10 +60,10 @@ public class URITransformation {
     /**
      * Constructor 
      */
-    public URITransformation() {
-        // TODO Auto-generated constructor stub
+    private URITransformation() {
+        // Avoid instantiation
     }
-
+    
     /**
      * Convert a percent encoded ASCII string to an UTF-16 string
      * 
@@ -74,33 +74,58 @@ public class URITransformation {
     public static String decode(
         String source
     ){
-        byte[] utf8 = new byte[source.length()];
-        int j = 0;
-        for(
-            int i = 0, iLimit = source.length();
-            i < iLimit;
-            i++
-        ){
-            char c = source.charAt(i);
-            if(c == '%') {
-                utf8[j++] = (byte) (
-                    0x10 * digitForCharacter(source.charAt(++i)) +
-                    digitForCharacter(source.charAt(++i))
-                );
-            } else {
-                utf8[j++] = (byte) c;
+        if(source.indexOf('%') < 0) {
+            return source;
+        } else {
+            byte[] utf8 = new byte[source.length()];
+            int j = 0;
+            for(
+                int i = 0, iLimit = source.length();
+                i < iLimit;
+                i++
+            ){
+                char c = source.charAt(i);
+                if(c == '%') {
+                    utf8[j++] = (byte) (
+                        0x10 * URITransformation.valueOfHexadecimalDigit(source.charAt(++i)) +
+                        URITransformation.valueOfHexadecimalDigit(source.charAt(++i))
+                    );
+                } else {
+                    utf8[j++] = (byte) c;
+                }
             }
+            return UnicodeTransformation.toString(utf8, 0, j);   
         }
-        return UnicodeTransformation.toString(utf8, 0, j);   
     }
     
-    private final static int digitForCharacter(
-        char character
+    /**
+     * Escape percent signs
+     * 
+     * @param source the URI to be encoded
+     * 
+     * @return the encoded URI
+     */
+    public static String encode(
+        String source 
+    ){
+        return source.replaceAll("%", "%25");
+    }
+    
+    
+    /**
+     * Retrieve the value of an (upper or lower case) hexadecimal digit
+     * 
+     * @param digit a hexadecimal digit
+     * 
+     * @return the hexadecimal digit's value
+     */
+    private final static int valueOfHexadecimalDigit(
+        char digit
     ){
         return 
-            character >= '0' && character <= '9' ? character - '0' :
-            character >= 'A' && character <= 'Z' ? character - 'A' + 10 :
-            character >= 'a' && character <= 'z' ? character - 'a' + 10 :
+            digit >= '0' && digit <= '9' ? digit - '0' :
+            digit >= 'A' && digit <= 'Z' ? digit - 'A' + 10 :
+            digit >= 'a' && digit <= 'z' ? digit - 'a' + 10 :
             -1; // invalid hexadecimal digit
     }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TransactionId.java,v 1.1 2009/09/07 15:14:13 hburger Exp $
+ * Name:        $Id: TransactionId.java,v 1.2 2010/06/02 13:46:07 hburger Exp $
  * Description: X/Open Transaction Identifier
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 15:14:13 $
+ * Date:        $Date: 2010/06/02 13:46:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -110,6 +110,7 @@ class TransactionId implements Xid {
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object obj) {
         if(!(obj instanceof Xid)) return false;
         if(!(obj.getClass() == TransactionId.class)) return equal(this, (Xid) obj);
@@ -122,6 +123,7 @@ class TransactionId implements Xid {
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
+    @Override
     public int hashCode() {
         long value = this.mostSigBits ^ this.leastSigBits;
         value ^= value >> 32;
@@ -151,6 +153,7 @@ class TransactionId implements Xid {
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         return toStringBuilder().toString();
     }

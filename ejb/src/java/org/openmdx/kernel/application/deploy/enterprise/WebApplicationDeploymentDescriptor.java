@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: WebApplicationDeploymentDescriptor.java,v 1.2 2009/09/07 13:03:03 hburger Exp $
+ * Name:        $Id: WebApplicationDeploymentDescriptor.java,v 1.3 2010/06/04 22:44:59 hburger Exp $
  * Description: Web Application Deployment Descriptor
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 13:03:03 $
+ * Date:        $Date: 2010/06/04 22:44:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -87,7 +87,8 @@ public class WebApplicationDeploymentDescriptor
     this.contextRoot = contextRoot;
   }
 
-  public void parseXml(
+  @Override
+public void parseXml(
     Element element
   ) {
     if ("web-app".equals(element.getTagName()))
@@ -100,7 +101,8 @@ public class WebApplicationDeploymentDescriptor
     }
   }
 
-  public void parseXml(
+  @Override
+public void parseXml(
     Element element,
     Report report
   ) {
@@ -131,7 +133,8 @@ public class WebApplicationDeploymentDescriptor
       }
   }
   
-  public Report verify() {
+  @Override
+public Report verify() {
     this.verify(this.report);    
     return this.report;
   }

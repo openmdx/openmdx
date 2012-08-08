@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.10 2009/12/17 12:37:35 wfro Exp $
+ * Name:        $Id: Standard_1.java,v 1.11 2010/06/02 13:39:53 hburger Exp $
  * Description: Standard Interception Plug-In
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/17 12:37:35 $
+ * Date:        $Date: 2010/06/02 13:39:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,6 +68,7 @@ public class Standard_1 extends Layer_1 {
     }
     
     //--------------------------------------------------------------------------
+    @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {

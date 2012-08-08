@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VariableSizeMappedRecord.java,v 1.19 2010/02/16 18:39:30 hburger Exp $
+ * Name:        $Id: VariableSizeMappedRecord.java,v 1.21 2010/06/02 13:45:10 hburger Exp $
  * Description: JCA: variable-size MappedRecord implementation
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/16 18:39:30 $
+ * Date:        $Date: 2010/06/02 13:45:10 $
  * ====================================================================
  *
  * This software is published under the BSD license  as listed below.
@@ -50,6 +50,8 @@
  */
 package org.openmdx.base.resource.spi;
 
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.AbstractMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -64,7 +66,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
 
 /**
  * Java Connector Architecture:
- * An variable-size MappedRecord implementation. Only keys of type string and Integers in the range [-128..127] are supported.
+ * A variable-size MappedRecord implementation. Only keys of type string and Integers in the range [-128..127] are supported.
  */
 @SuppressWarnings("unchecked")
 class VariableSizeMappedRecord 
@@ -73,99 +75,61 @@ class VariableSizeMappedRecord
 {
 
     /**
-     * Creates an <code>MappedRecord</code> with the specified name and the given content.  
-     * <p>
-     * This constructor does not declare any exceptions as it assumes that the
-     * necessary checks are made by the record factory: The arguments keys
-     * and values for example must have the same length.
-     *
-     * @param     recordName
-     *            The name of the record acts as a pointer to the meta 
-     *            information (stored in the metadata repository) for a specific
-     *            record type. 
-     * @param     recordShortDescription
-     *            The short description of the Record; or null.
-     *
-     * @exception ArrayIndexOutOfBoundsException
-     *            if the arguments keys and values do not have the same size.
-     */
-    VariableSizeMappedRecord(
-        String recordName,
-        String recordShortDescription
-    ){
-        super();
-        this.recordName = recordName;
-        this.recordShortDescription = recordShortDescription;
-    }
-
-    /**
-     * Creates an <code>MappedRecord</code> with the specified name and the given content.  
-     * <p>
-     * This constructor does not declare any exceptions as it assumes that the
-     * necessary checks are made by the record factory: The arguments keys
-     * and values for example must have the same length.
-     *
-     * @param     recordName
-     *            The name of the record acts as a pointer to the meta 
-     *            information (stored in the metadata repository) for a specific
-     *            record type. 
-     *
-     * @exception ArrayIndexOutOfBoundsException
-     *            if the arguments keys and values do not have the same size.
-     */
-    VariableSizeMappedRecord(
-        String recordName
-    ){
-        this(recordName,null);
-    }
-
-    /**
-     * Creates an <code>MappedRecord</code> with the specified name and the given content.  
-     * <p>
-     * This constructor does not declare any exceptions as it assumes that the
-     * necessary checks are made by the record factory: The arguments keys
-     * and values for example must have the same length.
-     *
-     * @param     recordName
-     *            The name of the record acts as a pointer to the meta 
-     *            information (stored in the metadata repository) for a specific
-     *            record type. 
-     * @param     recordShortDescription
-     *            The short description of the Record; or null.
-     * @param     initialContent
-     *            The map's initial content
-     *
-     * @exception ArrayIndexOutOfBoundsException
-     *            if the arguments keys and values do not have the same size.
-     */
-    VariableSizeMappedRecord(
-        String recordName,
-        String recordShortDescription,
-        Map initialContent
-    ){
-        this(recordName, recordShortDescription);
-        putAll(initialContent);
-    }
-
-    
-    //------------------------------------------------------------------------
-    // Implements Serializable
-    //------------------------------------------------------------------------
-
-    /**
      * Constructor
      */
     protected VariableSizeMappedRecord(){
         // for de-serialization
     }
+        
+    /**
+     * Creates a <code>MappedRecord</code> with the specified name.
+     *
+     * @param     recordName
+     *            The name of the record acts as a pointer to the meta 
+     *            information (stored in the metadata repository) for a specific
+     *            record type. 
+     */
+    VariableSizeMappedRecord(
+        String recordName
+    ){
+        this.recordName = recordName;
+        this.recordShortDescription = null;
+        this.values = new IdentityHashMap();
+    }
+
+    /**
+     * @serial
+     */
+    private String recordName;    
+
+    /**
+     * @serial
+     */
+    private String recordShortDescription;
+
+    /**
+     * 
+     */
+    private transient Map values = new IdentityHashMap();
     
     /**
-     * Serial Version UID
+     * Implements <code>Serializable</code>
      */
-    static final long serialVersionUID = -511654274174846301L;
+    private static final long serialVersionUID = 7135299628146306393L;
 
-
-    private Object normalizeKey(
+    /**
+     * Normalize the key to use an identity hash map.
+     * <p>
+     * This method supports
+     * <li><code>String</code>s
+     * <li><code>Integer</code>s in the range <code>-128</code> to <code>128</code>
+     * </ul>
+     * 
+     * @param key
+     * 
+     * @return the normalized key
+     */
+    private static Object normalizeKey(
         Object key
     ) {
         if(key instanceof String) {
@@ -197,6 +161,56 @@ class VariableSizeMappedRecord
         );
     }
     
+    
+    //------------------------------------------------------------------------
+    // Implements Serializable
+    //------------------------------------------------------------------------
+    
+    /**
+     * Serialize
+     * 
+     * @param out
+     * @throws IOException
+     */
+    private void writeObject(
+        ObjectOutputStream out
+    ) throws IOException {
+        out.defaultWriteObject();
+        int size = this.values.size();
+        out.writeInt(size);
+        for(Map.Entry<?, ?> entry : (Set<Map.Entry<?, ?>>)this.values.entrySet()) {
+            out.writeObject(entry.getKey());
+            out.writeObject(entry.getValue());
+        }
+    }
+    
+    /**
+     * De-serialize
+     * 
+     * @param in
+     * 
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    private void readObject(
+        java.io.ObjectInputStream in
+    ) throws IOException, ClassNotFoundException {
+       in.defaultReadObject();
+       int size = in.readInt();
+       this.values = new IdentityHashMap(size);
+       for(
+           int i = 0;
+           i < size;
+           i++
+       ){
+           this.values.put(
+               VariableSizeMappedRecord.normalizeKey(in.readObject()),
+               in.readObject()
+           );
+       }
+    }
+    
+    
     //--------------------------------------------------------------------------
     // Extends AbstractMap
     //--------------------------------------------------------------------------
@@ -226,12 +240,15 @@ class VariableSizeMappedRecord
      *            this map does not permit null keys or values, and the
      *            specified key or value is null.
      */
+    @Override
     public Object put(
         Object key,
         Object value
     ){
-        key = this.normalizeKey(key);
-        return this.values.put(key, value);
+        return this.values.put(
+            VariableSizeMappedRecord.normalizeKey(key), 
+            value
+         );
     }
 
     /**
@@ -240,6 +257,7 @@ class VariableSizeMappedRecord
      * 
      * @return  a set view of the mappings contained in this map.
      */
+    @Override
     public Set entrySet(
     ){
         return this.values.entrySet();
@@ -248,6 +266,7 @@ class VariableSizeMappedRecord
     /* (non-Javadoc)
      * @see java.util.Map#clear()
      */
+    @Override
     public void clear(
     ) {
         this.values.clear();        
@@ -256,16 +275,19 @@ class VariableSizeMappedRecord
     /* (non-Javadoc)
      * @see java.util.Map#containsKey(java.lang.Object)
      */
+    @Override
     public boolean containsKey(
         Object key
     ) {
-        key = this.normalizeKey(key);
-        return this.values.containsKey(key);
+        return this.values.containsKey(
+            VariableSizeMappedRecord.normalizeKey(key)
+        );
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#containsValue(java.lang.Object)
      */
+    @Override
     public boolean containsValue(
         Object value
     ) {
@@ -275,16 +297,19 @@ class VariableSizeMappedRecord
     /* (non-Javadoc)
      * @see java.util.Map#get(java.lang.Object)
      */
+    @Override
     public Object get(
         Object key
     ) {
-        key = this.normalizeKey(key);        
-        return this.values.get(key);
+        return this.values.get(
+            VariableSizeMappedRecord.normalizeKey(key)
+        );
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#isEmpty()
      */
+    @Override
     public boolean isEmpty(
     ) {
         return this.values.isEmpty();
@@ -293,21 +318,25 @@ class VariableSizeMappedRecord
     /* (non-Javadoc)
      * @see java.util.Map#remove(java.lang.Object)
      */
+    @Override
     public Object remove(
         Object key
     ) {
-        key = this.normalizeKey(key);
-        return this.values.remove(key);
+        return this.values.remove(
+            VariableSizeMappedRecord.normalizeKey(key)
+        );
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#size()
      */
+    @Override
     public int size(
     ) {
         return this.values.size();
     }
 
+    
     //--------------------------------------------------------------------------
     // Implements Record
     //--------------------------------------------------------------------------
@@ -365,6 +394,7 @@ class VariableSizeMappedRecord
      *
      * @return  true if two instances are equal
      */
+    @Override
     public boolean equals(
         Object other
     ){
@@ -395,6 +425,7 @@ class VariableSizeMappedRecord
      *
      * @return hash code
      */
+    @Override
     public int hashCode(
     ){
         return this.values.hashCode();
@@ -405,13 +436,13 @@ class VariableSizeMappedRecord
      *
      * @return  a copy of this MappedRecord instance
      */
-    public Object clone(
+    @Override
+    public VariableSizeMappedRecord clone(
     ){
-        return new VariableSizeMappedRecord(
-            this.recordName,
-            this.recordShortDescription,
-            this
-        );
+        VariableSizeMappedRecord that = new VariableSizeMappedRecord(this.recordName);
+        that.recordShortDescription = this.recordShortDescription;
+        that.putAll(this.values);
+        return that;
     }
 
     /**
@@ -426,64 +457,10 @@ class VariableSizeMappedRecord
      *
      * @return   a multi-line String representation of this Record.
      */
+    @Override
     public String toString(
     ){
         return IndentingFormatter.toString(this);
-    }
-
-    //--------------------------------------------------------------------------
-    // Instance members
-    //--------------------------------------------------------------------------
-
-    /**
-     * 
-     */
-    private String recordName;    
-
-    /**
-     *
-     */
-    private String recordShortDescription;
-
-    /**
-     *
-     */
-    final Map values = new IdentityHashMap();
-    
-    //--------------------------------------------------------------------------
-    // Class methods
-    //--------------------------------------------------------------------------
-
-    /**
-     * Member equality
-     *
-     * @param left
-     *        one object
-     * @param right
-     *        another object
-     *
-     * @return  true if both objects are either <code>null</code> or equal.
-     */
-    static boolean areEqual(
-        Object left,  
-        Object right
-    ){
-        return left==null ? right==null : left.equals(right);
-    }
-
-    /**
-     * Retrieve an object's hash code
-     *
-     * @param object
-     *        the relevant object
-     *
-     * @return  the object's hash code;
-     *          or 0 if object is <code>null</code>.
-     */
-    static int hashCode(
-        Object object
-    ){
-        return object==null ? 0 : object.hashCode();
     }
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIImporter_1.java,v 1.12 2010/04/13 17:38:40 wfro Exp $
+ * Name:        $Id: XMIImporter_1.java,v 1.13 2010/06/18 12:59:36 hburger Exp $
  * Description: XMI Model Importer
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/13 17:38:40 $
+ * Date:        $Date: 2010/06/18 12:59:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -267,7 +267,7 @@ implements UML1Consumer {
                     resolver.parse(this.modelUrl.toString());
                 }
             } else if(XMI_FORMAT_RSM == this.xmiFormat) {
-                xmiParser = new XMI2Parser(this.infos, this.warnings, this.errors);
+                xmiParser = new XMI20Parser(this.infos, this.warnings, this.errors);
                 if(resolver == null) {
                     resolver = new XMI2ReferenceResolver(
                         new HashMap(),
@@ -275,7 +275,8 @@ implements UML1Consumer {
                         this.pathMap,
                         this.infos,
                         this.warnings,
-                        this.errors
+                        this.errors, 
+                        new HashMap<String, UML1AssociationEnd>()
                     );
                     resolver.parse(this.modelUrl.toString());
                 }
@@ -288,7 +289,8 @@ implements UML1Consumer {
                         this.pathMap,
                         this.infos,
                         this.warnings,
-                        this.errors
+                        this.errors, 
+                        null
                     );
                     resolver.parse(this.modelUrl.toString());
                 }
@@ -543,7 +545,10 @@ implements UML1Consumer {
                 ModelExceptions.MODEL_DOMAIN,
                 ModelExceptions.INVALID_ATTRIBUTE_TYPE,
                 "type is null for association",
-                new BasicException.Parameter("association", umlAssociationEnd.getQualifiedName())
+                new BasicException.Parameter("association", umlAssociationEnd.getQualifiedName()),
+        		new BasicException.Parameter("id", umlAssociationEnd.getId()),
+        		new BasicException.Parameter("name", umlAssociationEnd.getName()),
+        		new BasicException.Parameter("qualifiedName", umlAssociationEnd.getQualifiedName())
             );
         }
         associationEndDefFacade.attributeValuesAsList("type").add(
@@ -836,7 +841,6 @@ implements UML1Consumer {
     private void processClass(
         UML1Class umlClass
     ) throws Exception {
-
         SysLog.detail("Processing class", umlClass.getQualifiedName());
 
         // ModelClass object

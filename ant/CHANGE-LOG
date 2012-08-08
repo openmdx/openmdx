@@ -4,6 +4,34 @@
                     =====================================
 
 ==============================================================================
+Version 2.6.4                                                       2010-08-08
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019292
+      Ant property operations 
+      
+      Support some property operations such as
+      * ${toUpperCase(<property-name>)}
+      * ${toLowerCase(<property-name>)} 
+    
+2.    CHANGES
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      none
+                  
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3   REMOVED FEATURES
+      none
+
+
+==============================================================================
 Version 2.2.1                                                       2008-09-26
 ==============================================================================
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: JavaBeans.java,v 1.14 2010/01/21 17:36:09 hburger Exp $
+ * Name:        $Id: JavaBeans.java,v 1.15 2010/06/02 15:08:12 hburger Exp $
  * Description: Java Beans 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/21 17:36:09 $
+ * Date:        $Date: 2010/06/02 15:08:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,6 +71,7 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.StringInputStream;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.query.Quantifier;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.ImmutableDate;
 import org.w3c.cci2.ImmutableDateTime;
@@ -272,6 +273,34 @@ public class JavaBeans {
             );
         }
     }    
+
+    private static class QuantifierPersistenceDelegate extends DefaultPersistenceDelegate {
+
+        public QuantifierPersistenceDelegate(
+        ) {            
+        }
+        
+        @Override
+        protected boolean mutatesTo(
+            Object oldInstance, 
+            Object newInstance
+        ) {
+            return oldInstance == newInstance;
+        }
+
+        @Override
+        protected Expression instantiate(
+            Object oldInstance, 
+            Encoder out
+        ) {
+            return new Expression(
+                oldInstance,
+                Quantifier.class,
+                "valueOf", 
+                new Object[]{((Quantifier)oldInstance).name()}
+            );
+        }
+    }    
     
     private static class DateTimePersistenceDelegate extends DefaultPersistenceDelegate {
 
@@ -348,6 +377,10 @@ public class JavaBeans {
             Duration.class, 
             durationPersistenceDelegate
         );
+        encoder.setPersistenceDelegate(
+            Quantifier.class, 
+            quantifierPersistenceDelegate
+        );
         try {
             encoder.writeObject(javaBean);
         }
@@ -398,6 +431,7 @@ public class JavaBeans {
     private static PersistenceDelegate dateTimePersistenceDelegate = new DateTimePersistenceDelegate();
     private static PersistenceDelegate durationPersistenceDelegate = new DurationPersistenceDelegate();
     private static PersistenceDelegate immutableDatePersistenceDelegate = new ImmutableDatePersistenceDelegate();
+    private static PersistenceDelegate quantifierPersistenceDelegate = new QuantifierPersistenceDelegate();
     private static Class<? extends XMLGregorianCalendar> xmlGregorianCalendarClass = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendarDate(2000, 1, 1, DatatypeConstants.FIELD_UNDEFINED).getClass();
     
 }

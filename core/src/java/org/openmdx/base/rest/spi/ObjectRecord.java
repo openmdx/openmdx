@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ObjectRecord.java,v 1.2 2010/03/23 09:07:28 hburger Exp $
+ * Name:        $Id: ObjectRecord.java,v 1.4 2010/06/02 13:45:10 hburger Exp $
  * Description: ObjectRecord 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 09:07:28 $
+ * Date:        $Date: 2010/06/02 13:45:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -127,7 +127,7 @@ public class ObjectRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getPath()
      */
-    @Override
+//  @Override
     public Path getPath() {
         return this.path;
     }
@@ -135,7 +135,7 @@ public class ObjectRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getValue()
      */
-    @Override
+//  @Override
     public MappedRecord getValue() {
         return this.value;
     }
@@ -143,7 +143,7 @@ public class ObjectRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getVersion()
      */
-    @Override
+//  @Override
     public Object getVersion() {
         return this.version;
     }
@@ -151,7 +151,7 @@ public class ObjectRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setPath(org.openmdx.base.naming.Path)
      */
-    @Override
+//  @Override
     public void setPath(Path path) {
         this.path = path;
     }
@@ -159,7 +159,7 @@ public class ObjectRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setValue(javax.resource.cci.MappedRecord)
      */
-    @Override
+//  @Override
     public void setValue(MappedRecord value) {
         this.value = value;
     }
@@ -167,7 +167,7 @@ public class ObjectRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setVersion(java.lang.Object)
      */
-    @Override
+//  @Override
     public void setVersion(Object version) {
         this.version = version;
     }
@@ -175,7 +175,7 @@ public class ObjectRecord
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#getRecordName()
      */
-    @Override
+//  @Override
     public String getRecordName() {
         return NAME;
     }
@@ -186,6 +186,7 @@ public class ObjectRecord
      * @param index the index
      * @return the value
      */
+    @Override
     protected Object get(
         int index
     ){
@@ -205,6 +206,7 @@ public class ObjectRecord
      * 
      * @return the old value
      */
+    @Override
     protected void put(
         int index,
         Object value

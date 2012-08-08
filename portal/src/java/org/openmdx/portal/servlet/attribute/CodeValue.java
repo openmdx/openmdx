@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeValue.java,v 1.43 2010/04/27 08:27:11 wfro Exp $
+ * Name:        $Id: CodeValue.java,v 1.44 2010/07/07 12:11:32 wfro Exp $
  * Description: CodeValue
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.44 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 08:27:11 $
+ * Date:        $Date: 2010/07/07 12:11:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -342,7 +342,11 @@ public class CodeValue
                       String selectedModifier = (featureValue != null) && (optionValue == featureValue.shortValue()) 
                           ? "selected" 
                           : "";
-                      p.write("        <option ", selectedModifier, " value=\"" + option.getKey(), "\">" + option.getKey());
+                      Object optionEncoded = option.getKey();
+                      if(option.getKey() instanceof String) {
+                    	  optionEncoded = htmlEncoder.encode((String)option.getKey(), false);
+                      }
+                      p.write("        <option ", selectedModifier, " value=\"" + optionEncoded, "\">" + optionEncoded);
                     }
                     p.write("    </select>");
                 }

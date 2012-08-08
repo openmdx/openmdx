@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SortOrder.java,v 1.1 2009/05/07 14:56:38 hburger Exp $
+ * Name:        $Id: SortOrder.java,v 1.6 2010/06/01 09:00:06 hburger Exp $
  * Description: Sort Order 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/07 14:56:38 $
+ * Date:        $Date: 2010/06/01 09:00:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,12 +51,12 @@
 package org.openmdx.base.query;
 
 /**
- * SortOrder
+ * Sort Order
  */
 public enum SortOrder {
 
     /**
-     * Descending Sort Order (&#x21293;) 
+     * Descending Sort Order (&#x2193;) 
      */
     DESCENDING(
         (short)-1, // code
@@ -64,7 +64,15 @@ public enum SortOrder {
     ),
     
     /**
-     * Descending Sort Order(&#x2191;)
+     * Unsorted Sort Order (&nbsp;)
+     */
+    UNSORTED(
+        (short)0, // code
+        ' ' // symbol
+    ),
+    
+    /**
+     * Ascending Sort Order (&#x2191;)
      */
     ASCENDING(
         (short)+1, // code
@@ -123,7 +131,7 @@ public enum SortOrder {
     public static short codeOf(
         SortOrder sortOrder
     ){
-        return sortOrder == null ? 0 : sortOrder.code;
+        return (sortOrder == null ? UNSORTED: sortOrder).code;
     }
     
     /**
@@ -140,8 +148,8 @@ public enum SortOrder {
     ){
         switch(code){
             case -1: return DESCENDING;
-            case 0: return null;
-            case 1: return ASCENDING;
+            case  0: return UNSORTED;
+            case +1: return ASCENDING;
             default: throw new IllegalArgumentException(
                 "Invalid sort order code: " + code
             );
@@ -149,25 +157,25 @@ public enum SortOrder {
     }
 
     /**
-     * Retrieve the <code>Quantifiers</code> represented by the given symbol
+     * Retrieve the <code>SortOrder</code> represented by the given symbol
      * 
-     * @param code
+     * @param symbol
      * 
-     * @return the <code>Quantifiers</code> represented by the given symbol
+     * @return the <code>SortOrder</code> represented by the given symbol
      * 
-     * @exception IllegalArgumentException if the symbol does not represent a <code>Quantifiers</code>
+     * @exception IllegalArgumentException if the symbol does not represent a <code>SortOrder</code>
      */
     public static SortOrder valueOf(
         char symbol
     ){
         switch(symbol){
             case '\u2193': return DESCENDING;
+            case ' ': return UNSORTED;
             case '\u2191': return ASCENDING;
             default: throw new IllegalArgumentException(
                 "Invalid sort order symbol: u" + Integer.toHexString(symbol)
             );
         }
     }
-    
     
 }

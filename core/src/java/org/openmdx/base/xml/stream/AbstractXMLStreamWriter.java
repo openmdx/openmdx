@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractXMLStreamWriter.java,v 1.7 2010/04/07 15:33:14 hburger Exp $
+ * Name:        $Id: AbstractXMLStreamWriter.java,v 1.8 2010/06/02 10:50:06 hburger Exp $
  * Description: Abstract XML Stream Writer 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/07 15:33:14 $
+ * Date:        $Date: 2010/06/02 10:50:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -152,7 +152,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#getNamespaceContext()
      */
-    @Override
+//  @Override
     public NamespaceContext getNamespaceContext(
     ) {
         return this.namespaceContext;
@@ -242,7 +242,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#getPrefix(java.lang.String)
      */
-    @Override
+//  @Override
     public String getPrefix(
         String namespaceURI
     ) throws XMLStreamException {
@@ -252,7 +252,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#getProperty(java.lang.String)
      */
-    @Override
+//  @Override
     public Object getProperty(
         String property
     ) throws IllegalArgumentException {
@@ -271,7 +271,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#setDefaultNamespace(java.lang.String)
      */
-    @Override
+//  @Override
     public void setDefaultNamespace(
         String namespaceURI
     ) throws XMLStreamException {
@@ -281,7 +281,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#setNamespaceContext(javax.xml.namespace.NamespaceContext)
      */
-    @Override
+//  @Override
     public void setNamespaceContext(
         NamespaceContext namespaceContext
     ) throws XMLStreamException {
@@ -299,7 +299,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#setPrefix(java.lang.String, java.lang.String)
      */
-    @Override
+//  @Override
     public void setPrefix(
         String prefix, 
         String namespaceURI
@@ -313,7 +313,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
     /* (non-Javadoc)
      * @see javax.xml.stream.XMLStreamWriter#writeDTD(java.lang.String)
      */
-    @Override
+//  @Override
     public void writeDTD(
         String dtd
     ) throws XMLStreamException {
@@ -326,7 +326,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
      * <li>XML version 1.0
      * </ul>
      */
-    @Override
+//  @Override
     public void writeStartDocument(
     ) throws XMLStreamException {
         writeStartDocument("UTF-8", "1.0");
@@ -337,7 +337,7 @@ public abstract class AbstractXMLStreamWriter implements XMLStreamWriter, LargeO
      * <li>Encoding UTF-8
      * </ul>
      */
-    @Override
+//  @Override
     public void writeStartDocument(
         String version
     ) throws XMLStreamException {

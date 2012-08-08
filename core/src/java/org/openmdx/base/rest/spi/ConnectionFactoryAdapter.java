@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ConnectionFactoryAdapter.java,v 1.9 2010/04/28 12:53:53 hburger Exp $
+ * Name:        $Id: ConnectionFactoryAdapter.java,v 1.10 2010/05/21 14:01:40 hburger Exp $
  * Description: Connection Factory Adapter 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/28 12:53:53 $
+ * Date:        $Date: 2010/05/21 14:01:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -79,6 +79,7 @@ public class ConnectionFactoryAdapter implements ConnectionFactory {
      * 
      * @param port the REST <code>Port</code>
      * @param supportsLocalTransactionDemarcation 
+     * @param transactionAttribute
      */
     public ConnectionFactoryAdapter(
         final Port port,

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TransactionBranchId.java,v 1.1 2009/09/07 15:14:13 hburger Exp $
+ * Name:        $Id: TransactionBranchId.java,v 1.2 2010/06/02 13:46:07 hburger Exp $
  * Description:  X/Open Transaction Branch Identifier
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 15:14:13 $
+ * Date:        $Date: 2010/06/02 13:46:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -97,6 +97,7 @@ class TransactionBranchId extends TransactionId {
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
+    @Override
     public int hashCode() {
         return super.hashCode() ^ this.branchQualifier;
     }
@@ -104,6 +105,7 @@ class TransactionBranchId extends TransactionId {
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object obj) {
         if(!(obj instanceof Xid)) return false;
         if(!(obj.getClass() == TransactionBranchId.class)) return equal(this, (Xid) obj);
@@ -119,6 +121,7 @@ class TransactionBranchId extends TransactionId {
      * 
      * @return a string builder containing the Xid's String representation
      */
+    @Override
     protected StringBuilder toStringBuilder(
     ){
         return super.toStringBuilder(
@@ -137,6 +140,7 @@ class TransactionBranchId extends TransactionId {
     /* (non-Javadoc)
      * @see javax.transaction.xa.Xid#getBranchQualifier()
      */
+    @Override
     public byte[] getBranchQualifier() {
         return new byte[]{
             (byte)(branchQualifier >> 24),

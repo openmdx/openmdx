@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CompressionMethod.java,v 1.1 2005/12/03 21:48:00 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: CompressionMethod.java,v 1.2 2010/06/04 22:22:48 hburger Exp $
  * Description: Ant Compression Method
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/12/03 21:48:00 $
+ * Date:        $Date: 2010/06/04 22:22:48 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -99,7 +98,8 @@ public final class CompressionMethod extends EnumeratedAttribute {
      *  Get valid enumeration values.
      *  @return valid enumeration values
      */
-    public String[] getValues() {
+    @Override
+	public String[] getValues() {
         return new String[] {NONE, ZIP, GZIP, BZIP2 };
     }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ServiceHeader.java,v 1.8 2009/12/21 13:31:39 wfro Exp $
+ * Name:        $Id: ServiceHeader.java,v 1.9 2010/06/02 13:39:35 hburger Exp $
  * Description: Service Header
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/21 13:31:39 $
+ * Date:        $Date: 2010/06/02 13:39:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -217,6 +217,7 @@ public final class ServiceHeader
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
+    @Override
     public Object clone(
     ) throws CloneNotSupportedException {        
         return new ServiceHeader(

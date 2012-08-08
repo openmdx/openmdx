@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractRestInteraction.java,v 1.21 2010/03/31 14:40:16 hburger Exp $
+ * Name:        $Id: AbstractRestInteraction.java,v 1.23 2010/08/09 13:14:53 hburger Exp $
  * Description: Abstract REST Interaction
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/31 14:40:16 $
+ * Date:        $Date: 2010/08/09 13:14:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -409,6 +409,7 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
     /* (non-Javadoc)
      * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
      */
+    @Override
     @SuppressWarnings("unchecked")
     public boolean execute(
         InteractionSpec ispec, 
@@ -417,18 +418,38 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
     ) throws ResourceException {
         assertOpened();
         try {
-            RestInteractionSpec interactionSpec = cast(null, RestInteractionSpec.class, ispec, false);            
+            RestInteractionSpec interactionSpec = AbstractRestInteraction.cast(
+                null, 
+                RestInteractionSpec.class, 
+                ispec, 
+                false
+            );            
             if(input instanceof MappedRecord) {
                 if(MessageRecord.NAME.equals(input.getRecordName())) {
                     invoke(
                         interactionSpec,
-                        cast("Invocation Request", MessageRecord.class, input, false),
-                        cast("Invocation Reply", MessageRecord.class, output, true)
+                        AbstractRestInteraction.cast(
+                            "Invocation Request", 
+                            MessageRecord.class, 
+                            input, 
+                            false
+                        ),
+                        AbstractRestInteraction.cast(
+                            "Invocation Reply", 
+                            MessageRecord.class, 
+                            output, 
+                            true
+                        )
                     );
                     return true;
                 } else {
                     MappedRecord inputRecord = (MappedRecord) input;
-                    IndexedRecord outputRecord = cast("Result Set", IndexedRecord.class, output, true);
+                    IndexedRecord outputRecord = AbstractRestInteraction.cast(
+                        "Result Set", 
+                        IndexedRecord.class, 
+                        output, 
+                        true
+                    );
                     if(Query_2Facade.isDelegate(inputRecord)){
                         Query_2Facade facade = Query_2Facade.newInstance(inputRecord);
                         Path objectId = facade.getPath();
@@ -488,7 +509,14 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
                                 for(Map.Entry<?, ?> e : (Set<Map.Entry<?, ?>>) inputRecord.entrySet()) {
                                     Object_2Facade facade = Object_2Facade.newInstance();
                                     facade.setPath(toResourceIdentifier(e.getKey()));
-                                    facade.setValue(cast("Value", MappedRecord.class, e.getValue(), false));
+                                    facade.setValue(
+                                        AbstractRestInteraction.cast(
+                                            "Value", 
+                                            MappedRecord.class, 
+                                            e.getValue(), 
+                                            false
+                                        )
+                                    );
                                     create(
                                         interactionSpec,
                                         facade,
@@ -499,7 +527,12 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
                             }
                             case PUT: {
                                 for(Map.Entry<?, ?> e : (Set<Map.Entry<?, ?>>) inputRecord.entrySet()) {
-                                    MappedRecord record = cast("Value", MappedRecord.class, e.getValue(), false);
+                                    MappedRecord record = AbstractRestInteraction.cast(
+                                        "Value", 
+                                        MappedRecord.class, 
+                                        e.getValue(), 
+                                        false
+                                    );
                                     if(Object_2Facade.isDelegate(record)) {
                                         move(
                                             interactionSpec,
@@ -590,6 +623,7 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.spi.RestConnection#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record)
      */
+    @Override
     public Record execute(
         InteractionSpec ispec, 
         Record input

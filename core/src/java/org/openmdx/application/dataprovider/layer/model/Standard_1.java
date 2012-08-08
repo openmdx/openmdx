@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.39 2010/03/23 09:15:37 hburger Exp $
+ * Name:        $Id: Standard_1.java,v 1.41 2010/06/04 19:31:30 hburger Exp $
  * Description: Model layer
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 09:15:37 $
+ * Date:        $Date: 2010/06/04 19:31:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -113,6 +113,7 @@ public class Standard_1 extends Layer_1 {
     }
     
     // --------------------------------------------------------------------------
+    @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {
@@ -135,9 +136,6 @@ public class Standard_1 extends Layer_1 {
          ) || "whenModified".equalsIgnoreCase(
              configuration.getFirstValue(LayerConfigurationEntries.OPTIMISTIC_LOCKING)
         );       
-        this.enableStateFilterSubstitution = !configuration.isOn(
-            LayerConfigurationEntries.DISABLE_STATE_FILTER_SUBSTITUATION
-        );
     }
 
     // --------------------------------------------------------------------------
@@ -709,11 +707,6 @@ public class Standard_1 extends Layer_1 {
      */
     protected boolean optimisticLocking = false;
 
-    /**
-     * Tells whether state filter substitution is enabled or disabled.
-     */
-    protected boolean enableStateFilterSubstitution;
-    
     protected final static Collection<String> TIME_OR_DATE_DATATYPES = Arrays.asList(
         PrimitiveTypes.DATE,
         PrimitiveTypes.DATETIME,

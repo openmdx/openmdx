@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: EntityManagerProxyFactory_2.java,v 1.5 2010/04/28 12:53:54 hburger Exp $
+ * Name:        $Id: EntityManagerProxyFactory_2.java,v 1.7 2010/08/09 13:03:13 hburger Exp $
  * Description: Entity Manager Proxy Factory
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/28 12:53:54 $
+ * Date:        $Date: 2010/08/09 13:03:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,7 +61,6 @@ import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.PersistenceManagerFactory;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.spi.PersistenceUnitTransactionType;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
@@ -72,11 +71,12 @@ import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.spi.PropertiesConfigurationProvider;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.rest.DataObjectManager_1;
+import org.openmdx.base.accessor.rest.spi.BasicCache_2;
 import org.openmdx.base.accessor.rest.spi.Switch_2;
-import org.openmdx.base.accessor.rest.spi.VirtualObjects_2;
 import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
 import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.base.resource.spi.Port;
@@ -86,7 +86,6 @@ import org.openmdx.base.rest.spi.ConnectionAdapter;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.BeanFactory;
 import org.openmdx.kernel.loading.Factory;
-import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 
 /**
  * Entity Manager Proxy Factory
@@ -429,13 +428,14 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
                     ),     
                     TransactionAttributeType.SUPPORTS, 
                     new Switch_2(
-                        new VirtualObjects_2(), 
+                        new BasicCache_2(), 
                         this.destinations
                     )
                 ), 
                 null, // connection2
                 STANDARD_PLUG_INS, 
-                this.optimalFetchSize, this.cacheThreshold  
+                this.optimalFetchSize, 
+                this.cacheThreshold  
             );
         } catch (ResourceException exception) {
             throw BasicException.initHolder(
@@ -464,9 +464,9 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
     }
 
     static {
-        DEFAULT_CONFIGURATION.put(
+        EntityManagerProxyFactory_2.DEFAULT_CONFIGURATION.put(
             ConfigurableProperty.TransactionType.qualifiedName(),
-            PersistenceUnitTransactionType.RESOURCE_LOCAL.name()
+            Constants.RESOURCE_LOCAL
         );    
     }
 

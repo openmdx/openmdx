@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PathTransformationTest.java,v 1.9 2009/09/15 16:41:15 hburger Exp $
+ * Name:        $Id: PathTransformationTest.java,v 1.11 2010/05/20 16:25:57 hburger Exp $
  * Description: Path Transformation Test
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/15 16:41:15 $
+ * Date:        $Date: 2010/05/20 16:25:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,8 +54,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -94,7 +97,7 @@ public class PathTransformationTest {
     /**
      * Add an instance variable for each part of the fixture 
      */
-    protected String xri1compatibility_18;
+    protected String xri1compatibility_19;
     
     /**
      * Add an instance variable for each part of the fixture 
@@ -107,6 +110,7 @@ public class PathTransformationTest {
     public void setUp() {
         paths = new String[]{
             null, // Must be the first entry
+            "org::openmdx::preferences1/provider/Java::Properties/segment/System/preferences/lost+found",
             "org::openmdx::preferences1/provider/Java::Properties/segment/(java::comp//env)",
             "org::openmdx::preferences1/provider/Java::Properties/segment/(java::comp)",
             "",
@@ -130,6 +134,7 @@ public class PathTransformationTest {
         };
         uri1 = new String[]{
             null,
+            "spice://org:openmdx:preferences1/provider/Java:Properties/segment/System/preferences/lost+found",
             "spice://org:openmdx:preferences1/provider/Java:Properties/segment/(java:comp%2fenv)",
             "spice://org:openmdx:preferences1/provider/Java:Properties/segment/(java:comp)",
             "spice:/",
@@ -153,6 +158,7 @@ public class PathTransformationTest {
         };
         xri1 = new String[]{
             null,
+            "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/lost+found",
             "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp/env)",
             "xri:@openmdx:org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)",
             "xri:@openmdx",
@@ -178,9 +184,10 @@ public class PathTransformationTest {
             "xri:(../../somewhere/else/e.jar)",
             "xri://www.openmdx.org/dtd/openmdx-ejb-jar_1_0.dtd"
         };
-        xri1compatibility_18 = "xri:@openmdx:*/provider/:*/segment/%";
+        xri1compatibility_19 = "xri:@openmdx:*/provider/:*/segment/%";
         xri2 = new String[]{
             null,
+            "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/($t*ces*lost%2Bfound)",
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp/env)",
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)",
             "xri://@openmdx",
@@ -210,6 +217,7 @@ public class PathTransformationTest {
         };
         iri2 = new String[]{
             null,
+            "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/($t*ces*lost%252Bfound)",
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp%2Fenv)",
             "xri://@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)",
             "xri://@openmdx",
@@ -239,6 +247,7 @@ public class PathTransformationTest {
         };
         uri2 = new String[]{
             null,
+            "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/System/preferences/($t*ces*lost%252Bfound)",
             "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp%2Fenv)",
             "@openmdx*org.openmdx.preferences1/provider/Java:Properties/segment/(java:comp)",
             "@openmdx",
@@ -276,42 +285,42 @@ public class PathTransformationTest {
 //            new Path(xri1[i]).toString()
 //        );
 //    }
-//
-//    @Test
-//    public void testU2P(
-//    ) throws ServiceException {
-//        for (
-//            int i = 1;
-//            i < uri1.length;
-//            i++
-//        ) {
-//            assertEquals(
-//                "[" + i + "]: " + paths[i],
-//                paths[i],
-//                new Path(uri1[i]).toString()
-//            );
-//            assertEquals(
-//                "[" + i + "]: " + paths[i],
-//                paths[i],
-//                new Path(uri2[i]).toString()
-//            );
-//        }
-//    }
-//
-//    @Test
-//    public void testP2P(
-//    ) throws ServiceException {
-//        for (
-//            int i = 1;
-//            i < paths.length;
-//            i++
-//        ) assertEquals(
-//            "[" + i + "]: " + paths[i],
-//            paths[i],
-//            new Path(paths[i]).toString()
-//        );
-//    }
-//    
+
+    @Test
+    public void testU2P(
+    ) throws ServiceException {
+        for (
+            int i = 1;
+            i < uri1.length;
+            i++
+        ) {
+            assertEquals(
+                "[" + i + "]: " + paths[i],
+                paths[i],
+                new Path(uri1[i]).toString()
+            );
+            assertEquals(
+                "[" + i + "]: " + paths[i],
+                paths[i],
+                new Path(uri2[i]).toString()
+            );
+        }
+    }
+
+    @Test
+    public void testP2P(
+    ) throws ServiceException {
+        for (
+            int i = 1;
+            i < paths.length;
+            i++
+        ) assertEquals(
+            "[" + i + "]: " + paths[i],
+            paths[i],
+            new Path(paths[i]).toString()
+        );
+    }
+    
     @Test
     public void testO2P(
     ) throws ServiceException {
@@ -417,7 +426,7 @@ public class PathTransformationTest {
     ) throws ServiceException {
         for (
             int i = 1;
-            i < 19;
+            i < 20;
             i++
         ){
             String xriValue = xri2[i];
@@ -432,7 +441,7 @@ public class PathTransformationTest {
     ) throws ServiceException {
         for (
             int i = 1;
-            i < 19;
+            i < 20;
             i++
         ) assertEquals(
             "[" + i + "]: " + iri2[i],
@@ -470,9 +479,9 @@ public class PathTransformationTest {
             new Path(paths[i]).toXri().toString()
         );
         assertEquals(
-            xri1compatibility_18,
-            xri1[18],
-            new Path(xri1compatibility_18).toXri().toString()
+            xri1compatibility_19,
+            xri1[19],
+            new Path(xri1compatibility_19).toXri().toString()
         );
     }
 
@@ -495,7 +504,7 @@ public class PathTransformationTest {
     ) throws ServiceException {
         for (
             int i = 1;
-            i < 19;
+            i < 20;
             i++
         ) {
             Path objectId =new Path(xri2[i]); 
@@ -513,6 +522,24 @@ public class PathTransformationTest {
         }
     }
 
+    @Test
+    public void testCodec(
+    ) throws UnsupportedEncodingException{
+        for(
+            int i = 1;
+            i < this.xri2.length;
+            i++
+        ){
+            assertEquals(
+                xri2[i], 
+                URLDecoder.decode(
+                    URLEncoder.encode(xri2[i], "UTF-8"), 
+                    "UTF-8"
+                )
+            );
+        }
+    }
+    
     @SuppressWarnings("deprecation")
     @Test
     public void testCR0003329(
@@ -545,7 +572,7 @@ public class PathTransformationTest {
     @Test
     public void testCR20006216(
     ){
-        assertEquals(paths[10], "(+resource/application-preferences.xml)", new Path(paths[10]).getComponent(4).get(0));
+        assertEquals(paths[11], "(+resource/application-preferences.xml)", new Path(paths[11]).getComponent(4).get(0));
         PathComponent stateId = new PathComponent("sins:0:");
         assertEquals("Object Id", "sins", stateId.get(0));
         assertEquals("State Number", "0", stateId.get(1));

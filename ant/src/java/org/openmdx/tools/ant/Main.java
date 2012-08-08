@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Main.java,v 1.1 2007/01/19 16:36:55 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Main.java,v 1.2 2010/06/04 22:15:26 hburger Exp $
  * Description: Ant Archive Task
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/19 16:36:55 $
+ * Date:        $Date: 2010/06/04 22:15:26 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -72,6 +71,7 @@ public class Main extends org.apache.tools.ant.Main {
 	/* (non-Javadoc)
 	 * @see org.apache.tools.ant.Main#exit(int)
 	 */
+	@Override
 	protected void exit(int exitCode) {
 		if(exitCode != 0) {
 			super.exit(exitCode);

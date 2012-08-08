@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HardWiredObjects_1.java,v 1.11 2010/01/03 15:15:27 wfro Exp $
+ * Name:        $Id: HardWiredObjects_1.java,v 1.12 2010/06/03 15:57:09 hburger Exp $
  * Description: Hard-Wired Objects Layer
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 15:15:27 $
+ * Date:        $Date: 2010/06/03 15:57:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -88,6 +88,7 @@ import org.openmdx.kernel.exception.BasicException;
 public class HardWiredObjects_1 extends Standard_1 {
 
     // --------------------------------------------------------------------------
+    @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {

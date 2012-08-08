@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MessageDrivenBeanDeploymentDescriptor.java,v 1.2 2009/09/07 13:03:03 hburger Exp $
+ * Name:        $Id: MessageDrivenBeanDeploymentDescriptor.java,v 1.3 2010/06/04 22:45:00 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 13:03:03 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,7 +70,8 @@ public class MessageDrivenBeanDeploymentDescriptor
     super(owningModule, url, containerTransaction);
   }
 
-  public void parseXml(
+  @Override
+public void parseXml(
     Element element,
     Report report
   ) {
@@ -87,7 +88,8 @@ public class MessageDrivenBeanDeploymentDescriptor
     }
   }
 
-  public void verify(
+  @Override
+public void verify(
     Report report
   ) {
     super.verify(report);

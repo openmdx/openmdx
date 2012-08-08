@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataManagerFactory_1.java,v 1.21 2010/04/28 14:12:19 hburger Exp $
+ * Name:        $Id: DataManagerFactory_1.java,v 1.23 2010/08/09 13:13:21 hburger Exp $
  * Description: Data Object Manager Factory
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/28 14:12:19 $
+ * Date:        $Date: 2010/08/09 13:13:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -73,11 +73,14 @@ import javax.resource.cci.ConnectionFactory;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.spi.PropertiesConfigurationProvider;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
+import org.openmdx.base.accessor.rest.spi.BasicCache_2;
+import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
+import org.openmdx.base.accessor.rest.spi.PinningCache_2;
 import org.openmdx.base.accessor.rest.spi.Switch_2;
-import org.openmdx.base.accessor.rest.spi.VirtualObjects_2;
 import org.openmdx.base.aop0.PlugIn_1;
 import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
 import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.base.resource.spi.Port;
@@ -86,16 +89,13 @@ import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.BeanFactory;
 import org.openmdx.kernel.loading.Classes;
-import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 import org.w3c.cci2.SparseArray;
 
 
 /**
  * Data Object Manager Factory
  */
-public class DataManagerFactory_1
-    extends AbstractPersistenceManagerFactory<DataObjectManager_1_0> 
-{
+public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<DataObjectManager_1_0> {
 
     /**
      * Constructor 
@@ -122,6 +122,7 @@ public class DataManagerFactory_1
             if(connectionFactory instanceof ConnectionFactoryAdapter) {
             	this.connectionFactory = (ConnectionFactory) connectionFactory;
             	this.connectionFactory2 = (ConnectionFactory) super.getConnectionFactory2();
+            	this.cachePlugIn = null; // TODO
             	this.plugIns = DEFAULT_PLUG_INS;
             } else {
                 SparseArray<?> plugIns = persistenceManagerConfiguration.values(
@@ -145,19 +146,19 @@ public class DataManagerFactory_1
                         ).instantiate();
                     }
                 }
-                String virtualObjectPlugIn = persistenceManagerConfiguration.getFirstValue("virtualObjectPlugIn");
-                VirtualObjects_2 virtualObjects = virtualObjectPlugIn == null ? new VirtualObjects_2(
-                ) : new BeanFactory<VirtualObjects_2>(
+                String cachePlugIn = persistenceManagerConfiguration.getFirstValue("cachePlugIn");
+                this.cachePlugIn = cachePlugIn == null ? new PinningCache_2(
+                ) : new BeanFactory<BasicCache_2>(
                     "class",
                     PropertiesConfigurationProvider.getConfiguration(
                         properties,
-                        virtualObjectPlugIn.split("\\.")
+                        cachePlugIn.split("\\.")
                     ).entries()
                 ).instantiate();
                 String connectionFactoryName = super.getConnectionFactoryName();
                 Map<Path,Port> destinations = new LinkedHashMap<Path,Port>();
                 Port port = new Switch_2(
-                    virtualObjects, 
+                    this.cachePlugIn, 
                     destinations
                 );
                 boolean supportsLocalTransaction = Constants.RESOURCE_LOCAL.equals(super.getTransactionType()); 
@@ -266,6 +267,11 @@ public class DataManagerFactory_1
     /**
      * 
      */
+    private final BasicCache_2 cachePlugIn;
+    
+    /**
+     * 
+     */
     private final PlugIn_1_0[] plugIns;
     
     /**
@@ -277,7 +283,6 @@ public class DataManagerFactory_1
      * Standard REST Connection Factory
      */
     private final ConnectionFactory connectionFactory2;
-    
     
     /**
      * The method is used by JDOHelper to construct an instance of 
@@ -359,22 +364,16 @@ public class DataManagerFactory_1
         String password
     ) {
         try {
+            RestConnectionSpec restConnectionSpec = new RestConnectionSpec(
+                userid,
+                password
+            );
             return new DataObjectManager_1(
                 this,
                 false,
                 userid == null ? null : PersistenceManagers.toPrincipalChain(userid),
-                this.connectionFactory.getConnection(
-                    new RestConnectionSpec(
-                        userid,
-                        password
-                    )
-                ),
-                getOptimistic() && this.connectionFactory2 != null ? this.connectionFactory2.getConnection(
-                    new RestConnectionSpec(
-                        userid,
-                        password
-                    )
-                ) : null,
+                this.connectionFactory.getConnection(restConnectionSpec),
+                getOptimistic() && this.connectionFactory2 != null ? this.connectionFactory2.getConnection(restConnectionSpec) : null,
                 this.plugIns, 
                 this.optimalFetchSize, 
                 this.cacheThreshold  
@@ -405,4 +404,17 @@ public class DataManagerFactory_1
         );
     }
 
+    /**
+     * Retrieve the data store cache
+     * 
+     * @param the data manager factory
+     * 
+     * @return the data store cache
+     */
+    public static DataStoreCache_2_0 getDataStoreCache(
+        PersistenceManagerFactory dataManagerFactory
+    ){
+        return dataManagerFactory instanceof DataManagerFactory_1 ? ((DataManagerFactory_1)dataManagerFactory).cachePlugIn : null;
+    }
+    
 }

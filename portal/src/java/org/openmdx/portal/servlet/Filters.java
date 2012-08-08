@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Filters.java,v 1.14 2009/03/08 18:03:18 wfro Exp $
+ * Name:        $Id: Filters.java,v 1.17 2010/06/29 08:21:13 wfro Exp $
  * Description: Filters
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:03:18 $
+ * Date:        $Date: 2010/06/29 08:21:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,7 +57,6 @@ package org.openmdx.portal.servlet;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -231,31 +230,43 @@ public class Filters
                   f.getGroupName() + ":" + this.getOrderAsString(f.getOrder()) + ":"  + f.getName();              
               Filter preparedFilter = null;
               if(baseFilter != null) {          
-                  // Combine conditions of f and baseFilter
+                  // Combine conditions of base filter and f
                   List<Condition> preparedConditions = new ArrayList<Condition>();
-                  preparedConditions.addAll(
-                      Arrays.asList(baseFilter.getCondition())
-                  );
-                  preparedConditions.addAll(
-                      Arrays.asList(f.getCondition())
-                  );
-                  // Combine order specifiers of f and baseFilter. Ordering of base filter 
+                  preparedConditions.addAll(baseFilter.getCondition());
+                  preparedConditions.addAll(f.getCondition());
+                  // Combine order specifiers of base filter and f. Ordering of base filter 
                   // has lower priority. Eliminate duplicate order specifiers.
                   List<OrderSpecifier> orderSpecifiers = new ArrayList<OrderSpecifier>();
                   Set<String> orderedFeatures = new HashSet<String>();
-                  for(int j = 0; j < f.getOrderSpecifier().length; j++) {
-                      OrderSpecifier orderSpecifier = f.getOrderSpecifier()[j];
+                  for(OrderSpecifier orderSpecifier : f.getOrderSpecifier()) {
                       if(!orderedFeatures.contains(orderSpecifier.getFeature())) {
                           orderSpecifiers.add(orderSpecifier);
                           orderedFeatures.add(orderSpecifier.getFeature());
                       }
                   }
-                  for(int j = 0; j < baseFilter.getOrderSpecifier().length; j++) {
-                      OrderSpecifier orderSpecifier = baseFilter.getOrderSpecifier()[j];
+                  for(OrderSpecifier orderSpecifier : baseFilter.getOrderSpecifier()) {
                       if(!orderedFeatures.contains(orderSpecifier.getFeature())) {
                           orderSpecifiers.add(orderSpecifier);
                           orderedFeatures.add(orderSpecifier.getFeature());
                       }
+                  }
+                  // Combine extensions of base filter and f                  
+                  org.openmdx.base.query.Extension extension = baseFilter.getExtension();
+                  if(extension == null) {
+                	  extension = f.getExtension();                  
+                  } 
+                  else if(f.getExtension() != null) {
+                	  org.openmdx.base.query.Extension ef = f.getExtension();
+                	  extension = extension.clone(); // Create new extension. Do not modify original
+                	  extension.setClause(
+                		  extension.getClause() + " AND " + ef.getClause()
+                	  );
+                	  extension.getStringParam().addAll(ef.getStringParam());
+                	  extension.getBooleanParam().addAll(ef.getBooleanParam());
+                	  extension.getDateTimeParam().addAll(ef.getDateTimeParam());
+                	  extension.getDateParam().addAll(ef.getDateParam());
+                	  extension.getDecimalParam().addAll(ef.getDecimalParam());
+                	  extension.getIntegerParam().addAll(ef.getIntegerParam());
                   }
                   preparedFilter = new Filter(
                       f.getName(),
@@ -263,9 +274,10 @@ public class Filters
                       f.getGroupName(),
                       f.getIconKey(),
                       f.getOrder(),
-                      (Condition[])preparedConditions.toArray(new Condition[preparedConditions.size()]),
-                      (OrderSpecifier[])orderSpecifiers.toArray(new OrderSpecifier[orderSpecifiers.size()]),
-                      new Object[]{this.getClass().getName()}
+                      preparedConditions,
+                      orderSpecifiers,
+                      extension,
+                      this.getClass().getName()
                   );
               }
               else {

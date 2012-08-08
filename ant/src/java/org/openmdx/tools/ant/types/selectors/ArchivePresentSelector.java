@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ArchivePresentSelector.java,v 1.1 2005/08/18 15:53:10 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ArchivePresentSelector.java,v 1.2 2010/06/04 22:25:16 hburger Exp $
  * Description: Archive Present Selector
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/08/18 15:53:10 $
+ * Date:        $Date: 2010/06/04 22:25:16 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -84,7 +83,8 @@ public class ArchivePresentSelector extends BaseSelector {
     /**
      * @return a string describing this object
      */
-    public String toString() {
+    @Override
+	public String toString() {
         StringBuffer buf = new StringBuffer("{presentselector target: ");
         if (target == null) {
             buf.append("NOT YET SET");
@@ -156,7 +156,8 @@ public class ArchivePresentSelector extends BaseSelector {
      * Checks to make sure all settings are kosher. In this case, it
      * means that the target attribute has been set and we have a mapper.
      */
-    public void verifySettings() {
+    @Override
+	public void verifySettings() {
         if (target == null) {
             setError("The target attribute is required.");
         }
@@ -179,7 +180,8 @@ public class ArchivePresentSelector extends BaseSelector {
      * @param file is ignored in case of an archive
      * @return whether the file should be selected or not
      */
-    public boolean isSelected(File basedir, String filename, File file) {
+    @Override
+	public boolean isSelected(File basedir, String filename, File file) {
         // throw BuildException on error
         validate();
 
@@ -205,7 +207,8 @@ public class ArchivePresentSelector extends BaseSelector {
         /**
          * @return the values as an array of strings
          */
-        public String[] getValues() {
+        @Override
+		public String[] getValues() {
             return new String[]{"srconly", "both"};
         }
     }

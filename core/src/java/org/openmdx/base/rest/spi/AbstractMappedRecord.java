@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractMappedRecord.java,v 1.2 2010/03/23 09:00:17 hburger Exp $
+ * Name:        $Id: AbstractMappedRecord.java,v 1.5 2010/06/02 14:27:18 hburger Exp $
  * Description: Abstract Mapped Record 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 09:00:17 $
+ * Date:        $Date: 2010/06/02 14:27:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -144,7 +144,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see java.util.Map#get(java.lang.Object)
      */
-    @Override
+//  @Override
     public final Object get(Object key) {
         return get(Arrays.binarySearch(this.keys, key));
     }
@@ -152,7 +152,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see java.util.Map#put(java.lang.Object, java.lang.Object)
      */
-    @Override
+//  @Override
     public final Object put(
         Object key, 
         Object value
@@ -178,7 +178,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see java.util.Map#entrySet()
      */
-    @Override
+//  @Override
     final public Set entrySet() {
         return this.entrySet == null ? this.entrySet = new AbstractSet(){
 
@@ -188,34 +188,34 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
 
                     private int i = 0;
                     
-                    @Override
+                //  @Override
                     public boolean hasNext() {
                         return i < size();
                     }
 
-                    @Override
+                //  @Override
                     public Object next() {
                         final String key = keys[i++]; 
                         return new Map.Entry() {
 
-                            @Override
+                        //  @Override
                             public Object getKey() {
                                 return key;
                             }
 
-                            @Override
+                        //  @Override
                             public Object getValue() {
                                 return get(key);
                             }
 
-                            @Override
+                        //  @Override
                             public Object setValue(Object value) {
                                 return put(key, value);
                             }
                         };
                     }
 
-                    @Override
+                //  @Override
                     public void remove() {
                         throw new UnsupportedOperationException();
                     }
@@ -234,7 +234,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see java.util.Map#keySet()
      */
-    @Override
+//  @Override
     final public Set keySet() {
         return this.keySet == null ? this.keySet = Sets.asSet(
             Arrays.asList(this.keys)
@@ -244,7 +244,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see java.util.Map#clear()
      */
-    @Override
+//  @Override
     final public void clear() {
         throw new UnsupportedOperationException();
     }
@@ -252,7 +252,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see java.util.Map#containsKey(java.lang.Object)
      */
-    @Override
+//  @Override
     final public boolean containsKey(Object key) {
         for(String candidate : this.keys) {
             if(candidate.equals(key)) return true;
@@ -263,7 +263,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see java.util.Map#containsValue(java.lang.Object)
      */
-    @Override
+//  @Override
     final public boolean containsValue(Object value) {
         for(String key : this.keys) {
             Object candidate = get(key);
@@ -275,7 +275,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see java.util.Map#isEmpty()
      */
-    @Override
+//  @Override
     final public boolean isEmpty() {
         return false;
     }
@@ -283,7 +283,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see java.util.Map#putAll(java.util.Map)
      */
-    @Override
+//  @Override
     final public void putAll(Map m) {
         for(Object e : m.entrySet()) {
             Map.Entry<?, ?> entry = (Entry<?, ?>) e;
@@ -294,7 +294,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see java.util.Map#remove(java.lang.Object)
      */
-    @Override
+//  @Override
     final public Object remove(Object key) {
         throw new UnsupportedOperationException();
     }
@@ -302,7 +302,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see java.util.Map#size()
      */
-    @Override
+//  @Override
     final public int size() {
         return this.keys.length;
     }
@@ -310,7 +310,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see java.util.Map#values()
      */
-    @Override
+//  @Override
     final public Collection values() {
         return new AbstractCollection(){
 
@@ -320,17 +320,17 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
 
                     private int i = 0;
                     
-                    @Override
+                //  @Override
                     public boolean hasNext() {
                         return i < keys.length;
                     }
 
-                    @Override
+                //  @Override
                     public Object next() {
                         return get(keys[i++]);
                     }
 
-                    @Override
+                //  @Override
                     public void remove() {
                         throw new UnsupportedOperationException();
                     }
@@ -349,7 +349,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#getRecordShortDescription()
      */
-    @Override
+//  @Override
     final public String getRecordShortDescription() {
         return this.recordShortDescription;
     }
@@ -357,7 +357,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#setRecordName(java.lang.String)
      */
-    @Override
+//  @Override
     final public void setRecordName(String recordName) {
         if(!recordName.equals(getRecordName())) throw BasicException.initHolder(
             new IllegalArgumentException(
@@ -375,7 +375,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#setRecordShortDescription(java.lang.String)
      */
-    @Override
+//  @Override
     final public void setRecordShortDescription(String description) {
         this.recordShortDescription = description;
     }
@@ -457,6 +457,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
      *
      * @return   a multi-line String representation of this Record.
      */
+    @Override
     public String toString(
     ){
         return IndentingFormatter.toString(this);

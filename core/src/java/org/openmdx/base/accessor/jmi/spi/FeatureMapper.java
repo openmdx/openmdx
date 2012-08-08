@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: FeatureMapper.java,v 1.15 2010/03/23 12:56:23 hburger Exp $
+ * Name:        $Id: FeatureMapper.java,v 1.17 2010/08/06 12:23:42 hburger Exp $
  * Description: FeatureMapper
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 12:56:23 $
+ * Date:        $Date: 2010/08/06 12:23:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,6 +62,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
@@ -75,12 +76,15 @@ import org.openmdx.kernel.exception.BasicException;
 public class FeatureMapper implements Serializable {
 
     //------------------------------------------------------------------------
-    public enum MethodSignature {
-
+    enum MethodSignature {
         DEFAULT, RETURN_IS_VOID, PREDICATE
-
     }
 
+    //------------------------------------------------------------------------
+    enum Type {
+        TEMRINAL, NON_TERMINAL, QUERY
+    }
+    
     //------------------------------------------------------------------------
     FeatureMapper(
         ModelElement_1_0 classDef,
@@ -98,21 +102,20 @@ public class FeatureMapper implements Serializable {
         if(accessor == null) {
             String accessorName = 'g' + mutatorName.substring(1);
             try {
-                Method concurrent = this.collections.putIfAbsent(
+                return Maps.putUnlessPresent(
+                    this.collections,
                     mutatorName,
-                    accessor = targetIntf.getMethod(accessorName)
+                    targetIntf.getMethod(accessorName)
                 );
-                if(concurrent != null) {
-                    accessor = concurrent;
-                }
             } catch (Exception exception) {
                 throw new UnsupportedOperationException(
                     accessorName + " requested by " + mutatorName + "(Collection)",
                     exception
                 );
             }
+        } else {
+            return accessor;
         }
-        return accessor;
     }
 
     //------------------------------------------------------------------------
@@ -164,13 +167,11 @@ public class FeatureMapper implements Serializable {
                 );
                 String accessorName = Identifier.OPERATION_NAME.toIdentifier(beanGetterName);
                 try {
-                    Method concurrent = this.accessors.putIfAbsent(
+                    return Maps.putUnlessPresent(
+                        this.accessors,
                         featureName,
-                        accessor = targetIntf.getMethod(accessorName)
+                        targetIntf.getMethod(accessorName)
                     );
-                    if(concurrent != null) {
-                        accessor = concurrent;
-                    }
                 } catch (Exception exception) {
                     throw new UnsupportedOperationException(
                         featureName,
@@ -180,8 +181,9 @@ public class FeatureMapper implements Serializable {
             } catch (ServiceException exception) {
                 throw new JmiServiceException(exception);
             }
+        } else {
+            return accessor;
         }
-        return accessor;
     }
 
     //------------------------------------------------------------------------
@@ -229,8 +231,11 @@ public class FeatureMapper implements Serializable {
                             (method.getReturnType() == void.class)
                             // Note: The argument type is ignored for the moment 
                     ){
-                        Method concurrent = this.mutators.putIfAbsent(featureName, method);
-                        return concurrent == null ? method : concurrent;
+                        return Maps.putUnlessPresent(
+                            this.mutators,
+                            featureName,
+                            method
+                        );
                     }
                 }
                 throw new UnsupportedOperationException(featureName);
@@ -270,8 +275,11 @@ public class FeatureMapper implements Serializable {
                     method.getName().equals(operationName) &&
                     (method.getReturnType() != void.class)
                 ) {
-                    Method concurrent = this.operations.putIfAbsent(featureName, method);
-                    return concurrent == null ? method : concurrent;
+                    return Maps.putUnlessPresent(
+                        this.operations,
+                        featureName, 
+                        method
+                    );
                 }
             }
             throw new UnsupportedOperationException(featureName);
@@ -301,8 +309,11 @@ public class FeatureMapper implements Serializable {
                         }
                     }
                     if(areEqual) {
-                        oldMethod = this.mapping.putIfAbsent(source, newMethod);
-                        return oldMethod == null ? newMethod : oldMethod;
+                        return Maps.putUnlessPresent(
+                            this.mapping,
+                            source, 
+                            newMethod
+                        );
                     }
                 }
             }
@@ -319,13 +330,11 @@ public class FeatureMapper implements Serializable {
         String className = (String)this.classDef.objGetValue("qualifiedName");
         ConcurrentMap<String,ModelElement_1_0> features = allFeatures.get(className);
         if(features == null) {
-            ConcurrentMap<String,ModelElement_1_0> concurrent = allFeatures.putIfAbsent(
+            features = Maps.putUnlessPresent(
+                allFeatures,
                 className, 
-                features = new ConcurrentHashMap<String,ModelElement_1_0>()
+                new ConcurrentHashMap<String,ModelElement_1_0>()
             );
-            if(concurrent != null) {
-                features = concurrent;
-            }
         }
         if(mode == MethodSignature.RETURN_IS_VOID) {
             methodName = methodName + "@void";            

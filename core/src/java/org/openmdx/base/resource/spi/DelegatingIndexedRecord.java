@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingIndexedRecord.java,v 1.7 2009/05/07 14:30:50 hburger Exp $
+ * Name:        $Id: DelegatingIndexedRecord.java,v 1.8 2010/06/02 13:45:10 hburger Exp $
  * Description: Delegating Indexed Record
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/07 14:30:50 $
+ * Date:        $Date: 2010/06/02 13:45:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -118,6 +118,7 @@ public class DelegatingIndexedRecord
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
+    @Override
     public int hashCode() {
         return source.hashCode();
     }
@@ -125,6 +126,7 @@ public class DelegatingIndexedRecord
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object that) {
         return source.equals(that);
     }
@@ -132,6 +134,7 @@ public class DelegatingIndexedRecord
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         return IndentingFormatter.toString(this);
     }
@@ -364,6 +367,7 @@ public class DelegatingIndexedRecord
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
+    @Override
     public Object clone() throws CloneNotSupportedException {
         return new DelegatingIndexedRecord(
             this.recordName,

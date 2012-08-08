@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: Aspect_1.java,v 1.21 2010/02/11 13:10:02 hburger Exp $
+ * Name:        $Id: Aspect_1.java,v 1.22 2010/06/02 13:44:09 hburger Exp $
  * Description: org::openmdx::base::Aspect plug-in
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/11 13:10:02 $
+ * Date:        $Date: 2010/06/02 13:44:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -152,6 +152,7 @@ public class Aspect_1 extends Interceptor_1 {
      * @throws ServiceException
      * @see org.openmdx.base.accessor.generic.cci.Featured_1_0#objGetContainer(java.lang.String)
      */
+    @Override
     public Container_1_0 objGetContainer(
         String feature
     ) throws ServiceException {
@@ -175,6 +176,7 @@ public class Aspect_1 extends Interceptor_1 {
      * @throws ServiceException
      * @see org.openmdx.base.accessor.generic.cci.Featured_1_0#objGetList(java.lang.String)
      */
+    @Override
     public List<Object> objGetList(
         String feature
     ) throws ServiceException {
@@ -187,6 +189,7 @@ public class Aspect_1 extends Interceptor_1 {
      * @throws ServiceException
      * @see org.openmdx.base.accessor.generic.cci.Featured_1_0#objGetSet(java.lang.String)
      */
+    @Override
     public Set<Object> objGetSet(
         String feature
     ) throws ServiceException {
@@ -199,6 +202,7 @@ public class Aspect_1 extends Interceptor_1 {
      * @throws ServiceException
      * @see org.openmdx.base.accessor.generic.cci.Featured_1_0#objGetSparseArray(java.lang.String)
      */
+    @Override
     public SortedMap<Integer, Object> objGetSparseArray(
         String feature
     ) throws ServiceException {
@@ -281,6 +285,7 @@ public class Aspect_1 extends Interceptor_1 {
      * @throws ServiceException
      * @see org.openmdx.base.accessor.generic.cci.Featured_1_0#objSetValue(java.lang.String, java.lang.Object)
      */
+    @Override
     public void objSetValue(
         String feature, 
         Object to

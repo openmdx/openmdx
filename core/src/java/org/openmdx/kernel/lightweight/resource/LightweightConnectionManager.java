@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightConnectionManager.java,v 1.2 2009/09/17 13:17:56 hburger Exp $
+ * Name:        $Id: LightweightConnectionManager.java,v 1.4 2010/08/03 14:02:32 hburger Exp $
  * Description: LightweightConnectionManager
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/17 13:17:56 $
+ * Date:        $Date: 2010/08/03 14:02:32 $
  * ====================================================================
  *
  * This software is published under the BSD licenseas listed below.
@@ -236,6 +236,42 @@ public class LightweightConnectionManager
     //------------------------------------------------------------------------    
 
     /**
+     * Allocate a managed connection
+     * 
+     * @param managedConnections set of managed conections
+     * @param subject
+     * @param managedConnectionFactory
+     * @param connectionRequestInfo
+     * 
+     * @return a (maybe newly created) managed connection
+     *
+     * @throws ResourceException
+     */
+    @Override
+    protected ManagedConnection allocateMangedConnection(
+        Set<ManagedConnection> managedConnections,
+        Subject subject,
+        ManagedConnectionFactory managedConnectionFactory, 
+        ConnectionRequestInfo connectionRequestInfo
+    ) throws ResourceException{
+        synchronized(managedConnections){
+            ManagedConnection managedConnection = managedConnectionFactory.matchManagedConnections(
+                managedConnections,
+                subject,
+                connectionRequestInfo
+            );
+            if(managedConnection == null) managedConnections.add(
+                managedConnection = allocateManagedConnection(
+                    subject,
+                    managedConnectionFactory,
+                    connectionRequestInfo
+                )
+            );
+            return managedConnection;        
+        }            
+    }
+
+    /**
      * Retrieve the current transaction from the transaction manager,
      */
     protected Transaction getTransaction(
@@ -253,6 +289,7 @@ public class LightweightConnectionManager
     /* (non-Javadoc)
      * @see org.openmdx.kernel.application.container.lightweight.AbstractConnectionManager#getManagedConnections()
      */
+    @Override
     protected Set<ManagedConnection> getManagedConnections(        
     ) throws ResourceException {
         Transaction transaction = getTransaction();
@@ -289,6 +326,7 @@ public class LightweightConnectionManager
      * 
      * @throws ResourceException 
      */
+    @Override
     protected synchronized ManagedConnection allocateManagedConnection(
         Subject subject,
         ManagedConnectionFactory managedConnectionFactory, 
@@ -379,11 +417,13 @@ public class LightweightConnectionManager
             //
         }
 
+        @Override
         public Iterator<ManagedConnection> iterator(
         ) {
             return new Interceptor(this.delegate.iterator());
         }
 
+        @Override
         public int size() {
             return delegate.size();
         }
@@ -396,6 +436,7 @@ public class LightweightConnectionManager
             return delegate.isEmpty();
         }
 
+        @Override
         public boolean add(ManagedConnection o) {
             return this.delegate.add(o);
         }        

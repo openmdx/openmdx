@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObjectNonIndexed.java,v 1.1 2009/05/26 14:31:20 wfro Exp $
+ * Name:        $Id: SlicedDbObjectNonIndexed.java,v 1.2 2010/06/02 13:41:40 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:20 $
+ * Date:        $Date: 2010/06/02 13:41:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -104,6 +104,7 @@ public class SlicedDbObjectNonIndexed
   }
   
   //-------------------------------------------------------------------------
+  @Override
   public int getIndex(
     FastResultSet frs
   ) throws SQLException {

@@ -1,9 +1,9 @@
 /*
  * ====================================================================
  * Description: Abstract Object_1
- * Revision:    $Revision: 1.48 $
+ * Revision:    $Revision: 1.50 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/31 14:37:26 $
+ * Date:        $Date: 2010/06/30 13:08:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,7 +57,6 @@ import javax.jdo.JDOHelper;
 import javax.jdo.listener.ClearCallback;
 import javax.jdo.listener.DeleteCallback;
 import javax.jdo.listener.StoreCallback;
-import javax.jdo.spi.PersistenceCapable;
 import javax.resource.cci.InteractionSpec;
 
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
@@ -160,7 +159,7 @@ class ObjectView_1
      * @see org.openmdx.base.accessor.spi.DelegatingObject_1#getStateDelegate()
      */
     @Override
-    protected PersistenceCapable getStateDelegate() {
+    protected DataObject_1_0 getStateDelegate() {
         return this.hollow ? this.dataObject : this.delegate;
     }
 
@@ -241,6 +240,7 @@ class ObjectView_1
      *              if the object can't be added to the unit of work for
      *        another reason.
      */
+    @Override
     public void objMakeTransactional(
     ) throws ServiceException {
         JDOHelper.getPersistenceManager(this.dataObject).makeTransactional(this.dataObject);
@@ -257,6 +257,7 @@ class ObjectView_1
      *              if the object can't be removed from its unit of work for
      *        another reason 
      */
+    @Override
     public void objMakeNontransactional(
     ) throws ServiceException {
         JDOHelper.getPersistenceManager(this.dataObject).makeNontransactional(this.dataObject);
@@ -307,7 +308,7 @@ class ObjectView_1
 
     @Override
     public boolean objIsContained(
-    ) throws ServiceException {
+    ){
         return this.dataObject.objIsContained();
     }
     

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UniqueValue.java,v 1.3 2010/01/21 17:37:53 hburger Exp $
+ * Name:        $Id: UniqueValue.java,v 1.5 2010/07/12 16:57:49 hburger Exp $
  * Description: Unique
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/21 17:37:53 $
+ * Date:        $Date: 2010/07/12 16:57:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -85,7 +85,7 @@ final class UniqueValue<T> {
     void set(
         T value
     ){
-        if(empty) {
+        if(this.empty) {
             this.value = value;
             this.empty = false;
         } else if (this.value == null ? value != null : !this.value.equals(value)) {
@@ -95,8 +95,8 @@ final class UniqueValue<T> {
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ILLEGAL_STATE,
-                        this.value instanceof PersistenceCapable ? ExceptionHelper.newObjectIdParameter("old", this.value) : new BasicException.Parameter("old", this.value),
-                        value instanceof PersistenceCapable ? ExceptionHelper.newObjectIdParameter("new", value) : new BasicException.Parameter("new", value)
+                        this.value instanceof PersistenceCapable ? ExceptionHelper.newObjectIdParameter("value1", this.value) : new BasicException.Parameter("value1", this.value),
+                        value instanceof PersistenceCapable ? ExceptionHelper.newObjectIdParameter("value2", value) : new BasicException.Parameter("value2", value)
                     )
                 )
             );
@@ -115,7 +115,7 @@ final class UniqueValue<T> {
         if(this.empty) {
             throw BasicException.initHolder(
                 new IllegalStateException(
-                    "There is no underlying state for the given request",
+                    "There is no matching state for the given request",
                     BasicException.newEmbeddedExceptionStack(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ILLEGAL_STATE

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ConnectionFactory.java,v 1.2 2009/03/08 18:52:19 wfro Exp $
+ * Project:     openMDX/Security, http://www.openmdx.org/
+ * Name:        $Id: ConnectionFactory.java,v 1.5 2010/08/03 14:27:24 hburger Exp $
  * Description: LDAP Connection Factory 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:19 $
+ * Date:        $Date: 2010/08/03 14:27:24 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,25 +50,19 @@
  */
 package org.openmdx.resource.ldap.spi;
 
-import java.io.Serializable;
-
-import javax.naming.NamingException;
-import javax.naming.Reference;
-import javax.resource.Referenceable;
 import javax.resource.ResourceException;
 import javax.resource.spi.ConnectionManager;
-import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.ManagedConnectionFactory;
-
-import org.openmdx.resource.ldap.cci.Connection;
-
 import netscape.ldap.LDAPException;
+import netscape.ldap.LDAPv3;
+
+import org.openmdx.resource.spi.AbstractConnectionFactory;
 
 /**
  * LDAP Connection Factory
  */
 public class ConnectionFactory
-    implements org.openmdx.resource.ldap.cci.ConnectionFactory, Serializable, Referenceable
+	extends AbstractConnectionFactory<LDAPv3>
+    implements org.openmdx.resource.cci.ConnectionFactory<LDAPv3,LDAPException>
 {
 
 	/**
@@ -79,47 +72,33 @@ public class ConnectionFactory
      * @param connectionManager
      */
     public ConnectionFactory(
-        ManagedConnectionFactory managedConnectionFactory, 
+        AbstractManagedConnectionFactory managedConnectionFactory, 
         ConnectionManager connectionManager
     ) {
-        this.managedConnectionFactory = managedConnectionFactory;
-        this.connectionManager = connectionManager;        
+    	super(managedConnectionFactory, connectionManager);        
     }
 
     /**
      * Implements <code>Serializable</code>
      */
-	private static final long serialVersionUID = 6209042994072311135L;
-
-    /**
-     * 
-     */
-    private final ManagedConnectionFactory managedConnectionFactory;
-    
-    /**
-     * 
-     */
-    private final ConnectionManager connectionManager;
-
-    /**
-     * 
-     */
-    private final ConnectionRequestInfo connectionRequestInfo = null;
+    private static final long serialVersionUID = -4449173495133105035L;
 
     
     //------------------------------------------------------------------------
     // Implements ConnectionFactory
     //------------------------------------------------------------------------
     
-    public Connection getConnection(
+	/* (non-Javadoc)
+     * @see org.openmdx.resource.ldap.cci.ConnectionFactory#getConnection()
+     */
+//  @Override
+    public LDAPv3 getConnection(
     ) throws LDAPException {
         try {
-            return (Connection) this.connectionManager.allocateConnection(
-                this.managedConnectionFactory, 
-                this.connectionRequestInfo
+            return newConnection(
+                null // Connection Request Info
             );
-        } 
-        catch (ResourceException exception) {
+        } catch (ResourceException exception) {
             throw (LDAPException) new LDAPException(
                 "Connection handle acquisition failed",
                 LDAPException.CONNECT_ERROR,
@@ -130,29 +109,4 @@ public class ConnectionFactory
         }
     }
 
-
-    //------------------------------------------------------------------------
-    // Implements Referenceable
-    //------------------------------------------------------------------------    
-
-    /**
-     * 
-     */
-    private Reference reference = null;
-    
-    /* (non-Javadoc)
-     * @see javax.resource.Referenceable#setReference(javax.naming.Reference)
-     */
-    public void setReference(Reference reference) {
-        this.reference = reference;
-    }
-
-    /* (non-Javadoc)
-     * @see javax.naming.Referenceable#getReference()
-     */
-    public Reference getReference(
-    ) throws NamingException {
-        return this.reference;
-    }
-    
 }

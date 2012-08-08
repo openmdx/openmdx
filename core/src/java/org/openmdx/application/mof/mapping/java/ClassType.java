@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ClassType.java,v 1.2 2009/05/16 22:17:47 wfro Exp $
+ * Name:        $Id: ClassType.java,v 1.3 2010/06/02 13:42:31 hburger Exp $
  * Description: Class Type 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:47 $
+ * Date:        $Date: 2010/06/02 13:42:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -70,6 +70,7 @@ public enum ClassType {
      */
     OBJECT {
 
+        @Override
         public String getType(
             ClassDef classDef,
             Format format,
@@ -142,6 +143,7 @@ public enum ClassType {
      */
     EXTENSION {
 
+        @Override
         public String getType(
             ClassDef classDef,
             Format format,
@@ -208,6 +210,7 @@ public enum ClassType {
      */
     MIXIN {
 
+        @Override
         public String getType(
             ClassDef classDef,
             Format format,

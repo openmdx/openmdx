@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.11 2010/01/26 15:37:47 hburger Exp $
+ * Name:        $Id: PlugIn_1.java,v 1.13 2010/06/02 16:14:39 hburger Exp $
  * Description: Audit Plug-In
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:37:47 $
+ * Date:        $Date: 2010/06/02 16:14:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -129,49 +129,49 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
         Set<java.util.Map.Entry<Path, Path>> entries =
             new AbstractSet<java.util.Map.Entry<Path, Path>>() {
 
-                @Override
-                public Iterator<java.util.Map.Entry<Path, Path>> iterator() {
-                    return new Iterator<java.util.Map.Entry<Path, Path>>() {
+            @Override
+            public Iterator<java.util.Map.Entry<Path, Path>> iterator() {
+                return new Iterator<java.util.Map.Entry<Path, Path>>() {
 
-                        protected int cursor = 0;
+                    protected int cursor = 0;
 
-                        public boolean hasNext() {
-                            return this.cursor < PlugIn_1.this.dataPrefix.length;
-                        }
+                    public boolean hasNext() {
+                        return this.cursor < PlugIn_1.this.dataPrefix.length;
+                    }
 
-                        public java.util.Map.Entry<Path, Path> next() {
-                            return new java.util.Map.Entry<Path, Path>() {
+                    public java.util.Map.Entry<Path, Path> next() {
+                        return new java.util.Map.Entry<Path, Path>() {
 
-                                private final int index = cursor++;
+                            private final int index = cursor++;
 
-                                public Path getKey() {
-                                    return PlugIn_1.this.dataPrefix[index];
-                                }
+                            public Path getKey() {
+                                return PlugIn_1.this.dataPrefix[index];
+                            }
 
-                                public Path getValue() {
-                                    return PlugIn_1.this.auditPrefix[index];
-                                }
+                            public Path getValue() {
+                                return PlugIn_1.this.auditPrefix[index];
+                            }
 
-                                public Path setValue(Path value) {
-                                    throw new UnsupportedOperationException();
-                                }
+                            public Path setValue(Path value) {
+                                throw new UnsupportedOperationException();
+                            }
 
-                            };
-                        }
+                        };
+                    }
 
-                        public void remove() {
-                            throw new UnsupportedOperationException();
-                        }
+                    public void remove() {
+                        throw new UnsupportedOperationException();
+                    }
 
-                    };
-                }
+                };
+            }
 
-                @Override
-                public int size() {
-                    return PlugIn_1.this.dataPrefix.length;
-                }
+            @Override
+            public int size() {
+                return PlugIn_1.this.dataPrefix.length;
+            }
 
-            };
+        };
 
         @Override
         public Set<java.util.Map.Entry<Path, Path>> entrySet() {
@@ -185,7 +185,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      * 
      * @see org.openmdx.base.aop0.PlugIn_1_0#g<Object>etSharedObject()
      */
-    @Override
+    //  @Override
     public Object getUserObject(Object key) {
         return Configuration.class == key ? this : null;
     }
@@ -253,9 +253,9 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      */
     private static String toXRI(Path value, boolean prefix) {
         return 
-            value == null ? null : 
+        value == null ? null : 
             prefix ? value.toXRI() + "/($...)" : 
-            value.toXRI();
+                value.toXRI();
     }
 
     /**
@@ -413,11 +413,11 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
         this.modifiedFeaturePersistent = modifiedFeaturePersistent;
     }
 
-    
+
     // ------------------------------------------------------------------------
     // Implements Configuration
     // ------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.audit2.spi.Configuration#getMapping()
      */
@@ -432,7 +432,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
         return this.auditSegmentId;
     }
 
-    
+
     // ------------------------------------------------------------------------
     // Implements PlugIn_1_0
     // ------------------------------------------------------------------------
@@ -445,7 +445,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
      * .rest.DataObject_1, java.lang.String)
      */
     public String getQualifier(DataObject_1 object, String qualifier)
-        throws ServiceException {
+    throws ServiceException {
         return qualifier;
     }
 
@@ -570,9 +570,9 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
                             } else {
                                 Set<Object> modifiedFeatures = isModifiedFeaturePersistent() ? 
                                     involvement.objGetSet("modifiedFeature") : 
-                                    new HashSet<Object>();
-                                involvedObject.addModifiedFeaturesTo(modifiedFeatures);
-                                dirty = !modifiedFeatures.isEmpty();
+                                        new HashSet<Object>();
+                                    involvedObject.addModifiedFeaturesTo(modifiedFeatures);
+                                    dirty = !modifiedFeatures.isEmpty();
                             }
                         }
                         if (dirty) {

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Extent_1.java,v 1.2 2009/12/08 06:26:40 hburger Exp $
+ * Name:        $Id: Extent_1.java,v 1.3 2010/06/01 08:59:09 hburger Exp $
  * Description: Extent_1 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/08 06:26:40 $
+ * Date:        $Date: 2010/06/01 08:59:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -80,13 +80,4 @@ public class Extent_1 extends org.openmdx.base.aop1.Extent_1 {
      */
     private static final long serialVersionUID = -7345812471210618135L;
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.aop1.Extent_1#subMap(java.lang.Object)
-     */
-    @Override
-    public Container_1_0 subMap(Object filter) {
-        return super.subMap(filter);
-    }
-
-    
 }

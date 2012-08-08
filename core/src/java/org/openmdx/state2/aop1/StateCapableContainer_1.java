@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateCapableContainer_1.java,v 1.6 2010/01/26 15:44:08 hburger Exp $
+ * Name:        $Id: StateCapableContainer_1.java,v 1.13 2010/07/01 15:58:03 hburger Exp $
  * Description: State Object Container
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:44:08 $
+ * Date:        $Date: 2010/07/01 15:58:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,12 +58,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOHelper;
+import javax.jdo.PersistenceManager;
 import javax.resource.cci.InteractionSpec;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -77,12 +79,16 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
-import org.openmdx.base.persistence.spi.Container;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.persistence.spi.TransientContainerId;
-import org.openmdx.base.query.FilterOperators;
-import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.query.Quantors;
+import org.openmdx.base.query.Condition;
+import org.openmdx.base.query.Filter;
+import org.openmdx.base.query.IsGreaterCondition;
+import org.openmdx.base.query.IsGreaterOrEqualCondition;
+import org.openmdx.base.query.IsInCondition;
+import org.openmdx.base.query.IsInstanceOfCondition;
+import org.openmdx.base.query.OrderSpecifier;
+import org.openmdx.base.query.Quantifier;
 import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.ViewKind;
 import org.openmdx.state2.spi.Configuration;
@@ -91,7 +97,7 @@ import org.openmdx.state2.spi.Configuration;
  * State Object Container
  */
 public class StateCapableContainer_1 
-    implements Serializable, Container, Container_1_0, Delegating_1_0<Container_1_0> 
+    implements Serializable, Container_1_0, Delegating_1_0<Container_1_0> 
 {
 
     /**
@@ -107,7 +113,7 @@ public class StateCapableContainer_1
         this(
             parent,
             container,
-            getFilter(parent, PersistenceHelper.getContainerId(container))
+            StateCapableContainer_1.getFilter(parent, PersistenceHelper.getContainerId(container))
         );
     }
 
@@ -121,7 +127,7 @@ public class StateCapableContainer_1
     private StateCapableContainer_1(
         ObjectView_1_0 parent,
         Container_1_0 container,
-        Object criteria
+        Filter criteria
     ){
         this.parent = parent;
         this.container = container;
@@ -148,28 +154,40 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Container_1_0#superSet()
      */
+//  @Override
     public Container_1_0 container(
     ) {
         return this.container.container();
     }     
 
+//  @Override
     public Path openmdxjdoGetContainerId() {
-        return PersistenceHelper.getContainerId(this.container);
+        return this.container.openmdxjdoGetContainerId();
     }
 
+//  @Override
     public TransientContainerId openmdxjdoGetTransientContainerId() {
-        return PersistenceHelper.getTransientContainerId(this.container);
+        return this.container.openmdxjdoGetTransientContainerId();
     }
     
-    public boolean openmdxjdoIsPersistent() {
-        return PersistenceHelper.isPersistent(this.container);
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
+     */
+//  @Override
+    public PersistenceManager openmdxjdoGetPersistenceManager() {
+        return this.container.openmdxjdoGetPersistenceManager();
     }
 
+//  @Override
+    public boolean openmdxjdoIsPersistent() {
+        return this.container.openmdxjdoIsPersistent();
+    }
+
+//  @Override
     public final Container_1_0 objGetDelegate(){
         return this.selection;
     }
     
-
     /**
      * Derive the filter from the state context
      * 
@@ -178,19 +196,16 @@ public class StateCapableContainer_1
      * @return the corresponding filter
      * @throws ServiceException 
      */
-    protected static FilterProperty[] getFilter(
+    protected static Filter getFilter(
         ObjectView_1_0 parent,
         Path containerId
     ) throws ServiceException{
         InteractionSpec interactionSpec = parent.getInteractionSpec();
         if(interactionSpec instanceof DateStateContext) {
             DateStateContext stateContext = (DateStateContext) interactionSpec;
-        	List<FilterProperty> filter = new ArrayList<FilterProperty>();
+        	List<Condition> filter = new ArrayList<Condition>();
         	filter.add(
-	            new FilterProperty(
-	                Quantors.THERE_EXISTS,
-	                SystemAttributes.OBJECT_INSTANCE_OF,
-	                FilterOperators.IS_IN,
+	            new IsInstanceOfCondition(
 	                "org:openmdx:state2:DateState"
 	            )
 	        );
@@ -203,10 +218,10 @@ public class StateCapableContainer_1
                     	XMLGregorianCalendar validTo = stateContext.getValidTo();
                     	if(validTo != null) {
                     		filter.add(
-                                new FilterProperty(
-                                    Quantors.FOR_ALL,
-                                    "stateValidFrom",
-                                    FilterOperators.IS_LESS_OR_EQUAL,
+                                new IsGreaterCondition(
+                                    Quantifier.FOR_ALL,
+                                    "stateValidFrom", // LESS_THAN_OR_EQUAL
+                                    false,
                                     validTo
                                 )
                     		);
@@ -214,19 +229,19 @@ public class StateCapableContainer_1
                     	XMLGregorianCalendar validFrom = stateContext.getValidFrom();
                     	if(validFrom != null) {
                     		filter.add(
-                                new FilterProperty(
-                                    Quantors.FOR_ALL,
+                                new IsGreaterOrEqualCondition(
+                                    Quantifier.FOR_ALL,
                                     "stateValidTo",
-                                    FilterOperators.IS_GREATER_OR_EQUAL,
+                                    true,
                                     validFrom
                                 )
                     		);
                     	}
                 		filter.add(
-                            new FilterProperty(
-                                Quantors.FOR_ALL,
+                            new IsInCondition(
+                                Quantifier.FOR_ALL,
                                 SystemAttributes.REMOVED_AT,
-                                FilterOperators.IS_IN
+                                true
                             )
                         );
                 		break;
@@ -234,18 +249,18 @@ public class StateCapableContainer_1
                     	XMLGregorianCalendar validAt = stateContext.getValidAt();
                     	if(validAt != null) {
                     		filter.add(
-                                new FilterProperty(
-                                    Quantors.FOR_ALL,
+                                new IsGreaterCondition(
+                                    Quantifier.FOR_ALL,
                                     "stateValidFrom",
-                                    FilterOperators.IS_LESS_OR_EQUAL,
+                                    false, // IS_LESS_OR_EQUAL
                                     validAt
                                 )
                             );
                     		filter.add(
-                                new FilterProperty(
-                                    Quantors.FOR_ALL,
+                                new IsGreaterOrEqualCondition(
+                                    Quantifier.FOR_ALL,
                                     "stateValidTo",
-                                    FilterOperators.IS_GREATER_OR_EQUAL,
+                                    true, // IS_GREATER_OR_EQUAL
                                     validAt
                                 )
                             );
@@ -253,26 +268,26 @@ public class StateCapableContainer_1
                     	Date existsAt = stateContext.getExistsAt();
                     	if(existsAt == null) {
                     		filter.add(
-                                new FilterProperty(
-                                    Quantors.FOR_ALL,
+                                new IsInCondition(
+                                    Quantifier.FOR_ALL,
                                     SystemAttributes.REMOVED_AT,
-                                    FilterOperators.IS_IN
+                                    true // IS_IN
                                 )
     						);
                     	} else {
                     		filter.add(
-                                new FilterProperty(
-                                    Quantors.FOR_ALL,
+                                new IsGreaterCondition(
+                                    Quantifier.FOR_ALL,
                                     SystemAttributes.CREATED_AT,
-                                    FilterOperators.IS_LESS_OR_EQUAL,
+                                    false, // IS_LESS_OR_EQUAL,
                                     existsAt
                                 )
                     		);
                     		filter.add(
-                                new FilterProperty(
-                                    Quantors.FOR_ALL,
+                                new IsGreaterOrEqualCondition(
+                                    Quantifier.FOR_ALL,
                                     SystemAttributes.REMOVED_AT,
-                                    FilterOperators.IS_GREATER_OR_EQUAL,
+                                    true, // IS_GREATER_OR_EQUAL
                                     existsAt
                                 )
                 			);
@@ -280,7 +295,7 @@ public class StateCapableContainer_1
                     	break;
                 }
         	}
-            return filter.toArray(new FilterProperty[filter.size()]);
+            return new Filter(filter, null, null);
         } else {
 	        return null;
         }
@@ -289,7 +304,8 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.FilterableMap#subMap(java.lang.Object)
      */
-    public Container_1_0 subMap(Object filter) {
+//  @Override
+    public Container_1_0 subMap(Filter filter) {
         return filter == null ? this : new StateCapableContainer_1(
             this.parent,
             this.selection,
@@ -300,36 +316,43 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.FilterableMap#values(java.lang.Object)
      */
-    public List<DataObject_1_0> values(Object criteria) {
+//  @Override
+    public List<DataObject_1_0> values(
+        OrderSpecifier... criteria
+    ) {
         return this.selection.values(criteria);
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#clear()
      */
+//  @Override
     public void clear() {
-        entrySet().clear();
+        this.entrySet().clear();
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#containsKey(java.lang.Object)
      */
+//  @Override
     public boolean containsKey(Object key) {
-        return keySet().contains(key);
+        return this.keySet().contains(key);
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#containsValue(java.lang.Object)
      */
+//  @Override
     public boolean containsValue(
         Object value
     ) {
-        return values().contains(value);
+        return this.values().contains(value);
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#entrySet()
      */
+//  @Override
     public Set<java.util.Map.Entry<String, DataObject_1_0>> entrySet() {
         if(this.entries == null) {
             this.entries = new AbstractSet<Map.Entry<String,DataObject_1_0>>()  {
@@ -360,6 +383,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#get(java.lang.Object)
      */
+//  @Override
     public DataObject_1_0 get(Object key) {
         return this.container.get(key);
     }
@@ -367,6 +391,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#isEmpty()
      */
+//  @Override
     public boolean isEmpty() {
         return this.selection.isEmpty();
     }
@@ -374,15 +399,17 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#keySet()
      */
+//  @Override
     public Set<String> keySet() {
         return this.keys == null ? 
-            this.keys = new Keys(this.selection) :
+            this.keys = new Keys(this.selection.keySet()) :
             this.keys;
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#put(java.lang.Object, java.lang.Object)
      */
+//  @Override
     public DataObject_1_0 put(String key, DataObject_1_0 value) {
         return this.selection.put(key, value);            
     }
@@ -390,6 +417,7 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#putAll(java.util.Map)
      */
+//  @Override
     public void putAll(Map<? extends String, ? extends DataObject_1_0> t) {
         throw new UnsupportedOperationException();
     }
@@ -411,12 +439,13 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#remove(java.lang.Object)
      */
+//  @Override
     public DataObject_1_0 remove(
         Object key
     ) {
         try {
-            assertModifiability();
-            DataObject_1_0 value = get(key);
+            this.assertModifiability();
+            DataObject_1_0 value = this.get(key);
             if(value.jdoIsPersistent()) {
                 JDOHelper.getPersistenceManager(value).deletePersistent(value);
             } 
@@ -434,13 +463,15 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see java.util.Map#size()
      */
+//  @Override
     public int size() {
-        return keySet().size();
+        return this.keySet().size();
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#values()
      */
+//  @Override
     public Collection<DataObject_1_0> values() {
         if(this.values == null) {
             this.values = new AbstractCollection<DataObject_1_0>() {
@@ -477,19 +508,30 @@ public class StateCapableContainer_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#retrieve()
      */
-    public void retrieveAll(FetchPlan fetchPlan) {
-        this.selection.retrieveAll(fetchPlan);
+//  @Override
+    public void openmdxjdoRetrieve(FetchPlan fetchPlan) {
+        this.selection.openmdxjdoRetrieve(fetchPlan);
     }
 
+//  @Override
     public boolean isRetrieved() {
         return this.selection.isRetrieved();
     }
 
     /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoEvict()
+     */
+//  @Override
+    public void openmdxjdoEvict(boolean allMembers, boolean allSubSets) {
+        this.selection.openmdxjdoEvict(allMembers, allSubSets);
+    }
+
+    /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#refreshAll()
      */
-    public void refreshAll() {
-        this.selection.refreshAll();
+//  @Override
+    public void openmdxjdoRefresh() {
+        this.selection.openmdxjdoRefresh();
     }
 
     
@@ -521,15 +563,15 @@ public class StateCapableContainer_1
          * @param delegate
          */
         Keys(
-            Map<String,DataObject_1_0> delegate
+            Set<String> delegate
         ){
-            this.delegate = delegate.entrySet();
+            this.delegate = delegate;
         }
 
         /**
          * objGetDelegate()'s entry set
          */
-        private final Set<Map.Entry<String,DataObject_1_0>> delegate;
+        private final Set<String> delegate;
         
         /* (non-Javadoc)
          * @see java.util.AbstractCollection#iterator()
@@ -537,7 +579,7 @@ public class StateCapableContainer_1
         @Override
         public Iterator<String> iterator(
         ){
-            return snapshot().iterator();
+            return this.snapshot().iterator();
         }
 
         /* (non-Javadoc)
@@ -545,7 +587,7 @@ public class StateCapableContainer_1
          */
         @Override
         public int size() {
-            return snapshot().size();
+            return this.snapshot().size();
         }
         
         /* (non-Javadoc)
@@ -553,19 +595,16 @@ public class StateCapableContainer_1
          */
         @Override
         public boolean isEmpty() {
-            return snapshot().isEmpty();
+            return this.snapshot().isEmpty();
         }
 
         private Collection<String> snapshot(){
             if(StateCapableContainer_1.this.container.isEmpty()) {
                 return Collections.emptyList();
             } else {
-                List<String> keys = new ArrayList<String>();
-                for(Map.Entry<String,DataObject_1_0> candidate : this.delegate){
-                    String key = toKey(candidate.getKey());
-                    if(!keys.contains(key)) {
-                        keys.add(key);
-                    }
+                Set<String> keys = new LinkedHashSet<String>();
+                for(String candidate : this.delegate){
+                    keys.add(this.toKey(candidate));
                 }
                 return keys;
             }
@@ -628,6 +667,7 @@ public class StateCapableContainer_1
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
+    //  @Override
         public boolean hasNext() {
             return this.delegate.hasNext();
         }
@@ -635,6 +675,7 @@ public class StateCapableContainer_1
         /* (non-Javadoc)
          * @see java.util.Iterator#next()
          */
+    //  @Override
         public String next() {
             return this.current = this.delegate.next();
         }
@@ -642,6 +683,7 @@ public class StateCapableContainer_1
         /* (non-Javadoc)
          * @see java.util.Iterator#remove()
          */
+    //  @Override
         public void remove() {
             if(this.current == null) {
                 throw new IllegalStateException("No current element");
@@ -665,11 +707,12 @@ public class StateCapableContainer_1
         /**
          * 
          */
-        private final Iterator<String> delegate = keySet().iterator();
+        private final Iterator<String> delegate = StateCapableContainer_1.this.keySet().iterator();
 
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
+    //  @Override
         public boolean hasNext() {
             return this.delegate.hasNext();
         }
@@ -677,6 +720,7 @@ public class StateCapableContainer_1
         /* (non-Javadoc)
          * @see java.util.Iterator#next()
          */
+    //  @Override
         public DataObject_1_0 next() {
             return StateCapableContainer_1.this.get(
                 this.delegate.next()
@@ -686,6 +730,7 @@ public class StateCapableContainer_1
         /* (non-Javadoc)
          * @see java.util.Iterator#remove()
          */
+    //  @Override
         public void remove() {
             this.delegate.remove();
         }
@@ -705,11 +750,12 @@ public class StateCapableContainer_1
         /**
          * 
          */
-        private final Iterator<String> delegate = keySet().iterator();
+        private final Iterator<String> delegate = StateCapableContainer_1.this.keySet().iterator();
 
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
+    //  @Override
         public boolean hasNext() {
             return this.delegate.hasNext();
         }
@@ -717,6 +763,7 @@ public class StateCapableContainer_1
         /* (non-Javadoc)
          * @see java.util.Iterator#next()
          */
+    //  @Override
         public Map.Entry<String,DataObject_1_0> next() {
             final String key = this.delegate.next(); 
             return new Map.Entry<String, DataObject_1_0>(){
@@ -739,6 +786,7 @@ public class StateCapableContainer_1
         /* (non-Javadoc)
          * @see java.util.Iterator#remove()
          */
+    //  @Override
         public void remove() {
             this.delegate.remove();
         }

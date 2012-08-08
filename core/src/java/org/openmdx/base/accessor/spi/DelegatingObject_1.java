@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DelegatingObject_1.java,v 1.34 2010/02/11 13:10:31 hburger Exp $
+ * Name:        $Id: DelegatingObject_1.java,v 1.35 2010/06/30 13:08:15 hburger Exp $
  * Description: DelegatingObject_1 class
- * Revision:    $Revision: 1.34 $
+ * Revision:    $Revision: 1.35 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/11 13:10:31 $
+ * Date:        $Date: 2010/06/30 13:08:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -119,7 +119,7 @@ public abstract class DelegatingObject_1
      * 
      * @return the object's state delegate
      */
-    protected PersistenceCapable getStateDelegate (
+    protected DataObject_1_0 getStateDelegate (
     ){
         try {
             return getDelegate();
@@ -168,7 +168,7 @@ public abstract class DelegatingObject_1
      */
     @Override
     public boolean objIsInaccessible(
-    ) throws ServiceException {
+    ){
         return 
             super.objIsInaccessible() ||
             this.delegate == null || 
@@ -299,7 +299,7 @@ public abstract class DelegatingObject_1
      */ 
     public boolean jdoIsDirty(
     ) {
-        return getStateDelegate().jdoIsDirty();
+        return this.getStateDelegate().jdoIsDirty();
     }
 
     /**
@@ -310,7 +310,7 @@ public abstract class DelegatingObject_1
      */
     public boolean jdoIsPersistent(
     ) {
-        return getStateDelegate().jdoIsPersistent();
+        return this.getStateDelegate().jdoIsPersistent();
     }
 
     /**
@@ -324,7 +324,7 @@ public abstract class DelegatingObject_1
      */
     public boolean jdoIsNew(
     ){
-        return getStateDelegate().jdoIsNew();
+        return this.getStateDelegate().jdoIsNew();
     }
 
     /**
@@ -336,7 +336,7 @@ public abstract class DelegatingObject_1
      */
     public boolean jdoIsDeleted(
     ) {
-        return getStateDelegate().jdoIsDeleted();
+        return this.getStateDelegate().jdoIsDeleted();
     }
 
     /**
@@ -346,15 +346,25 @@ public abstract class DelegatingObject_1
      */
     public boolean jdoIsTransactional(
     ) {
-        return getStateDelegate().jdoIsTransactional();
+        return this.getStateDelegate().jdoIsTransactional();
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Object_1_0#objIsContained()
      */
     public boolean objIsContained(
-    ) throws ServiceException {
-        return this.getDelegate().objIsContained();
+    ){
+        return this.getStateDelegate().objIsContained();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#getContainer(boolean)
+     */
+//  @Override
+    public Container_1_0 getContainer(
+        boolean forEviction
+    ) {
+        return this.getStateDelegate().getContainer(forEviction);
     }
 
     /* (non-Javadoc)

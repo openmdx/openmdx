@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BasicState_1.java,v 1.14 2010/02/11 13:09:37 hburger Exp $
+ * Name:        $Id: BasicState_1.java,v 1.20 2010/07/09 16:30:03 hburger Exp $
  * Description: Basic State Plug-In
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/11 13:09:37 $
+ * Date:        $Date: 2010/07/09 16:30:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2009, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -83,7 +83,9 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.cci.StateContext;
+import org.openmdx.state2.cci.ViewKind;
 import org.openmdx.state2.spi.DateStateContexts;
+import org.openmdx.state2.spi.Parameters;
 import org.openmdx.state2.spi.StateViewContext;
 
 /**
@@ -98,6 +100,8 @@ public abstract class BasicState_1<C extends StateContext<?>>
      * Constructor 
      *
      * @param self the plug-in holder
+     * @param next the next plug-in
+     * 
      * @throws ServiceException
      */
     protected BasicState_1(
@@ -167,8 +171,8 @@ public abstract class BasicState_1<C extends StateContext<?>>
      * 
      * @param candidate
      * @param context
+     * @param exact <code>true</code> if the state must exactly match the context
      * @param includeRemoved
-     * 
      * @return <code>true</code> if the candidate is involved
      * 
      * @throws ServiceException
@@ -176,6 +180,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     protected boolean isInvolved(
         DataObject_1_0 candidate, 
         C context, 
+        boolean exact, 
         boolean removed
     ) throws ServiceException {
         if(!candidate.jdoIsDeleted() && getModel().isInstanceof(candidate, getStateClass())) {
@@ -255,8 +260,18 @@ public abstract class BasicState_1<C extends StateContext<?>>
      */
     @SuppressWarnings("unchecked")
     protected final C getContext(
-    ) throws ServiceException {
+    ){
         return (C) this.self.getInteractionSpec();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.state2.aop1.Involved#getQueryAccess()
+     */
+    @Override
+    public AccessMode getQueryAccessMode() {
+        return Parameters.STRICT_QUERY && getContext().getViewKind() == ViewKind.TIME_RANGE_VIEW ? 
+            AccessMode.UNDERLYING_STATE : 
+            AccessMode.FOR_QUERY;
     }
 
     /* (non-Javadoc)
@@ -267,44 +282,57 @@ public abstract class BasicState_1<C extends StateContext<?>>
     ){
         return new Iterable<DataObject_1_0>(){
 
-            @SuppressWarnings("synthetic-access")
             public Iterator<DataObject_1_0> iterator() {
                 try {
                     Collection<DataObject_1_0> states = getStates();
-                    if(AccessMode.FOR_UPDATE == accessMode) {
-                        C context = getContext();
-                        switch(getContext().getViewKind()) {
-                            case TIME_POINT_VIEW :
-                                throw new ServiceException(
-                                    BasicException.Code.DEFAULT_DOMAIN,
-                                    BasicException.Code.NOT_SUPPORTED,
-                                    "A time-point view is read-only",
-                                    new BasicException.Parameter("xri", JDOHelper.getObjectId(self)),
-                                    new BasicException.Parameter("viewKind", TIME_POINT_VIEW),
-                                    new BasicException.Parameter("access", accessMode)
-                                );
-                            case TIME_RANGE_VIEW: 
-                                Map<DataObject_1_0,BoundaryCrossing> pending = new HashMap<DataObject_1_0,BoundaryCrossing>();
-                                for(DataObject_1_0 state : states){
-                                    //
-                                    // Enable Updates
-                                    //
-                                    if(isInvolved(state, context, false)) {
-                                        BoundaryCrossing boundaryCrossing = getBoundaryCrossing(state);
-                                        if(!state.jdoIsNew() || boundaryCrossing != BoundaryCrossing.NONE) {
-                                            pending.put(state, boundaryCrossing);
+                    if(accessMode == null) {
+                        return new InvolvedStates(states, false, true);
+                    } else switch (accessMode) {
+                        case UNDERLYING_STATE: 
+                            return new InvolvedStates(states, true, false);
+                        case FOR_QUERY: 
+                            return new InvolvedStates(states, false, false);
+                        case FOR_UPDATE:
+                            C context = getContext();
+                            switch(getContext().getViewKind()) {
+                                case TIME_POINT_VIEW :
+                                    throw new ServiceException(
+                                        BasicException.Code.DEFAULT_DOMAIN,
+                                        BasicException.Code.NOT_SUPPORTED,
+                                        "A time-point view is read-only",
+                                        new BasicException.Parameter("xri", BasicState_1.this.jdoGetObjectId()),
+                                        new BasicException.Parameter("viewKind", TIME_POINT_VIEW),
+                                        new BasicException.Parameter("access", accessMode)
+                                    );
+                                case TIME_RANGE_VIEW: 
+                                    Map<DataObject_1_0,BoundaryCrossing> pending = new HashMap<DataObject_1_0,BoundaryCrossing>();
+                                    for(DataObject_1_0 state : states){
+                                        //
+                                        // Enable Updates
+                                        //
+                                        if(isInvolved(state, context, false, false)) {
+                                            BoundaryCrossing boundaryCrossing = getBoundaryCrossing(state);
+                                            if(!state.jdoIsNew() || boundaryCrossing != BoundaryCrossing.NONE) {
+                                                pending.put(state, boundaryCrossing);
+                                            }
                                         }
                                     }
-                                }
-                                if(!pending.isEmpty()) {
-                                    enableUpdate(
-                                        pending
-                                    );
-                                }
-                                break;
-                        }
+                                    if(!pending.isEmpty()) {
+                                        enableUpdate(
+                                            pending
+                                        );
+                                    }
+                                    break;
+                            }
+                            return new InvolvedStates(states, false, false);
+                        default:
+                            throw new RuntimeServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.ASSERTION_FAILURE,
+                                "Unexpected access mode",
+                                new BasicException.Parameter("accessMode", accessMode)
+                            );
                     }
-                    return new InvolvedStates(states, accessMode == null);
                 } catch (ServiceException exception) {
                     throw new RuntimeServiceException(exception);
                 }
@@ -318,6 +346,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objGetList(java.lang.String)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public List<Object> objGetList(
         String feature
     ) throws ServiceException {
@@ -342,6 +371,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objGetSet(java.lang.String)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public Set<Object> objGetSet(
         String feature
     ) throws ServiceException {
@@ -366,6 +396,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objGetSparseArray(java.lang.String)
      */
     @SuppressWarnings("unchecked")
+    @Override
     public SortedMap<Integer, Object> objGetSparseArray(
         String feature
     ) throws ServiceException {
@@ -389,6 +420,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objGetValue(java.lang.String)
      */
+    @Override
     public Object objGetValue(
         String feature
     ) throws ServiceException {
@@ -397,7 +429,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
                 return this.self.objGetDelegate();
             } else {
                 UniqueValue<Object> reply = new UniqueValue<Object>();
-                for(DataObject_1_0 state : getInvolved(AccessMode.FOR_QUERY)){
+                for(DataObject_1_0 state : getInvolved(this.getQueryAccessMode())){
                     reply.set(state.objGetValue(feature));
                 }
                 return reply.get();
@@ -418,6 +450,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objSetValue(java.lang.String, java.lang.Object)
      */
+    @Override
     public void objSetValue(
         String feature, 
         Object to
@@ -504,6 +537,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objDefaultFetchGroup()
      */
+    @Override
     public Set<String> objDefaultFetchGroup(
     ) throws ServiceException {
         if(isView()){
@@ -526,6 +560,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objRemove()
      */
+    @Override
     public void objDelete(
     ) throws ServiceException {
         if(isView()) {
@@ -544,6 +579,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objAddToUnitOfWork()
      */
+    @Override
     public void objMakeTransactional(
     ) throws ServiceException {
         if(isView()) {
@@ -558,6 +594,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objRemoveFromUnitOfWork()
      */
+    @Override
     public void objMakeNontransactional(
     ) throws ServiceException {
         if(isView()) {
@@ -572,6 +609,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objRefresh()
      */
+    @Override
     public void objRefresh(
     ) throws ServiceException {
         if(isView()) {
@@ -600,6 +638,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objIsDeleted()
      */
+    @Override
     public boolean jdoIsDeleted(
     ) {
         if(isView()) {
@@ -620,6 +659,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetClass()
      */
+    @Override
     public String objGetClass(
     ) throws ServiceException {
         if(isView()) {
@@ -636,6 +676,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.PersistenceCapable_1_0#objIsDirty()
      */
+    @Override
     public boolean jdoIsDirty(
     ) {
         if(isView()) {
@@ -661,6 +702,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.cci.PersistenceCapable_1_0#objIsInUnitOfWork()
      */
+    @Override
     public boolean jdoIsTransactional(
     ) {
         if(isView()) {
@@ -686,6 +728,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.Object_1_5#getFactory()
      */
+    @Override
     public PersistenceManager jdoGetPersistenceManager(
     ) {
         return this.self.jdoGetPersistenceManager();
@@ -705,17 +748,24 @@ public abstract class BasicState_1<C extends StateContext<?>>
          * Constructor 
          *
          * @param states
+         * @param exact <code>true</code> if the state must exactly match the context
          * @param removed 
-         * 
          * @throws ServiceException
          */
         InvolvedStates(
             Collection<DataObject_1_0> states, 
+            boolean exact, 
             boolean removed
         ) throws ServiceException{
             this.candidates = states.iterator();
+            this.exact = exact;
             this.removed = removed;
         }
+
+        /**
+         * <code>true</code> if the state must exactly match the context
+         */
+        private final boolean exact;
 
         /**
          * 
@@ -749,7 +799,7 @@ public abstract class BasicState_1<C extends StateContext<?>>
                     this.candidates.hasNext()
                 ) {
                     DataObject_1_0 candidate = this.candidates.next();
-                    if(isInvolved(candidate, context, this.removed)) {
+                    if(isInvolved(candidate, context, this.exact, this.removed)) {
                         this.nextInvolved = candidate;
                     }
                 }

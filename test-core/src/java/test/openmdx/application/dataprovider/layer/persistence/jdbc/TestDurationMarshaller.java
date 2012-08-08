@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestDurationMarshaller.java,v 1.2 2009/12/14 15:06:11 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: TestDurationMarshaller.java,v 1.3 2010/06/03 15:57:46 hburger Exp $
  * Description: class TestRecord
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/14 15:06:11 $
+ * Date:        $Date: 2010/06/03 15:57:46 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,7 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+                            @Override
  */
 package test.openmdx.application.dataprovider.layer.persistence.jdbc;
 
@@ -105,6 +103,7 @@ public class TestDurationMarshaller extends TestCase {
      * Sets up the fixture, for example, open a network connection.
      * This method is called before a test is executed.
      */
+    @Override
     protected void setUp(
     ) throws Exception {
         this.datatypeFactory = DatatypeFactory.newInstance();
@@ -123,6 +122,7 @@ public class TestDurationMarshaller extends TestCase {
      * Sets up the fixture, for example, open a network connection.
      * This method is called before a test is executed.
      */
+    @Override
     protected void tearDown(
     ) throws Exception {
     }

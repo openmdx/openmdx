@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Involved.java,v 1.3 2009/08/17 13:08:46 hburger Exp $
+ * Name:        $Id: Involved.java,v 1.5 2010/07/09 13:52:41 hburger Exp $
  * Description: Involved 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/08/17 13:08:46 $
+ * Date:        $Date: 2010/07/09 13:52:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -67,5 +67,15 @@ interface Involved<T> {
     Iterable<T> getInvolved(
         AccessMode accessMode
     );
+    
+    /**
+     * Provide the query access mode. one of<ul>
+     * <li>{@link AccessMode#FOR_QUERY}
+     * <li>{@link AccessMode#UNDERLYING_STATE}
+     * </ul>
+     * 
+     * @return the query access mode
+     */
+    AccessMode getQueryAccessMode();
 
 }

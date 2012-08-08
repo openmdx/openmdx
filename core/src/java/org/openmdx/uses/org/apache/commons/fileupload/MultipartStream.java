@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/MultipartStream.java,v 1.5 2007/10/10 16:06:13 hburger Exp $
- * $Revision: 1.5 $
- * $Date: 2007/10/10 16:06:13 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/MultipartStream.java,v 1.6 2010/06/02 13:46:30 hburger Exp $
+ * $Revision: 1.6 $
+ * $Date: 2010/06/02 13:46:30 $
  *
  * ====================================================================
  *
@@ -129,7 +129,7 @@ import java.io.UnsupportedEncodingException;
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * @author Sean C. Sullivan
  *
- * @version $Id: MultipartStream.java,v 1.5 2007/10/10 16:06:13 hburger Exp $
+ * @version $Id: MultipartStream.java,v 1.6 2010/06/02 13:46:30 hburger Exp $
  */
 public class MultipartStream
 {
@@ -802,6 +802,7 @@ public class MultipartStream
      *
      * @return The string representation of this object.
      */
+    @Override
     public String toString()
     {
         StringBuffer sbTemp = new StringBuffer();

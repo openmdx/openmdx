@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ModelElement_1.java,v 1.24 2010/02/11 13:14:13 hburger Exp $
+ * Name:        $Id: ModelElement_1.java,v 1.25 2010/06/30 12:48:31 hburger Exp $
  * Description: ModelElement_1 class
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/11 13:14:13 $
+ * Date:        $Date: 2010/06/30 12:48:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -79,8 +79,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
 
 //---------------------------------------------------------------------------
-public class ModelElement_1 implements ModelElement_1_0
-{
+public class ModelElement_1 implements ModelElement_1_0 {
 
     private static final long serialVersionUID = 3257002159609753654L;
 
@@ -588,16 +587,26 @@ public class ModelElement_1 implements ModelElement_1_0
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objIsContained()
      */
-    public boolean objIsContained()
-        throws ServiceException {
+    public boolean objIsContained(
+    ){
+        throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.cci.DataObject_1_0#getContainer(boolean)
+     */
+//  @Override
+    public Container_1_0 getContainer(
+        boolean forEviction
+    ) {
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objIsInaccessible()
      */
-    public boolean objIsInaccessible()
-        throws ServiceException {
+    public boolean objIsInaccessible(
+    ){
         throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
     }
 

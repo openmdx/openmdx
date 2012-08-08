@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ApplicationClientDeploymentDescriptor.java,v 1.2 2009/09/07 13:03:03 hburger Exp $
+ * Name:        $Id: ApplicationClientDeploymentDescriptor.java,v 1.3 2010/06/04 22:44:59 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 13:03:03 $
+ * Date:        $Date: 2010/06/04 22:44:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -92,7 +92,8 @@ public class ApplicationClientDeploymentDescriptor
     );
   }
 
-  public void parseXml(
+  @Override
+public void parseXml(
     Element element
   ) {
     if ("application-client".equals(element.getTagName()))
@@ -105,7 +106,8 @@ public class ApplicationClientDeploymentDescriptor
     }
   }
     
-  public void parseXml(
+  @Override
+public void parseXml(
     Element element, 
     Report report
   ) {
@@ -147,7 +149,8 @@ public class ApplicationClientDeploymentDescriptor
 
   }
 
-  public void parseOpenMdxXml(
+  @Override
+public void parseOpenMdxXml(
     Element element
   ) {
     if ("openmdx-application-client".equals(element.getTagName()))
@@ -160,6 +163,7 @@ public class ApplicationClientDeploymentDescriptor
     }
   }
     
+	@Override
 	public void parseOpenMdxXml(
     Element element, 
     Report report
@@ -254,7 +258,8 @@ public class ApplicationClientDeploymentDescriptor
       Contexts.bind(containerContext, "main", reference);
   }
 
-  public String getDisplayName(
+  @Override
+public String getDisplayName(
   ) {
     return this.displayName;
   }
@@ -264,7 +269,8 @@ public class ApplicationClientDeploymentDescriptor
     return this.callbackHandler;
   }
 
-  public URL[] getModuleClassPath(
+  @Override
+public URL[] getModuleClassPath(
   ) {
     return this.clientClassPath;
   }
@@ -286,12 +292,14 @@ public class ApplicationClientDeploymentDescriptor
     this.mainClass = mainClass;
   }
   
-  public Report verify() {
+  @Override
+public Report verify() {
     this.verify(this.report);
     return this.report;
   }
 
-  public Report validate() {
+  @Override
+public Report validate() {
     return verify();
   }
 

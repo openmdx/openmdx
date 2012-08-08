@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AccountingRequest.java,v 1.3 2005/06/07 20:07:00 hburger Exp $
+ * Name:        $Id: AccountingRequest.java,v 1.4 2010/06/04 22:41:44 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/07 20:07:00 $
+ * Date:        $Date: 2010/06/04 22:41:44 $
  * ====================================================================
  *
  * Copyright (C) 2004  OMEX AG
@@ -67,7 +67,7 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.exception.InvalidParameter
 /**
  * Released under the LGPL<BR>
  * @author <a href="mailto:bloihl@users.sourceforge.net">Robert J. Loihl</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class AccountingRequest extends RadiusPacket {
     public final static byte[] START_ACCOUNTING_SERVICE_TYPE = new byte[]{0,0,0,1};
@@ -96,6 +96,7 @@ public class AccountingRequest extends RadiusPacket {
      * @param radiusAttribute the attribute to validate
      * @throws InvalidParameterException if the RadiusAttribute does not pass validation
      */
+    @Override
     public void validateAttribute(final RadiusAttribute radiusAttribute) throws InvalidParameterException{
         if ((this.initialized) && (radiusAttribute.getType() == RadiusAttributeValues.USER_NAME ||
                     radiusAttribute.getType() == RadiusAttributeValues.SERVICE_TYPE ||

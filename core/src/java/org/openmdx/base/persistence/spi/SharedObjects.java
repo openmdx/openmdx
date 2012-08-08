@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SharedObjects.java,v 1.7 2010/04/26 16:06:16 hburger Exp $
+ * Name:        $Id: SharedObjects.java,v 1.8 2010/07/08 09:08:21 hburger Exp $
  * Description: Shared Objects
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/26 16:06:16 $
+ * Date:        $Date: 2010/07/08 09:08:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,12 +50,15 @@
  */
 package org.openmdx.base.persistence.spi;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalInternalException;
 import javax.jdo.PersistenceManager;
+
+import org.openmdx.kernel.loading.Factory;
 
 /**
  * User Objects
@@ -235,6 +238,22 @@ public class SharedObjects {
          */
         String getUnitOfWorkIdentifier(
         );
+     
+        /**
+         * Set the transaction time factory
+         * 
+         * @param transactionTime
+         */
+        void setTransactionTime(
+            Factory<Date> transactionTime
+        );
+        
+        /**
+         * Retrieve the transaction time factory
+         * 
+         * @return the transaction time factory
+         */
+        Factory<Date> getTransactionTime();
         
     }
 

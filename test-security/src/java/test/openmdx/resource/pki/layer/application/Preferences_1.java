@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Preferences_1.java,v 1.4 2010/03/05 13:21:32 hburger Exp $
+ * Name:        $Id: Preferences_1.java,v 1.9 2010/09/01 15:09:06 hburger Exp $
  * Description: Preferences_1 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/05 13:21:32 $
+ * Date:        $Date: 2010/09/01 15:09:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,8 +50,16 @@
  */
 package test.openmdx.resource.pki.layer.application;
 
+import java.io.IOException;
+import java.net.URL;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.Key;
+import java.security.cert.CertPathValidatorException;
+import java.security.cert.CertPathValidatorResult;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +71,6 @@ import javax.resource.cci.Connection;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
-import java.security.cert.Certificate;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.spi.Layer_1;
@@ -73,9 +80,10 @@ import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.resource.cci.ConnectionFactory;
 import org.openmdx.resource.pki.cci.CertificateProvider;
-import org.openmdx.resource.pki.cci.ConnectionFactory;
-import org.openmdx.resource.pki.cci.KeyProvider;
+import org.openmdx.resource.pki.cci.CertificateValidator;
+import org.openmdx.resource.pki.cci.SignatureProvider;
 
 /**
  * Preferences_1
@@ -112,7 +120,8 @@ public class Preferences_1 extends Layer_1 {
 	/* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#activate(short, org.openmdx.compatibility.base.application.configuration.Configuration, org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0)
      */
-    public void activate(
+    @Override
+	public void activate(
         short id, 
         Configuration configuration, 
         Layer_1 delegation
@@ -124,11 +133,10 @@ public class Preferences_1 extends Layer_1 {
             throw new ServiceException(exception);
         }
         this.pkiProviders = new HashMap<String,Object>();
-//      System.err.println("Certificate: " + ((X509Certificate)certificateProvider.getCertificate()).getSubjectX500Principal());
-//      System.err.println("Key: " + ((RSAPrivateCrtKey)keyProvider.getKey()).getFormat());
     }
-
-    private final ConnectionFactory getConnectionFactory(
+    
+    @SuppressWarnings("unchecked")
+	private final ConnectionFactory<?,GeneralSecurityException> getConnectionFactory(
         String segment
     ) throws ServiceException {
         Object connectionFactory;
@@ -148,13 +156,14 @@ public class Preferences_1 extends Layer_1 {
                 new BasicException.Parameter("jndiName", "java:comp/env/pki/" + segment)                    
             ).log();
         }
-        return (ConnectionFactory) connectionFactory;
+        return (ConnectionFactory<?,GeneralSecurityException>) connectionFactory;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#deactivate()
      */
-    public void deactivate(
+    @Override
+	public void deactivate(
     ) throws Exception, ServiceException {
         this.pkiContext = null;
         this.pkiProviders = null;
@@ -231,15 +240,43 @@ public class Preferences_1 extends Layer_1 {
 	                    preferences.put("description",certificate.toString());
 	                    preferences.put("absolutePath",((CertificateProvider)connection).getAlias() + "/certificate");
 	                } else if ("key".equals(type)) {
-	                    Key key = ((KeyProvider)connection).getKey();
-	                    preferences.put("description",key.toString());
-	                    preferences.put("absolutePath",((KeyProvider)connection).getAlias() + "/key");
+	                    SignatureProvider signatureProvider = (SignatureProvider)connection;
+	                    preferences.put("absolutePath", signatureProvider.getClass().getSimpleName() + "/signature");
+	                } else if ("validator".equals(type)) {
+	                	CertificateFactory factory = CertificateFactory.getInstance("X.509");
+	                	URL url = new URL(
+	               			"xri://+resource/test/openmdx/resource/pki/UserCert.pem"
+	               		);
+	                	Certificate certificate = factory.generateCertificate(url.openStream());
+	                	CertPathValidatorResult result = ((CertificateValidator)connection).validate(
+                			factory.generateCertPath(
+                				Arrays.asList(certificate)
+                			)
+	                	);
+	                    preferences.put("description",result.toString());
+	                    preferences.put("absolutePath","TestTrust/validator");
 	                } else {
 	    	        	return super.get(ispec, input, output);
 	                }
 	                return output.add(facade.getDelegate());
+	        	} catch (CertPathValidatorException exception) {
+		        	throw new ServiceException(
+	                    exception,
+	                    BasicException.Code.DEFAULT_DOMAIN,
+	                    BasicException.Code.VALIDATION_FAILURE,
+	                    "Certificate validation failure",
+	                    new BasicException.Parameter("jndiName", jndiName)                    
+	                ).log();
+	        	} catch (InvalidAlgorithmParameterException exception) {
+		        	throw new ServiceException(
+	                    exception,
+	                    BasicException.Code.DEFAULT_DOMAIN,
+	                    BasicException.Code.NOT_SUPPORTED,
+	                    "Key store connection factory acquisition failed",
+	                    new BasicException.Parameter("jndiName", jndiName)                    
+	                ).log();
 	        	} catch (GeneralSecurityException exception) {
-		        		throw new ServiceException(
+		        	throw new ServiceException(
 	                    exception,
 	                    BasicException.Code.DEFAULT_DOMAIN,
 	                    BasicException.Code.MEDIA_ACCESS_FAILURE,
@@ -248,11 +285,18 @@ public class Preferences_1 extends Layer_1 {
 	                ).log();
 	            } catch (ResourceException exception) {
 	            	throw new ServiceException(
-		            		exception,
-		            		BasicException.Code.DEFAULT_DOMAIN,
-		            		BasicException.Code.SYSTEM_EXCEPTION,
-		            		"Key store adapter failure"
-		            	);
+	            		exception,
+	            		BasicException.Code.DEFAULT_DOMAIN,
+	            		BasicException.Code.SYSTEM_EXCEPTION,
+	            		"Key store adapter failure"
+	            	);
+				} catch (IOException exception) {
+	            	throw new ServiceException(
+	            		exception,
+	            		BasicException.Code.DEFAULT_DOMAIN,
+	            		BasicException.Code.NOT_FOUND,
+	            		"User certificate Retrieval failure"
+	            	);
 				}
 	        } else {
 	        	return super.get(ispec, input, output);

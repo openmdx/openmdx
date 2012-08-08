@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ElementDef.java,v 1.1 2009/01/13 02:10:41 wfro Exp $
+ * Name:        $Id: ElementDef.java,v 1.2 2010/06/02 13:42:22 hburger Exp $
  * Description: VelocityElementDef class
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:41 $
+ * Date:        $Date: 2010/06/02 13:42:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -110,6 +110,7 @@ public abstract class ElementDef {
   }
 
   //-------------------------------------------------------------------------
+  @Override
   public String toString(
   ) {
     return this.qualifiedName;

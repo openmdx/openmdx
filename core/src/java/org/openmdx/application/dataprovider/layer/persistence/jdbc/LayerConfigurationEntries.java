@@ -2,8 +2,8 @@
  * ==================================================================== Project:
  * openmdx, http://www.openmdx.org/ Name: $Id: LayerConfigurationEntries.java,v
  * 1.37 2006/11/17 16:55:57 hburger Exp $ Description: Generated constants for
- * LayerConfigurationEntries Revision: $Revision: 1.4 $ Owner: OMEX AG,
- * Switzerland, http://www.omex.ch Date: $Date: 2009/12/02 10:35:33 $
+ * LayerConfigurationEntries Revision: $Revision: 1.5 $ Owner: OMEX AG,
+ * Switzerland, http://www.omex.ch Date: $Date: 2010/06/04 19:32:05 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -743,5 +743,11 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
   static public final String RESULT_SET_TYPE_FORWARD_ONLY = "forwardOnly";
   static public final String RESULT_SET_TYPE_SCROLL_INSENSITIVE = "scrollInsensitive";
   static public final String RESULT_SET_TYPE_SCROLL_SENSITIVE = "scrollSensitive";
+
+  /**
+   * Defines whether "instance of state" filter properties may be substituted by
+   * core filter properties.
+   */
+  static public final String DISABLE_STATE_FILTER_SUBSTITUATION = "disableStateFilterSubstitution";
 
 }

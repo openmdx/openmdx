@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ApplicationContext.java,v 1.107 2010/04/27 21:22:22 wfro Exp $
+ * Name:        $Id: ApplicationContext.java,v 1.108 2010/07/22 23:18:23 wfro Exp $
  * Description: ApplicationContext
- * Revision:    $Revision: 1.107 $
+ * Revision:    $Revision: 1.108 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 21:22:22 $
+ * Date:        $Date: 2010/07/22 23:18:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -693,7 +693,9 @@ public final class ApplicationContext
                                     String title = 
                                         this.getCurrentLocaleAsIndex() < tab.getTitle().size() ? 
                                             tab.getTitle().get(this.getCurrentLocaleAsIndex()) : 
-                                            tab.getTitle().get(0);
+                                            	!tab.getTitle().isEmpty() ? 
+                                            		tab.getTitle().get(0) : 
+                                            			"NA";
                                     if(title != null) {
                                         if(title.startsWith("\u00BB")) title = title.substring(1);
                                         if(title.length() > 1) {

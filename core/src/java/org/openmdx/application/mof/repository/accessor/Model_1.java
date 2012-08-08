@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.44 2010/04/16 09:52:08 hburger Exp $
+ * Name:        $Id: Model_1.java,v 1.47 2010/08/06 12:25:25 hburger Exp $
  * Description: MOF repository accessor
- * Revision:    $Revision: 1.44 $
+ * Revision:    $Revision: 1.47 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 09:52:08 $
+ * Date:        $Date: 2010/08/06 12:25:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -91,6 +91,7 @@ import org.openmdx.application.xml.spi.ImportHelper;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
 import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
@@ -100,7 +101,7 @@ import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.Directions;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
@@ -352,6 +353,7 @@ public class Model_1 implements Model_1_0 {
         }
 
         //-----------------------------------------------------------------------
+        @Override
         public String toString(
         ) {
             return
@@ -1244,7 +1246,7 @@ public class Model_1 implements Model_1_0 {
                     null, 
                     0,
                     Integer.MAX_VALUE,
-                    Directions.ASCENDING
+                    SortOrder.ASCENDING.code()
                 );
                 for(
                     Iterator<MappedRecord> j = elementDefs.iterator();
@@ -1665,11 +1667,11 @@ public class Model_1 implements Model_1_0 {
                     }
                 }
             }
-            this.structuralFeatureDefMap.putIfAbsent(
+            allStructuralFeatureDefs = Maps.putUnlessPresent(
+                this.structuralFeatureDefMap,
                 (Path)classDef.jdoGetObjectId(),
                 allStructuralFeatureDefs
             );
-            allStructuralFeatureDefs = (Map)this.structuralFeatureDefMap.get(classDef.jdoGetObjectId());            
         }
         Map<Boolean,Map<Boolean,Map<String,ModelElement_1_0>>> structuralFeatureDefsIncludeSubtypes = (Map)allStructuralFeatureDefs.get(includeSubtypes);
         Map<Boolean,Map<String,ModelElement_1_0>> structuralFeatureDefsIncludeDerived = (Map<Boolean,Map<String,ModelElement_1_0>>)structuralFeatureDefsIncludeSubtypes.get(includeDerived);

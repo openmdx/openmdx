@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: AbstractDatabase_1.java,v 1.66 2010/04/16 09:47:54 hburger Exp $
+ * Name:        $Id: AbstractDatabase_1.java,v 1.75 2010/09/03 09:08:42 wfro Exp $
  * Description: AbstractDatabase_1 plugin
- * Revision:    $Revision: 1.66 $
+ * Revision:    $Revision: 1.75 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 09:47:54 $
+ * Date:        $Date: 2010/09/03 09:08:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -104,9 +104,11 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.application.dataprovider.layer.persistence.common.AbstractPersistence_1;
@@ -122,13 +124,10 @@ import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.URI_1;
-import org.openmdx.base.query.AttributeSpecifier;
-import org.openmdx.base.query.Directions;
+import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.Filter;
-import org.openmdx.base.query.FilterOperators;
-import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.query.Orders;
-import org.openmdx.base.query.Quantors;
+import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
@@ -165,6 +164,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     }
 
     // --------------------------------------------------------------------------
+    @Override
     public Interaction getInteraction(
         javax.resource.cci.Connection connection
     ) throws ResourceException {
@@ -225,6 +225,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     ) throws SQLException;
 
     //---------------------------------------------------------------------------
+    @Override
     public void activate(
         short id, 
         Configuration configuration,
@@ -233,7 +234,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
 
         SysLog.detail(
             "activating", 
-            "$Id: AbstractDatabase_1.java,v 1.66 2010/04/16 09:47:54 hburger Exp $"
+            "$Id: AbstractDatabase_1.java,v 1.75 2010/09/03 09:08:42 wfro Exp $"
         );
 
         super.activate( 
@@ -499,6 +500,9 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             );
         }     
 
+        this.enableStateFilterSubstitution = !configuration.isOn(
+            LayerConfigurationEntries.DISABLE_STATE_FILTER_SUBSTITUATION
+        );
         this.configuration = new DatabaseConfiguration(
             this.namespaceId,
             this.referenceIdFormat,
@@ -1743,6 +1747,36 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     }
 
     //---------------------------------------------------------------------------
+    /**
+     * Map database-neutral column name to database-specific column name.
+     */
+    String getDatabaseSpecificColumnName(
+        Connection conn,
+        String columnName,
+        boolean ignoreReservedWords
+    ) throws ServiceException {
+        String databaseProductName = null;
+        try {
+            databaseProductName = conn.getMetaData().getDatabaseProductName();
+        } catch(Exception e) {}
+        if(!ignoreReservedWords) {
+            if(
+                "HSQL Database Engine".equals(databaseProductName) &&
+                (RESERVED_WORDS_HSQLDB.contains(columnName) || (columnName.indexOf("$") >= 0))
+            ) {
+                columnName = "\"" + columnName.toUpperCase() + "\"";
+            }
+            else if(
+                "Oracle".equals(databaseProductName) &&
+                RESERVED_WORDS_ORACLE.contains(columnName)
+            ) {
+                columnName = "\"" + columnName + "\"";
+            }
+        }
+        return columnName;
+    }
+
+    //---------------------------------------------------------------------------    
     String getColumnName(
         Connection conn,
         String attributeName,
@@ -1807,20 +1841,11 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 columnName = columnName + "$" + String.valueOf(index);
             }
         }
-        else {
-            // DB-specific handling
-            String databaseProductName = null;
-            try {
-                databaseProductName = conn.getMetaData().getDatabaseProductName();
-            } catch(Exception e) {}
-            if(
-                !ignoreReservedWords &&
-                "HSQL Database Engine".equals(databaseProductName) &&
-                (RESERVED_WORDS_HSQLDB.contains(columnName) || (columnName.indexOf("$") >= 0))
-            ) {
-                columnName = "\"" + columnName.toUpperCase() + "\"";
-            }
-        }
+        columnName = this.getDatabaseSpecificColumnName(
+            conn, 
+            columnName, 
+            ignoreReservedWords
+        );
         return columnName;
     }
 
@@ -2904,7 +2929,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
              * FOR_ALL --> all attribute values must match --> all slices must match
              * THERE_EXISTS --> at least one attribute value must match --> at least one row must match --> subtract all rows which do not match
              */
-            if(filterProperty.quantor() == (negate ? Quantors.FOR_ALL : Quantors.THERE_EXISTS)) {
+            if(filterProperty.quantor() == (negate ? Quantifier.FOR_ALL.code() : Quantifier.THERE_EXISTS.code())) {
                 // For embedded features the clause is of the form (expr0 OR expr1 OR ... OR exprN)
                 // where N is the upper bound for the embedded feature 
                 int upperBound = this.embeddedFeatures.containsKey(filterProperty.name()) ? 
@@ -2941,7 +2966,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         columnName, 
                         clauseValues
                     );
-                    if(viewIsPrimary && (filterProperty.quantor() == Quantors.FOR_ALL)) {
+                    if(viewIsPrimary && (filterProperty.quantor() == Quantifier.FOR_ALL.code())) {
                         clause += " OR (" + columnName + " IS NULL)";
                     }
                     clause += ")";
@@ -3009,23 +3034,23 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         Collection<Object> clauseValues
     ) throws ServiceException {
         String clause = "";
-        int operator = filterProperty.operator();
+        short operator = filterProperty.operator();
         int quantor = filterProperty.quantor();
         if(negate) {
-            quantor = quantor == Quantors.THERE_EXISTS ? Quantors.FOR_ALL : Quantors.THERE_EXISTS;
-            operator = - operator;
+            quantor = quantor == Quantifier.THERE_EXISTS.code() ? Quantifier.FOR_ALL.code() : Quantifier.THERE_EXISTS.code();
+            operator = (short)-operator;
         }
-        switch(operator) {
+        switch(ConditionType.valueOf(operator)) {
 
             /**
              * Evaluate the following:
              * THERE_EXISTS v IN A: v NOT IN Q (Special: if Q={} ==> true, iff A<>{}, false otherwise)
              * FOR_ALL v IN A: v NOT IN Q (Special: if Q={} ==> true) 
              */
-            case FilterOperators.IS_NOT_IN:
+            case IS_NOT_IN:
                 // Q = {}
                 if(filterProperty.getValues().length == 0) {
-                    if(quantor == Quantors.FOR_ALL) {
+                    if(quantor == Quantifier.FOR_ALL.code()) {
                         clause += "(1=1)";
                     }
                     else {
@@ -3050,13 +3075,13 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 break;
 
             // IS_LESS
-            case FilterOperators.IS_LESS:
+            case IS_LESS:
                 clause += "(" + columnName + " < " + getPlaceHolder(conn, filterProperty.getValue(0)) + ")";
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 break;
 
             // IS_LESS_OR_EQUAL
-            case FilterOperators.IS_LESS_OR_EQUAL:
+            case IS_LESS_OR_EQUAL:
                 clause += "(" + columnName + " <= " + getPlaceHolder(conn, filterProperty.getValue(0)) + ")";
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 break;
@@ -3065,11 +3090,11 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             // Evaluate the following:
             // THERE_EXISTS v IN A: v IN Q (Special: if Q={} ==> false)
             // FOR_ALL v IN A: v IN Q (Special: if Q={} ==> true, iff A={}, false otherwise)
-            case FilterOperators.IS_IN:   
+            case IS_IN:   
 
                 // Q = {}
                 if(filterProperty.getValues().length == 0) {
-                    if(quantor == Quantors.THERE_EXISTS) {
+                    if(quantor == Quantifier.THERE_EXISTS.code()) {
                         clause += "(1=0)";
                     }
                     else {
@@ -3115,7 +3140,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                 columnName = viewAliasName + "." + dbObject.getObjectIdColumn().get(0);
                             }
                             Filter filter = (Filter)filterProperty.getValue(0);
-                            List<FilterProperty> allFilterProperties = Filter.getFilterProperties(filter);
+                            List<FilterProperty> allFilterProperties = FilterProperty.getFilterProperties(filter);
                             // Replace instance_of IN ... by object_class IN ...
                             FilterProperty objectClassFilterProperty = null;
                             for(Iterator<FilterProperty> i = allFilterProperties.iterator(); i.hasNext(); ) {
@@ -3248,33 +3273,33 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 break;
 
             // IS_GREATER_OR_EQUAL
-            case FilterOperators.IS_GREATER_OR_EQUAL:
+            case IS_GREATER_OR_EQUAL:
                 clause += "(" + columnName + " >= " + getPlaceHolder(conn, filterProperty.getValue(0)) + ")";
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 break;
 
             // IS_GREATER
-            case FilterOperators.IS_GREATER:
+            case IS_GREATER:
                 clause += "(" + columnName + " > " + getPlaceHolder(conn, filterProperty.getValue(0)) + ")";
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 break;
 
             // IS_BETWEEN
-            case FilterOperators.IS_BETWEEN:
+            case IS_BETWEEN:
                 clause += "((" + columnName + " >= " + getPlaceHolder(conn, filterProperty.getValue(0)) + ") AND (" + columnName + " <= " + getPlaceHolder(conn, filterProperty.getValue(1)) + "))";
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(1)));
                 break;
 
             // IS_OUTSIDE
-            case FilterOperators.IS_OUTSIDE:
+            case IS_OUTSIDE:
                 clause += "((" + columnName + " < " + getPlaceHolder(conn, filterProperty.getValue(0)) + ") OR (" + columnName + " > " + getPlaceHolder(conn, filterProperty.getValue(1)) + "))";
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(1)));
                 break;
 
             // IS_LIKE
-            case FilterOperators.IS_LIKE:
+            case IS_LIKE:
                 clause += "(";
                 for(
                     int j = 0; 
@@ -3418,7 +3443,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 break;
 
             // IS_UNLIKE
-            case FilterOperators.IS_UNLIKE:
+            case IS_UNLIKE:
                 clause += "(";
                 for(
                     int j = 0; 
@@ -3526,7 +3551,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 break;
 
             // SOUNDS_LIKE
-            case FilterOperators.SOUNDS_LIKE:
+            case SOUNDS_LIKE:
                 clause += "(SOUNDEX(" + columnName + ") IN (SOUNDEX(?)";
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 for(
@@ -3541,7 +3566,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 break;
 
             // SOUNDS_UNLIKE
-            case FilterOperators.SOUNDS_UNLIKE:
+            case SOUNDS_UNLIKE:
                 clause += "(SOUNDEX(" + columnName + ") NOT IN (SOUNDEX(?)";
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 for(
@@ -3561,7 +3586,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
                     "Unsupported operator", 
-                    new BasicException.Parameter("operator", FilterOperators.toString(operator))
+                    new BasicException.Parameter("operator", ConditionType.valueOf(operator))
                 );
         }
         return clause;
@@ -3877,16 +3902,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         );                        
                     }
                     isExtent = true;
-                    short operator = p.operator();
-                    boolean escaped = 
-                        FilterOperators.IS_LIKE == operator ||
-                        FilterOperators.IS_UNLIKE == operator;
-                    String raw = p.getValue(0).toString();     
-                    adjustedAccessPath = escaped ? toPattern(
-                        raw
-                    ) : new Path(
-                        raw
-                    );
+                    adjustedAccessPath = new Path(p.getValue(0).toString());
                 }
             }
             if(!isExtent) {
@@ -4627,29 +4643,32 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     }
                     else if(OBJECT_INSTANCE_OF.equals(p.name())) {
                         if(
-                            (p.operator() == FilterOperators.IS_IN) &&
-                            (p.quantor()  == Quantors.THERE_EXISTS) &&
-                            (p.getValues().length == 1) 
+                            (p.operator() == ConditionType.IS_IN.code()) &&
+                            (p.quantor()  == Quantifier.THERE_EXISTS.code())
                         ) {
-                            ModelElement_1_0 classDef = this.getModel().getDereferencedType(p.getValue(0));
-                            if(
-                                !"org:openmdx:base:ExtentCapable".equals(p.getValue(0)) &&
-                                (classDef != null)
-                            ) { 
-                                FilterProperty mappedFilterProperty = AbstractDatabase_1.this.mapInstanceOfFilterProperty(
-                                    request,
-                                    classDef
-                                );
-                                if(mappedFilterProperty != null) {
-                                    filterProperties.add(mappedFilterProperty);
-                                } 
+                            List<ModelElement_1_0> classDefs = new ArrayList<ModelElement_1_0>(); 
+                            for(Object qualifiedClassName: p.getValues()) {
+                                ModelElement_1_0 classDef =  this.getModel().getDereferencedType(qualifiedClassName);
+                                if(
+                                    !"org:openmdx:base:ExtentCapable".equals(qualifiedClassName) &&
+                                    (classDef != null)
+                                ) {                                 
+                                    classDefs.add(classDef);                                   
+                                }      
                             }
+                            FilterProperty mappedFilterProperty = AbstractDatabase_1.this.mapInstanceOfFilterProperty(
+                                request,
+                                classDefs.toArray(new ModelElement_1_0[classDefs.size()])
+                            );
+                            if(mappedFilterProperty != null) {
+                                filterProperties.add(mappedFilterProperty);
+                            } 
                         } 
                         else {
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.ASSERTION_FAILURE,
-                                "'THERE_EXISTS object_instanceOf IS_IN' clauses must have exactly one filter value",
+                                "Property " + OBJECT_INSTANCE_OF + " only accepts condition " + ConditionType.IS_IN + " and quantor " + Quantifier.THERE_EXISTS,
                                 new BasicException.Parameter("ispec", ispec),
                                 new BasicException.Parameter("input", input)
                             );
@@ -4672,7 +4691,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     i++
                 ) {
                     // only add to orderBy set if unspecified order
-                    if(request.attributeSpecifier()[i].order() != Orders.ANY) {
+                    if(request.attributeSpecifier()[i].order() != SortOrder.UNSORTED.code()) {
                         String attributeName = request.attributeSpecifier()[i].name();
                         orderBy.add(attributeName);
                         mixins.add(attributeName);
@@ -4878,12 +4897,12 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 ) {
                     AttributeSpecifier specifier = request.attributeSpecifier()[i];
                     // only add to ORDER set if specified order
-                    if(request.attributeSpecifier()[i].order() != Orders.ANY) {
+                    if(request.attributeSpecifier()[i].order() != SortOrder.UNSORTED.code()) {
                         if(!hasOrderBy) statement += " ORDER BY"; 
                         boolean viewIsIndexed = dbObject.getIndexColumn() != null;              
                         statement += hasOrderBy ? ", " : " ";
                         // order on mixin view (vm.) in case of indexed slices, otherwise on primary view (v.)
-                        statement += (viewIsIndexed ? "vm." : "v.") + getColumnName(conn, specifier.name(), 0, false, true) + (specifier.order() == Directions.DESCENDING ? " DESC" : " ASC");
+                        statement += (viewIsIndexed ? "vm." : "v.") + getColumnName(conn, specifier.name(), 0, false, true) + (specifier.order() == SortOrder.DESCENDING.code() ? " DESC" : " ASC");
                         hasOrderBy = true;
                     }
                 }
@@ -4949,7 +4968,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     request.size() : 
                         java.lang.Math.min(request.size(), AbstractDatabase_1.this.batchSize);
                 int replyPosition = request.position();
-                if(request.direction() == Directions.DESCENDING) {
+                if(request.direction() == SortOrder.DESCENDING.code()) {
                     if(replySize > replyPosition) replySize = replyPosition + 1;
                     replyPosition = replyPosition + 1 - replySize;
                 }
@@ -5674,21 +5693,6 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     }
 
     /**
-     * This is mainly used for identity attribute processing
-     * 
-     * @param likeValue
-     * 
-     * @return the corresponding path
-     * 
-     * @see SystemAttributes#OBJECT_IDENTITY
-     */
-    public static Path toPattern(
-        String likeValue
-    ){
-        return new Path(likeValue.replace("\\.", "."));
-    }
-        
-    /**
      * Retrieves the configured date type
      * 
      * @param connection
@@ -5792,45 +5796,56 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     //---------------------------------------------------------------------------
     protected FilterProperty mapInstanceOfFilterProperty(
         DataproviderRequest request,
-        ModelElement_1_0 classDef
+        ModelElement_1_0... classDefs
     ) throws ServiceException {
-        String qualifiedName = (String) classDef.objGetValue("qualifiedName");
-        if(
-            "org:openmdx:state2:DateState".equals(qualifiedName) || 
-            "org:openmdx:state2:DateTimeState".equals(qualifiedName)
-        ) {
-            for(FilterProperty filterProperty : request.attributeFilter()) {
-                if("core".equals(filterProperty.name())) {
-                    // Skipping 'object_instanceof' predicate because a 'core' predicate is supplied as well
-                    return null;
-                } 
+        Set<String> subClasses = new HashSet<String>();
+        for(ModelElement_1_0 classDef: classDefs) {
+            String qualifiedName = (String)classDef.objGetValue("qualifiedName");
+            // State queries
+            if(
+                this.enableStateFilterSubstitution && (
+                    "org:openmdx:state2:DateState".equals(qualifiedName) || 
+                    "org:openmdx:state2:DateTimeState".equals(qualifiedName)
+                )
+            ) {
+                if(classDefs.length > 1) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "Property " + SystemAttributes.OBJECT_INSTANCE_OF + " must have at most one argument for state queries",
+                        new BasicException.Parameter("request", request)
+                    );
+                }
+                for(FilterProperty filterProperty : request.attributeFilter()) {
+                    if("core".equals(filterProperty.name())) {
+                        // Skipping 'object_instanceof' predicate because a 'core' predicate is supplied as well
+                        return null;
+                    } 
+                }
+                return new FilterProperty(
+                    Quantifier.THERE_EXISTS.code(),
+                    "core",  
+                    ConditionType.IS_NOT_IN.code()
+                );
+            } 
+            // Adding the filter property OBJECT_CLASS for BasicObject typically results
+            // in a long list of subclasses which is expensive to process for database 
+            // systems. Eliminating the BasicObject filter could result in returning objects
+            // which are not instance of BasicObject. However this should never happen because
+            // BasicObject's and non-BasicObject's must never be mixed in the same database table.
+            else if(!"org:openmdx:base:BasicObject".equals(qualifiedName)) {
+                for(Object path : classDef.objGetList("allSubtype")) {
+                    subClasses.add(((Path)path).getBase());
+                }
             }
-            return new FilterProperty(
-                Quantors.THERE_EXISTS ,
-                "core",  
-                FilterOperators.IS_NOT_IN
-            );
-        } 
-        // Adding the filter property OBJECT_CLASS for BasicObject typically results
-        // in a long list of subclasses which is expensive to process for database 
-        // systems. Eliminating the BasicObject filter could result in returning objects
-        // which are not instance of BasicObject. However this should never happen because
-        // BasicObject's and non-BasicObject's must never be mixed in the same database table.
-        else if("org:openmdx:base:BasicObject".equals(qualifiedName)) {
-            return null;
-        } 
-        else {
-            Set<String> subClasses = new HashSet<String>();
-            for(Object path : classDef.objGetList("allSubtype")) {
-                subClasses.add(((Path)path).getBase());
-            }
-            return new FilterProperty(
-                Quantors.THERE_EXISTS ,
+        }
+        return subClasses.isEmpty() ? null :
+            new FilterProperty(
+                Quantifier.THERE_EXISTS.code() ,
                 OBJECT_CLASS,  
-                FilterOperators.IS_IN,
+                ConditionType.IS_IN.code(),
                 subClasses.toArray()
             );
-        }
     };
     
     //---------------------------------------------------------------------------
@@ -5901,6 +5916,14 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         Arrays.asList(   
             "position", 
             "POSITION"
+        )
+    );
+    protected static final Set<String> RESERVED_WORDS_ORACLE = new HashSet<String>(
+        Arrays.asList(   
+            "resource", 
+            "RESOURCE",
+            "comment", 
+            "COMMENT"
         )
     );
 
@@ -6010,6 +6033,11 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
      */
     protected int fetchSize;
 
+    /**
+     * Tells whether state filter substitution is enabled or disabled.
+     */
+    protected boolean enableStateFilterSubstitution;
+    
     /**
      * technical column names: object_oid, object_rid, object_idx
      * (may be used by DbObject implementations if required)

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: IsBetweenCondition.java,v 1.7 2009/01/06 10:21:19 wfro Exp $
- * Description: 
- * Revision:    $Revision: 1.7 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: IsBetweenCondition.java,v 1.10 2010/06/21 17:33:11 hburger Exp $
+ * Description: Is-Between Condition
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/06 10:21:19 $
+ * Date:        $Date: 2010/06/21 17:33:11 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,71 +45,154 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.query;
 
-import java.io.Serializable;
+import java.util.List;
 
-public class IsBetweenCondition
-  extends Condition
-  implements Serializable, Cloneable {
+/**
+ * Typed condition for<ul>
+ * <li>ConditionType.IS_BETWEEN
+ * <li>ConditionType.IS_OUTSIDE
+ * </ul>
+ */
+public class IsBetweenCondition extends Condition {
 
-  /**
-     * 
+    /**
+     * Constructor 
+     */
+    public IsBetweenCondition(
+    ) {
+        super(
+            null, // quantifier
+            null, //feature
+            new Object[]{null, null} // values
+        );
+        this.fulfils = false;
+    }
+
+    /**
+     * Constructor 
+     *
+     * @param quantifier
+     * @param feature
+     * @param fulfil
+     * @param lowerBound
+     * @param upperBound
+     */
+    public IsBetweenCondition(
+        Quantifier quantifier,
+        String feature,
+        boolean fulfil,
+        Object lowerBound,
+        Object upperBound
+    ) {
+        super(
+            quantifier,
+            feature,
+            lowerBound, 
+            upperBound
+        );
+        this.fulfils = fulfil;
+    }
+
+    /**
+     * Implements <code>Serializable</code>
      */
     private static final long serialVersionUID = 4050479036709154872L;
 
-public IsBetweenCondition(
-  ) {
-    super(
-        null, null
-    );
-  }
-  
-  public IsBetweenCondition(
-      short quantor,
-      String feature,
-      boolean fulfil,
-      Object lower,
-      Object upper
-  ) {
-    super(
-        quantor,
-        feature,
-        fulfil,
-        lower, upper
-    );
-  }
+    /**
+     * Defines whether the condition shall be <code>true</code> of <code>false</code>
+     */
+    private boolean fulfils;
+        
+    /**
+     * Clone the condition
+     * 
+     * @return a clone
+     */
+    @Override
+    public IsBetweenCondition clone(
+    ) throws CloneNotSupportedException {
+        return new IsBetweenCondition(
+            this.getQuantifier(), 
+            this.getFeature(), 
+            this.isFulfil(),
+            this.getLowerBound(),
+            this.getUpperBound()
+        );
+    }
 
-  public String getName(
-  ) {
-    return this.isFulfil()
-      ? "IS_BETWEEN"
-      : "IS_OUTSIDE";
-  }
+    /**
+     * Tells whether the condition shall be <code>true</code> or <code>false</code>
+     * 
+     * @return <code>true</code> if the condition shall be fulfilled
+     */
+    public boolean isFulfil() {
+        return this.fulfils;
+    }
 
-  public Object getLower(
-  ) {
-    return this.values[0];
-  }
-  
-  public void setLower(
-      Object lower
-  ) {
-    this.values[0] = lower;
-  }
+    /**
+     * Defines whether the condition shall be <code>true</code> or <code>false</code>
+     * 
+     * @param fulful <code>true</code> if the condition shall be fulfilled
+     */
+    public void setFulfil(
+        boolean fulfil
+    ) {
+        this.fulfils = fulfil;
+    }
 
-  public Object getUpper(
-  ) {
-    return this.values[1];
-  }
-  
-  public void setUpper(
-      Object upper
-  ) {
-    this.values[1] = upper;
-  }
+    @Override
+    public ConditionType getType(
+    ) {
+        return this.isFulfil() ? ConditionType.IS_BETWEEN : ConditionType.IS_OUTSIDE;
+    }
+
+    /**
+     * Retrieve the condition's lower bound
+     * 
+     * @return the condition's lower bound
+     */
+    public Object getLowerBound(
+    ) {
+        return super.getValue(0);
+    }
+
+    /**
+     * Required to decode legacy XML data
+     * 
+     * @deprecated use {@link Filter#setCondition(List)}
+     */
+    @Deprecated
+    public void setLower(
+        Object lower
+    ) {
+        super.setValue(0, lower);
+    }
+
+    /**
+     * Retrieve the condition's upper bound
+     * 
+     * @return the condition's upper bound
+     */
+    public Object getUpperBound(
+    ) {
+        return super.getValue(1);
+    }
+
+    /**
+     * Required to decode legacy XML data
+     * 
+     * @deprecated use {@link Filter#setCondition(List)}
+     */
+    @Deprecated
+    public void setUpper(
+        Object upper
+    ) {
+        super.setValue(1);
+    }
 
 }

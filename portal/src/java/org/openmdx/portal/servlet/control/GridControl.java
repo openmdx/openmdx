@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: GridControl.java,v 1.45 2009/09/25 12:02:38 wfro Exp $
+ * Name:        $Id: GridControl.java,v 1.46 2010/07/21 09:16:38 wfro Exp $
  * Description: GridControlDef
- * Revision:    $Revision: 1.45 $
+ * Revision:    $Revision: 1.46 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/25 12:02:38 $
+ * Date:        $Date: 2010/07/21 09:16:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -138,18 +138,21 @@ public class GridControl
           String columnLabel = 
               this.localeAsIndex < columnDef.getShortLabel().size() ? 
             	  columnDef.getShortLabel().get(this.localeAsIndex) : 
-            	  columnDef.getShortLabel().size() > 0 ? columnDef.getShortLabel().get(0) : "N/A";
+	            	  !columnDef.getShortLabel().isEmpty() ? columnDef.getShortLabel().get(0) : 
+	            		  this.localeAsIndex < columnDef.getLabel().size() ?
+	            			  columnDef.getLabel().get(this.localeAsIndex) :
+	            				  !columnDef.getLabel().isEmpty() ? columnDef.getLabel().get(0) : "N/A";
           String columnToolTip =
               this.localeAsIndex < columnDef.getToolTip().size() ? 
             	  columnDef.getToolTip().get(this.localeAsIndex) : 
-            	  columnDef.getToolTip().size() > 0 ? columnDef.getToolTip().get(0) : "N/A";
+            	  !columnDef.getToolTip().isEmpty() ? columnDef.getToolTip().get(0) : "N/A";
           columnFilterSetActions.add(
               new Action(
                   columnDef.isFilterable() && !objectContainer.isReferenceIsStoredAsAttribute() ? 
                 	  Action.EVENT_SET_COLUMN_FILTER : 
                 	  Action.EVENT_NONE,
                   new Action.Parameter[]{
-                      new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex),
+                      new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(paneIndex)),
                       new Action.Parameter(Action.PARAMETER_REFERENCE, this.id),       
                       new Action.Parameter(Action.PARAMETER_NAME, columnDef.getFeatureName())
                   },
@@ -165,7 +168,7 @@ public class GridControl
                 	  Action.EVENT_ADD_COLUMN_FILTER : 
                 	  Action.EVENT_NONE,
                   new Action.Parameter[]{
-                      new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex),
+                      new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(paneIndex)),
                       new Action.Parameter(Action.PARAMETER_REFERENCE, this.id),       
                       new Action.Parameter(Action.PARAMETER_NAME, columnDef.getFeatureName())          
                   },

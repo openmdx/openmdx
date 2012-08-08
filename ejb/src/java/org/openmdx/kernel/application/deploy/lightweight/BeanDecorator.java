@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BeanDecorator.java,v 1.4 2009/09/10 14:45:07 hburger Exp $
+ * Name:        $Id: BeanDecorator.java,v 1.5 2010/06/04 22:45:00 hburger Exp $
  * Description: Bean Decorator
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/10 14:45:07 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -208,7 +208,8 @@ abstract class BeanDecorator<T extends Bean>
         return super.delegate.getTimeBetweenEvictionRuns();
     }
 
-    public Report validate() {
+    @Override
+	public Report validate() {
         // the check whether validation has been done before avoids, that
         // the report is growing and growing
         if (!this.isValidated())

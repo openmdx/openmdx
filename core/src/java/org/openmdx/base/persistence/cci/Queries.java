@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Queries.java,v 1.4 2009/08/06 10:46:25 hburger Exp $
+ * Name:        $Id: Queries.java,v 1.6 2010/05/27 17:58:13 hburger Exp $
  * Description: OPENMDXQL Queries
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/08/06 10:46:25 $
+ * Date:        $Date: 2010/05/27 17:58:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,7 +69,7 @@ public class Queries {
      * {@link PersistenceManager#newQuery(String,Object)} to identify that the
      * created query should obey the OPENMDXQL syntax and semantic rules.
      */
-    public static final String OPENMDXQL = "javax.jdo.query.OPENMDXQL";
+    public static final String QUERY_LANGUAGE = "org.openmdx.query.OPENMDXQL";
 
     /**
      * A string constant used as the second argument to
@@ -82,5 +82,10 @@ public class Queries {
      * </ol>
      */
     public static final String ASPECT_QUERY = "org.openmdx.query.Aspect";
+    
+    /**
+     * The query extension's key
+     */
+    public static final String QUERY_EXTENSION = "org.openmdx.query.Extension";
     
 }

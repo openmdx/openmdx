@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestKeyStoreResources.java,v 1.5 2010/01/04 17:35:01 hburger Exp $
+ * Name:        $Id: TestKeyStoreResources.java,v 1.11 2010/09/06 04:12:36 hburger Exp $
  * Description: Test Key Store Resources
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/04 17:35:01 $
+ * Date:        $Date: 2010/09/06 04:12:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -77,27 +77,45 @@ import org.openmdx.preferences1.jmi1.Segment;
  */
 public class TestKeyStoreResources {
 
+	/**
+	 * Test set-up
+	 * 
+	 * @throws NamingException
+	 */
 	@Before
-	public void setUp() throws NamingException{
-		if(!NamingManager.hasInitialContextFactoryBuilder()) {
-			Map<String,String> pkiProviders = new HashMap<String,String>();
+	public void setUp() throws NamingException {
+		if (!NamingManager.hasInitialContextFactoryBuilder()) {
+			Map<String, String> pkiProviders = new HashMap<String, String>();
 			String userHome = System.getProperty("user.home").replaceAll("/", "\\\\/");
 			pkiProviders.put(
 				"org.openmdx.comp.env.pki.certificate",
-				"eis:org.openmdx.resource.pki.keystore.ManagedKeyStoreConnectionFactory?" +
+				"eis:org.openmdx.resource.pki.keystore.ManagedConnectionFactory?" +
 				"KeyStoreType=jks&" +
 				"ConnectionURL=file:" + userHome + "\\/opt\\/bea\\/weblogic92\\/server\\/lib\\/DemoTrust.jks&" +
+				"ConnectionType=CERTIFICATE_PROVIDER&" +
 				"UserName=certgenca&" +
 				"Password=DemoTrustKeyStorePassPhrase"
 			);
 			pkiProviders.put(
 				"org.openmdx.comp.env.pki.key",
-				"eis:org.openmdx.resource.pki.keystore.ManagedKeyStoreConnectionFactory?" +
+				"eis:org.openmdx.resource.pki.keystore.ManagedConnectionFactory?" +
 				"KeyStoreType=jks&" +
 				"ConnectionURL=file:" + userHome + "\\/opt\\/bea\\/weblogic92\\/server\\/lib\\/DemoIdentity.jks&" +
+				"ConnectionType=SIGNATURE_PROVIDER&" +
 				"PassPhraseSeparator=|&" +
 				"UserName=DemoIdentity&" +
+				"Algorithm=MD5withRSA&" +
 				"Password=DemoIdentityKeyStorePassPhrase|DemoIdentityPassPhrase"
+			);
+			pkiProviders.put(
+				"org.openmdx.comp.env.pki.validator",
+				"eis:org.openmdx.resource.pki.keystore.ManagedConnectionFactory?" +
+				"KeyStoreType=jks&" +
+				"ConnectionURL=xri:\\/\\/+resource\\/test\\/openmdx\\/resource\\/pki\\/TestTrust.jks&" +
+				"ConnectionType=CERTIFICATE_VALIDATOR&" +
+				"Algorithm=PKIX&" +
+				"UserName=KeyStore&" +
+				"Password=secret"
 			);
             NonManagedInitialContextFactoryBuilder.install(pkiProviders);
 		}
@@ -119,16 +137,27 @@ public class TestKeyStoreResources {
             Preferences1Package.AUTHORITY_XRI
         );
         Provider provider = authority.getProvider("PKI");
+        //
+        // Certificate
+        //
         Segment segment = (Segment) provider.getSegment("certificate");
         Preferences preferences = segment.getPreferences("certificate");
         assertEquals("certgenca/certificate", preferences.getAbsolutePath());
-        SysLog.log(Level.INFO,"{0}: {1}", preferences.getAbsolutePath(), preferences.getDescription());
+        SysLog.log(Level.INFO,"{0}: {1}", preferences.getAbsolutePath(), preferences.getDescription());        
         segment = (Segment) provider.getSegment("key");
-        preferences = segment.getPreferences("certificate");
-        assertEquals("DemoIdentity/certificate", preferences.getAbsolutePath());
-        SysLog.log(Level.INFO,"{0}: {1}", preferences.getAbsolutePath(), preferences.getDescription());
+//      preferences = segment.getPreferences("certificate");
+//      assertEquals("DemoIdentity/certificate", preferences.getAbsolutePath());
+//      SysLog.log(Level.INFO,"{0}: {1}", preferences.getAbsolutePath(), preferences.getDescription());
+        //
+        // Signature
+        //
         preferences = segment.getPreferences("key");
-        assertEquals("DemoIdentity/key", preferences.getAbsolutePath());
+        assertEquals("SignatureConnection/signature", preferences.getAbsolutePath());
+        SysLog.log(Level.INFO,"{0}: {1}", preferences.getAbsolutePath(), preferences.getDescription());
+        // Validator
+        segment = (Segment) provider.getSegment("validator");
+        preferences = segment.getPreferences("validator");
+        assertEquals("TestTrust/validator", preferences.getAbsolutePath());
         SysLog.log(Level.INFO,"{0}: {1}", preferences.getAbsolutePath(), preferences.getDescription());
     }
 

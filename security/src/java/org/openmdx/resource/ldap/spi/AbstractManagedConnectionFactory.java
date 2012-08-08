@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AbstractManagedConnectionFactory.java,v 1.1 2010/03/05 13:23:50 hburger Exp $
- * Description: Abstract Managed Connection Factory
- * Revision:    $Revision: 1.1 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: AbstractManagedConnectionFactory.java,v 1.6 2010/09/01 15:07:58 hburger Exp $
+ * Description: Abstract Managed LDAP Connection Factory
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/05 13:23:50 $
+ * Date:        $Date: 2010/09/01 15:07:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,232 +50,70 @@
  */
 package org.openmdx.resource.ldap.spi;
 
-import java.io.PrintWriter;
-import java.util.Collections;
-import java.util.Set;
-
 import javax.resource.ResourceException;
-import javax.resource.spi.ManagedConnectionFactory;
-import javax.resource.spi.SecurityException;
-import javax.resource.spi.security.PasswordCredential;
-import javax.security.auth.Subject;
+import javax.resource.spi.ConnectionManager;
+
+
 
 /**
- * Abstract Managed Connection Factory
+ * Abstract Managed LDAP Connection FactoryAbstract Managed LDAP Connection Factory
  */
-public abstract class AbstractManagedConnectionFactory implements ManagedConnectionFactory {
+public abstract class AbstractManagedConnectionFactory 
+	extends org.openmdx.resource.spi.AbstractManagedConnectionFactory 
+{
 
-    /**
+	/**
      * Constructor
      */
     protected AbstractManagedConnectionFactory() {
-        super();
+	    super();
     }
 
 	/**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 8606343080939877576L;
-
-    /**
-     * 
-     */
-    private Object identity = null;
-    
-    /**
-     * 
-     */
-    private PrintWriter logWriter;
-    
-    /**
-     * 'ConnectionURL' property, e.g.<ul>
-     * <li>"directory.knowledge.com"
-     * <li>"199.254.1.2"
-     * <li>"directory.knowledge.com:1050 people.catalog.com 199.254.1.2"
-     * </ul>
-     */
-    private String connectionURL;
-    
-    /**
-     * The distinguished name
-     */
-    private String userName;
-    
-    /**
-     * The LDAP password
-     */
-    private String password;
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#getLogWriter()
-     */
-    public final PrintWriter getLogWriter(
-    ) throws ResourceException {
-        return this.logWriter;
-    }
+    private static final long serialVersionUID = -1024116393801026171L;
 
 	/**
-     * 
-     * @param subject
-     * @return
-     * @throws ResourceException
+	 * Default LDAP protocol version
+	 */
+	protected static int DEFAULT_PROTOCOL_VERSION = 2;
+	
+    /**
+     * The LDAP protocol version
      */
-    protected PasswordCredential getCredential(
-        Subject subject
-    ) throws ResourceException{
-        Set<?> credentials = subject == null ? Collections.EMPTY_SET : subject.getPrivateCredentials(
-            PasswordCredential.class
+    private int protocolVersion = DEFAULT_PROTOCOL_VERSION;
+    
+    /**
+     * Retrieve the LDAP protocol version
+     * 
+     * @return the LDAP protocol version
+     */
+    public int getProtocolVersion() {
+		return this.protocolVersion;
+	}
+
+    /**
+     * Set the LDAP protocol version
+     * 
+     * @param protocolVersion the LDAP protocol version
+     */
+	public void setProtocolVersion(
+		int protocolVersion
+	) {
+		this.protocolVersion = protocolVersion;
+	}
+
+    /* (non-Javadoc)
+     * @see javax.resource.spi.ManagedConnectionFactory#createConnectionFactory(javax.resource.spi.ConnectionManager)
+     */
+    public Object createConnectionFactory(
+        ConnectionManager connectionManager
+    ) throws ResourceException {
+        return new ConnectionFactory(
+        	this, 
+        	connectionManager
         );
-        switch(credentials.size()) {
-            case 0: 
-                return null;
-            case 1:
-            	return (PasswordCredential) credentials.iterator().next();
-           default:
-               throw this.log(
-                   new SecurityException(
-                       "There is more than one " +   
-                       PasswordCredential.class.getName() +
-                       " instance among the subject's private credentials"
-                   )
-               );
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnectionFactory#setLogWriter(java.io.PrintWriter)
-     */
-    public final void setLogWriter(
-        PrintWriter logWriter
-    ) throws ResourceException {
-        this.logWriter = logWriter;
-    }
-
-    /**
-     * Retrieve connectionURL.
-     *
-     * @return Returns the connectionURL.
-     */
-    public final String getConnectionURL() {
-        return this.connectionURL;
-    }
-    
-    /**
-     * Set connectionURL.
-     * 
-     * @param connectionURL The connectionURL to set.
-     */
-    public final void setConnectionURL(
-        String connectionURL
-    ) {
-        this.connectionURL = connectionURL;
-    }
-    
-	/**
-     * Log and return an exception
-     * 
-     * @param an exception
-     * 
-     * @return the exception
-     */
-    protected final ResourceException log(
-        ResourceException exception
-    ){
-        try {
-            PrintWriter logWriter = this.getLogWriter();
-            if(logWriter != null) {
-                exception.printStackTrace(logWriter);
-            }
-        } catch (Exception ignore) {
-            // Ensure that the original exception will be available
-        }
-        return exception;
-    }
-
-    /**
-     * Set password.
-     * 
-     * @param password The password to set.
-     */
-    public final void setPassword(
-        String password
-    ) {
-        this.password = password;
-    }
-    
-    /**
-     * Retrieve password.
-     *
-     * @return Returns the password.
-     */
-    protected final String getPassword() {
-        return this.password;
-    }    
-
-    /**
-     * Retrieve userName.
-     *
-     * @return Returns the userName.
-     */
-    public final String getUserName() {
-        return this.userName;
-    }
-    
-    /**
-     * Set userName.
-     * 
-     * @param userName The userName to set.
-     */
-    public final void setUserName(
-        String userName 
-    ) {
-        this.userName = userName;
-    }
-
-    
-    //------------------------------------------------------------------------
-    // Extends Object
-    //------------------------------------------------------------------------
-
-    /**
-     * Provide an id for this managed connection
-     * 
-     * @return an id for this managed connection 
-     */
-    private Object getIdentity(){
-        if(this.identity == null) this.identity = this.connectionURL == null ?
-            new Object() :
-        this.userName == null && this.password == null ?
-            this.connectionURL : new StringBuilder(
-                this.connectionURL
-            ).append(
-                '|'
-            ).append(
-                this.userName == null ? "" : this.userName
-            ).append(
-                '|'
-            ).append(
-                this.password == null ? "" : this.password
-            ).toString();
-        return this.identity;
-    }
-    
-    /**
-     * Overriding equals() is required.
-     */
-    public boolean equals(Object that) {
-        return 
-            that != null && 
-            this.getClass().equals(that.getClass()) &&
-            this.getIdentity().equals(((AbstractManagedConnectionFactory)that).getIdentity());
-    }
-
-    /**
-     * Overriding hashCode() is required.
-     */
-    public int hashCode(
-    ) {
-        return this.getIdentity().hashCode();
     }
 
 }

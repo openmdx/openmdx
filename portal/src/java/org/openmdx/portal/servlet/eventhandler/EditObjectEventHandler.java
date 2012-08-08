@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectEventHandler.java,v 1.39 2010/03/28 00:49:53 wfro Exp $
+ * Name:        $Id: EditObjectEventHandler.java,v 1.40 2010/05/12 13:14:45 wfro Exp $
  * Description: EditObjectEventHandler 
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.40 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/28 00:49:53 $
+ * Date:        $Date: 2010/05/12 13:14:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -152,10 +152,6 @@ public class EditObjectEventHandler {
                             currentView.getForReference(),
                             currentView.getMode()
                         );            
-                        // Current view is dirty. Remove it and replace it by newly created. 
-                        editViewsCache.removeView(
-                            currentView.getRequestId()
-                        );
                     }
                     // Can not stay in edit object view. Return to returnToView as fallback
                     catch(Exception e1) {

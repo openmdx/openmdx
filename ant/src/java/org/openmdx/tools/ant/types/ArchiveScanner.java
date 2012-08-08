@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ArchiveScanner.java,v 1.1 2004/12/30 10:16:15 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ArchiveScanner.java,v 1.2 2010/06/04 22:24:36 hburger Exp $
  * Description: Archive Scanner
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/12/30 10:16:15 $
+ * Date:        $Date: 2010/06/04 22:24:36 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes or is based on software developed by other
+ * organizations as listed in the NOTICE file.
  */
 package org.openmdx.tools.ant.types;
 
@@ -69,7 +68,8 @@ public class ArchiveScanner extends ZipScanner {
     /* (non-Javadoc)
      * @see org.apache.tools.ant.types.ZipScanner#match(java.lang.String)
      */
-    public boolean match(String name) {
+    @Override
+	public boolean match(String name) {
         return 
         	super.match(name) &&
         	super.isSelected(name, null);        

@@ -153,7 +153,7 @@
     </children>
     <styles xmi:type="notation:CanonicalStyle" xmi:id="_pICPkUboEd-o1OTPw_6HJg"/>
     <element xmi:type="uml:Class" href="../org.openmdx.base.uml#_3C7B8A60016D403F48350281"/>
-    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_pICPkkboEd-o1OTPw_6HJg" x="625" y="585"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_pICPkkboEd-o1OTPw_6HJg" x="560" y="576"/>
   </children>
   <children xmi:type="notation:Shape" xmi:id="_yWk9wEcfEd-o1OTPw_6HJg" type="2001" fontName="Arial" fontHeight="11" fillColor="13369343" lineColor="2763429">
     <eAnnotations xmi:type="ecore:EAnnotation" xmi:id="_yWuuwEcfEd-o1OTPw_6HJg" source="Shortcut">

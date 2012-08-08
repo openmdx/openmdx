@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatabaseDriverFormatter.java,v 1.9 2008/09/09 14:19:59 hburger Exp $
+ * Name:        $Id: DatabaseDriverFormatter.java,v 1.10 2010/06/02 13:46:07 hburger Exp $
  * Description: Database Driver Formatter
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/09 14:19:59 $
+ * Date:        $Date: 2010/06/02 13:46:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -154,6 +154,7 @@ public class DatabaseDriverFormatter
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString(
     ){
         return this.driver.getClass().getName() + ": " + IndentingFormatter.toString(

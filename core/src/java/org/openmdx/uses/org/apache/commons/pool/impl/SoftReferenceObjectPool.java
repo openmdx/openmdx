@@ -1,7 +1,7 @@
 /*
  * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/SoftReferenceObjectPool.java,v $
- * $Revision: 1.4 $
- * $Date: 2008/03/21 18:42:15 $
+ * $Revision: 1.5 $
+ * $Date: 2010/06/02 13:46:51 $
  *
  * ====================================================================
  *
@@ -76,7 +76,7 @@ import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
  * {@link ObjectPool}.
  *
  * @author Rodney Waldhoff
- * @version $Revision: 1.4 $ $Date: 2008/03/21 18:42:15 $
+ * @version $Revision: 1.5 $ $Date: 2010/06/02 13:46:51 $
  */
 @SuppressWarnings("unchecked")
 public class SoftReferenceObjectPool extends BaseObjectPool implements ObjectPool {
@@ -102,6 +102,7 @@ public class SoftReferenceObjectPool extends BaseObjectPool implements ObjectPoo
         }
     }
 
+    @Override
     public synchronized Object borrowObject() throws Exception {        
         assertOpen();
         Object obj = null;
@@ -124,6 +125,7 @@ public class SoftReferenceObjectPool extends BaseObjectPool implements ObjectPoo
         return obj;
     }
 
+    @Override
     public void returnObject(Object obj) throws Exception {
         assertOpen();
         boolean success = true;
@@ -156,6 +158,7 @@ public class SoftReferenceObjectPool extends BaseObjectPool implements ObjectPoo
 
     }
 
+    @Override
     public synchronized void invalidateObject(Object obj) throws Exception {
         assertOpen();
         _numActive--;
@@ -167,6 +170,7 @@ public class SoftReferenceObjectPool extends BaseObjectPool implements ObjectPoo
      * Create an object, and place it into the pool.
      * addObject() is useful for "pre-loading" a pool with idle objects.
      */
+    @Override
     public void addObject() throws Exception {
         Object obj = _factory.makeObject();
         synchronized(this) {
@@ -176,14 +180,17 @@ public class SoftReferenceObjectPool extends BaseObjectPool implements ObjectPoo
     }
 
     /** Returns an approximation not less than the of the number of idle instances in the pool. */
+    @Override
     public int getNumIdle() {
         return _pool.size();
     }
 
+    @Override
     public int getNumActive() {
         return _numActive;
     }
 
+    @Override
     public synchronized void clear() {
         assertOpen();
         if(null != _factory) {
@@ -202,6 +209,7 @@ public class SoftReferenceObjectPool extends BaseObjectPool implements ObjectPoo
         _pool.clear();
     }
 
+    @Override
     synchronized public void close() throws Exception {
         clear();
         _pool = null;
@@ -209,6 +217,7 @@ public class SoftReferenceObjectPool extends BaseObjectPool implements ObjectPoo
         super.close();
     }
 
+    @Override
     synchronized public void setFactory(PoolableObjectFactory factory) throws IllegalStateException {
         assertOpen();
         if(0 < getNumActive()) {

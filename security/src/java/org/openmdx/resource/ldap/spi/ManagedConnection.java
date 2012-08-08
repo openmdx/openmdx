@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ManagedConnection.java,v 1.3 2009/03/08 18:52:19 wfro Exp $
+ * Name:        $Id: ManagedConnection.java,v 1.7 2010/07/16 13:19:02 hburger Exp $
  * Description: Managed LDAP Connection 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/08 18:52:19 $
+ * Date:        $Date: 2010/07/16 13:19:02 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,45 +50,34 @@
  */
 package org.openmdx.resource.ldap.spi;
 
-import java.io.PrintWriter;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
-import javax.resource.spi.ConnectionEvent;
-import javax.resource.spi.ConnectionEventListener;
-import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.EISSystemException;
-import javax.resource.spi.LocalTransaction;
-import javax.resource.spi.ManagedConnectionMetaData;
 import javax.resource.spi.security.PasswordCredential;
-import javax.security.auth.Subject;
-import javax.transaction.xa.XAResource;
 
 import netscape.ldap.LDAPException;
 import netscape.ldap.LDAPv3;
+
+import org.openmdx.resource.ldap.v3.Connection;
+import org.openmdx.resource.spi.AbstractManagedConnection;
 
 
 /**
  * Managed LDAP Connection
  */
-public class ManagedConnection 
-    implements javax.resource.spi.ManagedConnection {
+public class ManagedConnection extends AbstractManagedConnection {
 
     /**
      * Constructor 
      *
+     * @param physicalConnection
      * @param credential
-     * @param certificate
-     * @param key
      */
     public ManagedConnection(
     	LDAPv3 physicalConnection,
         PasswordCredential credential
     ) {
+    	super("LDAP","3.0", credential);
     	this.ldapConnection = physicalConnection;
-        this.credential = credential;
     }
 
     /**
@@ -98,244 +86,39 @@ public class ManagedConnection
     private LDAPv3 ldapConnection;
     
     /**
-     * Lazy initialized meta data
-     */
-    private ManagedConnectionMetaData metaData = null;
-
-    /**
-     * 
-     */
-    private PasswordCredential credential;
-
-    /**
-     * 
-     */
-    private PrintWriter logWriter = null;
-
-    /**
-     * 
-     */
-    private final Set<ConnectionEventListener> listeners = new HashSet<ConnectionEventListener>();
-    
-    /**
-     * 
-     */
-    private final Set<Connection> connections = new HashSet<Connection>();
-    
-    /**
-     * 
-     */
-    private final static String NON_TRANSACTIONAL = "KeyStore resources are non-transactional";
-    
-    
-    /**
      * Used by LDAPConnection
      * 
      * @return
      */
-    LDAPv3 getPhysicalConnection(
+    public LDAPv3 getPhysicalConnection(
     ){
     	return this.ldapConnection;
     }
     
-	void signalClose(
-		Connection connection
-	){
-    	ConnectionEvent event = new ConnectionEvent(
-    		this,
-    		ConnectionEvent.CONNECTION_CLOSED
-    	);
-    	event.setConnectionHandle(connection);
-    	for(ConnectionEventListener listener : this.listeners) {
-			listener.connectionClosed(event);
-    	}
-    }
-    
-    void signalException(
-		Connection connection,
-    	Exception exception 
-    ){
-    	ConnectionEvent event = new ConnectionEvent(
-    		this,
-    		ConnectionEvent.CONNECTION_ERROR_OCCURRED,
-    		exception
-    	);
-    	event.setConnectionHandle(connection);
-    	for(ConnectionEventListener listener : this.listeners) {
-			listener.connectionErrorOccurred(event);
-    	}
-    }
-    	
-    public void addConnectionEventListener(
-        ConnectionEventListener connectionEventListener
-    ) {
-    	this.listeners.add(connectionEventListener);
-    }
-
-    void dissociateConnection(
-        Object connection
-    ) {
-    	this.connections.remove(connection);
-    }
-    
-    public void associateConnection(
-        Object connection
-    ) throws ResourceException {
-        try {            
-        	Connection ldapConnection = (Connection) connection;
-        	ldapConnection.setManagedConnection(this);
-        	this.connections.add(ldapConnection);
-        } 
-        catch (ClassCastException exception){
-            throw new ResourceException(
-                "Managed connection class and connection class do not match",
-                exception
-            );
-		}
-    }
-
-
-    public void cleanup(
-    )throws ResourceException {
-    	for(Connection connection : this.connections) {
-    		connection.setManagedConnection(null);
-    	}
-    }
-
+    @Override
     public void destroy(
     ) throws ResourceException {
     	try {
 			this.ldapConnection.disconnect();
-		} 
-    	catch (LDAPException exception) {
+		} catch (LDAPException exception) {
 			throw this.log(
 				new EISSystemException(
 					"LDAP disconnection failure",
 					exception
 				)
 			);
-		} 
-    	finally {
-	        this.credential = null;
+		} finally {
+    		super.destroy();
 	        this.ldapConnection = null;
 		}
     }
 
-    public Object getConnection(
-        Subject subject, 
-        ConnectionRequestInfo connectionRequestInfo
-    ) throws ResourceException {
-        Object connection = new Connection();
-        this.associateConnection(connection);
-        return connection;
-    }
-
-    public LocalTransaction getLocalTransaction(
-    ) throws ResourceException {
-        throw this.log(new NotSupportedException(ManagedConnection.NON_TRANSACTIONAL));
-    }
-
-    public PrintWriter getLogWriter(
-    ) throws ResourceException {
-        return this.logWriter;
-    }
-
-    public ManagedConnectionMetaData getMetaData(
-    ) throws ResourceException {
-        return this.metaData == null ?
-            this.metaData = new MetaData() :
-            this.metaData;
-    }
-
-    public XAResource getXAResource(
-    ) throws ResourceException {
-        throw this.log(new NotSupportedException(ManagedConnection.NON_TRANSACTIONAL));
-    }
-
-    public void removeConnectionEventListener(
-        ConnectionEventListener connectionEventListener
-    ) {
-    	this.listeners.remove(connectionEventListener);
-    }
-
-    public void setLogWriter(
-        PrintWriter logWriter
-    ) throws ResourceException {
-        this.logWriter = logWriter;        
-    }
-    
-    /**
-     * Log and return an exception
-     * 
-     * @param an exception
-     * 
-     * @return the exception
+    /* (non-Javadoc)
+     * @see org.openmdx.resource.spi.AbstractManagedConnection#newConnection()
      */
-    private ResourceException log(
-        ResourceException exception
-    ){
-        try {
-            PrintWriter logWriter = this.getLogWriter();
-            if(logWriter != null) exception.printStackTrace(logWriter);
-        } 
-        catch (Exception ignore) {
-            // Ensure that the original exception will be available
-        }
-        return exception;
+    @Override
+    protected Object newConnection() {
+	    return new Connection();
     }
 
-    /**
-     * Test whether the managed connection was created with the same credentials.
-     * 
-     * @param credential
-     * 
-     * @return <code>true</code> if the managed connection was created with the same credentials
-     */
-    public boolean matches(
-        PasswordCredential credential
-    ){
-        return this.credential == credential || (
-        	this.credential != null &&
-        	credential != null &&
-        	this.credential.equals(credential)
-        );
-    }
-
-    /**
-     * ManagedConnectionMetaData implementation
-     */
-    class MetaData
-        implements ManagedConnectionMetaData {
-
-        /**
-         * Constructor 
-         *
-         * @param alias the certificate's alias
-         */
-        public MetaData(
-        ) {
-        }
-
-        public String getEISProductName(
-        ) throws ResourceException {
-            return "LDAP";
-        }
-
-        public String getEISProductVersion(
-        ) throws ResourceException {
-            return "3.0";
-        }
-
-        public int getMaxConnections(
-        )throws ResourceException {
-            return 0; // no limit
-        }
-
-        public String getUserName(
-        ) throws ResourceException {
-            return ManagedConnection.this.credential.getUserName();
-        }
-
-    }
-    
 }

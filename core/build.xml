@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.230 2010/04/30 13:08:16 wfro Exp $
+= Name:        $Id: build.xml,v 1.238 2010/09/06 20:13:37 wfro Exp $
 = Description: openMDX/Core Build File
-= Revision:    $Revision: 1.230 $
-= Date:        $Date: 2010/04/30 13:08:16 $
-= Copyright:   (c) 2003-2009 OMEX AG
+= Revision:    $Revision: 1.238 $
+= Date:        $Date: 2010/09/06 20:13:37 $
+= Copyright:   (c) 2003-2010 OMEX AG
 =======================================================================
 =
 = This software is published under the BSD license as listed below.
@@ -87,14 +87,6 @@
 	<patternset id="jcache.content">
 		<include name="javax/cache/**"/>
 	</patternset>
-	<patternset id="openmdx-base.jaxp-1.4">
-		<include name="javax/xml/*"/>
-		<include name="javax/xml/datatype/*"/>
-		<include name="javax/xml/namespace/*"/>
-		<include name="com/sun/org/apache/xerces/internal/jaxp/datatype/*"/>
-		<include name="com/sun/org/apache/xerces/internal/impl/msg/*"/>
-		<include name="com/sun/org/apache/xerces/internal/util/DatatypeMessageFormatter.*"/>
-	</patternset>
 	<patternset id="openmdx-system.content">
 		<include name="org/openmdx/compatibility/kernel/url/protocol/**"/>
 		<include name="org/openmdx/kernel/url/protocol/**"/>
@@ -104,7 +96,7 @@
 		<include name="org/apache/juli/*"/>
 		<include name="org/apache/juli/logging/*"/>
 	</patternset>
-	<patternset id="openmdx-base.jre-1.5">
+	<patternset id="openmdx-base.jre-1.6">
 		<patternset refid="jcache.content"/>
 		<patternset refid="jdo-api.content"/>
 		<include name="javax/jmi/**"/>
@@ -127,22 +119,19 @@
 		<exclude name="org/openmdx/kernel/url/protocol/**"/>
 		<include name="org/openmdx/jdo/**"/>
 		<include name="org/openmdx/uses/gnu/**"/>
-		<include name="org/openmdx/uses/org/apache/commons/beanutils/**"/>
 		<include name="org/openmdx/uses/org/apache/commons/collections/**"/>
 		<include name="org/openmdx/uses/org/apache/commons/fileupload/**"/>
-		<include name="org/openmdx/uses/org/apache/commons/logging/**"/>
 		<include name="org/openmdx/uses/org/apache/commons/pool/**"/>
-		<include name="org/openmdx/uses/org/apache/commons/transaction/**"/>
-		<include name="org/openmdx/uses/org/apache/regexp/**"/>
 		<include name="org/un/*/UnPackage*"/>
 		<include name="org/w3c/**"/>
 		<include name="org/xmi/*"/>
 		<include name="META-INF/orm.xml"/>
 		<include name="META-INF/openmdx*.properties"/>
-	</patternset>
-	<patternset id="openmdx-base.jre-1.6">
-		<patternset refid="openmdx-base.jre-1.5"/>
 	</patternset>		
+	<patternset id="openmdx-base.jre-1.5">
+		<patternset refid="openmdx-base.jre-1.6"/>
+		<include name="org/openmdx/uses/java/util/**"/>
+	</patternset>
 	<patternset id="openmdx-base.jar.content">					
 		<patternset refid="openmdx-base.${build.java.platform}"/>
 	</patternset>
@@ -152,7 +141,7 @@
 	<!-- ******************************************************************* -->
 	<target 
 		name="bootstrap" 
-		depends="build-init,generate-jaxp"
+		depends="build-init"
 		description="Generate version and jt dependend files" 
 	>
 		<antcall target="-preprocess-version-files-">
@@ -160,11 +149,9 @@
 			<param name="version-file.property-file" location="${openmdx.home}/openmdx.version.properties"/>
 			<param name="version-file.template-file" location="${basedir}/etc/ant/Version.java.template"/>
 		</antcall>
-		<!--
 		<antcall target="-preprocess-jt-files-">
 			<param name="preprocess-jt.target" value="java"/>
 		</antcall>
-		-->
 		<fail message="JRE ${build.target.jre} not found" unless="build.target.jre.found"/>
 		<javac 
 			destdir="${build.dir}/bin" 
@@ -226,43 +213,6 @@
 			dir="${openmdx.home}/ant"
 			target="deliverables"
 		/-->
-	</target>
-
-	<target 
-		name="generate-jaxp" 
-		description="Include the required JAXP 1.4 classes"
-		depends="-platform-init"
-		if="platform.is.jre-1.4"
-	>
-		<openmdx:unarchive dest="${build.dir}/bin">
-			<fileset dir="${openmdx.home}/java2/${build.java.platform}/endorsed/lib">
-				<include name="*.jar"/>
-			</fileset>
-			<patternset refid="openmdx-base.jaxp-1.4"/>
-		</openmdx:unarchive>
-		<openmdx:archive
-			destfile="${build.dir}/lib/openmdx-jaxp."
-			format="jar"
-		>
-			<openmdx:archivemanifest>
-				<attribute name="Specification-Title" value="Java API for XML Processing"/>
-				<attribute name="Specification-Version" value="1.4"/>
-				<attribute name="Specification-Vendor" value="Sun Microsystems, Inc."/>
-				<attribute name="Implementation-Title" value="Java API for XML Processing Partial Implementation"/>
-			</openmdx:archivemanifest>
-			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx-base.jaxp-1.4"/>
-			</openmdx:archivefileset>
-		</openmdx:archive>
-	</target>
-
-	<target 
-		name="-platform-init"
-		depends="build-init"
-	>
-		<condition property="platform.is.jre-1.4">
-			<equals arg1="${build.target.platform}" arg2="jre-1.4" />
-		</condition>
 	</target>
 
 	<!-- ******************************************************************* -->
@@ -478,9 +428,20 @@
 			</packageset>
 			<packageset dir="${build.dir}/src/java"/>
 			<classpath refid="project.bin.classpath"/>
-			<link href="http://java.sun.com/javase/6/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2se/"/>
-			<link href="http://java.sun.com/javaee/5/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2ee/"/>
-			<link href="http://www.openmdx.org/openmdx/core/${openmdx.public.version}/java-${build.java.platform}/" offline="true" packagelistLoc="${openmdx.home}/core/build/jre-1.6/doc/api/"/>			
+			<link 
+				href="http://java.sun.com/javase/6/docs/api/" 
+				offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2se/"
+			/>
+			<link 
+				href="http://java.sun.com/javaee/5/docs/api/" 
+				offline="true" 
+				packagelistLoc="${openmdx.home}/core/etc/javadoc/j2ee/"
+			/>
+			<link 
+				href="http://www.openmdx.org/openmdx/core/${openmdx.public.version}/java-${build.java.platform}/" 
+				offline="true" 
+				packagelistLoc="${openmdx.home}/core/build/jre-1.6/doc/api/"
+			/>			
 			<group>
 				<title>${project.specification.title} Kernel</title>
 				<package name="org.openmdx.kernel"/>
@@ -499,9 +460,7 @@
 				<package name="org.openmdx.base"/>
 				<package name="org.openmdx.base.*"/>
 				<package name="org.openmdx.compatibility.audit1.*"/>
-				<package name="org.openmdx.compatibility.datastore1.*"/>
 				<package name="org.openmdx.compatibility.jmi1"/>
-				<package name="org.openmdx.compatibility.sequence1.*"/>
 				<package name="org.openmdx.generic1.*"/>
 				<package name="org.openmdx.jmi1"/>
 				<package name="org.openmdx.preferences1.*"/>

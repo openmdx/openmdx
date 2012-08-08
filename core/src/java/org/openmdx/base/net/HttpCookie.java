@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: HttpCookie.java,v 1.6 2010/03/15 04:59:56 hburger Exp $
+ * Name:        $Id: HttpCookie.java,v 1.10 2010/06/02 13:44:54 hburger Exp $
  * Description: Basic Cookie
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/15 04:59:56 $
+ * Date:        $Date: 2010/06/02 13:44:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -161,7 +161,7 @@ public class HttpCookie implements Comparable<HttpCookie> {
 		this.name = name.toLowerCase();
         this.domain = (domain == null ? uri.getHost() : domain).toLowerCase();
 	    if(port == null) {
-	        this.ports = new int[]{uri.getPort()};
+	        this.ports = new int[]{getPort(uri)};
 	    } else {
             String[] ports = port.split(",");
             this.ports = new int[ports.length];
@@ -278,7 +278,7 @@ public class HttpCookie implements Comparable<HttpCookie> {
 	){
 		if(
 			(!this.secure || "https".equalsIgnoreCase(uri.getScheme())) &&
-			java.net.HttpCookie.domainMatches(this.domain, uri.getHost())
+			/*java.net.*/HttpCookie.domainMatches(this.domain, uri.getHost())
 		) {
 			int uriPort = getPort(uri);
 			for(int cookiePort : this.ports) {
@@ -290,6 +290,7 @@ public class HttpCookie implements Comparable<HttpCookie> {
 		return false;
 	}
 
+	
 	/**
 	 * Tells whether the cookie has to be discarded
 	 * 
@@ -346,8 +347,9 @@ public class HttpCookie implements Comparable<HttpCookie> {
 	    	this.path.hashCode();
     }
 
-	@Override
+//  @Override
     public int compareTo(HttpCookie that) {
+	    if(equals(that)) return 0;
 	    int result = this.name.compareTo(that.name);
         if(result != 0) return result;
         result = this.domain.compareTo(that.domain);
@@ -357,4 +359,98 @@ public class HttpCookie implements Comparable<HttpCookie> {
         return this.path.compareTo(that.path);
     }
 
+	
+	//------------------------------------------------------------------------
+	// Supports JRE 5.0
+	//------------------------------------------------------------------------
+	
+    /**
+     * The utility method to check whether a host name is in a domain
+     * or not.
+     *
+     * <p>This concept is described in the cookie specification.
+     * To understand the concept, some terminologies need to be defined first:
+     * <blockquote>
+     * effective host name = hostname if host name contains dot<br>
+     * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;or = hostname.local if not
+     * </blockquote>
+     * <p>Host A's name domain-matches host B's if:
+     * <blockquote><ul>
+     *   <li>their host name strings string-compare equal; or</li>
+     *   <li>A is a HDN string and has the form NB, where N is a non-empty
+     *   name string, B has the form .B', and B' is a HDN string.  (So,
+     *   x.y.com domain-matches .Y.com but not Y.com.)</li>
+     * </ul></blockquote>
+     *
+     * <p>A host isn't in a domain (RFC 2965 sec. 3.3.2) if:
+     * <blockquote><ul>
+     *   <li>The value for the Domain attribute contains no embedded dots,
+     *   and the value is not .local.</li>
+     *   <li>The effective host name that derives from the request-host does
+     *   not domain-match the Domain attribute.</li>
+     *   <li>The request-host is a HDN (not IP address) and has the form HD,
+     *   where D is the value of the Domain attribute, and H is a string
+     *   that contains one or more dots.</li>
+     * </ul></blockquote>
+     *
+     * <p>Examples:
+     * <blockquote><ul>
+     *   <li>A Set-Cookie2 from request-host y.x.foo.com for Domain=.foo.com
+     *   would be rejected, because H is y.x and contains a dot.</li>
+     *   <li>A Set-Cookie2 from request-host x.foo.com for Domain=.foo.com
+     *   would be accepted.</li>
+     *   <li>A Set-Cookie2 with Domain=.com or Domain=.com., will always be
+     *   rejected, because there is no embedded dot.</li>
+     *   <li>A Set-Cookie2 with Domain=ajax.com will be accepted, and the
+     *   value for Domain will be taken to be .ajax.com, because a dot
+     *   gets prepended to the value.</li>
+     *   <li>A Set-Cookie2 from request-host example for Domain=.local will
+     *   be accepted, because the effective host name for the request-
+     *   host is example.local, and example.local domain-matches .local.</li>
+     * </ul></blockquote>
+     *
+     * @param domain    the domain name to check host name with
+     * @param host      the host name in question
+     * @return          <tt>true</tt> if they domain-matches; <tt>false</tt> if not
+     */
+    private static boolean domainMatches(String domain, String host) {
+        if (domain == null || host == null)
+            return false;
+
+        // if there's no embedded dot in domain and domain is not .local
+        boolean isLocalDomain = ".local".equalsIgnoreCase(domain);
+        int embeddedDotInDomain = domain.indexOf('.');
+        if (embeddedDotInDomain == 0)
+            embeddedDotInDomain = domain.indexOf('.', 1);
+        if (!isLocalDomain
+            && (embeddedDotInDomain == -1 || embeddedDotInDomain == domain.length() - 1))
+            return false;
+
+        // if the host name contains no dot and the domain name is .local
+        int firstDotInHost = host.indexOf('.');
+        if (firstDotInHost == -1 && isLocalDomain)
+            return true;
+
+        int domainLength = domain.length();
+        int lengthDiff = host.length() - domainLength;
+        if (lengthDiff == 0) {
+            // if the host name and the domain name are just string-compare euqal
+            return host.equalsIgnoreCase(domain);
+        }
+        else if (lengthDiff > 0) {
+            // need to check H & D component
+            String H = host.substring(0, lengthDiff);
+            String D = host.substring(lengthDiff);
+
+            return (H.indexOf('.') == -1 && D.equalsIgnoreCase(domain));
+        }
+        else if (lengthDiff == -1) {
+            // if domain is actually .host
+            return (domain.charAt(0) == '.' &&
+                        host.equalsIgnoreCase(domain.substring(1)));
+        }
+
+        return false;
+    }
+	
 }

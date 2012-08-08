@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Involvement_1.java,v 1.4 2009/12/07 16:54:00 hburger Exp $
+ * Name:        $Id: Involvement_1.java,v 1.6 2010/06/18 12:57:46 hburger Exp $
  * Description: Involvement_1 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/07 16:54:00 $
+ * Date:        $Date: 2010/06/18 12:57:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,7 +58,6 @@ import java.util.Set;
 import javax.jdo.JDOObjectNotFoundException;
 
 import org.openmdx.audit2.spi.Configuration;
-import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -142,9 +141,6 @@ public class Involvement_1 extends Interceptor_1 {
     ) throws ServiceException {
         String multiplicity = ModelUtils.getMultiplicity(feature);
         String featureName = (String) feature.objGetValue("name");
-        if(SystemAttributes.CONTEXT_CAPABLE_CONTEXT.equals(featureName)) {
-            return false;
-        }
         Object left;
         Object right;
         if(

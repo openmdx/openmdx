@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UUIDFormatter.java,v 1.8 2008/09/09 14:20:01 hburger Exp $
+ * Name:        $Id: UUIDFormatter.java,v 1.9 2010/06/02 13:45:39 hburger Exp $
  * Description: UUID Formatter
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/09 14:20:01 $
+ * Date:        $Date: 2010/06/02 13:45:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -105,6 +105,7 @@ public class UUIDFormatter {
      *
      * @return  a String
      */
+    @Override
     public String toString()
     {
         if(this.uuid == null) {

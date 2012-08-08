@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ArchiveFormat.java,v 1.1 2005/08/25 22:46:01 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ArchiveFormat.java,v 1.2 2010/06/04 22:22:48 hburger Exp $
  * Description: Ant Archive Format
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/08/25 22:46:01 $
+ * Date:        $Date: 2010/06/04 22:22:48 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -89,7 +88,8 @@ abstract class ArchiveFormat extends EnumeratedAttribute {
      *  Get valid enumeration values.
      *  @return valid enumeration values
      */
-    public final String[] getValues() {
+    @Override
+	public final String[] getValues() {
         return new String[] {TAR, ZIP, EAR, JAR, WAR, RAR, PAR};
     }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultPortalExtension.java,v 1.92 2010/04/27 21:22:22 wfro Exp $
+ * Name:        $Id: DefaultPortalExtension.java,v 1.96 2010/08/05 09:34:37 wfro Exp $
  * Description: DefaultEvaluator
- * Revision:    $Revision: 1.92 $
+ * Revision:    $Revision: 1.96 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 21:22:22 $
+ * Date:        $Date: 2010/08/05 09:34:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -109,8 +109,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.FilterOperators;
-import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.ConditionType;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
@@ -269,10 +268,9 @@ public class DefaultPortalExtension
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getIdentityQueryFilterClause(java.lang.String)
      */
-    public List<Condition> getQuery(        
+    public org.openmdx.base.query.Filter getQuery(        
     	org.openmdx.ui1.jmi1.ValuedField field,
     	String filterValue,
-    	String queryFilterContext,
     	int queryFilterStringParamCount,
     	ApplicationContext application
     ) {
@@ -471,9 +469,9 @@ public class DefaultPortalExtension
                     (lookupObject != null) &&
                     !lookupReferenceNames.isEmpty()
                 ) {
-                    int[] filterOperators = new int[filterByFeatures.size()];
+                    ConditionType[] filterOperators = new ConditionType[filterByFeatures.size()];
                     for(int i = 0; i < filterByFeatures.size(); i++) {
-                        filterOperators[i] = FilterOperators.IS_LIKE;
+                        filterOperators[i] = ConditionType.IS_LIKE;
                     }
                     return new FindObjectsAutocompleter(
                         lookupObjectIdentity,
@@ -498,12 +496,13 @@ public class DefaultPortalExtension
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getFindObjectsBaseFilter(org.openmdx.portal.servlet.ApplicationContext, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String)
      */
-    public List<FilterProperty> getFindObjectsBaseFilter(
+    @Override
+    public List<Condition> getFindObjectsBaseFilter(
         ApplicationContext application,
         RefObject_1_0 context,
         String qualifiedFeatureName
     ) {
-        return new ArrayList<FilterProperty>();
+        return new ArrayList<Condition>();
     }
     
     //-------------------------------------------------------------------------
@@ -1336,16 +1335,21 @@ public class DefaultPortalExtension
                             else {
                               try {
                                   URL titleUrl = new URL((String)(titleValues[0]));
-                                  String query = URLDecoder.decode(titleUrl.getQuery(), "UTF-8");
-                                  int parameterPos = -1;
-                                  if((parameterPos = query.indexOf(WebKeys.REQUEST_PARAMETER + "=")) >= 0) {
-                                      String parameter = query.substring(parameterPos + 10);
-                                      if(parameter.indexOf("xri:@openmdx:") >= 0) {
-                                          xri = Action.getParameter(
-                                              parameter,
-                                              Action.PARAMETER_OBJECTXRI
-                                          );
-                                      }
+                                  if("xri".equals(titleUrl.getProtocol())) {
+                                	  xri = (String)titleValues[0];
+                                  }
+                                  else {
+	                                  String query = URLDecoder.decode(titleUrl.getQuery(), "UTF-8");
+	                                  int parameterPos = -1;
+	                                  if((parameterPos = query.indexOf(WebKeys.REQUEST_PARAMETER + "=")) >= 0) {
+	                                      String parameter = query.substring(parameterPos + 10);
+	                                      if(parameter.indexOf("xri:@openmdx:") >= 0 || parameter.indexOf("xri://@openmdx:") > 0) {
+	                                          xri = Action.getParameter(
+	                                              parameter,
+	                                              Action.PARAMETER_OBJECTXRI
+	                                          );
+	                                      }
+	                                  }
                                   }
                               }
                               catch(MalformedURLException e) {

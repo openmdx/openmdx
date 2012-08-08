@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestFilter.java,v 1.1 2009/09/17 17:12:59 hburger Exp $
+ * Name:        $Id: TestFilter.java,v 1.4 2010/06/01 09:00:53 hburger Exp $
  * Description: Test Filter
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/17 17:12:59 $
+ * Date:        $Date: 2010/06/01 09:00:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,29 +50,36 @@
  */
 package test.openmdx.base.query;
 
-import java.beans.XMLDecoder;
-import java.beans.XMLEncoder;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import static org.junit.Assert.assertEquals;
 
-import org.junit.Assert;
+import java.beans.XMLDecoder;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Date;
+
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.junit.Test;
-import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.Directions;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.persistence.spi.QueryExtension;
+import org.openmdx.base.query.AnyTypeCondition;
+import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsBetweenCondition;
 import org.openmdx.base.query.IsGreaterCondition;
 import org.openmdx.base.query.IsGreaterOrEqualCondition;
 import org.openmdx.base.query.IsInCondition;
+import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.OrderSpecifier;
-import org.openmdx.base.query.Quantors;
+import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.query.SoundsLikeCondition;
+import org.openmdx.base.text.conversion.JavaBeans;
+import org.w3c.spi2.Datatypes;
 
 /**
  * Test Filter
@@ -80,115 +87,138 @@ import org.openmdx.base.query.SoundsLikeCondition;
 public class TestFilter {
 
     @Test
-    public void testEncode() throws IOException {
-      try {
-        File scratchFile = File.createTempFile(getClass().getName(), null);
-        System.out.println("writing to file " + scratchFile);
-        OutputStream os = new FileOutputStream(scratchFile);
+    public void testEncode() throws IOException, ServiceException {
         Filter filter = new Filter(
-            new Condition[]{
+            Arrays.asList(
                 new IsBetweenCondition(
-                    Quantors.FOR_ALL,
+                    Quantifier.FOR_ALL,
                     "fBetween",
                     true,
                     "Lower", "Upper"
                 ),
                 new IsBetweenCondition(
-                    Quantors.FOR_ALL,
-                    "fBetween",
+                    Quantifier.FOR_ALL,
+                    "fOutside",
                     false,
                     "Lower", "Upper"
                 ),
                 new IsGreaterCondition(
-                    Quantors.FOR_ALL,
+                    Quantifier.FOR_ALL,
                     "fGreater",
                     true,
-                    Integer.valueOf(-1000), 
-                    Integer.valueOf(1000)
+                    Integer.valueOf(-1000)
                 ),
                 new IsGreaterCondition(
-                    Quantors.FOR_ALL,
+                    Quantifier.FOR_ALL,
                     "fGreater",
                     false,
-                    Integer.valueOf(-1000), 
                     Integer.valueOf(1000)
                 ),
                 new IsGreaterOrEqualCondition(
-                    Quantors.FOR_ALL,
+                    Quantifier.FOR_ALL,
                     "fGreaterOrEqual",
                     true,
-                    Double.parseDouble("-9999999999999.123"), 
-                    Double.parseDouble("99999999999.123")
+                    Double.parseDouble("-9999999999999.123")
                 ),
                 new IsGreaterOrEqualCondition(
-                    Quantors.FOR_ALL,
+                    Quantifier.FOR_ALL,
                     "fGreaterOrEqual",
                     false,
-                    Double.parseDouble("-9999999999999.123"), 
                     Double.parseDouble("99999999999.123")
                 ),
                 new IsInCondition(
-                    Quantors.FOR_ALL,
+                    Quantifier.FOR_ALL,
                     "fIsIn",
                     true,
                     Boolean.FALSE, 
                     Boolean.TRUE
                 ),
                 new IsInCondition(
-                    Quantors.FOR_ALL,
+                    Quantifier.FOR_ALL,
                     "fIsIn",
                     false,
                     Boolean.FALSE, 
                     Boolean.TRUE
                 ),
                 new IsLikeCondition(
-                    Quantors.FOR_ALL,
+                    Quantifier.FOR_ALL,
                     "fIsLike",
                     true,
-                    "IsLikeCondition", 
-                    "IsLikeCondition"
+                    "uri:@openmdx:a.b.c/:*/This/%", 
+                    "uri:@openmdx:a.b.c/:*/That/%"
                 ),
                 new IsLikeCondition(
-                    Quantors.FOR_ALL,
-                    "fIsLike",
+                    Quantifier.FOR_ALL,
+                    "fIsUnlike",
                     false,
-                    "IsLikeCondition", 
-                    "IsLikeCondition"
+                    "uri:@openmdx:a.b.c/:*/This/%", 
+                    "uri:@openmdx:a.b.c/:*/That/%"
                 ),
                 new SoundsLikeCondition(
-                    Quantors.FOR_ALL,
+                    Quantifier.FOR_ALL,
                     "fSoundsLike",
                     true,
-                    "uri:@openmdx:a.b.c/:*/This/%", 
-                    "uri:@openmdx:a.b.c/:*/That/%"
+                    "Mueller", 
+                    "Maeder"
                 ),
                 new SoundsLikeCondition(
-                    Quantors.FOR_ALL,
-                    "fSoundsLike",
+                    Quantifier.FOR_ALL,
+                    "fSoundsUnlike",
                     false,
-                    "uri:@openmdx:a.b.c/:*/This/%", 
-                    "uri:@openmdx:a.b.c/:*/That/%"
+                    "Mueller", 
+                    "Maeder"
+                ),
+                new AnyTypeCondition(
+                    Quantifier.THERE_EXISTS,
+                    "createdAt",
+                    ConditionType.IS_NOT_IN
                 )
-            },
-            new OrderSpecifier[]{
-                new OrderSpecifier("order_ASC", Directions.ASCENDING),
-                new OrderSpecifier("order_DESC", Directions.DESCENDING)
-            }
+            ),
+            Arrays.asList(
+                new OrderSpecifier("order_ASC", SortOrder.ASCENDING),
+                new OrderSpecifier("order_DESC", SortOrder.DESCENDING)
+            ),
+            null // extension
         );
-        XMLEncoder encoder = new XMLEncoder(os);
-        encoder.writeObject(filter);
-        encoder.close();
-
-        InputStream is = new FileInputStream(scratchFile);
-        XMLDecoder decoder = new XMLDecoder(is);
-        //... Filter filter2 = (Filter)
-            decoder.readObject();
+        Extension extension = new QueryExtension();
+        extension.setClause("SELECT something FROM somewhere WHERE b0 = ? AND i0 = ? AND i1 = ? AND i2 = ?");
+        extension.setBooleanParam(true);
+        extension.setIntegerParam(1,2,3);
+        filter.setExtension(extension);      
+        //
+        // CR20018833
+        // 
+        XMLDecoder decoder = new XMLDecoder(
+            new URL("xri://+resource/test/openmdx/query/CR20018833.xml").openStream()
+        );
+        Filter filter1 = (Filter) decoder.readObject();
         decoder.close();
-
-      }
-      catch(FileNotFoundException e) {
-        Assert.fail("can not open scratch file");
-      }
+        assertEquals("Deserialization", filter, filter1);
+        filter.getCondition().add(
+            new IsInstanceOfCondition(
+                true,
+                "org:openmdx:base:ExtentCapable"
+            )
+        );
+        filter.getCondition().add(
+            new IsInstanceOfCondition(
+                false,
+                "org:openmdx:base:BasicObject"
+            )
+        );
+        extension.setDateParam(
+            Datatypes.create(
+                XMLGregorianCalendar.class, 
+                "2000-02-29"
+            )
+        );
+        extension.setDateTimeParam(new Date());
+        extension.setDecimalParam(BigDecimal.ONE, BigDecimal.TEN);
+        extension.setStringParam("String parameter 0", "String parameter 1");
+        String xml = JavaBeans.toXML(filter);
+        System.out.println(xml);
+        Object filter2 = JavaBeans.fromXML(xml);
+        assertEquals("Deserialization", filter, filter2);
     }
 
 }

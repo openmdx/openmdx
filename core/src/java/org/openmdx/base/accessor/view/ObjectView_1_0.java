@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ObjectView_1_0.java,v 1.15 2009/11/27 19:06:29 hburger Exp $
+ * Name:        $Id: ObjectView_1_0.java,v 1.16 2010/07/08 16:58:40 hburger Exp $
  * Description: Object 1.6 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/27 19:06:29 $
+ * Date:        $Date: 2010/07/08 16:58:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -98,7 +98,7 @@ public interface ObjectView_1_0
      * @return <code>null</code> or the interaction specification associated with this object
      */
     InteractionSpec getInteractionSpec(
-    ) throws ServiceException;
+    );
     
     /**
      * Set the delegate 

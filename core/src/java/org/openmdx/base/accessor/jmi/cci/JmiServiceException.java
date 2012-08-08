@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: JmiServiceException.java,v 1.23 2009/06/05 15:28:41 hburger Exp $
+ * Name:        $Id: JmiServiceException.java,v 1.24 2010/06/02 13:43:21 hburger Exp $
  * Description: JmiServiceException class
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/05 15:28:41 $
+ * Date:        $Date: 2010/06/02 13:43:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -153,6 +153,7 @@ public class JmiServiceException extends JmiException
      *
      * @return Throwable  The exception cause.
      */
+    @Override
     public final BasicException getCause(
     ){
         return (BasicException) super.getCause();

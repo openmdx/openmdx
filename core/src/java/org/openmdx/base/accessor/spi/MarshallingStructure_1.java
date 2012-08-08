@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingStructure_1.java,v 1.2 2009/01/12 16:38:30 wfro Exp $
+ * Name:        $Id: MarshallingStructure_1.java,v 1.3 2010/06/02 13:43:52 hburger Exp $
  * Description: SPICE Basic Accessor Object interface
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 16:38:30 $
+ * Date:        $Date: 2010/06/02 13:43:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -133,6 +133,7 @@ public class MarshallingStructure_1
      *
      * @return  the object's model class
      */
+    @Override
     public String objGetType(
     ){
         return getDelegate().objGetType();
@@ -143,6 +144,7 @@ public class MarshallingStructure_1
      *
      * @return  the (String) field names contained in this structure
      */
+    @Override
     public List<String> objFieldNames(
     ){
         return getDelegate().objFieldNames();
@@ -160,6 +162,7 @@ public class MarshallingStructure_1
      *              if the structure has no such field
      */
     @SuppressWarnings("unchecked")
+    @Override
     public Object objGetValue(
         String fieldName
     ) throws ServiceException {

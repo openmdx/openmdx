@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: State_1.java,v 1.9 2010/01/06 17:16:35 wfro Exp $
+ * Name:        $Id: State_1.java,v 1.10 2010/06/02 13:41:57 hburger Exp $
  * Description: Strict_1 class performing type checking of DataproviderRequest/DataproviderReply
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/06 17:16:35 $
+ * Date:        $Date: 2010/06/02 13:41:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -72,6 +72,7 @@ public class State_1 extends Strict_1 {
     }
     
     // --------------------------------------------------------------------------
+    @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {

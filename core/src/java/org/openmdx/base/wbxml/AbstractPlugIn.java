@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractPlugIn.java,v 1.6 2010/03/09 18:47:18 hburger Exp $
+ * Name:        $Id: AbstractPlugIn.java,v 1.7 2010/06/02 10:50:06 hburger Exp $
  * Description: Abstract Plug-In
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/09 18:47:18 $
+ * Date:        $Date: 2010/06/02 10:50:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -74,7 +74,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.wbxml.PlugIn#reset()
      */
-    @Override
+//  @Override
     public void reset() {
         // nothing to do
     }
@@ -86,7 +86,7 @@ public abstract class AbstractPlugIn implements PlugIn {
      *
      * @return the default public identifier, which may be <code>null</code> 
      */
-    @Override
+//  @Override
     public String getDefaultDocumentPublicIdentifier(
         String defaultNamespaceURI
     ){
@@ -96,7 +96,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.wbxml.PlugIn#isStringTableReadyAtStartOfDocument()
      */
-    @Override
+//  @Override
     public boolean isStringTableReadyAtStartOfDocument() {
         return true;
     }
@@ -104,7 +104,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#setStringTable(byte[])ic
      */
-    @Override
+//  @Override
     public void setStringTable(
         ByteBuffer stringTable
     ) throws ServiceException {
@@ -118,7 +118,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.wbxml.PlugIn#getStringTable()
      */
-    @Override
+//  @Override
     public ByteBuffer getStringTable(
     ) throws ServiceException {
         return null;
@@ -127,7 +127,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getStringToken(java.lang.String)
      */
-    @Override
+//  @Override
     public StringToken getStringToken(
         String value
     ) {
@@ -137,7 +137,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getTagToken(java.lang.String)
      */
-    @Override
+//  @Override
     public CodeToken getTagToken(
         String namespaceURI, String value
     ) {
@@ -147,7 +147,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getAttributeNameToken(java.lang.String)
      */
-    @Override
+//  @Override
     public CodeToken getAttributeNameToken(
         String namespaceURI, 
         String elementName, 
@@ -159,7 +159,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getAttributeStartToken(boolean, java.lang.String, java.lang.String)
      */
-    @Override
+//  @Override
     public CodeToken findAttributeStartToken(
         boolean force, 
         String namespaceURI, 
@@ -171,7 +171,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getAttributeValueStartToken(boolean, java.lang.String)
      */
-    @Override
+//  @Override
     public CodeToken findAttributeValueToken(
         boolean force, 
         String namespaceURI, String value
@@ -182,7 +182,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#getAttributeValueToken(java.lang.String)
      */
-    @Override
+//  @Override
     public CodeToken getAttributeValueToken(
         String namespaceURI, String value
     ) {
@@ -192,7 +192,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#resolveString(int)
      */
-    @Override
+//  @Override
     public CharSequence resolveString(
         int index
     ) throws ServiceException {
@@ -207,7 +207,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#resolveAttributeStart(int, int)
      */
-    @Override
+//  @Override
     public CodeResolution resolveAttributeStart(
         int page, 
         int id
@@ -224,7 +224,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#resolveAttributeValue(int, int)
      */
-    @Override
+//  @Override
     public String resolveAttributeValue(
         int page, 
         int id
@@ -241,7 +241,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.PlugIn#resolveTag(int, int)
      */
-    @Override
+//  @Override
     public Object resolveTag(
         int page, 
         int id
@@ -258,7 +258,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#ext0()
      */
-    @Override
+//  @Override
     public void ext0(
     ) throws ServiceException {
         throw new ServiceException(
@@ -272,7 +272,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#ext1()
      */
-    @Override
+//  @Override
     public void ext1(
     ) throws ServiceException {
         throw new ServiceException(
@@ -286,7 +286,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#ext2()
      */
-    @Override
+//  @Override
     public void ext2(
     ) throws ServiceException {
         throw new ServiceException(
@@ -300,7 +300,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#extI0(java.lang.String)
      */
-    @Override
+//  @Override
     public void ext0(String argument
     ) throws ServiceException {
         throw new ServiceException(
@@ -314,7 +314,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#extI1(java.lang.String)
      */
-    @Override
+//  @Override
     public void ext1(String argument
     ) throws ServiceException {
         throw new ServiceException(
@@ -328,7 +328,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#extI2(java.lang.String)
      */
-    @Override
+//  @Override
     public void ext2(String argument
     ) throws ServiceException {
         throw new ServiceException(
@@ -342,7 +342,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#extT0(int)
      */
-    @Override
+//  @Override
     public void ext0(int argument
     ) throws ServiceException {
         throw new ServiceException(
@@ -356,7 +356,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#extT1(int)
      */
-    @Override
+//  @Override
     public void ext1(int argument
     ) throws ServiceException {
         throw new ServiceException(
@@ -370,7 +370,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#extT2(int)
      */
-    @Override
+//  @Override
     public void ext2(int argument
     ) throws ServiceException {
         throw new ServiceException(
@@ -384,7 +384,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.xml.wbxml.spi.ExtensionHandler#opaque(byte[])
      */
-    @Override
+//  @Override
     public void opaque(
         byte[] data
     ) throws ServiceException {
@@ -399,7 +399,7 @@ public abstract class AbstractPlugIn implements PlugIn {
     /* (non-Javadoc)
      * @see org.openmdx.base.wbxml.PlugIn#getNamespaceContext()
      */
-    @Override
+//  @Override
     public NamespaceContext getNamespaceContext() {
         return null;
     }

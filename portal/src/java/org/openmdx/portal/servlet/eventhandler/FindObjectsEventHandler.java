@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsEventHandler.java,v 1.28 2010/04/27 12:21:07 wfro Exp $
+ * Name:        $Id: FindObjectsEventHandler.java,v 1.32 2010/06/01 09:11:32 hburger Exp $
  * Description: FindObjectsEventHandler 
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.32 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 12:21:07 $
+ * Date:        $Date: 2010/06/01 09:11:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -68,18 +69,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.oasisopen.jmi1.RefContainer;
-import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.AttributeSpecifier;
-import org.openmdx.base.query.FilterOperators;
-import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.query.Orders;
-import org.openmdx.base.query.Quantors;
+import org.openmdx.base.query.AnyTypeCondition;
+import org.openmdx.base.query.Condition;
+import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.IsInstanceOfCondition;
+import org.openmdx.base.query.OrderSpecifier;
+import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 
@@ -98,9 +100,9 @@ public class FindObjectsEventHandler {
         String referenceName = Action.getParameter(parameter, Action.PARAMETER_REFERENCE_NAME);
         String filterByType = Action.getParameter(parameter, Action.PARAMETER_FILTER_BY_TYPE);
         String filterByFeature = Action.getParameter(parameter, Action.PARAMETER_FILTER_BY_FEATURE);
-        short filterOperator = FilterOperators.IS_LIKE;
+        ConditionType filterOperator = ConditionType.IS_LIKE;
         if(Action.getParameter(parameter, Action.PARAMETER_FILTER_OPERATOR) != null) {
-            filterOperator = (short)FilterOperators.fromString(
+            filterOperator = ConditionType.valueOf(
                 Action.getParameter(parameter, Action.PARAMETER_FILTER_OPERATOR)
             );
         }
@@ -126,8 +128,7 @@ public class FindObjectsEventHandler {
             Path objectIdentity = new Path(objectXri);
             pm = application.getNewPmData();
             RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(objectIdentity);
-            List filterProperties = new ArrayList();
-            filterProperties.addAll(
+            List<Condition> conditions = new ArrayList<Condition>(
                 application.getPortalExtension().getFindObjectsBaseFilter(
                     application, 
                     parent,
@@ -139,13 +140,8 @@ public class FindObjectsEventHandler {
                 (filterByType != null) &&
                 (filterByType.length()  > 0)
             ) {
-                filterProperties.add(
-                    new FilterProperty(
-                        Quantors.THERE_EXISTS,
-                        SystemAttributes.OBJECT_INSTANCE_OF,
-                        FilterOperators.IS_IN,
-                        filterByType
-                    )
+                conditions.add(
+                    new IsInstanceOfCondition(filterByType)
                 );                
             }
             // filterByFeature
@@ -168,27 +164,26 @@ public class FindObjectsEventHandler {
                         if(filterValue.indexOf(" [") >= 0 && filterValue.endsWith("]")) {
                         	filterValue = filterValue.substring(0, filterValue.indexOf(" ["));
                         }
-                        filterProperties.add(
-                            new FilterProperty(
-                                Quantors.THERE_EXISTS,
+                        conditions.add(
+                            new AnyTypeCondition(
+                                Quantifier.THERE_EXISTS,
                                 filterByFeature,
                                 filterOperator,
                                 filterFeatureIsNumeric ? Integer.valueOf(filterValue) :
-                                filterOperator == FilterOperators.IS_LIKE ? "(?i).*" + filterValue + ".*": filterValue
+                                filterOperator == ConditionType.IS_LIKE ? "(?i).*" + filterValue + ".*": filterValue
                             )
                         );
                     }
                 }
             }
             // Order
-            AttributeSpecifier s = null;
+            OrderSpecifier s = null;
             if(
                 (orderByFeature != null) && (orderByFeature.length() > 0)
             ) {
-                s = new AttributeSpecifier(
+                s = new OrderSpecifier(
                     orderByFeature,
-                    0,
-                    Orders.ASCENDING
+                    SortOrder.ASCENDING
                 );
             }
             Collection allObjects = (Collection)parent.refGetValue(referenceName);
@@ -196,12 +191,9 @@ public class FindObjectsEventHandler {
             try {
                 filteredObjects = ((RefContainer)allObjects).refGetAll(
                     new org.openmdx.base.query.Filter(
-                        filterProperties == null
-                            ? null
-                            : (FilterProperty[])filterProperties.toArray(new FilterProperty[filterProperties.size()]),
-                        s == null
-                            ? null
-                            : new AttributeSpecifier[]{s}
+                        conditions,
+                        s == null ? null : Collections.singletonList(s),
+                        null // extension
                     )
                 );
             }

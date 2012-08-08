@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ByteString.java,v 1.3 2009/12/31 14:10:17 wfro Exp $
+ * Name:        $Id: ByteString.java,v 1.4 2010/06/07 08:47:27 hburger Exp $
  * Description: ByteString 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/31 14:10:17 $
+ * Date:        $Date: 2010/06/07 08:47:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -165,7 +165,9 @@ public final class ByteString implements Final {
     @Override
     public String toString() {
         if(this.string == null) {
-            this.string = toHexadecimalString(this.buffer, this.offset, this.length).toString(); 
+            this.string = String.valueOf(
+                toHexadecimalString(this.buffer, this.offset, this.length * 2)
+            ); 
         }
         return this.string;
     }

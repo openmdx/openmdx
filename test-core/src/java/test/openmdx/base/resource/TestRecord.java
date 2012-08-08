@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestRecord.java,v 1.5 2010/03/17 16:35:44 hburger Exp $
- * Description: class TestRecord
- * Revision:    $Revision: 1.5 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: TestRecord.java,v 1.7 2010/06/03 15:58:06 hburger Exp $
+ * Description: Test Record
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/17 16:35:44 $
+ * Date:        $Date: 2010/06/03 15:58:06 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,14 +45,19 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package test.openmdx.base.resource;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.resource.cci.IndexedRecord;
@@ -110,6 +114,7 @@ public class TestRecord extends TestCase {
      * Sets up the fixture, for example, open a network connection.
      * This method is called before a test is executed.
      */
+    @Override
     protected void setUp(
     ) throws Exception {
       this.factory = Records.getRecordFactory();
@@ -139,6 +144,7 @@ public class TestRecord extends TestCase {
      * Sets up the fixture, for example, open a network connection.
      * This method is called before a test is executed.
      */
+    @Override
     protected void tearDown(
     ) throws Exception {
     }
@@ -1142,13 +1148,58 @@ for(
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
      */
-    public void testMixedArrayIndexedRecord(
+    public void testVariableSizedMappedRecordDeserialization(
     ) throws Throwable {
-        //...
+        MappedRecord original = Records.getRecordFactory().createMappedRecord("tbs");
+        String key1 = "k";
+        key1 += "1";
+        original.put(key1, "v1");
+        Integer key2 = new Integer(17);
+        original.put(key2, "v2");
+        {
+            Object key = getKey(original, "v1");
+            assertNotSame(key1, key);
+            assertSame("k1", key);
+        }
+        {
+            Object key = getKey(original, "v2");
+            assertNotSame(key2, key);
+            assertSame(Integer.valueOf(17), key);
+        }
+        ByteArrayOutputStream out0 = new ByteArrayOutputStream();
+        ObjectOutputStream out1 = new ObjectOutputStream(out0);
+        out1.writeObject(original);
+        out1.flush();
+        ByteArrayInputStream in0 = new ByteArrayInputStream(out0.toByteArray());
+        ObjectInputStream in1 = new ObjectInputStream(in0);
+        MappedRecord copy = (MappedRecord) in1.readObject();
+        assertEquals(original, copy);
+        original.put(key2, "v2");
+        {
+            Object key = getKey(copy, "v1");
+            assertNotSame(key1, key);
+            assertSame("k1", key);
+        }
+        {
+            Object key = getKey(copy, "v2");
+            assertNotSame(key2, key);
+            assertSame(Integer.valueOf(17), key);
+        }
     }
 
-        
-  //--------------------------------------------------------------------------
+    private static Object getKey(
+        MappedRecord map,
+        Object value
+    ){
+        for(Map.Entry<?, ?> entry : (Set<Map.Entry<?, ?>>)map.entrySet()){
+            if(value.equals(entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+    
+    //--------------------------------------------------------------------------
     // Instance members
     //--------------------------------------------------------------------------
     

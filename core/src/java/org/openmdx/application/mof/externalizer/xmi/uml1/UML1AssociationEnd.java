@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UML1AssociationEnd.java,v 1.1 2009/01/13 02:10:39 wfro Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: UML1AssociationEnd.java,v 1.2 2010/06/18 13:13:42 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:39 $
+ * Date:        $Date: 2010/06/18 13:13:42 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,7 +48,6 @@
  * This product includes software developed by the Apache Software
  * Foundation (http://www.apache.org/).
  */
-
 package org.openmdx.application.mof.externalizer.xmi.uml1;
 
 import java.util.ArrayList;
@@ -78,6 +76,37 @@ public class UML1AssociationEnd
     this.multiplicityRange = new UML1MultiplicityRange("1", "1");
   }
 
+  /**
+   * Used to create instances by the resolver which are amended by the parser.
+   * 
+   * @param id
+   * @param name
+   * @param qualifiedName
+   * @param visibility
+   * @param isSpecification
+   * @param participantId
+   */
+  public UML1AssociationEnd(
+      String id,
+      String name,
+      String qualifiedName,
+      UML1VisibilityKind visibility,
+      boolean isSpecification,
+      String participantId
+  ) {
+    this(
+    	id, 
+    	name, 
+    	qualifiedName, 
+    	visibility, 
+    	isSpecification,
+    	null,
+    	null,
+    	false
+    );
+    this.participantId = participantId;
+  }
+  
   public UML1AggregationKind getAggregation() {
     return aggregation;
   }
@@ -118,12 +147,21 @@ public class UML1AssociationEnd
     participant = className;
   }
 
+  public String getParticipantId() {
+	return this.participantId;
+  }
+
+  public void setParticipantId(String xmiId) {
+    this.participantId = xmiId;
+  }
+  
   public List getQualifier() {
     return this.qualifier;
   }
 
   private UML1MultiplicityRange multiplicityRange = null;
   private String participant = null;
+  private String participantId = null;
   private UML1AggregationKind aggregation;
   private UML1ChangeableKind changeability;
   private boolean isNavigable = false;

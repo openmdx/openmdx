@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: LayerManagerFactory_2.java,v 1.4 2010/04/07 13:08:05 hburger Exp $
+ * Name:        $Id: LayerManagerFactory_2.java,v 1.6 2010/08/09 13:12:05 hburger Exp $
  * Description: Layer Manager Factory 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/07 13:08:05 $
+ * Date:        $Date: 2010/08/09 13:12:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,7 +56,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 
 import org.openmdx.application.configuration.Configuration;
-import org.openmdx.kernel.persistence.spi.DelegatingPersistenceManagerFactory;
+import org.openmdx.base.persistence.spi.DelegatingPersistenceManagerFactory;
 
 /**
  * Layer Manager Factory 
@@ -94,7 +94,7 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
         Map<String,Object> userObjects
     ){
         this.delegate = delegate;
-        this.plugInMapping = newPlugInMapping(
+        this.plugInMapping = LayerManagerFactory_2.newPlugInMapping(
             delegate, 
             implementationMap
         );
@@ -165,7 +165,7 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
      */
     @Override
     public final PersistenceManager getPersistenceManager() {
-        return newLayerManager(
+        return this.newLayerManager(
             super.getPersistenceManager()
         );
     }
@@ -178,7 +178,7 @@ class LayerManagerFactory_2 extends DelegatingPersistenceManagerFactory {
         String userid,
         String password
     ) {
-        return newLayerManager(
+        return this.newLayerManager(
             super.getPersistenceManager(userid, password)
         );
     }

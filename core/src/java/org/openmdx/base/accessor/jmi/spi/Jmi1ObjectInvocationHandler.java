@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ObjectInvocationHandler.java,v 1.135 2010/04/19 11:25:20 hburger Exp $
+ * Name:        $Id: Jmi1ObjectInvocationHandler.java,v 1.143 2010/08/30 15:40:57 wfro Exp $
  * Description: JMI 1 Object Invocation Handler 
- * Revision:    $Revision: 1.135 $
+ * Revision:    $Revision: 1.143 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/19 11:25:20 $
+ * Date:        $Date: 2010/08/30 15:40:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,6 +58,7 @@ import java.io.Writer;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.AbstractSequentialList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -89,8 +90,8 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
-import org.openmdx.base.collection.MarshallingCollection;
 import org.openmdx.base.collection.MarshallingList;
+import org.openmdx.base.collection.MarshallingSequentialList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.RuntimeServiceException;
@@ -100,6 +101,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.jdo.listener.ConstructCallback;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
@@ -164,7 +166,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
      * @return the mapping
      */
     private final Mapping_1_0 getMapping(){
-        return this.refClass.refOutermostPackage().refMapping(); 
+        return ((Jmi1Package_1_0)this.refClass.refOutermostPackage()).refMapping(); 
     }
     
     /**
@@ -176,7 +178,10 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     protected FeatureMapper getFeatureMapper(
     ) throws ServiceException{
         if(this.featureMapper == null) {
-            this.featureMapper = getMapping().getFeatureMapper(refClass.refMofId(), refClass.isTerminal()); 
+            this.featureMapper = getMapping().getFeatureMapper(
+                refClass.refMofId(), 
+                refClass.isTerminal() ? FeatureMapper.Type.TEMRINAL : FeatureMapper.Type.NON_TERMINAL
+            ); 
         }
         return this.featureMapper;
     }
@@ -412,7 +417,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             } 
             else {
                 throw newUnsupportedOperationException(
-                    STANDARD, "refVerifyConstraints"
+                    DelegatingRefObject_1.STANDARD, "refVerifyConstraints"
                 );
             }
         }
@@ -445,7 +450,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             } 
             else {
                 throw newUnsupportedOperationException(
-                    STANDARD,
+                    DelegatingRefObject_1.STANDARD,
                     "refDefaultFetchGroup"
                 );
             }
@@ -457,7 +462,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         public ObjectView_1_0 refDelegate(
         ) {
             throw newUnsupportedOperationException(
-                STANDARD,
+                DelegatingRefObject_1.STANDARD,
                 "refDelegate"
             );        
         }
@@ -486,7 +491,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             } 
             else {
                 throw newUnsupportedOperationException(
-                    STANDARD,
+                    DelegatingRefObject_1.STANDARD,
                     "refInitialize"
                 );
             }
@@ -507,7 +512,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             } 
             else {
                 throw newUnsupportedOperationException(
-                    STANDARD,
+                    DelegatingRefObject_1.STANDARD,
                     "refInitialize"
                 );
             }
@@ -521,7 +526,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             Object newValue, 
             long length
         ) {
-            throw newUnsupportedOperationException(REFLECTIVE, feature);
+            throw newUnsupportedOperationException(DelegatingRefObject_1.REFLECTIVE, feature);
         }
 
         private UnsupportedOperationException newUnsupportedOperationException(
@@ -642,15 +647,27 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                 if("hashCode".equals(methodName)) {
                     return System.identityHashCode(this);
                 }
-                else if("toString".equals(methodName)) {
+                if("toString".equals(methodName)) {
                     return this.refDelegate.toString();
                 } 
-                else if("equals".equals(methodName)) {
-                    return proxy == args[0] || JDOHelper.getTransactionalObjectId(
-                        proxy
-                    ).equals(
-                        JDOHelper.getTransactionalObjectId(args[0])
-                    ); 
+                if("equals".equals(methodName)) {
+                    if(proxy == args[0]) {
+                        return true;
+                    } 
+                    boolean persistent = JDOHelper.isPersistent(proxy);
+                    if(persistent != JDOHelper.isPersistent(args[0])) {
+                        return false;
+                    }
+                    Object thisId;
+                    Object thatId;
+                    if (persistent) {
+                        thisId = JDOHelper.getObjectId(proxy);
+                        thatId = JDOHelper.getObjectId(args[0]);
+                    } else {
+                        thisId = JDOHelper.getTransactionalObjectId(proxy);
+                        thatId = JDOHelper.getTransactionalObjectId(args[0]);
+                    }
+                    return thisId != null && thisId.equals(thatId);
                 } 
             } 
             //
@@ -711,15 +728,19 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                 ) : value instanceof SortedMap ? SortedMaps.asSparseArray(
                                     (SortedMap<Integer,?>)value
                                 ) : value instanceof RefContainer ? Classes.newProxyInstance(
-                                    new Jmi1ContainerInvocationHandler(null, (RefContainer)value),
+                                    new Jmi1ContainerInvocationHandler((Marshaller)null, (RefContainer)value),
                                     method.getReturnType(), 
                                     RefContainer.class, 
-                                    org.openmdx.base.persistence.spi.Container.class,
+                                    PersistenceCapableCollection.class,
                                     Serializable.class
                                 ) : value;
                             }
                             // Query
-                            else if(args.length == 1 && args[0] instanceof AnyTypePredicate) {
+                            else if(
+                                args.length == 1 && (
+                                    args[0] == null || args[0] instanceof AnyTypePredicate
+                                ) 
+                            ){
                                 return ((RefContainer)
                                     this.refDelegate.refGetValue(featureName)
                                 ).refGetAll(
@@ -766,11 +787,13 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                             methodName.startsWith("add") &&
                             (args != null) && 
                             (args.length == 3) && 
-                            (args[0].getClass() == Boolean.class) && (
+                            (args[0].getClass() == Boolean.class) && 
+                            (
                                 args[1] instanceof String ||
                                 args[1] instanceof Number ||
                                 args[1].getClass().isPrimitive() 
-                            )
+                            ) &&
+                            (args[2] instanceof RefObject_1_0)                            
                         ) {
                             ((Jmi1Object_1_0)this.refDelegate).refAddValue(
                                 Identifier.ATTRIBUTE_NAME.toIdentifier(
@@ -780,8 +803,8 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                     null, // removableSuffix
                                     null // appendableSuffix
                                 ), 
-                                ((Boolean)args[0]).booleanValue() ? "!" + args[1] : args[1], 
-                                args[2]
+                                ((Boolean)args[0]).booleanValue() ? "!" + args[1] : args[1], // qualifier 
+                                args[2] // value
                             );
                             return null;
                         }
@@ -789,11 +812,13 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                         else if(
                             methodName.startsWith("add") &&
                             (args != null) && 
-                            (args.length == 2) && (
+                            (args.length == 2) && 
+                            (
                                 args[0] instanceof String ||
                                 args[0] instanceof Number ||
                                 args[0].getClass().isPrimitive() 
-                            )
+                            ) &&
+                            (args[1] instanceof RefObject_1_0)                            
                         ) {
                             ((Jmi1Object_1_0)this.refDelegate).refAddValue(
                                 Identifier.ATTRIBUTE_NAME.toIdentifier(
@@ -803,8 +828,28 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                                     null, // removableSuffix
                                     null // appendableSuffix
                                 ), 
-                                args[0], 
-                                args[1]
+                                args[0], // qualifier
+                                args[1] // value
+                            );
+                            return null;
+                        }
+                        // Adders with signature (Object object)
+                        else if(
+                            methodName.startsWith("add") &&
+                            (args != null) && 
+                            (args.length == 1) && 
+                            (args[0] instanceof RefObject_1_0)
+                        ) {
+                            ((Jmi1Object_1_0)this.refDelegate).refAddValue(
+                                Identifier.ATTRIBUTE_NAME.toIdentifier(
+                                    featureName,
+                                    "add", // removablePrefix
+                                    null, // prependablePrefix
+                                    null, // removableSuffix
+                                    null // appendableSuffix
+                                ), 
+                                null, // qualifier 
+                                args[0] // value
                             );
                             return null;
                         }
@@ -1024,6 +1069,12 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             int size = source.length;
             if(
                 (size == 1) &&
+                (source[0] instanceof RefObject_1_0)
+            ){
+                return new Object[]{RefContainer.REASSIGNABLE, null, source[0]};
+            }  
+            else if(
+                (size == 1) &&
                 (source[0] instanceof String || source[0] instanceof Number)
             ){
                 return new Object[]{RefContainer.REASSIGNABLE, source[0]};
@@ -1188,7 +1239,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
             Object reply = invocationTarget.invoke(
                 hasVoidArg ? null : args
             );
-            if(reply instanceof Container<?> && !(reply instanceof RefContainer)) {
+            if(reply instanceof Container<?> && !(reply instanceof RefContainer<?>)) {
                 return Classes.newProxyInstance(
                     new Jmi1ContainerInvocationHandler(
                         null, // marshaller
@@ -1196,7 +1247,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     ),
                     method.getReturnType(), 
                     RefContainer.class, 
-                    org.openmdx.base.persistence.spi.Container.class,
+                    PersistenceCapableCollection.class,
                     Serializable.class
                 );
             } else {
@@ -1206,119 +1257,6 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
     }
 
     
-    //-----------------------------------------------------------------------
-    /**
-     * MarshallingContainer
-     */
-    @SuppressWarnings("unchecked")
-    static class MarshallingContainer extends MarshallingCollection
-        implements RefContainer {
-
-        /**
-         * Constructor 
-         *
-         * @param marshaller
-         * @param delegate
-         */
-        MarshallingContainer(
-            StandardMarshaller marshaller,
-            RefContainer delegate
-        ){
-            super(marshaller, (Collection) delegate);
-            this.marshaller = marshaller;
-            this.delegate = delegate;
-        }
-
-        private static final long serialVersionUID = 6428539771257840145L;
-        protected final StandardMarshaller marshaller;
-        protected final RefContainer delegate;
-
-        /**
-         * @return
-         * @see javax.jmi.reflect.RefBaseObject#refImmediatePackage()
-         */
-        public RefPackage refImmediatePackage() {
-            return this.delegate.refImmediatePackage();
-        }
-
-        /**
-         * @return
-         * @see javax.jmi.reflect.RefBaseObject#refMetaObject()
-         */
-        public RefObject refMetaObject() {
-            return this.delegate.refMetaObject();
-        }
-
-        /**
-         * @return
-         * @see javax.jmi.reflect.RefBaseObject#refMofId()
-         */
-        public String refMofId() {
-            return this.delegate.refMofId();
-        }
-
-        /**
-         * @return
-         * @see javax.jmi.reflect.RefBaseObject#refOutermostPackage()
-         */
-        public RefPackage refOutermostPackage() {
-            return this.delegate.refOutermostPackage();
-        }
-
-        /**
-         * @param deepVerify
-         * @return
-         * @see javax.jmi.reflect.RefBaseObject#refVerifyConstraints(boolean)
-         */
-        public Collection refVerifyConstraints(boolean deepVerify) {
-            return this.delegate.refVerifyConstraints(deepVerify);
-        }
-
-        /* (non-Javadoc)
-         * @see org.oasisopen.jmi1.RefContainer#refAdd(java.lang.Object[])
-         */
-        public void refAdd(Object... arguments) {
-            this.delegate.refAdd(this.marshaller.unmarshal(arguments));
-        }
-
-        /* (non-Javadoc)
-         * @see org.oasisopen.jmi1.RefContainer#refGet(java.lang.Object[])
-         */
-        public Object refGet(Object... arguments) {
-            return this.marshaller.marshal(
-                this.delegate.refGet(this.marshaller.unmarshal(arguments))
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see org.oasisopen.jmi1.RefContainer#refGetAll(java.lang.Object)
-         */
-        public List<?> refGetAll(Object query) {
-            return this.marshaller.marshal(
-                this.delegate.refGetAll(query)
-            );
-        }
-
-        /* (non-Javadoc)
-         * @see org.oasisopen.jmi1.RefContainer#refRemove(java.lang.Object[])
-         */
-        public void refRemove(Object... arguments) {
-            this.delegate.refRemove(this.marshaller.unmarshal(arguments));
-        }
-
-        /* (non-Javadoc)
-         * @see org.oasisopen.jmi1.RefContainer#refRemoveAll(java.lang.Object)
-         */
-        public long refRemoveAll(Object query) {
-            return this.delegate.refRemoveAll(query);
-        }
-
-    }
-
-    //------------------------------------------------------------------------
-    // Class StandardMarshaller
-    //------------------------------------------------------------------------
-
     /**
      * Class StandardMarshaller
      */
@@ -1383,7 +1321,7 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
                     new Jmi1ContainerInvocationHandler(this, (Container)source),
                     source.getClass().getInterfaces()[0], 
                     RefContainer.class, 
-                    org.openmdx.base.persistence.spi.Container.class,
+                    PersistenceCapableCollection.class,
                     Serializable.class 
                 ) : source instanceof Record ? delegate.refCreateStruct(
                     (Record)source
@@ -1397,7 +1335,13 @@ public class Jmi1ObjectInvocationHandler implements InvocationHandler, Serializa
         public final List marshal(
             List source
         ){
-            return new MarshallingList(this, source);
+            return source instanceof AbstractSequentialList ? new MarshallingSequentialList(
+                this,
+                source
+            ) : new MarshallingList(
+                this, 
+                source
+            );
         }
 
         /**

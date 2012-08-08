@@ -8,15 +8,10 @@ public final class AggregationKindEnum implements AggregationKind {
     public static final AggregationKindEnum SHARED = new AggregationKindEnum("shared");
     public static final AggregationKindEnum COMPOSITE = new AggregationKindEnum("composite");
 
-    private static final java.util.List typeName;
+    private static final java.util.List typeName = java.util.Collections.unmodifiableList(
+        java.util.Arrays.asList("Model", "AggregationKind")
+    );
     private final String literalName;
-
-    static {
-        java.util.ArrayList temp = new java.util.ArrayList();
-        temp.add("Model");
-        temp.add("AggregationKind");
-        typeName = java.util.Collections.unmodifiableList(temp);
-    }
 
     private AggregationKindEnum(String literalName) {
         this.literalName = literalName;
@@ -26,14 +21,17 @@ public final class AggregationKindEnum implements AggregationKind {
         return typeName;
     }
 
+    @Override
     public String toString() {
         return literalName;
     }
 
+    @Override
     public int hashCode() {
         return literalName.hashCode();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof AggregationKindEnum) return (o == this);
         else if (o instanceof AggregationKind) return (o.toString().equals(literalName));

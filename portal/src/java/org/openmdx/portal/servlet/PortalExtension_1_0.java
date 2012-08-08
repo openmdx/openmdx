@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PortalExtension_1_0.java,v 1.36 2010/04/27 21:22:22 wfro Exp $
+ * Name:        $Id: PortalExtension_1_0.java,v 1.39 2010/06/01 10:32:10 wfro Exp $
  * Description: Evaluator_1_0
- * Revision:    $Revision: 1.36 $
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 21:22:22 $
+ * Date:        $Date: 2010/06/01 10:32:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,14 +58,12 @@ package org.openmdx.portal.servlet;
 import java.util.List;
 import java.util.Map;
 
-import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefStruct;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.FilterProperty;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.control.Control;
 import org.openmdx.portal.servlet.control.GridControl;
@@ -157,14 +155,14 @@ public interface PortalExtension_1_0 {
      * 
      * @param field return the query for field
      * @param filterValue field is queried for this value.
-     * @param queryFilterContext use this context for query filters
      * @param queryFilterStringParamCount use this count for string parameters for query filters
-     * @return list of conditions. 
+     * @param application the application context
+     *
+     * @return a filter
      */
-    public List<Condition> getQuery(        
+    public org.openmdx.base.query.Filter getQuery(        
     	org.openmdx.ui1.jmi1.ValuedField field,
         String filterValue,
-        String queryFilterContext,
         int queryFilterStringParamCount,
         ApplicationContext application
     );
@@ -215,7 +213,7 @@ public interface PortalExtension_1_0 {
      * be returned by the find objects reply a filter of the form active=true can
      * be returned.
      */
-    public List<FilterProperty> getFindObjectsBaseFilter(
+    public List<Condition> getFindObjectsBaseFilter(
         ApplicationContext application,
         RefObject_1_0 context,
         String qualifiedFeatureName

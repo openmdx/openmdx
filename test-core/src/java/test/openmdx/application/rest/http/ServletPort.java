@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ServletPort.java,v 1.11 2010/03/19 12:34:36 hburger Exp $
+ * Name:        $Id: ServletPort.java,v 1.16 2010/06/03 15:57:54 hburger Exp $
  * Description: ServletPort 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:34:36 $
+ * Date:        $Date: 2010/06/03 15:57:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,7 +62,6 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.URI;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -100,6 +99,7 @@ import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.spi.RestFormat;
 import org.openmdx.base.rest.spi.RestFormat.Target;
+import org.openmdx.base.text.conversion.URITransformation;
 import org.openmdx.kernel.id.UUIDs;
 import org.w3c.cci2.CharacterLargeObjects;
 import org.xml.sax.InputSource;
@@ -194,7 +194,8 @@ public class ServletPort
 
         protected final EmbeddedSession session = new EmbeddedSession();
         protected final String remoteUser = System.getProperty("user.name", "ServletPort");
-
+        protected static final String CONTEXT_PATH = "/ServletPort";
+        
         /**
          * Constructor 
          *
@@ -207,7 +208,7 @@ public class ServletPort
         ) throws ResourceException {
             super(
                 connection, 
-                "http://test.openmdx.org/ServletPort/"
+                "http://test.openmdx.org" + CONTEXT_PATH
             );
         }
 
@@ -312,6 +313,7 @@ public class ServletPort
             /**
              * @deprecated
              */
+            @SuppressWarnings("dep-ann")
             public javax.servlet.http.HttpSessionContext getSessionContext() {
                 throw new UnsupportedOperationException();
             }
@@ -391,10 +393,12 @@ public class ServletPort
             /**
              * Constructor 
              *
-             * @param uri
+             * @param contextURL
              */
-            protected ServletTarget(String uri) {
-                super(uri);
+            protected ServletTarget(
+                String contextURL
+            ) {
+                super(contextURL);
             }
 
             /**
@@ -435,14 +439,14 @@ public class ServletPort
             ){
                 this.interactionSpec = interactionSpec;
                 String servletPath = xri.toXRI();
-                this.servletPath = servletPath.substring(
+                this.servletPath = '/' + servletPath.substring(
                     servletPath.charAt(14) == '!' ? 14 : 15
                 );
             }
             
             protected final RestInteractionSpec interactionSpec;
             protected final String servletPath;
-            protected final ServletTarget outputTarget = new ServletTarget(ServletInteraction.this.uri);
+            protected final ServletTarget outputTarget = new ServletTarget(ServletInteraction.this.contextURL);
             private final EmbeddedRequest request = new EmbeddedRequest();
             private final EmbeddedResponse response = new EmbeddedResponse();
             /* (non-Javadoc)
@@ -453,7 +457,7 @@ public class ServletPort
                 try {
                     setRequestField("Content-Type", MIME_TYPE + ";charset=UTF-8"); 
                     setRequestField("Accept", MIME_TYPE); 
-                    setRequestField("Accept", MIME_TYPE); 
+                    setRequestField("Accept-Charset", "UTF-8"); 
                     setRequestField("interaction-verb", Integer.toString(this.interactionSpec.getInteractionVerb()));
                     this.outputTarget.close();
                     ServletPort.this.servlet.service(this.request, this.response);
@@ -484,9 +488,10 @@ public class ServletPort
             ) throws ServiceException {
                 InputSource source = this.response.body.getInputSource(); 
                 return new RestFormat.Source(
-                    ServletInteraction.this.uri,
+                    ServletInteraction.this.contextURL,
                     source,
-                    MIME_TYPE
+                    MIME_TYPE, 
+                    null
                 );
             }
 
@@ -508,35 +513,34 @@ public class ServletPort
             class EmbeddedRequest implements HttpServletRequest {
                 
                 private final Map<String,String> headers = new HashMap<String,String>();
-                private URI uri = null;
                 private final Map<String,String[]> parameters = new HashMap<String,String[]>();
                 
-                @Override
+            //  @Override
                 public String getAuthType() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public String getContextPath() {
-                    throw new UnsupportedOperationException();
+                   return CONTEXT_PATH;
                 }
 
-                @Override
+            //  @Override
                 public Cookie[] getCookies() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public long getDateHeader(String name) {
                     return Long.parseLong(getHeader(name));
                 }
 
-                @Override
+            //  @Override
                 public String getHeader(String name) {
                     return this.headers.get(name.toLowerCase());
                 }
 
-                @Override
+            //  @Override
                 @SuppressWarnings("unchecked")
                 public Enumeration getHeaderNames() {
                     return Collections.enumeration(
@@ -544,7 +548,7 @@ public class ServletPort
                     );
                 }
 
-                @Override
+            //  @Override
                 @SuppressWarnings("unchecked")
                 public Enumeration getHeaders(String name) {
                     String header = this.headers.get(name.toLowerCase());
@@ -553,12 +557,12 @@ public class ServletPort
 
                         private int cursor = 0;
                         
-                        @Override
+                    //  @Override
                         public boolean hasMoreElements() {
                             return this.cursor < values.length;
                         }
 
-                        @Override
+                    //  @Override
                         public Object nextElement() {
                             return values[this.cursor++].trim();
                         }
@@ -566,115 +570,112 @@ public class ServletPort
                     };
                 }
 
-                @Override
+            //  @Override
                 public int getIntHeader(String name) {
                     return Integer.parseInt(getHeader(name));
                 }
 
-                @Override
+            //  @Override
                 public String getMethod() {
                     return ServletMessage.this.interactionSpec.getFunctionName();
                 }
 
-                @Override
+            //  @Override
                 public String getPathInfo() {
-                    throw new UnsupportedOperationException();
+                    return null;
                 }
 
-                @Override
+            //  @Override
                 public String getPathTranslated() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public String getQueryString() {
-                    throw new UnsupportedOperationException();
+                    return null;
                 }
 
-                @Override
+            //  @Override
                 public String getRemoteUser() {
                     return remoteUser;
                 }
 
-                @Override
+            //  @Override
                 public String getRequestURI() {
-                    if(this.uri == null) {
-                        this.uri = URI.create(ServletInteraction.this.uri); 
-                    }
-                    return this.uri.getPath();
+                    return getContextPath() + URITransformation.encode(ServletMessage.this.servletPath);
                 }
 
-                @Override
+            //  @Override
                 public StringBuffer getRequestURL() {
                     return new StringBuffer(
-                        ServletInteraction.this.uri
+                        ServletInteraction.this.contextURL
                     ).append(
-                        ServletMessage.this.servletPath
+                        URITransformation.encode(ServletMessage.this.servletPath)
                     );
                 }
 
-                @Override
+            //  @Override
                 public String getRequestedSessionId() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public String getServletPath() {
-                    return '/' + ServletMessage.this.servletPath;
+                    return ServletMessage.this.servletPath;
                 }
 
-                @Override
+            //  @Override
                 public HttpSession getSession() {
                     return getSession(true);
                 }
 
-                @Override
+            //  @Override
                 public HttpSession getSession(boolean create) {
                     return ServletInteraction.this.session;
                 }
 
-                @Override
+            //  @Override
                 public Principal getUserPrincipal() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public boolean isRequestedSessionIdFromCookie() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public boolean isRequestedSessionIdFromURL() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public boolean isRequestedSessionIdFromUrl() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public boolean isRequestedSessionIdValid() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public boolean isUserInRole(String role) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public Object getAttribute(String name) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 @SuppressWarnings("unchecked")
                 public Enumeration getAttributeNames() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public String getCharacterEncoding() {
                     HttpHeaderFieldContent contentType = new HttpHeaderFieldValue(
                         request.getHeaders("Content-Type")
@@ -698,7 +699,7 @@ public class ServletPort
                     }
                 }
 
-                @Override
+            //  @Override
                 public int getContentLength() {
                     String contentLength = headers.get("content-length");
                     try {
@@ -708,73 +709,73 @@ public class ServletPort
                     }
                 }
 
-                @Override
+            //  @Override
                 public String getContentType() {
                     return request.getHeader("Content-Type");
                 }
 
-                @Override
+            //  @Override
                 public ServletInputStream getInputStream(
                 ) throws IOException {
                     return ServletMessage.this.outputTarget.body.getBinarySource();
                 }
 
-                @Override
+            //  @Override
                 public String getLocalAddr(
                 ) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public String getLocalName() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public int getLocalPort() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public Locale getLocale() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 @SuppressWarnings("unchecked")
                 public Enumeration getLocales() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public String getParameter(String name) {
                     String[] values = getParameterValues(name);
                     return values == null || values.length == 0 ? null : values[0];
                 }
 
-                @Override
+            //  @Override
                 @SuppressWarnings("unchecked")
                 public Map getParameterMap() {
                     return this.parameters;
                 }
 
-                @Override
+            //  @Override
                 @SuppressWarnings("unchecked")
                 public Enumeration getParameterNames() {
                     return Collections.enumeration(this.parameters.keySet());
                 }
 
-                @Override
+            //  @Override
                 public String[] getParameterValues(String name) {
                     return this.parameters.get(name);
                 }
 
-                @Override
+            //  @Override
                 public String getProtocol() {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public BufferedReader getReader(
                 ) throws IOException {
                     return new BufferedReader(
@@ -782,70 +783,70 @@ public class ServletPort
                     );
                 }
 
-                @Override
+            //  @Override
                 public String getRealPath(
                     String path
                 ) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public String getRemoteAddr(
                 ) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public String getRemoteHost(
                 ) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public int getRemotePort(
                 ) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public RequestDispatcher getRequestDispatcher(
                     String path
                 ) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public String getScheme(
                 ) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public String getServerName(
                 ) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public int getServerPort(
                 ) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public boolean isSecure(
                 ) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public void removeAttribute(
                     String name
                 ) {
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public void setAttribute(
                     String name, 
                     Object o
@@ -853,7 +854,7 @@ public class ServletPort
                     throw new UnsupportedOperationException();
                 }
 
-                @Override
+            //  @Override
                 public void setCharacterEncoding(
                     String env
                 ) throws UnsupportedEncodingException {
@@ -1011,6 +1012,7 @@ public class ServletPort
                              * @throws IOException
                              * @see java.io.OutputStream#flush()
                              */
+                            @Override
                             public void flush(
                             ) throws IOException {
                                 this.delegate.flush();
@@ -1023,6 +1025,7 @@ public class ServletPort
                              * @throws IOException
                              * @see java.io.OutputStream#write(byte[], int, int)
                              */
+                            @Override
                             public void write(byte[] b, int off, int len)
                                 throws IOException {
                                 this.delegate.write(b, off, len);
@@ -1033,6 +1036,7 @@ public class ServletPort
                              * @throws IOException
                              * @see java.io.OutputStream#write(byte[])
                              */
+                            @Override
                             public void write(byte[] b)
                                 throws IOException {
                                 this.delegate.write(b);

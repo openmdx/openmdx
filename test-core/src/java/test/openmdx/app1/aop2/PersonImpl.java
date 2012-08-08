@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersonImpl.java,v 1.1 2009/09/17 16:23:01 hburger Exp $
+ * Name:        $Id: PersonImpl.java,v 1.3 2010/06/24 16:54:15 hburger Exp $
  * Description: Person 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/17 16:23:01 $
+ * Date:        $Date: 2010/06/24 16:54:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -83,7 +83,7 @@ import org.w3c.cci2.SparseArray;
  */
 public class PersonImpl 
     extends AbstractObject<test.openmdx.app1.jmi1.Person,test.openmdx.app1.cci2.Person,Void> 
-    implements StoreCallback
+    implements StoreCallback, NaturalPerson
 {
 
     /**
@@ -193,6 +193,7 @@ public class PersonImpl
      */
     public Void assignAddress(PersonAssignAddressParams in) {
         RefPackage_1_0 nextPackage = (RefPackage_1_0) ((RefObject)nextObject()).refOutermostPackage();
+        @SuppressWarnings("unused")
         test.openmdx.app1.cci2.PersonAssignAddressParams nextInput = (test.openmdx.app1.cci2.PersonAssignAddressParams) nextPackage.refCreateStruct(in.refDelegate());
 //        nextObject().assignAddress(nextInput);
         System.out.println("Assigning addresses to " + sameObject().refMofId() + ": " + in.getAddress());

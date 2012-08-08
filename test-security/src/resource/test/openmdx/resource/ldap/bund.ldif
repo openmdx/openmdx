@@ -1,0 +1,3610 @@
+dn: o=Bund,c=DE
+o: Bund
+objectClass: top
+objectClass: organization
+
+dn: ou=BMI,o=Bund,c=DE
+businessCategory:: T2JlcnN0ZSBCdW5kZXNiZWjDtnJkZQ==
+description: BMI
+objectClass: top
+objectClass: organizationalUnit
+ou: BMI
+
+dn: ou=Service,o=Bund,c=DE
+description: IVBB EXTERN
+objectClass: top
+objectClass: organizationalUnit
+ou: Service
+
+dn: ou=BFDT,o=Bund,c=DE
+description: BFDT
+objectClass: top
+objectClass: organizationalUnit
+ou: BFDT
+
+dn: cn=Liegenschaften,o=Bund,c=DE
+cn: Liegenschaften
+objectClass: subtree
+objectClass: top
+
+dn: ou=THW,o=Bund,c=DE
+description: Technisches Hilfswerk
+objectClass: top
+objectClass: organizationalUnit
+ou: THW
+
+dn: ou=BLE,o=Bund,c=DE
+description:: QnVuZGVzYW10IGbDvHIgTGFuZHdpcnRzY2hhZnQgdW5kIEVybsOkaHJ1bmc=
+objectClass: top
+objectClass: organizationalUnit
+ou: BLE
+
+dn: cn=CA IVBB Deutsche Telekom AG,o=Bund,c=DE
+authorityRevocationList;binary:: MIIBcTCB2zANBgkqhkiG9w0BAQUFADBCMQswCQYDVQQ
+ GEwJERTENMAsGA1UEChMEQnVuZDEkMCIGA1UEAxMbQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIE
+ FHFw0wMjA3MTYxMjE4MzNaFw0wMzAxMTUwMDE4MzNaoGgwZjBYBgNVHSMEUTBPoUekRTBDMQswC
+ QYDVQQGEwJkZTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzEZMBcGA1UEAxMQUENBLTEtVmVy
+ d2FsdHVuZ4IEOpOIUzAKBgNVHRQEAwIBBDANBgkqhkiG9w0BAQUFAAOBgQBJoE55YjISzWCt1Ay
+ 6YL5ix/I95JiTYBvSP16EzzfFIRQfRT4FEx9GOmTmIeM8mqtYyKj0UvFVtejdtNifWyTtTtjnEV
+ XaZpbxAAcIaZHvdIo0WfVpSENsFjbOFVs2GF4YAI3Es9R+ER6IXDbLNvZXk26aUfVLBTWml9edM
+ ka7Wg==
+cACertificate;binary:: MIIDjDCCAnSgAwIBAgIEOpOIUzANBgkqhkiG9w0BAQUFADBDMQswC
+ QYDVQQGEwJkZTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzEZMBcGA1UEAxMQUENBLTEtVmVy
+ d2FsdHVuZzAeFw0wMTAyMjEwOTIwMTlaFw0wNDAyMjEwOTIwMTlaMEIxCzAJBgNVBAYTAkRFMQ0
+ wCwYDVQQKEwRCdW5kMSQwIgYDVQQDExtDQSBJVkJCIERldXRzY2hlIFRlbGVrb20gQUcwgZ8wDQ
+ YJKoZIhvcNAQEBBQADgY0AMIGJAoGBAKBcgow+0I4qeLhvN1+lYGSRDEjFOJCn4sB/CENrxRGEV
+ 93jVlZjVaB/6ODk3nAUj27oIWqJ/H8kJL4xFobYhrY1F8FjBdFmWPli50hJmtgGiLmwhCziMur+
+ BAMKDlmdRujmBJv8AjP010ncGgW2D2wovkZCXhDBS08mTHPyCl1zAgMBAAGjggELMIIBBzASBgN
+ VHRMBAf8ECDAGAQH/AgEDMA4GA1UdDwEB/wQEAwIBBjAWBgNVHSAEDzANMAsGCSsGAQQBvXQBAT
+ BcBgNVHR8EVTBTMFGgT6BNhktsZGFwOi8vL2NuPVBDQS0xLVZlcndhbHR1bmcsbz1QS0ktMS1WZ
+ XJ3YWx0dW5nLGM9ZGU/YXV0aG9yaXR5UmV2b2NhdGlvbkxpc3QwWAYDVR0jBFEwT6FHpEUwQzEL
+ MAkGA1UEBhMCZGUxGTAXBgNVBAoTEFBLSS0xLVZlcndhbHR1bmcxGTAXBgNVBAMTEFBDQS0xLVZ
+ lcndhbHR1bmeCBDqSPEEwEQYDVR0OBAoECEJJv3oUiSfDMA0GCSqGSIb3DQEBBQUAA4IBAQBW8w
+ 3BQ7ttrBqoRfL/ubh02uUtdVy+fA01tE339n3agOf0TW1IKiFI2dmk5DVxYQt8TLqlysA0T/fRZ
+ BUPmyC/80nG40rt4xcs27AxJ6f+nw3QL1ev2BzWUA3Kbb1tt7ePzEpIulGrnRr1PuIF78Q6tDsU
+ 5kCAIUtC/M5WcxW4uKxF5fW1tWVLbYxf05wXPOfrgy7gedxRKdvKB6funXNeBuWDtCPEmQaVSIh
+ BXkuvCAc3AFTQLOR3xQd+qxg9uttUvrt/nVZllbV+6DCYYjlptohzcfkRrZ//ImTLvF6+PkSQ8S
+ PlRkhLs4P3EsWxOOX77uZ0LOuZF3RgkDUDKr8e
+certificateRevocationList;binary:: MIIBdTCB3wIBATANBgkqhkiG9w0BAQUFADBCMQswC
+ QYDVQQGEwJERTENMAsGA1UEChMEQnVuZDEkMCIGA1UEAxMbQ0EgSVZCQiBEZXV0c2NoZSBUZWxl
+ a29tIEFHFw0wNDAyMjEwNjI1MTlaFw0wNDAyMjIwNjU1MTlaoGkwZzBYBgNVHSMEUTBPoUekRTB
+ DMQswCQYDVQQGEwJkZTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzEZMBcGA1UEAxMQUENBLT
+ EtVmVyd2FsdHVuZ4IEOpOIUzALBgNVHRQEBAICD3AwDQYJKoZIhvcNAQEFBQADgYEAORsHSG0ap
+ bjRg3E0V/N53yN1M/lQ/w3ogfBflgD9fagZ0jrxfWLvUtrGF0agSYE1HKo8UZGigSQleh9K6HEs
+ bFKdeXP2BvT5LIgq81XwVtYYI6x+xjo+GlPyTV/PwNZf6X+2x1MZAzbdkPNXSYwKH+/HnkLapqN
+ KiVvKn1+UzaQ=
+cn: CA IVBB Deutsche Telekom AG
+objectClass: ivbbCA
+objectClass: top
+objectClass: applicationProcess
+objectClass: pkiCA
+
+dn: ou=BfA,o=Bund,c=DE
+description:: QnVuZGVzdmVyc2ljaGVydW5nc2Fuc3RhbHQgZsO8ciBBbmdlc3RlbGxl
+objectClass: top
+objectClass: organizationalUnit
+ou: BfA
+
+dn: ou=BAMF,o=Bund,c=DE
+description: DSC
+objectClass: top
+objectClass: organizationalUnit
+ou: BAMF
+
+dn: ou=BVerfG,o=Bund,c=DE
+description: BVerfG
+objectClass: top
+objectClass: organizationalUnit
+ou: BVerfG
+
+dn: ou=BAKS,o=Bund,c=DE
+description:: QnVuZGVzYWthZGVtaWUgZsO8ciBTaWNoZXJoZWl0c3BvbGl0aWs=
+objectClass: top
+objectClass: organizationalUnit
+ou: BAKS
+
+dn: ou=BPA,o=Bund,c=DE
+businessCategory:: T2JlcnN0ZSBCdW5kZXNiZWjDtnJkZQ==
+description: Bundespresseamt
+objectClass: top
+objectClass: organizationalUnit
+ou: BPA
+
+dn: cn=ivbbadmin,o=Bund,c=DE
+cn: ivbbadmin
+description: Default Administrator
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+sn: ivbbadmin
+
+dn:: b3U9QW10IGbDvHIgTmVja2FyYXVzYmF1IEhlaWRlbGJlcmcsY249TGllZ2Vuc2NoYWZ0ZW4
+ sbz1CdW5kLGM9REU=
+objectClass: top
+objectClass: organizationalUnit
+ou:: QW10IGbDvHIgTmVja2FyYXVzYmF1IEhlaWRlbGJlcmc=
+
+dn: ou=AOK Hessen,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Hessen
+
+dn: ou=1. Panzerdivision,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: 1. Panzerdivision
+
+dn: ou=Berufsgenossenschaft Handel und Warendistribution,cn=Liegenschaften,o
+ =Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Berufsgenossenschaft Handel und Warendistribution
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBNZW5zY2hlbnJlY2h
+ 0c3BvbGl0aWsgdW5kIEh1bWFuaXTDpHJlIEhpbGZlLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZC
+ xjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBNZW5zY2hlbnJlY2h0c3B
+ vbGl0aWsgdW5kIEh1bWFuaXTDpHJlIEhpbGZl
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBBdXNzaWVkbGVyZnJ
+ hZ2VuIHVuZCBuYXRpb25hbGUgTWluZGVyaGVpdGVuLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZC
+ xjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBBdXNzaWVkbGVyZnJhZ2V
+ uIHVuZCBuYXRpb25hbGUgTWluZGVyaGVpdGVu
+
+dn:: b3U9QWthZGVtaWUgZGVyIEJ1bmRlc3dlaHIgZsO8ciBJbmZvcm1hdGlvbiB1bmQgS29tbXV
+ uaWthdGlvbixjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QWthZGVtaWUgZGVyIEJ1bmRlc3dlaHIgZsO8ciBJbmZvcm1hdGlvbiB1bmQgS29tbXVuaWt
+ hdGlvbg==
+
+dn:: b3U9QWthZGVtaWUgZGVyIEvDvG5zdGUsY249TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU
+ =
+objectClass: top
+objectClass: organizationalUnit
+ou:: QWthZGVtaWUgZGVyIEvDvG5zdGU=
+
+dn:: b3U9QW10IGbDvHIgZGVuIE1pbGl0w6RyaXNjaGVuIEFic2NoaXJtZGllbnN0LGNuPUxpZWd
+ lbnNjaGFmdGVuLG89QnVuZCxjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QW10IGbDvHIgZGVuIE1pbGl0w6RyaXNjaGVuIEFic2NoaXJtZGllbnN0
+
+dn:: b3U9QWxmcmVkLVdlZ2VuZXIgSW5zdGl0dXQgZsO8ciBQb2xhci0gdW5kIE1lZXJlc2ZvcnN
+ jaHVuZyxjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QWxmcmVkLVdlZ2VuZXIgSW5zdGl0dXQgZsO8ciBQb2xhci0gdW5kIE1lZXJlc2ZvcnNjaHV
+ uZw==
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBLdWx0dXIgdW5kIE1
+ lZGllbixjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBLdWx0dXIgdW5kIE1lZGl
+ lbg==
+
+dn:: b3U9QW10IGbDvHIgRmx1Z3NpY2hlcnVuZyBkZXIgQnVuZGVzd2Vocixjbj1MaWVnZW5zY2h
+ hZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QW10IGbDvHIgRmx1Z3NpY2hlcnVuZyBkZXIgQnVuZGVzd2Vocg==
+
+dn:: b3U9QXVzYmlsZHVuZ3MtIHVuZCBRdWFsaWZpemllcnVuZ3MtWmVudHJ1bSBEw7xzc2VsZG9
+ yZiBHbWJILGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QXVzYmlsZHVuZ3MtIHVuZCBRdWFsaWZpemllcnVuZ3MtWmVudHJ1bSBEw7xzc2VsZG9yZiB
+ HbWJI
+
+dn:: b3U9QmVybmhhcmQtTm9jaHQtSW5zdGl0dXQgZsO8ciBUcm9wZW5tZWRpemluLGNuPUxpZWd
+ lbnNjaGFmdGVuLG89QnVuZCxjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVybmhhcmQtTm9jaHQtSW5zdGl0dXQgZsO8ciBUcm9wZW5tZWRpemlu
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGbDvHIgZGllIGRldXRzY2gtZnJhbnrDtnNpc2NoZSBadXNhbW1
+ lbmFyYmVpdCxjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGbDvHIgZGllIGRldXRzY2gtZnJhbnrDtnNpc2NoZSBadXNhbW1lbmF
+ yYmVpdA==
+
+dn: ou=Berufsbildungszentrum Kleinmachnow,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Berufsbildungszentrum Kleinmachnow
+
+dn: ou=10. Panzerdivision,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: 10. Panzerdivision
+
+dn: ou=Bildungs- und Wissenschaftszentrum der Bundesfinanzverwaltung,cn=Lieg
+ enschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Bildungs- und Wissenschaftszentrum der Bundesfinanzverwaltung
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBNaXR0ZWxzdGFuZCB
+ 1bmQgVG91cmlzbXVzLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBNaXR0ZWxzdGFuZCB1bmQ
+ gVG91cmlzbXVz
+
+dn:: b3U9QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7xyIEluZm9ybWF0aW9uc3R
+ lY2huaWssY249TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7xyIEluZm9ybWF0aW9uc3RlY2h
+ uaWs=
+
+dn: ou=Antidiskriminierungsstelle des Bundes,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Antidiskriminierungsstelle des Bundes
+
+dn: ou=AOK Rheinland/Hamburg,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Rheinland/Hamburg
+
+dn: l=Bundesgebiet,ou=THW,o=Bund,c=DE
+l: Bundesgebiet
+objectClass: top
+objectClass: locality
+
+dn: ou=Ausbildungszentrum AGV Bau Saar GmbH,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Ausbildungszentrum AGV Bau Saar GmbH
+
+dn: l=Karlsruhe,ou=BVerfG,o=Bund,c=DE
+l: Karlsruhe
+objectClass: top
+objectClass: locality
+
+dn:: b3U9YWlkIGluZm9kaWVuc3Q6IEVybsOkaHJ1bmdcLCBMYW5kd2lydHNjaGFmdFwsIFZlcmJ
+ yYXVjaGVyc2NodXR6IGUuIFYuLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: YWlkIGluZm9kaWVuc3Q6IEVybsOkaHJ1bmcsIExhbmR3aXJ0c2NoYWZ0LCBWZXJicmF1Y2h
+ lcnNjaHV0eiBlLiBWLg==
+
+dn: ou=Berufsgenossenschaft der chemischen Industrie,cn=Liegenschaften,o=Bun
+ d,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Berufsgenossenschaft der chemischen Industrie
+
+dn: ou=13. Panzergrenadierdivision,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: 13. Panzergrenadierdivision
+
+dn:: b3U9QmVydWZzZ2Vub3NzZW5zY2hhZnQgZsO8ciBGYWhyemV1Z2hhbHR1bmdlbixjbj1MaWV
+ nZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVydWZzZ2Vub3NzZW5zY2hhZnQgZsO8ciBGYWhyemV1Z2hhbHR1bmdlbg==
+
+dn:: b3U9QmVow7ZyZGVubmFtZUxhbmdmb3JtLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPUR
+ F
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVow7ZyZGVubmFtZUxhbmdmb3Jt
+
+dn:: b3U9QmVydWZzZ2Vub3NzZW5zY2hhZnQgRW5lcmdpZSBUZXh0aWwgRWxla3RybyBCcmFuY2h
+ lbnZlcndhbHR1bmcgRW5lcmdpZS0gdW5kIFdhc3NlcndpcnRzY2hhZnQgRMO8c3NlbGRvcmYsY2
+ 49TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVydWZzZ2Vub3NzZW5zY2hhZnQgRW5lcmdpZSBUZXh0aWwgRWxla3RybyBCcmFuY2hlbnZ
+ lcndhbHR1bmcgRW5lcmdpZS0gdW5kIFdhc3NlcndpcnRzY2hhZnQgRMO8c3NlbGRvcmY=
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBkaWUgbmV1ZW4gQnV
+ uZGVzbMOkbmRlcixjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBkaWUgbmV1ZW4gQnVuZGV
+ zbMOkbmRlcg==
+
+dn: ou=\"Arbeitsgemeinschaft industrieller Forschungsvereinigungen \"\"Otto 
+ von Guericke\"\" e.V.\",cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: "Arbeitsgemeinschaft industrieller Forschungsvereinigungen ""Otto von Gu
+ ericke"" e.V."
+
+dn: ou=ABC- und Selbstschutzschule des Heeres,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: ABC- und Selbstschutzschule des Heeres
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBJbmZvcm1hdGlvbnN
+ 0ZWNobmlrLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBJbmZvcm1hdGlvbnN0ZWN
+ obmlr
+
+dn: ou=Alexander-von-Humboldt-Stiftung,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Alexander-von-Humboldt-Stiftung
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBkaWUgQmVsYW5nZSB
+ iZWhpbmRlcnRlciBNZW5zY2hlbixjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBkaWUgQmVsYW5nZSBiZWh
+ pbmRlcnRlciBNZW5zY2hlbg==
+
+dn:: b3U9QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7xyIE1pZ3JhdGlvblwsIEZ
+ sw7xjaHRsaW5nZSB1bmQgSW50ZWdyYXRpb24sY249TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9RE
+ U=
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7xyIE1pZ3JhdGlvbiwgRmzDvGN
+ odGxpbmdlIHVuZCBJbnRlZ3JhdGlvbg==
+
+dn: ou=Bund der Vertriebenen e. V.,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Bund der Vertriebenen e. V.
+
+dn:: b3U9QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7xyIGRpZSBCZWxhbmdlIGR
+ lciBQYXRpZW50aW5uZW4gdW5kIFBhdGllbnRlbixjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz
+ 1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7xyIGRpZSBCZWxhbmdlIGRlciB
+ QYXRpZW50aW5uZW4gdW5kIFBhdGllbnRlbg==
+
+dn: l=Bonn,ou=BLE,o=Bund,c=DE
+l: Bonn
+objectClass: top
+objectClass: locality
+
+dn:: b3U9QmVydWZzZ2Vub3NzZW5zY2hhZnQgTWV0YWxsIE5vcmQgU8O8ZCxjbj1MaWVnZW5zY2h
+ hZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVydWZzZ2Vub3NzZW5zY2hhZnQgTWV0YWxsIE5vcmQgU8O8ZA==
+
+dn: ou=Berufsgenossenschaft Druck und Papierverarbeitung,cn=Liegenschaften,o
+ =Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Berufsgenossenschaft Druck und Papierverarbeitung
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBGcmFnZW4gZGVyIEF
+ icsO8c3R1bmcgdW5kIFLDvHN0dW5nc2tvbnRyb2xsZSxjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bm
+ QsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBGcmFnZW4gZGVyIEFicsO
+ 8c3R1bmcgdW5kIFLDvHN0dW5nc2tvbnRyb2xsZQ==
+
+dn:: b3U9QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7xyIE1lbnNjaGVucmVjaHR
+ zZnJhZ2VuLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7xyIE1lbnNjaGVucmVjaHRzZnJ
+ hZ2Vu
+
+dn: ou=AOK-Die Gesundheitskasse in Rheinland Pfalz,cn=Liegenschaften,o=Bund,
+ c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK-Die Gesundheitskasse in Rheinland Pfalz
+
+dn:: b3U9QWJzY2hsdXNzcHLDvGZlcmF1ZnNpY2h0c2tvbW1pc3Npb24sY249TGllZ2Vuc2NoYWZ
+ 0ZW4sbz1CdW5kLGM9REU=
+objectClass: top
+objectClass: organizationalUnit
+ou:: QWJzY2hsdXNzcHLDvGZlcmF1ZnNpY2h0c2tvbW1pc3Npb24=
+
+dn:: b3U9QU9LIFNhY2hzZW4vVGjDvHJpbmdlbixjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1
+ ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QU9LIFNhY2hzZW4vVGjDvHJpbmdlbg==
+
+dn: ou=Arbeiterwohlfahrt Bundesverband e.V.,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Arbeiterwohlfahrt Bundesverband e.V.
+
+dn: ou=Ausbildungszentrum Munster,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Ausbildungszentrum Munster
+
+dn: l=Berlin,ou=BfA,o=Bund,c=DE
+l: Berlin
+objectClass: top
+objectClass: locality
+
+dn: ou=Berufsgenossenschaft der Bauwirtschaft,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Berufsgenossenschaft der Bauwirtschaft
+
+dn: ou=Artillerieschule des Heeres,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Artillerieschule des Heeres
+
+dn:: bD1Ow7xybmJlcmcsb3U9QkFNRixvPUJ1bmQsYz1ERQ==
+l:: TsO8cm5iZXJn
+objectClass: top
+objectClass: locality
+
+dn:: b3U9QnVuZGVzYXVmc2ljaHRzYW10IGbDvHIgRmx1Z3NpY2hlcnVuZyAoQkFGKSxjbj1MaWV
+ nZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QnVuZGVzYXVmc2ljaHRzYW10IGbDvHIgRmx1Z3NpY2hlcnVuZyAoQkFGKQ==
+
+dn: ou=Berufsgenossenschaft Energie Textil Elektro,cn=Liegenschaften,o=Bund,
+ c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Berufsgenossenschaft Energie Textil Elektro
+
+dn: ou=AOK-Bundesverband,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK-Bundesverband
+
+dn: ou=Ausbildungszentrum Spezielle Operationen,cn=Liegenschaften,o=Bund,c=D
+ E
+objectClass: top
+objectClass: organizationalUnit
+ou: Ausbildungszentrum Spezielle Operationen
+
+dn:: b3U9QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7xyIGRpZSBCZWxhbmdlIGJ
+ laGluZGVydGVyIE1lbnNjaGVuLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7xyIGRpZSBCZWxhbmdlIGJlaGl
+ uZGVydGVyIE1lbnNjaGVu
+
+dn: ou=AOK Saarland,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Saarland
+
+dn: ou=Ausbildungszentrum Bau e.V.,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Ausbildungszentrum Bau e.V.
+
+dn: ou=AOK Berlin - Die Gesundheitskasse,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Berlin - Die Gesundheitskasse
+
+dn: ou=AOK Mecklenburg-Vorpommern,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Mecklenburg-Vorpommern
+
+dn:: b3U9QmVydWZzZ2Vub3NzZW5zY2hhZnQgZGVyIFN0cmHDn2VuLVwsIFUtQmFobmVuIHVuZCB
+ FaXNlbmJhaG5lbixjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVydWZzZ2Vub3NzZW5zY2hhZnQgZGVyIFN0cmHDn2VuLSwgVS1CYWhuZW4gdW5kIEVpc2V
+ uYmFobmVu
+
+dn:: b3U9QWxmcmVkLVdlZ2VuZXIgSW5zdGl0dXQgZsO8ciBQb2xhci0gdW5kIE1lZXJlc2ZvcnN
+ jaHVuZyBpbiBkZXIgSGVsbWhvbHotR2VtZWluc2NoYWZ0LGNuPUxpZWdlbnNjaGFmdGVuLG89Qn
+ VuZCxjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QWxmcmVkLVdlZ2VuZXIgSW5zdGl0dXQgZsO8ciBQb2xhci0gdW5kIE1lZXJlc2ZvcnNjaHV
+ uZyBpbiBkZXIgSGVsbWhvbHotR2VtZWluc2NoYWZ0
+
+dn: ou=AOK - Die Gesundheitskasse im Saarland,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK - Die Gesundheitskasse im Saarland
+
+dn: ou=Berufsbildungszentrum Koblenz,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Berufsbildungszentrum Koblenz
+
+dn:: b3U9QWJzYXR6ZsO2cmRlcnVuZ3Nmb25kcyBkZXIgZGV1dHNjaGVuIExhbmQtIHVuZCBFcm7
+ DpGhydW5nc3dpcnRzY2hhZnQgLSBBYnNhdHpmb25kcyxjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bm
+ QsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QWJzYXR6ZsO2cmRlcnVuZ3Nmb25kcyBkZXIgZGV1dHNjaGVuIExhbmQtIHVuZCBFcm7DpGh
+ ydW5nc3dpcnRzY2hhZnQgLSBBYnNhdHpmb25kcw==
+
+dn: ou=Bergbau-Berufsgenossenschaft,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Bergbau-Berufsgenossenschaft
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBkZW4gQmVybGluLVV
+ tenVnIHVuZCBkZW4gQm9ubi1BdXNnbGVpY2gsY249TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9RE
+ U=
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBkZW4gQmVybGluLVVtenV
+ nIHVuZCBkZW4gQm9ubi1BdXNnbGVpY2g=
+
+dn:: b3U9QXVzd8OkcnRpZ2VzIEFtdCxjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QXVzd8OkcnRpZ2VzIEFtdA==
+
+dn: ou=BARMER GEK,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: BARMER GEK
+
+dn:: b3U9QmVydWZzZ2Vub3NzZW5zY2hhZnQgTmFocnVuZ3NtaXR0ZWwgdW5kIEdhc3RzdMOkdHR
+ lbixjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVydWZzZ2Vub3NzZW5zY2hhZnQgTmFocnVuZ3NtaXR0ZWwgdW5kIEdhc3RzdMOkdHRlbg=
+ =
+
+dn: ou=Bund deutscher Nordschleswiger,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Bund deutscher Nordschleswiger
+
+dn: ou=AOK Bremen/Bremerhaven,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Bremen/Bremerhaven
+
+dn: ou=AOK Schleswig-Holstein,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Schleswig-Holstein
+
+dn: ou=AOK Westfalen-Lippe,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Westfalen-Lippe
+
+dn: ou=AOK Sachsen-Anhalt,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Sachsen-Anhalt
+
+dn: ou=AOK Bayern,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Bayern
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBNZW5zY2hlbnJlY2h
+ 0c3BvbGl0aWsgdW5kIEh1bWFuaXTDpHJlIEhpbGZlIGltIEF1c3fDpHJ0aWdlbiBBbXQsY249TG
+ llZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBNZW5zY2hlbnJlY2h0c3B
+ vbGl0aWsgdW5kIEh1bWFuaXTDpHJlIEhpbGZlIGltIEF1c3fDpHJ0aWdlbiBBbXQ=
+
+dn: l=Berlin,ou=BPA,o=Bund,c=DE
+l: Berlin
+objectClass: top
+objectClass: locality
+
+dn:: b3U9QmVydWZzZ2Vub3NzZW5zY2hhZnQgZsO8ciBHZXN1bmRoZWl0c2RpZW5zdCB1bmQgV29
+ obGZhaHJ0c3BmbGVnZSxjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVydWZzZ2Vub3NzZW5zY2hhZnQgZsO8ciBHZXN1bmRoZWl0c2RpZW5zdCB1bmQgV29obGZ
+ haHJ0c3BmbGVnZQ==
+
+dn:: b3U9QWthZGVtaWUgZsO8ciBSYXVtZm9yc2NodW5nIHVuZCBMYW5kZXNwbGFudW5nLGNuPUx
+ pZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QWthZGVtaWUgZsO8ciBSYXVtZm9yc2NodW5nIHVuZCBMYW5kZXNwbGFudW5n
+
+dn: ou=AOK Brandenburg - Die Gesundheitskasse,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Brandenburg - Die Gesundheitskasse
+
+dn: ou=Astrophysikalisches Institut,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Astrophysikalisches Institut
+
+dn:: b3U9QWt0aW9uc2dlbWVpbnNjaGFmdCBEaWVuc3QgZsO8ciBkZW4gRnJpZWRlbiBlLlYuLGN
+ uPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QWt0aW9uc2dlbWVpbnNjaGFmdCBEaWVuc3QgZsO8ciBkZW4gRnJpZWRlbiBlLlYu
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBUb3VyaXNtdXMsY24
+ 9TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBUb3VyaXNtdXM=
+
+dn:: b3U9YWlkIGluZm9kaWVuc3QgRXJuw6RocnVuZ1wsIExhbmR3aXJ0c2NoYWZ0XCwgVmVyYnJ
+ hdWNoZXJzY2h1dHogZS4gVi4sY249TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+objectClass: top
+objectClass: organizationalUnit
+ou:: YWlkIGluZm9kaWVuc3QgRXJuw6RocnVuZywgTGFuZHdpcnRzY2hhZnQsIFZlcmJyYXVjaGV
+ yc2NodXR6IGUuIFYu
+
+dn: ou=BARMER Ersatzkasse,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: BARMER Ersatzkasse
+
+dn: ou=AOK Niedersachsen,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Niedersachsen
+
+dn:: b3U9QU9LIEJhZGVuLVfDvHJ0dGVtYmVyZyxjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1
+ ERQ==
+objectClass: top
+objectClass: organizationalUnit
+ou:: QU9LIEJhZGVuLVfDvHJ0dGVtYmVyZw==
+
+dn: ou=Beauftragte zur Aufarbeitung des sexuellen Kindesmissbrauchs,cn=Liege
+ nschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Beauftragte zur Aufarbeitung des sexuellen Kindesmissbrauchs
+
+dn: l=Berlin,ou=BAKS,o=Bund,c=DE
+l: Berlin
+objectClass: top
+objectClass: locality
+
+dn:: b3U9QW10IGbDvHIgR2VvaW5mb3JtYXRpb25zd2VzZW4gZGVyIEJ1bmRlc3dlaHIsY249TGl
+ lZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+objectClass: top
+objectClass: organizationalUnit
+ou:: QW10IGbDvHIgR2VvaW5mb3JtYXRpb25zd2VzZW4gZGVyIEJ1bmRlc3dlaHI=
+
+dn:: b3U9QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBkaWUgTmFjaHJpY2h
+ 0ZW5kaWVuc3RlLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+objectClass: top
+objectClass: organizationalUnit
+ou:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO8ciBkaWUgTmFjaHJpY2h0ZW5
+ kaWVuc3Rl
+
+dn: ou=AOK Rheinland-Pfalz,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: AOK Rheinland-Pfalz
+
+dn: ou=Beschaffungsamt des Bundesministeriums des Innern,cn=Liegenschaften,o
+ =Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: Beschaffungsamt des Bundesministeriums des Innern
+
+dn:: b3U9QWJzYXR6ZsO2cmRlcnVuZ3Nmb25kcyBkZXIgZGV1dHNjaGVuIEZvcnN0LSB1bmQgSG9
+ sendpcnRzY2hhZnQgLSBIb2x6YWJzYXR6Zm9uZHMsY249TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLG
+ M9REU=
+objectClass: top
+objectClass: organizationalUnit
+ou:: QWJzYXR6ZsO2cmRlcnVuZ3Nmb25kcyBkZXIgZGV1dHNjaGVuIEZvcnN0LSB1bmQgSG9send
+ pcnRzY2hhZnQgLSBIb2x6YWJzYXR6Zm9uZHM=
+
+dn: l=init,ou=Service,o=Bund,c=DE
+l: init
+objectClass: top
+objectClass: locality
+
+dn:: b3U9QXJiZWl0c2dlbWVpbnNjaGFmdCBmw7xyIHdpcnRzY2hhZnRsaWNoZSBWZXJ3YWx0dW5
+ nIGUuVi4sY249TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+objectClass: top
+objectClass: organizationalUnit
+ou:: QXJiZWl0c2dlbWVpbnNjaGFmdCBmw7xyIHdpcnRzY2hhZnRsaWNoZSBWZXJ3YWx0dW5nIGU
+ uVi4=
+
+dn: l=t-systems,ou=Service,o=Bund,c=DE
+l: t-systems
+objectClass: top
+objectClass: locality
+
+dn: ou=14. Panzergrenadierdivision Hanse,cn=Liegenschaften,o=Bund,c=DE
+objectClass: top
+objectClass: organizationalUnit
+ou: 14. Panzergrenadierdivision Hanse
+
+dn: cn=Meissler Christine,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Meissler Christine
+collectiveOrganizationalUnitName: BAKS
+givenName: Christine
+ivbbLastDeliveryCollective: 091201
+mail: meissler@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Meissler
+
+dn: cn=Praktikant Zwei,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+certificateSerialNumber: 133376419100284
+cn: Praktikant Zwei
+collectiveOrganizationalUnitName: BFDT
+givenName: Zwei
+ivbbLastDeliveryCollective: 091201
+mail: praktikant2@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Praktikant
+userCertificate;binary:: MIIFJDCCBAygAwIBAgIGeU4eFPZ8MA0GCSqGSIb3DQEBBQUAMGA
+ xCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMQ0wCwYDVQQLEwRCdW5kMS
+ cwJQYDVQQDEx5DQSBJVkJCIERldXRzY2hlIFRlbGVrb20gQUcgMDkwHhcNMDkwNzEwMDcyMjMwW
+ hcNMTIwNzEwMjM1OTU5WjBiMQswCQYDVQQGEwJERTENMAsGA1UEChMEQnVuZDENMAsGA1UECxME
+ QmZEVDEPMA0GA1UEBxMGQmVybGluMRgwFgYDVQQDEw9QcmFrdGlrYW50IFp3ZWkxCjAIBgNVBAU
+ TATEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCq6nZT+uJDwNducQxqXNUXACpMPQ
+ oxDtAAYq5FfA2wuF9jB0Ji6Fv/3j6/25mpwi10ZZdJitrHtlFOaSQgpUflJQB3/LTYyPix1nOvU
+ Rrt9Thv6Y7MNEeX8d5dUgaq+NrbltWEBEzjVXZoQPdLGzP+YRwg6YxwPVpx5MVfoPTEr/vj3w8U
+ TGLYTwR7HW3WsVGGS4UjAw8Sj83HkTu6E57N8mUeGX9VK/qZLhqc+LtY9YNTLxFyW68R+nfDCjt
+ bmA62UN/ySKPbz36J4lzWfPqJlTK3xNQzUCW53qaUCZ98oSTvhhguwCYkU2yRvosvL/jM6d1jb8
+ AiRoAxZUx3CnvBAgMBAAGjggHgMIIB3DBvBgNVHSMEaDBmgBRQBGMAnC7bsfVSb0tMVry3Ur6pg
+ aFKpEgwRjELMAkGA1UEBhMCREUxGTAXBgNVBAoTEFBLSS0xLVZlcndhbHR1bmcxHDAaBgNVBAMT
+ E1BDQS0xLVZlcndhbHR1bmctMDiCAgvAMB4GA1UdEQQXMBWBE3ByYWt0aWthbnQyQGJmZHQuZGU
+ wgeEGA1UdHwSB2TCB1jCB06CB0KCBzYZvbGRhcDovL3g1MDAuYnVuZC5kZS9DTj1DQSBJVkJCIE
+ RldXRzY2hlIFRlbGVrb20gQUcgMDksT1U9QnVuZCxPPVBLSS0xLVZlcndhbHR1bmcsQz1ERT9jZ
+ XJ0aWZpY2F0ZVJldm9jYXRpb25MaXN0hlpodHRwOi8veDUwMC5idW5kLmRlL2NnaS1iaW4vc2hv
+ d19hdHRyP2NuPUNBJTIwSVZCQiUyMERldXRzY2hlJTIwVGVsZWtvbSUyMEFHJTIwMDkmYXR0cj1
+ jcmwwFgYDVR0gBA8wDTALBgkrBgEEAb10AQEwDgYDVR0PAQH/BAQDAgXgMD0GCCsGAQUFBwEBBD
+ EwLzAtBggrBgEFBQcwAYYhaHR0cDovL29jc3AuaXZiYi50ZWxlc2VjLmRlL29jc3ByMA0GCSqGS
+ Ib3DQEBBQUAA4IBAQCbYYGeSkWZzFaspol0IoeTuKle+gtsTuFywIQn7MzEsVU9h+wEgODEydPm
+ NgJrEKB+5l9XKTJ7XdDmf54/PKxdyh50GTHsIkSlQYf9hx33eXVWonCfpwFycVlNLGExCf2HdC1
+ K7Sw35TP1+YGqx1ipd5B2bMiFcaGK5JGzh2BQZ2OTomhnvem45ez+n6VsJ3/6rwjk31+G/XvC6A
+ qIl7vjHQbY+4Q78R3wPFNwpwApCdLwfT3kqaQA8nqLGF5EaoBxTwD/p+IEWveIFs0valB1FuNtd
+ YX9I+Cs92ahVCgquJEecZMOMszt8BvI9E5mIiwcTPHRgsCaerkr+pSVazwd
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlYXVmdHJhZ3RlIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO
+ 8ciBNaWdyYXRpb25cLCBGbMO8Y2h0bGluZ2UgdW5kIEludGVncmF0aW9uLGNuPUxpZWdlbnNjaG
+ FmdGVuLG89QnVuZCxjPURF
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7
+ xyIE1pZ3JhdGlvbiwgRmzDvGNodGxpbmdlIHVuZCBJbnRlZ3JhdGlvbg==
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Beauftragte der Bundesregierung
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 10117
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: RG9yb3RoZWVuc3RyYcOfZSA4NA==
+ivbbTelephoneNumber: +49 3018 400-0
+ivbbUpperOrganization: Bundeskanzleramt
+l: Berlin
+labeledURI: http://www.integrationsbeauftragte.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10117
+street:: RG9yb3RoZWVuc3RyYcOfZSA4NA==
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlYXVmdHJhZ3RlciBkZXIgQnVuZGVzcmVnaWVydW5nIGb
+ DvHIgTWl0dGVsc3RhbmQgdW5kIFRvdXJpc211cyxjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz
+ 1ERQ==
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZs
+ O8ciBNaXR0ZWxzdGFuZCB1bmQgVG91cmlzbXVz
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Beauftragter der Bundesregierung
+ivbbOrganizationType: Wirtschaftsverwaltung
+ivbbPostalCode: 10115
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: U2NoYXJuaG9yc3RzdHJhw59lCQkJCQkgMzQgLSAzNw==
+ivbbTelephoneNumber: +49 3018 615-7180
+ivbbUpperOrganization:: QnVuZGVzbWluaXN0ZXJpdW0gZsO8ciBXaXJ0c2NoYWZ0IHVuZCBU
+ ZWNobm9sb2dpZQ==
+l: Berlin
+labeledURI: http://www.bmwi.de/BMWi/Navigation/Ministerium/beauftragte,did=1
+ 73144.html
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10115
+street:: U2NoYXJuaG9yc3RzdHJhw59lCQkJCQkgMzQgLSAzNw==
+
+dn: ou=Hauptadresse,ou=10. Panzerdivision,cn=Liegenschaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: 10. Panzerdivision
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Sigmaringen
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType:: U3RyZWl0a3LDpGZ0ZQ==
+ivbbPostalCode: 72488
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: QmluZ2Vyc3RyYcOfZSAyOA==
+ivbbUpperOrganization:: SGVlcmVzZsO8aHJ1bmdza29tbWFuZG8=
+l: Sigmaringen
+labeledURI: http://www.deutschesheer.de/portal/a/10div
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 72488
+street:: QmluZ2Vyc3RyYcOfZSAyOA==
+telephoneNumber: +49 7571 76-1130
+
+dn: cn=Hadam Thomas,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Hadam Thomas
+collectiveOrganizationalUnitName: BAKS
+givenName: Thomas
+ivbbLastDeliveryCollective: 091201
+mail: hadam@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Hadam
+
+dn: ou=Hauptadresse,ou=AOK Westfalen-Lippe,cn=Liegenschaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK Westfalen-Lippe
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Dortmund
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 44263
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: Tm9ydGtpcmNoZW5zdHJhw59lIDEwMyAtIDEwNQ==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Dortmund
+labeledURI: http://www.aok.de/westfalen-lippe/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 44263
+street:: Tm9ydGtpcmNoZW5zdHJhw59lIDEwMyAtIDEwNQ==
+telephoneNumber: +49 231 4193-0
+
+dn: cn=Gruen Lydia,l=init,ou=Service,o=Bund,c=DE
+cn: Gruen Lydia
+collectiveOrganizationalUnitName: Service
+givenName: Lydia
+ivbbLastDeliveryCollective: 091201
+mail: Lydia.Gruen@init.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Gruen
+
+dn: cn=Lahl Kersten,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Lahl Kersten
+collectiveOrganizationalUnitName: BAKS
+givenName: Kersten
+ivbbLastDeliveryCollective: 091201
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Lahl
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlYXVmdHJhZ3RlciBkZXIgQnVuZGVzcmVnaWVydW5nIGb
+ DvHIgRnJhZ2VuIGRlciBBYnLDvHN0dW5nIHVuZCBSw7xzdHVuZ3Nrb250cm9sbGUsY249TGllZ2
+ Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZs
+ O8ciBGcmFnZW4gZGVyIEFicsO8c3R1bmcgdW5kIFLDvHN0dW5nc2tvbnRyb2xsZQ==
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Beauftragter der Bundesregierung
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 10117
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Werderscher Markt 1
+ivbbTelephoneNumber: +49 3018 17-4292
+ivbbUpperOrganization:: QXVzd8OkcnRpZ2VzIEFtdA==
+l: Berlin
+labeledURI: http://www.auswaertiges-amt.de/diplo/de/Aussenpolitik/Themen/Abr
+ uestung/Uebersicht-ABCKonv.html
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10117
+street: Werderscher Markt 1
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUF1c2JpbGR1bmdzLSB1bmQgUXVhbGlmaXppZXJ1bmdzLVp
+ lbnRydW0gRMO8c3NlbGRvcmYgR21iSCxjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QXVzYmlsZHVuZ3MtIHVuZCBRdWFsaWZpemllcnVuZ3MtWm
+ VudHJ1bSBEw7xzc2VsZG9yZiBHbWJI
+ivbbGouvernmentNameShortForm:: QVFaIETDvHNzZWxkb3JmIEdtYkg=
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation:: RMO8c3NlbGRvcmY=
+ivbbOrganizationCategory:: WnV3ZW5kdW5nc2VtcGbDpG5nZXI=
+ivbbOrganizationType: Unternehmen
+ivbbPostalCode: 40597
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: Rm9yc3RzdHJhw59lIAkJCQkgMTY=
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l:: RMO8c3NlbGRvcmY=
+labeledURI: http://www.aqz.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 40597
+street:: Rm9yc3RzdHJhw59lIAkJCQkgMTY=
+telephoneNumber: +49 211 711715-0
+
+dn: cn=Paech Gerlinde,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Paech Gerlinde
+collectiveOrganizationalUnitName: BAKS
+givenName: Gerlinde
+ivbbLastDeliveryCollective: 091201
+mail: paech@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Paech
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFic2F0embDtnJkZXJ1bmdzZm9uZHMgZGVyIGRldXRzY2h
+ lbiBMYW5kLSB1bmQgRXJuw6RocnVuZ3N3aXJ0c2NoYWZ0IC0gQWJzYXR6Zm9uZHMsY249TGllZ2
+ Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QWJzYXR6ZsO2cmRlcnVuZ3Nmb25kcyBkZXIgZGV1dHNjaG
+ VuIExhbmQtIHVuZCBFcm7DpGhydW5nc3dpcnRzY2hhZnQgLSBBYnNhdHpmb25kcw==
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Bonn
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 53177
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: U2Nod2VydGJlcmdlciBTdHJhw59lIDE0
+ivbbUpperOrganization:: QnVuZGVzbWluaXN0ZXJpdW0gZsO8ciBFcm7DpGhydW5nLCBMYW5k
+ d2lydHNjaGFmdCB1bmQgVmVyYnJhdWNoZXJzY2h1dHo=
+l: Bonn
+labeledURI: http://www.absatzfonds.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 53177
+street:: U2Nod2VydGJlcmdlciBTdHJhw59lIDE0
+telephoneNumber: +49 228 52098-0
+
+dn: ou=Hauptadresse,ou=AOK Brandenburg - Die Gesundheitskasse,cn=Liegenschaf
+ ten,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK Brandenburg - Die Gesundheitskasse
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Teltow
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 14513
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: UG90c2RhbWVyIFN0cmHDn2UgCQkgMjA=
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Teltow
+labeledURI: http://www.aok.de/brandenburg/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 14513
+street:: UG90c2RhbWVyIFN0cmHDn2UgCQkgMjA=
+telephoneNumber: +49 3328 390-0
+
+dn: ou=Hauptadresse,ou=\"Arbeitsgemeinschaft industrieller Forschungsvereini
+ gungen \"\"Otto von Guericke\"\" e.V.\",cn=Liegenschaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: "Arbeitsgemeinschaft industrieller Forschungsve
+ reinigungen ""Otto von Guericke"" e.V."
+ivbbGouvernmentNameShortForm: AiF
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation:: S8O2bG4=
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 50968
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: QmF5ZW50aGFsZ8O8cnRlbCAyMw==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l:: S8O2bG4=
+labeledURI: http://www.aif.de/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 50968
+street:: QmF5ZW50aGFsZ8O8cnRlbCAyMw==
+telephoneNumber: +49 221 37680-0
+
+dn: cn=Scheske Michael,l=init,ou=Service,o=Bund,c=DE
+cn: Scheske Michael
+collectiveOrganizationalUnitName: Service
+givenName: Michael
+ivbbLastDeliveryCollective: 091201
+mail: Michael.Scheske@init.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Scheske
+
+dn: cn=Behl Kevin,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Behl Kevin
+collectiveOrganizationalUnitName: BAKS
+givenName: Kevin
+ivbbLastDeliveryCollective: 091201
+mail: behl@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Behl
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFPSyBCYWRlbi1Xw7xydHRlbWJlcmcsY249TGllZ2Vuc2N
+ oYWZ0ZW4sbz1CdW5kLGM9REU=
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QU9LIEJhZGVuLVfDvHJ0dGVtYmVyZw==
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Stuttgart
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 70191
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: SGVpbGJyb25uZXIgU3RyYcOfZSAxODQ=
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Stuttgart
+labeledURI: http://www.aok.de/baden-wuerttemberg/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 70191
+street:: SGVpbGJyb25uZXIgU3RyYcOfZSAxODQ=
+telephoneNumber: +49 711 2593-0
+
+dn: cn=Troelenberg Martin,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Troelenberg Martin
+collectiveOrganizationalUnitName: BAKS
+givenName: Martin
+ivbbLastDeliveryCollective: 091201
+mail: troelenberg@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Troelenberg
+
+dn: ou=Hauptadresse,ou=Bergbau-Berufsgenossenschaft,cn=Liegenschaften,o=Bund
+ ,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: Bergbau-Berufsgenossenschaft
+ivbbGouvernmentNameShortForm: BBG
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Bochum
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType:: VW5mYWxsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 44789
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: SHVuc2NoZWlkdHN0cmHDn2UgMTg=
+ivbbUpperOrganization:: QnVuZGVzbWluaXN0ZXJpdW0gZsO8ciBBcmJlaXQgdW5kIFNvemlh
+ bGVz
+l: Bochum
+labeledURI: http://www.bergbau-bg.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 44789
+street:: SHVuc2NoZWlkdHN0cmHDn2UgMTg=
+telephoneNumber: +49 234 316-0
+
+dn: ou=Hauptadresse,ou=AOK Rheinland/Hamburg,cn=Liegenschaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK Rheinland/Hamburg
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation:: RMO8c3NlbGRvcmY=
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 40213
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: S2FzZXJuZW5zdHJhw59lIAkJIDYx
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l:: RMO8c3NlbGRvcmY=
+labeledURI: http://www.aok.de/rheinland-hamburg/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 40213
+street:: S2FzZXJuZW5zdHJhw59lIAkJIDYx
+telephoneNumber: +49 211 8791-0
+
+dn:: b3U9SGF1cHRzaXR6LG91PUJlYXVmdHJhZ3RlciBmw7xyIGRpZSBkZXV0c2NoLWZyYW56w7Z
+ zaXNjaGUgWnVzYW1tZW5hcmJlaXQsY249TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGVyIGbDvHIgZGllIGRldXRzY2gtZnJhbn
+ rDtnNpc2NoZSBadXNhbW1lbmFyYmVpdA==
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Bonn
+ivbbOrganizationCategory: Beauftragter der Bundesregierung
+ivbbOrganizationType: Kulturverwaltung
+ivbbPostalCode: 53117
+ivbbRealEstateName: Hauptsitz
+ivbbStreetAdress:: R3JhdXJoZWluZG9yZmVyIFN0cmHDn2UgMTk4
+ivbbTelephoneNumber: +49 228 99 681-3837
+ivbbUpperOrganization:: QXVzd8OkcnRpZ2VzIEFtdA==
+l: Bonn
+labeledURI: http://www.auswaertiges-amt.de/diplo/de/AAmt/Koordinatoren/D-F-B
+ eauftragter.html
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptsitz
+postalCode: 53117
+street:: R3JhdXJoZWluZG9yZmVyIFN0cmHDn2UgMTk4
+
+dn: ou=Hauptadresse,ou=Artillerieschule des Heeres,cn=Liegenschaften,o=Bund,
+ c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: Artillerieschule des Heeres
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Idar-Oberstein
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType:: U3RyZWl0a3LDpGZ0ZQ==
+ivbbPostalCode: 55743
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Am Rilchenberg 30
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Idar-Oberstein
+labeledURI: http://www.deutschesheer.de/portal/a/ha/kcxml/04_Sj9SPykssy0xPLM
+ nMz0vM0Y_QjzKLN3SKt_TxAMlB2J6B-pFw0aCUVH1vfV-P_NxU_QD9gtyIckdHRUUA88i7gg!!/
+ delta/base64xml/L3dJdyEvd0ZNQUFzQUMvNElVRS82XzFCXzlLQw!!
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 55743
+street: Am Rilchenberg 30
+telephoneNumber: +49 6781 51-1030
+
+dn: cn=Schweizer Walter,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Schweizer Walter
+collectiveOrganizationalUnitName: BAKS
+givenName: Walter
+ivbbLastDeliveryCollective: 091201
+mail: schweizer@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Schweizer
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUF1c3fDpHJ0aWdlcyBBbXQsY249TGllZ2Vuc2NoYWZ0ZW4
+ sbz1CdW5kLGM9REU=
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QXVzd8OkcnRpZ2VzIEFtdA==
+ivbbGouvernmentNameShortForm: AA
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 10117
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Werderscher Markt 1
+ivbbTelephoneNumber: +49 3018 17-0
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Berlin
+labeledURI: http://www.auswaertiges-amt.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10117
+street: Werderscher Markt 1
+telephoneNumber: +49 30 5000-0
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlYXVmdHJhZ3RlciBkZXIgQnVuZGVzcmVnaWVydW5nIGb
+ DvHIgQXVzc2llZGxlcmZyYWdlbiB1bmQgbmF0aW9uYWxlIE1pbmRlcmhlaXRlbixjbj1MaWVnZW
+ 5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZs
+ O8ciBBdXNzaWVkbGVyZnJhZ2VuIHVuZCBuYXRpb25hbGUgTWluZGVyaGVpdGVu
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Beauftragter der Bundesregierung
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 10559
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Alt-Moabit 101 D
+ivbbTelephoneNumber: +49 3018 681-1062
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Berlin
+labeledURI: http://www.aussiedlerbeauftragter.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10559
+street: Alt-Moabit 101 D
+
+dn: cn=Rosenthal Gregor,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+certificateSerialNumber: 460487451730332
+cn: Rosenthal Gregor
+collectiveOrganizationalUnitName: BFDT
+givenName: Gregor
+ivbbLastDeliveryCollective: 091201
+mail: gregor.rosenthal@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Rosenthal
+userCertificate;binary:: MIIFLzCCBBegAwIBAgIHAaLPlvvhnDANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MDcxMDA3Mjg0M
+ loXDTEyMDcxMDIzNTk1OVowZzELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDTALBgNVBAsT
+ BEJmRFQxDzANBgNVBAcTBkJlcmxpbjEdMBsGA1UEAxMUUm9zZW50aGFsIERyLiBHcmVnb3IxCjA
+ IBgNVBAUTATEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCAr8/BrDJRkFPAVWet1n
+ cAfEWTKVToMOVe1EHT7KG1deb8I0xQTHtck4b30B3MBA8k71gwwww4kWxFzyQKLg5cF7N999p39
+ x1F77FDwVLCmdtC3J8MtYoGOBrLLOEW3Y0/A5ze3kA0IwAVFimpi1/mWM9N+/kV4Z/lfeFFrnj/
+ +8kP9hHdPh3i4gV5b/2phqil/rYqaX/ph+Ji0adD6i8Pd5eB98m5h//KONPAYffRXgmxvI8Ubzb
+ 9/OqQIHmlOYAJzJCwH01jKhklozw05+IFLHD/8cAED0AhrgHH3VovE9DNRZx6yM9JASttzbodZ8
+ b5seR9oKuhiWXuG/ckmMLXAgMBAAGjggHlMIIB4TBvBgNVHSMEaDBmgBRQBGMAnC7bsfVSb0tMV
+ ry3Ur6pgaFKpEgwRjELMAkGA1UEBhMCREUxGTAXBgNVBAoTEFBLSS0xLVZlcndhbHR1bmcxHDAa
+ BgNVBAMTE1BDQS0xLVZlcndhbHR1bmctMDiCAgvAMCMGA1UdEQQcMBqBGGdyZWdvci5yb3NlbnR
+ oYWxAYmZkdC5kZTCB4QYDVR0fBIHZMIHWMIHToIHQoIHNhm9sZGFwOi8veDUwMC5idW5kLmRlL0
+ NOPUNBIElWQkIgRGV1dHNjaGUgVGVsZWtvbSBBRyAwOSxPVT1CdW5kLE89UEtJLTEtVmVyd2Fsd
+ HVuZyxDPURFP2NlcnRpZmljYXRlUmV2b2NhdGlvbkxpc3SGWmh0dHA6Ly94NTAwLmJ1bmQuZGUv
+ Y2dpLWJpbi9zaG93X2F0dHI/Y249Q0ElMjBJVkJCJTIwRGV1dHNjaGUlMjBUZWxla29tJTIwQUc
+ lMjAwOSZhdHRyPWNybDAWBgNVHSAEDzANMAsGCSsGAQQBvXQBATAOBgNVHQ8BAf8EBAMCBeAwPQ
+ YIKwYBBQUHAQEEMTAvMC0GCCsGAQUFBzABhiFodHRwOi8vb2NzcC5pdmJiLnRlbGVzZWMuZGUvb
+ 2NzcHIwDQYJKoZIhvcNAQEFBQADggEBAInuc0UYDgKAQcdAvbKljxtQ9+/6Y8HoDmKFyoWNzj5T
+ rlaefqttowGKy5RVBzL4Me1buGHO0K4SRYnBqX5Bqta+HDP+Gngdbq633DBB/hOYhWuwysvdygE
+ uF9gzkYPuZ9hgPT/l9aM+aLBMUeyhlgtLi7bueNoKST7VfMulRtCLakOW18XErMtawxjVWpqTy4
+ r+GNAMlvdCCqi095fx+S/DipZQAk9LMm2H110+J+P7du81u5EHXlGD5Ld+ZMw14fiIbz4r7dxHW
+ jcGS3f1eYkLDJhnxUCcbjnrG8wFm2MxbXd3gtOPdYk7jjwTcysxU17H3V7pborkqPzhxXMt7pI=
+
+dn: cn=Gaebel Frank,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Gaebel Frank
+collectiveOrganizationalUnitName: BAKS
+givenName: Frank
+ivbbLastDeliveryCollective: 091201
+mail: gaebel@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Gaebel
+
+dn: cn=Grumblat Dieter,l=Neutral,ou=BMI,o=Bund,c=DE
+certificateSerialNumber: 661976188859001
+cn: Grumblat Dieter
+collectiveOrganizationalUnitName: BMI
+givenName: Dieter
+ivbbLastDeliveryCollective: 091201
+mail: Dieter.Grumblat@bmi.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Grumblat
+userCertificate;binary:: MIIFKjCCBBKgAwIBAgIHAloQV5YyeTANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MTEzMDEzMDE1O
+ FoXDTEyMTEzMDIzNTk1OVowXzELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDDAKBgNVBAsT
+ A0JNSTENMAsGA1UEBxMEQm9ubjEYMBYGA1UEAxMPR3J1bWJsYXQgRGlldGVyMQowCAYDVQQFEwE
+ xMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAk12nGQvIFPj43QqJ8zAC4W9o+Wpck0
+ A1uYDD0ictZFMT9T7udGmzHtvx2ig3e1qEJpcPhcC18TDtlyP4OquGh5BHiqyQl1+DYhugkjhrC
+ ZCULwGot+2u2sWuYPD6cbmW/0WOl1YN2eob7QnptdHM4ZmPbc0NdRqUApW1mfTX6wwW/poFMj+j
+ NKBwJAJfkogR3UHi7ioxHDqa1ac9oAOA3JhXWd6jL9NpZi/BDRfcE6E3y7S7XPwmQrjo3mP10e5
+ 8YKgYgbn9WHZXoFRStJuPFs/aiw6S62sv8cYNeZmlR4wr3HBi5avePH4pYPGWNvjpZiV4FNZtRA
+ hNU3f3zYvAXQIDAQABo4IB6DCCAeQwbwYDVR0jBGgwZoAUUARjAJwu27H1Um9LTFa8t1K+qYGhS
+ qRIMEYxCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMRwwGgYDVQQDExNQ
+ Q0EtMS1WZXJ3YWx0dW5nLTA4ggILwDAmBgNVHREEHzAdgRtkaWV0ZXIuZ3J1bWJsYXRAYm1pLmJ
+ 1bmQuZGUwgeEGA1UdHwSB2TCB1jCB06CB0KCBzYZvbGRhcDovL3g1MDAuYnVuZC5kZS9DTj1DQS
+ BJVkJCIERldXRzY2hlIFRlbGVrb20gQUcgMDksT1U9QnVuZCxPPVBLSS0xLVZlcndhbHR1bmcsQ
+ z1ERT9jZXJ0aWZpY2F0ZVJldm9jYXRpb25MaXN0hlpodHRwOi8veDUwMC5idW5kLmRlL2NnaS1i
+ aW4vc2hvd19hdHRyP2NuPUNBJTIwSVZCQiUyMERldXRzY2hlJTIwVGVsZWtvbSUyMEFHJTIwMDk
+ mYXR0cj1jcmwwFgYDVR0gBA8wDTALBgkrBgEEAb10AQEwDgYDVR0PAQH/BAQDAgXgMD0GCCsGAQ
+ UFBwEBBDEwLzAtBggrBgEFBQcwAYYhaHR0cDovL29jc3AuaXZiYi50ZWxlc2VjLmRlL29jc3ByM
+ A0GCSqGSIb3DQEBBQUAA4IBAQAQMj8yh7cUmXWu5aYQqOfsDzwZELTDV5WgYse8faCaqPSICgxi
+ m6GPt7eMM6HFVQo7sTqtlKZ/8aZZCsoWiAeQQPHVdT4bKLvsa6lTQHdDHiHbcfuvoJGxFRaHJ3S
+ CWUyFG4qUCeSRR7lZdEkaQOxvchs8gs7+M56Kk+EzF7BSTaEDWl5zfcebRFwv8EmNSsAC/BT/RY
+ K/ZvYE4RdgU8Ly9aunI09xr/5IBNBk6TWqtINvfZbYd1EsI/Fc4ynLOFYqsSZGxk1dm7iQ45o5k
+ rQPBJHR1LryDr+0pAvpRqIlGBatPyR35bpOIVkCNHEZGBkJohksrz9Zlbq7YIu4/hoW
+
+dn: cn=Weigt Florian,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Weigt Florian
+collectiveOrganizationalUnitName: BAKS
+givenName: Florian
+ivbbLastDeliveryCollective: 091201
+mail: weigt@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Weigt
+
+dn: cn=Poststelle,l=Bundesgebiet,ou=THW,o=Bund,c=DE
+cn: Poststelle
+collectiveOrganizationalUnitName: THW
+ivbbLastDeliveryCollective: 091201
+mail: Poststelle@thw.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Poststelle
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFsZnJlZC1XZWdlbmVyIEluc3RpdHV0IGbDvHIgUG9sYXI
+ tIHVuZCBNZWVyZXNmb3JzY2h1bmcgaW4gZGVyIEhlbG1ob2x6LUdlbWVpbnNjaGFmdCxjbj1MaW
+ VnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QWxmcmVkLVdlZ2VuZXIgSW5zdGl0dXQgZsO8ciBQb2xhci
+ 0gdW5kIE1lZXJlc2ZvcnNjaHVuZyBpbiBkZXIgSGVsbWhvbHotR2VtZWluc2NoYWZ0
+ivbbGouvernmentNameShortForm: AWI
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Bremerhaven
+ivbbOrganizationCategory:: WnV3ZW5kdW5nc2VtcGbDpG5nZXI=
+ivbbOrganizationType: Forschungseinrichtung
+ivbbPostalCode: 27570
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Am Handelshafen 12
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Bremerhaven
+labeledURI: http://www.awi.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 27570
+street: Am Handelshafen 12
+telephoneNumber: +49 471 4831-0
+
+dn: cn=Potzka Alexander,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Potzka Alexander
+collectiveOrganizationalUnitName: BAKS
+givenName: Alexander
+ivbbLastDeliveryCollective: 091201
+mail: potzka@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Potzka
+
+dn: cn=Rossmann Cornelia,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Rossmann Cornelia
+collectiveOrganizationalUnitName: BAKS
+givenName: Cornelia
+ivbbLastDeliveryCollective: 091201
+mail: rossmann@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Rossmann
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFic2NobHVzc3Byw7xmZXJhdWZzaWNodHNrb21taXNzaW9
+ uLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QWJzY2hsdXNzcHLDvGZlcmF1ZnNpY2h0c2tvbW1pc3Npb2
+ 4=
+ivbbGouvernmentNameShortForm: APAK
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Mittelbare Bundesverwaltung
+ivbbOrganizationType: Wirtschaftsverwaltung
+ivbbPostalCode: 10787
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: UmF1Y2hzdHJhw59lIDI2
+ivbbUpperOrganization:: QnVuZGVzbWluaXN0ZXJpdW0gZsO8ciBXaXJ0c2NoYWZ0IHVuZCBU
+ ZWNobm9sb2dpZQ==
+l: Berlin
+labeledURI: http://www.apak-aoc.de/home/home.asp
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10787
+street:: UmF1Y2hzdHJhw59lIDI2
+telephoneNumber: +49 30 726161-200
+
+dn: cn=Radke Martina,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Radke Martina
+collectiveOrganizationalUnitName: BAKS
+givenName: Martina
+ivbbLastDeliveryCollective: 091201
+mail: radke@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Radke
+
+dn: ou=Hauptadresse,ou=Ausbildungszentrum Spezielle Operationen,cn=Liegensch
+ aften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: Ausbildungszentrum Spezielle Operationen
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Pfullendorf
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType:: U3RyZWl0a3LDpGZ0ZQ==
+ivbbPostalCode: 88630
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: S2FzZXJuZW5zdHJhw59lIDIw
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Pfullendorf
+labeledURI: http://www.deutschesheer.de/portal/a/heer/kcxml/04_Sj9SPykssy0xP
+ LMnMz0vM0Y_QjzKLd4_393EDSYGYZu7m-pEwsaCUVH1fj_zcVH1v_QD9gtyIckdHRUUA3guuFQ!
+ !/delta/base64xml/L2dJQSEvUUt3QS80SVVFLzZfR19PUTU!?yw_contentURL=%2F01DB050
+ 100000001%2FW26LUC6Y297INFODE%2Fcontent.jsp
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 88630
+street:: S2FzZXJuZW5zdHJhw59lIDIw
+telephoneNumber: +49 7552 405-2010
+
+dn: ou=Hauptadresse,ou=Ausbildungszentrum Munster,cn=Liegenschaften,o=Bund,c
+ =DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: Ausbildungszentrum Munster
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Munster
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType:: U3RyZWl0a3LDpGZ0ZQ==
+ivbbPostalCode: 29633
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Am Park 331
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Munster
+labeledURI: http://www.deutschesheer.de/portal/a/ha/kcxml/04_Sj9SPykssy0xPLM
+ nMz0vM0Y_QjzKLN3SKt_TxAMlB2J6B-pFw0aCUVH1vfV-P_NxU_QD9gtyIckdHRUUA88i7gg!!/
+ delta/base64xml/L3dJdyEvd0ZNQUFzQUMvNElVRS82XzFCX0w2Ng!!
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 29633
+street: Am Park 331
+telephoneNumber: +49 5192 12-4090
+
+dn: cn=Nakas Dorothea,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+certificateSerialNumber: 390409950293826
+cn: Nakas Dorothea
+collectiveOrganizationalUnitName: BFDT
+givenName: Dorothea
+ivbbLastDeliveryCollective: 091201
+mail: nakas@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Nakas
+userCertificate;binary:: MIIFDTCCA/WgAwIBAgIHAWMTZmdvQjANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MDkwMTExMDkwO
+ FoXDTEyMDkwMTIzNTk1OVowUDELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDTALBgNVBAsT
+ BEJmRFQxFzAVBgNVBAMTDk5ha2FzIERvcm90aGVhMQowCAYDVQQFEwExMIIBIjANBgkqhkiG9w0
+ BAQEFAAOCAQ8AMIIBCgKCAQEAo0lFO8KHH98fBT/WeTmHM0OEb1ny4sJ3kWMu1YHCcPyElXXvm+
+ C3HkHrAYO/eYKQ1NW2LKgZlOumTgIf08873PKwU+bCqAbnCs0ntZx7SMDJ5///k/aE0UKlecQvW
+ lV8yrDvUJ0GriLD4bRXkIIRiCdd0tUc6NJlDrRZpwZpWw3G/fC/hOv0TZiB5/J/ZinGmC1bivAq
+ pJlFFGNAT+6Hbs4BY7nCdZZpj4kI0GuM1h0oU5QHqJ3+SB7GsEiRpNOkq5q/nDTWxhhtjJ1Qllv
+ aoTZdWUl/kd7WQVGX1D3GRYE7SFqMIInA6L8ygIAMvJvyUDpj3f4zcSluaqdyt3uaawIDAQABo4
+ IB2jCCAdYwbwYDVR0jBGgwZoAUUARjAJwu27H1Um9LTFa8t1K+qYGhSqRIMEYxCzAJBgNVBAYTA
+ kRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMRwwGgYDVQQDExNQQ0EtMS1WZXJ3YWx0dW5n
+ LTA4ggILwDAYBgNVHREEETAPgQ1uYWthc0BiZmR0LmRlMIHhBgNVHR8EgdkwgdYwgdOggdCggc2
+ Gb2xkYXA6Ly94NTAwLmJ1bmQuZGUvQ049Q0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5LE
+ 9VPUJ1bmQsTz1QS0ktMS1WZXJ3YWx0dW5nLEM9REU/Y2VydGlmaWNhdGVSZXZvY2F0aW9uTGlzd
+ IZaaHR0cDovL3g1MDAuYnVuZC5kZS9jZ2ktYmluL3Nob3dfYXR0cj9jbj1DQSUyMElWQkIlMjBE
+ ZXV0c2NoZSUyMFRlbGVrb20lMjBBRyUyMDA5JmF0dHI9Y3JsMBYGA1UdIAQPMA0wCwYJKwYBBAG
+ 9dAEBMA4GA1UdDwEB/wQEAwIF4DA9BggrBgEFBQcBAQQxMC8wLQYIKwYBBQUHMAGGIWh0dHA6Ly
+ 9vY3NwLml2YmIudGVsZXNlYy5kZS9vY3NwcjANBgkqhkiG9w0BAQUFAAOCAQEAH83k9FOp6pvjF
+ Yv26+FOgAORh9NdSsysMtF6UBVv2PBHvkwZSPmAyFDCrfTM7RT+jojyWoOYzQW0AKL/juqb+jY7
+ bDVgAsLMRra90KgOjBXdsvku1P/jw/TOmKXBZxErptnUDewulzSR+GE6uxJBX+Fp8AS+t6eYJfc
+ Pol4DCCPRFTBNjd7UgEgAlLZ7t5VlbOVgPAUE+kshJ9eCXbaAB3i9DcaA+i2vkk4h8ic2pnDS8J
+ 7VuUyWEu3TO5ywGK9N9LHJBvqTIQEl3W9ulwieo3uQCa8d8FiSudVGPoR/MosqWS6oDlCvYOeSr
+ EzPC/V4T0dJ7hJjRn2qORQROb6Nrw==
+
+dn: ou=Hauptadresse,ou=AOK Berlin - Die Gesundheitskasse,cn=Liegenschaften,o
+ =Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK Berlin - Die Gesundheitskasse
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 10957
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: V2lsaGVsbXN0cmHDn2UgCQkgMQ==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Berlin
+labeledURI: http://www.aok.de/berlin/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10957
+street:: V2lsaGVsbXN0cmHDn2UgCQkgMQ==
+telephoneNumber: +49 30 2531-0
+
+dn: cn=Laekemaeker Julia,l=init,ou=Service,o=Bund,c=DE
+cn: Laekemaeker Julia
+collectiveOrganizationalUnitName: Service
+givenName: Julia
+ivbbLastDeliveryCollective: 091201
+mail: Julia.Laekemaeker@init.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Laekemaeker
+
+dn: cn=Cambeis Thomas,l=Karlsruhe,ou=BVerfG,o=Bund,c=DE
+cn: Cambeis Thomas
+givenName: Thomas
+mail: tcambeis@bundesverfassungsgericht.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Cambeis
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFyYmVpdHNnZW1laW5zY2hhZnQgZsO8ciB3aXJ0c2NoYWZ
+ 0bGljaGUgVmVyd2FsdHVuZyBlLlYuLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QXJiZWl0c2dlbWVpbnNjaGFmdCBmw7xyIHdpcnRzY2hhZn
+ RsaWNoZSBWZXJ3YWx0dW5nIGUuVi4=
+ivbbGouvernmentNameShortForm: AWV
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Eschborn
+ivbbOrganizationCategory:: WnV3ZW5kdW5nc2VtcGbDpG5nZXI=
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 65760
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: RMO8c3NlbGRvcmZlciBTdHJhw59lIAkJCSA0MA==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Eschborn
+labeledURI: http://www.awv-net.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 65760
+street:: RMO8c3NlbGRvcmZlciBTdHJhw59lIAkJCSA0MA==
+telephoneNumber: +49 6196 495-388
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlYXVmdHJhZ3RlciBkZXIgQnVuZGVzcmVnaWVydW5nIGb
+ DvHIgZGllIEJlbGFuZ2UgYmVoaW5kZXJ0ZXIgTWVuc2NoZW4sY249TGllZ2Vuc2NoYWZ0ZW4sbz
+ 1CdW5kLGM9REU=
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZs
+ O8ciBkaWUgQmVsYW5nZSBiZWhpbmRlcnRlciBNZW5zY2hlbg==
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Beauftragter der Bundesregierung
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 10117
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: V2lsaGVsbXN0cmHDn2UgNDk=
+ivbbTelephoneNumber: +49 3018 527-2944
+ivbbUpperOrganization:: QnVuZGVzbWluaXN0ZXJpdW0gZsO8ciBBcmJlaXQgdW5kIFNvemlh
+ bGVz
+l: Berlin
+labeledURI: http://www.behindertenbeauftragter.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10117
+street:: V2lsaGVsbXN0cmHDn2UgNDk=
+
+dn: ou=Hauptadresse,ou=AOK Mecklenburg-Vorpommern,cn=Liegenschaften,o=Bund,c
+ =DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK Mecklenburg-Vorpommern
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Schwerin
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 19032
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: QW0gR3LDvG5lbiBUYWwgCQkgNTA=
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Schwerin
+labeledURI: http://www.aok.de/mecklenburg-vorpommern/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 19032
+street:: QW0gR3LDvG5lbiBUYWwgCQkgNTA=
+telephoneNumber: +49 1802 590590-0
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlYXVmdHJhZ3RlciBkZXIgQnVuZGVzcmVnaWVydW5nIGb
+ DvHIgZGVuIEJlcmxpbi1VbXp1ZyB1bmQgZGVuIEJvbm4tQXVzZ2xlaWNoLGNuPUxpZWdlbnNjaG
+ FmdGVuLG89QnVuZCxjPURF
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZs
+ O8ciBkZW4gQmVybGluLVVtenVnIHVuZCBkZW4gQm9ubi1BdXNnbGVpY2g=
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Beauftragter der Bundesregierung
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 10115
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: SW52YWxpZGVuc3RyYcOfZSA0NA==
+ivbbTelephoneNumber: +49 3018 300-0
+ivbbUpperOrganization:: QnVuZGVzbWluaXN0ZXJpdW0gZsO8ciBWZXJrZWhyLCBCYXUgdW5k
+ IFN0YWR0ZW50d2lja2x1bmc=
+l: Berlin
+labeledURI: http://www.aussiedlerbeauftragter.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10115
+street:: SW52YWxpZGVuc3RyYcOfZSA0NA==
+
+dn: cn=Praktikant Eins,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+certificateSerialNumber: 1110875714834573
+cn: Praktikant Eins
+collectiveOrganizationalUnitName: BFDT
+givenName: Eins
+ivbbLastDeliveryCollective: 091201
+mail: praktikant1@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Praktikant
+userCertificate;binary:: MIIFJTCCBA2gAwIBAgIHA/JV6F9QjTANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MDcxMDA3MjExM
+ loXDTEyMDcxMDIzNTk1OVowYjELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDTALBgNVBAsT
+ BEJmRFQxDzANBgNVBAcTBkJlcmxpbjEYMBYGA1UEAxMPUHJha3Rpa2FudCBFaW5zMQowCAYDVQQ
+ FEwExMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn1lOjuLHoLK1JpMhN5UjqC8Qqn
+ ISOyJq1M/WeBRgFyeh4YOJf9QcScjaHGzPTJYQuhHHtHu1GR8+SXFP2zWmEQCE1mmdOBYUx92UQ
+ ofk2Yu9DDbvgnVReNrmSaplwBhwlDDoiY5tooEWD0FESfYJ1MSITmc81GTFDfhyB+9Btn1VebrQ
+ lMAOGjXp1oN2bFQaHZrz4XVboTMPkDZ4tN/SNSyw+PKMpX7d5Ky15+mNRKSVnpfqsyY5ERoo0bS
+ eierr1GiGKETXSfOw5QNgIzNXn0DgYMah+GBfPYmbsQT2vylordfXHt5hpPDqTq2NeEUuPj2gr9
+ 02mxrleUoozxUmMQIDAQABo4IB4DCCAdwwbwYDVR0jBGgwZoAUUARjAJwu27H1Um9LTFa8t1K+q
+ YGhSqRIMEYxCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMRwwGgYDVQQD
+ ExNQQ0EtMS1WZXJ3YWx0dW5nLTA4ggILwDAeBgNVHREEFzAVgRNwcmFrdGlrYW50MUBiZmR0LmR
+ lMIHhBgNVHR8EgdkwgdYwgdOggdCggc2Gb2xkYXA6Ly94NTAwLmJ1bmQuZGUvQ049Q0EgSVZCQi
+ BEZXV0c2NoZSBUZWxla29tIEFHIDA5LE9VPUJ1bmQsTz1QS0ktMS1WZXJ3YWx0dW5nLEM9REU/Y
+ 2VydGlmaWNhdGVSZXZvY2F0aW9uTGlzdIZaaHR0cDovL3g1MDAuYnVuZC5kZS9jZ2ktYmluL3No
+ b3dfYXR0cj9jbj1DQSUyMElWQkIlMjBEZXV0c2NoZSUyMFRlbGVrb20lMjBBRyUyMDA5JmF0dHI
+ 9Y3JsMBYGA1UdIAQPMA0wCwYJKwYBBAG9dAEBMA4GA1UdDwEB/wQEAwIF4DA9BggrBgEFBQcBAQ
+ QxMC8wLQYIKwYBBQUHMAGGIWh0dHA6Ly9vY3NwLml2YmIudGVsZXNlYy5kZS9vY3NwcjANBgkqh
+ kiG9w0BAQUFAAOCAQEAlcWK10hIrZB2L+eYlNDAznTa2FhFYclZF8gnzopw2hF7Yzm5CxqQKyG+
+ rXwvBDveRt4WxiNn3lt+vtD9wQ2dPgzEY+EPJ2IBCgLHuSmthfU5Z5Sc87LZ7CSPpcSsDBkfgwX
+ VFeSimov/7Q5soV4rBeB+98PyERFCs0L/augVjwn9ubXM36vfNqP721cJEjJhJk5y6cNGybeKRu
+ 67W0fsb1lnxWwe4qHVWJpEl3RHKoId5zCi97dWqf6OGtMMtxQpeB2czmausWDIUYCZ1FSpf9vEt
+ IPVc4RYRu4JrT3DIdK+Xp2SkHYyR/CNw/064Gz0E0K16cA8OsyuLvMkXVCb4w==
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFrdGlvbnNnZW1laW5zY2hhZnQgRGllbnN0IGbDvHIgZGV
+ uIEZyaWVkZW4gZS5WLixjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QWt0aW9uc2dlbWVpbnNjaGFmdCBEaWVuc3QgZsO8ciBkZW
+ 4gRnJpZWRlbiBlLlYu
+ivbbGouvernmentNameShortForm: AGDF
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Bonn
+ivbbOrganizationCategory:: WnV3ZW5kdW5nc2VtcGbDpG5nZXI=
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 53115
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: QmzDvGNoZXJzdHJhw59lIDE0
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Bonn
+labeledURI: http://www.friedensdienst.de/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 53115
+street:: QmzDvGNoZXJzdHJhw59lIDE0
+telephoneNumber: +49 228 24999-0
+
+dn: cn=Repkow Andrea,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+certificateSerialNumber: 964128553933016
+cn: Repkow Andrea
+collectiveOrganizationalUnitName: BFDT
+givenName: Andrea
+ivbbLastDeliveryCollective: 091201
+mail: repkow@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Repkow
+userCertificate;binary:: MIIFHjCCBAagAwIBAgIHA2zeq/mY2DANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MDcxMDA3MjcyM
+ FoXDTEyMDcxMDIzNTk1OVowYDELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDTALBgNVBAsT
+ BEJmRFQxDzANBgNVBAcTBkJlcmxpbjEWMBQGA1UEAxMNUmVwa293IEFuZHJlYTEKMAgGA1UEBRM
+ BMTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJwueiTTyfDeTJJMvByUE8SaXA0k8M
+ bu/vkg7V7yJcpUZimpR3F787BKmixRjnac89t0TvHjX+b9WkxmC0a/1d0/WSSIpHFK1wx2exDZE
+ de6RHvrFNL516FXhZqDyS0FgUPKsGcRje3ry2IktpAlzekP+3geGNUQHplAkLrXU/f/XbRIesQj
+ +40x4m6+70xt4m4AD0AgZBwnQVOlJzh/uraodhACjsy2CQPGSaHRpJjvaoRf9UwbCUbpnlJZWrn
+ AFMntJwmlWS9uVHK3g5T1HhWpxa/N8SNwGef/pZJ/Tq+9Q0FoCMncxQhiPGvKSMukarFfsaeTMS
+ SrlViX4W8ZGp8CAwEAAaOCAdswggHXMG8GA1UdIwRoMGaAFFAEYwCcLtux9VJvS0xWvLdSvqmBo
+ UqkSDBGMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzEcMBoGA1UEAxMT
+ UENBLTEtVmVyd2FsdHVuZy0wOIICC8AwGQYDVR0RBBIwEIEOcmVwa293QGJmZHQuZGUwgeEGA1U
+ dHwSB2TCB1jCB06CB0KCBzYZvbGRhcDovL3g1MDAuYnVuZC5kZS9DTj1DQSBJVkJCIERldXRzY2
+ hlIFRlbGVrb20gQUcgMDksT1U9QnVuZCxPPVBLSS0xLVZlcndhbHR1bmcsQz1ERT9jZXJ0aWZpY
+ 2F0ZVJldm9jYXRpb25MaXN0hlpodHRwOi8veDUwMC5idW5kLmRlL2NnaS1iaW4vc2hvd19hdHRy
+ P2NuPUNBJTIwSVZCQiUyMERldXRzY2hlJTIwVGVsZWtvbSUyMEFHJTIwMDkmYXR0cj1jcmwwFgY
+ DVR0gBA8wDTALBgkrBgEEAb10AQEwDgYDVR0PAQH/BAQDAgXgMD0GCCsGAQUFBwEBBDEwLzAtBg
+ grBgEFBQcwAYYhaHR0cDovL29jc3AuaXZiYi50ZWxlc2VjLmRlL29jc3ByMA0GCSqGSIb3DQEBB
+ QUAA4IBAQBnBx2WQSrkSwmH7jrSGu1UQdHv5MhT85LKP8m1da2Yk41wqmzijvU6ObpnMitOr8Mn
+ e18YERGx/phyXFBu8fk7dyuxf5cYpuwhvDTfjqeMF4EiK09NWttKKca/+r6dwX50P70WBcZ3Vxi
+ S3dHODITJB4dVMq8dWDZRQfkuHf/ifRrOfZKBtkupzyY5Vrwpv2ZY1mG1/e75/3TB8NH3Os1P2c
+ rLSebmSn9KNa5c8VY1ID4Kqxt6MhtwLjJs1dBf1DuIDfp0OWDSoNWD3CYHD/itf2l8Jtwygdm07
+ MuZ4XrXLMRwKZAt9YOjCEzv8rO8PhSu7Clf2B2p08y2Wyuw6zTA
+
+dn: cn=Tapp Andreas,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+certificateSerialNumber: 760932116630094
+cn: Tapp Andreas
+collectiveOrganizationalUnitName: BFDT
+givenName: Andreas
+ivbbLastDeliveryCollective: 091201
+mail: tapp@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Tapp
+userCertificate;binary:: MIIFGzCCBAOgAwIBAgIHArQQUIKKTjANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MDcxMDA3MzMxN
+ FoXDTEyMDcxMDIzNTk1OVowXzELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDTALBgNVBAsT
+ BEJmRFQxDzANBgNVBAcTBkJlcmxpbjEVMBMGA1UEAxMMVGFwcCBBbmRyZWFzMQowCAYDVQQFEwE
+ xMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApuNeg7kKt/itQ5EtVOvGIcFRwd6iQv
+ AgsKYrTRY+9fyW7A89WaDqDZLGQWaQVqUycdubP3S4WUiRUKiF5on12+KnhthhPY4niUGmlpNM/
+ QSMjr7aKdLL1kWVuW6wkn17KO+owCnTS/LmBq98gyOHlLq+pDugtPSn196uCTFL+XvfFBSLeMhO
+ k+KEFi9FOcko9Vy16TEEhhUZC+ssC6OWgYmeidOMfZhiNrS4QMPXyJSIi9jNK1xevH2uOTAXZZo
+ 4Lxu8GCxvqgqGPFgnSVINAzjG4Gif58SDSeml9aJNotjHV19r2HgvipQMEweIi12qiy3tvKKjC+
+ 6eXqdAvvPZmwIDAQABo4IB2TCCAdUwbwYDVR0jBGgwZoAUUARjAJwu27H1Um9LTFa8t1K+qYGhS
+ qRIMEYxCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMRwwGgYDVQQDExNQ
+ Q0EtMS1WZXJ3YWx0dW5nLTA4ggILwDAXBgNVHREEEDAOgQx0YXBwQGJmZHQuZGUwgeEGA1UdHwS
+ B2TCB1jCB06CB0KCBzYZvbGRhcDovL3g1MDAuYnVuZC5kZS9DTj1DQSBJVkJCIERldXRzY2hlIF
+ RlbGVrb20gQUcgMDksT1U9QnVuZCxPPVBLSS0xLVZlcndhbHR1bmcsQz1ERT9jZXJ0aWZpY2F0Z
+ VJldm9jYXRpb25MaXN0hlpodHRwOi8veDUwMC5idW5kLmRlL2NnaS1iaW4vc2hvd19hdHRyP2Nu
+ PUNBJTIwSVZCQiUyMERldXRzY2hlJTIwVGVsZWtvbSUyMEFHJTIwMDkmYXR0cj1jcmwwFgYDVR0
+ gBA8wDTALBgkrBgEEAb10AQEwDgYDVR0PAQH/BAQDAgXgMD0GCCsGAQUFBwEBBDEwLzAtBggrBg
+ EFBQcwAYYhaHR0cDovL29jc3AuaXZiYi50ZWxlc2VjLmRlL29jc3ByMA0GCSqGSIb3DQEBBQUAA
+ 4IBAQCWGMU21mxj8yeRBuvE66PL6weqy342Gj/1CJ3WbT7DZ+KUThwN2aKXSvQeU4eApBhYauB2
+ dbg/SErREJtxClN1bg4HvGrAWXd87h/kQJusS/wW9rEShav3etUaiwbQ7/Vwy6O17uYLm+G5xWX
+ e/fDLpZbFuxmcK+KAiGCVO6fjRw+4GjN0EhqWRHmjUVsDxTFNzZxhON3Chv09VtbW+08aQg+sZJ
+ bPNOTDi+cT1uJbNidvkXReC8ViK2+SWwpveBtvRg6HI5Mgbb+k7aCKZAtV83DY4LlWqfCSiKaPq
+ 7sd6+sW9DfcMcaB0vYjImlzAviSWgPYi4KrabBDWssTMU71
+
+dn: cn=Planitzer Frank,l=Berlin,ou=BfA,o=Bund,c=DE
+cn: Planitzer Frank
+collectiveOrganizationalUnitName: BfA
+givenName: Frank
+ivbbLastDeliveryCollective: 091201
+mail: frank.planitzer@bfa.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Planitzer
+
+dn:: Y249QnVuZGVzdmVyc2ljaGVydW5nc2Fuc3RhbHQgZsO8ciBBbmdlc3RlbGx0ZSAoQmZBKSx
+ sPUJlcmxpbixvdT1CZkEsbz1CdW5kLGM9REU=
+cn:: QnVuZGVzdmVyc2ljaGVydW5nc2Fuc3RhbHQgZsO8ciBBbmdlc3RlbGx0ZSAoQmZBKQ==
+collectiveOrganizationalUnitName: BfA
+ivbbLastDeliveryCollective: 091201
+mail: bfa@bfa.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn:: QnVuZGVzdmVyc2ljaGVydW5nc2Fuc3RhbHQgZsO8ciBBbmdlc3RlbGx0ZSAoQmZBKQ==
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlYXVmdHJhZ3RlciBkZXIgQnVuZGVzcmVnaWVydW5nIGb
+ DvHIgZGllIG5ldWVuIEJ1bmRlc2zDpG5kZXIsY249TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9RE
+ U=
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZs
+ O8ciBkaWUgbmV1ZW4gQnVuZGVzbMOkbmRlcg==
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Beauftragter der Bundesregierung
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 10559
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Alt-Moabit 101 D
+ivbbTelephoneNumber: +49 3018 681-0
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Berlin
+labeledURI: http://www.bmi.bund.de/cln_174/BODL/DE/Home/startseite_node.html
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10559
+street: Alt-Moabit 101 D
+
+dn: ou=Hauptadresse,ou=ABC- und Selbstschutzschule des Heeres,cn=Liegenschaf
+ ten,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: ABC- und Selbstschutzschule des Heeres
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Sonthofen
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType:: U3RyZWl0a3LDpGZ0ZQ==
+ivbbPostalCode: 87527
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: TcO8aGxlbndlZyAxMg==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Sonthofen
+labeledURI: http://www.deutschesheer.de/portal/a/ha/kcxml/04_Sj9SPykssy0xPLM
+ nMz0vM0Y_QjzKLN3SKt_TxAMlB2J6B-pFw0aCUVH1vfV-P_NxU_QD9gtyIckdHRUUA88i7gg!!/
+ delta/base64xml/L3dJdyEvd0ZNQUFzQUMvNElVRS82XzFCXzlTSQ!!
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 87527
+street:: TcO8aGxlbndlZyAxMg==
+telephoneNumber: +49 8321 278-1010
+
+dn: cn=Juncker Oliver,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Juncker Oliver
+collectiveOrganizationalUnitName: BAKS
+givenName: Oliver
+ivbbLastDeliveryCollective: 091201
+mail: juncker@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Juncker
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlYXVmdHJhZ3RlIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO
+ 8ciBNZW5zY2hlbnJlY2h0c2ZyYWdlbixjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7
+ xyIE1lbnNjaGVucmVjaHRzZnJhZ2Vu
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Beauftragte der Bundesregierung
+ivbbOrganizationType: Justizverwaltung
+ivbbPostalCode: 10117
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: TW9ocmVuc3RyYcOfZSAJCQkJIDM3
+ivbbTelephoneNumber: +49 3018 580-0
+ivbbUpperOrganization: Bundesministerium der Justiz
+l: Berlin
+labeledURI: http://www.bmj.bund.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10117
+street:: TW9ocmVuc3RyYcOfZSAJCQkJIDM3
+
+dn: ou=Hauptadresse,ou=AOK Niedersachsen,cn=Liegenschaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK Niedersachsen
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Hannover
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 30519
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: SGlsZGVzaGVpbWVyIFN0cmHDn2UgCQkgMjcz
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Hannover
+labeledURI: http://www.aok.de/niedersachsen/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 30519
+street:: SGlsZGVzaGVpbWVyIFN0cmHDn2UgCQkgMjcz
+telephoneNumber: +49 511 8701-0
+
+dn: cn=Geist Wolfgang,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Geist Wolfgang
+collectiveOrganizationalUnitName: BAKS
+givenName: Wolfgang
+ivbbLastDeliveryCollective: 091201
+mail: geist@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Geist
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFtdCBmw7xyIE5lY2thcmF1c2JhdSBIZWlkZWxiZXJnLGN
+ uPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QW10IGbDvHIgTmVja2FyYXVzYmF1IEhlaWRlbGJlcmc=
+ivbbGouvernmentNameShortForm: ANH
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Heidelberg
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType: Wasser- und Schifffahrtsverwaltung
+ivbbPostalCode: 69115
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: VmFuZ2Vyb3dzdHJhw59lIDIw
+ivbbUpperOrganization:: V2Fzc2VyLSB1bmQgU2NoaWZmZmFocnRzZGlyZWt0aW9uIFPDvGR3
+ ZXN0
+l: Heidelberg
+labeledURI: http:/www.anh.wsv.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 69115
+street:: VmFuZ2Vyb3dzdHJhw59lIDIw
+telephoneNumber: +49 6221 507-401
+
+dn: cn=Mathiak Christel,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Mathiak Christel
+collectiveOrganizationalUnitName: BAKS
+givenName: Christel
+ivbbLastDeliveryCollective: 091201
+mail: mathiak@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Mathiak
+
+dn:: Y249R8O2cmluZyBNYXJsZW5lLGw9QnVuZGVzZ2ViaWV0LG91PUJGRFQsbz1CdW5kLGM9REU
+ =
+certificateSerialNumber: 692424410535
+cn:: R8O2cmluZyBNYXJsZW5l
+collectiveOrganizationalUnitName: BFDT
+givenName: Marlene
+ivbbLastDeliveryCollective: 091201
+mail: goering@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn:: R8O2cmluZw==
+userCertificate;binary:: MIIFIDCCBAigAwIBAgIGAKE3tgWnMA0GCSqGSIb3DQEBBQUAMGA
+ xCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMQ0wCwYDVQQLEwRCdW5kMS
+ cwJQYDVQQDEx5DQSBJVkJCIERldXRzY2hlIFRlbGVrb20gQUcgMDkwHhcNMDkwNzEwMDcxNTQ1W
+ hcNMTIwNzEwMjM1OTU5WjBiMQswCQYDVQQGEwJERTENMAsGA1UEChMEQnVuZDENMAsGA1UECxME
+ QmZEVDEPMA0GA1UEBxMGQmVybGluMRgwFgYDVQQDDA9Hw7ZyaW5nIE1hcmxlbmUxCjAIBgNVBAU
+ TATEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCia0HSH3XGYDZpVTt368WLaXfpcM
+ ZKfrW1lcbMdQAzDnrb2w99Tcf0VHH2vBEiOh0s3LyBoF9nxz+1aESLniOW+rkb01I0b6lPi/u+H
+ NsK8K63T3uDEPYgEO9WcuzxBFINQxdopBTLKJexuOdtjVcRkdND0X+I8Utsgx3bxNtVf7GQlW+8
+ y540SVG/n1jU3JFKVkDyqS2cWQPTZLFZmu+hnrMROn9YMARJh+HF2LWceMa8yTNpont+r/P9g4p
+ mjc3re1UBIMM2ecWQPBS6acgH8tdffeh5je1yr3yV1I3Ua8C7ST8vHr+rzvPtNgF6YW7f/PuqrU
+ VPqKqNitAhpawhAgMBAAGjggHcMIIB2DBvBgNVHSMEaDBmgBRQBGMAnC7bsfVSb0tMVry3Ur6pg
+ aFKpEgwRjELMAkGA1UEBhMCREUxGTAXBgNVBAoTEFBLSS0xLVZlcndhbHR1bmcxHDAaBgNVBAMT
+ E1BDQS0xLVZlcndhbHR1bmctMDiCAgvAMBoGA1UdEQQTMBGBD2dvZXJpbmdAYmZkdC5kZTCB4QY
+ DVR0fBIHZMIHWMIHToIHQoIHNhm9sZGFwOi8veDUwMC5idW5kLmRlL0NOPUNBIElWQkIgRGV1dH
+ NjaGUgVGVsZWtvbSBBRyAwOSxPVT1CdW5kLE89UEtJLTEtVmVyd2FsdHVuZyxDPURFP2NlcnRpZ
+ mljYXRlUmV2b2NhdGlvbkxpc3SGWmh0dHA6Ly94NTAwLmJ1bmQuZGUvY2dpLWJpbi9zaG93X2F0
+ dHI/Y249Q0ElMjBJVkJCJTIwRGV1dHNjaGUlMjBUZWxla29tJTIwQUclMjAwOSZhdHRyPWNybDA
+ WBgNVHSAEDzANMAsGCSsGAQQBvXQBATAOBgNVHQ8BAf8EBAMCBeAwPQYIKwYBBQUHAQEEMTAvMC
+ 0GCCsGAQUFBzABhiFodHRwOi8vb2NzcC5pdmJiLnRlbGVzZWMuZGUvb2NzcHIwDQYJKoZIhvcNA
+ QEFBQADggEBAAKWTs32u3YtJF7ipgcVrptpHRidrfG0v7Ma3y97o39delIzrPz3RwO5cebLnbPm
+ vCZnA+cKLw7SCxNlUVVwBRGykU88O2MGnrsbLh3XARZk8Caq7OJfGY02Hm83YE442VPjGsLG+5W
+ bgpYuntyWEvyuDOx0iXcrgpoLueChVeWjxAThJ0EkJ3HMLhkBiyhiPObpQcgKhE6YoMLkf8QmBC
+ xxbMJMCXfrIuNUWAeCAx/73K0ri+Wl3BtrIUb9kfUGaYTnQwZfr3566vHvsEWf9d9E30eC2bJ0a
+ 5/ymnPwE7pjULW5DOIl3HlmdwD8REGNsFd3A+KUXKfV3LUzj0PMX+s=
+
+dn: ou=Hauptadresse,ou=Astrophysikalisches Institut,cn=Liegenschaften,o=Bund
+ ,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: Astrophysikalisches Institut
+ivbbGouvernmentNameShortForm: AIP
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Potsdam
+ivbbOrganizationCategory:: WnV3ZW5kdW5nc2VtcGbDpG5nZXI=
+ivbbOrganizationType: Forschungseinrichtung
+ivbbPostalCode: 14482
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: An der Sternwarte 16
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Potsdam
+labeledURI: http://www.aip.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 14482
+street: An der Sternwarte 16
+telephoneNumber: +49 331 7499-0
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFtdCBmw7xyIEdlb2luZm9ybWF0aW9uc3dlc2VuIGRlciB
+ CdW5kZXN3ZWhyLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QW10IGbDvHIgR2VvaW5mb3JtYXRpb25zd2VzZW4gZGVyIE
+ J1bmRlc3dlaHI=
+ivbbGouvernmentNameShortForm: AGeoBw
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Euskirchen
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType:: U3RyZWl0a3LDpGZ0ZQ==
+ivbbPostalCode: 53879
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: S29tbWVybmVyIFN0cmHDn2UgMTg4
+ivbbUpperOrganization: Bundesministerium der Verteidigung
+l: Euskirchen
+labeledURI: http://www.streitkraeftebasis.de/portal/a/streitkraeftebasis/die
+ nst/portraits/ageobw?yw_contentURL=/01DB040000000001/W26JVBNT868INFODE/cont
+ ent.jsp
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 53879
+street:: S29tbWVybmVyIFN0cmHDn2UgMTg4
+telephoneNumber: +49 2251 953-4130
+
+dn: cn=Linke Marco,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Linke Marco
+collectiveOrganizationalUnitName: BAKS
+givenName: Marco
+ivbbLastDeliveryCollective: 091201
+mail: linke@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Linke
+
+dn: ou=Hauptadresse,ou=AOK Schleswig-Holstein,cn=Liegenschaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK Schleswig-Holstein
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Kiel
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 24145
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: RWRpc29uc3RyYcOfZSA3MA==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Kiel
+labeledURI: http://www.aok.de/schleswig-holstein/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 24145
+street:: RWRpc29uc3RyYcOfZSA3MA==
+telephoneNumber: +49 431 605-0
+
+dn: ou=Hauptadresse,ou=AOK - Die Gesundheitskasse im Saarland,cn=Liegenschaf
+ ten,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK - Die Gesundheitskasse im Saarland
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation:: U2FhcmJyw7xja2Vu
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 66121
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: SGFsYmVyZ3N0cmHDn2UJIDE=
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l:: U2FhcmJyw7xja2Vu
+labeledURI: http://www.aok.de/saarland/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 66121
+street:: SGFsYmVyZ3N0cmHDn2UJIDE=
+telephoneNumber: +49 681 6001-0
+
+dn: ou=Hauptadresse,ou=AOK-Die Gesundheitskasse in Rheinland Pfalz,cn=Liegen
+ schaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK-Die Gesundheitskasse in Rheinland Pfalz
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Eisenberg
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 67304
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: VmlyY2hvd3N0cmHDn2UJIDMw
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Eisenberg
+labeledURI: http://www.aok.de/rlpf
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 67304
+street:: VmlyY2hvd3N0cmHDn2UJIDMw
+telephoneNumber: +49 6351 403-0
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PWFpZCBpbmZvZGllbnN0IEVybsOkaHJ1bmdcLCBMYW5kd2l
+ ydHNjaGFmdFwsIFZlcmJyYXVjaGVyc2NodXR6IGUuIFYuLGNuPUxpZWdlbnNjaGFmdGVuLG89Qn
+ VuZCxjPURF
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: YWlkIGluZm9kaWVuc3QgRXJuw6RocnVuZywgTGFuZHdpcn
+ RzY2hhZnQsIFZlcmJyYXVjaGVyc2NodXR6IGUuIFYu
+ivbbGouvernmentNameShortForm: aid
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Bonn
+ivbbOrganizationCategory:: WnV3ZW5kdW5nc2VtcGbDpG5nZXI=
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 53123
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: SGVpbHNiYWNoc3RyYcOfZSAxNg==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Bonn
+labeledURI: http://www.aid.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 53123
+street:: SGVpbHNiYWNoc3RyYcOfZSAxNg==
+telephoneNumber: +49 228 8499-0
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFic2F0embDtnJkZXJ1bmdzZm9uZHMgZGVyIGRldXRzY2h
+ lbiBGb3JzdC0gdW5kIEhvbHp3aXJ0c2NoYWZ0IC0gSG9semFic2F0emZvbmRzLGNuPUxpZWdlbn
+ NjaGFmdGVuLG89QnVuZCxjPURF
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QWJzYXR6ZsO2cmRlcnVuZ3Nmb25kcyBkZXIgZGV1dHNjaG
+ VuIEZvcnN0LSB1bmQgSG9sendpcnRzY2hhZnQgLSBIb2x6YWJzYXR6Zm9uZHM=
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Bonn
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 53175
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Godesberger Allee 142 - 148
+ivbbUpperOrganization:: QnVuZGVzbWluaXN0ZXJpdW0gZsO8ciBFcm7DpGhydW5nLCBMYW5k
+ d2lydHNjaGFmdCB1bmQgVmVyYnJhdWNoZXJzY2h1dHo=
+l: Bonn
+labeledURI: http://www.holzabsatzfonds.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 53175
+street: Godesberger Allee 142 - 148
+telephoneNumber: +49 228 30838-0
+
+dn: cn=Meiser Dennis,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+certificateSerialNumber: 87634764424201
+cn: Meiser Dennis
+collectiveOrganizationalUnitName: BFDT
+givenName: Dennis
+ivbbLastDeliveryCollective: 091201
+mail: meiser@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Meiser
+userCertificate;binary:: MIIFHTCCBAWgAwIBAgIGT7QPAOQJMA0GCSqGSIb3DQEBBQUAMGA
+ xCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMQ0wCwYDVQQLEwRCdW5kMS
+ cwJQYDVQQDEx5DQSBJVkJCIERldXRzY2hlIFRlbGVrb20gQUcgMDkwHhcNMDkwNzEwMDcxOTI5W
+ hcNMTIwNzEwMjM1OTU5WjBgMQswCQYDVQQGEwJERTENMAsGA1UEChMEQnVuZDENMAsGA1UECxME
+ QmZEVDEPMA0GA1UEBxMGQmVybGluMRYwFAYDVQQDEw1NZWlzZXIgRGVubmlzMQowCAYDVQQFEwE
+ xMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAilA8K3jlpxkCB1/K/T8MluF67BOx6p
+ 7PlaEVXcfAR8kPR1SPbFWZvZLev+jXDYjnhEU32xwS0ad3uWS2I9w3yBIJVM6bzgJHSYaw0FFca
+ 6cawDMHm2VyLYLZELz+v+BJHDRoFd9vDu4N6lmBnOFWW7VoAkR5KECXXRWjtYzzDynL+7VPrfw2
+ AWetu7ixVlNv7cPZQQpQH6jrZW99obiJ5opvpHAe8honTuM/LFiIgTE4VUyE0bQ65OSp+7o4C2E
+ NprC+0Ikhe6dEHpP+Saa3piQrp4dcuMcGeiIpBkHAV/MV2AuIYMPNTdeRX/dKf+q8GJcUrJhxAN
+ nIxi3dvyhjhwIDAQABo4IB2zCCAdcwbwYDVR0jBGgwZoAUUARjAJwu27H1Um9LTFa8t1K+qYGhS
+ qRIMEYxCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMRwwGgYDVQQDExNQ
+ Q0EtMS1WZXJ3YWx0dW5nLTA4ggILwDAZBgNVHREEEjAQgQ5tZWlzZXJAYmZkdC5kZTCB4QYDVR0
+ fBIHZMIHWMIHToIHQoIHNhm9sZGFwOi8veDUwMC5idW5kLmRlL0NOPUNBIElWQkIgRGV1dHNjaG
+ UgVGVsZWtvbSBBRyAwOSxPVT1CdW5kLE89UEtJLTEtVmVyd2FsdHVuZyxDPURFP2NlcnRpZmljY
+ XRlUmV2b2NhdGlvbkxpc3SGWmh0dHA6Ly94NTAwLmJ1bmQuZGUvY2dpLWJpbi9zaG93X2F0dHI/
+ Y249Q0ElMjBJVkJCJTIwRGV1dHNjaGUlMjBUZWxla29tJTIwQUclMjAwOSZhdHRyPWNybDAWBgN
+ VHSAEDzANMAsGCSsGAQQBvXQBATAOBgNVHQ8BAf8EBAMCBeAwPQYIKwYBBQUHAQEEMTAvMC0GCC
+ sGAQUFBzABhiFodHRwOi8vb2NzcC5pdmJiLnRlbGVzZWMuZGUvb2NzcHIwDQYJKoZIhvcNAQEFB
+ QADggEBAGc0Qfusg5ZocKGgrZSeBxnjB3apj3cQ9RCQoz+Rlld06pfSwAOnTcNe4cOnASQWJu/o
+ C6RPooqVHpXIlLfJuhTjkk088S6GCZfPnAF4/mpBPbZRRc27+lcwl2MBuJKpz7tXmRftJM8yKN0
+ DOQXu35OCvCW3pCHvc5oDz/Lz/c/w64BxyAUYO6wu6SE9XeRA+WVzigQm7B3jRfXAzQrqKhSfdQ
+ sQKu+l4FC6x+KbQrmmA2poLpcu+wE9L65T9mxO2jFuMtomJ4vLinET+k9QwyOJmR1TlKPzTkKCO
+ QQE7pv3vI1OjT33I0IcCZQ/rFfInN4YUYY95L0fQFPxwBCijFo=
+
+dn:: Y249RsO2aHJlbmJhY2ggR2VyZCxsPUJlcmxpbixvdT1CQUtTLG89QnVuZCxjPURF
+cn:: RsO2aHJlbmJhY2ggR2VyZA==
+collectiveOrganizationalUnitName: BAKS
+givenName: Gerd
+ivbbLastDeliveryCollective: 091201
+mail: foehrenbach@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn:: RsO2aHJlbmJhY2g=
+
+dn: ou=Hauptadresse,ou=Alexander-von-Humboldt-Stiftung,cn=Liegenschaften,o=B
+ und,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: Alexander-von-Humboldt-Stiftung
+ivbbGouvernmentNameShortForm: AvH
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Bonn
+ivbbOrganizationCategory:: WnV3ZW5kdW5nc2VtcGbDpG5nZXI=
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 53173
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: SmVhbi1QYXVsLVN0cmHDn2UgMTI=
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Bonn
+labeledURI: http://www.avh.de/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 53173
+street:: SmVhbi1QYXVsLVN0cmHDn2UgMTI=
+telephoneNumber: +49 228 833-0
+
+dn: cn=Burihabwa Ntagahoraho,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Burihabwa Ntagahoraho
+collectiveOrganizationalUnitName: BAKS
+givenName: Ntagahoraho
+ivbbLastDeliveryCollective: 091201
+mail: burihabwa@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Burihabwa
+
+dn: ou=Hauptadresse,ou=Berufsbildungszentrum Koblenz,cn=Liegenschaften,o=Bun
+ d,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: Berufsbildungszentrum Koblenz
+ivbbGouvernmentNameShortForm: BBiZ-Koblenz
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Koblenz
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType: Wasser- und Schifffahrtsverwaltung
+ivbbPostalCode: 56070
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: SGFmZW5zdHJhw59lIDE=
+ivbbUpperOrganization:: V2Fzc2VyLSB1bmQgU2NoaWZmZmFocnRzZGlyZWt0aW9uIFPDvGR3
+ ZXN0
+l: Koblenz
+labeledURI: http://www.bni-hamburg.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 56070
+street:: SGFmZW5zdHJhw59lIDE=
+telephoneNumber: +49 261 9819-0
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlYXVmdHJhZ3RlIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO
+ 8ciBkaWUgQmVsYW5nZSBkZXIgUGF0aWVudGlubmVuIHVuZCBQYXRpZW50ZW4sY249TGllZ2Vuc2
+ NoYWZ0ZW4sbz1CdW5kLGM9REU=
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7
+ xyIGRpZSBCZWxhbmdlIGRlciBQYXRpZW50aW5uZW4gdW5kIFBhdGllbnRlbg==
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Beauftragte der Bundesregierung
+ivbbOrganizationType: Gesundheitsverwaltung
+ivbbPostalCode: 10117
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: RnJpZWRyaWNoc3RyYcOfZSAxMDg=
+ivbbTelephoneNumber: +49 3018 441-3420
+ivbbUpperOrganization:: QnVuZGVzbWluaXN0ZXJpdW0gZsO8ciBHZXN1bmRoZWl0
+l: Berlin
+labeledURI: http://www.patientenbeauftragte.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10117
+street:: RnJpZWRyaWNoc3RyYcOfZSAxMDg=
+
+dn: cn=Administrator Toni,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+cn: Administrator Toni
+collectiveOrganizationalUnitName: BFDT
+givenName: Toni
+ivbbLastDeliveryCollective: 091201
+mail: it-service-desk@bva.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Administrator
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFtdCBmw7xyIEZsdWdzaWNoZXJ1bmcgZGVyIEJ1bmRlc3d
+ laHIsY249TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QW10IGbDvHIgRmx1Z3NpY2hlcnVuZyBkZXIgQnVuZGVzd2
+ Vocg==
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Frankfurt am Main
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType:: U3RyZWl0a3LDpGZ0ZQ==
+ivbbPostalCode: 60487
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: SW5zdGVyYnVyZ2VyIFN0cmHDn2UgNCAtIDY=
+ivbbUpperOrganization: Bundesministerium der Verteidigung
+l: Frankfurt am Main
+labeledURI: http://www.luftwaffe.de/portal/a/luftwaffe/kcxml/04_Sj9SPykssy0x
+ PLMnMz0vM0Y_QjzKLNzKI9_I2A8mB2e5ezvqRcNGglFR9X4_83FR9b_0A_YLciHJHR0VFAKMQmN
+ o!/delta/base64xml/L3dJdyEvd0ZNQUFzQUMvNElVRS82XzIwX0tKRg!!
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 60487
+street:: SW5zdGVyYnVyZ2VyIFN0cmHDn2UgNCAtIDY=
+telephoneNumber: +49 69 79307-210
+
+dn: cn=Schmidt-Radefeldt Roman,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Schmidt-Radefeldt Roman
+collectiveOrganizationalUnitName: BAKS
+givenName: Roman
+ivbbLastDeliveryCollective: 091201
+mail: schmidt-radefeldt@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Schmidt-Radefeldt
+
+dn: cn=Posteingang-EA,l=Berlin,ou=BPA,o=Bund,c=DE
+cn: Posteingang-EA
+collectiveOrganizationalUnitName: BPA
+ivbbLastDeliveryCollective: 091201
+mail: posteingang-ea@bpa.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Posteingang-EA
+
+dn: cn=Plaikner Oswald,l=Karlsruhe,ou=BVerfG,o=Bund,c=DE
+certificateSerialNumber: 697936784167581
+cn: Plaikner Oswald
+givenName: Oswald
+mail: oplaikner@bundesverfassungsgericht.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Plaikner
+userCertificate;binary:: MIIFPDCCBCSgAwIBAgIHAnrFEhiSnTANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MTAyMzEzMzgyM
+ FoXDTEyMTAyMzIzNTk1OVowZzELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDzANBgNVBAsT
+ BkJWZXJmRzESMBAGA1UEBxMJS2FybHNydWhlMRgwFgYDVQQDEw9QbGFpa25lciBPc3dhbGQxCjA
+ IBgNVBAUTATEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC/wNLkUdRbZkiTolm25C
+ zRL7PAKuEANg2fXkXuIYGSuFmPkIelh1R7sW9J57cgl8dCtkOx9WhipLZ2AQ1uw25qDmXpFYFGO
+ rJdPyayLVilfIMCPBFgjGtCC+qY6dPtXOeEZbWG1qdf6Vb+s0soOXK8IHL0MRe0Vj5vXhI0nX05
+ Ips/pH2zdY9Kzhi0ZN4QbgTj2/twcvCfFQk3l8F8BEOuczavUtNgv2eR/MzyimqysHNv2Us/+p9
+ ze2H8lKMjto73O778baEqIrIzDF/Kw21xi4+Jp9GDbCkQ8YhxtjYi6018MMV/GtNQ8PrZqRNiuk
+ rqys2aDONQW4aGOIp7zLY7AgMBAAGjggHyMIIB7jBvBgNVHSMEaDBmgBRQBGMAnC7bsfVSb0tMV
+ ry3Ur6pgaFKpEgwRjELMAkGA1UEBhMCREUxGTAXBgNVBAoTEFBLSS0xLVZlcndhbHR1bmcxHDAa
+ BgNVBAMTE1BDQS0xLVZlcndhbHR1bmctMDiCAgvAMDAGA1UdEQQpMCeBJW9wbGFpa25lckBidW5
+ kZXN2ZXJmYXNzdW5nc2dlcmljaHQuZGUwgeEGA1UdHwSB2TCB1jCB06CB0KCBzYZvbGRhcDovL3
+ g1MDAuYnVuZC5kZS9DTj1DQSBJVkJCIERldXRzY2hlIFRlbGVrb20gQUcgMDksT1U9QnVuZCxPP
+ VBLSS0xLVZlcndhbHR1bmcsQz1ERT9jZXJ0aWZpY2F0ZVJldm9jYXRpb25MaXN0hlpodHRwOi8v
+ eDUwMC5idW5kLmRlL2NnaS1iaW4vc2hvd19hdHRyP2NuPUNBJTIwSVZCQiUyMERldXRzY2hlJTI
+ wVGVsZWtvbSUyMEFHJTIwMDkmYXR0cj1jcmwwFgYDVR0gBA8wDTALBgkrBgEEAb10AQEwDgYDVR
+ 0PAQH/BAQDAgXgMD0GCCsGAQUFBwEBBDEwLzAtBggrBgEFBQcwAYYhaHR0cDovL29jc3AuaXZiY
+ i50ZWxlc2VjLmRlL29jc3ByMA0GCSqGSIb3DQEBBQUAA4IBAQAH7/SVc8Yo2NFsNgxdcXJ+DbDs
+ QJ9KFP/eJw/Tpw4Bxfsj66hKyWru40s7stX2Gu686s473v+ttt22rD18PQWyauMdTO8ejEmtAm8
+ jZ66jG3D9QefXFINJJ4VbXz2bDGPccEGvM1rwe4BNaxLy3QATV7gXV7vf+OY9ijfAjf9+/tsjo1
+ 0tiX6QY2FsiL/rOuZ7wz1sXj+tJOd+Nx+B+MQaR93f4PgKFnNuLgO5dGwg7XankyUQUICF0KKz2
+ Ie1A54w9aPnoSNtKij+a0ur7zOHfGgjSQwcAjYvDrSigjAkvz63K0dVfxAtKpggPdjsU9Ik3YlA
+ rlcU/69Vipa7G8EN
+
+dn: ou=Hauptadresse,ou=14. Panzergrenadierdivision Hanse,cn=Liegenschaften,o
+ =Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: 14. Panzergrenadierdivision Hanse
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Neubrandenburg
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType:: U3RyZWl0a3LDpGZ0ZQ==
+ivbbPostalCode: 17033
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Weg am Hang 35
+ivbbUpperOrganization:: SGVlcmVzZsO8aHJ1bmdza29tbWFuZG8=
+l: Neubrandenburg
+labeledURI: http://www.deutschesheer.de/portal/a/14div
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 17033
+street: Weg am Hang 35
+telephoneNumber: +49 395 372-2140
+
+dn: ou=Hauptadresse,ou=Ausbildungszentrum Bau e.V.,cn=Liegenschaften,o=Bund,
+ c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: Ausbildungszentrum Bau e.V.
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Kiel
+ivbbOrganizationCategory:: WnV3ZW5kdW5nc2VtcGbDpG5nZXI=
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 24145
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: QmFya2F1ZXIgU3RyYcOfZSAJCQkgNTAgLSA1Mg==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Kiel
+labeledURI: http://www.abz-bau-saar.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 24145
+street:: QmFya2F1ZXIgU3RyYcOfZSAJCQkgNTAgLSA1Mg==
+telephoneNumber: +49 431 7101-500
+
+dn: ou=Hauptadresse,ou=13. Panzergrenadierdivision,cn=Liegenschaften,o=Bund,
+ c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: 13. Panzergrenadierdivision
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Leipzig
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType:: U3RyZWl0a3LDpGZ0ZQ==
+ivbbPostalCode: 04159
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Wiederitzscher Weg 30
+ivbbUpperOrganization:: SGVlcmVzZsO8aHJ1bmdza29tbWFuZG8=
+l: Leipzig
+labeledURI: http://www.deutschesheer.de/portal/a/13div
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 04159
+street: Wiederitzscher Weg 30
+telephoneNumber: +49 341 595-2151
+
+dn: ou=Hauptadresse,ou=Arbeiterwohlfahrt Bundesverband e.V.,cn=Liegenschafte
+ n,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: Arbeiterwohlfahrt Bundesverband e.V.
+ivbbGouvernmentNameShortForm: AWO
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory:: WnV3ZW5kdW5nc2VtcGbDpG5nZXI=
+ivbbOrganizationType: Verband
+ivbbPostalCode: 10961
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: QmzDvGNoZXJzdHJhw59lCQkgNjIgLSA2Mw==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Berlin
+labeledURI: http://www.awo.org
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10961
+street:: QmzDvGNoZXJzdHJhw59lCQkgNjIgLSA2Mw==
+telephoneNumber: +49 30 26309-0
+
+dn: ou=Hauptadresse,ou=1. Panzerdivision,cn=Liegenschaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: 1. Panzerdivision
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Hannover
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType:: U3RyZWl0a3LDpGZ0ZQ==
+ivbbPostalCode: 30173
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: SGFucy1Cw7Zja2xlci1BbGxlZSAxOC8xNg==
+ivbbUpperOrganization:: SGVlcmVzZsO8aHJ1bmdza29tbWFuZG8=
+l: Hannover
+labeledURI: http://www.deutschesheer.de/portal/a/1div/kcxml/04_Sj9SPykssy0xP
+ LMnMz0vM0Y_QjzKLNzSPt_D3AMlB2H4u-pFw0aCUVH1fj_zcVH1v_QD9gtyIckdHRUUAZaDfRw!
+ !/delta/base64xml/L3dJdyEvd0ZNQUFzQUMvNElVRS82XzE3XzhPMA!!
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 30173
+street:: SGFucy1Cw7Zja2xlci1BbGxlZSAxOC8xNg==
+telephoneNumber: +49 511 284-2150
+
+dn: cn=Gusek Daniel,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Gusek Daniel
+collectiveOrganizationalUnitName: BAKS
+givenName: Daniel
+ivbbLastDeliveryCollective: 091201
+mail: gusek@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Gusek
+
+dn: ou=Hauptadresse,ou=AOK Hessen,cn=Liegenschaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK Hessen
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation:: QmFkIEhvbWJ1cmcgdm9yIGRlciBIw7ZoZQ==
+ivbbOrganizationCategory: Mittelbare Bundesverwaltung
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 61352
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: QmFzbGVyIFN0cmHDn2UgCQkgMg==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l:: QmFkIEhvbWJ1cmcgdm9yIGRlciBIw7ZoZQ==
+labeledURI: http://www.aok.de/hessen/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 61352
+street:: QmFzbGVyIFN0cmHDn2UgCQkgMg==
+telephoneNumber: +49 6172 272-0
+
+dn:: Y249R3Jvw59qb2hhbm4gTWVyaWtvLGw9QmVybGluLG91PUJBS1Msbz1CdW5kLGM9REU=
+cn:: R3Jvw59qb2hhbm4gTWVyaWtv
+collectiveOrganizationalUnitName: BAKS
+givenName: Meriko
+ivbbLastDeliveryCollective: 091201
+mail: grossjohann@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn:: R3Jvw59qb2hhbm4=
+
+dn: cn=Blanke Ursula,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Blanke Ursula
+collectiveOrganizationalUnitName: BAKS
+givenName: Ursula
+ivbbLastDeliveryCollective: 091201
+mail: blanke@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Blanke
+
+dn: cn=Posteingang,l=Berlin,ou=BPA,o=Bund,c=DE
+cn: Posteingang
+collectiveOrganizationalUnitName: BPA
+ivbbLastDeliveryCollective: 091201
+mail: posteingang@bpa.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Posteingang
+
+dn: cn=Fester Herrmann,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Fester Herrmann
+collectiveOrganizationalUnitName: BAKS
+givenName: Herrmann
+ivbbLastDeliveryCollective: 091201
+mail: fester@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Fester
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlYXVmdHJhZ3RlciBkZXIgQnVuZGVzcmVnaWVydW5nIGb
+ DvHIgTWVuc2NoZW5yZWNodHNwb2xpdGlrIHVuZCBIdW1hbml0w6RyZSBIaWxmZSxjbj1MaWVnZW
+ 5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZs
+ O8ciBNZW5zY2hlbnJlY2h0c3BvbGl0aWsgdW5kIEh1bWFuaXTDpHJlIEhpbGZl
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Beauftragter der Bundesregierung
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 10117
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Werderscher Markt									 1
+ivbbTelephoneNumber: +49 3018 17-4764
+ivbbUpperOrganization:: QXVzd8OkcnRpZ2VzIEFtdA==
+l: Berlin
+labeledURI: http://www.auswaertiges-amt.de/diplo/de/AAmt/Koordinatoren/MR-Ko
+ ordinator/MRBeauftragter.html
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10117
+street: Werderscher Markt									 1
+telephoneNumber: +49 30 5000-4765
+
+dn: cn=Kurz Thomas,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Kurz Thomas
+collectiveOrganizationalUnitName: BAKS
+givenName: Thomas
+ivbbLastDeliveryCollective: 091201
+mail: kurz@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Kurz
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFtdCBmw7xyIGRlbiBNaWxpdMOkcmlzY2hlbiBBYnNjaGl
+ ybWRpZW5zdCxjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QW10IGbDvHIgZGVuIE1pbGl0w6RyaXNjaGVuIEFic2NoaX
+ JtZGllbnN0
+ivbbGouvernmentNameShortForm: MAD
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation:: S8O2bG4=
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType: Wehrverwaltung
+ivbbPostalCode: 50968
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: QnLDvGhsZXIgU3RyYcOfZSAzMDA=
+ivbbUpperOrganization: Bundesministerium der Verteidigung
+l:: S8O2bG4=
+labeledURI: http://www.mad.bundeswehr.de/portal/a/mad
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 50968
+street:: QnLDvGhsZXIgU3RyYcOfZSAzMDA=
+telephoneNumber: +49 221 9371-0
+
+dn: cn=Praktikant Vier,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+certificateSerialNumber: 1065716272670161
+cn: Praktikant Vier
+collectiveOrganizationalUnitName: BFDT
+givenName: Vier
+ivbbLastDeliveryCollective: 091201
+mail: praktikant4@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Praktikant
+userCertificate;binary:: MIIFJTCCBA2gAwIBAgIHA8lDZ90l0TANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MDcxMDA3MjUwM
+ 1oXDTEyMDcxMDIzNTk1OVowYjELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDTALBgNVBAsT
+ BEJmRFQxDzANBgNVBAcTBkJlcmxpbjEYMBYGA1UEAxMPUHJha3Rpa2FudCBWaWVyMQowCAYDVQQ
+ FEwExMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiydhLzZDnS3emMD10yXKwxgIPp
+ o4E6Uri4n/UeHicSh99ASyt8zrXBbAZBYfKHg9JPBb1YvBOlHZ9r8EEMGOS1VE6mLCGb71E6OzY
+ szQDvLvkh3bm34ChpQRFgHjD7ysKTfB3WNghLCv/5kCjMBnqpimhKeJ7UB5dSnrTn1MEePLqLqa
+ TOU34XyFcPnUHT4xk/6LZ10GPcIIvq16xlAvRSxBCHujSlqmvWEeJSPsMZO8KG+gWGrTp3hvMj6
+ lgUpWfZ3ndOW9Vin888svhxaOSBVc9BUm5IVFYs8McJK6TPGhbmTi3w+UXn7UBz8kp2wSRY0gT7
+ +2ZbOUpp/cau5RNQIDAQABo4IB4DCCAdwwbwYDVR0jBGgwZoAUUARjAJwu27H1Um9LTFa8t1K+q
+ YGhSqRIMEYxCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMRwwGgYDVQQD
+ ExNQQ0EtMS1WZXJ3YWx0dW5nLTA4ggILwDAeBgNVHREEFzAVgRNwcmFrdGlrYW50NEBiZmR0LmR
+ lMIHhBgNVHR8EgdkwgdYwgdOggdCggc2Gb2xkYXA6Ly94NTAwLmJ1bmQuZGUvQ049Q0EgSVZCQi
+ BEZXV0c2NoZSBUZWxla29tIEFHIDA5LE9VPUJ1bmQsTz1QS0ktMS1WZXJ3YWx0dW5nLEM9REU/Y
+ 2VydGlmaWNhdGVSZXZvY2F0aW9uTGlzdIZaaHR0cDovL3g1MDAuYnVuZC5kZS9jZ2ktYmluL3No
+ b3dfYXR0cj9jbj1DQSUyMElWQkIlMjBEZXV0c2NoZSUyMFRlbGVrb20lMjBBRyUyMDA5JmF0dHI
+ 9Y3JsMBYGA1UdIAQPMA0wCwYJKwYBBAG9dAEBMA4GA1UdDwEB/wQEAwIF4DA9BggrBgEFBQcBAQ
+ QxMC8wLQYIKwYBBQUHMAGGIWh0dHA6Ly9vY3NwLml2YmIudGVsZXNlYy5kZS9vY3NwcjANBgkqh
+ kiG9w0BAQUFAAOCAQEAHQYOQQ+gwCfxJSSf4Pcj8P0YIC3n/Vu+LcRjNklM9yfw8u4FrRUE/UCN
+ eU6LAi3YouvpfRvzSN9h5euXH7aZzUAqdi+76TuzVkbV1+g3clczzQlUi1fdBdULiPQ/WnJP/GA
+ BKOBxVkLdeaQr/7RjSXfBAnVBhoq0ClLx+gqWpT4mjP84xbX1QZ7MSxT6jxGd5gj413Di8ZCbt4
+ Qo1qihunTHk7UGbfccBFlnkeiHARee8V84b/DA8uqS7s6Xkg+t8Nn1PTdzyHHUEtHcxuPWEMdYw
+ cVX1isxLGlQwgerHfQEzIGwIsyUTql1POu4/vGRjHS6dWYFtPa5Bz/ri7sraA==
+
+dn: cn=Labude Andreas,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Labude Andreas
+collectiveOrganizationalUnitName: BAKS
+givenName: Andreas
+ivbbLastDeliveryCollective: 091201
+mail: labude@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Labude
+
+dn: cn=Kiermas Sven,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Kiermas Sven
+collectiveOrganizationalUnitName: BAKS
+givenName: Sven
+ivbbLastDeliveryCollective: 091201
+mail: kiermas@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Kiermas
+
+dn: cn=Ferhad Breschkai,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+certificateSerialNumber: 930487365696896
+cn: Ferhad Breschkai
+collectiveOrganizationalUnitName: BFDT
+givenName: Breschkai
+ivbbLastDeliveryCollective: 091201
+mail: ferhad@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Ferhad
+userCertificate;binary:: MIIFITCCBAmgAwIBAgIHA05F+OZ9gDANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MDcxMDA3MDkwN
+ FoXDTEyMDcxMDIzNTk1OVowYzELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDTALBgNVBAsT
+ BEJmRFQxDzANBgNVBAcTBkJlcmxpbjEZMBcGA1UEAxMQRmVyaGFkIEJyZXNjaGthaTEKMAgGA1U
+ EBRMBMTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAIz4vPozZUxeGow+WsTQDCxkuz
+ JQxF/iAedWKOuCuQUT+39QQn8smnywR9nhsAXZZbtgs75wfzZkZxbEUJL5a6XegsRxDcm/xmAOl
+ HvMVu8DhIDbAPlQVoCXjVNjsRbAgJTsTwgRviq+xPZyA5Mkfx/6IlbgdaPV3y+EWzaBTF5MGyk4
+ BQnZ0ptrg/L7t6BlUh1gtUWH3NORoNXmEIp+QRZIlm7gLkwNoZc2NF/WkgWD9mz2rIfPC2wWrjO
+ MybhdvTsqzOe/yvLQvTLZrvwTJ59FGBDjKfuC03zkzOj6a/q2u4BV++7FexhVqmGH5oB6sR2qDE
+ CJR+hSMME3L5sSG2UCAwEAAaOCAdswggHXMG8GA1UdIwRoMGaAFFAEYwCcLtux9VJvS0xWvLdSv
+ qmBoUqkSDBGMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzEcMBoGA1UE
+ AxMTUENBLTEtVmVyd2FsdHVuZy0wOIICC8AwGQYDVR0RBBIwEIEOZmVyaGFkQGJmZHQuZGUwgeE
+ GA1UdHwSB2TCB1jCB06CB0KCBzYZvbGRhcDovL3g1MDAuYnVuZC5kZS9DTj1DQSBJVkJCIERldX
+ RzY2hlIFRlbGVrb20gQUcgMDksT1U9QnVuZCxPPVBLSS0xLVZlcndhbHR1bmcsQz1ERT9jZXJ0a
+ WZpY2F0ZVJldm9jYXRpb25MaXN0hlpodHRwOi8veDUwMC5idW5kLmRlL2NnaS1iaW4vc2hvd19h
+ dHRyP2NuPUNBJTIwSVZCQiUyMERldXRzY2hlJTIwVGVsZWtvbSUyMEFHJTIwMDkmYXR0cj1jcmw
+ wFgYDVR0gBA8wDTALBgkrBgEEAb10AQEwDgYDVR0PAQH/BAQDAgXgMD0GCCsGAQUFBwEBBDEwLz
+ AtBggrBgEFBQcwAYYhaHR0cDovL29jc3AuaXZiYi50ZWxlc2VjLmRlL29jc3ByMA0GCSqGSIb3D
+ QEBBQUAA4IBAQAjkAYqEezJ0AY6Y0w24qH8Ml6q3U/xYD+lkf7c2oAx4pANUoCgNtUGqRMkcwE0
+ HYBnRDuF/jY5S3MoDA0OCaetbhtf3m+6izHU5zM9KXJphuEClDFnmBTfoJJOLogE8HsTNmzw7jb
+ ZZuaTGBqD50L3r3BKC5RF1KE25laW0fz6x8iQdxtYZnC1u68jnwsIwTEnRg9JsQDQPKP3l5inh/
+ 9/ra1kBYA23gWF/9CmGrR4j+DueoYAo0xCA2OggVkKfXYHabE9iMMuBkqch+zS2R8iNfZqudrr3
+ rgsyEQG6nvCA4dtkvENdAl6kFfJh1fTSX3aoEqcODNNrYjQahAoX0iG
+
+dn:: Y249UG9zdHN0ZWxsZSxsPU7DvHJuYmVyZyxvdT1CQU1GLG89QnVuZCxjPURF
+certificateSerialNumber: 555973624351599
+cn: Poststelle
+collectiveOrganizationalUnitName: BAMF
+ivbbLastDeliveryCollective: 091201
+mail: Poststelle@erv.bamf.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Poststelle
+userCertificate;binary:: MIIFYDCCBEigAwIBAgIHAfmnsmJLbzANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MDkwOTE1MDgyM
+ 1oXDTEyMDkwOTIzNTk1OVowgZQxCzAJBgNVBAYTAkRFMQ0wCwYDVQQKEwRCVU5EMQ0wCwYDVQQL
+ EwRCQU1GMRIwEAYDVQQHEwlOdWVybmJlcmcxRzBFBgNVBAMMPkdSUDogUG9zdHN0ZWxsZSBmw7x
+ yIEJ1bmRlc2FtdCBmw7xyIE1pZ3JhdGlvbiB1bmQgRmzDvGNodGxpbmdlMQowCAYDVQQFEwExMI
+ IBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA9Kaf2KD1hviYvhFSo+F3yfVUY4bqPz5zR
+ eHIvjLKlebm8h6RPwv7Z9kSkCussHHlPhwYSh+bTqkTB05RAQ/NGbprMT/z+sfpfmQn541X+vPV
+ T4eiu4zG9qL5zoCL4GI5U/uLuatzrDWqCuWtw/Pc8XuEXQXUe5J41OFzUATqkxg1uSnkDtwGjE+
+ PNVrJd/cgITbSEnLTCcCek90J6m0BgFg40wX6Hf5sFMZHBNdvd0ngGefyAOiMlDbVEe07Ilmhpi
+ qe5S9iZUpr5SGpJysRz4nxMWJlNfSSjTX2APmrdLY8r30RE4Ys4Q5BbRzfzIAGl9KruuvWoUmS+
+ ZB1k+EnQQIDAQABo4IB6DCCAeQwbwYDVR0jBGgwZoAUUARjAJwu27H1Um9LTFa8t1K+qYGhSqRI
+ MEYxCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMRwwGgYDVQQDExNQQ0E
+ tMS1WZXJ3YWx0dW5nLTA4ggILwDAmBgNVHREEHzAdgRtwb3N0c3RlbGxlQGVydi5iYW1mLmJ1bm
+ QuZGUwgeEGA1UdHwSB2TCB1jCB06CB0KCBzYZvbGRhcDovL3g1MDAuYnVuZC5kZS9DTj1DQSBJV
+ kJCIERldXRzY2hlIFRlbGVrb20gQUcgMDksT1U9QnVuZCxPPVBLSS0xLVZlcndhbHR1bmcsQz1E
+ RT9jZXJ0aWZpY2F0ZVJldm9jYXRpb25MaXN0hlpodHRwOi8veDUwMC5idW5kLmRlL2NnaS1iaW4
+ vc2hvd19hdHRyP2NuPUNBJTIwSVZCQiUyMERldXRzY2hlJTIwVGVsZWtvbSUyMEFHJTIwMDkmYX
+ R0cj1jcmwwFgYDVR0gBA8wDTALBgkrBgEEAb10AQEwDgYDVR0PAQH/BAQDAgXgMD0GCCsGAQUFB
+ wEBBDEwLzAtBggrBgEFBQcwAYYhaHR0cDovL29jc3AuaXZiYi50ZWxlc2VjLmRlL29jc3ByMA0G
+ CSqGSIb3DQEBBQUAA4IBAQBnLd7SuXZ/dwrHcsJa0Hz3ShHGvAiZtMfLJdiaawwT/U4qyMFed1m
+ rxDkYtP8R/UPwyyhKRcde8p18OBSoYj1VYlBgmH1U8x5e7jvQcB0NJlOX7OHf3WHuDe9wZA1Bfc
+ YwZxDr8EV5n0VgtktXv3RRO/jcafsYTWCEYgrldebUqoq1MaEOxolMLgpCEsxkyXJdn7izeCAoL
+ C7YRPdNjROmj3hzQjkb63vfqf65vGvxFeXVvge3oWPrUUrkoq6HAnA7YpF/PE/3Xwr5tDN65qVC
+ ej4trqaqUV/Slad7vw9vgupcQhhdnqKSYE30N+gvFf7HxBnc+QvSbfxbX+aQvEfV
+
+dn: cn=Buschermoehle Heinrich,l=init,ou=Service,o=Bund,c=DE
+cn: Buschermoehle Heinrich
+collectiveOrganizationalUnitName: Service
+givenName: Heinrich
+ivbbLastDeliveryCollective: 091201
+mail: Heinrich.Buschermoehle@init.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Buschermoehle
+
+dn: cn=Gabler Mario,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Gabler Mario
+collectiveOrganizationalUnitName: BAKS
+givenName: Mario
+ivbbLastDeliveryCollective: 091201
+mail: gabler@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Gabler
+
+dn: cn=Bohr Manfred,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Bohr Manfred
+collectiveOrganizationalUnitName: BAKS
+givenName: Manfred
+ivbbLastDeliveryCollective: 091201
+mail: bohr@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Bohr
+
+dn: cn=Legenstein Claudia,l=init,ou=Service,o=Bund,c=DE
+certificateSerialNumber: 22063
+cn: Legenstein Claudia
+collectiveOrganizationalUnitName: Service
+givenName: Claudia
+ivbbLastDeliveryCollective: 091201
+mail: Claudia.Legenstein@init.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Legenstein
+userCertificate;binary:: MIIEczCCA1ugAwIBAgICVi8wDQYJKoZIhvcNAQEFBQAwYDELMAk
+ GA1UEBhMCREUxGTAXBgNVBAoTEFBLSS0xLVZlcndhbHR1bmcxDTALBgNVBAsTBEJ1bmQxJzAlBg
+ NVBAMTHkNBIElWQkIgRGV1dHNjaGUgVGVsZWtvbSBBRyAwNzAeFw0wNzEyMDUxMDM2MTRaFw0xM
+ DExMjkyMzU5MDBaMIGDMQswCQYDVQQGEwJERTENMAsGA1UEChMEQlVORDEQMA4GA1UECxMHU0VS
+ VklDRTELMAkGA1UEBxMCREUxKTAnBgkqhkiG9w0BCQEWGkNsYXVkaWEuTGVnZW5zdGVpbkBpbml
+ 0LmRlMRswGQYDVQQDExJDbGF1ZGlhIExlZ2Vuc3RlaW4wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMI
+ GJAoGBAP9qCBWg0GAxqt0lvhz9+QrpU87Im256PCHEB4Up6GozGGkOsVUMh/DLhaTI2S2j15tcg
+ aV57XfgsZdJ5YMfPEw1Sn3glo8S0yW4CHuf9USAJA8J4paSt3Fk+n4iG1BJhvgmCiHINyYZSqxB
+ 8DoQaYjbMJPhjy+LS0PD5ziLaohpAgMBAAGjggGVMIIBkTAOBgNVHQ8BAf8EBAMCBeAwWQYDVR0
+ jBFIwUKFKpEgwRjELMAkGA1UEBhMCREUxGTAXBgNVBAoTEFBLSS0xLVZlcndhbHR1bmcxHDAaBg
+ NVBAMTE1BDQS0xLVZlcndhbHR1bmctMDaCAg+pMCUGA1UdEQQeMByBGkNsYXVkaWEuTGVnZW5zd
+ GVpbkBpbml0LmRlMIHkBgNVHR8EgdwwgdkwdaBzoHGGb2xkYXA6Ly94NTAwLmJ1bmQuZGUvQ049
+ Q0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA3LE9VPUJ1bmQsTz1QS0ktMS1WZXJ3YWx0dW5
+ nLEM9REU/Y2VydGlmaWNhdGVSZXZvY2F0aW9uTGlzdDBgoF6gXIZaaHR0cDovL3g1MDAuYnVuZC
+ 5kZS9jZ2ktYmluL3Nob3dfYXR0cj9jbj1DQSUyMElWQkIlMjBEZXV0c2NoZSUyMFRlbGVrb20lM
+ jBBRyUyMDA3JmF0dHI9Y3JsMBYGA1UdIAQPMA0wCwYJKwYBBAG9dAEBMA0GCSqGSIb3DQEBBQUA
+ A4IBAQBYFGQG50MmnMGno3lcPWgMo9m7eyfGwehgqQKu75QAdVEr4UK7p2wcHtiDnOqCt1hvo05
+ 9F+4by43HH1IF2ydooNnYN9+csu2Try9xozyypzAZVCLgEzdOgP79L+5wxx02Ql33zhv1qJ+nHD
+ 2tMhDwEj1gUoSbALjT91XGKz66NJw/Wk6u/Fs5bPCD23rpbeQO781+kFfLpX6VYYkKnWLZVb8KW
+ KWVD6hHwkm+yo9qT4nbLeXPRmOcqmou9NxAZjXHOIdLGoaQY2RERY9HwGahh1I4Mo32f68NfxWz
+ mHZFzlivZMTkxjsleEBLGztD9ptigbMOanLdVHM4D+8Rbsan
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlYXVmdHJhZ3RlIGRlciBCdW5kZXNyZWdpZXJ1bmcgZsO
+ 8ciBJbmZvcm1hdGlvbnN0ZWNobmlrLGNuPUxpZWdlbnNjaGFmdGVuLG89QnVuZCxjPURF
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGUgZGVyIEJ1bmRlc3JlZ2llcnVuZyBmw7
+ xyIEluZm9ybWF0aW9uc3RlY2huaWs=
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Beauftragter der Bundesregierung
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 10559
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Alt-Moabit 101 D
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Berlin
+labeledURI: http://www.cio.bund.de/cln_094/DE/Home/home_node.html
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10559
+street: Alt-Moabit 101 D
+telephoneNumber: +49 3018 681-1109
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFrYWRlbWllIGRlciBLw7xuc3RlLGNuPUxpZWdlbnNjaGF
+ mdGVuLG89QnVuZCxjPURF
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QWthZGVtaWUgZGVyIEvDvG5zdGU=
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Mittelbare Bundesverwaltung
+ivbbOrganizationType: Kulturverwaltung
+ivbbPostalCode: 10117
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Pariser Platz 4
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Berlin
+labeledURI: http://www.adk.de/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10117
+street: Pariser Platz 4
+telephoneNumber: +49 30 20057-0
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFrYWRlbWllIGRlciBCdW5kZXN3ZWhyIGbDvHIgSW5mb3J
+ tYXRpb24gdW5kIEtvbW11bmlrYXRpb24sY249TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QWthZGVtaWUgZGVyIEJ1bmRlc3dlaHIgZsO8ciBJbmZvcm
+ 1hdGlvbiB1bmQgS29tbXVuaWthdGlvbg==
+ivbbGouvernmentNameShortForm: AIK
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Strausberg
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType:: U3RyZWl0a3LDpGZ0ZQ==
+ivbbPostalCode: 15344
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: UHLDtnR6ZWxlciBDaGF1c3NlZSAyMA==
+ivbbUpperOrganization:: U3RyZWl0a3LDpGZ0ZWFtdA==
+l: Strausberg
+labeledURI: http://www.aik-bundeswehr.de/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 15344
+street:: UHLDtnR6ZWxlciBDaGF1c3NlZSAyMA==
+telephoneNumber: +49 3341 58-1602
+
+dn: ou=Hauptadresse,ou=AOK Bayern,cn=Liegenschaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK Bayern
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation:: TcO8bmNoZW4=
+ivbbOrganizationCategory: Mittelbare Bundesverwaltung
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 81739
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: Q2FybC1XZXJ5LVN0cmHDn2UgMjg=
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l:: TcO8bmNoZW4=
+labeledURI: http://www.aok.de/bayern/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 81739
+street:: Q2FybC1XZXJ5LVN0cmHDn2UgMjg=
+telephoneNumber: +49 89 627 30-0
+
+dn: ou=Hauptadresse,ou=AOK Sachsen-Anhalt,cn=Liegenschaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK Sachsen-Anhalt
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Magdeburg
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 39106
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: TMO8bmVidXJnZXIgU3RyYcOfZSA0
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Magdeburg
+labeledURI: http://www.aok.de/sachsen-anhalt/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 39106
+street:: TMO8bmVidXJnZXIgU3RyYcOfZSA0
+telephoneNumber: +49 391 580-3
+
+dn: ou=Hauptadresse,ou=Ausbildungszentrum AGV Bau Saar GmbH,cn=Liegenschafte
+ n,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: Ausbildungszentrum AGV Bau Saar GmbH
+ivbbGouvernmentNameShortForm: AGV
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation:: U2FhcmJyw7xja2Vu
+ivbbOrganizationCategory:: WnV3ZW5kdW5nc2VtcGbDpG5nZXI=
+ivbbOrganizationType: Unternehmen
+ivbbPostalCode: 66121
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Kolbenholz 			 4 - 6
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l:: U2FhcmJyw7xja2Vu
+labeledURI: http://www.abz-bau-saar.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 66121
+street: Kolbenholz 			 4 - 6
+telephoneNumber: +49 681 98906-0
+
+dn:: Y249UHJha3Rpa2FudCBGw7xuZixsPUJ1bmRlc2dlYmlldCxvdT1CRkRULG89QnVuZCxjPUR
+ F
+certificateSerialNumber: 225320265472720
+cn:: UHJha3Rpa2FudCBGw7xuZg==
+collectiveOrganizationalUnitName: BFDT
+givenName:: RsO8bmY=
+ivbbLastDeliveryCollective: 091201
+mail: praktikant5@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Praktikant
+userCertificate;binary:: MIIFJjCCBA6gAwIBAgIHAMztdmJa0DANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MDcxMDA3MjYxM
+ loXDTEyMDcxMDIzNTk1OVowYzELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDTALBgNVBAsT
+ BEJmRFQxDzANBgNVBAcTBkJlcmxpbjEZMBcGA1UEAwwQUHJha3Rpa2FudCBGw7xuZjEKMAgGA1U
+ EBRMBMTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJd43MgJNDi7LqACuOk8BId8fM
+ aTI9DcaVECJ5OxGFXlNqmLtZ0DFwPOdxg5l9MfvRnC1CRJIApyOZ3KToJujzy+0FlIBEXuXnks+
+ odcgWPVa+/TH7dhnceuuixtI3lCg4Xyil05L0AniWVbxOID8VTUqPkGN/VzKDz8mrLhmSN/1Ijs
+ sdocon71kEToyWcpheNkYskxWb0BwCsOC5JeNjA2pqrnXG6x3wGGXUzVgpZHlZRHn7uW/mtZYLi
+ y1oZ6usrQ7/6XlR8TBvFMi3OTB48QI5b8HoDqyc+tIJ2PLeIxSz0mr3AAsVpoZdalMjV9UTpoXO
+ eru8JzLj0obdSKMskCAwEAAaOCAeAwggHcMG8GA1UdIwRoMGaAFFAEYwCcLtux9VJvS0xWvLdSv
+ qmBoUqkSDBGMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzEcMBoGA1UE
+ AxMTUENBLTEtVmVyd2FsdHVuZy0wOIICC8AwHgYDVR0RBBcwFYETcHJha3Rpa2FudDVAYmZkdC5
+ kZTCB4QYDVR0fBIHZMIHWMIHToIHQoIHNhm9sZGFwOi8veDUwMC5idW5kLmRlL0NOPUNBIElWQk
+ IgRGV1dHNjaGUgVGVsZWtvbSBBRyAwOSxPVT1CdW5kLE89UEtJLTEtVmVyd2FsdHVuZyxDPURFP
+ 2NlcnRpZmljYXRlUmV2b2NhdGlvbkxpc3SGWmh0dHA6Ly94NTAwLmJ1bmQuZGUvY2dpLWJpbi9z
+ aG93X2F0dHI/Y249Q0ElMjBJVkJCJTIwRGV1dHNjaGUlMjBUZWxla29tJTIwQUclMjAwOSZhdHR
+ yPWNybDAWBgNVHSAEDzANMAsGCSsGAQQBvXQBATAOBgNVHQ8BAf8EBAMCBeAwPQYIKwYBBQUHAQ
+ EEMTAvMC0GCCsGAQUFBzABhiFodHRwOi8vb2NzcC5pdmJiLnRlbGVzZWMuZGUvb2NzcHIwDQYJK
+ oZIhvcNAQEFBQADggEBAD6u41n1LIRh5CeqNmBSG9ftovG92oBIm4xuhrlwbnnyAzDTSYwejcbb
+ Svy5DFYuvBJhsJm1AUVXz8v320pJy192KdPgmJsD078us8gt3+B4UjVDogdQ6bqbaFSS95tO2+W
+ HCUYDLCwYU9ZDZxc/s4PVnH/UTOvu8qm/n/EqVetHpjTjH3Bjt9pPevt0O9MoFzHyqeuYUYaHe6
+ OE+5OrrQdzCe7IQb9NVf0Z9DquYtrluSZAJpOh9ZFKpIZ+0FGnAO/Df4csNhhi/R9BamwQ6k9EP
+ u69RwYlmZlDQ+rfcFWHgRW818R75NrlAhmfBW0sJm0CTZ5tRQyJVoyOYfU1IyU=
+
+dn: cn=Dieste Alexandra,l=init,ou=Service,o=Bund,c=DE
+cn: Dieste Alexandra
+collectiveOrganizationalUnitName: Service
+givenName: Alexandra
+ivbbLastDeliveryCollective: 091201
+mail: Alexandra.Dieste@init.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Dieste
+
+dn:: b3U9SGF1cHRzaXR6LG91PUJlYXVmdHJhZ3RlciBkZXIgQnVuZGVzcmVnaWVydW5nIGbDvHI
+ gS3VsdHVyIHVuZCBNZWRpZW4sY249TGllZ2Vuc2NoYWZ0ZW4sbz1CdW5kLGM9REU=
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZs
+ O8ciBLdWx0dXIgdW5kIE1lZGllbg==
+ivbbGouvernmentNameShortForm: BKM
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Bonn
+ivbbOrganizationCategory: Beauftragter der Bundesregierung
+ivbbOrganizationType: Kulturverwaltung
+ivbbPostalCode: 53117
+ivbbRealEstateName: Hauptsitz
+ivbbStreetAdress:: R3JhdXJoZWluZG9yZmVyIFN0cmHDn2UgMTk4
+ivbbTelephoneNumber: +49 228 99 681-3837
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Bonn
+labeledURI: http://www.kulturstaatsminister.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptsitz
+postalCode: 53117
+street:: R3JhdXJoZWluZG9yZmVyIFN0cmHDn2UgMTk4
+
+dn: ou=Hauptadresse,ou=AOK Bremen/Bremerhaven,cn=Liegenschaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK Bremen/Bremerhaven
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Bremen
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 28195
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: QsO8cmdlcm1laXN0ZXItU21pZHQtU3RyYcOfZSAJCSA5NQ==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Bremen
+labeledURI: http://www.aok.de/bremen/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 28195
+street:: QsO8cmdlcm1laXN0ZXItU21pZHQtU3RyYcOfZSAJCSA5NQ==
+telephoneNumber: +49 421 1761-0
+
+dn: ou=Hauptadresse,ou=AOK-Bundesverband,cn=Liegenschaften,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: AOK-Bundesverband
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 10178
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: Um9zZW50aGFsZXIgU3RyYcOfZQkJIDMx
+ivbbUpperOrganization:: QnVuZGVzbWluaXN0ZXJpdW0gZsO8ciBHZXN1bmRoZWl0
+l: Berlin
+labeledURI: http://www.aok-bv.de/index.html
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10178
+street:: Um9zZW50aGFsZXIgU3RyYcOfZQkJIDMx
+telephoneNumber: +49 30 34646-0
+
+dn: cn=Becker Maria,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Becker Maria
+collectiveOrganizationalUnitName: BAKS
+givenName: Maria
+ivbbLastDeliveryCollective: 091201
+mail: becker@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Becker
+
+dn: cn=Bahr Gerhard,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Bahr Gerhard
+collectiveOrganizationalUnitName: BAKS
+givenName: Gerhard
+ivbbLastDeliveryCollective: 091201
+mail: bahr@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Bahr
+
+dn:: b3U9QWthZGVtaWUgZsO8ciBSYXVtZm9yc2NodW5nIHVuZCBMYW5kZXNwbGFudW5nLG91PUF
+ rYWRlbWllIGbDvHIgUmF1bWZvcnNjaHVuZyB1bmQgTGFuZGVzcGxhbnVuZyxjbj1MaWVnZW5zY2
+ hhZnRlbixvPUJ1bmQsYz1ERQ==
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QWthZGVtaWUgZsO8ciBSYXVtZm9yc2NodW5nIHVuZCBMYW
+ 5kZXNwbGFudW5n
+ivbbGouvernmentNameShortForm: ARL
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Hannover
+ivbbOrganizationCategory:: WnV3ZW5kdW5nc2VtcGbDpG5nZXI=
+ivbbOrganizationType: Forschungseinrichtung
+ivbbPostalCode: 30161
+ivbbRealEstateName:: QWthZGVtaWUgZsO8ciBSYXVtZm9yc2NodW5nIHVuZCBMYW5kZXNwbGF
+ udW5n
+ivbbStreetAdress:: SG9oZW56b2xsZXJuc3RyYcOfZSAxMQ==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Hannover
+labeledURI: http://www.arl-net.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou:: QWthZGVtaWUgZsO8ciBSYXVtZm9yc2NodW5nIHVuZCBMYW5kZXNwbGFudW5n
+postalCode: 30161
+street:: SG9oZW56b2xsZXJuc3RyYcOfZSAxMQ==
+telephoneNumber: +49 511 34842-0
+
+dn: cn=Rosin Kevin,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Rosin Kevin
+collectiveOrganizationalUnitName: BAKS
+givenName: Kevin
+ivbbLastDeliveryCollective: 091201
+mail: rosin@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Rosin
+
+dn: cn=Kruk Michael,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Kruk Michael
+collectiveOrganizationalUnitName: BAKS
+givenName: Michael
+ivbbLastDeliveryCollective: 091201
+mail: kruk@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Kruk
+
+dn: ou=Hauptadresse,ou=Antidiskriminierungsstelle des Bundes,cn=Liegenschaft
+ en,o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: Antidiskriminierungsstelle des Bundes
+ivbbGouvernmentNameShortForm: ADS
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 10117
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: R2xpbmthc3RyYcOfZSAyNA==
+ivbbTelephoneNumber: +49 3018 555-1865
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Berlin
+labeledURI: http://www.antidiskriminierungsstelle.de/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10117
+street:: R2xpbmthc3RyYcOfZSAyNA==
+
+dn: cn=POSTSTELLE BONN,l=Bonn,ou=BLE,o=Bund,c=DE
+cn: POSTSTELLE BONN
+collectiveOrganizationalUnitName: BLE
+givenName: BONN
+ivbbLastDeliveryCollective: 091201
+mail: Info@ble.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: POSTSTELLE
+
+dn: cn=Hartmann Kim,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+certificateSerialNumber: 1009726643994894
+cn: Hartmann Kim
+collectiveOrganizationalUnitName: BFDT
+givenName: Kim
+ivbbLastDeliveryCollective: 091201
+mail: hartmann@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Hartmann
+userCertificate;binary:: MIIFHzCCBAegAwIBAgIHA5ZXTe+BDjANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MDcxMDA3MTcwN
+ FoXDTEyMDcxMDIzNTk1OVowXzELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDTALBgNVBAsT
+ BEJmRFQxDzANBgNVBAcTBkJlcmxpbjEVMBMGA1UEAxMMSGFydG1hbm4gS2ltMQowCAYDVQQFEwE
+ xMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArrFp0s0/4aMp4WrPjkzB/l4xlxQxHs
+ ++y9fZh/eivtic+D8C7+WdqNJjHJxCwP+5xNju99eGXnvuHliXMb2rwYTr32Dl54Si0ODy+u9Nz
+ +kwf20S1mtOHE6Xl8/dV3NyP3aoIgv8uvE/tjk5J0XIP4TbFwvS6ShOgIci664vnbV4hPJfBFOI
+ ysuXdCdBPbkpzvXJuNMpmM7X4lXDkD/vzJvyxMkbv80NGCVmbba5V0Ouf31ZC2ftC61gzD5OYYU
+ AfnKmuSf/UgYWR1OsDWtRMzhdNjVuFmpqY5V/0TQSXjRDVVfRSJ3HBFXw15WxGAgQIPamQ7LNWL
+ 87Y30dLc4GrQIDAQABo4IB3TCCAdkwbwYDVR0jBGgwZoAUUARjAJwu27H1Um9LTFa8t1K+qYGhS
+ qRIMEYxCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMRwwGgYDVQQDExNQ
+ Q0EtMS1WZXJ3YWx0dW5nLTA4ggILwDAbBgNVHREEFDASgRBoYXJ0bWFubkBiZmR0LmRlMIHhBgN
+ VHR8EgdkwgdYwgdOggdCggc2Gb2xkYXA6Ly94NTAwLmJ1bmQuZGUvQ049Q0EgSVZCQiBEZXV0c2
+ NoZSBUZWxla29tIEFHIDA5LE9VPUJ1bmQsTz1QS0ktMS1WZXJ3YWx0dW5nLEM9REU/Y2VydGlma
+ WNhdGVSZXZvY2F0aW9uTGlzdIZaaHR0cDovL3g1MDAuYnVuZC5kZS9jZ2ktYmluL3Nob3dfYXR0
+ cj9jbj1DQSUyMElWQkIlMjBEZXV0c2NoZSUyMFRlbGVrb20lMjBBRyUyMDA5JmF0dHI9Y3JsMBY
+ GA1UdIAQPMA0wCwYJKwYBBAG9dAEBMA4GA1UdDwEB/wQEAwIF4DA9BggrBgEFBQcBAQQxMC8wLQ
+ YIKwYBBQUHMAGGIWh0dHA6Ly9vY3NwLml2YmIudGVsZXNlYy5kZS9vY3NwcjANBgkqhkiG9w0BA
+ QUFAAOCAQEARL/DQ+NvAdVnObSllSlZcnXmaTNolep2oUB1OYV4fKl+c85t7YKNVhom5o2DFqCF
+ b1OGQbks2fKZj+JQTLfrcgpxoInsdU/pBhPgfXcTlJ9+lEIa8ae5KKzF2VcglLCWPO9ljG1+KeF
+ +ONg12MisWrV9DbiZVGWQ1lo1jM0bdL0KBWOY7vRkAzwazXO2AGX04s/W7eQjcOYKD041rKeAW+
+ aFE0GRqmAjfDxWcCIbP9RtTbQeLhtBcJnijQHR67xd9sThBN+uoIilh7MEaAZ8hQFB0cgqGqZXh
+ GEuLJqo7ZRA2w/sq6zC9ZdtpZ58LmdkZFVZyxueGlewl0kMUVe9PA==
+
+dn:: Y249SGVyYnN0IFJlbsOpLGw9QmVybGluLG91PUJBS1Msbz1CdW5kLGM9REU=
+cn:: SGVyYnN0IFJlbsOp
+collectiveOrganizationalUnitName: BAKS
+givenName:: UmVuw6k=
+ivbbLastDeliveryCollective: 091201
+mail: herbst@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Herbst
+
+dn: cn=Hohloch Stefan,l=Neutral,ou=BMI,o=Bund,c=DE
+certificateSerialNumber: 94583867071123
+cn: Hohloch Stefan
+collectiveOrganizationalUnitName: BMI
+givenName: Stefan
+ivbbLastDeliveryCollective: 091201
+mail: Stefan.Hohloch@bmi.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Hohloch
+userCertificate;binary:: MIIFGjCCBAKgAwIBAgIGVgYFzFqTMA0GCSqGSIb3DQEBBQUAMGA
+ xCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMQ0wCwYDVQQLEwRCdW5kMS
+ cwJQYDVQQDEx5DQSBJVkJCIERldXRzY2hlIFRlbGVrb20gQUcgMDkwHhcNMDkwNjA1MTAxNDQxW
+ hcNMTIwNjA1MjM1OTU5WjBRMQswCQYDVQQGEwJERTENMAsGA1UEChMEQnVuZDEOMAwGA1UECxMF
+ QkRCT1MxFzAVBgNVBAMTDkhvaGxvY2ggU3RlZmFuMQowCAYDVQQFEwExMIIBIjANBgkqhkiG9w0
+ BAQEFAAOCAQ8AMIIBCgKCAQEAh/euaVNKFWkeyUrDw1fC8hzMH/ABk5aFLmmiLTj/6joJOnw2ny
+ 1a5yL5l7ltlrpuM2szQ3NANU2g0vn6YrIJ75nOSd8zWIzqldiRR7vKdyb+K/TrgPulKuKxssIOC
+ 6a6+wOWmcN2j9GkSFCBJnAOB/519CDNK7mX4BAeUE3U4shUWlbrSx3/3KeSzK70hJ36hdp+b5sJ
+ KTFrK55Qptrs1fWCAtv4zlmoAhKdCWMFEXKIYoz7xnq4HpBRFyRJ+CLoFj6iQ8yU/cKnQnk+cpY
+ +dto/agdIQPOsIRHlwf2tbw7izsclRV0u3764+DbTuvIT/cgu9UGOa4bdpHo0QNAdUwIDAQABo4
+ IB5zCCAeMwbwYDVR0jBGgwZoAUUARjAJwu27H1Um9LTFa8t1K+qYGhSqRIMEYxCzAJBgNVBAYTA
+ kRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMRwwGgYDVQQDExNQQ0EtMS1WZXJ3YWx0dW5n
+ LTA4ggILwDAlBgNVHREEHjAcgRpTdGVmYW4uSG9obG9jaEBibWkuYnVuZC5kZTCB4QYDVR0fBIH
+ ZMIHWMIHToIHQoIHNhm9sZGFwOi8veDUwMC5idW5kLmRlL0NOPUNBIElWQkIgRGV1dHNjaGUgVG
+ VsZWtvbSBBRyAwOSxPVT1CdW5kLE89UEtJLTEtVmVyd2FsdHVuZyxDPURFP2NlcnRpZmljYXRlU
+ mV2b2NhdGlvbkxpc3SGWmh0dHA6Ly94NTAwLmJ1bmQuZGUvY2dpLWJpbi9zaG93X2F0dHI/Y249
+ Q0ElMjBJVkJCJTIwRGV1dHNjaGUlMjBUZWxla29tJTIwQUclMjAwOSZhdHRyPWNybDAWBgNVHSA
+ EDzANMAsGCSsGAQQBvXQBATAOBgNVHQ8BAf8EBAMCBeAwPQYIKwYBBQUHAQEEMTAvMC0GCCsGAQ
+ UFBzABhiFodHRwOi8vb2NzcC5pdmJiLnRlbGVzZWMuZGUvb2NzcHIwDQYJKoZIhvcNAQEFBQADg
+ gEBAEwouzLD0HRZ3ADrOqs04nXxDrll3rODZgpUcFxztCKrniVhtwkFZBtGTdPNjGu+euVVebtm
+ GngrqTVsTW7fsq9Kr091aiccm+4NQz6NOqnZNpGZ/rLxlNJ/czdT+SKW3Eir2xR57yS92CsL0P5
+ wXGA5M5g1tbo7XByOty9fp7YRb4C34qbHO8VPkUvWnp65P23nmzMGygAZNyyqt2pMcn2834zvM0
+ LdgYXqM9wldh7OankzT0IHBm+41o/R0ZJsVsRm87/3YuBTgl+Lahrc5814NFPtTYk1NxvDjsKFk
+ 4F5NoOgOCx4/waAtUCMNL0zYmU/terBypji8cKvucVailE=
+
+dn: ou=Hauptadresse,ou=Berufsbildungszentrum Kleinmachnow,cn=Liegenschaften,
+ o=Bund,c=DE
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm: Berufsbildungszentrum Kleinmachnow
+ivbbGouvernmentNameShortForm: BBiZ-Kleinmachnow
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Kleinmachnow
+ivbbOrganizationCategory: Unmittelbare Bundesverwaltung
+ivbbOrganizationType: Wasser- und Schifffahrtsverwaltung
+ivbbPostalCode: 14532
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Stahnsdorfer Damm 1
+ivbbUpperOrganization: Wasser- und Schifffahrtsdirektion Ost
+l: Kleinmachnow
+labeledURI: http://www.bni-hamburg.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 14532
+street: Stahnsdorfer Damm 1
+telephoneNumber: +49 33203 581-0
+
+dn: cn=Kieper Dennis,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Kieper Dennis
+collectiveOrganizationalUnitName: BAKS
+givenName: Dennis
+ivbbLastDeliveryCollective: 091201
+mail: kieper@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Kieper
+
+dn: cn=Fleischer Heidi,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+certificateSerialNumber: 412762431761889
+cn: Fleischer Heidi
+collectiveOrganizationalUnitName: BFDT
+givenName: Heidi
+ivbbLastDeliveryCollective: 091201
+mail: fleischer@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Fleischer
+userCertificate;binary:: MIIFIzCCBAugAwIBAgIHAXdnvh8t4TANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MDcxMDA3MTExM
+ loXDTEyMDcxMDIzNTk1OVowYjELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDTALBgNVBAsT
+ BEJmRFQxDzANBgNVBAcTBkJlcmxpbjEYMBYGA1UEAxMPRmxlaXNjaGVyIEhlaWRpMQowCAYDVQQ
+ FEwExMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtkcgKIy0G8FwQn8atlLH0oKMIl
+ 8kbKy4BOYLsjBa023w7Gf5p33m0pQu+fKV5ICyTcATC/YXmPW8j8YjbJy6HHnU9Lyl14TtnZ1Vu
+ v9EKT5dRQsdYxiCr9ei28oIKQQUnrQyb+q2iqJsrnW/NA2kR9APUDLALWnSlnbV0AvIuRFuScHo
+ 4nVDDs1ze8K2OtJRUP2cPty+0g79xMedplONyjgvT4gU8bKCRIH5keDYBJYR1Bpfpm3K3tLc8QV
+ J6pPdoO8PtOfP9Z3zsTH44gxI5UGFJYa2I90d+hTgL/kanalxyoHJFiVUiUVMRo1XHhHlgSGk4s
+ wPkjs+IwRsKM1U6wIDAQABo4IB3jCCAdowbwYDVR0jBGgwZoAUUARjAJwu27H1Um9LTFa8t1K+q
+ YGhSqRIMEYxCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMRwwGgYDVQQD
+ ExNQQ0EtMS1WZXJ3YWx0dW5nLTA4ggILwDAcBgNVHREEFTATgRFmbGVpc2NoZXJAYmZkdC5kZTC
+ B4QYDVR0fBIHZMIHWMIHToIHQoIHNhm9sZGFwOi8veDUwMC5idW5kLmRlL0NOPUNBIElWQkIgRG
+ V1dHNjaGUgVGVsZWtvbSBBRyAwOSxPVT1CdW5kLE89UEtJLTEtVmVyd2FsdHVuZyxDPURFP2Nlc
+ nRpZmljYXRlUmV2b2NhdGlvbkxpc3SGWmh0dHA6Ly94NTAwLmJ1bmQuZGUvY2dpLWJpbi9zaG93
+ X2F0dHI/Y249Q0ElMjBJVkJCJTIwRGV1dHNjaGUlMjBUZWxla29tJTIwQUclMjAwOSZhdHRyPWN
+ ybDAWBgNVHSAEDzANMAsGCSsGAQQBvXQBATAOBgNVHQ8BAf8EBAMCBeAwPQYIKwYBBQUHAQEEMT
+ AvMC0GCCsGAQUFBzABhiFodHRwOi8vb2NzcC5pdmJiLnRlbGVzZWMuZGUvb2NzcHIwDQYJKoZIh
+ vcNAQEFBQADggEBAG+79qDO2DFhUvUCK7l8bBxtAwZ8yhikAxdem4QEljPHbIQWeJUwaKhwsLFR
+ Ooit9rQJiFiLSFAs42h50XwDRHRDCW99atbqMX1RB7TUwgzpaLf3/Aiwx+2trfpAG7bUTE17Kgt
+ 1BhuEIw2xf7RxjroH50r5Cysgi6A9ewIJDmIYOEeuENxCjb+jMDJXU13MSuHxMU4rX90DPVuzb8
+ AIx2ikFKr4jrNvjX1SuKAPUa3Bezm5aGD9KOfRrZqdAlPgBrE0QTyB8nZqU1vvIxilT3jUd/Uo0
+ 0H+nTTTC/7uMYx0+X7OBUvU942UfTY7s/Ve0PBAtBDDooUC4VmRs/zpBlo=
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUFPSyBTYWNoc2VuL1Row7xyaW5nZW4sY249TGllZ2Vuc2N
+ oYWZ0ZW4sbz1CdW5kLGM9REU=
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QU9LIFNhY2hzZW4vVGjDvHJpbmdlbg==
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Dresden
+ivbbOrganizationCategory: Sonstige
+ivbbOrganizationType:: U296aWFsdmVyc2ljaGVydW5nc3Ryw6RnZXI=
+ivbbPostalCode: 01067
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress: Sternplatz	 7
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Dresden
+labeledURI: http://www.aok.de/aokplus/
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 01067
+street: Sternplatz	 7
+telephoneNumber: +49 1802 471000
+
+dn: cn=Weissflog Andrea,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Weissflog Andrea
+collectiveOrganizationalUnitName: BAKS
+givenName: Andrea
+ivbbLastDeliveryCollective: 091201
+mail: weissflog@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Weissflog
+
+dn:: Y249SGF3bGl0c2Noa2EgQmrDtnJuLGw9QmVybGluLG91PUJBS1Msbz1CdW5kLGM9REU=
+cn:: SGF3bGl0c2Noa2EgQmrDtnJu
+collectiveOrganizationalUnitName: BAKS
+givenName:: QmrDtnJu
+ivbbLastDeliveryCollective: 091201
+mail: hawlitschka@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Hawlitschka
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlYXVmdHJhZ3RlciBkZXIgQnVuZGVzcmVnaWVydW5nIGb
+ DvHIgZGllIE5hY2hyaWNodGVuZGllbnN0ZSxjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ
+ ==
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVhdWZ0cmFndGVyIGRlciBCdW5kZXNyZWdpZXJ1bmcgZs
+ O8ciBkaWUgTmFjaHJpY2h0ZW5kaWVuc3Rl
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Berlin
+ivbbOrganizationCategory: Beauftragter der Bundesregierung
+ivbbOrganizationType: Sonstige
+ivbbPostalCode: 10557
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: V2lsbHktQnJhbmR0LVN0cmHDn2UgMQ==
+ivbbTelephoneNumber: +49 3018 400-2070
+ivbbUpperOrganization: Bundeskanzleramt
+l: Berlin
+labeledURI: http://www.bundesregierung.de/Content/DE/Artikel/2009/09/2009-09
+ -30-aufgaben.html
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 10557
+street:: V2lsbHktQnJhbmR0LVN0cmHDn2UgMQ==
+
+dn: cn=Praktikant Drei,l=Bundesgebiet,ou=BFDT,o=Bund,c=DE
+certificateSerialNumber: 533966176024425
+cn: Praktikant Drei
+collectiveOrganizationalUnitName: BFDT
+givenName: Drei
+ivbbLastDeliveryCollective: 091201
+mail: praktikant3@bfdt.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Praktikant
+userCertificate;binary:: MIIFJTCCBA2gAwIBAgIHAeWjsD53aTANBgkqhkiG9w0BAQUFADB
+ gMQswCQYDVQQGEwJERTEZMBcGA1UEChMQUEtJLTEtVmVyd2FsdHVuZzENMAsGA1UECxMEQnVuZD
+ EnMCUGA1UEAxMeQ0EgSVZCQiBEZXV0c2NoZSBUZWxla29tIEFHIDA5MB4XDTA5MDcxMDA3MjMzO
+ FoXDTEyMDcxMDIzNTk1OVowYjELMAkGA1UEBhMCREUxDTALBgNVBAoTBEJ1bmQxDTALBgNVBAsT
+ BEJmRFQxDzANBgNVBAcTBkJlcmxpbjEYMBYGA1UEAxMPUHJha3Rpa2FudCBEcmVpMQowCAYDVQQ
+ FEwExMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvQ/6Ds03LB+06IOlUXG2YEg6zP
+ 1lzmSQuSWtyqCRECyb3SkapRBKccznKAtF8eGaVTaBa4x+wCV19MrOjWLBrpBGG34DDh01bqBkG
+ oiynF78Xt4AEiUa2A5MuXAjDh6/5/2kroL5EfC3SeN1XucMdO3pNypZcylXuZvCrn4gwy7ON3ZT
+ MXq7SABpSfG4VJAI9kuAjDtGMc+oUrTAS1u+XmnpKqWoQpLn1zds6VUblGwKuK3GxkHbbktn263
+ aQIFxstIha0Pok+oVhC14IMA9jwaSlQkConikuihGrtSsVvkcaRZAtNZnUFGBG6v4n3HQmKUHYp
+ a381BdMKUtKJICqQIDAQABo4IB4DCCAdwwbwYDVR0jBGgwZoAUUARjAJwu27H1Um9LTFa8t1K+q
+ YGhSqRIMEYxCzAJBgNVBAYTAkRFMRkwFwYDVQQKExBQS0ktMS1WZXJ3YWx0dW5nMRwwGgYDVQQD
+ ExNQQ0EtMS1WZXJ3YWx0dW5nLTA4ggILwDAeBgNVHREEFzAVgRNwcmFrdGlrYW50M0BiZmR0LmR
+ lMIHhBgNVHR8EgdkwgdYwgdOggdCggc2Gb2xkYXA6Ly94NTAwLmJ1bmQuZGUvQ049Q0EgSVZCQi
+ BEZXV0c2NoZSBUZWxla29tIEFHIDA5LE9VPUJ1bmQsTz1QS0ktMS1WZXJ3YWx0dW5nLEM9REU/Y
+ 2VydGlmaWNhdGVSZXZvY2F0aW9uTGlzdIZaaHR0cDovL3g1MDAuYnVuZC5kZS9jZ2ktYmluL3No
+ b3dfYXR0cj9jbj1DQSUyMElWQkIlMjBEZXV0c2NoZSUyMFRlbGVrb20lMjBBRyUyMDA5JmF0dHI
+ 9Y3JsMBYGA1UdIAQPMA0wCwYJKwYBBAG9dAEBMA4GA1UdDwEB/wQEAwIF4DA9BggrBgEFBQcBAQ
+ QxMC8wLQYIKwYBBQUHMAGGIWh0dHA6Ly9vY3NwLml2YmIudGVsZXNlYy5kZS9vY3NwcjANBgkqh
+ kiG9w0BAQUFAAOCAQEAcYZWXrGC0RFmYMvQC5+wmwT1+98agGuTRdPFxrHLksJFyDnnuxmKyqQq
+ DDRMyfwuYKhxgWMioNsRaxbqhQKrEkOB9NLsVdnLgV4S0RrECEhNyqC42PVM+phVT984SWEAIXg
+ L/HlRY7vWLeJkakvh7EOo3kEyqz0iC+TnITOBrJwA1Nx2tnGFxK2n9ELC+OJzp+Nd8CYIFKXZZ1
+ 5PHqhdu54fu8Pa+8FTOxARLf+FyGlEo0eaGAKI+kupNdWyhumY8FDPSefaX+5kI/BZI67PEnjwB
+ jwidSeuWgBekC11zvSG/J/sBZZLJ78OnL11Qnp3xgPeIqk3ogmUYUDab+sX7g==
+
+dn: cn=Peters Frank,l=Berlin,ou=BAKS,o=Bund,c=DE
+cn: Peters Frank
+collectiveOrganizationalUnitName: BAKS
+givenName: Frank
+ivbbLastDeliveryCollective: 091201
+mail: peters@baks.bund.de
+objectClass: ivbbPerson
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+sn: Peters
+
+dn:: b3U9SGF1cHRhZHJlc3NlLG91PUJlcm5oYXJkLU5vY2h0LUluc3RpdHV0IGbDvHIgVHJvcGV
+ ubWVkaXppbixjbj1MaWVnZW5zY2hhZnRlbixvPUJ1bmQsYz1ERQ==
+ivbbFacsimileTelephoneNumber: -3445
+ivbbGouvernmentNameLongForm:: QmVybmhhcmQtTm9jaHQtSW5zdGl0dXQgZsO8ciBUcm9wZW
+ 5tZWRpemlu
+ivbbGouvernmentNameShortForm: BNI
+ivbbLiegenschaftsNummer: 05.05.2010
+ivbbLocation: Hamburg
+ivbbOrganizationCategory:: WnV3ZW5kdW5nc2VtcGbDpG5nZXI=
+ivbbOrganizationType: Forschungseinrichtung
+ivbbPostalCode: 20359
+ivbbRealEstateName: Hauptadresse
+ivbbStreetAdress:: QmVybmhhcmQtTm9jaHQtU3RyYcOfZSA3NA==
+ivbbUpperOrganization: Bundesrepublik Deutschland
+l: Hamburg
+labeledURI: http://www.bni-hamburg.de
+objectClass: ivbbRealEstate
+objectClass: top
+objectClass: organizationalUnit
+ou: Hauptadresse
+postalCode: 20359
+street:: QmVybmhhcmQtTm9jaHQtU3RyYcOfZSA3NA==
+telephoneNumber: +49 40 42818-0
+

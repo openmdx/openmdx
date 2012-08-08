@@ -34,7 +34,7 @@ import java.util.Set;
  * But, you might want that loophole, so this class is kept simple.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.2 $ $Date: 2009/09/14 11:50:48 $
+ * @version $Revision: 1.3 $ $Date: 2010/06/02 13:44:25 $
  * 
  * @author Daniel Rall
  * @author Stephen Colebourne
@@ -124,6 +124,7 @@ abstract class AbstractMapDecorator implements Map {
         return map.values();
     }
    
+    @Override
     public boolean equals(Object object) {
         if (object == this) {
             return true;
@@ -131,10 +132,12 @@ abstract class AbstractMapDecorator implements Map {
         return map.equals(object);
     }
 
+    @Override
     public int hashCode() {
         return map.hashCode();
     }
 
+    @Override
     public String toString() {
         return map.toString();
     }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HomeHandler.java,v 1.5 2010/04/16 12:36:39 hburger Exp $
+ * Name:        $Id: HomeHandler.java,v 1.6 2010/06/04 22:45:00 hburger Exp $
  * Description: Home Handler
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 12:36:39 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -109,7 +109,8 @@ implements HomeHandle
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
-    public Object invoke(
+    @Override
+	public Object invoke(
         Object proxy, 
         Method method, 
         Object[] arguments
@@ -175,7 +176,8 @@ implements HomeHandle
      * 
      * @throws RemoteException 
      */
-    public HomeHandle getHomeHandle(
+    @Override
+	public HomeHandle getHomeHandle(
     ) throws RemoteException {
         return this;
     }

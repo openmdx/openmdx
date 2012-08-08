@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMI2ReferenceResolver.java,v 1.5 2010/04/13 18:07:28 wfro Exp $
+ * Name:        $Id: XMI2ReferenceResolver.java,v 1.7 2010/06/18 13:09:12 hburger Exp $
  * Description: XMI2 Reference Resolver
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/13 18:07:28 $
+ * Date:        $Date: 2010/06/18 13:09:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,6 +61,7 @@ import java.util.Stack;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.openmdx.application.mof.externalizer.xmi.uml1.UML1AssociationEnd;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1Comment;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1Generalization;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1TagDefinition;
@@ -82,9 +83,11 @@ public class XMI2ReferenceResolver
         Map pathMap,
         PrintStream infos,
         PrintStream warnings,
-        PrintStream errors
+        PrintStream errors, 
+        Map<String, UML1AssociationEnd> umlAssociationEnds
     ) {
         this.xmiReferences = xmiReferences;
+        this.umlAssociationEnds = umlAssociationEnds;
         this.scope = scope;
         this.pathMap = pathMap;
         this.infos = infos;
@@ -121,7 +124,12 @@ public class XMI2ReferenceResolver
         return null;
     }
 
-    //---------------------------------------------------------------------------
+	//---------------------------------------------------------------------------
+	public UML1AssociationEnd lookupAssociationEnd(String xmiId) {
+		return this.umlAssociationEnds == null ? null : this.umlAssociationEnds.get(xmiId);
+	}
+
+	//---------------------------------------------------------------------------
     public String lookupProject(
         String packageName
     ) {
@@ -132,6 +140,7 @@ public class XMI2ReferenceResolver
     public void startDocument(
     ) throws SAXException {
         this.hasErrors = false;
+        this.elementStack = this.umlAssociationEnds == null ? null : new Stack();
     }
 
     //---------------------------------------------------------------------------
@@ -143,12 +152,16 @@ public class XMI2ReferenceResolver
     }
 
     //---------------------------------------------------------------------------
-//    private void info(
-//        String message
-//    ) {
-//        this.errors.println("INFO:   " + message);
-//    }
-//    
+    private String getScopeAsQualifiedName(
+    ) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < this.scope.size(); i++) {
+            if(i > 0) sb.append("::");
+            sb.append(this.scope.get(i));
+        }
+        return sb.toString();
+    }
+
     //---------------------------------------------------------------------------
     public boolean hasErrors(
     ) {
@@ -162,7 +175,63 @@ public class XMI2ReferenceResolver
         String qName,
         Attributes atts
     ) {
-        if(
+    	Object element = DUMMY;
+    	if(
+    		("ownedEnd".equals(qName) || "ownedAttribute".equals(qName)) && 
+    		(atts.getValue("association") != null || atts.getValue("aggregation") != null)
+    	) {
+    		if(this.umlAssociationEnds != null) {
+    			UML1AssociationEnd umlAssociationEnd = new UML1AssociationEnd(
+                    atts.getValue("xmi:id"),
+                    atts.getValue("name"),
+                    this.getScopeAsQualifiedName() + "::" + atts.getValue("name"),
+                    XMI20Parser.toUMLVisibilityKind(atts.getValue("visibility")),
+                    false,
+                    atts.getValue("type")
+                );
+    			element = umlAssociationEnd;
+    			this.umlAssociationEnds.put(umlAssociationEnd.getId(), umlAssociationEnd);
+    		}
+    	} else if("ownedAttribute".equals(qName)) { 
+    		if(this.elementStack != null) {
+	    		//
+	    		// Might be a reference, might be a primitive type
+	    		//
+				element = new UML1AssociationEnd(
+	                atts.getValue("xmi:id"),
+	                atts.getValue("name"),
+	                this.getScopeAsQualifiedName() + "::" + atts.getValue("name"),
+	                XMI20Parser.toUMLVisibilityKind(atts.getValue("visibility")),
+	                false,
+	                atts.getValue("type")
+	            );
+    		}
+    	} else if("type".equals(qName) && atts.getValue("href") != null) { 
+    		if(this.elementStack != null) {
+    			Object parent = this.elementStack.peek();
+    			if(parent instanceof UML1AssociationEnd) {
+    				UML1AssociationEnd umlAssociationEnd = (UML1AssociationEnd) parent;
+    				String href = atts.getValue("href");
+    				int h = href.indexOf('#');
+    				int q = href.indexOf('?');
+    				if(q > h && h >= 0) {
+    					umlAssociationEnd.setParticipantId(
+							href.substring(h + 1, q)
+    					);
+    				}
+    			}
+    		}
+    	} else if("association".equals(qName)) {
+    		if(this.elementStack != null) {
+    			Object parent = this.elementStack.peek();
+    			if(parent instanceof UML1AssociationEnd) {
+    				UML1AssociationEnd umlAssociationEnd = (UML1AssociationEnd) parent;
+        			this.umlAssociationEnds.put(umlAssociationEnd.getId(), umlAssociationEnd);
+    			}
+    		}
+    	} else if("uml:Package".equals(qName)) {
+            scope.push(atts.getValue("name"));
+    	} else if(
             "ownedMember".equals(qName) ||
             "packagedElement".equals(qName)
         ) {
@@ -186,7 +255,7 @@ public class XMI2ReferenceResolver
         }
         // UML package reference
         else if(
-            "references".equals(qName) &&
+        	("importedElement".equals(qName) || "references".equals(qName)) &&
             ("uml:Package".equals(atts.getValue("xmi:type")) || "uml:Model".equals(atts.getValue("xmi:type"))) 
         ) {
             URI href = null;
@@ -235,7 +304,8 @@ public class XMI2ReferenceResolver
                                 this.pathMap,
                                 this.infos,
                                 this.warnings,
-                                this.errors
+                                this.errors, 
+                                this.umlAssociationEnds
                             );
                         nestedReferenceResolver.parse(packageURI);
                     }
@@ -245,7 +315,10 @@ public class XMI2ReferenceResolver
                     this.error("Can not process nested model " + atts.getValue("href") + ". Reason=" + e.getMessage());
                 }
             }
-        }
+       }
+    	if(this.elementStack != null) {
+    		this.elementStack.push(element);
+    	}
     }
 
     //---------------------------------------------------------------------------
@@ -256,9 +329,13 @@ public class XMI2ReferenceResolver
     ) {
         if(
             "ownedMember".equals(qName) || 
-            "packagedElement".equals(qName)
+            "packagedElement".equals(qName) ||
+            "uml:Package".equals(qName)
         ) {
             scope.pop();
+        }
+        if(this.elementStack != null) {
+        	this.elementStack.pop();
         }
     }
 
@@ -342,6 +419,7 @@ public class XMI2ReferenceResolver
     }
 
     //---------------------------------------------------------------------------
+    @Override
     public String toString(
     ) {
         return
@@ -359,10 +437,13 @@ public class XMI2ReferenceResolver
     private String uri = null;
     private final Stack scope;
     private final Map xmiReferences;
+    private final Map<String, UML1AssociationEnd> umlAssociationEnds;
     private final Map pathMap;
     private final Map projects;
     private boolean hasErrors = false;
-
+    private Stack elementStack = null;
+    private final static Object DUMMY = new Object();
+    
 }
 
 //--- End of File -----------------------------------------------------------

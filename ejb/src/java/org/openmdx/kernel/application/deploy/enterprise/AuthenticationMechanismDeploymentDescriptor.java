@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AuthenticationMechanismDeploymentDescriptor.java,v 1.2 2009/09/07 13:03:03 hburger Exp $
+ * Name:        $Id: AuthenticationMechanismDeploymentDescriptor.java,v 1.3 2010/06/04 22:44:59 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 13:03:03 $
+ * Date:        $Date: 2010/06/04 22:44:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,7 +63,8 @@ public class AuthenticationMechanismDeploymentDescriptor
     super();
   }
 
-  public void parseXml(
+  @Override
+public void parseXml(
     Element element,
     Report report
   ) {
@@ -71,14 +72,16 @@ public class AuthenticationMechanismDeploymentDescriptor
     this.credentialInterface = getElementContent(getUniqueChild(element, "credential-interface", report));
   }
 
-  public void parseOpenMdxXml(
+  @Override
+public void parseOpenMdxXml(
     Element element,
     Report report
   ) {
       //
   }
 
-  public void verify(
+  @Override
+public void verify(
     Report report
   ) {
     super.verify(report);

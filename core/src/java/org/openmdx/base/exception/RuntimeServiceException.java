@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDXx, http://www.openmdx.org/
- * Name:        $Id: RuntimeServiceException.java,v 1.18 2009/06/05 15:24:27 hburger Exp $
+ * Name:        $Id: RuntimeServiceException.java,v 1.19 2010/06/02 13:44:33 hburger Exp $
  * Description: Exception Framework 
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/05 15:24:27 $
+ * Date:        $Date: 2010/06/02 13:44:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -169,6 +169,7 @@ public final class RuntimeServiceException
      *
      * @return Throwable  The exception cause.
      */
+    @Override
     public final BasicException getCause(
     ){
         return (BasicException) super.getCause();

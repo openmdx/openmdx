@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Exporter.java,v 1.8 2010/01/06 18:17:44 hburger Exp $
+ * Name:        $Id: Exporter.java,v 1.9 2010/06/09 16:18:15 hburger Exp $
  * Description: XML Exporter
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/06 18:17:44 $
+ * Date:        $Date: 2010/06/09 16:18:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,6 +58,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -166,9 +167,8 @@ public class Exporter {
     /**
      * These attributes shall not be exported
      */
-    final static Collection<String> EXCLUDED_ATTRIBUTES = Arrays.asList(
-        SystemAttributes.OBJECT_INSTANCE_OF, 
-        SystemAttributes.CONTEXT_CAPABLE_CONTEXT
+    final static Collection<String> EXCLUDED_ATTRIBUTES = Collections.singleton(
+        SystemAttributes.OBJECT_INSTANCE_OF
     );
 
     /**

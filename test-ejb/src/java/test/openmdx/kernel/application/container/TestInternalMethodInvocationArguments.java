@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestInternalMethodInvocationArguments.java,v 1.4 2010/04/09 09:40:33 hburger Exp $
+ * Name:        $Id: TestInternalMethodInvocationArguments.java,v 1.5 2010/06/04 22:39:42 hburger Exp $
  * Description: Test Internal Method Invocation Arguments
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/09 09:40:33 $
+ * Date:        $Date: 2010/06/04 22:39:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -108,7 +108,8 @@ public class TestInternalMethodInvocationArguments extends TestCase {
      * Sets up the fixture, for example, open a network connection.
      * This method is called before a test is executed.
      */
-    protected void setUp(
+    @Override
+	protected void setUp(
     ) throws Exception {
         this.map = new TreeMap<String,Object>();
         this.map.put("integer", Integer.valueOf(5));
@@ -123,7 +124,8 @@ public class TestInternalMethodInvocationArguments extends TestCase {
         this.blob = new ByteString(this.bytes);
     }
 
-    protected void tearDown(
+    @Override
+	protected void tearDown(
     ) throws Exception {
         this.map = null;
     }

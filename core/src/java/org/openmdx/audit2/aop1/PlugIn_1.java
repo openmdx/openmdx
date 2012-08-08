@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.3 2009/12/09 14:09:23 hburger Exp $
+ * Name:        $Id: PlugIn_1.java,v 1.4 2010/06/01 08:08:23 hburger Exp $
  * Description: Audit Plug-in
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/09 14:09:23 $
+ * Date:        $Date: 2010/06/01 08:08:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -110,7 +110,7 @@ public class PlugIn_1 implements PlugIn_1_0 {
         DataObject_1_0 dataObject = view.objGetDelegate();
         if(dataObject.jdoIsPersistent()) {
             Path objectId = view.jdoGetObjectId();
-            Configuration configuration = getConfiguration(dataObject);
+            Configuration configuration = this.getConfiguration(dataObject);
             if(objectId.startsWith(configuration.getAuditSegmentId())) {
                 String type = objectId.get(objectId.size() - 2);
                 if(this.configuration.isAudit1Persistence()) {

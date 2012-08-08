@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractPersistence_1.java,v 1.3 2010/01/10 23:05:37 wfro Exp $
+ * Name:        $Id: AbstractPersistence_1.java,v 1.4 2010/06/02 13:40:09 hburger Exp $
  * Description: Abstract persistence layer
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/10 23:05:37 $
+ * Date:        $Date: 2010/06/02 13:40:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -84,6 +84,7 @@ abstract public class AbstractPersistence_1 extends OperationAwareLayer_1 {
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0#activate(short, org.openmdx.compatibility.base.application.configuration.Configuration, org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0)
      */
+    @Override
     public void activate(
         short id, 
         Configuration configuration,

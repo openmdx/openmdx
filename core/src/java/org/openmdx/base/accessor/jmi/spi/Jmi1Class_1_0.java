@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1Class_1_0.java,v 1.5 2010/04/19 11:21:52 hburger Exp $
- * Description: Jmi1Class 
- * Revision:    $Revision: 1.5 $
+ * Name:        $Id: Jmi1Class_1_0.java,v 1.7 2010/08/19 15:15:32 wfro Exp $
+ * Description: Jmi1Class_1_0 
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/19 11:21:52 $
+ * Date:        $Date: 2010/08/19 15:15:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -86,13 +86,6 @@ public interface Jmi1Class_1_0 extends RefClass {
      * @return this Jmi1Class' marshaller
      */
     StandardMarshaller getMarshaller();
-    
-    /**
-     * Retrieve the outermost package
-     * 
-     * @return the outermost package
-     */
-    Jmi1Package_1_0 refOutermostPackage();
     
     /**
      * Asserts that the associated persistence manager is open

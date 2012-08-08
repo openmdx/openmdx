@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ConnectionAdapter.java,v 1.30 2010/04/28 12:53:53 hburger Exp $
+ * Name:        $Id: ConnectionAdapter.java,v 1.33 2010/06/02 16:14:39 hburger Exp $
  * Description: REST Connection Adapter
- * Revision:    $Revision: 1.30 $
+ * Revision:    $Revision: 1.33 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/28 12:53:53 $
+ * Date:        $Date: 2010/06/02 16:14:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,14 +67,16 @@ import javax.resource.spi.LocalTransactionException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
-import org.openmdx.base.accessor.rest.spi.VirtualObjects_2_0;
+import org.openmdx.base.accessor.rest.spi.CacheAccessor_2_0;
+import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
+import org.openmdx.base.accessor.rest.spi.ManagedConnectionCache_2_0;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.AbstractInteraction;
 import org.openmdx.base.resource.spi.LocalTransactions;
 import org.openmdx.base.resource.spi.Port;
-import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.UserTransactions;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
@@ -86,7 +88,7 @@ import org.openmdx.kernel.log.SysLog;
  */
 public class ConnectionAdapter 
     extends AbstractConnection 
-    implements VirtualObjects_2_0
+    implements CacheAccessor_2_0
 {
 
 	/**
@@ -111,10 +113,10 @@ public class ConnectionAdapter
                 if(metaData != null && metaData.supportsLocalTransactionDemarcation()) {
                     this.transactionManager = null;
                     this.transactionProxy = LocalTransactions.getLocalTransaction(
-                        getLocalTransaction()
+                        this.getLocalTransaction()
                     );
                 } else {
-                    this.transactionManager = getTransactionManager(); 
+                    this.transactionManager = ConnectionAdapter.getTransactionManager(); 
                     this.transactionProxy = this.transactionManager == null ? LocalTransactions.getLocalTransaction(
                         UserTransactions.getUserTransaction()
                     ) : LocalTransactions.getLocalTransaction(
@@ -196,7 +198,7 @@ public class ConnectionAdapter
             return this.transactionManager.suspend();
         } catch(Exception exception) {
             throw new LocalTransactionException(
-                "Transaction rollback failure",
+                "Transaction could not be suspended",
                 exception
             );
         } else {
@@ -218,7 +220,7 @@ public class ConnectionAdapter
             this.transactionManager.resume(transaction);
         } catch(Exception exception) {
             throw new LocalTransactionException(
-                "Transaction rollback failure",
+                "Transaction could not be resumed",
                 exception
             );
         }
@@ -253,6 +255,7 @@ public class ConnectionAdapter
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#close()
      */
+    @Override
     public void close(
     ) throws ResourceException {
         super.close();
@@ -280,8 +283,8 @@ public class ConnectionAdapter
      */
     public Interaction createInteraction(
     ) throws ResourceException {
-        assertOpen();
-        return new InteractionAdapter(getDelegate());
+        this.assertOpen();
+        return new InteractionAdapter(this.getDelegate());
     }
 
     /* (non-Javadoc)
@@ -297,54 +300,44 @@ public class ConnectionAdapter
 
     
     //------------------------------------------------------------------------
-    // Implements VirtualObjects_2_0
+    // Implements CacheProvider_2_0
     //------------------------------------------------------------------------
 
-    /**
-     * Retrieve the virtual objects delegate
-     * 
-     * @return the virtual objects delegate
-     * 
-     * @exception ResourceException
-     */
-    private VirtualObjects_2_0 getVirtualObjects(
-    ) throws ResourceException {
-        Interaction delegate = getDelegate();
-        if(delegate instanceof VirtualObjects_2_0) {
-            return (VirtualObjects_2_0) delegate;
-        } else {
-            throw ResourceExceptions.initHolder(
-                new ResourceException(
-                    "The delegate interaction does not support virtual objects",
-                    BasicException.newEmbeddedExceptionStack(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.NOT_SUPPORTED,
-                        new BasicException.Parameter("expected", VirtualObjects_2_0.class.getName()),
-                        new BasicException.Parameter("actual", delegate.getClass().getName())
-                    )
-                )
+    private CacheAccessor_2_0 getCacheAccessor(
+    ) throws ServiceException {
+        try {
+            Interaction delegate = this.getDelegate();
+            if(delegate instanceof CacheAccessor_2_0) {
+                return (CacheAccessor_2_0)delegate;
+            }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "The delegate interaction is not a cache accessor",
+                new BasicException.Parameter("expected", CacheAccessor_2_0.class.getName()),
+                new BasicException.Parameter("actual", delegate.getClass().getName())
             );
+        } catch (ResourceException exception) {
+            throw new ServiceException(exception);
         }
     }
-    
+
     /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.rest.spi.VirtualObjects_2_0#sawSeed(org.openmdx.base.naming.Path, java.lang.String)
+     * @see org.openmdx.base.accessor.rest.spi.CacheAccessor_2_0#getDataStoreCache()
      */
-    public void putSeed(
-        Path xri, 
-        String objectClass
-    ) throws ResourceException {
-        getVirtualObjects().putSeed(xri, objectClass);
+//  @Override
+    public DataStoreCache_2_0 getDataStoreCache(
+    ) throws ServiceException {
+        return this.getCacheAccessor().getDataStoreCache();
     }
-    
+
     /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.rest.spi.VirtualObjects_2_0#isVirtual(org.openmdx.base.naming.Path)
+     * @see org.openmdx.base.accessor.rest.spi.CacheProvider_2_0#getCache()
      */
-    @Override
-    public boolean isVirtual(
-        Path xri
-    ) throws ResourceException {
-        return getVirtualObjects().isVirtual(xri);
+//  @Override
+    public ManagedConnectionCache_2_0 getManagedConnectionCache(
+    ) throws ServiceException {
+        return this.getCacheAccessor().getManagedConnectionCache();
     }
 
     
@@ -374,7 +367,7 @@ public class ConnectionAdapter
                 ConnectionAdapter.this.interaction.execute(
                     InteractionSpecs.getRestInteractionSpecs(true).CREATE,
                     Object_2Facade.newInstance(
-                        TRANSACTION_OBJECTS,
+                        ConnectionAdapter.TRANSACTION_OBJECTS,
                         "org:openmdx:kernel:UnitOfWork"
                     ).getDelegate()
                 )
@@ -411,7 +404,7 @@ public class ConnectionAdapter
                 throw new LocalTransactionException("There is no active transaction");
             }
             try {
-                interaction.execute(
+                ConnectionAdapter.this.interaction.execute(
                     InteractionSpecs.getRestInteractionSpecs(true).DELETE,
                     this.currentTransaction
                 );
@@ -452,25 +445,26 @@ public class ConnectionAdapter
         /* (non-Javadoc)
          * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record)
          */
+        @Override
         public Record execute(
             InteractionSpec ispec, 
             Record input
         ) throws ResourceException {
-            assertOpened();
+            this.assertOpened();
             switch(ConnectionAdapter.this.transactionAttribute){
                 case REQUIRES_NEW:
-                    Transaction suspendedTransaction = suspendCurrentTransaction();
+                    Transaction suspendedTransaction = ConnectionAdapter.this.suspendCurrentTransaction();
                     try {
-                        transactionProxy.begin();
+                        ConnectionAdapter.this.transactionProxy.begin();
                         try {
                             Record reply = this.delegate.execute(ispec, input);
-                            transactionProxy.commit();
+                            ConnectionAdapter.this.transactionProxy.commit();
                             return reply;
                         } catch (ResourceException exception) {
-                            transactionProxy.commit();
+                            ConnectionAdapter.this.transactionProxy.commit();
                             throw exception;
                         } catch (RuntimeException exception) {
-                            transactionProxy.rollback();
+                            ConnectionAdapter.this.transactionProxy.rollback();
                             throw exception;
                         }
                     } finally {
@@ -490,25 +484,25 @@ public class ConnectionAdapter
             Record input,
             Record output
         ) throws ResourceException {
-            assertOpened();
+            this.assertOpened();
             switch(ConnectionAdapter.this.transactionAttribute){
                 case REQUIRES_NEW:
-                    Transaction suspendedTransaction = suspendCurrentTransaction();
+                    Transaction suspendedTransaction = ConnectionAdapter.this.suspendCurrentTransaction();
                     try {
-                        transactionProxy.begin();
+                        ConnectionAdapter.this.transactionProxy.begin();
                         try {
                             boolean reply = this.delegate.execute(ispec, input, output);
-                            transactionProxy.commit();
+                            ConnectionAdapter.this.transactionProxy.commit();
                             return reply;
                         } catch (ResourceException exception) {
-                            transactionProxy.commit();
+                            ConnectionAdapter.this.transactionProxy.commit();
                             throw exception;
                         } catch (RuntimeException exception) {
-                            transactionProxy.rollback();
+                            ConnectionAdapter.this.transactionProxy.rollback();
                             throw exception;
                         }
                     } finally {
-                        resumeSuspendedTransaction(suspendedTransaction);
+                        ConnectionAdapter.this.resumeSuspendedTransaction(suspendedTransaction);
                     }
                 default:
                     return this.delegate.execute(ispec, input, output);

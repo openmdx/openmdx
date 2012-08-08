@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StateAccessor.java,v 1.7 2010/02/10 16:03:10 hburger Exp $
+ * Name:        $Id: StateAccessor.java,v 1.8 2010/06/02 16:18:49 hburger Exp $
  * Description: JPA State Interrogation 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/10 16:03:10 $
+ * Date:        $Date: 2010/06/02 16:18:49 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -107,7 +107,7 @@ public class StateAccessor
      * 
      * @return  the detached object's XRI
      */
-    @Override
+//  @Override
     public Path getTransactionalObjectId(Object pc) {
         return toTransactionalObjectId(getObjectId(pc));
     }

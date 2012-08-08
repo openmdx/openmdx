@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ImportHandler.java,v 1.16 2009/12/31 01:50:01 wfro Exp $
+ * Name:        $Id: ImportHandler.java,v 1.17 2010/06/02 13:43:14 hburger Exp $
  * Description: Import Handler
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/31 01:50:01 $
+ * Date:        $Date: 2010/06/02 13:43:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -610,6 +610,7 @@ public class ImportHandler extends DefaultHandler {
     /**
      * 
      */
+    @Override
     public void characters(
         char[] ch, 
         int offset, 

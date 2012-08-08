@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: PersistenceManagers.java,v 1.2 2009/09/29 15:50:03 hburger Exp $
+ * Name:        $Id: PersistenceManagers.java,v 1.3 2010/07/09 13:51:44 hburger Exp $
  * Description: Abstract PersistenceManager
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/29 15:50:03 $
+ * Date:        $Date: 2010/07/09 13:51:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -120,6 +120,30 @@ public class PersistenceManagers {
         );
     }
 
+    /**
+     * Delete All
+     * 
+     * @param pm
+     * @param pcs
+     */
+    public static void deletePersistentAll(
+        PersistenceManager pm, 
+        Object... pcs
+    ) {
+        List<JDOException> exceptions = null;
+        for(Object pc : pcs) try {
+            pm.deletePersistent(pc);
+        } catch (JDOException exception) {
+            (
+                exceptions == null ? exceptions = new ArrayList<JDOException>() : exceptions
+            ).add(exception);
+        }
+        if(exceptions != null) throw new JDOException(
+            "Delete persistent failure",
+            exceptions.toArray(new JDOException[exceptions.size()])
+        );
+    }
+    
     /**
      * Refresh All
      * 

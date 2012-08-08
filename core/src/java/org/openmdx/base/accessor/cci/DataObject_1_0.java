@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataObject_1_0.java,v 1.22 2010/02/11 13:13:20 hburger Exp $
+ * Name:        $Id: DataObject_1_0.java,v 1.23 2010/06/30 12:49:16 hburger Exp $
  * Description: Data Object interface
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/11 13:13:20 $
+ * Date:        $Date: 2010/06/30 12:49:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -389,14 +389,24 @@ public interface DataObject_1_0
     ) throws ResourceException;
     
     /**
+     * Return the object's container
+     * 
+     * @param lazily if <code>true</code> the method returns <code>null</code> for persistent 
+     * objects with not yet initialized container reference 
+     * 
+     * @return the object's container if <code>objIsContained()</code>, <code>null</code> otherwise 
+     */
+    Container_1_0 getContainer(
+        boolean lazily
+    );
+    
+    /**
      * Tests whether object is member of a container.
      * 
      * @return <code>true</code> if object was moved into a container.
-     * 
-     * @throws ServiceException
      */
     boolean objIsContained(
-    ) throws ServiceException;
+    );
 
     /**
      * Tests whether this object can't leave its hollow state
@@ -404,7 +414,7 @@ public interface DataObject_1_0
      * @return  true if this instance is inaccessible
      */
     boolean objIsInaccessible(
-    ) throws ServiceException;
+    );
 
     /**
      * Retrieve the inaccessibility reason.

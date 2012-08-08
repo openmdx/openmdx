@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/DefaultFileItem.java,v 1.4 2005/04/07 14:15:24 hburger Exp $
- * $Revision: 1.4 $
- * $Date: 2005/04/07 14:15:24 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/DefaultFileItem.java,v 1.5 2010/06/02 13:46:30 hburger Exp $
+ * $Revision: 1.5 $
+ * $Date: 2010/06/02 13:46:30 $
  *
  * ====================================================================
  *
@@ -95,7 +95,7 @@ import java.io.UnsupportedEncodingException;
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * @author Sean C. Sullivan
  *
- * @version $Id: DefaultFileItem.java,v 1.4 2005/04/07 14:15:24 hburger Exp $
+ * @version $Id: DefaultFileItem.java,v 1.5 2010/06/02 13:46:30 hburger Exp $
  */
 public class DefaultFileItem
     implements FileItem
@@ -595,6 +595,7 @@ public class DefaultFileItem
     /**
      * Removes the file contents from the temporary storage.
      */
+    @Override
     protected void finalize()
     {
         File outputFile = dfos.getFile();

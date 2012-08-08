@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: NonRepairingNamespaceContext.java,v 1.4 2010/03/02 15:56:00 hburger Exp $
+ * Name:        $Id: NonRepairingNamespaceContext.java,v 1.5 2010/06/02 10:50:06 hburger Exp $
  * Description: Non-Repairing Namespace Context
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/02 15:56:00 $
+ * Date:        $Date: 2010/06/02 10:50:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -156,7 +156,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
     /* (non-Javadoc)
      * @see javax.xml.namespace.NamespaceContext#getNamespaceURI(java.lang.String)
      */
-    @Override
+//  @Override
     public String getNamespaceURI(
         String prefix
     ) {
@@ -173,7 +173,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
     /* (non-Javadoc)
      * @see javax.xml.namespace.NamespaceContext#getPrefix(java.lang.String)
      */
-    @Override
+//  @Override
     public String getPrefix(String namespaceURI) {
         if(namespaceURI == null) throw new IllegalArgumentException();
         for(Map.Entry<String, String> e : mapping.entrySet()) {
@@ -191,7 +191,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
     /* (non-Javadoc)
      * @see javax.xml.namespace.NamespaceContext#getPrefixes(java.lang.String)
      */
-    @Override
+//  @Override
     public Iterator<?> getPrefixes(
         final String namespaceURI
     ) {
@@ -239,7 +239,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
-        @Override
+    //  @Override
         public boolean hasNext() {
             return !this.primary.isEmpty() || this.delegate.hasNext();
         }
@@ -247,7 +247,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
         /* (non-Javadoc)
          * @see java.util.Iterator#next()
          */
-        @Override
+    //  @Override
         public Object next() {
             return this.primary.isEmpty() ? this.delegate.next() : this.primary.get(0);
         }
@@ -255,7 +255,7 @@ class NonRepairingNamespaceContext implements NamespaceContext {
         /* (non-Javadoc)
          * @see java.util.Iterator#remove()
          */
-        @Override
+    //  @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }

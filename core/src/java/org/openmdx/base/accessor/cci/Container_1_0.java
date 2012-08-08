@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Container_1_0.java,v 1.9 2009/08/18 14:02:26 hburger Exp $
+ * Name:        $Id: Container_1_0.java,v 1.12 2010/06/30 12:49:16 hburger Exp $
  * Description: Container_1_0 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/08/18 14:02:26 $
+ * Date:        $Date: 2010/06/30 12:49:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2009, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,12 +53,16 @@ package org.openmdx.base.accessor.cci;
 import java.util.List;
 import java.util.Map;
 
-import javax.jdo.FetchPlan;
+import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
+import org.openmdx.base.query.Filter;
+import org.openmdx.base.query.OrderSpecifier;
 
 /**
  * Container_1_0
  */
-public interface Container_1_0 extends Map<String,DataObject_1_0>{
+public interface Container_1_0 
+    extends PersistenceCapableCollection, Map<String,DataObject_1_0> 
+{
 
     /**
      * Retrieve the selection's container
@@ -69,20 +73,6 @@ public interface Container_1_0 extends Map<String,DataObject_1_0>{
 
     /**
      * Selects objects matching the filter.
-     * <p>
-     * The semantics of the collection returned by this method become
-     * undefined if the backing collection (i.e., this container) is
-     * structurally modified in any way other than via the returned collection.
-     * (Structural modifications are those that change the size of this list, or
-     * otherwise perturb it in such a fashion that iterations in progress may
-     * yield incorrect results.) 
-     * <p>
-     * This method returns a <code>Collection</code> as opposed to a
-     * <code>Set</code> because it behaves as set in respect to object id
-     * equality, not element equality.
-     * <p>
-     * The acceptable filter object classes must be specified by the 
-     * container implementation.
      *
      * @param       filter
      *              The filter to be applied to objects of this container
@@ -98,15 +88,12 @@ public interface Container_1_0 extends Map<String,DataObject_1_0>{
      *              applied to this container.
      */
     Container_1_0 subMap(
-        Object filter
+        Filter filter
     );
 
     /**
      * Applies given criteria to the elements of the container and returns the
      * result as list.
-     * <p>
-     * The acceptable criteria classes must be specified by the container 
-     * implementation.
      *
      * @param       criteria
      *                The criteria to be applied to objects of this container;
@@ -119,27 +106,9 @@ public interface Container_1_0 extends Map<String,DataObject_1_0>{
      * @exception   ClassCastException
      *                  if the class of the specified criteria prevents them from
      *                  being applied to this container's elements.
-     * @exception   IllegalArgumentException
-     *                  if some aspect of the criteria prevents them from being
-     *                  applied to this container's elements. 
      */
     List<DataObject_1_0> values(
-        Object criteria
-    );
-
-    /**
-     * Load the collection into the cache
-     * <p>
-     * Retrieve field values of instances from the store.  This tells
-     * the <code>PersistenceManager</code> that the application intends to use 
-     * the instances, and their field values should be retrieved.  The fields
-     * in the current fetch group must be retrieved, and the implementation
-     * might retrieve more fields than the current fetch group.
-     * 
-     * @param fetchPlan the fetch plan to be used, or <code>null</code>
-     */
-    void retrieveAll(
-        FetchPlan fetchPlan
+        OrderSpecifier... criteria
     );
 
     /**
@@ -149,9 +118,4 @@ public interface Container_1_0 extends Map<String,DataObject_1_0>{
      */
     boolean isRetrieved();
     
-    /**
-     * Refresh the collection
-     */
-    void refreshAll();
-
 }

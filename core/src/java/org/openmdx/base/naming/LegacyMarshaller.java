@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LegacyMarshaller.java,v 1.1 2009/05/28 16:36:39 hburger Exp $
+ * Name:        $Id: LegacyMarshaller.java,v 1.2 2010/06/21 17:31:22 hburger Exp $
  * Description: Legacy Marshaller 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/28 16:36:39 $
+ * Date:        $Date: 2010/06/21 17:31:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -218,7 +218,9 @@ public final class LegacyMarshaller implements Marshaller {
                     end+1 < source.length() &&
                     ! (source.charAt(end) == COMPONENT_SEPARATOR) &&
                     ! (source.charAt(end) == FIELD_SEPARATOR)
-            ) end++;
+            ) {
+                end++;
+            }
             buffer.append(source.substring(start,++end));
         }
         target.add(buffer.toString());

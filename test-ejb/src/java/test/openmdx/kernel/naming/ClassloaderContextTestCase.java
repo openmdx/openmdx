@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ClassloaderContextTestCase.java,v 1.1 2009/04/03 15:08:16 hburger Exp $
+ * Name:        $Id: ClassloaderContextTestCase.java,v 1.2 2010/06/04 22:39:41 hburger Exp $
  * Description: ClassloaderContextTestCase
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/03 15:08:16 $
+ * Date:        $Date: 2010/06/04 22:39:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -80,7 +80,8 @@ public class ClassloaderContextTestCase extends TestCase {
     /* (non-Javadoc)
      * @see junit.framework.TestCase#setUp()
      */
-    protected void setUp() throws Exception {
+    @Override
+	protected void setUp() throws Exception {
         javaURLContextFactory javaContextFactory = new javaURLContextFactory();
         savedClassLoader = Thread.currentThread().getContextClassLoader();
         applicationClassLoader = savedClassLoader == null ?
@@ -100,7 +101,8 @@ public class ClassloaderContextTestCase extends TestCase {
     /* (non-Javadoc)
      * @see junit.framework.TestCase#tearDown()
      */
-    protected void tearDown() throws Exception {
+    @Override
+	protected void tearDown() throws Exception {
         Thread.currentThread().setContextClassLoader(savedClassLoader);
         super.tearDown();
     }

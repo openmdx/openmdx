@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Quantifier.java,v 1.2 2009/05/07 14:56:38 hburger Exp $
+ * Name:        $Id: Quantifier.java,v 1.4 2010/05/27 15:48:50 hburger Exp $
  * Description: Quantifier 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/07 14:56:38 $
+ * Date:        $Date: 2010/05/27 15:48:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -87,39 +87,39 @@ public enum Quantifier {
     }
     
     /**
-     * The <code>Quantifiers</code> legacy code
+     * The <code>Quantifier</code>'s legacy code
      */
     private final short code;
     
     /**
-     * The <code>Quantifiers</code> UNICODE symbol
+     * The <code>Quantifier</code>'s UNICODE symbol
      */
     private final char symbol;
     
     /**
-     * Retrieve the <code>Quantifiers</code>'s code
+     * Retrieve the <code>Quantifier</code>'s code
      * 
-     * @return the <code>Quantifiers</code>'s code
+     * @return the <code>Quantifier</code>'s code
      */
     public short code(){
         return this.code;
     }
 
     /**
-     * Retrieve the <code>Quantifiers</code>'s unicode symbol
+     * Retrieve the <code>Quantifier</code>'s UNICODE symbol
      * 
-     * @return the <code>Quantifiers</code>'s unicode symbol
+     * @return the <code>Quantifier</code>'s UNICODE symbol
      */
     public char symbol() {
         return this.symbol;
     }
 
     /**
-     * Retrieve the <code>Quantifiers</code>'s code
+     * Retrieve the <code>Quantifier</code>'s code
      * 
      * @param quantifier
      * 
-     * @return the <code>Quantifiers</code>'s code
+     * @return the <code>Quantifier</code>'s code
      */
     public static short codeOf(
         Quantifier quantifier
@@ -128,13 +128,13 @@ public enum Quantifier {
     }
     
     /**
-     * Retrieve the <code>Quantifiers</code> represented by the given code
+     * Retrieve the <code>Quantifier</code> represented by the given code
      * 
      * @param code
      * 
-     * @return the <code>Quantifiers</code> represented by the given code
+     * @return the <code>Quantifier</code> represented by the given code
      * 
-     * @exception IllegalArgumentException if the code does not represent a <code>Quantifiers</code>
+     * @exception IllegalArgumentException if the code does not represent a <code>Quantifier</code>
      */
     public static Quantifier valueOf(
         short code
@@ -150,18 +150,19 @@ public enum Quantifier {
     }
 
     /**
-     * Retrieve the <code>Quantifiers</code> represented by the given symbol
+     * Retrieve the <code>Quantifier</code> represented by the given symbol
      * 
      * @param code
      * 
-     * @return the <code>Quantifiers</code> represented by the given symbol
+     * @return the <code>Quantifier</code> represented by the given symbol
      * 
-     * @exception IllegalArgumentException if the symbol does not represent a <code>Quantifiers</code>
+     * @exception IllegalArgumentException if the symbol does not represent a <code>Quantifier</code>
      */
     public static Quantifier valueOf(
         char symbol
     ){
         switch(symbol){
+            case ' ': return null;
             case '\u2200': return FOR_ALL;
             case '\u2203': return THERE_EXISTS;
             default: throw new IllegalArgumentException(

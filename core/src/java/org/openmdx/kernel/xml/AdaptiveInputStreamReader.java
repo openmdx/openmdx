@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AdaptiveInputStreamReader.java,v 1.5 2010/02/23 18:22:58 hburger Exp $
+ * Name:        $Id: AdaptiveInputStreamReader.java,v 1.6 2010/06/02 13:46:30 hburger Exp $
  * Description: Adaptive InputStream Reader
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/23 18:22:58 $
+ * Date:        $Date: 2010/06/02 13:46:30 $
  * ====================================================================
  *
  * This software is published under the BSD license  as listed below.
@@ -151,6 +151,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#mark(int)
 	 */
+    @Override
 	public void mark(int readAheadLimit) throws IOException {
 	    getDelegate().mark(readAheadLimit);
 	}
@@ -158,6 +159,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#markSupported()
 	 */
+    @Override
 	public boolean markSupported() {
         return this.delegate != null && this.delegate.markSupported();
 	}
@@ -165,6 +167,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#read()
 	 */
+    @Override
 	public int read() throws IOException {
 		return getDelegate().read();
 	}
@@ -172,6 +175,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#read(char[], int, int)
 	 */
+    @Override
 	public int read(char[] cbuf, int off, int len) throws IOException {
         return getDelegate().read(cbuf, off, len);
 	}
@@ -179,6 +183,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#read(char[])
 	 */
+    @Override
 	public int read(char[] cbuf) throws IOException {
         return getDelegate().read(cbuf);
 	}
@@ -186,6 +191,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#ready()
 	 */
+    @Override
 	public boolean ready() throws IOException {
 		return getDelegate().ready();
 	}
@@ -193,6 +199,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#reset()
 	 */
+    @Override
 	public void reset() throws IOException {
 	    getDelegate().reset();
 	}
@@ -200,6 +207,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#skip(long)
 	 */
+    @Override
 	public long skip(long n) throws IOException {
 		return getDelegate().skip(n);
 	}
@@ -207,6 +215,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#close()
 	 */
+    @Override
 	public void close() throws IOException {
 	    if(this.delegate != null) {
 	        if(this.propagateClose) {
@@ -436,6 +445,7 @@ public class AdaptiveInputStreamReader extends Reader {
 	    /* (non-Javadoc)
 	     * @see java.lang.Object#toString()
 	     */
+	    @Override
 	    public String toString() {
 	        StringBuffer b = new StringBuffer(
 	            "<?xml version=\""
@@ -535,6 +545,7 @@ public class AdaptiveInputStreamReader extends Reader {
          * 
          * @exception IOException
          */
+        @Override
         public void close() throws IOException {
             this.in = null;
         }
@@ -542,6 +553,7 @@ public class AdaptiveInputStreamReader extends Reader {
         /* (non-Javadoc)
          * @see java.io.Reader#read(char[], int, int)
          */
+        @Override
         public int read(
             char[] cbuf, 
             int off, 
@@ -562,6 +574,7 @@ public class AdaptiveInputStreamReader extends Reader {
         /* (non-Javadoc)
          * @see java.io.Reader#read()
          */
+        @Override
         public int read(
         ) throws IOException {
             if(isEncodingKnown()){
@@ -620,6 +633,7 @@ public class AdaptiveInputStreamReader extends Reader {
         /* (non-Javadoc)
          * @see java.io.Reader#mark(int)
          */
+        @Override
         public void mark(int readAheadLimit) throws IOException {
             this.in.mark(
                 readAheadLimit * maxBytesPerCharacter()
@@ -629,6 +643,7 @@ public class AdaptiveInputStreamReader extends Reader {
         /* (non-Javadoc)
          * @see java.io.Reader#markSupported()
          */
+        @Override
         public boolean markSupported() {
             return this.in.markSupported();
         }
@@ -636,6 +651,7 @@ public class AdaptiveInputStreamReader extends Reader {
         /* (non-Javadoc)
          * @see java.io.Reader#reset()
          */
+        @Override
         public void reset() throws IOException {
             this.in.reset();
         }

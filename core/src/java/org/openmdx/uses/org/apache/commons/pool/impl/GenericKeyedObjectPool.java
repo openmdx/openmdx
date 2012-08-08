@@ -1,7 +1,7 @@
 /*
  * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/GenericKeyedObjectPool.java,v $
- * $Revision: 1.7 $
- * $Date: 2008/03/21 18:42:12 $
+ * $Revision: 1.8 $
+ * $Date: 2010/06/02 13:46:51 $
  *
  * ====================================================================
  *
@@ -165,7 +165,7 @@ import org.openmdx.uses.org.apache.commons.pool.KeyedPoolableObjectFactory;
  * @see GenericObjectPool
  * @author Rodney Waldhoff
  * @author Dirk Verbeeck
- * @version $Revision: 1.7 $ $Date: 2008/03/21 18:42:12 $
+ * @version $Revision: 1.8 $ $Date: 2010/06/02 13:46:51 $
  */
 @SuppressWarnings("unchecked")
 public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements KeyedObjectPool {
@@ -757,6 +757,7 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
 
     //-- ObjectPool methods ------------------------------------------
 
+    @Override
     public synchronized Object borrowObject(Object key) throws Exception {
         long starttime = System.currentTimeMillis();
         boolean newlyCreated = false;
@@ -835,6 +836,7 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
         }
     }
 
+    @Override
     public synchronized void clear() {
         for(Iterator keyiter = _poolList.iterator(); keyiter.hasNext(); ) {
             Object key = keyiter.next();
@@ -854,6 +856,7 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
         notifyAll();
     }
 
+    @Override
     public synchronized void clear(Object key) {
         CursorableLinkedList pool = (CursorableLinkedList)(_poolMap.remove(key));
         if(null == pool) {
@@ -873,18 +876,22 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
         notifyAll();
     }
 
+    @Override
     public synchronized int getNumActive() {
         return _totalActive;
     }
 
+    @Override
     public synchronized int getNumIdle() {
         return _totalIdle;
     }
 
+    @Override
     public synchronized int getNumActive(Object key) {
         return getActiveCount(key);
     }
 
+    @Override
     public synchronized int getNumIdle(Object key) {
         try {
             return((CursorableLinkedList)(_poolMap.get(key))).size();
@@ -893,6 +900,7 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
         }
     }
 
+    @Override
     public void returnObject(Object key, Object obj) throws Exception {
 
         // if we need to validate this object, do so
@@ -943,6 +951,7 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
         }
     }
 
+    @Override
     public void invalidateObject(Object key, Object obj) throws Exception {
         try {
             _factory.destroyObject(key, obj);
@@ -955,6 +964,7 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
         }
     }
 
+    @Override
     public void addObject(Object key) throws Exception {
         Object obj = _factory.makeObject(key);
         synchronized(this) {
@@ -963,6 +973,7 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
         }
     }
 
+    @Override
     public synchronized void close() throws Exception {
         clear();
         _poolList = null;
@@ -982,6 +993,7 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
         }
     }
 
+    @Override
     public synchronized void setFactory(KeyedPoolableObjectFactory factory) throws IllegalStateException {
         if(0 < getNumActive()) {
             throw new IllegalStateException("Objects are already active");
@@ -1168,6 +1180,7 @@ public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements Keyed
             tstamp = time;
         }
 
+        @Override
         public String toString() {
             return value + ";" + tstamp;
         }

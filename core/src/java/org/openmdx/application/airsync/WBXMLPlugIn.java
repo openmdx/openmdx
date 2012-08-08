@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: WBXMLPlugIn.java,v 1.9 2010/03/04 14:25:19 wfro Exp $
+ * Name:        $Id: WBXMLPlugIn.java,v 1.11 2010/07/08 16:22:05 wfro Exp $
  * Description: AirSync 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/04 14:25:19 $
+ * Date:        $Date: 2010/07/08 16:22:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -166,6 +166,8 @@ public class WBXMLPlugIn extends AbstractPlugIn {
             "YomiLastName", // 0x3A
             "CompressedRTF", // 0x3B
             "Picture", // 0x3C
+            "Alias", // 0x3D
+            "WeightedRank", // 0x3E
         },
         { // Email
             "Attachment", // 0x05
@@ -732,7 +734,7 @@ public class WBXMLPlugIn extends AbstractPlugIn {
      */
     private static final NamespaceContext namespaceContext = new NamespaceContext(){
 
-        @Override
+    //  @Override
         public String getNamespaceURI(String prefix) {
             if(XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
                 return NAMESPACE_URIS[0];
@@ -742,13 +744,13 @@ public class WBXMLPlugIn extends AbstractPlugIn {
             }
         }
 
-        @Override
+    //  @Override
         public String getPrefix(String namespaceURI) {
             Integer page = _NAMESPACE_URIS.get(namespaceURI);
             return page == null ? null : NAMESPACE_PREFIXES[page.intValue()];
         }
 
-        @Override
+    //  @Override
         public Iterator<?> getPrefixes(String namespaceURI) {
             String prefix = getPrefix(namespaceURI);
             return (prefix == null ? Collections.emptySet() : Collections.singleton(prefix)).iterator();

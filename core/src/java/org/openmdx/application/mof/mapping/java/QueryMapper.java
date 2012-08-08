@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: QueryMapper.java,v 1.3 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: QueryMapper.java,v 1.4 2010/05/26 15:36:02 hburger Exp $
  * Description: JMI Query Mapper
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2010/05/26 15:36:02 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -258,27 +258,30 @@ public class QueryMapper
             this.pw.println();
         }
         if(this.model.isPrimitiveType(featureDef.getQualifiedTypeName())) {
-            //
-            // order by
-            // 
-            this.pw.println("  /**");
-            this.pw.println(
-                MapperUtils.wrapText(
-                    "   * ",
-                    "Allows to adds a sort instruction for <code>" + classDef.getName() + 
-                    "</code> depending the feature <code>" + featureDef.getName() + "</code>"
-                )
-            );
-            this.pw.println(
-                MapperUtils.wrapText(
-                    "   * ",
-                    "Note: <em>The order in which </em><code>orderBy&hellip;</code><em> instructions are given is relevant!</em>"
-                )
-            );
-            this.pw.println("   */");
-            this.pw.println("    public " + getOrderType(featureDef) + ' ' + getPredicateName("orderBy", featureDef) + '(');
-            this.pw.println("  );");
-            this.pw.println();
+            String orderType = getOrderType(featureDef);
+            if(orderType != null) {
+                //
+                // order by
+                // 
+                this.pw.println("  /**");
+                this.pw.println(
+                    MapperUtils.wrapText(
+                        "   * ",
+                        "Allows to adds a sort instruction for <code>" + classDef.getName() + 
+                        "</code> depending the feature <code>" + featureDef.getName() + "</code>"
+                    )
+                );
+                this.pw.println(
+                    MapperUtils.wrapText(
+                        "   * ",
+                        "Note: <em>The order in which </em><code>orderBy&hellip;</code><em> instructions are given is relevant!</em>"
+                    )
+                );
+                this.pw.println("   */");
+                this.pw.println("    public " + orderType + ' ' + getPredicateName("orderBy", featureDef) + '(');
+                this.pw.println("  );");
+                this.pw.println();
+            }
         }
     }
 

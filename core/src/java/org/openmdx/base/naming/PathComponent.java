@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PathComponent.java,v 1.4 2009/11/10 15:17:48 hburger Exp $
+ * Name:        $Id: PathComponent.java,v 1.5 2010/06/02 13:44:54 hburger Exp $
  * Description: A Path COmponent 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/10 15:17:48 $
+ * Date:        $Date: 2010/06/02 13:44:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -735,6 +735,7 @@ implements Comparable, Cloneable, Serializable
      *
      * @return    a clone of this instance.
      */
+    @Override
     public Object clone()
     {
         return new PathComponent(this);
@@ -753,6 +754,7 @@ implements Comparable, Cloneable, Serializable
      *
      * @return   A non-null string representation of this path component.
      */
+    @Override
     public String toString(
     ){
         StringBuilder target = new StringBuilder();
@@ -779,6 +781,7 @@ implements Comparable, Cloneable, Serializable
      * @return  true if this object is the same as the object argument;
      *          false otherwise.
      */
+    @Override
     public boolean equals(
         Object that
     ){
@@ -798,6 +801,7 @@ implements Comparable, Cloneable, Serializable
      *
      * @return the path component's hash code
      */
+    @Override
     public int hashCode(
     ){
         int hashCode = 1;

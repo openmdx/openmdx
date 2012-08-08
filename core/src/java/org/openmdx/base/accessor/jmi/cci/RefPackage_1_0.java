@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1_0.java,v 1.38 2010/04/19 11:19:44 hburger Exp $
+ * Name:        $Id: RefPackage_1_0.java,v 1.41 2010/07/07 21:55:33 hburger Exp $
  * Description: RefPackage 1.0 Interface
- * Revision:    $Revision: 1.38 $
+ * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/19 11:19:44 $
+ * Date:        $Date: 2010/07/07 21:55:33 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,15 +45,12 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.accessor.jmi.cci;
 
-import java.util.UUID;
-
 import javax.jdo.PersistenceManager;
-import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
 import javax.resource.cci.InteractionSpec;
@@ -66,7 +62,6 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Filter;
-import org.w3c.cci2.Container;
 
 /**
  * This interface extends the javax.jmi.reflect.RefPackage interface by
@@ -91,28 +86,6 @@ public interface RefPackage_1_0 extends RefPackage {
   public PersistenceManager refDelegate(
   );
     
-  /**
-   * Get object with the given object id. 
-   *  
-   * @param objectId unique id of RefObject.
-   * 
-   * @return RefObject
-   */
-  RefObject refObject(
-    Path objectId
-  );
-
-  /**
-   * Get object with the given object id. 
-   *  
-   * @param transientObjectId transient id of RefObject.
-   * 
-   * @return RefObject
-   */
-  RefObject refObject(
-    UUID transientObjectId
-  );
-  
   /**
    * Retrieves the JDO Persistence Manager delegating to this package.
    * 
@@ -164,11 +137,11 @@ public interface RefPackage_1_0 extends RefPackage {
     * @param resourceIdentifier
     * @param containerClass
     * 
-    * @return
+    * @return the container specified by its resource identifier
     */
-   RefContainer refContainer(
+   <C extends RefContainer<?>> C refContainer(
        Path resourceIdentifier,
-       Class<Container<RefObject>> containerClass
+       Class<C> containerClass
    );
 
    /**

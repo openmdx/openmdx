@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateTimeFormat.java,v 1.3 2010/01/11 13:02:54 hburger Exp $
+ * Name:        $Id: DateTimeFormat.java,v 1.4 2010/06/02 13:46:51 hburger Exp $
  * Description: infrastructure: date format
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/11 13:02:54 $
+ * Date:        $Date: 2010/06/02 13:46:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -210,6 +210,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
     /* (non-Javadoc)
      * @see java.lang.ThreadLocal#initialValue()
      */
+    @Override
     protected SimpleDateFormat initialValue() {
     	SimpleDateFormat formatter = new SimpleDateFormat(pattern);
     	formatter.setLenient(this.lenient);
@@ -385,6 +386,7 @@ public class DateTimeFormat extends ThreadLocal<SimpleDateFormat> {
         /* (non-Javadoc)
          * @see org.openmdx.base.text.format.DateFormat#parse(java.lang.String)
          */
+        @Override
         public Date parse(
             String text
         ) throws ParseException {

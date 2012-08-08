@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Report.java,v 1.2 2010/03/05 16:40:37 hburger Exp $
+ * Name:        $Id: Report.java,v 1.3 2010/06/04 22:45:00 hburger Exp $
  * Description: Configuration result
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/05 16:40:37 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -238,7 +238,8 @@ public class Report
      *
      * @return  a stringified report
      */
-    public String toString()
+    @Override
+	public String toString()
     {
         StringBuilder buf = new StringBuilder(
             "Name   : ").append(this.name

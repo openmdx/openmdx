@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractURLConnection.java,v 1.6 2009/09/08 12:47:12 hburger Exp $
+ * Name:        $Id: AbstractURLConnection.java,v 1.7 2010/06/02 13:46:30 hburger Exp $
  * Description: Delegating URL connection
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/08 12:47:12 $
+ * Date:        $Date: 2010/06/02 13:46:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -123,6 +123,7 @@ public abstract class AbstractURLConnection
     /* (non-Javadoc)
      * @see java.net.URLConnection#toString()
      */
+    @Override
     public String toString() {
         return super.toString() + "{ " + this.delegate + " }";
     }
@@ -132,6 +133,7 @@ public abstract class AbstractURLConnection
      * @param value
      * @see java.net.URLConnection#addRequestProperty(java.lang.String, java.lang.String)
      */
+    @Override
     public void addRequestProperty(String key, String value) {
         this.delegate.addRequestProperty(key, value);
     }
@@ -140,6 +142,7 @@ public abstract class AbstractURLConnection
      * @throws IOException
      * @see java.net.URLConnection#connect()
      */
+    @Override
     public void connect()
         throws IOException {
         this.delegate.connect();
@@ -150,6 +153,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.lang.Object#equals(java.lang.Object)
      */
+    @Override
     public boolean equals(Object obj) {
         return this.delegate.equals(obj);
     }
@@ -158,6 +162,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getAllowUserInteraction()
      */
+    @Override
     public boolean getAllowUserInteraction() {
         return this.delegate.getAllowUserInteraction();
     }
@@ -167,6 +172,7 @@ public abstract class AbstractURLConnection
      * @throws IOException
      * @see java.net.URLConnection#getContent()
      */
+    @Override
     public Object getContent()
         throws IOException {
         return this.delegate.getContent();
@@ -178,6 +184,7 @@ public abstract class AbstractURLConnection
      * @throws IOException
      * @see java.net.URLConnection#getContent(java.lang.Class[])
      */
+    @Override
     @SuppressWarnings("unchecked")
     public Object getContent(Class[] classes)
         throws IOException {
@@ -188,6 +195,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getContentEncoding()
      */
+    @Override
     public String getContentEncoding() {
         return this.delegate.getContentEncoding();
     }
@@ -196,6 +204,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getContentLength()
      */
+    @Override
     public int getContentLength() {
         return this.delegate.getContentLength();
     }
@@ -204,6 +213,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getContentType()
      */
+    @Override
     public String getContentType() {
         return this.delegate.getContentType();
     }
@@ -212,6 +222,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getDate()
      */
+    @Override
     public long getDate() {
         return this.delegate.getDate();
     }
@@ -220,6 +231,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getDefaultUseCaches()
      */
+    @Override
     public boolean getDefaultUseCaches() {
         return this.delegate.getDefaultUseCaches();
     }
@@ -228,6 +240,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getDoInput()
      */
+    @Override
     public boolean getDoInput() {
         return this.delegate.getDoInput();
     }
@@ -236,6 +249,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getDoOutput()
      */
+    @Override
     public boolean getDoOutput() {
         return this.delegate.getDoOutput();
     }
@@ -244,6 +258,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getExpiration()
      */
+    @Override
     public long getExpiration() {
         return this.delegate.getExpiration();
     }
@@ -253,6 +268,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getHeaderField(int)
      */
+    @Override
     public String getHeaderField(int n) {
         return this.delegate.getHeaderField(n);
     }
@@ -262,6 +278,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getHeaderField(java.lang.String)
      */
+    @Override
     public String getHeaderField(String name) {
         return this.delegate.getHeaderField(name);
     }
@@ -272,6 +289,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getHeaderFieldDate(java.lang.String, long)
      */
+    @Override
     public long getHeaderFieldDate(String name, long Default) {
         return this.delegate.getHeaderFieldDate(name, Default);
     }
@@ -282,6 +300,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getHeaderFieldInt(java.lang.String, int)
      */
+    @Override
     public int getHeaderFieldInt(String name, int Default) {
         return this.delegate.getHeaderFieldInt(name, Default);
     }
@@ -291,6 +310,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getHeaderFieldKey(int)
      */
+    @Override
     public String getHeaderFieldKey(int n) {
         return this.delegate.getHeaderFieldKey(n);
     }
@@ -299,6 +319,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getHeaderFields()
      */
+    @Override
     public Map<String,List<String>> getHeaderFields() {
         return this.delegate.getHeaderFields();
     }
@@ -307,6 +328,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getIfModifiedSince()
      */
+    @Override
     public long getIfModifiedSince() {
         return this.delegate.getIfModifiedSince();
     }
@@ -316,6 +338,7 @@ public abstract class AbstractURLConnection
      * @throws IOException
      * @see java.net.URLConnection#getInputStream()
      */
+    @Override
     public InputStream getInputStream()
         throws IOException {
         return this.delegate.getInputStream();
@@ -325,6 +348,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getLastModified()
      */
+    @Override
     public long getLastModified() {
         return this.delegate.getLastModified();
     }
@@ -334,6 +358,7 @@ public abstract class AbstractURLConnection
      * @throws IOException
      * @see java.net.URLConnection#getOutputStream()
      */
+    @Override
     public OutputStream getOutputStream()
         throws IOException {
         return this.delegate.getOutputStream();
@@ -344,6 +369,7 @@ public abstract class AbstractURLConnection
      * @throws IOException
      * @see java.net.URLConnection#getPermission()
      */
+    @Override
     public Permission getPermission()
         throws IOException {
         return this.delegate.getPermission();
@@ -353,6 +379,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getRequestProperties()
      */
+    @Override
     public Map<String,List<String>> getRequestProperties() {
         return this.delegate.getRequestProperties();
     }
@@ -362,6 +389,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getRequestProperty(java.lang.String)
      */
+    @Override
     public String getRequestProperty(String key) {
         return this.delegate.getRequestProperty(key);
     }
@@ -370,6 +398,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getURL()
      */
+    @Override
     public URL getURL() {
         return this.delegate.getURL();
     }
@@ -378,6 +407,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.net.URLConnection#getUseCaches()
      */
+    @Override
     public boolean getUseCaches() {
         return this.delegate.getUseCaches();
     }
@@ -386,6 +416,7 @@ public abstract class AbstractURLConnection
      * @return
      * @see java.lang.Object#hashCode()
      */
+    @Override
     public int hashCode() {
         return this.delegate.hashCode();
     }
@@ -394,6 +425,7 @@ public abstract class AbstractURLConnection
      * @param allowuserinteraction
      * @see java.net.URLConnection#setAllowUserInteraction(boolean)
      */
+    @Override
     public void setAllowUserInteraction(boolean allowuserinteraction) {
         this.delegate.setAllowUserInteraction(allowuserinteraction);
     }
@@ -402,6 +434,7 @@ public abstract class AbstractURLConnection
      * @param defaultusecaches
      * @see java.net.URLConnection#setDefaultUseCaches(boolean)
      */
+    @Override
     public void setDefaultUseCaches(boolean defaultusecaches) {
         this.delegate.setDefaultUseCaches(defaultusecaches);
     }
@@ -410,6 +443,7 @@ public abstract class AbstractURLConnection
      * @param doinput
      * @see java.net.URLConnection#setDoInput(boolean)
      */
+    @Override
     public void setDoInput(boolean doinput) {
         this.delegate.setDoInput(doinput);
     }
@@ -418,6 +452,7 @@ public abstract class AbstractURLConnection
      * @param dooutput
      * @see java.net.URLConnection#setDoOutput(boolean)
      */
+    @Override
     public void setDoOutput(boolean dooutput) {
         this.delegate.setDoOutput(dooutput);
     }
@@ -426,6 +461,7 @@ public abstract class AbstractURLConnection
      * @param ifmodifiedsince
      * @see java.net.URLConnection#setIfModifiedSince(long)
      */
+    @Override
     public void setIfModifiedSince(long ifmodifiedsince) {
         this.delegate.setIfModifiedSince(ifmodifiedsince);
     }
@@ -435,6 +471,7 @@ public abstract class AbstractURLConnection
      * @param value
      * @see java.net.URLConnection#setRequestProperty(java.lang.String, java.lang.String)
      */
+    @Override
     public void setRequestProperty(String key, String value) {
         this.delegate.setRequestProperty(key, value);
     }
@@ -443,6 +480,7 @@ public abstract class AbstractURLConnection
      * @param usecaches
      * @see java.net.URLConnection#setUseCaches(boolean)
      */
+    @Override
     public void setUseCaches(boolean usecaches) {
         this.delegate.setUseCaches(usecaches);
     }

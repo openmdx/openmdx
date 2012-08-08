@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Sets.java,v 1.8 2009/11/10 15:18:49 hburger Exp $
+ * Name:        $Id: Sets.java,v 1.9 2010/07/15 16:36:47 hburger Exp $
  * Description: Sets 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/10 15:18:49 $
+ * Date:        $Date: 2010/07/15 16:36:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,7 @@ package org.openmdx.base.collection;
 import java.util.AbstractSet;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -101,6 +102,21 @@ public class Sets {
             collection == null || collection instanceof Set<?> ? (Set<T>)collection : 
             new CollectionSet(collection);
     }
+    
+    /**
+     * Decorate a map as set
+     * 
+     * @param map the map backing up the set
+     * 
+     * @param map
+     * 
+     * @return the decorator
+     */
+    public static <T> Set<T> asSet(
+        Map<T,? super String> map
+    ){
+        return map == null ? null : new MapSet<T>(map);
+    }
         
     /**
      * Decorate a collection as set
@@ -131,6 +147,87 @@ public class Sets {
         return new SubSet<T>(collection, selector);
     }
     
+
+    //------------------------------------------------------------------------
+    // Class CollectionSet
+    //------------------------------------------------------------------------
+    
+    /**
+     * Wrap a collection as set
+     */
+    static class MapSet<T> extends AbstractSet<T> {
+        
+        /**
+         * Constructor 
+         *
+         * @param map
+         */
+        MapSet(
+            Map<T,? super String> map
+        ){
+            this.map = map;
+        }
+            
+        private final Map<T,? super String> map;
+        
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#iterator()
+         */
+        @Override
+        public Iterator<T> iterator() {
+            return this.map.keySet().iterator();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#size()
+         */
+        @Override
+        public int size() {
+            return this.map.size();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#add(java.lang.Object)
+         */
+        @Override
+        public boolean add(T e) {
+            return this.map.put(e, "") == null;
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#clear()
+         */
+        @Override
+        public void clear() {
+            this.map.clear();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#contains(java.lang.Object)
+         */
+        @Override
+        public boolean contains(Object o) {
+            return this.map.containsKey(o);
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#isEmpty()
+         */
+        @Override
+        public boolean isEmpty() {
+            return this.map.isEmpty();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractCollection#remove(java.lang.Object)
+         */
+        @Override
+        public boolean remove(Object o) {
+            return this.map.remove(o) != null;
+        }
+        
+    }
+
     
     //------------------------------------------------------------------------
     // Class CollectionSet

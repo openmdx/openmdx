@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: JavaClock_1.java,v 1.9 2010/03/23 19:09:24 hburger Exp $
+ * Name:        $Id: JavaClock_1.java,v 1.10 2010/06/03 15:58:22 hburger Exp $
  * Description: Java Clock Provider
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 19:09:24 $
+ * Date:        $Date: 2010/06/03 15:58:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,6 +81,7 @@ import org.openmdx.kernel.exception.BasicException;
 public class JavaClock_1 extends Layer_1 {
 	
     // --------------------------------------------------------------------------
+    @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SubcontextTestCase.java,v 1.1 2009/04/03 15:08:16 hburger Exp $
+ * Name:        $Id: SubcontextTestCase.java,v 1.2 2010/06/07 10:10:47 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/03 15:08:16 $
+ * Date:        $Date: 2010/06/07 10:10:47 $
  * ====================================================================
  *
  * This software is published under the GNU Lesser General Public
@@ -61,17 +61,17 @@ public class SubcontextTestCase extends TestCase
         Context ctx    = new InitialContext();
         Context newCtx = null;
 
-        ctx.createSubcontext("a");
-        ctx.createSubcontext("a/b");
-        ctx.createSubcontext("a/b/c");
-        ctx.createSubcontext("a/b/c/0");
-        ctx.createSubcontext("a/b/c/0/1");
+        ctx.createSubcontext("aa");
+        ctx.createSubcontext("aa/bb");
+        ctx.createSubcontext("aa/bb/cc");
+        ctx.createSubcontext("aa/bb/cc/00");
+        ctx.createSubcontext("aa/bb/cc/00/11");
 
-        newCtx = ctx.createSubcontext("a/b/c/0/1/2");
+        newCtx = ctx.createSubcontext("aa/bb/cc/00/11/22");
 
         String name = newCtx.getNameInNamespace();
 
-        assertEquals("/a/b/c/0/1/2", name);
+        assertEquals("aa/bb/cc/00/11/22", name);
     }
 
     /**

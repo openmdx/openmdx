@@ -1,14 +1,14 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusClient.java,v 1.19 2010/03/11 18:50:58 hburger Exp $
+ * Project:     openMDX/Security, http://www.openmdx.org/
+ * Name:        $Id: RadiusClient.java,v 1.24 2010/08/03 14:27:23 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/11 18:50:58 $
+ * Date:        $Date: 2010/08/03 14:27:23 $
  * ====================================================================
  *
- * Copyright (C) 2004-2007  OMEX AG
+ * Copyright (C) 2004-2010  OMEX AG
  *
  * * This library is free software; you can redistribute it and/or
  *   modify it under the terms of the GNU Lesser General Public
@@ -44,12 +44,12 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  * 
  * This library BASED on Java Radius Client 2.0.0
  * (http://http://jradius-client.sourceforge.net/),
- * but it's namespace and content has been MODIFIED by OMEX AG
+ * but its namespace and content has been MODIFIED by OMEX AG
  * in order to integrate it into the openMDX framework.
  */
 package org.openmdx.uses.net.sourceforge.jradiusclient;
@@ -60,6 +60,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -114,14 +116,14 @@ import org.openmdx.uses.net.sourceforge.jradiusclient.exception.RadiusException;
  */
 public class RadiusClient
     extends AbstractRadiusClient
-	implements MultiLineStringRepresentation
+	implements RadiusConnection, MultiLineStringRepresentation
 {
     private static byte [] NAS_ID;
     private static final int AUTH_LOOP_COUNT = 3;
     private static final int ACCT_LOOP_COUNT = 3;
     private static final int DEFAULT_AUTH_PORT = 1812;
     private static final int DEFAULT_ACCT_PORT = 1813;
-    private static final int DEFAULT_SOCKET_TIMEOUT = 6000;
+    public static final int DEFAULT_SOCKET_TIMEOUT = 6000;
     private byte[] sharedSecret = null;
     private InetAddress[] hostname = null;
     private int authenticationPort[] = null;
@@ -132,6 +134,8 @@ public class RadiusClient
     private final byte [] NAS_IP;
     private boolean valid;
     public static final String ENCODING = "UTF-8";
+    private int authenticationRetries = AUTH_LOOP_COUNT;
+    private int accountingRetries = ACCT_LOOP_COUNT;
     
     /*
      * Static Initializer
@@ -205,8 +209,8 @@ public class RadiusClient
         	new int[]{authPort}, 
         	new int[]{acctPort}, 
         	sharedSecret, 
-        	sockTimeout, 
-        	Logger.getLogger(Logger.GLOBAL_LOGGER_NAME), 
+        	new BigDecimal(BigInteger.valueOf(sockTimeout), 3), 
+        	Logger.getLogger(AbstractRadiusClient.DEFAULT_LOGGER_NAME), 
         	false, 
         	null
         );
@@ -232,13 +236,17 @@ public class RadiusClient
         int[] authPort, 
         int[] acctPort, 
         String sharedSecret, 
-        int sockTimeout, 
+        BigDecimal sockTimeout, 
         Logger logger, 
         boolean trace, 
         InetAddress nasAddress
     ) throws RadiusException, InvalidParameterException{
         super(logger, trace);
         this.setProvider(hostname, authPort, acctPort);
+        if(hostname.length > 1) {
+        	this.authenticationRetries = hostname.length;
+        	this.accountingRetries = hostname.length;
+        }
         this.setSharedSecret(sharedSecret);
         //set up the socket for this client
         try{
@@ -246,7 +254,9 @@ public class RadiusClient
         }catch(SocketException sex){
             throw new RadiusException(sex);
         }
-        this.setTimeout(sockTimeout);
+        this.setTimeout(
+        	sockTimeout == null ? RadiusClient.DEFAULT_SOCKET_TIMEOUT : sockTimeout.scaleByPowerOfTen(3).intValue()
+        );
         //set up the md5 engine
         try{
 	        this.md5MessageDigest = MessageDigest.getInstance("MD5");
@@ -274,7 +284,7 @@ public class RadiusClient
      */
     public RadiusPacket authenticate(RadiusPacket accessRequest)
     throws RadiusException, InvalidParameterException {
-        return this.authenticate(accessRequest, RadiusClient.AUTH_LOOP_COUNT);
+        return this.authenticate(accessRequest, this.authenticationRetries);
     }
     /**
      * This method performs the job of authenticating the given <code>RadiusPacket</code> against
@@ -404,7 +414,7 @@ public class RadiusClient
             length, 
             requestAuthenticator, 
             requestAttributes, 
-            RadiusClient.ACCT_LOOP_COUNT, 
+            this.accountingRetries, 
             requestPacket.getSocketIndex(), 
             this.getHostname(), 
             this.getAcctPort()
@@ -606,8 +616,8 @@ public class RadiusClient
 	            }
 	            if(exceptionCount == exceptions.size()) try{
 	            	hostnames.add(InetAddress.getByName(hostname[i]));
-	            	authPorts.add(valueOf(authPort[i]));
-	            	acctPorts.add(valueOf(acctPort[i]));
+	            	authPorts.add(Integer.valueOf(authPort[i]));
+	            	acctPorts.add(Integer.valueOf(acctPort[i]));
 	            } catch(java.net.UnknownHostException exception){
 	            	exceptions.add("Hostname[" + i + "] could not be resolved: " + hostname[i]);
 	            }
@@ -943,6 +953,7 @@ public class RadiusClient
      *
      * @return a string representation of this object.
      */
+    @Override
     public String toString(){
         return getClass().getName() + ": " + IndentingFormatter.toString(
         	ArraysExtension.asMap(
@@ -971,6 +982,7 @@ public class RadiusClient
      * @return true if the specified Object is equal to this
      *		<code>RadiusClient</code>.
      */
+    @Override
     public boolean equals(Object object){
         if (object == null){
             return false;
@@ -991,6 +1003,7 @@ public class RadiusClient
     /**
      * @return int the hashCode for this <code>RadiusClient</code>
      */
+    @Override
     public int hashCode(){
         InetAddress[] x1 = this.getHostname();
         int[] x2 = this.getAcctPort();
@@ -1007,25 +1020,29 @@ public class RadiusClient
         }
         return h;
     }
-    /**
-     * closes the socket
-     *
+    
+    /* (non-Javadoc)
+     * @see java.io.Closeable#close()
      */
-    protected void closeSocket(){
+//  @Override
+    public void close() throws IOException {
         this.socket.close();
     }
+
     /**
      * overrides finalize to close socket and then normal finalize on super class
      */
-    public void finalize() throws Throwable{
-        this.closeSocket();
+    @Override
+    public void finalize(
+    ) throws Throwable{
+        this.close();
         super.finalize();
     }
 
     /**
-     * We should not reuse radius clients with send/receaive failures
+     * We should not reuse radius clients with send/receive failures
      * 
-     * @return <code>true</code> unless there was asend/receivw failure
+     * @return <code>true</code> unless there was a send/receive failure
      */
     public boolean isValid(){
     	if(!this.valid){

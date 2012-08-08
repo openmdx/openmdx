@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Handler.java,v 1.12 2008/09/19 23:35:42 hburger Exp $
+ * Name:        $Id: Handler.java,v 1.13 2010/06/02 13:46:30 hburger Exp $
  * Description: XRI Protocol Handler
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/09/19 23:35:42 $
+ * Date:        $Date: 2010/06/02 13:46:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -351,6 +351,7 @@ public class Handler
      * 
      * @return a <code>MalformedURLException</code> for the given <code>URL</code>.
      */
+    @Override
     protected MalformedURLException newMalformedURLException(
         URL url
     ){

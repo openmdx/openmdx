@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.6 2010/03/31 14:32:23 hburger Exp $
+ * Name:        $Id: PlugIn_1.java,v 1.7 2010/07/13 09:13:01 hburger Exp $
  * Description: Standard Plug-In
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/31 14:32:23 $
+ * Date:        $Date: 2010/07/13 09:13:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -116,27 +116,37 @@ public class PlugIn_1
      * 
      * @param defaultQualifierType The default qualifier type to set.
      */
-    public void setDefaultQualifierType(String defaultQualifierType) {
+    public void setDefaultQualifierType(
+        String defaultQualifierType
+    ) {
         this.defaultQualifierType = QualifierType.valueOf(defaultQualifierType);
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#setCore(org.openmdx.base.accessor.rest.DataObject_1, org.openmdx.base.accessor.rest.DataObject_1)
      */
-    public void postSetCore(DataObject_1 target, DataObject_1 core) {
+//  @Override
+    public void postSetCore(
+        DataObject_1 target, 
+        DataObject_1 core
+    ) {
         // nothing to do
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#beforeCompletion(org.openmdx.base.accessor.rest.UnitOfWork_1)
      */
-    public void beforeCompletion(UnitOfWork_1 unitOfWork) {
+//  @Override
+    public void beforeCompletion(
+        UnitOfWork_1 unitOfWork
+    ) {
         // nothing to do
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.PlugIn_1_0#newQualifier(org.openmdx.base.accessor.rest.DataObject_1, java.lang.String)
      */
+//  @Override
     public String getQualifier(
         DataObject_1 object, 
         String qualifier
@@ -171,6 +181,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.StoreLifecycleListener#postStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
+//  @Override
     public void postStore(InstanceLifecycleEvent event) {
         // nothing to do
     }
@@ -178,6 +189,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.StoreLifecycleListener#preStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
+//  @Override
     public void preStore(InstanceLifecycleEvent event) {
         DataObject_1 persistentInstance = (DataObject_1) event.getPersistentInstance();
         DataObjectManager_1 dataObjectManager = persistentInstance.jdoGetPersistenceManager(); 
@@ -196,7 +208,10 @@ public class PlugIn_1
                     dirtyFeatures.remove(SystemAttributes.CREATED_BY);
                 }
             }
-            if(model.isInstanceof(persistentInstance, "org:openmdx:base:Modifiable")){
+            if(
+                model.isInstanceof(persistentInstance, "org:openmdx:base:Modifiable") &&
+                !model.isInstanceof(persistentInstance, "org:openmdx:base:Aspect")
+            ){
                 if(persistentInstance.jdoIsDirty() && !persistentInstance.jdoIsDeleted()) {
                     persistentInstance.objSetValue(SystemAttributes.MODIFIED_AT, unitOfWork.getTransactionTime());
                     Collection<Object> modifiedBy = persistentInstance.objGetSet(SystemAttributes.MODIFIED_BY);
@@ -237,6 +252,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.DeleteLifecycleListener#postDelete(javax.jdo.listener.InstanceLifecycleEvent)
      */
+//  @Override
     public void postDelete(InstanceLifecycleEvent event) {
         // nothing to do
     }
@@ -244,6 +260,7 @@ public class PlugIn_1
     /* (non-Javadoc)
      * @see javax.jdo.listener.DeleteLifecycleListener#preDelete(javax.jdo.listener.InstanceLifecycleEvent)
      */
+//  @Override
     public void preDelete(InstanceLifecycleEvent event) {
         DataObject_1 persistentInstance = (DataObject_1) event.getPersistentInstance();
         try {

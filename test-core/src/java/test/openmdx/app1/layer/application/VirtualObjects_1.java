@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VirtualObjects_1.java,v 1.9 2010/03/23 16:38:24 hburger Exp $
+ * Name:        $Id: VirtualObjects_1.java,v 1.10 2010/06/03 15:57:09 hburger Exp $
  * Description: Hard-Wired Objects Layer
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 16:38:24 $
+ * Date:        $Date: 2010/06/03 15:57:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -78,6 +78,7 @@ import org.openmdx.kernel.exception.BasicException;
 public class VirtualObjects_1 extends HardWiredObjects_1 {
 
     // --------------------------------------------------------------------------
+    @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {

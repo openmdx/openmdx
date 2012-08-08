@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: QueryRecord.java,v 1.1 2010/03/19 12:32:54 hburger Exp $
+ * Name:        $Id: QueryRecord.java,v 1.3 2010/06/02 13:45:10 hburger Exp $
  * Description: Query Record 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:32:54 $
+ * Date:        $Date: 2010/06/02 13:45:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -313,7 +313,7 @@ public class QueryRecord
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#getRecordName()
      */
-    @Override
+//  @Override
     public String getRecordName() {
         return NAME;
     }
@@ -324,6 +324,7 @@ public class QueryRecord
      * @param index the index
      * @return the value
      */
+    @Override
     protected Object get(
         int index
     ){
@@ -348,6 +349,7 @@ public class QueryRecord
      * 
      * @return the old value
      */
+    @Override
     protected void put(
         int index,
         Object value

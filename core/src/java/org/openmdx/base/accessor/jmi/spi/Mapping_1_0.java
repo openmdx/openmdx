@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Mapping_1_0.java,v 1.4 2010/04/16 18:24:20 hburger Exp $
+ * Name:        $Id: Mapping_1_0.java,v 1.5 2010/05/26 14:41:25 hburger Exp $
  * Description: Mapping_1_0 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 18:24:20 $
+ * Date:        $Date: 2010/05/26 14:41:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -133,7 +133,7 @@ public interface Mapping_1_0 {
      * Retrieve the feature mapper
      * 
      * @param qualifiedClassName
-     * @param terminal
+     * @param type
      * 
      * @return the feature mapper
      * 
@@ -141,7 +141,7 @@ public interface Mapping_1_0 {
      */
     FeatureMapper getFeatureMapper(
         String qualifiedClassName,
-        boolean terminal
+        FeatureMapper.Type type
     ) throws ServiceException;
 
     /**

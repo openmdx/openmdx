@@ -1,7 +1,7 @@
 /*
  * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/StackObjectPool.java,v $
- * $Revision: 1.5 $
- * $Date: 2008/03/21 18:42:15 $
+ * $Revision: 1.6 $
+ * $Date: 2010/06/02 13:46:51 $
  *
  * ====================================================================
  *
@@ -83,7 +83,7 @@ import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
  * artificial limits.
  *
  * @author Rodney Waldhoff
- * @version $Revision: 1.5 $ $Date: 2008/03/21 18:42:15 $
+ * @version $Revision: 1.6 $ $Date: 2010/06/02 13:46:51 $
  */
 @SuppressWarnings("unchecked")
 public class StackObjectPool extends BaseObjectPool implements ObjectPool {
@@ -165,6 +165,7 @@ public class StackObjectPool extends BaseObjectPool implements ObjectPool {
         _pool.ensureCapacity( initcapacity > _maxSleeping ? _maxSleeping : initcapacity);
     }
 
+    @Override
     public synchronized Object borrowObject() throws Exception {
         assertOpen();
         Object obj = null;
@@ -184,6 +185,7 @@ public class StackObjectPool extends BaseObjectPool implements ObjectPool {
         return obj;
     }
 
+    @Override
     public void returnObject(Object obj) throws Exception {
         assertOpen();
         boolean success = true;
@@ -220,6 +222,7 @@ public class StackObjectPool extends BaseObjectPool implements ObjectPool {
         }
     }
 
+    @Override
     public synchronized void invalidateObject(Object obj) throws Exception {
         assertOpen();
         _numActive--;
@@ -229,16 +232,19 @@ public class StackObjectPool extends BaseObjectPool implements ObjectPool {
         notifyAll(); // _numActive has changed
     }
 
+    @Override
     public int getNumIdle() {
         assertOpen();
         return _pool.size();
     }
 
+    @Override
     public int getNumActive() {
         assertOpen();
         return _numActive;
     }
 
+    @Override
     public synchronized void clear() {
         assertOpen();
         if(null != _factory) {
@@ -254,6 +260,7 @@ public class StackObjectPool extends BaseObjectPool implements ObjectPool {
         _pool.clear();
     }
 
+    @Override
     synchronized public void close() throws Exception {
         clear();
         _pool = null;
@@ -265,6 +272,7 @@ public class StackObjectPool extends BaseObjectPool implements ObjectPool {
      * Create an object, and place it into the pool.
      * addObject() is useful for "pre-loading" a pool with idle objects.
      */
+    @Override
     public void addObject() throws Exception {
         Object obj = _factory.makeObject();
         synchronized(this) {
@@ -273,6 +281,7 @@ public class StackObjectPool extends BaseObjectPool implements ObjectPool {
         }
     }
 
+    @Override
     synchronized public void setFactory(PoolableObjectFactory factory) throws IllegalStateException {
         assertOpen();
         if(0 < getNumActive()) {

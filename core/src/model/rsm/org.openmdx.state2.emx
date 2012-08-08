@@ -212,7 +212,7 @@
             <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_-V5WfoC4Ed2lDKTVYu2_Tw"/>
           </children>
           <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_-V5WcYC4Ed2lDKTVYu2_Tw" fontName="Arial" fontHeight="11" showListVisibility="Text" fillColor="13434879" lineColor="3276953" showStereotype="Text"/>
-          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_-V5WcoC4Ed2lDKTVYu2_Tw" x="19080" y="4134" width="10367" height="3228"/>
+          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_-V5WcoC4Ed2lDKTVYu2_Tw" x="19080" y="4134" width="9746" height="3228"/>
         </children>
         <children xmi:id="_stTMgIygEd6xh6MVzLqAFg">
           <children xmi:id="_svSwkIygEd6xh6MVzLqAFg" type="ImageCompartment">
@@ -511,6 +511,6 @@
   </profileApplication>
   <profileApplication xmi:id="_wjvNUN67EdmkJO73lqONhA">
     <eAnnotations xmi:id="_wjvNUd67EdmkJO73lqONhA" source="http://www.eclipse.org/uml2/2.0.0/UML"/>
-    <appliedProfile href="platform:/resource/openmdx-core_profiles/openMDX.epx#_O4XmQN64EdmrtKJSXC0_FQ?openMDX?"/>
+    <appliedProfile href="platform:/resource/openMDX%202%20~%20Core_profiles%20(RSM)/openMDX.epx#_O4XmQN64EdmrtKJSXC0_FQ?openMDX?"/>
   </profileApplication>
 </uml:Model>

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: MarshallingList.java,v 1.17 2009/01/11 21:28:59 wfro Exp $
+ * Name:        $Id: MarshallingList.java,v 1.20 2010/07/01 16:24:13 hburger Exp $
  * Description: MarshallingList
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/11 21:28:59 $
+ * Date:        $Date: 2010/07/01 16:24:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -92,7 +92,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
      * @param list
      */    
     public MarshallingList(
-        org.openmdx.base.marshalling.Marshaller marshaller,
+        Marshaller marshaller,
         List list 
     ) {
         this(
@@ -149,6 +149,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
     // Implements List
     //------------------------------------------------------------------------
 
+    @Override
     public void add(
         int index, 
         E element
@@ -167,6 +168,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
     /* (non-Javadoc)
      * @see java.util.Collection#add(java.lang.Object)
      */
+    @Override
     public boolean add(
         E element
     ) {
@@ -183,6 +185,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
     /* (non-Javadoc)
      * @see java.util.Collection#clear()
      */
+    @Override
     public void clear() {
         getDelegate().clear();
     }
@@ -190,6 +193,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
     /* (non-Javadoc)
      * @see java.util.Collection#contains(java.lang.Object)
      */
+    @Override
     public boolean contains(
         Object candidate
     ) {
@@ -203,6 +207,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
         }        
     }
 
+    @Override
     public E get(
         int index
     ) {
@@ -219,6 +224,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
     /* (non-Javadoc)
      * @see java.util.List#indexOf(java.lang.Object)
      */
+    @Override
     public int indexOf(
         Object candidate
     ) {
@@ -241,6 +247,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
     /* (non-Javadoc)
      * @see java.util.Collection#isEmpty()
      */
+    @Override
     public boolean isEmpty() {
         return getDelegate().isEmpty();
     }
@@ -248,6 +255,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
     /* (non-Javadoc)
      * @see java.util.List#lastIndexOf(java.lang.Object)
      */
+    @Override
     public int lastIndexOf(
         Object candidate
     ) {
@@ -267,6 +275,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
         }        
     }
 
+    @Override
     public E remove(
         int index
     ) {
@@ -283,6 +292,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
     /* (non-Javadoc)
      * @see java.util.Collection#remove(java.lang.Object)
      */
+    @Override
     public boolean remove(
         Object candidate
     ) {
@@ -302,6 +312,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
         }        
     }
 
+    @Override
     public E set(
         int index, 
         E element
@@ -319,32 +330,44 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable 
         }        
     }
 
+    @Override
     public int size(
     ) {
         return getDelegate().size();
     }
 
+    @Override
     public Iterator<E> iterator(
     ) {
         return new MarshallingListIterator(getDelegate().listIterator());
     }
 
+    @Override
     public ListIterator<E> listIterator(
     ) {
         return new MarshallingListIterator(getDelegate().listIterator());
     }
 
+    @Override
     public ListIterator<E> listIterator(
         int index
     ) {
         return new MarshallingListIterator(getDelegate().listIterator(index));
     }
  
+    /* (non-Javadoc)
+     * @see java.util.AbstractCollection#toString()
+     */
+    @Override
+    public String toString() {
+        return getDelegate().toString();
+    }
+
     
     //------------------------------------------------------------------------
     // Class MarshallingListIterator
     //-----------------------------------------------------------------------
-    
+
     /**
      * 
      */

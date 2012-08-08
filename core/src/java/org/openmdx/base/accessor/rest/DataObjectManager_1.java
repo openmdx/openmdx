@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataObjectManager_1.java,v 1.55 2010/04/28 11:13:32 hburger Exp $
+ * Name:        $Id: DataObjectManager_1.java,v 1.65 2010/08/06 12:15:13 hburger Exp $
  * Description: Data Object Manager
- * Revision:    $Revision: 1.55 $
+ * Revision:    $Revision: 1.65 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/28 11:13:32 $
+ * Date:        $Date: 2010/08/06 12:15:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,7 @@ package org.openmdx.base.accessor.rest;
 
 import static org.openmdx.base.persistence.cci.Queries.ASPECT_QUERY;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -92,11 +93,13 @@ import javax.resource.cci.MappedRecord;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.cci.Structure_1_0;
-import org.openmdx.base.accessor.rest.spi.VirtualObjects_2_0;
+import org.openmdx.base.accessor.rest.spi.CacheAccessor_2_0;
+import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
+import org.openmdx.base.accessor.rest.spi.ManagedConnectionCache_2_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.aop0.PlugIn_1_0;
-import org.openmdx.base.collection.Registry;
 import org.openmdx.base.collection.ConcurrentWeakRegistry;
+import org.openmdx.base.collection.Registry;
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
@@ -104,6 +107,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.InstanceLifecycleListenerRegistry;
+import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.persistence.spi.StandardFetchGroup;
@@ -114,6 +118,7 @@ import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
+import org.openmdx.kernel.loading.Factory;
 
 /**
  * A Data Object Manager 1.x implementation
@@ -315,6 +320,11 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     protected Object taskIdentifier = null;
     
     /**
+     * The transaction time factory may be set by an application
+     */
+    protected Factory<Date> transactionTime;
+    
+    /**
      * The plug-ins
      */
     private final PlugIn_1_0[] plugIns;
@@ -355,6 +365,22 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
 
         public String getUnitOfWorkIdentifier() {
             return DataObjectManager_1.this.currentTransaction().getUnitOfWorkIdentifier();
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.SharedObjects.Accessor#getTransactionTime()
+         */
+    //  @Override
+        public Factory<Date> getTransactionTime() {
+            return DataObjectManager_1.this.transactionTime;
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.SharedObjects.Accessor#setTransactionTime(org.openmdx.kernel.loading.Factory)
+         */
+    //  @Override
+        public void setTransactionTime(Factory<Date> transactionTime) {
+            DataObjectManager_1.this.transactionTime = transactionTime;
         }
         
     };
@@ -506,11 +532,11 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * 
      * @return <code>null</code> if the object has been added to the cache
      */
-    DataObject_1 putIfAbsent(
+    void putUnlessPresent(
         UUID transientObjectId,
         DataObject_1 object
     ){
-        return this.transientRegistry.putIfAbsent(
+        this.transientRegistry.putUnlessPresent(
             transientObjectId,
             object
         );
@@ -521,14 +547,12 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * 
      * @param objectId
      * @param object
-     * 
-     * @return <code>null</code> if the object has been added to the cache
      */
-    DataObject_1 putIfAbsent(
+    void putUnlessPresent(
         Path objectId,
         DataObject_1 object
     ){
-        return this.persistentRegistry.putIfAbsent(
+        this.persistentRegistry.putUnlessPresent(
             objectId,
             object
         );
@@ -549,16 +573,18 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getManagedObjects()
      */
-    @Override
+//  @Override
     public Set<?> getManagedObjects() {
         return this.transientRegistry.values();
     }
 
-    @Override
+//  @Override
     public void evictAll(
     ){
-        for(Object pc : this.persistentRegistry.values()) {
-            ((Evictable)pc).evict();
+        for(DataObject_1 pc : this.persistentRegistry.values()) {
+            if(pc.jdoIsPersistent() && !pc.jdoIsDirty()) {
+                pc.evict();
+            }
         }
     }
 
@@ -594,8 +620,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     ) {
         try {
             ((DataObject_1)pc).objRemove(true);
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             throw new JDOUserException(
                 "unable to delete object",
                 e,
@@ -609,7 +634,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      */
     @SuppressWarnings("unchecked")
     public void deletePersistentAll(Collection pcs) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        PersistenceManagers.deletePersistentAll(this, pcs);
     }
 
     /* (non-Javadoc)
@@ -813,9 +838,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
                 new Selector (){
 
                     public boolean accept(Object candidate) {
-                        return
-                            candidate instanceof DataObject_1_0 &&
-                            states.contains(JDOHelper.getObjectState(candidate));
+                        return states.contains(JDOHelper.getObjectState(candidate));
                     }
                     
                 }
@@ -892,7 +915,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @exception ClassCastException if pc is not an instance of <code>DataObject_1_0</code>
      */
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     public <T> T makePersistent(T pc) {
         DataObject_1_0 source = (DataObject_1_0) pc;
         if(this.getCopyOnAttach() && source.jdoIsDetached()) {
@@ -995,24 +1018,24 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @see javax.jdo.PersistenceManager#deletePersistentAll(java.lang.Object[])
      */
     public void deletePersistentAll(Object... pcs) {
-        // TODO Auto-generated method stub
-
+        PersistenceManagers.deletePersistentAll(this, pcs);
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeNontransactionalAll(java.lang.Object[])
      */
     public void makeNontransactionalAll(Object... pcs) {
-        // TODO Auto-generated method stub
-
+        PersistenceManagers.makeNontransactionalAll(
+            this, 
+            Arrays.asList(pcs)
+        );
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[])
      */
     public void makeTransientAll(Object... pcs) {
-        // TODO Auto-generated method stub
-
+        this.makeTransientAll(false, pcs);
     }
 
     /* (non-Javadoc)
@@ -1026,8 +1049,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @see javax.jdo.PersistenceManager#retrieveAll(java.lang.Object[])
      */
     public void retrieveAll(Object... pcs) {
-        // TODO Auto-generated method stub
-
+        PersistenceManagers.retrieveAll(this, false, pcs);
     }
 
     /* (non-Javadoc)
@@ -1075,9 +1097,14 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     protected Object getPlugInObject(
         Object key
     ){
-        if(key == VirtualObjects_2_0.class) {
+        if(key == ManagedConnectionCache_2_0.class || key == DataStoreCache_2_0.class) {
             Object nativeConnection = this.jdoConnection.getNativeConnection();
-            return nativeConnection instanceof VirtualObjects_2_0 ? nativeConnection : null;
+            if(nativeConnection instanceof CacheAccessor_2_0) try {
+                CacheAccessor_2_0 cacheAccessor = (CacheAccessor_2_0)nativeConnection;
+                return key == ManagedConnectionCache_2_0.class ? cacheAccessor.getManagedConnectionCache() : cacheAccessor.getDataStoreCache();
+            } catch (ServiceException exception) {
+                exception.log();
+            }
         } else {
             for(PlugIn_1_0 plugIn : DataObjectManager_1.this.plugIns) {
                 Object userObject = plugIn.getUserObject(key);
@@ -1310,13 +1337,13 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     ) {
         if(pc instanceof DataObject_1) {
             DataObject_1 dataObject = (DataObject_1) pc;
-            if(dataObject.jdoIsPersistent() && !dataObject.jdoIsNew()) try {
-                dataObject.unconditionalEvict();
-                Container_1 container = dataObject.getContainer(true);
-                if(container != null) {
-                    container.evict();
-                }
-                dataObject.unconditionalLoad();
+            if(
+                dataObject.jdoIsPersistent() &&
+                dataObject.jdoIsDirty() &&
+                !dataObject.jdoIsNew() &&
+                !dataObject.jdoIsDeleted()
+            ) try {
+                dataObject.unconditionalRefresh();
             } catch(ServiceException e) {
                 throw new JDOUserException(
                     "Unable to refresh object",
@@ -1332,9 +1359,9 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      */
     public void refreshAll() {
         UnitOfWork_1 unitOfWork = currentTransaction();
-        refreshAll(
-            unitOfWork.isActive() ? unitOfWork.getMembers() : this.persistentRegistry.values()
-        );
+        if(unitOfWork.isActive()) {
+            refreshAll(unitOfWork.getMembers());
+        }
     }
 
     /* (non-Javadoc)
@@ -1342,7 +1369,11 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      */
     @SuppressWarnings("unchecked")
     public void refreshAll(Collection pcs) {
-        PersistenceManagers.refreshAll(this, pcs);
+        if(pcs instanceof PersistenceCapableCollection) {
+            ((PersistenceCapableCollection)pcs).openmdxjdoRefresh();
+        } else  {
+            PersistenceManagers.refreshAll(this, pcs);
+        }
     }
 
     /* (non-Javadoc)
@@ -1372,14 +1403,30 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @see javax.jdo.PersistenceManager#retrieve(java.lang.Object)
      */
     public void retrieve(Object pc) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        retrieve(pc, false);
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieve(java.lang.Object, boolean)
      */
     public void retrieve(Object pc, boolean useFetchPlan) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        if(pc instanceof DataObject_1) try {
+            ((DataObject_1)pc).objRetrieve(
+                false, // reload
+                useFetchPlan ? this.getFetchPlan() : null
+            );
+        } catch (ServiceException exception) {
+            throw new JDOUserException(
+                "Retrieval failure",
+                exception,
+                pc
+            );
+        } else {
+            throw new IllegalArgumentException(
+                "The first argument should be a DataObject_1 instance: " +
+                (pc == null ? "" : pc.getClass().getName())
+            );
+        }
     }
 
     /* (non-Javadoc)
@@ -1387,7 +1434,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      */
     @SuppressWarnings("unchecked")
     public void retrieveAll(Collection pcs) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        retrieveAll(pcs, false);
     }
 
     /* (non-Javadoc)
@@ -1395,7 +1442,13 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      */
     @SuppressWarnings("unchecked")
     public void retrieveAll(Collection pcs, boolean useFetchPlan) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+        if(pcs instanceof PersistenceCapableCollection) {
+            ((PersistenceCapableCollection)pcs).openmdxjdoRetrieve(
+                useFetchPlan ? this.getFetchPlan() : null
+            );
+        } else {
+            PersistenceManagers.retrieveAll(this, useFetchPlan, pcs);
+        }
     }
 
     /* (non-Javadoc)
@@ -1475,7 +1528,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     public void close(
     ) {
         if(!isClosed()) {
-            // TODO ?   this.connection.close();
             this.connection = null;
             this.connection2 = null;
             this.instanceLifecycleListeners.close();
@@ -1554,17 +1606,14 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
                         null, // transientObjectId
                         null // objectClass
                     );
-                    DataObject_1 newObject = validate ? object.assertObjectIsAccessible(false) : object;
+                    DataObject_1 newObject = validate ? object.objRetrieve(false, this.getFetchPlan()) : object;
                     if(object == newObject) {
-                        DataObject_1 concurrent = this.persistentRegistry.putIfAbsent(xri, object); 
-                        if(concurrent != null) {
-                            object = concurrent;
-                        }
+                        object = this.persistentRegistry.putUnlessPresent(xri, object); 
                     } else {
                         this.persistentRegistry.put(xri, object = newObject);
                     }
                 } else if(validate) {
-                    object.assertObjectIsAccessible(false);
+                    object.objRetrieve(false, this.getFetchPlan());
                 }
                 return object;
             } catch(ServiceException exception) {
@@ -1660,17 +1709,17 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
             );
         }
         for(
-            Iterator<?> i = this.persistentRegistry.values().iterator();
+            Iterator<DataObject_1> i = this.persistentRegistry.values().iterator();
             i.hasNext();
         ){
-            DataObject_1 pc = (DataObject_1) i.next();
+            DataObject_1 pc = i.next();
             if(pc.jdoIsPersistent() && pc.jdoGetObjectId().startsWith(accessPath)){
                 pc.invalidate(makeNonTransactional);
                 i.remove();
             }
         }
     }
-
+    
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.transport.spi.Manager_1_0#move(org.openmdx.compatibility.base.naming.Path, org.openmdx.compatibility.base.naming.Path)
      */
@@ -1681,7 +1730,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         if(!isClosed()){
             DataObject_1 object = this.transientRegistry.get(transientObjectId);
             if(object != null) {
-                this.persistentRegistry.putIfAbsent(objectId, object);
+                this.persistentRegistry.putUnlessPresent(objectId, object);
             }
         }
     }
@@ -1706,7 +1755,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @exception        ServiceException
      *                   DATA_CONVERSION: Object can't be marshalled
      */
-    @Override
+//  @Override
     public Object marshal (
         Object source
     ) throws ServiceException{
@@ -1724,7 +1773,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @exception       ServiceException
      *                  Object can't be unmarshalled
      */
-    @Override
+//  @Override
     public Object unmarshal (
         Object source
     ) throws ServiceException{

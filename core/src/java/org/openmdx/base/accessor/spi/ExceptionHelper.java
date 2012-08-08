@@ -1,15 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ExceptionHelper.java,v 1.1 2010/01/21 17:25:17 hburger Exp $
+ * Name:        $Id: ExceptionHelper.java,v 1.2 2010/07/12 13:19:26 hburger Exp $
  * Description: ExceptionHelper 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/21 17:25:17 $
+ * Date:        $Date: 2010/07/12 13:19:26 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2010, OMEX AG, Switzerland
  * All rights reserved.
@@ -83,14 +82,17 @@ public class ExceptionHelper {
         String label,
         Object object
     ){
-        return JDOHelper.isPersistent(object) ? new BasicException.Parameter(
-            label,
-            JDOHelper.getTransactionalObjectId(object), 
-            ((Path)JDOHelper.getObjectId(object)).toXRI() 
-        ) : new BasicException.Parameter(
-            label,
-            JDOHelper.getTransactionalObjectId(object)
-        );
+        return 
+            object == null ? new BasicException.Parameter(
+                label
+            ) : JDOHelper.isPersistent(object) ? new BasicException.Parameter(
+                label,
+                JDOHelper.getTransactionalObjectId(object), 
+                ((Path)JDOHelper.getObjectId(object)).toXRI() 
+            ) : new BasicException.Parameter(
+                label,
+                JDOHelper.getTransactionalObjectId(object)
+            );
     }
 
 }

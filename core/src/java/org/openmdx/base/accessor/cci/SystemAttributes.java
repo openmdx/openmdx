@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SystemAttributes.java,v 1.5 2010/01/21 17:11:57 hburger Exp $
+ * Name:        $Id: SystemAttributes.java,v 1.7 2010/06/09 16:18:15 hburger Exp $
  * Description: Generated constants for SystemAttributes
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/21 17:11:57 $
+ * Date:        $Date: 2010/06/09 16:18:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -91,14 +91,9 @@ public class SystemAttributes {
     //------------------------------------------------------------------------
 
     /**
-     * The ContextCapables's context reference.
-     */
-    static public final String CONTEXT_CAPABLE_CONTEXT = "context";
-
-    /**
      * The prefix of a DataproviderObject's view attribute.
      */
-    static public final String CONTEXT_PREFIX = CONTEXT_CAPABLE_CONTEXT + ':';
+    static public final String CONTEXT_PREFIX = "context:";
 
     //------------------------------------------------------------------------
     // Creatable

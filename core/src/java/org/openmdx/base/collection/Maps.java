@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Maps.java,v 1.3 2009/09/14 11:50:49 hburger Exp $
+ * Name:        $Id: Maps.java,v 1.6 2010/08/06 12:00:15 hburger Exp $
  * Description: Maps 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/14 11:50:49 $
+ * Date:        $Date: 2010/08/06 12:00:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,7 @@ package org.openmdx.base.collection;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Maps
@@ -85,4 +86,22 @@ public class Maps {
         );
     }
 
+    /**
+     * Return the <em>actual</em> value
+     * 
+     * @param target the concurrent map
+     * @param key
+     * @param value
+     * 
+     * @return the <em>new</em> or <em>kept</em> value
+     */
+    public static <K,V> V putUnlessPresent(
+        ConcurrentMap<K,V> target,
+        K key,
+        V value
+    ){
+        V concurrent = target.putIfAbsent(key, value);
+        return concurrent == null ? value : concurrent;
+    }
+        
 }

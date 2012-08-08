@@ -18,10 +18,6 @@
         <element xmi:type="uml:Package" href="../org.openmdx.security.realm1.uml#_3C7B8A60016D3FB68C60019CPP"/>
         <layoutConstraint xmi:type="notation:Location" xmi:id="_VeyYcUcyEd-o1OTPw_6HJg"/>
       </children>
-      <children xmi:type="notation:Node" xmi:id="_W28eMEcyEd-o1OTPw_6HJg" type="3006">
-        <element xmi:type="uml:Package" href="../org.openmdx.security.realm1.uml#_W2t0sEcyEd-o1OTPw_6HJg"/>
-        <layoutConstraint xmi:type="notation:Location" xmi:id="_W28eMUcyEd-o1OTPw_6HJg"/>
-      </children>
       <styles xmi:type="notation:TitleStyle" xmi:id="_VewjTUcyEd-o1OTPw_6HJg" showTitle="true"/>
       <styles xmi:type="notation:SortingStyle" xmi:id="_VewjTkcyEd-o1OTPw_6HJg"/>
       <styles xmi:type="notation:FilteringStyle" xmi:id="_VewjT0cyEd-o1OTPw_6HJg"/>

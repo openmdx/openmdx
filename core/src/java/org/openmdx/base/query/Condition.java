@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Condition.java,v 1.12 2010/03/31 14:39:23 hburger Exp $
+ * Name:        $Id: Condition.java,v 1.15 2010/06/21 17:33:10 hburger Exp $
  * Description: Condition
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/31 14:39:23 $
+ * Date:        $Date: 2010/06/21 17:33:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,192 +52,62 @@ package org.openmdx.base.query;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import javax.resource.ResourceException;
 
 import org.openmdx.base.resource.Records;
 
-public abstract class Condition
-    implements Serializable, Cloneable {
-
+/**
+ * Abstract Condition
+ */
+public abstract class Condition implements Serializable, Cloneable {
 
     /**
      * Constructor 
      */
-    protected Condition(){
-        // For encoding and decoding
-    }
-    
-    //-----------------------------------------------------------------------    
     protected Condition(
-        Object... values
     ) {
-        this(null, null, false, values);
-    }
-  
-    //-----------------------------------------------------------------------    
-    protected Condition(
-        short quantor,
-        String feature,
-        boolean fulfils,
-        Object... values
-    ) {
-        this.quantifier = Quantifier.valueOf(quantor);
-        this.feature = feature;
-        this.fulfils = fulfils;
-        this.values = values;
+        this(null, null, (Object[])null);
     }
 
-    //-----------------------------------------------------------------------    
+    /**
+     * Constructor 
+     *
+     * @param quantifier
+     * @param feature
+     * @param values
+     */
     protected Condition(
         Quantifier quantifier,
         String feature,
-        boolean fulfils,
         Object... values
     ) {
         this.quantifier = quantifier;
         this.feature = feature;
-        this.fulfils = fulfils;
         this.values = values;
     }
 
-    //-----------------------------------------------------------------------    
-    public Object clone(
-    ) throws CloneNotSupportedException {
-        return super.clone();
-    }
-
-    //-----------------------------------------------------------------------    
     /**
-     * Retrieve the quantor's <code>enum</code> representation
-     * 
-     * @return the quantor's <code>enum</code> representation
+     * The quantifier, i.e. &#x2200; or &#x2203;  
      */
-    public Quantifier quantifier() {
-        return this.quantifier;
-    }
-  
-    //-----------------------------------------------------------------------    
-    public short getQuantor() {
-        return this.quantifier == null ? 0 : this.quantifier.code();
-    }
-  
-    //-----------------------------------------------------------------------    
-    public void setQuantor(
-        short quantor
-    ) {
-        this.quantifier = Quantifier.valueOf(quantor);
-    }
-
-    //-----------------------------------------------------------------------    
-    public String getFeature() {
-        return this.feature;
-    }
-
-    //-----------------------------------------------------------------------    
-    public void setFeature(
-        String feature
-    ) {
-        this.feature = feature;
-    }
-
-    //-----------------------------------------------------------------------    
-    public boolean isFulfil() {
-        return this.fulfils;
-    }
-
-    //-----------------------------------------------------------------------    
-    public void setFulfil(
-        boolean fulfil
-    ) {
-        this.fulfils = fulfil;
-    }
-
-    //-----------------------------------------------------------------------    
-    public Object[] getValue(
-    ) {
-        return this.values;
-    }
-
-    //-----------------------------------------------------------------------    
-    public Object getValue(
-        int index
-    ) {
-        return this.values[index];
-    }
-
-    //-----------------------------------------------------------------------    
-    public void setValue(
-        int index,
-        Object value
-    ) {
-        this.values[index] = value;
-    }
-
-    //-----------------------------------------------------------------------    
-    public void setValue(
-        Object... values
-    ) {
-        this.values = values;
-    }
-
-    //-----------------------------------------------------------------------    
-    public abstract String getName();
-
-    //-----------------------------------------------------------------------    
-    public String toString (
-    ) {
-        try {
-            return Records.getRecordFactory().asMappedRecord(
-                getClass().getName(), 
-                (quantifier == null ? "" : quantifier.toString() + ' ' + feature + ' ') + getName() + ' ' + Arrays.asList(values),
-                TO_STRING_FIELDS, 
-                new Object[]{
-                    quantifier,
-                    feature, 
-                    getName(), 
-                    Arrays.asList(values)
-                }
-            ).toString();
-        } catch (ResourceException exception) {
-            return super.toString();
-        }
-    }
-  
-    @Override
-    public boolean equals(
-        Object obj
-    ) {
-        if(obj instanceof Condition) {
-            Condition that = (Condition)obj;
-            boolean isEqual =
-                this.isFulfil() == that.isFulfil() &&
-                this.getFeature().equals(that.getFeature()) &&
-                this.getName().equals(that.getName()) &&
-                Arrays.asList(this.getValue()).equals(Arrays.asList(that.getValue()));
-            return isEqual;
-                
-        }
-        else {
-            return false;
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    // Variables
-    //-------------------------------------------------------------------------
-
-    protected final static Object[] EMPTY_OBJECT_ARRAY = new Object[]{};
-    
     private Quantifier quantifier;
+    
+    /**
+     * The unqualified feature name
+     */
     private String feature;
-    private boolean fulfils;
-    protected Object[] values;
+    
+    /**
+     * The condition specific values
+     */
+    private Object[] values;
     
     private static final String[] TO_STRING_FIELDS = {
-        "quantor",
+        "quantifier",
         "feature",
-        "operator",
+        "type",
         "values"
     };
     
@@ -246,4 +116,255 @@ public abstract class Condition
      */
     private static final long serialVersionUID = -3115618018740431736L;
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#clone()
+     */
+    @Override
+    public Object clone(
+    ) throws CloneNotSupportedException {
+        return super.clone();
+    }
+
+    /**
+     * Retrieve the quantifier's <code>enum</code> representation
+     * 
+     * @return the quantifier's <code>enum</code> representation
+     */
+    public Quantifier getQuantifier() {
+        return this.quantifier;
+    }
+  
+    /**
+     * Set the quantifier's <code>enum</code> representation
+     * 
+     * @param the quantifier's <code>enum</code> representation
+     */
+    public void setQuantifier(
+        Quantifier quantifier
+    ) {
+        this.quantifier = quantifier;
+    }
+    
+    /**
+     * Required to decode legacy XML data
+     * 
+     * @deprecated use {@link Condition#setQuantifier(Quantifier)}
+     */
+    @Deprecated
+    public void setQuantor(
+        short quantor
+    ) {
+        this.quantifier = Quantifier.valueOf(quantor);
+    }
+
+    /**
+     * Retrieve the feature name
+     * 
+     * @return the unqualified feature name
+     */
+    public String getFeature() {
+        return this.feature;
+    }
+
+    /**
+     * Set the feature name
+     * 
+     * @param the unqualified feature name
+     */
+    public void setFeature(
+        String feature
+    ) {
+        this.feature = feature;
+    }
+
+    /**
+     * Retrieve the values (with a condition type specific semantic and cardinality)
+     * 
+     * @return the values
+     */
+    public Object[] getValue(
+    ) {
+        return this.values;
+    }
+
+    /**
+     * Replace the values (with a condition type specific semantic and cardinality)
+     * 
+     * @param the values
+     */
+    public void setValue(
+        Object... values
+    ) {
+        this.values = values;
+    }
+
+    /**
+     * Retrieve one of the values (with a condition type specific semantic)
+     * 
+     * @param index
+     * 
+     * @return the values
+     */
+    public Object getValue(
+        int index
+    ) {
+        return this.values[index];
+    }
+
+    /**
+     * Replace a single value (with a condition type specific semantic)
+     * 
+     * @param index the index
+     * @param value the value
+     */
+    public void setValue(
+        int index,
+        Object value
+    ) {
+        this.values[index] = value;
+    }
+
+    /**
+     * Retrieve the condition type's string representation
+     * 
+     * @return the condition type's name
+     */
+    public String getName(
+    ){
+        ConditionType type = this.getType();
+        return type == null ? "PIGGY_BACK" : type.name();
+    }
+
+    /**
+     * Retrieve the condition type's character representation
+     * 
+     * @return the condition type's symbol
+     */
+    public char getSymbol(
+    ){
+        ConditionType type = this.getType();
+        return type == null ? '\uFFFC' : type.symbol();
+    }
+
+    /**
+     * Retrieve the condition type's character representation
+     * 
+     * @return the condition type's symbol
+     */
+    public abstract ConditionType getType();
+
+    /**
+     * Retrieve the condition's string representation, e.g.<code> 
+     * &#x2026;(&#x2200; color | color &#x2208; ["RED", "GREEN"])&#x2026;</code> 
+     * 
+     * @return the condition's string representation
+     */
+    @Override
+    public String toString (
+    ) {
+        try {
+            ConditionType type = this.getType();
+            List<?> values = this.values == null ? Collections.emptyList() : Arrays.asList(this.values);
+            StringBuilder description;
+            if(type == null) {
+                description = null;
+            } else {
+                description = new StringBuilder();
+                if(this.quantifier != null) {
+                    description.append(
+                        this.quantifier.symbol()
+                    ).append(
+                        ' '
+                    ).append(
+                        this.feature
+                    ).append(
+                        " | "
+                    ).append(
+                        this.feature
+                    ).append(
+                        ' '
+                    );
+                }
+                description.append(
+                    type.symbol()
+                ).append(
+                    ' '
+                ).append(
+                    values
+                );
+            }
+            return Records.getRecordFactory().asMappedRecord(
+                this.getClass().getName(), 
+                description == null ? null : description.toString(),
+                Condition.TO_STRING_FIELDS, 
+                new Object[]{
+                    this.quantifier,
+                    this.feature, 
+                    this.getType(), 
+                    values
+                }
+            ).toString();
+        } catch (ResourceException exception) {
+            return super.toString();
+        }
+    }
+  
+    /**
+     * Compare ths object to another one
+     * 
+     * @param obj the other object
+     * 
+     * @return <code>true</code> if the other object represents the same condition
+     */
+    @Override
+    public boolean equals(
+        Object obj
+    ) {
+        if(obj instanceof Condition) {
+            Condition that = (Condition)obj;
+            return 
+                this.quantifier == that.quantifier &&
+                this.feature.equals(that.feature) &&
+                this.getType() == that.getType() &&
+                this.areEqual(this.values, that.values);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Compare the value arrays, treating empty and <code>null</code> as equal
+     * 
+     * @param left
+     * @param right
+     * 
+     * @return if the value arrays are equal
+     */
+    protected boolean areEqual(
+        Object[] left,
+        Object[] right
+    ){
+        if(left == null || left.length == 0) {
+            return right == null || right.length == 0; 
+        } else if (right == null){
+            return false;
+        } else {
+            ConditionType type = this.getType();
+            if(
+                type == ConditionType.IS_IN ||
+                type == ConditionType.IS_NOT_IN ||
+                type == ConditionType.IS_LIKE ||
+                type == ConditionType.IS_UNLIKE ||
+                type == ConditionType.SOUNDS_LIKE ||
+                type == ConditionType.SOUNDS_UNLIKE 
+           ){
+               List<Object> l = Arrays.asList(left);
+               List<Object> r = Arrays.asList(right);
+               return r.containsAll(l) && l.containsAll(r);
+            } else {
+               return Arrays.equals(left, right);
+           }
+        }
+    }
+    
 }

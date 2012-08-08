@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ConnectorContext.java,v 1.5 2009/09/18 12:34:53 hburger Exp $
+ * Name:        $Id: ConnectorContext.java,v 1.6 2010/08/03 14:02:01 hburger Exp $
  * Description: DataSource Context 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/18 12:34:53 $
+ * Date:        $Date: 2010/08/03 14:02:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,8 @@
  */
 package org.openmdx.kernel.lightweight.naming.eis;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -163,6 +165,10 @@ class ConnectorContext extends ResourceContext {
             return Byte.valueOf(encodedValue.substring(16));
         } else if (encodedValue.startsWith("(java.lang.String)")){
             return encodedValue.substring(18);
+        } else if (encodedValue.startsWith("(java.math.BigInteger)")){
+            return new BigInteger(encodedValue.substring(22));
+        } else if (encodedValue.startsWith("(java.math.BigDecimal)")){
+            return new BigDecimal(encodedValue.substring(22));
 //      } else if(encodedValue.indexOf('%') >= 0) {
 //          return URITransformation.decode(encodedValue);
         } else {

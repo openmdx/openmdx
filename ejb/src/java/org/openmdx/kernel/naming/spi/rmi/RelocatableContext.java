@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RelocatableContext.java,v 1.4 2009/09/11 13:39:20 hburger Exp $
+ * Name:        $Id: RelocatableContext.java,v 1.6 2010/06/07 10:27:10 hburger Exp $
  * Description: Relocatable Context
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/11 13:39:20 $
+ * Date:        $Date: 2010/06/07 10:27:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -96,7 +96,7 @@ public class RelocatableContext extends StringBasedContext implements Serializab
 		String nameInNamespace
 	) {
 		this.initialContext = initialContext;
-		this.prefix = nameInNamespace.length() == 0 ? "" : nameInNamespace.substring(1);
+		this.prefix = nameInNamespace;
 	}
 
 	/* (non-Javadoc)
@@ -253,6 +253,7 @@ public class RelocatableContext extends StringBasedContext implements Serializab
 	/* (non-Javadoc)
 	 * @see javax.naming.Context#close()
 	 */
+	@Override
 	public void close() throws NamingException {
 		super.close();
 		this.prefix = null;
@@ -263,7 +264,7 @@ public class RelocatableContext extends StringBasedContext implements Serializab
 	 * @see javax.naming.Context#getNameInNamespace()
 	 */
 	public String getNameInNamespace() throws NamingException {
-		return '/' + this.prefix;
+		return this.prefix;
 	}
 	
 	/**

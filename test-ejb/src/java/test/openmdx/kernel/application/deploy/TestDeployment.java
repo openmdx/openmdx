@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestDeployment.java,v 1.7 2010/04/09 09:40:33 hburger Exp $
+ * Name:        $Id: TestDeployment.java,v 1.8 2010/06/04 22:39:41 hburger Exp $
  * Description: Container Test
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/09 09:40:33 $
+ * Date:        $Date: 2010/06/04 22:39:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -138,7 +138,8 @@ public class TestDeployment extends TestCase {
    * Sets up the fixture, for example, open a network connection.
    * This method is called before a test is executed.
    */
-  protected void setUp(
+  @Override
+protected void setUp(
   ) throws Exception {
     LightweightContainer.getInstance(
         LightweightContainer.Mode.ENTERPRISE_APPLICATION_CONTAINER
@@ -151,7 +152,8 @@ public class TestDeployment extends TestCase {
     this.directory = this.createTemporaryTestFiles();
   }
 
-  protected void tearDown(
+  @Override
+protected void tearDown(
   ) throws Exception {
     InitialContext initialContext = new InitialContext();
     traceContext("", initialContext, "test");

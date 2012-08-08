@@ -1,7 +1,7 @@
 /*
  * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/GenericObjectPool.java,v $
- * $Revision: 1.11 $
- * $Date: 2008/03/21 18:42:14 $
+ * $Revision: 1.12 $
+ * $Date: 2010/06/02 13:46:51 $
  *
  * ====================================================================
  *
@@ -164,7 +164,7 @@ import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
  * @see GenericKeyedObjectPool
  * @author Rodney Waldhoff
  * @author Dirk Verbeeck
- * @version $Revision: 1.11 $ $Date: 2008/03/21 18:42:14 $
+ * @version $Revision: 1.12 $ $Date: 2010/06/02 13:46:51 $
  */
 @SuppressWarnings("unchecked")
 public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
@@ -758,6 +758,7 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
 
     //-- ObjectPool methods ------------------------------------------
 
+    @Override
     public Object borrowObject() throws Exception {
         long starttime = System.currentTimeMillis();
         boolean newlyCreated = false;
@@ -862,6 +863,7 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
         }
     }
 
+    @Override
     public void invalidateObject(Object obj) throws Exception {
         assertOpen();
         try {
@@ -875,6 +877,7 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
         }
     }
 
+    @Override
     public synchronized void clear() {
         assertOpen();
         for(Iterator it = _pool.iterator(); it.hasNext(); ) {
@@ -889,16 +892,19 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
         notifyAll(); // num sleeping has changed
     }
 
+    @Override
     public synchronized int getNumActive() {
         assertOpen();
         return _numActive;
     }
 
+    @Override
     public synchronized int getNumIdle() {
         assertOpen();
         return _pool.size();
     }
 
+    @Override
     public void returnObject(Object obj) throws Exception {
         assertOpen();
         boolean success = true;
@@ -933,6 +939,7 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
         }
     }
 
+    @Override
     public synchronized void close() throws Exception {
         clear();
         _pool = null;
@@ -945,6 +952,7 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
         super.close();
     }
 
+    @Override
     public synchronized void setFactory(PoolableObjectFactory factory) throws IllegalStateException {
         assertOpen();
         if(0 < getNumActive()) {
@@ -1036,6 +1044,7 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
      * Create an object, and place it into the pool.
      * addObject() is useful for "pre-loading" a pool with idle objects.
      */
+    @Override
     public void addObject() throws Exception {
         Object obj = _factory.makeObject();
         synchronized(this) {

@@ -1,4 +1,4 @@
-#Tue Apr 13 17:03:09 CEST 2010
+#Tue Jun 08 13:39:28 CEST 2010
 eclipse.preferences.version=1
 encoding//diagrams/models-Main.umlclass=UTF-8
 encoding//diagrams/net.rfc-Main.umlclass=UTF-8
@@ -14,8 +14,6 @@ encoding//diagrams/org.openmdx.base-Main.umlclass=UTF-8
 encoding//diagrams/org.openmdx.base-Parameters.umlclass=UTF-8
 encoding//diagrams/org.openmdx.base-Primitives.umlclass=UTF-8
 encoding//diagrams/org.openmdx.compatibility.audit1-Main.umlclass=UTF-8
-encoding//diagrams/org.openmdx.compatibility.datastore1-Main.umlclass=UTF-8
-encoding//diagrams/org.openmdx.compatibility.sequence1-Main.umlclass=UTF-8
 encoding//diagrams/org.openmdx.generic1-Main.umlclass=UTF-8
 encoding//diagrams/org.openmdx.preferences1-Main.umlclass=UTF-8
 encoding//diagrams/org.openmdx.role2-Main.umlclass=UTF-8

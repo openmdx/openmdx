@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RequestedObject.java,v 1.11 2010/04/13 17:45:06 wfro Exp $
+ * Name:        $Id: RequestedObject.java,v 1.13 2010/06/02 13:39:35 hburger Exp $
  * Description: Request Object
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/13 17:45:06 $
+ * Date:        $Date: 2010/06/02 13:39:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -140,6 +140,7 @@ public class RequestedObject
      *
      * @return the requested dataprovider object's string representation
      */
+    @Override
     public String toString(
     ){
         return this.object != null ? this.object.toString() :
@@ -299,7 +300,7 @@ public class RequestedObject
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getPath()
      */
-    @Override
+//  @Override
     public Path getPath() {
         return this.getObject().getPath();
     }
@@ -307,7 +308,7 @@ public class RequestedObject
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getValue()
      */
-    @Override
+//  @Override
     public MappedRecord getValue() {
         return this.getObject().getValue();
     }
@@ -315,7 +316,7 @@ public class RequestedObject
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#getVersion()
      */
-    @Override
+//  @Override
     public Object getVersion() {
         return this.getObject().getVersion();
     }
@@ -323,7 +324,7 @@ public class RequestedObject
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setPath(org.openmdx.base.naming.Path)
      */
-    @Override
+//  @Override
     public void setPath(Path path) {
         this.getObject().setPath(path);
     }
@@ -331,7 +332,7 @@ public class RequestedObject
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setValue(javax.resource.cci.MappedRecord)
      */
-    @Override
+//  @Override
     public void setValue(MappedRecord value) {
         this.getObject().setValue(value);
     }
@@ -339,7 +340,7 @@ public class RequestedObject
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ObjectRecord#setVersion(java.lang.Object)
      */
-    @Override
+//  @Override
     public void setVersion(Object version) {
         this.getObject().setVersion(version);
     }

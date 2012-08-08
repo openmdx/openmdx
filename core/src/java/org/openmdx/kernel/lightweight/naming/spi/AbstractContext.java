@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractContext.java,v 1.1 2009/09/11 13:16:23 hburger Exp $
+ * Name:        $Id: AbstractContext.java,v 1.2 2010/06/02 13:45:39 hburger Exp $
  * Description: Abstract Context
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/11 13:16:23 $
+ * Date:        $Date: 2010/06/02 13:45:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -124,6 +124,7 @@ public abstract class AbstractContext implements Context {
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         try {
             return getClass().getName() + ": " + getNameInNamespace();

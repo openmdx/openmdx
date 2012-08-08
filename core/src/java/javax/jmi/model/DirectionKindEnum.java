@@ -9,15 +9,10 @@ public final class DirectionKindEnum implements DirectionKind {
     public static final DirectionKindEnum INOUT_DIR = new DirectionKindEnum("inout_dir");
     public static final DirectionKindEnum RETURN_DIR = new DirectionKindEnum("return_dir");
 
-    private static final java.util.List typeName;
+    private static final java.util.List typeName = java.util.Collections.unmodifiableList(
+        java.util.Arrays.asList("Model", "DirectionKind")
+    );
     private final String literalName;
-
-    static {
-        java.util.ArrayList temp = new java.util.ArrayList();
-        temp.add("Model");
-        temp.add("DirectionKind");
-        typeName = java.util.Collections.unmodifiableList(temp);
-    }
 
     private DirectionKindEnum(String literalName) {
         this.literalName = literalName;
@@ -27,14 +22,17 @@ public final class DirectionKindEnum implements DirectionKind {
         return typeName;
     }
 
+    @Override
     public String toString() {
         return literalName;
     }
 
+    @Override
     public int hashCode() {
         return literalName.hashCode();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof DirectionKindEnum) return (o == this);
         else if (o instanceof DirectionKind) return (o.toString().equals(literalName));

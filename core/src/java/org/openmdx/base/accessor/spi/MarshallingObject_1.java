@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingObject_1.java,v 1.22 2010/01/26 15:41:36 hburger Exp $
+ * Name:        $Id: MarshallingObject_1.java,v 1.24 2010/06/22 07:13:59 hburger Exp $
  * Description: MarshallingObject_1 class
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:41:36 $
+ * Date:        $Date: 2010/06/22 07:13:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -55,6 +55,7 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import javax.jdo.JDOUserException;
+import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
@@ -146,11 +147,15 @@ public abstract class MarshallingObject_1<M extends Marshaller>
      * @exception   ServiceException 
      *              if the object is not accessible
      */
+    @Override
     public void objSetValue(
         String feature,
         Object to
     ) throws ServiceException {
-        getDelegate().objSetValue(feature, getMarshaller().unmarshal(to));
+        this.getDelegate().objSetValue(
+            feature, 
+            getMarshaller().unmarshal(to)
+        );
     }
 
     /**
@@ -167,10 +172,13 @@ public abstract class MarshallingObject_1<M extends Marshaller>
      * @exception   ServiceException 
      *              if the object is not accessible
      */
+    @Override
     public Object objGetValue(
         String feature
     ) throws ServiceException {
-        return getMarshaller().marshal(getDelegate().objGetValue(feature));
+        return this.getMarshaller().marshal(
+            getDelegate().objGetValue(feature)
+        );
     }
 
     /**
@@ -191,12 +199,13 @@ public abstract class MarshallingObject_1<M extends Marshaller>
      * @exception   ClassCastException
      *              if the feature's value is not a list
      */
+    @Override
     public List<Object> objGetList(
         String feature
     ) throws ServiceException {
         return new MarshallingList<Object>(
-            getMarshaller(),
-            getDelegate().objGetList(feature)
+            this.getMarshaller(),
+            this.getDelegate().objGetList(feature)
         );
     }
 
@@ -218,12 +227,13 @@ public abstract class MarshallingObject_1<M extends Marshaller>
      * @exception   ClassCastException
      *              if the feature's value is not a set
      */
+    @Override
     public Set<Object> objGetSet(
         String feature
     ) throws ServiceException {
         return new MarshallingSet<Object>(
-            getMarshaller(),
-            getDelegate().objGetSet(feature)
+            this.getMarshaller(),
+            this.getDelegate().objGetSet(feature)
         );
     }
 
@@ -245,12 +255,13 @@ public abstract class MarshallingObject_1<M extends Marshaller>
      * @exception   ServiceException NOT_SUPPORTED
      *              if the object has no such feature
      */
+    @Override
     public SortedMap<Integer,Object> objGetSparseArray(
         String feature
     ) throws ServiceException {
         return new MarshallingSortedMap(
-            getMarshaller(),
-            getDelegate().objGetSparseArray(feature)
+            this.getMarshaller(),
+            this.getDelegate().objGetSparseArray(feature)
         );
     }
 
@@ -272,12 +283,14 @@ public abstract class MarshallingObject_1<M extends Marshaller>
      * @exception   ServiceException NOT_SUPPORTED
      *              if the object has no such feature
      */
+    @Override
     public Container_1_0 objGetContainer(
         String feature
     ) throws ServiceException {
         return new MarshallingContainer(
-            getMarshaller(),
-            getContainer(feature)
+            this.jdoGetPersistenceManager(),
+            this.getMarshaller(),
+            this.getContainer(feature)
         );
     }
 
@@ -292,7 +305,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
     protected Container_1_0 getContainer(
         String feature
     ) throws ServiceException {
-        return getDelegate().objGetContainer(feature);
+        return this.getDelegate().objGetContainer(feature);
     }
     
     //--------------------------------------------------------------------------
@@ -310,6 +323,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
      * 
      * @exception ServiceException if case of failure
      */
+    @Override
     public DataObject_1_0 openmdxjdoClone(
     ) {
         try {
@@ -345,14 +359,15 @@ public abstract class MarshallingObject_1<M extends Marshaller>
      * @exception ServiceException  
      *            if the move operation fails.
      */
+    @Override
     public void objMove(
         Container_1_0 there,
         String criteria
     ) throws ServiceException {
         Container_1_0 to = there == null ? 
             null : 
-            ((MarshallingContainer)there).getDelegate(getMarshaller()); 
-        getDelegate().objMove(
+            ((MarshallingContainer)there).getDelegate(this.getMarshaller()); 
+        this.getDelegate().objMove(
             to,
             criteria
         );
@@ -377,10 +392,11 @@ public abstract class MarshallingObject_1<M extends Marshaller>
          * @param container
          */
         protected MarshallingContainer(
+            PersistenceManager persistenceManager,
             Marshaller marshaller,
             Container_1_0 container
         ) throws ServiceException {
-            super(marshaller, container);
+            super(persistenceManager, marshaller, container);
         }
 
         /**

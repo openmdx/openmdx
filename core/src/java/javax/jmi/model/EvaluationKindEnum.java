@@ -7,16 +7,11 @@ public final class EvaluationKindEnum implements EvaluationKind {
     public static final EvaluationKindEnum IMMEDIATE = new EvaluationKindEnum("immediate");
     public static final EvaluationKindEnum DEFERRED = new EvaluationKindEnum("deferred");
 
-    private static final java.util.List typeName;
+    private static final java.util.List typeName = java.util.Collections.unmodifiableList(
+        java.util.Arrays.asList("Model", "Constraint", "EvaluationKind")
+    );
+    
     private final String literalName;
-
-    static {
-        java.util.ArrayList temp = new java.util.ArrayList();
-        temp.add("Model");
-        temp.add("Constraint");
-        temp.add("EvaluationKind");
-        typeName = java.util.Collections.unmodifiableList(temp);
-    }
 
     private EvaluationKindEnum(String literalName) {
         this.literalName = literalName;
@@ -26,14 +21,17 @@ public final class EvaluationKindEnum implements EvaluationKind {
         return typeName;
     }
 
+    @Override
     public String toString() {
         return literalName;
     }
 
+    @Override
     public int hashCode() {
         return literalName.hashCode();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof EvaluationKindEnum) return (o == this);
         else if (o instanceof EvaluationKind) return (o.toString().equals(literalName));

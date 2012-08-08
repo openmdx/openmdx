@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Extent_1.java,v 1.1 2009/11/12 13:35:46 hburger Exp $
+ * Name:        $Id: Extent_1.java,v 1.3 2010/06/01 08:57:59 hburger Exp $
  * Description: State Object Container
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/12 13:35:46 $
+ * Date:        $Date: 2010/06/01 08:57:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,9 +55,10 @@ import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.query.FilterOperators;
-import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.query.Quantors;
+import org.openmdx.base.query.Condition;
+import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.Filter;
+import org.openmdx.base.query.Quantifier;
 
 /**
  * org::openmdx::state2 aware extent
@@ -104,26 +105,26 @@ public class Extent_1 extends org.openmdx.base.aop1.Extent_1 {
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.FilterableMap#subMap(java.lang.Object)
      */
-    public Container_1_0 subMap(Object filter) {
-        if(filter instanceof FilterProperty[]){
-            FilterProperty[] filterProperties =(FilterProperty[])filter;
-            for(FilterProperty filterProperty : filterProperties){
-                try {
-                    if(
-                        Quantors.THERE_EXISTS == filterProperty.quantor() &&
-                        SystemAttributes.OBJECT_INSTANCE_OF.equals(filterProperty.name()) &&
-                        FilterOperators.IS_IN == filterProperty.operator() &&
-                        filterProperty.values().size() == 1 &&
-                        getModel().isSubtypeOf(filterProperty.getValue(0), "org:openmdx:state2:BasicState")
-                    ){
-                        return getStateCapableContainer().subMap(filter);
-                    }
-                } catch (ServiceException exception) {
-                    throw new RuntimeServiceException(exception);
+    @Override
+    public Container_1_0 subMap(Filter filter) {
+        if(filter == null) {
+            return null;
+        } else try {
+            for(Condition filterProperty : filter.getCondition()){
+                if(
+                    Quantifier.THERE_EXISTS == filterProperty.getQuantifier() &&
+                    SystemAttributes.OBJECT_INSTANCE_OF.equals(filterProperty.getFeature()) &&
+                    ConditionType.IS_IN == filterProperty.getType() &&
+                    filterProperty.getValue().length == 1 &&
+                    this.getModel().isSubtypeOf(filterProperty.getValue(0), "org:openmdx:state2:BasicState")
+                ){
+                    return this.getStateCapableContainer().subMap(filter);
                 }
             }
+            return super.subMap(filter);
+        } catch (ServiceException exception) {
+            throw new RuntimeServiceException(exception);
         }
-        return super.subMap(filter);
     }
 
 }

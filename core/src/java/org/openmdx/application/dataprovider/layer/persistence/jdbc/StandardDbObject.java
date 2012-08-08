@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StandardDbObject.java,v 1.5 2010/01/04 23:42:05 wfro Exp $
+ * Name:        $Id: StandardDbObject.java,v 1.7 2010/06/02 13:41:40 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/04 23:42:05 $
+ * Date:        $Date: 2010/06/02 13:41:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,9 +59,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 
+import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.FilterProperty;
 import org.openmdx.kernel.exception.BasicException;
 
 @SuppressWarnings({
@@ -191,36 +191,42 @@ extends DbObject {
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public String getReferenceClause(
     ) throws ServiceException {
         return this.referenceClause;
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public List<Object> getReferenceValues(
     ) {
         return this.referenceValues;
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public String getObjectIdClause(
     ) throws ServiceException {
         return this.objectIdClause;
     }
 
     //---------------------------------------------------------------------------
+    @Override
     public List<String> getObjectIdValues(
     ) throws ServiceException {
         return this.objectIdValues;
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public String getIndexColumn(
     ) {
         return this.indexColumn;
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public void remove(
     ) throws ServiceException {
 
@@ -357,6 +363,7 @@ extends DbObject {
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public Path getObjectReference(
         FastResultSet frs
     ) throws SQLException, ServiceException {
@@ -386,6 +393,7 @@ extends DbObject {
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public String getObjectId(
         FastResultSet frs
     ) throws SQLException, ServiceException {
@@ -404,6 +412,7 @@ extends DbObject {
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public int getIndex(
         FastResultSet frs
     ) throws SQLException {
@@ -422,6 +431,7 @@ extends DbObject {
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public boolean includeColumn(
         String columnName
     ) {
@@ -434,18 +444,21 @@ extends DbObject {
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public String getTableName(
     ) {
         return this.dbObjectConfiguration.getDbObjectForUpdate1();
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public String[] getJoinCriteria(
     ) {
         return this.dbObjectConfiguration.getJoinCriteria();
     }
 
     //---------------------------------------------------------------------------
+    @Override
     public String getHint(
     ) throws ServiceException {
         return this.dbObjectConfiguration == null
@@ -475,6 +488,7 @@ extends DbObject {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     public FilterProperty mapToIdentityFilterProperty(
         FilterProperty p
     ) throws ServiceException {

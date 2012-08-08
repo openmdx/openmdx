@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TimeBasedIdGenerator.java,v 1.3 2009/10/14 16:05:14 hburger Exp $
+ * Name:        $Id: TimeBasedIdGenerator.java,v 1.4 2010/06/02 13:45:39 hburger Exp $
  * Description: Time Based Id Provider using Random based Node
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/14 16:05:14 $
+ * Date:        $Date: 2010/06/02 13:45:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,6 +71,7 @@ public abstract class TimeBasedIdGenerator
      * 
      * @return this UUID prvider's clock sequence.
      */
+    @Override
     protected int getClockSequence(
     ){
         return TimeBasedIdGenerator.clockSequence;
@@ -87,6 +88,7 @@ public abstract class TimeBasedIdGenerator
      * 
      * @return the timestamp for the next UUID
      */
+    @Override
     protected long getTimestamp(){
         long timestamp = this.timestamp++;
         if(timestamp >= frameEnd){
@@ -110,6 +112,7 @@ public abstract class TimeBasedIdGenerator
     /* (non-Javadoc)
      * @see org.openmdx.kernel.id.spi.TimeBasedIdBuilder#getNode()
      */
+    @Override
     protected long getNode() {
         return getRandomBasedNode();
     }

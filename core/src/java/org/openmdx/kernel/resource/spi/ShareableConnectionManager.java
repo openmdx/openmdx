@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ShareableConnectionManager.java,v 1.1 2009/03/11 15:58:15 hburger Exp $
+ * Name:        $Id: ShareableConnectionManager.java,v 1.3 2010/08/03 14:03:07 hburger Exp $
  * Description: Shareable Connection Manager
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/11 15:58:15 $
+ * Date:        $Date: 2010/08/03 14:03:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.resource.ResourceException;
+import javax.resource.spi.ConnectionRequestInfo;
 import javax.resource.spi.ManagedConnection;
+import javax.resource.spi.ManagedConnectionFactory;
+import javax.security.auth.Subject;
 
 
 /**
@@ -114,8 +117,45 @@ public class ShareableConnectionManager extends AbstractConnectionManager {
     /* (non-Javadoc)
      * @see org.openmdx.kernel.application.container.lightweight.AbstractConnectionManager#getManagedConnections()
      */
+    @Override
     protected Set<ManagedConnection> getManagedConnections() {
         return this.sharedConnections;
+    }
+
+    /**
+     * Allocate a managed connection
+     * 
+     * @param managedConnections set of managed conections
+     * @param subject
+     * @param managedConnectionFactory
+     * @param connectionRequestInfo
+     * 
+     * @return a (maybe newly created) managed connection
+     *
+     * @throws ResourceException
+     */
+    @Override
+    protected ManagedConnection allocateMangedConnection(
+        Set<ManagedConnection> managedConnections,
+        Subject subject,
+        ManagedConnectionFactory managedConnectionFactory, 
+        ConnectionRequestInfo connectionRequestInfo
+    ) throws ResourceException{
+        synchronized(managedConnections){
+            ManagedConnection managedConnection = managedConnectionFactory.matchManagedConnections(
+                managedConnections,
+                subject,
+                connectionRequestInfo
+            );
+            if(managedConnection == null) managedConnections.add(
+                managedConnection = allocateManagedConnection(
+                    subject,
+                    managedConnectionFactory,
+                    connectionRequestInfo
+                )
+            );
+            return managedConnection;        
+        }            
     }
 
 }

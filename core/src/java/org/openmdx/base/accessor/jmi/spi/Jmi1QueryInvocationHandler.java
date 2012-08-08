@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1QueryInvocationHandler.java,v 1.3 2009/12/20 23:58:22 wfro Exp $
- * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.3 $
+ * Name:        $Id: Jmi1QueryInvocationHandler.java,v 1.6 2010/06/08 12:54:19 hburger Exp $
+ * Description: JMI Query Invocation Handler 
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/20 23:58:22 $
+ * Date:        $Date: 2010/06/08 12:54:19 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2008, OMEX AG, Switzerland
+ * Copyright (c) 2007-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,7 +48,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.accessor.jmi.spi;
 
 import java.lang.reflect.InvocationHandler;
@@ -59,11 +57,12 @@ import java.lang.reflect.Method;
 import javax.jdo.Query;
 
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.query.Quantors;
+import org.openmdx.base.query.Quantifier;
 
 /**
- * Jmi1QueryInvocationHandler
+ * JMI Query Invocation Handler
  */
 public class Jmi1QueryInvocationHandler implements InvocationHandler {
 
@@ -71,6 +70,20 @@ public class Jmi1QueryInvocationHandler implements InvocationHandler {
         RefQuery_1 query
     ) {
         this.query = query;
+    }
+
+    /**
+     * Retrieve the feature mapper
+     * 
+     * @return the feature mapper
+     * @throws ServiceException 
+     */
+    protected FeatureMapper getFeatureMapper(
+    ) throws ServiceException{
+        if(this.featureMapper == null) {
+            this.featureMapper = this.query.getFeatureMapper();
+        }
+        return this.featureMapper;
     }
 
     /* (non-Javadoc)
@@ -111,7 +124,7 @@ public class Jmi1QueryInvocationHandler implements InvocationHandler {
             //
             // orderBy
             //
-            ModelElement_1_0 feature = this.query.getFeatureMapper().getFeature(
+            ModelElement_1_0 feature = this.getFeatureMapper().getFeature(
                 methodName.substring(7),
                 FeatureMapper.MethodSignature.PREDICATE                                
             );
@@ -121,54 +134,32 @@ public class Jmi1QueryInvocationHandler implements InvocationHandler {
             );
         } 
         else if(methodName.startsWith("thereExists")) {
-            //
-            // thereExists
-            //
-            if("thereExistsContext".equals(methodName)) {
-                return this.query.refGetPredicate(
-                    Quantors.THERE_EXISTS,
-                    "org:openmdx:base:ContextCapable:context"
-                );
-            } 
-            else {
-                ModelElement_1_0 feature = this.query.getFeatureMapper().getFeature(
-                    methodName.substring(11),
-                    FeatureMapper.MethodSignature.PREDICATE                                
-                );
-                String featureName = (String)feature.objGetValue("name");
-                return this.query.refGetPredicate(
-                    Quantors.THERE_EXISTS,
-                    featureName
-                );
-            }
+            ModelElement_1_0 feature = this.getFeatureMapper().getFeature(
+                methodName.substring(11),
+                FeatureMapper.MethodSignature.PREDICATE                                
+            );
+            String featureName = (String)feature.objGetValue("name");
+            return this.query.refGetPredicate(
+                Quantifier.THERE_EXISTS,
+                featureName
+            );
         } 
         else if(methodName.startsWith("forAll")) {
-            //
-            // forAll
-            //
-            if("forAllContext".equals(methodName)){
-                return this.query.refGetPredicate(
-                    Quantors.FOR_ALL,
-                    "org:openmdx:base:ContextCapable:context"
-                );
-            } 
-            else {
-                ModelElement_1_0 feature = this.query.getFeatureMapper().getFeature(
-                    methodName.substring(6),
-                    FeatureMapper.MethodSignature.PREDICATE                
-                );
-                String featureName = (String)feature.objGetValue("name");
-                return this.query.refGetPredicate(
-                    Quantors.FOR_ALL,
-                    featureName
-                );
-            }
+            ModelElement_1_0 feature = this.getFeatureMapper().getFeature(
+                methodName.substring(6),
+                FeatureMapper.MethodSignature.PREDICATE                
+            );
+            String featureName = (String)feature.objGetValue("name");
+            return this.query.refGetPredicate(
+                Quantifier.FOR_ALL,
+                featureName
+            );
         } 
         else if(args == null || args.length == 0) {
             //
             // Predicate
             //
-            ModelElement_1_0 feature = this.query.getFeatureMapper().getFeature(
+            ModelElement_1_0 feature = this.getFeatureMapper().getFeature(
                 methodName,
                 FeatureMapper.MethodSignature.PREDICATE                
             );
@@ -190,5 +181,6 @@ public class Jmi1QueryInvocationHandler implements InvocationHandler {
     // Members
     //-----------------------------------------------------------------------
     private final RefQuery_1 query;
+    private transient FeatureMapper featureMapper;
    
 }

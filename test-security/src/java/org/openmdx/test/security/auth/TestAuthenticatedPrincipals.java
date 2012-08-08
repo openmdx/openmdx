@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestAuthenticatedPrincipals.java,v 1.3 2010/03/13 20:29:49 hburger Exp $
+ * Name:        $Id: TestAuthenticatedPrincipals.java,v 1.4 2010/06/04 22:38:01 hburger Exp $
  * Description: Signed Token
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/13 20:29:49 $
+ * Date:        $Date: 2010/06/04 22:38:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -145,6 +145,7 @@ public class TestAuthenticatedPrincipals extends TestCase {
 		return "/opt/Oracle/Middleware/wlserver_10.3/server/lib/DemoIdentity.jks";
 	}
 	
+	@Override
 	protected void setUp() throws Exception {		
 		KeyStore keyStore = TestAuthenticatedPrincipals.getKeyStore(
 			this.getKeyStoreType(),

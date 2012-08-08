@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Database_1.java,v 1.5 2010/02/11 13:15:11 hburger Exp $
+ * Name:        $Id: Database_1.java,v 1.6 2010/06/02 13:41:40 hburger Exp $
  * Description: Database_1Jdbc2 plugin
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/11 13:15:11 $
+ * Date:        $Date: 2010/06/02 13:41:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -86,6 +86,7 @@ public class Database_1 extends AbstractDatabase_1 {
     }
     
     //---------------------------------------------------------------------------
+    @Override
     PreparedStatement prepareStatement(
         Connection conn,
         String statement,
@@ -118,6 +119,7 @@ public class Database_1 extends AbstractDatabase_1 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     boolean isBlobColumnValue(
         Object val
     ) {
@@ -127,6 +129,7 @@ public class Database_1 extends AbstractDatabase_1 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     boolean isClobColumnValue(
         Object val
     ) {
@@ -136,6 +139,7 @@ public class Database_1 extends AbstractDatabase_1 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     Object getBlobColumnValue(
         Object val,
         String attributeName,
@@ -167,6 +171,7 @@ public class Database_1 extends AbstractDatabase_1 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     Object getClobColumnValue(
         Object val,
         String attributeName,
@@ -199,6 +204,7 @@ public class Database_1 extends AbstractDatabase_1 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     void setClobColumnValue(
         PreparedStatement ps,
         int column,
@@ -264,6 +270,7 @@ public class Database_1 extends AbstractDatabase_1 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     void setBlobColumnValue(
         PreparedStatement ps,
         int column,
@@ -336,6 +343,7 @@ public class Database_1 extends AbstractDatabase_1 {
 
     //---------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
+    @Override
     FastResultSet setPosition(
         ResultSet rs,
         int position,
@@ -417,6 +425,7 @@ public class Database_1 extends AbstractDatabase_1 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     void resultSetUpdateLong(
         ResultSet rs,
         String columnName,
@@ -429,6 +438,7 @@ public class Database_1 extends AbstractDatabase_1 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     void resultSetUpdateInt(
         ResultSet rs,
         String columnName,
@@ -441,6 +451,7 @@ public class Database_1 extends AbstractDatabase_1 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     void resultSetUpdateString(
         ResultSet rs,
         String columnName,
@@ -453,6 +464,7 @@ public class Database_1 extends AbstractDatabase_1 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     void resultSetUpdateRow(
         ResultSet rs
     ) throws SQLException {
@@ -460,6 +472,7 @@ public class Database_1 extends AbstractDatabase_1 {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     int resultSetGetRow(
         ResultSet rs
     ) throws SQLException {

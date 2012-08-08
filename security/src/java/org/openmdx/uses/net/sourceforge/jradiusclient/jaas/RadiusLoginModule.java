@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusLoginModule.java,v 1.6 2010/03/11 18:50:59 hburger Exp $
+ * Name:        $Id: RadiusLoginModule.java,v 1.7 2010/07/14 13:49:46 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/11 18:50:59 $
+ * Date:        $Date: 2010/07/14 13:49:46 $
  * ====================================================================
  *
  * Copyright (C) 2004  OMEX AG
@@ -150,8 +150,8 @@ public class RadiusLoginModule implements LoginModule {
                 this.radiusSubject.getPrincipals().add(this.userPrincipal);
             }
             //now clean out state
-            this.userName = null;//???
-            this.radiusClient = null;//????
+            this.userName = null;
+            this.radiusClient = null;
             this.challengedAttempts = 0;
             this.authenticationCommitted = true;
         }

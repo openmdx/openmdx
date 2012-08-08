@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Connection_2RemotePort.java,v 1.9 2010/03/23 18:35:35 wfro Exp $
+ * Name:        $Id: Connection_2RemotePort.java,v 1.10 2010/06/02 13:43:07 hburger Exp $
  * Description: Remote REST Connection Port
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 18:35:35 $
+ * Date:        $Date: 2010/06/02 13:43:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -254,6 +254,7 @@ class Connection_2RemotePort implements Port {
         /* (non-Javadoc)
          * @see org.openmdx.base.resource.spi.Port#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record)
          */
+        @Override
         public Record execute(
             InteractionSpec ispec, 
             Record input

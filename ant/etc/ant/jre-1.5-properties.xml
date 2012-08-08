@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.5-properties.xml,v 1.48 2009/09/18 16:55:44 wfro Exp $
+= Name:        $Id: jre-1.5-properties.xml,v 1.49 2010/06/04 20:37:19 hburger Exp $
 = Description: JRE 5.0 Platform Properties
-= Revision:    $Revision: 1.48 $
-= Date:        $Date: 2009/09/18 16:55:44 $
+= Revision:    $Revision: 1.49 $
+= Date:        $Date: 2010/06/04 20:37:19 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -99,6 +99,7 @@
 		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/wsdl4j-1.6.1.jar"/>		
 		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/jdo2-api.jar"/>
 		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/openjpa.jar"/>
+		<pathelement location="${openmdx.home}/java2/${build.java.platform}/extension/lib/jcache.jar"/>
 	</path>
 	<path id="java2.standard.lib">
 		<pathelement location="${build.target.jre}/lib/jce.jar"/>

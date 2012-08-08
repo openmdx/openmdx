@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Handler_1.java,v 1.4 2008/06/28 00:21:33 hburger Exp $
+ * Name:        $Id: Handler_1.java,v 1.5 2010/06/02 13:45:39 hburger Exp $
  * Description: XRI protocol handler
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:33 $
+ * Date:        $Date: 2010/06/02 13:45:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -76,6 +76,7 @@ public abstract class Handler_1
     /* (non-Javadoc)
      * @see java.net.URLStreamHandler#openConnection(java.net.URL)
      */
+    @Override
     protected URLConnection openConnection(
         final URL url
 	) throws IOException {

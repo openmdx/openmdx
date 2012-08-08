@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: TestMain.java,v 1.35 2010/04/28 12:55:05 hburger Exp $
+ * Name:        $Id: TestMain.java,v 1.50 2010/08/09 13:20:38 hburger Exp $
  * Description: Unit test for model app1
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.50 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/28 12:55:05 $
+ * Date:        $Date: 2010/08/09 13:20:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -84,6 +84,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 import javax.ejb.TransactionAttributeType;
+import javax.jdo.Constants;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.JDOHelper;
@@ -91,6 +92,8 @@ import javax.jdo.JDOOptimisticVerificationException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
+import javax.jdo.spi.PersistenceCapable;
+import javax.jmi.reflect.InvalidCallException;
 import javax.jmi.reflect.InvalidObjectException;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
@@ -99,6 +102,8 @@ import javax.naming.spi.NamingManager;
 import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionFactory;
 import javax.servlet.ServletException;
+import javax.transaction.Status;
+import javax.transaction.UserTransaction;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.After;
@@ -126,6 +131,8 @@ import org.openmdx.base.accessor.jmi.spi.DelegatingRefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.EntityManagerFactory_1;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
+import org.openmdx.base.accessor.rest.spi.Synchronization_2_0;
+import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
@@ -135,12 +142,11 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
-import org.openmdx.compatibility.datastore1.jmi1.Datastore1Package;
-import org.openmdx.compatibility.datastore1.jmi1.QueryFilter;
 import org.openmdx.generic1.cci2.PropertyQuery;
 import org.openmdx.generic1.jmi1.BooleanProperty;
 import org.openmdx.generic1.jmi1.DecimalProperty;
@@ -150,7 +156,7 @@ import org.openmdx.generic1.jmi1.Property;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
+import org.openmdx.kernel.naming.ComponentEnvironment;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.SparseArray;
 import org.w3c.cci2.StringTypePredicate;
@@ -158,13 +164,13 @@ import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.StateAccessor;
 import org.w3c.spi2.Datatypes;
 
+import test.openmdx.app1.aop2.NaturalPerson;
 import test.openmdx.app1.cci2.AddressQuery;
 import test.openmdx.app1.cci2.CycleMember1Query;
 import test.openmdx.app1.cci2.InvoiceHasInvoicePosition;
 import test.openmdx.app1.cci2.InvoicePositionQuery;
 import test.openmdx.app1.cci2.InvoiceQuery;
 import test.openmdx.app1.cci2.PersonQuery;
-import test.openmdx.app1.cci2.SegmentContainsInvoice;
 import test.openmdx.app1.cci2.SegmentHasAddress;
 import test.openmdx.app1.cci2.SegmentHasPerson;
 import test.openmdx.app1.jmi1.Address;
@@ -207,8 +213,12 @@ import test.openmdx.application.rest.http.ServletPort;
 @SuiteClasses(
     {
         TestMain.LocalConnectionTest.class,
-        TestMain.ReInitialization.class,
-        TestMain.ProxyConnectionTest.class
+        TestMain.ProxyConnectionSetUp.class,
+        TestMain.ProxyConnectionTest.class,
+        TestMain.ContainerManagedOptimisticTransactionSetUp.class,
+        TestMain.ContainerManagedTransactionTest.class,
+        TestMain.ContainerManagedPessimisticTransactionSetUp.class,
+        TestMain.ContainerManagedTransactionTest.class
     }
 )
 public class TestMain {
@@ -291,6 +301,7 @@ public class TestMain {
 
         @Before
         public  void setUp(){
+            entityManagerFactory.getDataStoreCache().pinAll(true, AddressFormat.class);
             this.entityManager = entityManagerFactory.getPersistenceManager();
             this.authority = this.entityManager.getObjectById(
                 Authority.class,
@@ -431,9 +442,9 @@ public class TestMain {
 
         protected void testPackageAcquisition(
         ){
-            QueryFilter instance = this.entityManager.newInstance(QueryFilter.class);
-            Datastore1Package datastore1Package = (Datastore1Package)instance.refImmediatePackage();
-            assertEquals("MOF ID", "org:openmdx:compatibility:datastore1:datastore1", datastore1Package.refMofId());
+            UnitOfWork instance = this.entityManager.newInstance(UnitOfWork.class);
+            Audit2Package audit2Package = (Audit2Package)instance.refImmediatePackage();
+            assertEquals("MOF ID", "org:openmdx:audit2:audit2", audit2Package.refMofId());
         }
 
         protected void resetAuditSegment(
@@ -451,9 +462,9 @@ public class TestMain {
                 AUDIT_SEGMENT_NAME
             );
             if(segment != null) {
-                begin();
+                this.begin();
                 segment.refDelete();
-                commit();
+                this.commit();
             }
             segment = this.entityManager.newInstance(
                 SharedObjects.getPlugInObject(
@@ -462,9 +473,9 @@ public class TestMain {
                     org.openmdx.compatibility.audit1.jmi1.Segment.class :
                     org.openmdx.audit2.jmi1.Segment.class
             );
-            begin();
+            this.begin();
             provider.addSegment(false, AUDIT_SEGMENT_NAME, segment);
-            commit();
+            this.commit();
         }
 
         protected void resetDataSegment(
@@ -474,16 +485,17 @@ public class TestMain {
                 DATA_SEGMENT_NAME
             );
             if(segment != null) {
-                begin();
+                this.begin();
                 segment.refDelete();
-                commit();
+                this.commit();
             }
             segment = this.entityManager.newInstance(test.openmdx.app1.jmi1.Segment.class);
-            begin();
+            this.begin();
             provider.addSegment(false, DATA_SEGMENT_NAME, segment);
-            commit();
+            this.commit();
         }
 
+        @SuppressWarnings("deprecation")
         protected void testMain(
         ) throws ServiceException, CanNotFormatNameException, IOException, ParseException, ClassNotFoundException{
             this.id = 500000l;
@@ -550,7 +562,7 @@ public class TestMain {
             try {
                 super.taskId = "CR20018821";
                 @SuppressWarnings("unused")
-                RefContainer segments = (RefContainer) persistenceManager.getObjectById(
+                RefContainer<?> segments = (RefContainer<?>) persistenceManager.getObjectById(
                     provider.refGetPath().getChild("segment")
                 );
             } finally {
@@ -562,14 +574,14 @@ public class TestMain {
             //
             try {
                 super.taskId = "CR20018821";
-                begin();
+                this.begin();
                 Importer.importObjects(
                     Importer.asTarget(persistenceManager),
                     Importer.asSource(
                         new URL("xri://+resource/test/openmdx/app1/data.xml")
                     )
                 );
-                commit();
+                this.commit();
             } finally {
                 super.taskId = null;
             }
@@ -591,11 +603,10 @@ public class TestMain {
                 invoice.setDescription("this is an invoice for PG0");
                 invoice.setProductGroupId("PG0");
                 assertNull("CR0003551", refGetPath(invoice));
-                SegmentContainsInvoice.Invoice<Invoice> invoices = segment.getInvoice();
-                RefContainer refInvoices = (RefContainer) invoices;
+                RefContainer<Invoice> refInvoices = (RefContainer<Invoice>) segment.<Invoice>getInvoice();
                 invoice.addProperty(false, "flag", booleanProperty);
 
-                begin();
+                this.begin();
 
                 refInvoices.refAdd(RefContainer.REASSIGNABLE, nextId(), invoice);
                 assertNotNull("CR0003551", refGetPath(invoice));
@@ -607,7 +618,7 @@ public class TestMain {
                     invoice.addInvoicePosition(false, nextId(), invoicePosition);
                     assertNotNull("CR0003551", refGetPath(invoicePosition));
                 }
-                commit();
+                this.commit();
 
                 synchronized(this) {
                     try {
@@ -640,7 +651,12 @@ public class TestMain {
                     if(this instanceof LocalConnectionTest) {
                         assertTrue("Implementation detail", flag instanceof DelegatingRefObject_1_0);
                         DelegatingRefObject_1_0 entity = (DelegatingRefObject_1_0) flag;
-                        assertNotSame("Made persistent", entity.openmdxjdoGetDelegate(), entity.openmdxjdoGetDataObject());
+                        Object dataObject = entity.openmdxjdoGetDataObject();
+                        assertTrue(dataObject instanceof PersistenceCapable);
+                        assertTrue(dataObject instanceof RefObject_1_0);
+                        ObjectView_1_0 objectView = ((RefObject_1_0)dataObject).refDelegate();
+                        assertNotNull(objectView);
+                        assertNotSame("Made persistent", entity.openmdxjdoGetDelegate(), dataObject);
                     }
                     if(this instanceof ProxyConnectionTest) {
                         assertFalse("Implementation detail", flag instanceof DelegatingRefObject_1_0);
@@ -752,12 +768,12 @@ public class TestMain {
 
             // modify feature 
             for(NameFormat nameFormat: nameFormats) try {
-                begin();
+                this.begin();
                 nameFormat.refSetValue(
                     "description",
                     "modified description"
                 );
-                commit();
+                this.commit();
                 fail("all attributes are non changeable --> object can not be updated");
             } catch(JDOFatalDataStoreException e) {
                 System.out.println("all attributes are non changeable --> object can not be updated");
@@ -765,17 +781,14 @@ public class TestMain {
 
             try {
                 NameFormat nameFormat = (NameFormat) persistenceManager.newInstance(NameFormat.class);
-                begin();
+                this.begin();
                 nameFormat.setDescription(
                     "a description"
                 );
                 segment.getNameFormat().add(nameFormat);
-                commit();
+                this.commit();
                 fail("constraint isFrozen --> object can not be updated");
             } catch(JDOFatalDataStoreException e) {
-                if(persistenceManager.currentTransaction().isActive()){
-                    persistenceManager.currentTransaction().rollback();
-                }
                 System.out.println("constraint isFrozen --> object can not be updated");
             }
 
@@ -796,7 +809,7 @@ public class TestMain {
                         "Commit address addition"
                     }[i]
                 );
-                begin();
+                this.begin();
                 postalAddress = postalAddressClass.createInternationalPostalAddress();
                 postalAddress.setCountry("Switzerland");
                 postalAddress.setCity("Zurich");
@@ -805,7 +818,7 @@ public class TestMain {
                 postalAddress.setStreet("Bahnhofstr.");
                 postalAddress.setAddressLine("Familie", "Muster");
                 segment.addAddress(false, "0001", postalAddress);
-
+                Object postalAddressId = JDOHelper.getObjectId(postalAddress);
                 // create a EmailAddress
                 emailAddress = emailAddressClass.createEmailAddress();
                 emailAddress.setAddress("hans.muster@app1.ch");
@@ -816,43 +829,47 @@ public class TestMain {
                     segment.getAddress().size()
                 );
                 switch(i){
-                    case 0:
-                        persistenceManager.currentTransaction().rollback();
+                    case 0: {
+                        this.rollback();
                         assertEquals(
                             "Rolled back address count",
                             0,
                             segment.getAddress().size()
                         );
-                        break;
-                    case 1:
-                        commit();
+                    } break;
+                    case 1: {
+                        this.commit();
                         assertEquals(
                             "Commited address count",
                             2,
                             segment.getAddress().size()
                         );
-                        begin();
+                        InternationalPostalAddress retrievedAddress = (InternationalPostalAddress) this.entityManager.getObjectById(postalAddressId);
+                        InternationalPostalAddress clonedAddress = PersistenceHelper.clone(retrievedAddress);
+                        assertFalse(JDOHelper.isPersistent(clonedAddress));
+                        this.entityManager.retrieve(retrievedAddress);
+                        this.begin();
                         segment.getAddress().clear();
                         assertEquals(
                             "Transient cleared address count",
                             0,
                             segment.getAddress().size()
                         );
-                        commit();
+                        this.commit();
                         assertEquals(
                             "Cleared persistent address count",
                             0,
                             segment.getAddress().size()
                         );
-                        break;
-                    case 2:
+                    } break;
+                    case 2: {
                         segment.getAddress().clear();
                         assertEquals(
                             "Cleared transient address count",
                             0,
                             segment.getAddress().size()
                         );
-                        commit();
+                        this.commit();
                         assertEquals(
                             "Cleared committed address count",
                             0,
@@ -862,8 +879,8 @@ public class TestMain {
                             "Cleared committed address count",
                             segment.getAddress().isEmpty()
                         );
-                        break;
-                    case 3:
+                    } break;
+                    case 3: {
                         EmailAddress transientAddress = emailAddressClass.createEmailAddress();
                         transientAddress.setAddress("john.player@games.net");
                         segment.addAddress(false, "0003", transientAddress);
@@ -873,29 +890,29 @@ public class TestMain {
                             segment.getAddress().size()
                         );
                         transientAddress.refDelete(); // segment.getAddress().remove(transientAddress);
-                        commit();
+                        this.commit();
                         assertEquals(
                             "Commited address count",
                             2,
                             segment.getAddress().size()
                         );
-                        break;
+                    } break;
                     default:
                         fail("No more instructions");
                 }
-                assertTrue(
-                    "Identity should be available outside the unit of work",
-                    Arrays.equals(
-                        refGetPath(segment).getSuffix(
-                            refGetPath(segment).size() - 2
-                        ),
-                        new String[]{"segment",DATA_SEGMENT_NAME}
-                    )
-                );
             }
+            assertTrue(
+                "Identity should be available outside the unit of work",
+                Arrays.equals(
+                    refGetPath(segment).getSuffix(
+                        refGetPath(segment).size() - 2
+                    ),
+                    new String[]{"segment",DATA_SEGMENT_NAME}
+                )
+            );
 
             try {
-                begin();
+                this.begin();
                 InternationalPostalAddress duplicateAddress = postalAddressClass.createInternationalPostalAddress();
                 duplicateAddress.setCountry("Switzerland");
                 duplicateAddress.setCity("Zurich");
@@ -910,7 +927,7 @@ public class TestMain {
                     emailAddress.getAddress()
                 );
                 segment.addAddress(false,"0001", duplicateAddress);
-                commit();
+                this.commit();
                 fail("DUPLICATE expected");
             } catch (JmiServiceException exception) {
                 assertTrue(
@@ -922,7 +939,7 @@ public class TestMain {
                     BasicException.Code.DUPLICATE,
                     exception.getExceptionCode()
                 );
-                persistenceManager.currentTransaction().rollback();
+                this.rollback();
             } catch (JDOException exception) {
                 assertFalse(
                     "Late duplicate recognition", 
@@ -944,9 +961,78 @@ public class TestMain {
                 "Identity should be available after unit of work failure",
                 emailAddress.getIdentity().endsWith("/segment/Standard/address/0002")
             );
-
+            //
+            // CR20018768 refresh
+            // 
+            try {
+                super.taskId = "CR20018768";
+                this.begin();
+                for(int i = 3; i >= 0; i--) {
+                    emailAddress.setAddress("jean.\u00e9echantillon");
+                    assertTrue(JDOHelper.isDirty(emailAddress));
+                    assertEquals(
+                        "jean.\u00e9echantillon",
+                        emailAddress.getAddress()
+                    );
+                    switch(i){
+                        case 3: 
+                            this.entityManager.refresh(emailAddress);
+                            break;
+                        case 2:
+                            this.entityManager.refreshAll(segment.getAddress());
+                            break;
+                        case 1:
+                            AddressQuery query = null;
+                            this.entityManager.refreshAll(segment.getAddress(query));
+                            break;
+                        default:
+                            this.entityManager.refreshAll();
+                    }
+                    assertTrue(!JDOHelper.isDirty(emailAddress));
+                    assertEquals(
+                        "Persistent E-Mail-Address be reset",
+                        "hans.muster@app1.ch",
+                        emailAddress.getAddress()
+                    );
+                }
+                this.commit();
+                for(int i = 3; i >= 0; i--) {
+                    switch(i){
+                        case 3: 
+                            this.entityManager.evict(emailAddress);
+                            break;
+                        case 2:
+                            this.entityManager.evictAll(segment.getAddress());
+                            break;
+                        case 1:
+                            AddressQuery query = null;
+                            this.entityManager.evictAll(segment.getAddress(query));
+                            break;
+                        default:
+                            this.entityManager.evictAll();
+                    }
+                }
+                for(int i = 3; i >= 0; i--) {
+                    switch(i){
+                        case 3: 
+                            this.entityManager.retrieve(emailAddress);
+                            break;
+                        case 2:
+                            this.entityManager.retrieveAll(segment.getAddress());
+                            break;
+                        case 1:
+                            AddressQuery query = null;
+                            this.entityManager.retrieveAll(segment.getAddress(query));
+                            break;
+                        default:
+                            // there is no retrireveAll() operation
+                    }
+                }
+            } finally {
+                super.taskId = null;
+            }
             // invoke sendMessageTemplate (struct with object reference field)
-            begin();
+            this.begin();
             MessageTemplate messageTemplate = messageTemplateClass.createMessageTemplate();
             messageTemplate.setText("hello world");
             segment.addMessageTemplate(
@@ -954,8 +1040,8 @@ public class TestMain {
                 "template0",
                 messageTemplate
             );
-            commit();
-            begin();
+            this.commit();
+            this.begin();
             EmailAddressSendMessageTemplateResult sendResult = emailAddress.sendMessageTemplate(
                 app1Package.createEmailAddressSendMessageTemplateParams(
                     messageTemplate,
@@ -964,7 +1050,7 @@ public class TestMain {
                 )
             );
             assertNotNull("Send result", sendResult);
-            commit();
+            this.commit();
 
             // create a person without qualifier
             Person person;
@@ -975,7 +1061,7 @@ public class TestMain {
             // 
             try {
                 super.taskId = "CR0003390";
-                begin();
+                this.begin();
                 person = segment.getPerson(false,"DOE");
                 Runtime runtime = Runtime.getRuntime();
                 persistenceManager.makeTransactional(segment);
@@ -998,7 +1084,7 @@ public class TestMain {
                         );
                     }
                 }
-                commit();
+                this.commit();
             } finally {
                 super.taskId = null;
             }
@@ -1008,8 +1094,13 @@ public class TestMain {
             //
             try {
                 super.taskId = "CR0003686";
-                begin();
+                this.begin();
                 person = personClass.createPerson();
+                assertEquals(
+                    "Mix-in", 
+                    this instanceof LocalConnectionTest, 
+                    person instanceof NaturalPerson
+                );
                 person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1963-01-01"));
                 person.setLastName("Rossi");
                 person.setSalutation("Signor");
@@ -1018,7 +1109,7 @@ public class TestMain {
                 int age = GregorianCalendar.getInstance().get(GregorianCalendar.YEAR) - 1963;
                 assertEquals("Age", age, person.getAge()); 
                 segment.addPerson(false, nextId(), person);
-                commit();
+                this.commit();
                 fail("'Signor' was expected not to be supported");
             } catch(JDOFatalDataStoreException exception) {
                 System.out.println("Unsupported language prevents commit");
@@ -1026,7 +1117,7 @@ public class TestMain {
                 super.taskId = null;
             }
 
-            begin();
+            this.begin();
             person = personClass.createPerson();
             person.setForeignId("FX");
             person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
@@ -1043,66 +1134,76 @@ public class TestMain {
             additionalInfo.put(2, "Zwei");
             person.getAssignedAddress().addAll(Arrays.asList(postalAddress,emailAddress));
             segment.addPerson(false, nextId(), person);
-            commit();
+            this.commit();
             
 
-            {
-                begin();
-                person.getAdditionalInfo().put(10, "Ten");
-            }
             Path personId = (Path) JDOHelper.getObjectId(person);
-            {
-                PersistenceManager anotherPersistenceManager = super.entityManager.getPersistenceManagerFactory().getPersistenceManager();
-                Person anotherPerson = (Person) anotherPersistenceManager.getObjectById(personId);
-                SparseArray<String> anotherInfo = anotherPerson.getAdditionalInfo();
-                assertEquals("CR20018969", 2, anotherInfo.size());
-                assertEquals("CR20018969.0", "Null", anotherInfo.get(0));
-                assertNull("CR20018969.1", anotherInfo.get(1));
-                assertEquals("CR20018969.2", "Zwei", anotherInfo.get(2));
-                assertNull("CR20018969.3", anotherInfo.get(3));
-                assertTrue("CR20018969.1_2", anotherInfo.subMap(1, 2).isEmpty());
-                SparseArray<String> tail = anotherInfo.tailMap(1);
-                assertEquals("CR20018969.1_", 1, tail.size());
-                SparseArray<String> head = anotherInfo.headMap(1);
-                assertEquals("CR20018969._1", 1, head.size());
-                assertEquals("CR20018969.0", "Null", head.get(0));
-                assertNull("CR20018969.0", tail.get(0));
-                assertNull("CR20018969.2", head.get(2));
-                assertEquals("CR20018969.2", "Zwei", tail.get(2));
-                anotherPersistenceManager.currentTransaction().begin();
-                for(Map.Entry<Integer,String> e : anotherInfo.entrySet()) {
-                    e.setValue(e.getKey().toString());
+            if(!(this instanceof ContainerManagedTransactionTest)){
+                {
+                    this.begin();
+                    person.getAdditionalInfo().put(10, "Ten");
                 }
-                anotherPersistenceManager.currentTransaction().commit();
-            }            
-            try {
-              commit();
-              fail("CONCURRENT_ACCESS_FAILURE expected");
-            } catch (JDOOptimisticVerificationException exception){
-                assertEquals(
-                    "CONCURRENT_ACCESS_FAILURE expected",
-                    BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-                    BasicException.toExceptionStack(exception).getCause(null).getExceptionCode()
-                );
-            }          
-            {
-                PersistenceManager anotherPersistenceManager = super.entityManager.getPersistenceManagerFactory().getPersistenceManager();
-                Person anotherPerson = (Person) anotherPersistenceManager.getObjectById(personId);
-                SparseArray<String> anotherInfo = anotherPerson.getAdditionalInfo();
-                assertEquals("CR20018969", 2, anotherInfo.size());
-                assertEquals("CR20018969.0", "0", anotherInfo.get(0));
-                assertNull("CR20018969.1", anotherInfo.get(1));
-                assertEquals("CR20018969.2", "2", anotherInfo.get(2));
-                assertNull("CR20018969.3", anotherInfo.get(3));
-                assertTrue("CR20018969.1_2", anotherInfo.subMap(1, 2).isEmpty());
-                SparseArray<String> tail = anotherInfo.tailMap(1);
-                assertEquals("CR20018969.1_", 1, tail.size());
-                SparseArray<String> head = anotherInfo.headMap(1);
-                assertEquals("CR20018969._1", 1, head.size());
-                assertEquals("CR20018969.0", "0", head.get(0));
-                assertNull("CR20018969.0", tail.get(0));
-                assertNull("CR20018969.2", head.get(2));
-                assertEquals("CR20018969.2", "2", tail.get(2));
+                //
+                // CR20019182 persistenceCapable.equals() 
+                // 
+                try {
+                    super.taskId = "CR20019182";
+                    PersistenceManager anotherPersistenceManager = super.entityManager.getPersistenceManagerFactory().getPersistenceManager();
+                    Person anotherPerson = (Person) anotherPersistenceManager.getObjectById(personId);
+                    assertNotSame("Same person in different persistence managers", person, anotherPerson);
+                    assertEquals("Same person in different persistence managers", person, anotherPerson);
+                    SparseArray<String> anotherInfo = anotherPerson.getAdditionalInfo();
+                    assertEquals("CR20018969", 2, anotherInfo.size());
+                    assertEquals("CR20018969.0", "Null", anotherInfo.get(0));
+                    assertNull("CR20018969.1", anotherInfo.get(1));
+                    assertEquals("CR20018969.2", "Zwei", anotherInfo.get(2));
+                    assertNull("CR20018969.3", anotherInfo.get(3));
+                    assertTrue("CR20018969.1_2", anotherInfo.subMap(1, 2).isEmpty());
+                    SparseArray<String> tail = anotherInfo.tailMap(1);
+                    assertEquals("CR20018969.1_", 1, tail.size());
+                    SparseArray<String> head = anotherInfo.headMap(1);
+                    assertEquals("CR20018969._1", 1, head.size());
+                    assertEquals("CR20018969.0", "Null", head.get(0));
+                    assertNull("CR20018969.0", tail.get(0));
+                    assertNull("CR20018969.2", head.get(2));
+                    assertEquals("CR20018969.2", "Zwei", tail.get(2));
+                    anotherPersistenceManager.currentTransaction().begin();
+                    for(Map.Entry<Integer,String> e : anotherInfo.entrySet()) {
+                        e.setValue(e.getKey().toString());
+                    }
+                    anotherPersistenceManager.currentTransaction().commit();
+                } finally {
+                    super.taskId = null;
+                }            
+                try {
+                  this.commit();
+                  fail("CONCURRENT_ACCESS_FAILURE expected");
+                } catch (JDOOptimisticVerificationException exception){
+                    assertEquals(
+                        "CONCURRENT_ACCESS_FAILURE expected",
+                        BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+                        BasicException.toExceptionStack(exception).getCause(null).getExceptionCode()
+                    );
+                }          
+                {
+                    PersistenceManager anotherPersistenceManager = super.entityManager.getPersistenceManagerFactory().getPersistenceManager();
+                    Person anotherPerson = (Person) anotherPersistenceManager.getObjectById(personId);
+                    SparseArray<String> anotherInfo = anotherPerson.getAdditionalInfo();
+                    assertEquals("CR20018969", 2, anotherInfo.size());
+                    assertEquals("CR20018969.0", "0", anotherInfo.get(0));
+                    assertNull("CR20018969.1", anotherInfo.get(1));
+                    assertEquals("CR20018969.2", "2", anotherInfo.get(2));
+                    assertNull("CR20018969.3", anotherInfo.get(3));
+                    assertTrue("CR20018969.1_2", anotherInfo.subMap(1, 2).isEmpty());
+                    SparseArray<String> tail = anotherInfo.tailMap(1);
+                    assertEquals("CR20018969.1_", 1, tail.size());
+                    SparseArray<String> head = anotherInfo.headMap(1);
+                    assertEquals("CR20018969._1", 1, head.size());
+                    assertEquals("CR20018969.0", "0", head.get(0));
+                    assertNull("CR20018969.0", tail.get(0));
+                    assertNull("CR20018969.2", head.get(2));
+                    assertEquals("CR20018969.2", "2", tail.get(2));
+                }
             }
 
             assertEquals("person.refMofId() must be object path", 1, new Path(person.refMofId()).size() % 2);
@@ -1118,14 +1219,14 @@ public class TestMain {
 
             
             // Add country code to postal code
-            begin();
+            this.begin();
             person.voidOp();
             //
             // The postal address object itself is untouched 
             // but has been modified by an operation on the person object
             //
             persistenceManager.makeTransactional(postalAddress);
-            commit();
+            this.commit();
 
             assertEquals(
                 "voidOp should have updated the postal codes",
@@ -1148,7 +1249,7 @@ public class TestMain {
             PostalAddress additionalAddress;
             try {
                 super.taskId = "CR0002096";
-                begin();
+                this.begin();
                 additionalAddress = app1Package.getPostalAddress().createPostalAddress();
                 additionalAddress.setCity("Zurich");
                 additionalAddress.setHouseNumber("1");
@@ -1158,7 +1259,7 @@ public class TestMain {
                 System.out.println("adding three more addresses");
                 segment.addAddress(false, "CR0002096", additionalAddress);
                 person.getAssignedAddress().addAll(Arrays.asList(postalAddress,additionalAddress,emailAddress));
-                commit();
+                this.commit();
             } finally {
                 super.taskId = null;
             }
@@ -1187,7 +1288,7 @@ public class TestMain {
             // assignAddress by operation. This operation does not really
             // perform an assign. It is just there to see whether the operation
             // invocation works.
-            begin();
+            this.begin();
             person.assignAddress(
                 app1Package.createPersonAssignAddressParams(
                     Arrays.asList(
@@ -1198,17 +1299,35 @@ public class TestMain {
                     )
                 )
             );
-            commit();
+            this.commit();
 
+            //
+            // CR20018578 State After Removal
+            // 
+            try {
+                super.taskId = "CR20018578";
+                this.begin();
+                assertTrue("Persistent", JDOHelper.isPersistent(additionalAddress));
+                assertFalse("Deleted", JDOHelper.isDeleted(additionalAddress));
+                assertNotNull("Object Id", JDOHelper.getObjectId(additionalAddress));
+                additionalAddress.refDelete();
+                assertTrue("Persistent", JDOHelper.isPersistent(additionalAddress));
+                assertTrue("Deleted", JDOHelper.isDeleted(additionalAddress));
+                assertNotNull("Object Id", JDOHelper.getObjectId(additionalAddress));
+                this.commit();
+                assertFalse("Persistent", JDOHelper.isPersistent(additionalAddress));
+                assertNull("Object Id", JDOHelper.getObjectId(additionalAddress));
+                assertNotNull("Transactional Object Id", JDOHelper.getTransactionalObjectId(additionalAddress));
+            } finally {
+                super.taskId = null;
+            }
+            
             //
             // CR0002096
             // 
             try {
                 super.taskId = "CR0002096";
-                begin();
-                additionalAddress.refDelete();
-                commit();
-                begin();
+                this.begin();
                 int j = 0;
                 assignedAddresses = person.getAssignedAddress();
                 for(
@@ -1243,7 +1362,7 @@ public class TestMain {
                         System.out.println("Assigned address " + j + ": removed");
                     }
                 }
-                commit();
+                this.commit();
                 assertEquals("number of assigned addresses", 4, person.getAssignedAddress().size());
             } finally {
                 super.taskId = null;
@@ -1254,8 +1373,86 @@ public class TestMain {
             //
             try {
                 super.taskId = "CR20018837";
+                System.out.println("Removal test");
+                for(int i = 0; i < 8; i++) {
+                    boolean persistentNew = i % 2 == 0;
+                    String invoiceId = this.taskId + (char)('a' + i);
+                    this.begin();
+                    Invoice additionalInvoice = this.entityManager.newInstance(Invoice.class);
+                    additionalInvoice.setDescription("Invoice # " + invoiceId);
+                    assertFalse("Step " + i + " Additional invoice not yet deleted", JDOHelper.isDeleted(additionalInvoice));
+                    assertFalse("Step " + i + " Additional invoice not yet persistent", JDOHelper.isPersistent(additionalInvoice));
+                    assertFalse("Step " + i + " Additional invoice not yet new", JDOHelper.isNew(additionalInvoice));
+                    assertFalse("Step " + i + " Additional invoice not yet persistent", JDOHelper.isDirty(additionalInvoice));
+                    InvoicePosition additionalPosition = this.entityManager.newInstance(InvoicePosition.class);
+                    assertFalse("Step " + i + " Additional position not yet deleted", JDOHelper.isDeleted(additionalPosition));
+                    assertFalse("Step " + i + " Additional position not yet persistent", JDOHelper.isPersistent(additionalPosition));
+                    assertFalse("Step " + i + " Additional position not yet new", JDOHelper.isNew(additionalPosition));
+                    assertFalse("Step " + i + " Additional position not yet persistent", JDOHelper.isDirty(additionalPosition));
+                    segment.addInvoice(false,invoiceId , additionalInvoice);
+                    assertSame("Step " + i + " Created invoice retrieval", additionalInvoice, segment.getInvoice(false, invoiceId));
+                    assertFalse("Step " + i + " Additional invoice not yet deleted", JDOHelper.isDeleted(additionalInvoice));
+                    assertTrue("Step " + i + " Additional invoice now persistent", JDOHelper.isPersistent(additionalInvoice));
+                    assertTrue("Step " + i + " Additional invoice now new", JDOHelper.isNew(additionalInvoice));
+                    assertTrue("Step " + i + " Additional invoice now persistent", JDOHelper.isDirty(additionalInvoice));
+                    additionalInvoice.addInvoicePosition(false,Integer.toString(i) , additionalPosition);
+                    assertSame("Step " + i + " Created position retrieval", additionalPosition, additionalInvoice.getInvoicePosition(false,Integer.toString(i)));
+                    assertFalse("Step " + i + " Additional invoice not yet deleted", JDOHelper.isDeleted(additionalPosition));
+                    assertTrue("Step " + i + " Additional invoice now persistent", JDOHelper.isPersistent(additionalPosition));
+                    assertTrue("Step " + i + " Additional invoice now new", JDOHelper.isNew(additionalPosition));
+                    assertTrue("Step " + i + " Additional invoice now persistent", JDOHelper.isDirty(additionalPosition));
+                    Object positionId = JDOHelper.getObjectId(additionalPosition);
+                    if(!persistentNew) {
+                        this.commit();
+                        this.begin();
+                    }
+                    switch(i/2) {
+                        case 0:
+                            additionalInvoice.refDelete();
+                            break;
+                        case 1:
+                            segment.getInvoice().remove(QualifierType.REASSIGNABLE, invoiceId);
+                            break;
+                        case 2:
+                            this.entityManager.deletePersistent(additionalInvoice);
+                            break;
+                        case 3:
+                            segment.getInvoice().remove(additionalInvoice);
+                            break;
+                    }
+                    assertSame("Step " + i + " Deleted invoice retrieval", additionalInvoice, segment.getInvoice(false, invoiceId));
+                    assertTrue("Step " + i + " Additional invoice now deleted", JDOHelper.isDeleted(additionalInvoice));
+                    assertTrue("Step " + i + " Additional invoice still persistent", JDOHelper.isPersistent(additionalInvoice));
+                    assertEquals("Step " + i + " Additional invoice might be new new", i % 2 == 0, JDOHelper.isNew(additionalInvoice));
+                    assertTrue("Step " + i + " Additional invoice now deleted", JDOHelper.isDirty(additionalInvoice));
+                    assertSame("Step " + i + " Deleted position retrieval", additionalPosition, this.entityManager.getObjectById(positionId));
+                    if(persistentNew) {
+                        assertTrue("Step " + i + " Additional position now deleted", JDOHelper.isDeleted(additionalPosition));
+                        assertTrue("Step " + i + " Additional position still persistent", JDOHelper.isPersistent(additionalPosition));
+                        assertEquals("Step " + i + " Additional position might be new", i % 2 == 0, JDOHelper.isNew(additionalPosition));
+                        assertTrue("Step " + i + " Additional position now deleted", JDOHelper.isDirty(additionalPosition));
+                    }
+                    this.commit();
+                    assertNull("Step " + i + " Deleted invoice retrieval", segment.getInvoice(false, invoiceId));
+                    assertFalse("Step " + i + " Additional invoice now transient", JDOHelper.isDeleted(additionalInvoice));
+                    assertFalse("Step " + i + " Additional invoice now transient", JDOHelper.isPersistent(additionalInvoice));
+                    assertFalse("Step " + i + " Additional invoice now transient", JDOHelper.isNew(additionalInvoice));
+                    assertFalse("Step " + i + " Additional invoice now transient", JDOHelper.isDirty(additionalInvoice));
+                    assertFalse("Step " + i + " Additional position now transient", JDOHelper.isDeleted(additionalPosition));
+                    assertFalse("Step " + i + " Additional position now transient", JDOHelper.isPersistent(additionalPosition));
+                    assertFalse("Step " + i + " Additional position now transient", JDOHelper.isNew(additionalPosition));
+                    assertFalse("Step " + i + " Additional position now transient", JDOHelper.isDirty(additionalPosition));
+                }
+            } finally {
+                super.taskId = null;
+            }
+            //
+            // CR20018837
+            //
+            try {
+                super.taskId = "CR20018837";
                 System.out.println("Persistent-new-deleted test");
-                begin();
+                this.begin();
                 additionalAddress = app1Package.getPostalAddress().createPostalAddress();
                 additionalAddress.setCity("Liestal");
                 additionalAddress.setHouseNumber("2");
@@ -1273,11 +1470,11 @@ public class TestMain {
                 assertTrue("Additional address now deleted", JDOHelper.isDeleted(additionalAddress));
                 assertTrue("Additional address still persistent", JDOHelper.isPersistent(additionalAddress));
                 assertTrue("Additional address still new", JDOHelper.isNew(additionalAddress));
-                persistenceManager.currentTransaction().rollback();
+                this.rollback();
                 assertFalse("Additional address no longer deleted", JDOHelper.isDeleted(additionalAddress));
                 assertFalse("Additional address no longer persistent", JDOHelper.isPersistent(additionalAddress));
                 assertFalse("Additional address no longer new", JDOHelper.isNew(additionalAddress));
-                begin();
+                this.begin();
                 additionalAddress = app1Package.getPostalAddress().createPostalAddress();
                 additionalAddress.setCity("Liestal");
                 additionalAddress.setHouseNumber("3");
@@ -1295,11 +1492,11 @@ public class TestMain {
                 assertTrue("Additional address now deleted", JDOHelper.isDeleted(additionalAddress));
                 assertTrue("Additional address still persistent", JDOHelper.isPersistent(additionalAddress));
                 assertTrue("Additional address still new", JDOHelper.isNew(additionalAddress));
-                persistenceManager.currentTransaction().commit();
+                this.commit();
                 assertFalse("Additional address no longer deleted", JDOHelper.isDeleted(additionalAddress));
                 assertFalse("Additional address no longer persistent", JDOHelper.isPersistent(additionalAddress));
                 assertFalse("Additional address no longer new", JDOHelper.isNew(additionalAddress));
-                begin();
+                this.begin();
                 additionalAddress = app1Package.getPostalAddress().createPostalAddress();
                 additionalAddress.setCity("Liestal");
                 additionalAddress.setHouseNumber("4");
@@ -1317,7 +1514,7 @@ public class TestMain {
                 //            assertTrue("Additional address now deleted", JDOHelper.isDeleted(additionalAddress));
                 assertTrue("Additional address still persistent", JDOHelper.isPersistent(additionalAddress));
                 assertTrue("Additional address still new", JDOHelper.isNew(additionalAddress));
-                persistenceManager.currentTransaction().rollback();
+                this.rollback();
                 assertFalse("Additional address no longer deleted", JDOHelper.isDeleted(additionalAddress));
                 assertFalse("Additional address no longer persistent", JDOHelper.isPersistent(additionalAddress));
                 assertFalse("Additional address no longer new", JDOHelper.isNew(additionalAddress));
@@ -1325,7 +1522,7 @@ public class TestMain {
                 System.out.println("Transient container test");
                 @SuppressWarnings("unused")
                 test.openmdx.app1.jmi1.Segment transientSegment = app1Package.getSegment().createSegment();
-                begin();
+                this.begin();
                 //            additionalAddress = app1Package.getPostalAddress().createPostalAddress();
                 //            additionalAddress.setCity("Frick");
                 //            additionalAddress.setHouseNumber("3");
@@ -1344,8 +1541,8 @@ public class TestMain {
                 //            assertFalse("Additional address not deleted", JDOHelper.isDeleted(additionalAddress));
                 //            assertFalse("Additional address not persistent", JDOHelper.isPersistent(additionalAddress));
                 //            assertFalse("Additional address not new", JDOHelper.isNew(additionalAddress));
-                persistenceManager.currentTransaction().rollback();
-                begin();
+                this.rollback();
+                this.begin();
                 //            additionalAddress = app1Package.getPostalAddress().createPostalAddress();
                 //            additionalAddress.setCity("Frick");
                 //            additionalAddress.setHouseNumber("4");
@@ -1355,7 +1552,7 @@ public class TestMain {
                 //            assertSame("Transient address retrieval", additionalAddress, transientSegment.getAddress(false, "9004"));
                 //            assertTrue("Transient address removal", transientSegment.getAddress().remove(additionalAddress));
                 //            assertNull("Removed address retrieval", transientSegment.getAddress(false, "9004"));
-                persistenceManager.currentTransaction().rollback();
+                this.rollback();
             } finally {
                 super.taskId = null;
             }
@@ -1365,7 +1562,7 @@ public class TestMain {
             try {
                 super.taskId = "CR0002987";
                 System.out.println("Explicit rollback test");
-                begin();
+                this.begin();
                 additionalAddress = app1Package.getPostalAddress().createPostalAddress();
                 additionalAddress.setCity("Seldwyla");
                 additionalAddress.setHouseNumber("0");
@@ -1376,12 +1573,12 @@ public class TestMain {
                 segment.addAddress(false,"9001", additionalAddress);
                 assertTrue("Additional address now persistent", JDOHelper.isPersistent(additionalAddress));
                 assertTrue("Additional address now new", JDOHelper.isNew(additionalAddress));
-                persistenceManager.currentTransaction().rollback();
+                this.rollback();
                 assertFalse("Additional address no longer persistent", JDOHelper.isPersistent(additionalAddress));
                 assertFalse("Additional address no longer new", JDOHelper.isNew(additionalAddress));
                 try {
                     System.out.println("Implicit rollback test");
-                    begin();
+                    this.begin();
                     additionalAddress = app1Package.getPostalAddress().createPostalAddress();
                     additionalAddress.setCity("Seldwyla");
                     additionalAddress.setHouseNumber("0");
@@ -1395,7 +1592,7 @@ public class TestMain {
                     NameFormat jmiNameFormat = app1Package.getNameFormat().createNameFormat();
                     jmiNameFormat.setDescription("modified description");
                     segment.addNameFormat(false,nextId(), jmiNameFormat);
-                    commit();
+                    this.commit();
                     fail("constraint isFrozen --> object can not be updated");
                 } catch(JDOFatalDataStoreException e) {
                     assertFalse("Additional address no longer new", JDOHelper.isNew(additionalAddress));
@@ -1414,7 +1611,7 @@ public class TestMain {
                     i++
             ){
                 assertNull("No TRANSIENT person expected", segment.getPerson(false, "TRANSIENT"));
-                if(i==0) begin();
+                if(i==0) this.begin();
             }
             // create and remove in same unit of work
             person = personClass.createPerson();
@@ -1444,10 +1641,10 @@ public class TestMain {
 
             segment.addPerson(false,"TRANSIENT", person);
             segment.getPerson(false, "TRANSIENT").refDelete(); // get and remove it in same unit of work
-            commit();
+            this.commit();
 
             // create some PersonGroups
-            begin();
+            this.begin();
             PersonGroup g0 = personGroupClass.createPersonGroup();
             g0.setName("Group 0");
             segment.addPersonGroup(
@@ -1469,10 +1666,10 @@ public class TestMain {
                 "g2",
                 g2
             );
-            commit();
+            this.commit();
 
             // create some Persons
-            begin();
+            this.begin();
             for(
                     int i = 0;
                     i <= N_PERSONS;
@@ -1492,21 +1689,22 @@ public class TestMain {
                 person.getPersonGroup().add(g0);
                 person.getPersonGroup().add(g1);
                 person.getPersonGroup().add(g2);
-                if(i == N_PERSONS) {
-                    //                  TODO or NOTTODO            
-                    //                  try {
-                    //                  segment.addForeignPerson("F" + N_PERSONS, person);
-                    //                  }
-                    //                  catch(JmiServiceException e) {
-                    //                  System.out.println("exception=" + e);
-                    //                  //assertEquals("excepted exception NOT_SUPPORTED", CommonExceptions.NOT_SUPPORTED, e.getExceptionCode());
-                    //                  }
-                }
-                else {
+                if(i < N_PERSONS) {
                     segment.addPerson(false, "000" + i, person);
+                } else if (this instanceof LocalConnectionTest) try {
+                    //
+                    // CR20019192 UnsupportedOperationException in JMI collection delegate calls 
+                    // 
+                    super.taskId = "CRCR20019192";
+                    segment.addForeignPerson("F" + N_PERSONS, person);
+                    fail("This shared assoication is expected to be unmodifiable");
+                } catch(InvalidCallException expected) {
+                    // We expect to pass this exception handler
+                } finally {
+                    super.taskId = null;
                 }
             }
-            commit();
+            this.commit();
 
             // get person on 'composite' association 'SegmentHasPerson'
             person = segment.getPerson(false,"0001");
@@ -1518,7 +1716,7 @@ public class TestMain {
 
             // test unqualified feature retrieval
             assertTrue("postalAddress.address must be instance of String", emailAddress.refGetValue("address") instanceof String);
-            assertTrue("segment.address must be instance of Container", segment.refGetValue("address") instanceof RefContainer);
+            assertTrue("segment.address must be instance of Container", segment.refGetValue("address") instanceof RefContainer<?>);
             assertTrue("postalAddress.address must be instance of String", emailAddress.refGetValue("address") instanceof String);
             //
             // test performance of accessor.jmi of reading all attributes of person 1000 times
@@ -1623,9 +1821,8 @@ public class TestMain {
 
             System.out.println("person.age=" + person.getAge());
             System.out.println("person givenName=" + person.getGivenName().get(0));
-            int people;
             {
-                people = segment.getForeignPerson().size();
+                int people = segment.getForeignPerson().size();
                 System.out.println("Number of people: " + people);
             }
             // get persons with filter 1
@@ -1673,54 +1870,101 @@ public class TestMain {
                 StringTypePredicate.SOUNDS,
                 "Maasteer"
             );
-
-            people = segment.getPerson().size();
-            // 1 added by XmlImporter, 1 added with addPerson(), N_PERSONS added by addPerson()
-
-            SegmentHasPerson.Person<Person> allPeople = segment.getPerson();
-            List<Person> maasteer = allPeople.getAll(personQuery);
-            int numberOfPersons = maasteer.size();
-            assertEquals(
-                "number of persons found with SOUNDS_LIKE",
-                TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
-                numberOfPersons
-            );
-            begin();
-            maasteer.clear();
-            assertEquals(
-                "number of persons found with SOUNDS_LIKE",
-                people - TEST_PERSON_COUNT - SIMILAR_NAME_COUNT,
-                segment.getPerson().size()
-            );
-            persistenceManager.currentTransaction().rollback();
-
-            allPeople = segment.getPerson();
-            maasteer = allPeople.getAll(personQuery);
             {
-                assertTrue(
-                    "People found with SOUNDS_LIKE: Second Last",
-                    maasteer.listIterator(TEST_PERSON_COUNT + SIMILAR_NAME_COUNT - 1).hasNext()
+                int people = segment.getPerson().size();
+                assertEquals(
+                    "1 added by XmlImporter, 1 added with addPerson(), N_PERSONS added by addPerson()",
+                    N_PERSONS + 2, 
+                    people
                 );
-                assertFalse(
-                    "People found with SOUNDS_LIKE: Last",
-                    maasteer.listIterator(TEST_PERSON_COUNT + SIMILAR_NAME_COUNT).hasNext()
+    
+                SegmentHasPerson.Person<Person> allPeople = segment.getPerson();
+                List<Person> maasteer = allPeople.getAll(personQuery);
+                int numberOfPersons = maasteer.size();
+                assertEquals(
+                    "number of persons found with SOUNDS_LIKE",
+                    TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
+                    numberOfPersons
                 );
+                this.begin();
+                maasteer.clear();
+                assertEquals(
+                    "Container emptied",
+                    0,
+                    segment.getPerson().size()
+                );
+                this.rollback();
+                allPeople = segment.getPerson();
+                maasteer = allPeople.getAll(personQuery);
+                {
+                    assertTrue(
+                        "People found with SOUNDS_LIKE: Second Last",
+                        maasteer.listIterator(TEST_PERSON_COUNT + SIMILAR_NAME_COUNT - 1).hasNext()
+                    );
+                    assertFalse(
+                        "People found with SOUNDS_LIKE: Last",
+                        maasteer.listIterator(TEST_PERSON_COUNT + SIMILAR_NAME_COUNT).hasNext()
+                    );
+                }
+                numberOfPersons = maasteer.size();
+                assertEquals(
+                    "number of persons found with SOUNDS_LIKE",
+                    TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
+                    numberOfPersons
+                );
+                this.begin();
+                maasteer.clear();
+                int remaining = segment.getPerson().size(); 
+                assertEquals(
+                    "container emptied",
+                    0,
+                    remaining
+                );
+                this.rollback();
             }
-            numberOfPersons = maasteer.size();
-            assertEquals(
-                "number of persons found with SOUNDS_LIKE",
-                TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
-                numberOfPersons
-            );
-            begin();
-            maasteer.clear();
-            assertEquals(
-                "number of persons found with SOUNDS_LIKE",
-                people - TEST_PERSON_COUNT - SIMILAR_NAME_COUNT,
-                segment.getPerson().size()
-            );
-            persistenceManager.currentTransaction().rollback();
-
+            //
+            // CR20019185  Batching does not work for extent queries 
+            //
+            try {
+                super.taskId = "CR20019185";
+                //
+                // Object Identity IS_LIKE Condition
+                //
+                personQuery = (PersonQuery) PersistenceHelper.newQuery(
+                    persistenceManager.getExtent(Person.class),
+                    segment.refMofId() + "/person/($..)"
+                );
+                //
+                // String Feature IS_LIKE Condition
+                //
+                personQuery.lastName().like(
+                    StringTypePredicate.SOUNDS,
+                    "Maasteer"
+                );
+                //
+                // Reference IS_LIKE Condition
+                //
+                personQuery.forAllAssignedAddress().elementOf(
+                    PersistenceHelper.getCandidates(
+                        persistenceManager.getExtent(Address.class),
+                        segment.refMofId() + "/address/($..)"
+                    )
+                );
+                List<Person> maasteer = segment.getExtent(personQuery);
+                int numberOfPersons = 0;
+                for(@SuppressWarnings("unused") Person p : maasteer) {
+                    numberOfPersons++;
+                }
+                assertEquals(
+                    "number of persons found with SOUNDS_LIKE",
+                    TEST_PERSON_COUNT + SIMILAR_NAME_COUNT,
+                    numberOfPersons
+                );
+                
+            } finally {
+                super.taskId = null;
+            }
+            
             // find persons with assigned address
             personQuery = app1Package.createPersonQuery();
             personQuery.thereExistsAssignedAddress().equalTo(postalAddress);
@@ -1769,38 +2013,38 @@ public class TestMain {
             }
 
             // modify given name
-            begin();
+            this.begin();
             person.setGivenName(new String[]{"Heiri"});
             System.out.println("person modified givenName=" + person.getGivenName().get(0));
-            commit();
+            this.commit();
             assertEquals("giveName", "Heiri", person.getGivenName().get(0));
 
-            begin();
+            this.begin();
             person.getGivenName().clear();
             assertTrue("No givenName", person.getGivenName().isEmpty());
-            commit();
+            this.commit();
             assertTrue("No givenName", person.getGivenName().isEmpty());
             assertTrue("No givenName", person.getGivenName().isEmpty());
 
             // person.formatAs
-            begin(); // isQuery() is false      
+            this.begin(); // isQuery() is false      
             PersonFormatNameAsResult formattedName = person.formatNameAs(
                 app1Package.createPersonFormatNameAsParams("Standard")
             );
-            commit(); // result available after commit only               
+            this.commit(); // result available after commit only               
             System.out.println("formatted name=" + formattedName.getFormattedName());
             System.out.println("formatted name as set=" + formattedName.getFormattedNameAsSet());
             System.out.println("formatted name as list=" + formattedName.getFormattedNameAsList());
             System.out.println("formatted name as sparsearray=" + formattedName.getFormattedNameAsSparseArray());
 
             // test optional argument
-            begin(); // isQuery() is false               
+            this.begin(); // isQuery() is false               
             formattedName = person.formatNameAs(
                 app1Package.createPersonFormatNameAsParams(
                     null // default value is Standard
                 )
             );
-            commit(); // result available after commit only               
+            this.commit(); // result available after commit only               
             System.out.println("formatted name=" + formattedName.getFormattedName());
             try {
                 person.formatNameAs(
@@ -1815,7 +2059,7 @@ public class TestMain {
 
             // test dateOp (date and dateTime in operation parameter)
             // Test for non-query operation with result 
-            begin();
+            this.begin();
             Date dateTimeNow = new Date();
             PersonDateOpResult dateOpResult = person.dateOp(
                 app1Package.createPersonDateOpParams(
@@ -1826,7 +2070,7 @@ public class TestMain {
                     dateTimeNow
                 )
             );
-            commit();
+            this.commit();
             System.out.println("dateOp.dateResult=" + dateOpResult.getDateResult());
             System.out.println("dateOp.dateTimeResult=" + dateOpResult.getDateTimeResult());
 
@@ -1840,7 +2084,7 @@ public class TestMain {
             System.out.println("removing person=" + segment.getPerson("00082").getLastName());
 
             int initialPersonCount = segment.getPerson().size();
-            begin();
+            this.begin();
             segment.getPerson(false,"0001").refDelete();
             segment.getPerson(false,"00053").refDelete();
             segment.getPerson(false,"00082").refDelete();
@@ -1850,7 +2094,7 @@ public class TestMain {
                 initialPersonCount - 3,
                 finalPersonCount
             );
-            persistenceManager.currentTransaction().rollback();
+            this.rollback();
 
             finalPersonCount = segment.getPerson().size();
             assertEquals(
@@ -1858,7 +2102,7 @@ public class TestMain {
                 initialPersonCount,
                 finalPersonCount
             );
-            begin();
+            this.begin();
             segment.getPerson(false,"0001").refDelete();
             segment.getPerson(false,"00053").refDelete();
             segment.getPerson(false,"00082").refDelete();
@@ -1868,7 +2112,7 @@ public class TestMain {
                 initialPersonCount - 3,
                 finalPersonCount
             );
-            commit();
+            this.commit();
             finalPersonCount = segment.getPerson().size();
             assertEquals(
                 "Commit person count",
@@ -1884,7 +2128,7 @@ public class TestMain {
             //
             try {
                 super.taskId = "CR0003390";
-                begin();
+                this.begin();
                 person = segment.getPerson("DOE");
                 assertNull("DOE does not exist", person);
                 person = personClass.createPerson();
@@ -1895,12 +2139,12 @@ public class TestMain {
                 person = segment.getPerson("DOE");
                 assertTrue("DOE is persistent-new-deleted", JDOHelper.isNew(person));
                 assertTrue("DOE is persistent-new-deleted", JDOHelper.isDeleted(person));
-                persistenceManager.currentTransaction().rollback();
+                this.rollback();
 
                 // Add after failed get
                 assertNull("person NO1 exists", segment.getPerson("NO1"));
 
-                begin();
+                this.begin();
                 person = personClass.createPerson();
                 person.setForeignId("X1");
                 person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1961-11-11"));
@@ -1913,7 +2157,7 @@ public class TestMain {
                 person.setGivenName(new String[]{"Hans", "Heiri"});
                 person.getAssignedAddress().add(postalAddress);
                 segment.addPerson(false, "NO1", person);
-                persistenceManager.currentTransaction().rollback();
+                this.rollback();
 
                 // ... and test whether they are removed
                 assertNull("Person N01", segment.getPerson(false,"NO1"));
@@ -1924,7 +2168,7 @@ public class TestMain {
                 segment.getPerson().remove(QualifierType.REASSIGNABLE,"NO2");
 
                 // Add after failed removal
-                begin();
+                this.begin();
                 person = personClass.createPerson();
                 person.setForeignId("X2");
                 person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1961-11-11"));
@@ -1937,7 +2181,7 @@ public class TestMain {
                 person.setGivenName(new String[]{"Hans", "Heiri"});
                 person.getAssignedAddress().add(postalAddress);
                 segment.addPerson(false,"NO2", person);
-                persistenceManager.currentTransaction().rollback();
+                this.rollback();
 
                 assertNull("person 00053 not removed", segment.getPerson("00053"));
                 assertNull("person 00082 not removed", segment.getPerson("00082"));
@@ -1967,22 +2211,22 @@ public class TestMain {
 
                     // invoke sendMessage on PostalAddress
                     if(address instanceof PostalAddress) {
-                        begin(); // isQuery() is false               
+                        this.begin(); // isQuery() is false               
                         ((PostalAddress)address).sendMessage(
                             app1Package.createPostalAddressSendMessageParams(
                                 new byte[]{'h', 'e', 'l', 'l', 'o'}
                             )
                         );
-                        commit();
+                        this.commit();
                     }
                     else if(address instanceof EmailAddress) {
-                        begin(); // isQuery() is false               
+                        this.begin(); // isQuery() is false               
                         ((EmailAddress)address).sendMessage(
                             app1Package.createEmailAddressSendMessageParams(
                                 "hello"
                             )
                         );
-                        commit();
+                        this.commit();
                     }
                     else {
                         fail("address format " + address.getClass().getName() + " unknown");
@@ -1996,7 +2240,7 @@ public class TestMain {
                 //
                 // test cycles
                 //
-                begin();
+                this.begin();
                 CycleMember1 member1 = cycleMember1Class.createCycleMember1();
                 member1.setDescription("this is member1");
                 CycleMember2 member2 = cycleMember2Class.createCycleMember2();
@@ -2005,7 +2249,7 @@ public class TestMain {
                 member2.setM1(member1);
                 segment.addCycleMember1(false, new BigDecimal(1), member1);
                 segment.addCycleMember2(false, "member2", member2);
-                commit();
+                this.commit();
     
                 // verify member1, member2
                 member1 = segment.getCycleMember1(new BigDecimal(1));
@@ -2027,7 +2271,7 @@ public class TestMain {
             }
 
             // test streams
-            begin();
+            this.begin();
 
             final int contentLength = 1000;
             byte[] content = new byte[contentLength];
@@ -2053,7 +2297,7 @@ public class TestMain {
                 )
             );
             segment.addDocument(false, "myDoc", document);
-            commit();
+            this.commit();
 
             // verify returned document
             document = segment.getDocument("myDoc");
@@ -2109,7 +2353,7 @@ public class TestMain {
                 //
                 // Modify content
                 //
-                begin();
+                this.begin();
                 for(
                         int i = 0;
                         i < contentLength;
@@ -2120,7 +2364,7 @@ public class TestMain {
                 document.setContent(
                     org.w3c.cci2.BinaryLargeObjects.valueOf(content)
                 );
-                commit();
+                this.commit();
             }
             {
                 contentLo = document.getContent();
@@ -2173,14 +2417,14 @@ public class TestMain {
             //
             try {
                 super.taskId = "CR20018821";
-                begin();
+                this.begin();
                 Importer.importObjects(
                     Importer.asTarget(persistenceManager),
                     Importer.asSource(
                         new URL("xri://+resource/test/openmdx/app1/data.xml")
                     )
                 );
-                commit();
+                this.commit();
                 File file = File.createTempFile("data", ".zip");
                 Exporter.export(
                     Exporter.asTarget(file, Exporter.MIME_TYPE_XML),
@@ -2262,7 +2506,7 @@ public class TestMain {
                     assertEquals("people", cardinality, jpaPeople.size());
                     assertEquals("addresses", 1, jpaAddresses.size());
                     objectInputStream.close();
-                    super.begin();
+                    this.begin();
                     for(test.openmdx.app1.cci2.Address jpaAddress : jpaAddresses) {
                         assertFalse("deleted", JDOHelper.isDeleted(jpaAddress));
                         assertFalse("detached", JDOHelper.isDetached(jpaAddress));
@@ -2341,8 +2585,26 @@ public class TestMain {
                             System.out.println("OK");
                         }
                     }
-                    super.commit();
+                    this.commit();
                 }
+            } finally {
+                super.taskId = null;
+            }
+            // 
+            // Test CR20019184
+            // 
+            try {
+                super.taskId = "CR20019184";
+                this.begin();
+                postalAddress = postalAddressClass.createInternationalPostalAddress();
+                postalAddress.setCountry("Suisse");
+                postalAddress.setCity("Gen\u00E8ve");
+                postalAddress.setHouseNumber("10");
+                postalAddress.setPostalCode("1201");
+                postalAddress.setStreet("rue Voltaire");
+                postalAddress.setAddressLine("Hotel", "Ibis Gen\u00E8ve Centre Gare");
+                segment.addAddress(false, "lost+found", postalAddress);
+                this.commit();
             } finally {
                 super.taskId = null;
             }
@@ -2367,14 +2629,16 @@ public class TestMain {
             // Touch
             //
             super.taskId = "CR20018820";
-            super.begin();
+            this.begin();
             person.setGivenName("Rainer Maria");
-            super.commit();
+            this.commit();
             //
             // By Task Id
             //
-            Collection<UnitOfWork> task = AuditQueries.getUnitOfWorkBelongingToTask(super.entityManager, "CR0002096"); 
-            assertEquals("Size of task CR0002096", 3 * run, task.size());
+            Collection<UnitOfWork> task = AuditQueries.getUnitOfWorkBelongingToTask(super.entityManager, "CR20018578"); 
+            assertEquals("Size of task CR20018578", 1 * run, task.size());
+            task = AuditQueries.getUnitOfWorkBelongingToTask(super.entityManager, "CR0002096"); 
+            assertEquals("Size of task CR0002096", 2 * run, task.size());
             dumpTask("CR0002096", task);
             //
             // By Object
@@ -2453,7 +2717,7 @@ public class TestMain {
             id = "all units of work"; 
             task = AuditQueries.getUnitOfWorkForTimeRange(super.entityManager, from, null);
             dumpTask(id + scope, task);
-            assertEquals(id + scope, (10 * create + 13) * factor, task.size());
+            assertEquals(id + scope, (10 * create + 17) * factor, task.size());
             id = "units of work involving people"; 
             task = AuditQueries.getUnitOfWorkInvolvingObject(
                 from, 
@@ -2577,7 +2841,7 @@ public class TestMain {
                 if(i % 100 == 0) {
                     System.out.println(i + " persons created. Free memory " + Runtime.getRuntime().freeMemory());
                 }
-                begin();
+                this.begin();
                 Person person = personClass.createPerson();
                 person.setForeignId("F" + i);
                 person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
@@ -2591,7 +2855,7 @@ public class TestMain {
                 person.getPersonGroup().add(g1);
                 person.getPersonGroup().add(g2);
                 segment.addPerson(false,"L" + (1000000 + i), person);
-                commit();
+                this.commit();
             }
 
             // Retrieve persons
@@ -2655,7 +2919,7 @@ public class TestMain {
 
 
     //------------------------------------------------------------------------
-    // Class ReInitialization
+    // Class LocalConnectionTest
     //------------------------------------------------------------------------
 
     /**
@@ -2666,6 +2930,7 @@ public class TestMain {
         @Test
         public void run(
         ) throws Exception{
+//          super.testInMemoryProvider();
             super.resetAuditSegment();
             super.resetDataSegment();
             super.testCR20018726();
@@ -2679,15 +2944,21 @@ public class TestMain {
 
     
     //------------------------------------------------------------------------
-    // Class ReInitialize
+    // Class ProxyConnectionSetUp
     //------------------------------------------------------------------------
 
     /**
      * Replaces the entity manager factory
      */
-    public static class ReInitialization {
+    public static class ProxyConnectionSetUp {
      
-        private final static boolean USE_SERVLET = Boolean.TRUE; // avoids dead code warning
+        /**
+         * Tells whether a servlet connection shall be used
+         * @return
+         */
+        protected boolean useServlet(){
+            return true;
+        }
         
         /**
          * Switch to proxy set-up
@@ -2697,17 +2968,17 @@ public class TestMain {
          */
         @Test
         public void reInitialize() throws ResourceException, ServletException{
-            ConnectionFactory inboundConnectionFactory = USE_SERVLET ?  new ConnectionFactoryAdapter(
+            ConnectionFactory inboundConnectionFactory = useServlet() ?  new ConnectionFactoryAdapter(
                 new ServletPort(
                     Collections.singletonMap(
                         "entity-manager-factory-name",
-                        "test-Main-EntityManagerFactory"
+                        "jdo:test-Main-EntityManagerFactory"
                     )
                 ),
                 true, // supportsLocalTransactionDemarcation
                 TransactionAttributeType.NEVER
             ) : InboundConnectionFactory_2.newInstance(
-                "test-Main-EntityManagerFactory"
+                "jdo:test-Main-EntityManagerFactory"
             );
             Map<String,Object> dataManagerProxyConfiguration = new HashMap<String,Object>();
             dataManagerProxyConfiguration.put(
@@ -2737,6 +3008,195 @@ public class TestMain {
             
         }
         
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Class AbstractContainerManagedTransactionSetUp
+    //------------------------------------------------------------------------
+
+    /**
+     * Replaces the entity manager factory
+     */
+    public abstract static class AbstractContainerManagedTransactionSetUp {
+     
+        /**
+         * Defines whether the unit of work is optimistic or pessimistic
+         * 
+         * @return <code>true</code> if the unit of work is optimistic
+         */
+        protected abstract boolean isOptimistic();
+        
+        /**
+         * Switch container managed transaction set-up
+         * 
+         * @throws ResourceException 
+         * @throws ServletException 
+         */
+        @Test
+        public void reInitialize() throws ResourceException, ServletException {
+            Map<String,Object> override = new HashMap<String, Object>();
+            override.put(
+                ConfigurableProperty.TransactionType.qualifiedName(), 
+                Constants.JTA
+            );
+            override.put(
+                ConfigurableProperty.Optimistic.qualifiedName(),
+                this.isOptimistic()
+            );
+            entityManagerFactory = JDOHelper.getPersistenceManagerFactory(
+                override,
+                "test-Main-EntityManagerFactory"
+            );
+        }
+        
+    }
+
+    //------------------------------------------------------------------------
+    // Class ContainerManagedOptimisticTransactionSetUp
+    //------------------------------------------------------------------------
+
+    /**
+     * Replaces the entity manager factory
+     */
+    public static class ContainerManagedOptimisticTransactionSetUp extends AbstractContainerManagedTransactionSetUp {
+
+        /* (non-Javadoc)
+         * @see test.openmdx.app1.TestMain.AbstractContainerManagedTransactionSetUp#isOptimistic()
+         */
+        @Override
+        protected boolean isOptimistic() {
+            return true;
+        }
+     
+        
+    }
+
+    //------------------------------------------------------------------------
+    // Class ContainerManagedPessimisticTransactionSetUp
+    //------------------------------------------------------------------------
+
+    /**
+     * Replaces the entity manager factory
+     */
+    public static class ContainerManagedPessimisticTransactionSetUp extends AbstractContainerManagedTransactionSetUp {
+
+        /* (non-Javadoc)
+         * @see test.openmdx.app1.TestMain.AbstractContainerManagedTransactionSetUp#isOptimistic()
+         */
+        @Override
+        protected boolean isOptimistic() {
+            return false;
+        }
+     
+        
+    }
+    
+    //------------------------------------------------------------------------
+    // Class ContainerManagedTransactionTest
+    //------------------------------------------------------------------------
+
+    /**
+     * 3rd Run
+     */
+    public static class ContainerManagedTransactionTest extends LocalConnectionTest {
+
+        private UserTransaction userTransaction;
+        
+        @Override
+        public void run(
+        ) throws Exception{
+            this.userTransaction = ComponentEnvironment.lookup(
+                UserTransaction.class
+            );
+            this.userTransaction.begin();
+            super.resetAuditSegment();
+            super.resetDataSegment();
+            super.testCR20018726();
+            super.testCR20018667();
+            super.testCR20019014();
+            super.testMain();
+            this.userTransaction.rollback();
+        }
+
+        /* (non-Javadoc)
+         * @see test.openmdx.app1.TestMain.AbstractTest#begin()
+         */
+        @Override
+        protected void begin() {
+            try {
+                if(this.userTransaction.getStatus() == Status.STATUS_ACTIVE) {
+                    this.userTransaction.rollback();
+                }
+                this.userTransaction.begin();
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
+            ((Synchronization_2_0)entityManager.currentTransaction()).afterBegin();
+        }
+
+        /* (non-Javadoc)
+         * @see test.openmdx.app1.TestMain.AbstractTest#commit()
+         */
+        @Override
+        protected void commit() {
+            try {
+                try {
+                    ((Synchronization_2_0)entityManager.currentTransaction()).beforeCompletion();
+                } catch (JDOException commitException) {
+                    try {
+                        this.userTransaction.rollback();
+                    } catch (Exception rollbackException) {
+                        throw new JDOFatalDataStoreException(
+                            "Container managed rollback failed",
+                            rollbackException
+                        );
+                    } finally {
+                        ((Synchronization_2_0)entityManager.currentTransaction()).afterCompletion(Status.STATUS_ROLLEDBACK);
+                    }
+                    throw commitException;
+                }
+                try {
+                    this.userTransaction.commit();
+                } catch (Exception commitException) {
+                    ((Synchronization_2_0)entityManager.currentTransaction()).afterCompletion(Status.STATUS_ROLLEDBACK);
+                    throw new JDOFatalDataStoreException(
+                        "Container managed commit failed",
+                        commitException
+                    );
+                }
+                ((Synchronization_2_0)entityManager.currentTransaction()).afterCompletion(Status.STATUS_COMMITTED);
+            } finally {
+                try {
+                    this.userTransaction.begin();
+                } catch (Exception exception) {
+                    throw new RuntimeException(
+                        "Could not start container managed read-only transaction",
+                        exception
+                    );
+                }
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see test.openmdx.app1.TestMain.AbstractTest#rollback()
+         */
+        @Override
+        protected void rollback() {
+            try {
+                this.userTransaction.rollback();
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            } finally {
+                ((Synchronization_2_0)entityManager.currentTransaction()).afterCompletion(Status.STATUS_ROLLEDBACK);
+            }
+            try {
+                this.userTransaction.begin();
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
+            }
+        }
+
     }
 
     

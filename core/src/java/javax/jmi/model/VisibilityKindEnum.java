@@ -8,15 +8,11 @@ public final class VisibilityKindEnum implements VisibilityKind {
     public static final VisibilityKindEnum PROTECTED_VIS = new VisibilityKindEnum("protected_vis");
     public static final VisibilityKindEnum PRIVATE_VIS = new VisibilityKindEnum("private_vis");
 
-    private static final java.util.List typeName;
+    private static final java.util.List typeName = java.util.Collections.unmodifiableList(
+        java.util.Arrays.asList("Model","VisibilityKind")
+    );
+    
     private final String literalName;
-
-    static {
-        java.util.ArrayList temp = new java.util.ArrayList();
-        temp.add("Model");
-        temp.add("VisibilityKind");
-        typeName = java.util.Collections.unmodifiableList(temp);
-    }
 
     private VisibilityKindEnum(String literalName) {
         this.literalName = literalName;
@@ -26,14 +22,17 @@ public final class VisibilityKindEnum implements VisibilityKind {
         return typeName;
     }
 
+    @Override
     public String toString() {
         return literalName;
     }
 
+    @Override
     public int hashCode() {
         return literalName.hashCode();
     }
 
+    @Override
     public boolean equals(Object o) {
         if (o instanceof VisibilityKindEnum) return (o == this);
         else if (o instanceof VisibilityKind) return (o.toString().equals(literalName));

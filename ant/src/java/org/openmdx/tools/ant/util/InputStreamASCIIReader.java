@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InputStreamASCIIReader.java,v 1.2 2005/08/24 20:17:02 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: InputStreamASCIIReader.java,v 1.3 2010/06/04 22:27:36 hburger Exp $
  * Description: InputStream ASCII Reader
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/08/24 20:17:02 $
+ * Date:        $Date: 2010/06/04 22:27:36 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -110,6 +109,7 @@ public class InputStreamASCIIReader extends Reader {
 	 * 
 	 * @exception IOException
 	 */
+	@Override
 	public void close() throws IOException {
 		this.in = null;
 	}
@@ -117,6 +117,7 @@ public class InputStreamASCIIReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#read(char[], int, int)
 	 */
+	@Override
 	public int read(
 		char[] cbuf, 
 		int off, 
@@ -137,6 +138,7 @@ public class InputStreamASCIIReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#read()
 	 */
+	@Override
 	public int read(
 	) throws IOException {
 		if(isEncodingKnown()){
@@ -195,6 +197,7 @@ public class InputStreamASCIIReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#mark(int)
 	 */
+	@Override
 	public void mark(int readAheadLimit) throws IOException {
 		this.in.mark(
 			readAheadLimit * maxBytesPerCharacter()
@@ -204,6 +207,7 @@ public class InputStreamASCIIReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#markSupported()
 	 */
+	@Override
 	public boolean markSupported() {
 		return this.in.markSupported();
 	}
@@ -211,6 +215,7 @@ public class InputStreamASCIIReader extends Reader {
 	/* (non-Javadoc)
 	 * @see java.io.Reader#reset()
 	 */
+	@Override
 	public void reset() throws IOException {
 		this.in.reset();
 	}

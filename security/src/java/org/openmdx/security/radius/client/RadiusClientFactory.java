@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: RadiusClientFactory.java,v 1.7 2010/03/11 18:50:58 hburger Exp $
+ * Name:        $Id: RadiusClientFactory.java,v 1.9 2010/08/03 14:27:24 hburger Exp $
  * Description: Java Radius Client Derivate
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/11 18:50:58 $
+ * Date:        $Date: 2010/08/03 14:27:24 $
  * ====================================================================
  *
  * Copyright (C) 2004-2010  OMEX AG
@@ -49,16 +49,17 @@
  * 
  * This library BASED on Java Radius Client 2.0.0
  * (http://jradius-client.sourceforge.net/),
- * but it's namespace and content has been MODIFIED by OMEX AG
+ * but its namespace and content has been MODIFIED by OMEX AG
  * in order to integrate it into the openMDX framework.
  */
 package org.openmdx.security.radius.client;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.util.logging.Logger;
 
 import org.openmdx.uses.net.sourceforge.jradiusclient.RadiusClient;
-
 import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
 
 
@@ -93,7 +94,10 @@ public class RadiusClientFactory implements PoolableObjectFactory {
         this.authenticationPorts = authenticationPorts;
         this.accountingPorts = accountingPorts;
         this.sharedSecret = sharedSecret;
-        this.socketTimeout = socketTimeout;
+        this.socketTimeout = new BigDecimal(
+        	BigInteger.valueOf(socketTimeout), 
+        	3
+        );
         this.logger = logger;
         this.trace = trace;
         this.nasAddress = nasAddress;
@@ -122,7 +126,7 @@ public class RadiusClientFactory implements PoolableObjectFactory {
     /**
      * The Radius Client's Socket Timeout
      */
-    private final long socketTimeout;
+    private final BigDecimal socketTimeout;
     
     /**
      * The logger for trace and failure messages
@@ -153,7 +157,7 @@ public class RadiusClientFactory implements PoolableObjectFactory {
             this.authenticationPorts,
             this.accountingPorts,
             this.sharedSecret,
-            (int)this.socketTimeout, 
+            this.socketTimeout, 
             this.logger, 
             this.trace, 
             this.nasAddress

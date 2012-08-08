@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TimeBasedUUIDGeneratorUsingIP4Address.java,v 1.7 2008/01/08 16:16:32 hburger Exp $
+ * Name:        $Id: TimeBasedUUIDGeneratorUsingIP4Address.java,v 1.8 2010/06/02 13:45:39 hburger Exp $
  * Description: Random Based UUID Provider
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:32 $
+ * Date:        $Date: 2010/06/02 13:45:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -110,6 +110,7 @@ public class TimeBasedUUIDGeneratorUsingIP4Address
     /* (non-Javadoc)
      * @see org.openmdx.kernel.id.spi.TimeBasedUUIDBuilder#getNode()
      */
+    @Override
     protected long getNode() {
         return TimeBasedUUIDGeneratorUsingIP4Address.node;
     }

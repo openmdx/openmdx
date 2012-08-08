@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: JULIFileHandler.java,v 1.1 2009/04/01 14:05:36 hburger Exp $
+ * Name:        $Id: JULIFileHandler.java,v 1.2 2010/06/02 13:46:07 hburger Exp $
  * Description: JULI File Handler
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/01 14:05:36 $
+ * Date:        $Date: 2010/06/02 13:46:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,7 +69,7 @@ import java.util.logging.SimpleFormatter;
  * named {prefix}.{date}.{suffix} in a configured directory, with an
  * optional preceding timestamp.
  *
- * @version $Revision: 1.1 $ $Date: 2009/04/01 14:05:36 $
+ * @version $Revision: 1.2 $ $Date: 2010/06/02 13:46:07 $
  */
 public class JULIFileHandler extends Handler {
 
@@ -132,6 +132,7 @@ public class JULIFileHandler extends Handler {
      *
      * @param  record  description of the log event
      */
+    @Override
     public void publish(LogRecord record) {
 
         if (!isLoggable(record)) {
@@ -204,6 +205,7 @@ public class JULIFileHandler extends Handler {
     /**
      * Close the currently open log file (if any).
      */
+    @Override
     public void close() {
         
         try {
@@ -224,6 +226,7 @@ public class JULIFileHandler extends Handler {
     /**
      * Flush the writer.
      */
+    @Override
     public void flush() {
 
         try {

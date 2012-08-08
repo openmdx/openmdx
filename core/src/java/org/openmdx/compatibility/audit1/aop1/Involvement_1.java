@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Involvement_1.java,v 1.5 2009/12/15 14:05:50 hburger Exp $
+ * Name:        $Id: Involvement_1.java,v 1.7 2010/06/01 08:59:09 hburger Exp $
  * Description: Involvement 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/15 14:05:50 $
+ * Date:        $Date: 2010/06/01 08:59:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,9 +62,10 @@ import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.AttributeSpecifier;
-import org.openmdx.base.query.FilterOperators;
-import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.Filter;
+import org.openmdx.base.query.IsGreaterCondition;
+import org.openmdx.base.query.IsLikeCondition;
+import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.text.conversion.UUIDConversion;
@@ -94,7 +95,7 @@ public class Involvement_1 extends org.openmdx.audit2.aop1.Involvement_1 {
     /**
      * 
      */
-    private Path afterImagePath = NULL;
+    private Path afterImagePath = Involvement_1.NULL;
     
     /**
      * Retrive the unit of work container
@@ -118,9 +119,9 @@ public class Involvement_1 extends org.openmdx.audit2.aop1.Involvement_1 {
     protected Path getBeforeImagePath(
     ) throws ServiceException {
         return Qualifiers.getAudit1ImageId(
-            getConfiguration(), 
-            getObjectPath(), 
-            getUnitOfWorkId()
+            this.getConfiguration(), 
+            this.getObjectPath(), 
+            this.getUnitOfWorkId()
         );
     }
 
@@ -133,7 +134,7 @@ public class Involvement_1 extends org.openmdx.audit2.aop1.Involvement_1 {
     protected ObjectView_1_0 getBeforeImage(
     ) throws ServiceException {
         return (ObjectView_1_0) self.jdoGetPersistenceManager().getObjectById(
-            getBeforeImagePath()
+            this.getBeforeImagePath()
         );
     }
 
@@ -146,30 +147,27 @@ public class Involvement_1 extends org.openmdx.audit2.aop1.Involvement_1 {
      */
     protected ObjectView_1_0 getNextUnitOfWork(
     ) throws ServiceException{
-        Date createdAt = (Date) getUnitOfWork().objGetValue(SystemAttributes.CREATED_AT);
-        List<DataObject_1_0> involving  = getUnitOfWorkContainer().subMap(
-            new FilterProperty[]{
-                new FilterProperty(
-                    Quantifier.THERE_EXISTS.code(),
+        Date createdAt = (Date) this.getUnitOfWork().objGetValue(SystemAttributes.CREATED_AT);
+        List<DataObject_1_0> involving  = this.getUnitOfWorkContainer().subMap(
+            new Filter(
+                new IsLikeCondition(
+                    Quantifier.THERE_EXISTS,
                     "involved",
-                    FilterOperators.IS_LIKE,
-                    Qualifiers.toAudit1InvolvedId(getObjectPath())
+                    true, // IS_LIKE,
+                    Qualifiers.toAudit1InvolvedId(this.getObjectPath())
                 ),
-                new FilterProperty(
-                    Quantifier.THERE_EXISTS.code(),
+                new IsGreaterCondition(
+                    Quantifier.THERE_EXISTS,
                     SystemAttributes.CREATED_AT,
-                    FilterOperators.IS_GREATER,
+                    true, // IS_GREATER,
                     createdAt
                 )
-            }
+            )
         ).values(
-            new AttributeSpecifier[]{
-                new AttributeSpecifier(
-                    SystemAttributes.CREATED_AT,
-                    0,
-                    SortOrder.ASCENDING.code()
-                )
-            }
+            new OrderSpecifier(
+                SystemAttributes.CREATED_AT,
+                SortOrder.ASCENDING
+            )
         );
         return involving.isEmpty() ? null : (ObjectView_1_0)involving.get(0);
     }
@@ -182,23 +180,23 @@ public class Involvement_1 extends org.openmdx.audit2.aop1.Involvement_1 {
      */
     protected Path getAfterImagePath(
     ) throws ServiceException {
-        if(this.afterImagePath == NULL) {
-            ObjectView_1_0 nextUnitOfWork = getNextUnitOfWork();
+        if(this.afterImagePath == Involvement_1.NULL) {
+            ObjectView_1_0 nextUnitOfWork = this.getNextUnitOfWork();
             if(nextUnitOfWork == null) {
-                ObjectView_1_0 object = getObject();
+                ObjectView_1_0 object = this.getObject();
                 if(object == null) {
                     return this.afterImagePath = null;
                 }
                 Path candidate = Qualifiers.getAudit1ImageId(
-                    getConfiguration(), 
-                    getObjectPath(), 
+                    this.getConfiguration(), 
+                    this.getObjectPath(), 
                     UUIDConversion.toUID(UUIDs.newUUID())
                 );
                 return this.afterImagePath = ((DataObject_1)object.objGetDelegate()).getBeforeImage(candidate).jdoGetObjectId();
             } else {
                 return this.afterImagePath = Qualifiers.getAudit1ImageId(
-                    getConfiguration(), 
-                    getObjectPath(), 
+                    this.getConfiguration(), 
+                    this.getObjectPath(), 
                     (String) nextUnitOfWork.objGetValue("unitOfWorkId")
                 );
             }
@@ -214,14 +212,14 @@ public class Involvement_1 extends org.openmdx.audit2.aop1.Involvement_1 {
      */
     protected ObjectView_1_0 getAfterImage(
     ) throws ServiceException {
-        Path afterImagePath = getAfterImagePath();
+        Path afterImagePath = this.getAfterImagePath();
         if(afterImagePath == null) {
             return null;
         } 
         ObjectView_1_0 afterImage = (ObjectView_1_0) self.jdoGetPersistenceManager().getObjectById(
             afterImagePath
         );
-        Date transactionTime = (Date) getUnitOfWork().objGetValue(SystemAttributes.CREATED_AT);
+        Date transactionTime = (Date) this.getUnitOfWork().objGetValue(SystemAttributes.CREATED_AT);
         Date objectVersion = (Date) afterImage.objGetValue(SystemAttributes.MODIFIED_AT);
         boolean matching = transactionTime.equals(objectVersion);
         return matching ? afterImage : null;
@@ -235,8 +233,8 @@ public class Involvement_1 extends org.openmdx.audit2.aop1.Involvement_1 {
         String feature
     ) throws ServiceException {
         return
-            "beforeImage".equals(feature) ? getBeforeImage() : 
-            "afterImage".equals(feature) ? getAfterImage() :
+            "beforeImage".equals(feature) ? this.getBeforeImage() : 
+            "afterImage".equals(feature) ? this.getAfterImage() :
             super.objGetValue(feature);
     }
 

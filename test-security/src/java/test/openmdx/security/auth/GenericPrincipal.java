@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org
- * Name:        $Id: GenericPrincipal.java,v 1.1 2010/03/05 13:21:20 hburger Exp $
+ * Name:        $Id: GenericPrincipal.java,v 1.2 2010/06/04 22:38:00 hburger Exp $
  * Description: Generic Principal
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/05 13:21:20 $
+ * Date:        $Date: 2010/06/04 22:38:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -169,7 +169,8 @@ public final class GenericPrincipal
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
-    public String toString() {
+    @Override
+	public String toString() {
         return 
             this.identity != null ? this.identity :
             this.name != null ? this.name : 
@@ -179,7 +180,8 @@ public final class GenericPrincipal
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
-    public boolean equals(Object object) {
+    @Override
+	public boolean equals(Object object) {
 		if(object == this) return true;
         if(!(object instanceof GenericPrincipal)) return false;
         GenericPrincipal that = (GenericPrincipal) object;
@@ -192,7 +194,8 @@ public final class GenericPrincipal
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
-    public int hashCode() {
+    @Override
+	public int hashCode() {
     	return
     		this.identity != null ? this.identity.hashCode() : 
 			this.name != null ? this.name.hashCode() :

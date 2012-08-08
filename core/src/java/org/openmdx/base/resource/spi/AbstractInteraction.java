@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractInteraction.java,v 1.2 2010/01/14 14:00:13 hburger Exp $
+ * Name:        $Id: AbstractInteraction.java,v 1.3 2010/05/06 08:00:44 hburger Exp $
  * Description: Abstract Interaction 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/14 14:00:13 $
+ * Date:        $Date: 2010/05/06 08:00:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -82,12 +82,12 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     /**
      * The open flag
      */
-    private boolean closed = false;
+    private volatile boolean closed = false;
 
     /**
      * The open flag
      */
-    private boolean opened = false;
+    private volatile boolean opened = false;
     
     /**
      * The chain of warnings
@@ -117,9 +117,11 @@ public abstract class AbstractInteraction<C extends Connection> implements Inter
     protected void assertOpened(
     ) throws ResourceException {
         assertNotClosed();
-        if(!this.opened) {
-            this.opened = true;
-            open();
+        if(!this.opened) synchronized(this){
+            if(!this.opened) {
+                open();
+                this.opened = true;
+            }
         }
     }
     

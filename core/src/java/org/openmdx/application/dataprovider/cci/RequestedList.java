@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX http://www.openmdx.org/
- * Name:        $Id: RequestedList.java,v 1.6 2009/12/14 15:21:32 wfro Exp $
+ * Name:        $Id: RequestedList.java,v 1.8 2010/06/02 13:39:35 hburger Exp $
  * Description: RequestedList class
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/14 15:21:32 $
+ * Date:        $Date: 2010/06/02 13:39:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,9 +59,7 @@ import java.util.NoSuchElementException;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.AttributeSpecifier;
-import org.openmdx.base.query.Directions;
-import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -202,6 +200,7 @@ public class RequestedList
      * @exception   RuntimeServiceException
      *              if size is not available
      */
+    @Override
     public int size(
     ){
         if(this.exception != null) throw new RuntimeServiceException(
@@ -230,6 +229,7 @@ public class RequestedList
      *              if the index is out of range (index < 0 || index >
      *              size()).
      */
+    @Override
     public ListIterator<Object> listIterator(
         int index
     ){
@@ -256,13 +256,16 @@ public class RequestedList
             this.previousIndex = index - 1;
             this.currentIndex = -1;
             this.nextIndex = index;
-            this.iterator = // throw IndexOutOfBoundsException if necessary
-                this.reply == null || (
-                    index >= this.reply.getObjects().length && 
-                    hasMore(this.reply)
-                ) ? 
-                    cache(this.nextIndex, Directions.ASCENDING) :
-                        Arrays.asList((Object[])this.reply.getObjects()).listIterator(index);
+            // throw IndexOutOfBoundsException if necessary
+            this.iterator = this.reply == null || (
+                index >= this.reply.getObjects().length && 
+                hasMore(this.reply)
+            ) ? cache(
+                this.nextIndex, 
+                SortOrder.ASCENDING.code()
+            ) : Arrays.asList(
+                (Object[])this.reply.getObjects()
+            ).listIterator(index);
         }
 
         /**
@@ -324,7 +327,7 @@ public class RequestedList
                 return Arrays.asList(
                     (Object[])reply.getObjects()
                 ).listIterator(
-                    direction == Directions.ASCENDING ? 0 : reply.getObjects().length
+                    direction == SortOrder.ASCENDING.code() ? 0 : reply.getObjects().length
                 );
             } catch (ServiceException exception) {
                 throw new RuntimeServiceException(exception);
@@ -360,7 +363,7 @@ public class RequestedList
         ){
             if (! this.iterator.hasNext()) this.iterator = cache(
                 this.nextIndex,
-                Directions.ASCENDING
+                SortOrder.ASCENDING.code()
             );
             this.currentIndex = this.previousIndex = this.nextIndex;
             this.nextIndex++; 
@@ -397,7 +400,7 @@ public class RequestedList
         ){
             if (! this.iterator.hasPrevious()) this.iterator = cache(
                 this.previousIndex,
-                Directions.DESCENDING
+                SortOrder.DESCENDING.code()
             );
             this.currentIndex = this.nextIndex = this.previousIndex;
             this.previousIndex--; 

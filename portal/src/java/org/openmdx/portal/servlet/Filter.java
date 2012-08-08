@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Filter.java,v 1.12 2009/06/16 17:08:26 wfro Exp $
+ * Name:        $Id: Filter.java,v 1.13 2010/06/01 09:10:40 hburger Exp $
  * Description: Filter
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/16 17:08:26 $
+ * Date:        $Date: 2010/06/01 09:10:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,10 +59,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.resource.ResourceException;
 
 import org.openmdx.base.query.Condition;
+import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.log.SysLog;
@@ -76,7 +78,55 @@ implements Serializable {
     ) {
     }
 
-    //-------------------------------------------------------------------------
+    /**
+     * Constructor 
+     *
+     * @param name
+     * @param labels
+     * @param groupName
+     * @param iconKey
+     * @param order
+     * @param condition
+     * @param orderSpecifier
+     * @param context
+     */
+    public Filter(
+        String name,
+        String[] labels,
+        String groupName,
+        String iconKey,
+        Integer[] order,
+        List<Condition> condition,
+        List<OrderSpecifier> orderSpecifier,
+        Extension extension,
+        Object... context
+    ) {
+        super(
+            condition,
+            Filter.removeDuplicateOrderSpecifiers(name, orderSpecifier, context),
+            extension
+        );
+        this.name = name;
+        this.labels = labels;
+        this.groupName = groupName;
+        this.iconKey = iconKey;
+        this.order = order;
+    }
+
+    /**
+     * Constructor 
+     *
+     * @param name
+     * @param labels
+     * @param groupName
+     * @param iconKey
+     * @param order
+     * @param condition
+     * @param orderSpecifier
+     * @param context
+     * 
+     * @deprecated use {@link Filter#Filter(String, String[], String, String, Integer[], List, List, Object...)}
+     */
     public Filter(
         String name,
         String[] labels,
@@ -87,40 +137,46 @@ implements Serializable {
         OrderSpecifier[] orderSpecifier,
         Object[] context
     ) {
-        super(
-            condition,
-            Filter.removeDuplicateOrderSpecifiers(name, orderSpecifier, context)
-        );
-        this.name = name;
-        this.labels = labels;
-        this.groupName = groupName;
-        this.iconKey = iconKey;
-        this.order = order;
+    	this(
+    		name,
+    		labels,
+    		groupName,
+    		iconKey,
+    		order,
+    		Arrays.asList(condition),
+    		Arrays.asList(orderSpecifier), 
+    		null, // extension
+    		context
+    	);
     }
-
+    
     //-------------------------------------------------------------------------
-    private static OrderSpecifier[] removeDuplicateOrderSpecifiers(
+    private static List<OrderSpecifier> removeDuplicateOrderSpecifiers(
         String name,
-        OrderSpecifier[] orderSpecifier,
+        List<OrderSpecifier> orderSpecifiers,
         Object[] context
     ) {
-        if(orderSpecifier == null) return null;
+        if(orderSpecifiers == null) return null;
         List<String> features = new ArrayList<String>();
         List<OrderSpecifier> specifiers = new ArrayList<OrderSpecifier>();
         boolean hasDuplicates = false;
-        for(int i = 0; i < orderSpecifier.length; i++) {
-            if(!features.contains(orderSpecifier[i].getFeature())) {
-                specifiers.add(orderSpecifier[i]);
-                features.add(orderSpecifier[i].getFeature());            
+        for(OrderSpecifier orderSpecifier : orderSpecifiers){
+            if(!features.contains(orderSpecifier.getFeature())) {
+                specifiers.add(orderSpecifier);
+                features.add(orderSpecifier.getFeature());            
             }
             else {
                 hasDuplicates = true;
             }
         }
         if(hasDuplicates) {
-        	SysLog.warning("Filter has duplicate order specifiers [name=" + name + "; context=" + Arrays.asList(context) + "]", Arrays.asList(orderSpecifier));
+        	SysLog.log(
+        		Level.WARNING, 
+        		"{0}|{1}|{2}", "Sys|Filter has duplicate order specifiers [name={0}; context={1}|{2}", 
+        		name, Arrays.asList(context), orderSpecifiers
+        	);
         }
-        return (OrderSpecifier[])specifiers.toArray(new OrderSpecifier[specifiers.size()]);
+        return specifiers;
     }
 
     //-------------------------------------------------------------------------
@@ -254,16 +310,8 @@ implements Serializable {
                     this.groupName,
                     this.iconKey,
                     this.order,
-                    Records.getRecordFactory().asIndexedRecord(
-                        Condition.class.getName(),
-                        "",
-                        this.getCondition()
-                    ),
-                    Records.getRecordFactory().asIndexedRecord(
-                        OrderSpecifier.class.getName(),
-                        "",
-                        this.getOrderSpecifier()
-                    )
+                    this.getCondition(),
+                    this.getOrderSpecifier()
                 }
             ).toString();
         } 
@@ -278,10 +326,9 @@ implements Serializable {
      */
     public boolean hasParameter(
     ) {
-        for(int i = 0; i < this.getCondition().length; i++) {
-            Condition condition = this.getCondition()[i];
-            for(int j = 0; j < condition.getValue().length; j++) {
-                if("?".equals(condition.getValue()[j])) {
+        for(Condition condition : this.getCondition()) {
+            for(Object value : condition.getValue()) {
+                if("?".equals(value)) {
                     return true;
                 }
             }

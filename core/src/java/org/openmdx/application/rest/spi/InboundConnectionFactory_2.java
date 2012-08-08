@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: InboundConnectionFactory_2.java,v 1.21 2009/12/30 10:49:34 hburger Exp $
+ * Name:        $Id: InboundConnectionFactory_2.java,v 1.23 2010/08/09 13:03:12 hburger Exp $
  * Description: Inbound REST Connection Factory
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/30 10:49:34 $
+ * Date:        $Date: 2010/08/09 13:03:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,9 +53,11 @@ package org.openmdx.application.rest.spi;
 import java.util.Collections;
 import java.util.Map;
 
+import javax.jdo.Constants;
 import javax.jdo.JDOException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManagerFactory;
+import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.resource.NotSupportedException;
@@ -67,6 +69,7 @@ import javax.resource.cci.ResourceAdapterMetaData;
 
 import org.openmdx.base.Version;
 import org.openmdx.base.accessor.rest.InboundConnection_2;
+import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
 import org.openmdx.base.resource.spi.ResourceExceptions;
@@ -81,16 +84,21 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
 
     /**
      * Constructor 
-     *
-     * @param overrides configuration overrides
-     * @param entityManagerFactoryName name used for entity manager lookup
+     * 
+     * @param entityManagerFactoryName name used for entity manager lookup, 
+     * i.e. one of<ul>
+     * <li><code>jdo:<em>&lang;JDO-name&rang;</em>
+     * <li><code>java:comp/env/<em>&lang;JNDI-name&rang;</em>
+     * </ul>
+     * @param overrides configuration overrides taken into consideration in 
+     * case of a JDO name
      */
     private InboundConnectionFactory_2(
-        Map<?,?> overrides,
-        String entityManagerFactoryName
+        String entityManagerFactoryName,
+        Map<?,?> overrides
     ){
-        this.overrides = overrides;
         this.entityManagerFactoryName = entityManagerFactoryName;
+        this.overrides = overrides;
     }
 
     /**
@@ -103,12 +111,15 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
      */
     private Reference reference;
 
+    /**
+     * The entity manager factory's name
+     */
     private final String entityManagerFactoryName;
     
     /**
      * @serial The connection factory configuration
      */
-    private final Map<?,?> overrides;
+    final Map<?,?> overrides;
     
     /**
      * The persistence manager factory
@@ -157,8 +168,21 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
             return true;
         }
 
-        public boolean supportsLocalTransactionDemarcation() {
-            return true;
+        public boolean supportsLocalTransactionDemarcation(
+        ) {
+            Object transactionType = InboundConnectionFactory_2.this.overrides.get(
+                ConfigurableProperty.TransactionType.qualifiedName()
+            );
+            if(transactionType == null) try {
+                transactionType = InboundConnectionFactory_2.this.getPersistenceManagerFactory().getTransactionType();
+            } catch (ResourceException exception) {
+                throw new RuntimeException(
+                    "Unable to determine the connection's transaction type",
+                    exception
+                    
+                );
+            }
+            return Constants.RESOURCE_LOCAL.equals(transactionType);
         }
         
     };
@@ -171,9 +195,12 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
     protected PersistenceManagerFactory getPersistenceManagerFactory(
     ) throws ResourceException {
         if(this.persistenceManagerFactory == null) try {
-            this.persistenceManagerFactory =  JDOHelper.getPersistenceManagerFactory(
+            this.persistenceManagerFactory = this.entityManagerFactoryName.startsWith("jdo:") ? JDOHelper.getPersistenceManagerFactory(
                 this.overrides,
-                this.entityManagerFactoryName
+                this.entityManagerFactoryName.substring(4)
+            ) :  JDOHelper.getPersistenceManagerFactory(
+                this.entityManagerFactoryName,
+                (Context)null
             );
         } catch (JDOException exception) {
             throw ResourceExceptions.initHolder(
@@ -192,14 +219,40 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
     
     /**
      * Create a new REST dispatcher
-     * @param entityManagerFactory the entity manager factory JNDI name
+     * 
+     * @param entityManagerFactoryName name used for entity manager lookup, 
+     * i.e. one of<ul>
+     * <li><code>jdo:<em>&lang;JDO-name&rang;</em>
+     * <li><code>java:comp/env/<em>&lang;JNDI-name&rang;</em>
+     * </ul>
      */
     public static ConnectionFactory newInstance(
         String entityManagerFactoryName
     ){
         return new InboundConnectionFactory_2(
-            Collections.EMPTY_MAP,
-            entityManagerFactoryName
+            entityManagerFactoryName,
+            Collections.EMPTY_MAP
+        );
+    }
+
+    /**
+     * Create a new REST dispatcher
+     * 
+     * @param entityManagerFactoryName name used for entity manager lookup, 
+     * i.e. one of<ul>
+     * <li><code>jdo:<em>&lang;JDO-name&rang;</em>
+     * <li><code>java:comp/env/<em>&lang;JNDI-name&rang;</em>
+     * </ul>
+     * @param overrides configuration overrides taken into consideration in 
+     * case of a JDO name
+     */
+    public static ConnectionFactory newInstance(
+        String entityManagerFactoryName,
+        Map<?,?> overrides
+    ){
+        return new InboundConnectionFactory_2(
+            entityManagerFactoryName,
+            overrides
         );
     }
 

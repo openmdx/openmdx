@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingContainer_1.java,v 1.8 2010/01/26 15:41:36 hburger Exp $
+ * Name:        $Id: MarshallingContainer_1.java,v 1.14 2010/07/01 15:56:13 hburger Exp $
  * Description: Marshalling Filterable Map
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:41:36 $
+ * Date:        $Date: 2010/07/01 15:56:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,25 +53,24 @@ package org.openmdx.base.accessor.spi;
 import java.util.List;
 
 import javax.jdo.FetchPlan;
+import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.collection.MarshallingMap;
 import org.openmdx.base.collection.MarshallingSequentialList;
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.cci.PersistenceHelper;
-import org.openmdx.base.persistence.spi.Container;
 import org.openmdx.base.persistence.spi.TransientContainerId;
+import org.openmdx.base.query.Filter;
+import org.openmdx.base.query.OrderSpecifier;
 
 /**
  * A Marshalling Filterable Map
  */
 public class MarshallingContainer_1
     extends MarshallingMap<String,DataObject_1_0>
-    implements Container, Container_1_0
+    implements Container_1_0
 {
 
     /**
@@ -81,30 +80,33 @@ public class MarshallingContainer_1
      * @param map
      */
     public MarshallingContainer_1(
+        PersistenceManager persistenceManager,
         Marshaller marshaller, 
         Container_1_0 container
     ) {
         super(marshaller, container);
+        this.persistenceManager = persistenceManager;
     }
 
+    private final PersistenceManager persistenceManager;
+    
+//  @Override
     public Container_1_0 subMap(
-        Object filter
+        Filter filter
     ) {
-        try {
-            return new MarshallingContainer_1(
-                super.marshaller,
-                getDelegate().subMap(super.marshaller.unmarshal(filter))
-            );
-        }
-        catch(ServiceException e) {
-            throw new RuntimeServiceException(e);
-        }
+        return new MarshallingContainer_1(
+            this.persistenceManager,
+            super.marshaller,
+            this.getDelegate().subMap(filter)
+        );
     }
 
+//  @Override
     public Container_1_0 container() {
         return new MarshallingContainer_1(
+            this.persistenceManager,
             super.marshaller,
-            getDelegate().container()
+            this.getDelegate().container()
         );
     }
 
@@ -126,53 +128,69 @@ public class MarshallingContainer_1
     // Implements Container_1_0
     //------------------------------------------------------------------------
     
+//  @Override
     public List<DataObject_1_0> values(
-        Object criteria
+        OrderSpecifier... criteria
     ) {
-        try {
-            return new MarshallingSequentialList<DataObject_1_0>(
-                super.marshaller,
-                getDelegate().values(super.marshaller.unmarshal(criteria))
-            );
-        }
-        catch(ServiceException e) {
-            throw new RuntimeServiceException(e);
-        }        
+        return new MarshallingSequentialList<DataObject_1_0>(
+            super.marshaller,
+            this.getDelegate().values(criteria)
+        );
     }
     
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#getContainerId()
      */
+//  @Override
     public Path openmdxjdoGetContainerId() {
-        return PersistenceHelper.getContainerId(getDelegate());
+        return this.getDelegate().openmdxjdoGetContainerId();
     }
-    
-    
 
+//  @Override
     public TransientContainerId openmdxjdoGetTransientContainerId() {
-        return PersistenceHelper.getTransientContainerId(getDelegate());
+        return this.getDelegate().openmdxjdoGetTransientContainerId();
     }
 
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
+     */
+//  @Override
+    public PersistenceManager openmdxjdoGetPersistenceManager() {
+        return this.getDelegate().openmdxjdoGetPersistenceManager();
+    }
+
+    //  @Override
     public boolean openmdxjdoIsPersistent() {
-        return PersistenceHelper.isPersistent(getDelegate());
+        return this.getDelegate().openmdxjdoIsPersistent();
    }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#retrieveAll(boolean)
      */
-    public void retrieveAll(FetchPlan fetchPlan) {
-        getDelegate().retrieveAll(fetchPlan);
+//  @Override
+    public void openmdxjdoRetrieve(FetchPlan fetchPlan) {
+        this.getDelegate().openmdxjdoRetrieve(fetchPlan);
     }
 
+//  @Override
     public boolean isRetrieved() {
-        return getDelegate().isRetrieved();
+        return this.getDelegate().isRetrieved();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoEvict()
+     */
+    @Override
+    public void openmdxjdoEvict(boolean allMembers, boolean allSubSets) {
+        this.getDelegate().openmdxjdoEvict(allMembers, allSubSets);
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#refreshAll()
      */
-    public void refreshAll() {
-        getDelegate().refreshAll();
+//  @Override
+    public void openmdxjdoRefresh() {
+        this.getDelegate().openmdxjdoRefresh();
     }
 
     
@@ -182,7 +200,7 @@ public class MarshallingContainer_1
 
     @Override
     public String toString() {
-        return getDelegate().toString();
+        return this.getDelegate().toString();
     }
 
 }

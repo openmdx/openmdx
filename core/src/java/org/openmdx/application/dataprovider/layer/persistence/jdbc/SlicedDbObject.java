@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObject.java,v 1.16 2009/12/31 01:50:00 wfro Exp $
+ * Name:        $Id: SlicedDbObject.java,v 1.18 2010/06/02 13:41:40 hburger Exp $
  * Description: SlicedDbObject
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/31 01:50:00 $
+ * Date:        $Date: 2010/06/02 13:41:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -193,6 +193,7 @@ public class SlicedDbObject extends StandardDbObject {
 
     
     //---------------------------------------------------------------------------  
+    @Override
     public int getIndex(
         FastResultSet frs
     ) throws SQLException {
@@ -620,6 +621,7 @@ public class SlicedDbObject extends StandardDbObject {
     }
 
     //-------------------------------------------------------------------------
+    @Override
     public void createObjectSlice(
         int index,
         String objectClass,
@@ -638,6 +640,7 @@ public class SlicedDbObject extends StandardDbObject {
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public void createMultiValuedObject(
         MappedRecord object
     ) throws ServiceException {
@@ -650,6 +653,7 @@ public class SlicedDbObject extends StandardDbObject {
     }
 
     //---------------------------------------------------------------------------  
+    @Override
     public boolean supportsObjectReplacement(
     ) {
         return true;
@@ -967,6 +971,7 @@ public class SlicedDbObject extends StandardDbObject {
     }
 
     //---------------------------------------------------------------------------
+    @Override
     public MappedRecord[] sliceAndNormalizeObject(
         MappedRecord object
     ) throws ServiceException {
@@ -1038,7 +1043,10 @@ public class SlicedDbObject extends StandardDbObject {
         DbObjectConfiguration dbObjectConfiguration = this.getConfiguration();    
         Object_2Facade normalizedObjectFacade = null;
         try {
-            normalizedObjectFacade = Object_2Facade.newInstance(new Path(""));
+            normalizedObjectFacade = Object_2Facade.newInstance(
+                new Path(""),
+                facade.getObjectClass()
+            );
         } 
         catch (ResourceException e) {
             throw new ServiceException(e);
@@ -1182,7 +1190,10 @@ public class SlicedDbObject extends StandardDbObject {
             for(int j = 0; j <= lastIndex; j++) { 
                 if(slices[j] == null) {
                     try {
-                        slices[j] = Object_2Facade.newInstance(Object_2Facade.getPath(object)).getDelegate();
+                        slices[j] = Object_2Facade.newInstance(
+                            Object_2Facade.getPath(object),
+                            facade.getObjectClass()
+                        ).getDelegate();
                     } 
                     catch (ResourceException e) {
                         throw new ServiceException(e);

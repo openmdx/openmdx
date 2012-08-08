@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ManagedKeyStoreConnection.java,v 1.2 2009/05/06 13:43:20 hburger Exp $
- * Description: Managed Connection 
- * Revision:    $Revision: 1.2 $
+ * Project:     opeMDX/Security, http://www.openmdx.org/
+ * Name:        $Id: ManagedKeyStoreConnection.java,v 1.9 2010/09/06 04:06:15 hburger Exp $
+ * Description: Managed Key Store Connection 
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/06 13:43:20 $
+ * Date:        $Date: 2010/09/06 04:06:15 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006, OMEX AG, Switzerland
+ * Copyright (c) 2006-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,283 +50,222 @@
  */
 package org.openmdx.resource.pki.keystore;
 
-import java.io.PrintWriter;
+import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.CertPath;
+import java.security.cert.CertPathValidator;
+import java.security.cert.CertPathValidatorException;
+import java.security.cert.CertPathValidatorResult;
 import java.security.cert.Certificate;
+import java.security.cert.PKIXParameters;
 
-import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
-import javax.resource.spi.ConnectionEventListener;
-import javax.resource.spi.ConnectionRequestInfo;
-import javax.resource.spi.LocalTransaction;
-import javax.resource.spi.ManagedConnection;
-import javax.resource.spi.ManagedConnectionMetaData;
 import javax.resource.spi.security.PasswordCredential;
-import javax.security.auth.Subject;
-import javax.transaction.xa.XAResource;
+
+import org.openmdx.resource.spi.AbstractManagedConnection;
 
 /**
- * Managed Connection
+ * Managed Key Store Connection 
  */
-class ManagedKeyStoreConnection 
-    implements ManagedConnection
-{
+class ManagedKeyStoreConnection extends AbstractManagedConnection {
 
-    /**
-     * Constructor 
-     *
-     * @param credential
-     * @param certificate
-     * @param key
+	/**
+	 * Constructor
+	 * 
+	 * @param connectionType
+	 * @param credential
+	 */
+	private ManagedKeyStoreConnection(
+    	ConnectionType connectionType,
+        PasswordCredential credential
+    ){
+    	super("KeyStore","1.0",credential);
+		this.connectionType = connectionType;
+	}
+		
+	/**
+     * Constructor
+     * 
+     * @param connectionType
+	 * @param credential
+	 * @param alias 
+	 * @param certificate
+	 * @param key
+	 * @param algorithm
      */
     ManagedKeyStoreConnection(
+    	ConnectionType connectionType,
         PasswordCredential credential,
-        Certificate certificate,
-        Key key
+        String alias,
+        Certificate certificate, 
+        Key key, 
+        String algorithm
     ) {
-        this.credential = credential;
+    	this(connectionType, credential);
+    	this.alias = alias; 
         this.certificate = certificate;
         this.key = key;
+        this.algorithm = algorithm;
+    }
+
+	/**
+     * Constructor 
+     * 
+     * @param connectionType
+     * @param credential
+     * @param parameters
+     * @param algorithm 
+     *
+     * @throws NoSuchAlgorithmException 
+     */
+    ManagedKeyStoreConnection(
+    	ConnectionType connectionType,
+        PasswordCredential credential,
+        PKIXParameters parameters, 
+        String algorithm
+    ) throws NoSuchAlgorithmException {
+    	this(connectionType, credential);
+        this.alias = null;
+        this.certificate = null;
+        this.key = null;
+        this.parameters = parameters;
+        this.validator = CertPathValidator.getInstance(algorithm);
     }
 
     /**
-     * Lazy initialized meta data
+     * The connection type to be provided
      */
-    private ManagedConnectionMetaData metaData = null;
-
+    private final ConnectionType connectionType;
+    
     /**
-     * 
-     */
-    private PasswordCredential credential;
-
-    /**
-     * 
+     * <code>null</code> unless connectionType is CERTIFICATE or PRIVATE_KEY
      */
     private Certificate certificate;
 
     /**
-     * 
+     * <code>null</code> unless connectionType is PRIVATE_KEY
      */
     private Key key;
-
-    /**
-     * 
-     */
-    private PrintWriter logWriter = null;
-
-    /**
-     * 
-     */
-    private final static String NON_TRANSACTIONAL = "KeyStore resources are non-transactional";
-        
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#addConnectionEventListener(javax.resource.spi.ConnectionEventListener)
-     */
-    public void addConnectionEventListener(
-        ConnectionEventListener connectionEventListener
-    ) {
-        //
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#associateConnection(java.lang.Object)
-     */
-    public void associateConnection(
-        Object connection
-    ) throws ResourceException {
-        try {            
-            CertificateConnection certificateConnection = (CertificateConnection) connection;
-            certificateConnection.setAlias(getAlias());
-            certificateConnection.setCertificate(this.certificate);
-            if(connection instanceof KeyConnection) {
-                KeyConnection keyConnection = (KeyConnection) connection;
-                keyConnection.setKey(this.key);
-            }
-        } catch (ClassCastException exception){
-            throw new ResourceException(
-                "Managed connection class and connection class do not match",
-                exception
-            );
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#cleanup()
-     */
-    public void cleanup(
-    )throws ResourceException {
-        //
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#destroy()
-     */
-    public void destroy(
-    ) throws ResourceException {
-        this.credential = null;
-        this.certificate = null;
-        this.key = null;
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#getConnection(javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
-     */
-    public Object getConnection(
-        Subject subject, 
-        ConnectionRequestInfo connectionRequestInfo
-    ) throws ResourceException {
-        Object connection = this.key == null ? new CertificateConnection() : new KeyConnection();
-        this.associateConnection(connection);
-        return connection;
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#getLocalTransaction()
-     */
-    public LocalTransaction getLocalTransaction(
-    ) throws ResourceException {
-        throw log(new NotSupportedException(NON_TRANSACTIONAL));
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#getLogWriter()
-     */
-    public PrintWriter getLogWriter(
-    ) throws ResourceException {
-        return this.logWriter;
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#getMetaData()
-     */
-    public ManagedConnectionMetaData getMetaData(
-    ) throws ResourceException {
-        return this.metaData == null ?
-            this.metaData = new MetaData() :
-            this.metaData;
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#getXAResource()
-     */
-    public XAResource getXAResource(
-    ) throws ResourceException {
-        throw log(new NotSupportedException(NON_TRANSACTIONAL));
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#removeConnectionEventListener(javax.resource.spi.ConnectionEventListener)
-     */
-    public void removeConnectionEventListener(
-        ConnectionEventListener connectionEventListener
-    ) {
-        //
-    }
-
-    /* (non-Javadoc)
-     * @see javax.resource.spi.ManagedConnection#setLogWriter(java.io.PrintWriter)
-     */
-    public void setLogWriter(
-        PrintWriter logWriter
-    ) throws ResourceException {
-        this.logWriter = logWriter;        
-    }
     
     /**
-     * Log and return an exception
-     * 
-     * @param an exception
-     * 
-     * @return the exception
+     * <code>null</code> unless connectionType is VALIDATOR
      */
-    private ResourceException log(
-        ResourceException exception
-    ){
-        try {
-            PrintWriter logWriter = getLogWriter();
-            if(logWriter != null) exception.printStackTrace(logWriter);
-        } catch (Exception ignore) {
-            // Ensure that the original exception will be available
-        }
-        return exception;
-    }
+    private PKIXParameters parameters;
+    
+    /**
+     * <code>null</code> unless connectionType is VALIDATOR
+     */
+    private CertPathValidator validator;
+    
+    /**
+     * The algorithm to be used
+     */
+    private String algorithm;
+    
+    /**
+     * 
+     */
+    private String alias;
+    
 
     /**
-     * Test whether the managed connection was created with the same credentials.
-     * 
-     * @param credential
-     * 
-     * @return <code>true</code> if the managed connection was created with the same credentials
+     * @return the certificate
      */
-    boolean matches(
-        PasswordCredential credential
-    ){
-        return this.credential.equals(credential);
+    Certificate getCertificate() {
+    	return this.certificate;
     }
 
-    /**
-     * Retrieve the alias
+	/**
+	 * Retrieve the signature
+	 * 
+     * @return the initialized signature
      * 
+	 * @throws GeneralSecurityException
+     */
+    Signature getSignature(
+    	ConnectionType type
+    ) throws GeneralSecurityException {
+    	Signature signature = Signature.getInstance(this.algorithm);
+    	switch(type) {
+	    	case SIGNATURE_PROVIDER:
+	    		if(this.connectionType != ConnectionType.SIGNATURE_PROVIDER) {
+	    			throw new SignatureException(
+	    				"The signatures provided by this key store connection can be used for verification only"
+	    			);
+	    		}
+	        	signature.initSign((PrivateKey) this.key);
+	    		break;
+	    	case SIGNATURE_VERIFIER:
+	    		signature.initVerify(this.certificate);
+	    		break;
+    	}
+    	return signature;
+    }
+
+	/**
      * @return the alias
      */
-    String getAlias(){
-        return this.credential.getUserName();
+    String getAlias() {
+    	return this.alias;
     }
-    
-    
-    //------------------------------------------------------------------------
-    // Class MetaData
-    //------------------------------------------------------------------------
-    
+
     /**
-     * ManagedConnectionMetaData implementation
+     * @return the algorithm
      */
-    class MetaData
-        implements ManagedConnectionMetaData
-    {
+    String getAlgorithm() {
+    	return this.algorithm;
+    }
 
-        /**
-         * Constructor 
-         *
-         * @param alias the certificate's alias
-         */
-        public MetaData(
-        ) {
-            super();
-        }
+	/**
+     * Validate a certification path
+     * 
+     * @param certificationPath
+     * 
+     * @return the certification validation result
+     * 
+     * @throws InvalidAlgorithmParameterException 
+     * @throws CertPathValidatorException 
+     */
+    CertPathValidatorResult validate(
+    	CertPath certificationPath
+    ) throws CertPathValidatorException, InvalidAlgorithmParameterException {
+    	return this.validator.validate(certificationPath, this.parameters);
+    }
 
-        /* (non-Javadoc)
-         * @see javax.resource.spi.ManagedConnectionMetaData#getEISProductName()
-         */
-        public String getEISProductName(
-        ) throws ResourceException {
-            return "KeyStore";
-        }
+	/* (non-Javadoc)
+     * @see javax.resource.spi.ManagedConnection#destroy()
+     */
+    @Override
+    public void destroy(
+    ) throws ResourceException {
+        this.certificate = null;
+        this.key = null;
+    	super.destroy();
+    }
 
-        /* (non-Javadoc)
-         * @see javax.resource.spi.ManagedConnectionMetaData#getEISProductVersion()
-         */
-        public String getEISProductVersion(
-        ) throws ResourceException {
-            return "1.0";
-        }
-
-        /* (non-Javadoc)
-         * @see javax.resource.spi.ManagedConnectionMetaData#getMaxConnections()
-         */
-        public int getMaxConnections(
-        )throws ResourceException {
-            return 0; // no limit
-        }
-
-        /* (non-Javadoc)
-         * @see javax.resource.spi.ManagedConnectionMetaData#getUserName()
-         */
-        public String getUserName(
-        ) throws ResourceException {
-            return getAlias();
-        }
-
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.resource.spi.AbstractManagedConnection#newConnection()
+     */
+    @Override
+    protected Object newConnection(
+    ) throws ResourceException {
+    	switch(this.connectionType) {
+	    	case CERTIFICATE_PROVIDER: 
+	    		return new CertificateConnection();
+	    	case SIGNATURE_PROVIDER:
+	    	case SIGNATURE_VERIFIER:
+	    		return new SignatureConnection();
+	    	case CERTIFICATE_VALIDATOR: 
+	    		return new ValidatorConnection();
+	    	default : 
+	    		return null;
+    	}
     }
     
 }

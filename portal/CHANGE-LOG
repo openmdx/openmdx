@@ -4,6 +4,79 @@
                     =====================================
 
 ==============================================================================
+Version 2.7.0                                                       2010-08-20
+==============================================================================
+
+1.    NEW FEATURES
+      none
+                                    
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+            
+2.1.  FIXED BUGS
+      
+	  CR1000947
+	  References / Lookups. Populating references with the GUI should be possible 
+	  by entering an XRI into the appropriate field
+      
+      CR10009463
+      Turning off unneeded locales leads to NA's. Grid column labels are set 
+      to NA if only one locale (locale[0]) is enabled in web.xml.
+      
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
+Version 2.6.1                                                       2010-06-04
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019195
+      JRE 5.0
+      
+      openMDX 2.6 is now JRE 5.0 enabled. 
+      
+      CR10009406
+      Configurable user-agent for mobiles. The option mobileUserAgents for
+      ObjectInspectorServlet in web.xml allows to configure a comma or 
+      semi-colon separated list user agent patterns. The GUI will be launched 
+      in mobile mode if the user-agent header contains (indexOf() >= 0) one of 
+      the configured user agent patterns.  
+                                    
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20018664 	
+      FilterProperty 
+      
+      FilterProperty & AttributeSpecifier are now used by dataprovider classes 
+      only.
+
+      CR0002764
+      Filter Operators 
+      
+      Replace some generated short constant classes by enums:
+      * Directions & Orders -> SortOrder
+      * FilterOperators -> ConditionType
+            
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
 Version 2.6.0                                                       2010-05-01
 ==============================================================================
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestServlet_2.java,v 1.58 2010/04/28 12:49:02 hburger Exp $
+ * Name:        $Id: RestServlet_2.java,v 1.73 2010/08/09 13:01:44 hburger Exp $
  * Description: REST Servlet 
- * Revision:    $Revision: 1.58 $
+ * Revision:    $Revision: 1.73 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/28 12:49:02 $
+ * Date:        $Date: 2010/08/09 13:01:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,8 +55,15 @@ import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isControlObjec
 import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isTransactionCommitIdentifier;
 import static org.openmdx.base.accessor.rest.spi.ControlObjects_2.isTransactionObjectIdentifier;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.ListIterator;
+import java.util.Map;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -86,6 +93,7 @@ import org.openmdx.base.io.HttpHeaderFieldValue;
 import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.ExtendedRecordFactory;
@@ -96,10 +104,13 @@ import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.rest.spi.RestFormat;
+import org.openmdx.base.rest.spi.RestFormat.Source;
+import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.xml.stream.XMLOutputFactories;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
+import org.xml.sax.InputSource;
 
 /**
  * REST Servlet
@@ -109,6 +120,19 @@ public class RestServlet_2 extends HttpServlet {
     private static final long serialVersionUID = -4403464830407956377L;
     private final static int DEFAULT_POSITION = 0;
     private final static int DEFAULT_SIZE = 25;
+    
+    /**
+     * Use "text/xml" as pretty printing default value.
+     */
+    private final static String DEFAULT_MIME_TYPE = "text/xml";
+    
+    /**
+     * Note that our default encoding is "UTF-8" even for "text/xml" as 
+     * opposed to the RFC 3023 specification which requires "US-ASCII" as
+     * default encoding for "text/xml"! 
+     */
+    private final static String DEFAULT_CHARACTER_ENCODING = "UTF-8";
+    
     protected ConnectionFactory connectionFactory = null;
 
     /**
@@ -216,12 +240,7 @@ public class RestServlet_2 extends HttpServlet {
     private Path getXri(
         HttpServletRequest request 
     ) {
-        String uri = request.getServletPath().substring(1);
-        return new Path(
-            uri.startsWith("@openmdx") ? uri : 
-            uri.startsWith("!") ? "xri://@openmdx" + uri :
-            "xri://@openmdx*" + uri
-        );
+        return RestFormat.toResourceIdentifier(request.getServletPath());
     }
 
     /**
@@ -306,9 +325,18 @@ public class RestServlet_2 extends HttpServlet {
         super.init(config);
         try {
             String entityManagerFactoryName = config.getInitParameter("entity-manager-factory-name");
-            this.connectionFactory = InboundConnectionFactory_2.newInstance(
-                entityManagerFactoryName == null ? "EntityManagerFactory" : entityManagerFactoryName
+            // Do not isolate units of works            
+            Map<Object,Object> overrides = new HashMap<Object,Object>();
+            overrides.put(
+                ConfigurableProperty.Multithreaded.qualifiedName(),
+                false
             );
+            this.connectionFactory = InboundConnectionFactory_2.newInstance(
+                entityManagerFactoryName == null ? "jdo:EntityManagerFactory" : 
+                entityManagerFactoryName.indexOf(':') < 0 ? "jdo:" + entityManagerFactoryName :
+                entityManagerFactoryName, 
+                overrides
+            );            
         } catch(Exception exception) {
             throw Throwables.log(
                 new ServletException(exception)
@@ -317,7 +345,7 @@ public class RestServlet_2 extends HttpServlet {
     }
 
     /**
-     * Re-fetch objects afert auto-commit
+     * Re-fetch objects after auto-commit
      * 
      * @param interaction
      * @param reply the list to be updated
@@ -416,6 +444,20 @@ public class RestServlet_2 extends HttpServlet {
     }
     
     /**
+     * Tells whether the request's query string shall be interpreted as REST input record
+     * 
+     * @param request
+     * 
+     * @return <code>true</code> if the query string shall be interpreted as REST input record
+     */
+    private static boolean hasQuery(
+        HttpServletRequest request
+    ){
+        String query = request.getQueryString();
+        return query != null && query.length() != 0;
+    }
+
+    /**
      * REST DELETE Request
      * 
      * @param request the HTTP Request
@@ -429,11 +471,11 @@ public class RestServlet_2 extends HttpServlet {
         HttpServletRequest request, 
         HttpServletResponse response
     ) throws ServletException, IOException {
-        prepare(request, response);
+        prolog(request, response);
         Interaction interaction = getInteraction(request);
         try {
             Path xri = this.getXri(request);
-            if(request.getContentType() == null) {
+            if(request.getContentType() == null && !hasQuery(request)) {
                 execute(  
                     interaction,
                     !isTransactionObjectIdentifier(xri) && isAutoCommitting(request), 
@@ -443,7 +485,7 @@ public class RestServlet_2 extends HttpServlet {
                 );
             } else {
                 MappedRecord object = RestFormat.parseRequest(
-                    RestFormat.asSource(request),
+                    RestServlet_2.getSource(request, response),
                     xri
                 );
                 execute(  
@@ -474,6 +516,7 @@ public class RestServlet_2 extends HttpServlet {
                 Throwables.log(exception);
             }
         }
+        epilog(request, response);
     }
 
     /**
@@ -491,7 +534,7 @@ public class RestServlet_2 extends HttpServlet {
         HttpServletRequest request, 
         HttpServletResponse response
     ) throws ServletException, IOException {
-        prepare(request, response);
+        prolog(request, response);
         Interaction interaction = getInteraction(request);
         try {
             Path xri = this.getXri(request);
@@ -565,7 +608,7 @@ public class RestServlet_2 extends HttpServlet {
                     input = inputFacade.getDelegate();
                 } else {
                     input = RestFormat.parseRequest(
-                        RestFormat.asSource(request),
+                        RestServlet_2.getSource(request, response),
                         null
                     );
                 }
@@ -602,6 +645,7 @@ public class RestServlet_2 extends HttpServlet {
                 Throwables.log(exception);
             }
         }
+        epilog(request, response);
     }
 
     /**
@@ -619,7 +663,7 @@ public class RestServlet_2 extends HttpServlet {
         HttpServletRequest request, 
         HttpServletResponse response
     ) throws ServletException, IOException {
-        prepare(request, response);
+        prolog(request, response);
         Path xri = this.getXri(request);
         if(isConnectionObjectIdentifier(xri)) {
             HttpSession session = request.getSession(true);
@@ -682,7 +726,7 @@ public class RestServlet_2 extends HttpServlet {
             Interaction interaction = getInteraction(request);
             try {
                 MappedRecord value = RestFormat.parseRequest(
-                    RestFormat.asSource(request),
+                    RestServlet_2.getSource(request, response),
                     xri
                 ); 
                 if(Object_2Facade.isDelegate(value)) {
@@ -775,6 +819,7 @@ public class RestServlet_2 extends HttpServlet {
                 }
             }
         }
+        epilog(request, response);
     }
 
     /**
@@ -791,7 +836,7 @@ public class RestServlet_2 extends HttpServlet {
         HttpServletRequest request, 
         HttpServletResponse response
     ) throws ServletException, IOException {
-        prepare(request, response);
+        prolog(request, response);
         Interaction interaction = getInteraction(request);
         try {
             IndexedRecord output = (IndexedRecord) execute(  
@@ -800,7 +845,7 @@ public class RestServlet_2 extends HttpServlet {
                 true, 
                 InteractionSpecs.getRestInteractionSpecs(isRetainValues(request)).PUT, 
                 RestFormat.parseRequest(
-                    RestFormat.asSource(request),
+                    RestServlet_2.getSource(request, response),
                     this.getXri(request)
                 )
             );
@@ -834,15 +879,34 @@ public class RestServlet_2 extends HttpServlet {
                 Throwables.log(exception);
             }
         }
+        epilog(request, response);
     }
 
+    /**
+     * Commit the response
+     * 
+     * @param request
+     * @param response
+     * 
+     * @throws IOException 
+     */
+    protected void epilog(
+        HttpServletRequest request, 
+        HttpServletResponse response
+    ) throws IOException{
+        //
+        // Force any content in the buffer to be written to the client
+        //
+        response.flushBuffer();
+    }
+    
     /**
      * Set response content type and encoding
      * 
      * @param request
      * @param response
      */
-    protected void prepare(
+    protected void prolog(
         HttpServletRequest request, 
         HttpServletResponse response
     ){
@@ -852,15 +916,18 @@ public class RestServlet_2 extends HttpServlet {
         String characterEncoding = new HttpHeaderFieldValue(
             request.getHeaders("Accept-Charset")
         ).getPreferredContent(
-            "UTF-8"
+            DEFAULT_CHARACTER_ENCODING
         ).getValue(
         );
         HttpHeaderFieldValue acceptType = new HttpHeaderFieldValue(request.getHeaders("Accept"));
         for(HttpHeaderFieldContent candidate : acceptType){
             String mimeType = candidate.getValue();
             if(XMLOutputFactories.isSupported(mimeType)) {
-                response.setContentType(mimeType);
-                response.setCharacterEncoding(candidate.getParameterValue("charset", characterEncoding));
+                prepare(
+                    response,
+                    mimeType,
+                    candidate.getParameterValue("charset", characterEncoding)
+                );
                 return;
             }
         }
@@ -872,19 +939,161 @@ public class RestServlet_2 extends HttpServlet {
             HttpHeaderFieldContent requestType = new HttpHeaderFieldContent(contentType);
             String mimeType = requestType.getValue();
             if(XMLOutputFactories.isSupported(mimeType)) {
-                response.setContentType(mimeType);
-                response.setCharacterEncoding(requestType.getParameterValue("charset", characterEncoding));
+                prepare(
+                    response,
+                    mimeType,
+                    requestType.getParameterValue("charset", characterEncoding)
+                );
                 return;
             }
         }
         //
         // Last resort
         //
-        response.setContentType("text/xml"); 
-        // Note that our default encoding is "UTF-8" even for "text/xml" as 
-        // opposed to the RFC 3023 specification which requires "US-ASCII" as
-        // default encoding for "text/xml"! 
-        response.setCharacterEncoding(characterEncoding); 
+        prepare(
+            response,
+            DEFAULT_MIME_TYPE,
+            characterEncoding
+        );
+    }
+    
+    /**
+     * Set content type and character encoding
+     * 
+     * @param response
+     * @param mimeType
+     * @param characterEncoding
+     */
+    private void prepare(
+        HttpServletResponse response,
+        String mimeType,
+        String characterEncoding
+    ){
+        response.setContentType(mimeType + ";charset=" + characterEncoding);
+        response.setCharacterEncoding(characterEncoding);
+    }
+    
+    /**
+     * Retrieve the decoded query string
+     * 
+     * @param request
+     * 
+     * @return the decoded query string; or <code>null</code> if the query is either missing or empty
+     * 
+     * @throws IOException
+     */
+    private static String getQueryString(
+        HttpServletRequest request
+    ) throws IOException{
+        String query = request.getQueryString();
+        return query == null || query.length() == 0 ? null : URLDecoder.decode(query, "UTF-8"); 
+    }
+    
+    /**
+     * Use the query string if a request has no body
+     * 
+     * @param request
+     * 
+     * @return the request's query string reader which may be empty but never <code>null</code>.
+     * 
+     * @throws IOException 
+     */
+    private static Reader getQueryReader(
+        HttpServletRequest request
+    ) throws IOException {
+        String query = getQueryString(request);
+        return new StringReader(query == null ? "" : query);
+    }
+
+    /**
+     * Use the query string if a request has no body
+     * 
+     * @param request
+     * 
+     * @return the request's query string input stream which may be empty but never <code>null</code>.
+     * 
+     * @throws IOException 
+     */
+    private static InputStream getQueryInputStream(
+        HttpServletRequest request
+    ) throws IOException {
+        String query = request.getQueryString(); // getQueryString(request);
+        return new ByteArrayInputStream(
+            query == null ? new byte[0] : Base64.decode(query)
+        );
+    }
+    
+    /**
+     * Tells whether the query string should be treated as input record
+     * 
+     * @param request
+     * 
+     * @return <code>true</code> if the HTTP request usually has no body
+     */
+    private static boolean useQueryAsSource(
+        HttpServletRequest request
+    ){
+        String method = request.getMethod();
+        return "GET".equals(method) || "DELETE".equals(method);
+    }
+    
+    /**
+     * Retrieve the base URL
+     * 
+     * @return the base URL
+     */
+    protected static String getBase(
+        HttpServletRequest request
+    ) {
+        String contextPath = request.getContextPath();
+        StringBuffer url = request.getRequestURL();
+        return url.substring(
+            0,
+            url.indexOf(contextPath) + contextPath.length() + 1
+        );
+    }
+
+    /**
+     * Provide a <code>parse()</code> source
+     * 
+     * @param request the HTTP request
+     * @param response the HTTP response
+     * 
+     * @return a <code>Source</code>
+     * 
+     * @throws ServiceException
+     */
+    private static Source getSource(
+        HttpServletRequest request, 
+        HttpServletResponse response
+    ) throws ServiceException {
+        try {
+            HttpHeaderFieldValue contentHeader = new HttpHeaderFieldValue(
+                request.getHeaders("Content-Type")
+            ); 
+            boolean query = contentHeader.isEmpty() && useQueryAsSource(request);
+            HttpHeaderFieldContent contentType = query ? new HttpHeaderFieldContent(
+                response.getContentType()
+            ) : contentHeader.getPreferredContent(
+                "application/xml;charset=UTF-8"
+            );
+            String mimeType = contentType.getValue();
+            String encoding = contentType.getParameterValue("charset", null);
+            InputSource inputSource = RestFormat.isBinary(mimeType) ? new InputSource(
+                query ? getQueryInputStream(request) : request.getInputStream()
+            ) : new InputSource (
+                query ? getQueryReader(request) : request.getReader()
+            ); 
+            inputSource.setEncoding(encoding);
+            return new Source(
+                RestServlet_2.getBase(request), 
+                inputSource, 
+                mimeType, 
+                null
+            );
+        } catch (IOException exception) {
+            throw new ServiceException(exception);
+        }
     }
     
     
@@ -909,7 +1118,7 @@ public class RestServlet_2 extends HttpServlet {
             HttpServletRequest request,
             HttpServletResponse response
         ) {
-            super(RestFormat.getBase(request));
+            super(RestServlet_2.getBase(request));
             this.response = response;
         }
 
@@ -925,10 +1134,14 @@ public class RestServlet_2 extends HttpServlet {
         protected XMLStreamWriter newWriter(
         ) throws XMLStreamException {
             try {
-                String mimeType = this.response.getContentType();
+                HttpHeaderFieldContent contentType = new HttpHeaderFieldContent(this.response.getContentType());
+                String mimeType = contentType.getValue();
                 XMLOutputFactory xmlOutputFactory = RestFormat.getOutputFactory(mimeType);
-                if(("application/vnd.openmdx.wbxml".equals(mimeType))) {
-                    String characterEncoding = this.response.getCharacterEncoding();
+                if((RestFormat.isBinary(mimeType))) {
+                    String characterEncoding = contentType.getParameterValue(
+                        "charset",
+                        this.response.getCharacterEncoding()
+                    );
                     return characterEncoding == null ? xmlOutputFactory.createXMLStreamWriter(
                         this.response.getOutputStream()
                     ) : xmlOutputFactory.createXMLStreamWriter(

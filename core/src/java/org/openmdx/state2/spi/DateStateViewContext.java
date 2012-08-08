@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DateStateViewContext.java,v 1.3 2009/03/31 17:05:16 hburger Exp $
+ * Name:        $Id: DateStateViewContext.java,v 1.4 2010/07/07 11:01:24 hburger Exp $
  * Description: Date State View
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:05:16 $
+ * Date:        $Date: 2010/07/07 11:01:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,7 +71,7 @@ public class DateStateViewContext
      * Constructor 
      *
      * @param validFor the view's valid time point
-     * @param validAt the view's transaction time point
+     * @param validAt the view's transaction time point, or <code>null</code> for an up-to-date view
      */
     private DateStateViewContext(
         XMLGregorianCalendar validFor,
@@ -116,7 +116,7 @@ public class DateStateViewContext
      * Create a time point view context 
      *
      * @param validFor the view's valid time point
-     * @param validAt the view's transaction time point
+     * @param validAt the view's transaction time point, or <code>null</code> for an up-to-date view
      */
     public static DateStateViewContext newTimePointViewContext(
         XMLGregorianCalendar validFor,

@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectInspectorServlet.java,v 1.112 2010/04/27 21:22:22 wfro Exp $
+ * Name:        $Id: ObjectInspectorServlet.java,v 1.115 2010/08/10 08:40:44 wfro Exp $
  * Description: ObjectInspectorServlet 
- * Revision:    $Revision: 1.112 $
+ * Revision:    $Revision: 1.115 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 21:22:22 $
+ * Date:        $Date: 2010/08/10 08:40:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -109,6 +109,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
@@ -200,6 +201,8 @@ import org.openmdx.uses.org.apache.commons.fileupload.FileUploadException;
  *   <li>retrieveByPathPattern: list of path patterns. Objects with access path matching the path patterns are retrieved
  *       by their access path instead of their refMofId, i.e. their identity.</li>
  *   <li>viewsTimeout: timeout for unused views in minutes. Default is 5.</li>
+ *   <li>mobileUserAgents: semi-colon or comma separated list of mobile user agents. The GUI will be launched in 
+ *       mobile mode if the user-agent header contains (indexOf() >= 0) one of the configured mobileUserAgent strings. 
  * </ul>
  * <p>
  */
@@ -242,7 +245,7 @@ public class ObjectInspectorServlet
         System.out.println();
         System.out.println();
         System.out.println(messagePrefix + "Starting web application \"" + conf.getServletContext().getContextPath() + "\"");
-        System.out.println(messagePrefix + "Driven by openMDX/Portal. Revision: $Revision: 1.112 $");
+        System.out.println(messagePrefix + "Driven by openMDX/Portal. Revision: $Revision: 1.115 $");
         System.out.println(messagePrefix + "For more information see http://www.openmdx.org");
         System.out.println(messagePrefix + "Loading... (see log for more information)");
         
@@ -511,6 +514,16 @@ public class ObjectInspectorServlet
         catch(Exception e) {
         	SysLog.warning("can not initialize codes", e.getMessage());
         }
+        // Mobile user agents
+        this.mobileUserAgents = new ArrayList<String>();
+        if(this.getInitParameter("mobileUserAgents") != null) {
+        	StringTokenizer tokens = new StringTokenizer(this.getInitParameter("mobileUserAgents"), ";,", false);
+        	while(tokens.hasMoreTokens()) {
+        		this.mobileUserAgents.add(
+        			tokens.nextToken()
+        		);
+        	}
+        }
     }
   
     //-------------------------------------------------------------------------
@@ -554,15 +567,22 @@ public class ObjectInspectorServlet
     ) throws ServiceException {
     	SysLog.detail("Creating new context", "user=" + request.getRemoteUser());
 		String userAgent = request.getHeader("user-agent");
-        boolean iPhone = userAgent != null && userAgent.indexOf("iPhone") > 0;    	
-
+        boolean isMobileUserAgent = false;
+        if(userAgent != null) {
+	        for(String mobileUserAgent: this.mobileUserAgents) {        
+	        	if(userAgent.indexOf(mobileUserAgent) >= 0) {
+	        		isMobileUserAgent = true;
+	        		break;
+	        	}
+	        }
+        }
         ApplicationContextConfiguration configuration = new ApplicationContextConfiguration();
         configuration.setApplicationName(this.applicationName);
         configuration.setLocale((String)session.getAttribute(WebKeys.LOCALE_KEY));
         configuration.setTimezone( (String)session.getAttribute(WebKeys.TIMEZONE_KEY));
         configuration.setControlFactory(this.controlFactory);
         configuration.setSessionId(session.getId());
-        configuration.setViewPortType(iPhone ? ViewPort.Type.MOBILE : ViewPort.Type.STANDARD);
+        configuration.setViewPortType(isMobileUserAgent ? ViewPort.Type.MOBILE : ViewPort.Type.STANDARD);
         configuration.setLoginPrincipal(request.getUserPrincipal() == null ? null : request.getUserPrincipal().getName());
         configuration.setUserRole(userRole);
         configuration.setLoginRealmIdentity(this.realmIdentity);
@@ -1377,6 +1397,7 @@ public class ObjectInspectorServlet
     private String favoritesReference = null;
     private String[] locale;
     private Map<String,String> mimeTypeImpls = null;
+    private List<String> mobileUserAgents = null;
     private String exceptionDomain = null;
     private String filterCriteriaField = null;
     private String[] filterValuePattern = new String[]{"(?i)",  ".*", ".*"};

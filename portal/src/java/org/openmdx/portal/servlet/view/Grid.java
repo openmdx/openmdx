@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Grid.java,v 1.88 2010/04/07 15:54:50 wfro Exp $
+ * Name:        $Id: Grid.java,v 1.92 2010/06/01 10:32:11 wfro Exp $
  * Description: GridControl
- * Revision:    $Revision: 1.88 $
+ * Revision:    $Revision: 1.92 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/07 15:54:50 $
+ * Date:        $Date: 2010/06/01 10:32:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,10 +60,8 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -78,7 +76,6 @@ import java.util.regex.Pattern;
 
 import javax.jdo.PersistenceManager;
 
-import org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1_Attributes;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
@@ -87,20 +84,18 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.query.Condition;
+import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.IsBetweenCondition;
 import org.openmdx.base.query.IsGreaterCondition;
 import org.openmdx.base.query.IsGreaterOrEqualCondition;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.OrderSpecifier;
-import org.openmdx.base.query.Orders;
-import org.openmdx.base.query.PiggyBackCondition;
-import org.openmdx.base.query.Quantors;
+import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.query.SoundsLikeCondition;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.text.conversion.JavaBeans;
-import org.openmdx.base.text.conversion.UUIDConversion;
-import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
@@ -604,21 +599,10 @@ public abstract class Grid
               null,
               this.currentFilter.getCondition(),
               this.currentFilter.getOrderSpecifier(),
-              new Object[]{
-            	  this.getGridControl().getContainerId(), 
-            	  this.view.getApplicationContext().getCurrentUserRole(), 
-            	  this.view.getObjectReference().refMofId()
-              } 
-          );
-          // Do not store PiggyBackConditions
-          List<Condition> conditions = new ArrayList<Condition>();
-          for(Condition condition: defaultFilter.getCondition()) {
-        	  if(!(condition instanceof PiggyBackCondition)) {
-        		  conditions.add(condition);
-        	  }
-          }
-          defaultFilter.setCondition(
-        	  conditions.toArray(new Condition[conditions.size()])
+              null, // Do not store PiggyBackConditions
+        	  this.getGridControl().getContainerId(), 
+        	  this.view.getApplicationContext().getCurrentUserRole(), 
+        	  this.view.getObjectReference().refMofId()
           );
           String filterAsXml = JavaBeans.toXML(defaultFilter);
           Properties settings = this.view.getApplicationContext().getSettings();
@@ -888,22 +872,14 @@ public abstract class Grid
     		}
     		else {
     			this.currentFilter = filter;
-    			for(
-    				int i = 0; 
-    				i < this.currentFilter.getCondition().length; 
-    				i++
-    			) {
-    				Condition condition = this.currentFilter.getCondition()[i];
-    				for(
-    					int j = 0; 
-    					j < condition.getValue().length; 
-    					j++
-    				) {
+    			int i = 0;
+    			for(Condition condition : this.currentFilter.getCondition()) {
+    				for(Object value : condition.getValue()){
     					// Replace ? by filter value entered by user
     					// Replace ${name} by attribute value
     					if(
-    						"?".equals(condition.getValue()[j]) ||
-    						(condition.getValue()[j] instanceof String && ((String)condition.getValue()[j]).startsWith("${") && ((String)condition.getValue()[j]).endsWith("}")) 
+    						"?".equals(value) ||
+    						(value instanceof String && ((String)value).startsWith("${") && ((String)value).endsWith("}")) 
     					) {
     						this.currentFilter = new Filter(
     							this.currentFilter.getName(),
@@ -913,15 +889,14 @@ public abstract class Grid
     							this.currentFilter.getOrder(),
     							this.currentFilter.getCondition(),
     							this.currentFilter.getOrderSpecifier(),
-    							new Object[]{
-    								this.getGridControl().getQualifiedReferenceName(), 
-    								this.view.getApplicationContext().getCurrentUserRole(), 
-    								this.view.getObjectReference().refMofId()
-    							} 
+    							this.currentFilter.getExtension(),
+								this.getGridControl().getQualifiedReferenceName(), 
+								this.view.getApplicationContext().getCurrentUserRole(), 
+								this.view.getObjectReference().refMofId()
     						);
     						Condition newCondition = (Condition)condition.clone();
     						// ?
-    						if("?".equals(condition.getValue()[j])) {
+    						if("?".equals(value)) {
 	    						List values = new ArrayList();
 	    						StringTokenizer tokenizer = new StringTokenizer(filterValues, ",;");
 	    						while(tokenizer.hasMoreTokens()) {
@@ -936,7 +911,7 @@ public abstract class Grid
     						}
     						// ${name}
     						else {
-    							String feature = ((String)condition.getValue()[j]);
+    							String feature = (String)value;
     							feature = feature.substring(2);
     							feature = feature.substring(0, feature.length() - 1);
     							newCondition.setValue(
@@ -945,12 +920,14 @@ public abstract class Grid
     								}
     							);
     						}
-    						this.currentFilter.setCondition(
+    						this.currentFilter.getCondition(
+    						).set(
     							i,
     							newCondition
     						);
     					}
     				}
+    				i++;
     			}
     		}
     		SysLog.detail("selected filter ", this.currentFilter);
@@ -975,7 +952,7 @@ public abstract class Grid
       if(token.startsWith(">=")) {
         this.condition = 
           new IsGreaterOrEqualCondition(
-            Quantors.THERE_EXISTS,
+        	  Quantifier.THERE_EXISTS,
             feature,
             true,
             (Object[])null
@@ -985,7 +962,7 @@ public abstract class Grid
       else if(token.startsWith("<=")) {
         this.condition =
           new IsGreaterCondition(
-            Quantors.THERE_EXISTS,
+        	  Quantifier.THERE_EXISTS,
             feature,
             false,
             (Object[])null
@@ -995,7 +972,7 @@ public abstract class Grid
       else if(token.startsWith("<>")) {
         this.condition =
           new IsInCondition(
-            Quantors.THERE_EXISTS,
+        	  Quantifier.THERE_EXISTS,
             feature,
             false,
             (Object[])null
@@ -1005,7 +982,7 @@ public abstract class Grid
       else if(token.startsWith("<")) {
         this.condition =
           new IsGreaterOrEqualCondition(
-            Quantors.THERE_EXISTS,
+        	  Quantifier.THERE_EXISTS,
             feature,
             false,
             (Object[])null
@@ -1015,7 +992,7 @@ public abstract class Grid
       else if(token.startsWith(">")) {
         this.condition =
           new IsGreaterCondition(
-            Quantors.THERE_EXISTS,
+        	  Quantifier.THERE_EXISTS,
             feature,
             true,
             (Object[])null
@@ -1025,7 +1002,7 @@ public abstract class Grid
       else if(token.startsWith("*")) {
         this.condition =
           new SoundsLikeCondition(
-            Quantors.THERE_EXISTS,
+        	  Quantifier.THERE_EXISTS,
             feature,
             true,
             (Object[])null
@@ -1035,7 +1012,7 @@ public abstract class Grid
       else if(token.startsWith("!*")) {
           this.condition =
             new SoundsLikeCondition(
-              Quantors.THERE_EXISTS,
+            	Quantifier.THERE_EXISTS,
               feature,
               false,
               (Object[])null
@@ -1045,7 +1022,7 @@ public abstract class Grid
       else if(token.startsWith("%")) {
         this.condition =
           new IsLikeCondition(
-            Quantors.THERE_EXISTS,
+        	  Quantifier.THERE_EXISTS,
             feature,
             true,
             (Object[])null
@@ -1055,7 +1032,7 @@ public abstract class Grid
       else if(token.startsWith("!%")) {
           this.condition =
             new IsLikeCondition(
-              Quantors.THERE_EXISTS,
+            	Quantifier.THERE_EXISTS,
               feature,
               false,
               (Object[])null
@@ -1065,7 +1042,7 @@ public abstract class Grid
       else if(token.startsWith("=")) {
         this.condition =
           new IsInCondition(
-            Quantors.THERE_EXISTS,
+        	  Quantifier.THERE_EXISTS,
             feature,
             true,
             (Object[])null
@@ -1075,7 +1052,7 @@ public abstract class Grid
       else if(token.startsWith("!=")) {
         this.condition =
           new IsInCondition(
-            Quantors.THERE_EXISTS,
+        	  Quantifier.THERE_EXISTS,
             feature,
             false,
             (Object[])null
@@ -1132,18 +1109,13 @@ public abstract class Grid
         org.openmdx.ui1.jmi1.ValuedField column = (org.openmdx.ui1.jmi1.ValuedField)gridControl.getObjectContainer().getMember().get(i);
         if(filterName.equals(column.getFeatureName())) {
 
-          List<Condition> conditions = new ArrayList<Condition>();
-          // Add new conditions to conditions of current filter 
-          if(add) {
-              conditions.addAll(
-                  Arrays.asList(this.currentFilter.getCondition())
-              );
-          }
-          // Set conditions of "All" filter as base conditions
-          else {
-              conditions.addAll(
-                  Arrays.asList(this.getFilter("All").getCondition())
-              );
+          Filter baseFilter = add ? this.currentFilter : this.getFilter("All");
+          List<Condition> conditions = new ArrayList<Condition>(
+        	  baseFilter.getCondition()  
+          );
+          Extension extension = baseFilter.getExtension();
+          if(extension != null) {
+        	  extension = extension.clone();
           }
           
           // Number
@@ -1165,7 +1137,7 @@ public abstract class Grid
               while(andExpr.hasMoreTokens()) {
                 Condition condition = 
                   new IsInCondition(
-                    Quantors.THERE_EXISTS,
+                	  Quantifier.THERE_EXISTS,
                     column.getFeatureName(),
                     true,
                     (Object[])null
@@ -1203,12 +1175,8 @@ public abstract class Grid
                   catch(NumberFormatException e) {}
                 }
                 if(values.size() > 0) {
-                    condition.setValue(
-                      values.toArray(new Object[values.size()])
-                    );
-                    conditions.add(
-                      condition
-                    );
+                    condition.setValue(values.toArray());
+                    conditions.add(condition);
                 }
               }
             }
@@ -1220,7 +1188,7 @@ public abstract class Grid
               while(andExpr.hasMoreTokens()) {
                 Condition condition = 
                   new IsInCondition(
-                    Quantors.THERE_EXISTS,
+                	  Quantifier.THERE_EXISTS,
                     column.getFeatureName(),
                     true,
                     (Object[])null
@@ -1271,10 +1239,11 @@ public abstract class Grid
             while(andExpr.hasMoreTokens()) {
               Condition condition = 
                 new IsBetweenCondition(
-                  Quantors.THERE_EXISTS,
+                	Quantifier.THERE_EXISTS,
                   column.getFeatureName(),
                   true,
-                  null, null
+                  null, 
+                  null
                 );
               List values = new ArrayList();
               StringTokenizer orExpr = new StringTokenizer(andExpr.nextToken().trim(), ";");
@@ -1345,7 +1314,7 @@ public abstract class Grid
             if(values.size() > 0) {
                 conditions.add(
                   new IsInCondition(
-                    Quantors.THERE_EXISTS,
+                	  Quantifier.THERE_EXISTS,
                     column.getFeatureName(),
                     true,
                     values.toArray(new Object[values.size()])
@@ -1365,108 +1334,39 @@ public abstract class Grid
                       if(andExpr != null) {
                     	  // if getQuery() returns a query filter it must be merged with 
                     	  // the base query which might also contain a query filter
-                    	  String queryFilterContext = null;
-                    	  String queryFilterClause = null;
-                    	  Object[] queryFilterStringParams = null;
-                    	  for(Iterator<Condition> k = conditions.iterator(); k.hasNext(); ) {
-                    		  Condition condition = k.next();
-                    		  if(condition instanceof PiggyBackCondition) {
-                    			  if(queryFilterContext == null) {
-	                    			  queryFilterContext = condition.getFeature().substring(
-	                    				  0, 
-	                    				  condition.getFeature().lastIndexOf(":") + 1
-	                    			  );
-                    			  }
-                    			  if(condition.getFeature().endsWith(Database_1_Attributes.QUERY_FILTER_STRING_PARAM)) {
-                    				  queryFilterStringParams = condition.getValue();
-                    				  k.remove();
-                    			  }
-                    			  else if(condition.getFeature().endsWith(Database_1_Attributes.QUERY_FILTER_CLAUSE)) {
-                    				  queryFilterClause = (String)condition.getValue()[0];
-                    				  // Remove condition and re-add merged clause later
-                    				  k.remove();
-                    			  }
-                    		  }
-                    	  }
-                    	  if(queryFilterContext == null) {
-                    		  queryFilterContext = SystemAttributes.CONTEXT_PREFIX + UUIDConversion.toUID(UUIDs.newUUID()) + ":";
-                    	  }
-                    	  List<Condition> query = application.getPortalExtension().getQuery(
+                    	  org.openmdx.base.query.Filter query = application.getPortalExtension().getQuery(
                               column,
                               andExpr,
-                              queryFilterContext,
-                              queryFilterStringParams == null ? 0 : queryFilterStringParams.length,
+                              extension == null ? 0 : extension.getStringParam().size(),
                               application
                           );
                     	  if(query != null) {
-                    		  if(queryFilterClause == null) {
-                    			  conditions.addAll(query);
-                    		  }
-                    		  // Merge base query with returned query
-                    		  else {
-                    			  for(Condition condition: query) {
-                    				  if(condition instanceof PiggyBackCondition) {
-                    					  // Merged clause
-                    					  if(condition.getFeature().endsWith(Database_1_Attributes.QUERY_FILTER_CLAUSE)) {
-                    						  condition.setValue(
-                    							  0,
-                    							  condition.getValue(0) + " AND " + queryFilterClause
-                    						  );
-                    						  conditions.add(condition);
-                    					  }
-                    					  else if(condition.getFeature().endsWith(Database_1_Attributes.QUERY_FILTER_CLASS)) {
-	                						  // ignore
-	                					  }
-                    					  // Merged string parameter
-                    					  else if(condition.getFeature().endsWith(Database_1_Attributes.QUERY_FILTER_STRING_PARAM)) {
-                    						  List<Object> stringParams = new ArrayList(
-                    							  queryFilterStringParams == null ?
-                    								  Collections.emptyList() :
-                    									  Arrays.asList(queryFilterStringParams)
-                    						  );
-                    						  stringParams.addAll(Arrays.asList(condition.getValue()));                    						  
-	                						  condition.setValue(
-	                							  (Object[])stringParams.toArray(new String[stringParams.size()])
-	                						  );
-	                						  conditions.add(condition);
-	                					  }
-                    					  // Add parameter
-                    					  else {
-                    						  conditions.add(condition);
-                    					  }
-                    				  }
-                    				  else {
-                    					  conditions.add(condition);
-                    				  }
-                    			  }
-                    		  }
-                    	  }
-                          else {
-                        	  // Re-add removed clause
-                        	  if(queryFilterClause != null) {
-                        		  conditions.add(
-                        			  new PiggyBackCondition(
-                        				  queryFilterContext + Database_1_Attributes.QUERY_FILTER_CLAUSE,
-                        				  queryFilterClause
-                        		      )
-                        		  );
-                        	  }
-                        	  // Re-add removed string parameter
-                        	  if(queryFilterStringParams != null) {
-                        		  conditions.add(
-                        			  new PiggyBackCondition(
-                        				  queryFilterContext + Database_1_Attributes.QUERY_FILTER_STRING_PARAM,
-                        				  queryFilterStringParams
-                        		      )
-                        		  );                        		  
-                        	  }
-                              Condition condition = 
-                                  new IsLikeCondition(
-                                      Quantors.THERE_EXISTS,
-                                      column.getFeatureName(),
-                                      true,
-                                      (Object[])null
-                                  );
+                			  conditions.addAll(query.getCondition());
+                			  Extension queryExtension = query.getExtension();
+                			  if(queryExtension != null) {
+                    			  //
+	                    		  // Merge base query with returned query
+                    			  //
+                				  if(extension == null) {
+                					  extension = queryExtension.clone();
+                				  } else {
+                					  // Merged clause
+                					  extension.setClause(
+                						  extension.getClause() + " AND " + queryExtension.getClause()
+                					  );
+                					  // Merged string parameter
+                					  extension.getStringParam().addAll(
+                						  queryExtension.getStringParam()
+                					  );
+                				  }
+                			  }
+                    	  } else {
+                              Condition condition = new IsLikeCondition(
+                            	  Quantifier.THERE_EXISTS,
+                                  column.getFeatureName(),
+                                  true,
+                                  (Object[])null
+                              );
                               List values = new ArrayList();
                               StringTokenizer orExpr = new StringTokenizer(andExpr.trim(), ";");
                               while(orExpr.hasMoreTokens()) {
@@ -1485,12 +1385,8 @@ public abstract class Grid
                                   values.add(trimmedToken);
                               }
                               if(!values.isEmpty()) {
-                                  condition.setValue(
-                                      values.toArray(new Object[values.size()])
-                                  );
-                                  conditions.add(
-                                      condition
-                                  );
+                                  condition.setValue(values.toArray());
+                                  conditions.add(condition);
                               }
                           }
                       }
@@ -1503,9 +1399,12 @@ public abstract class Grid
               "",
               WebKeys.ICON_DEFAULT,
               null,
-              (Condition[])conditions.toArray(new Condition[conditions.size()]),
-              new OrderSpecifier[]{},
-              new Object[]{this.getGridControl().getContainerId(), this.view.getApplicationContext().getCurrentUserRole(), this.view.getObjectReference().refMofId()}               
+              conditions,
+              null, // order
+              extension,
+              this.getGridControl().getContainerId(), 
+              this.view.getApplicationContext().getCurrentUserRole(), 
+              this.view.getObjectReference().refMofId()               
           );
           break;
         }
@@ -1530,7 +1429,7 @@ public abstract class Grid
 	  );
 	  // apply filter to container
 	  if(this.currentFilter != null) {
-		  List orderSpecifier = new ArrayList(Arrays.asList(this.currentFilter.getOrderSpecifier()));
+		  List orderSpecifier = new ArrayList(this.currentFilter.getOrderSpecifier());
 		  // Lookup column to be ordered
 		  org.openmdx.ui1.jmi1.ValuedField column = null;        
 		  for(
@@ -1558,7 +1457,7 @@ public abstract class Grid
 						  i,
 						  new OrderSpecifier(
 							  orderByFeature,
-							  order
+							  SortOrder.valueOf(order)
 						  )
 					  );
 					  found = true;
@@ -1569,7 +1468,7 @@ public abstract class Grid
 				  orderSpecifier.add(
 					  new OrderSpecifier(
 						  orderByFeature,
-						  order
+						  SortOrder.valueOf(order)
 					  )         
 				  );
 			  }
@@ -1580,8 +1479,11 @@ public abstract class Grid
 				  this.currentFilter.getIconKey(),
 				  this.currentFilter.getOrder(),
 				  this.currentFilter.getCondition(),
-				  (OrderSpecifier[])orderSpecifier.toArray(new OrderSpecifier[orderSpecifier.size()]),
-				  new Object[]{this.getGridControl().getQualifiedReferenceName(), this.view.getApplicationContext().getCurrentUserRole(), this.view.getObjectReference().refMofId()}                 
+				  orderSpecifier,
+				  this.currentFilter.getExtension(),
+				  this.getGridControl().getQualifiedReferenceName(), 
+				  this.view.getApplicationContext().getCurrentUserRole(), 
+				  this.view.getObjectReference().refMofId()                 
 			  );
 		  }
 	  }
@@ -1599,7 +1501,7 @@ public abstract class Grid
     ) {
 	    Short order = (Short)this.columnSortOrders.get(feature);
 	    return order == null
-	      ? Orders.ANY
+	      ? SortOrder.UNSORTED.code()
 	      : order.shortValue();
     }
 
@@ -1709,9 +1611,10 @@ public abstract class Grid
       
       // toggle ANY -> ASCENDING -> DESCENDING -> ANY
       // show icon of current ordering
-      switch(order) {
-        case Orders.ANY:
-          return new Action(
+      try {
+        switch(SortOrder.valueOf(order)) {
+          case UNSORTED:
+            return new Action(
               Action.EVENT_SET_ORDER_ASC,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
@@ -1722,9 +1625,9 @@ public abstract class Grid
               application.getTexts().getSortAscendingText(),
               WebKeys.ICON_SORT_ANY,
               true
-          );
-        case Orders.ASCENDING:
-          return new Action(
+            );
+          case ASCENDING:
+            return new Action(
               Action.EVENT_SET_ORDER_DESC,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
@@ -1735,9 +1638,9 @@ public abstract class Grid
               application.getTexts().getSortDescendingText(),
               WebKeys.ICON_SORT_UP,
               true
-          );
-        case Orders.DESCENDING:
-          return new Action(
+            );
+          case DESCENDING:
+            return new Action(
               Action.EVENT_SET_ORDER_ANY,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
@@ -1749,7 +1652,9 @@ public abstract class Grid
               WebKeys.ICON_SORT_DOWN,
               true
           );
-        default:
+          default: return null; // unreachable statement 
+        } 
+      } catch (IllegalArgumentException exception) {
           return new Action(
               Action.EVENT_NONE,
               new Action.Parameter[]{},
@@ -1758,7 +1663,8 @@ public abstract class Grid
               WebKeys.ICON_SORT_ANY,
               true
           );          
-      }
+       }
+      
     }
 
     //-------------------------------------------------------------------------
@@ -1772,9 +1678,10 @@ public abstract class Grid
       // toggle ANY -> ASCENDING -> DESCENDING -> ANY
       // show icon of current ordering
       int paneIndex = gridControl.getPaneIndex();
-      switch(order) {
-        case Orders.ANY:
-          return new Action(
+      try {
+        switch(SortOrder.valueOf(order)) {
+          case UNSORTED:
+            return new Action(
               Action.EVENT_ADD_ORDER_ASC,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
@@ -1784,9 +1691,9 @@ public abstract class Grid
               application.getTexts().getSortAscendingText(),
               WebKeys.ICON_SORT_ANY,
               true
-          );
-        case Orders.ASCENDING:
-          return new Action(
+            );
+          case ASCENDING:
+            return new Action(
               Action.EVENT_ADD_ORDER_DESC,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
@@ -1796,9 +1703,9 @@ public abstract class Grid
               application.getTexts().getSortDescendingText(),
               WebKeys.ICON_SORT_UP,
               true
-          );
-        case Orders.DESCENDING:
-          return new Action(
+            );
+          case DESCENDING:
+            return new Action(
               Action.EVENT_ADD_ORDER_ANY,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
@@ -1809,7 +1716,10 @@ public abstract class Grid
               WebKeys.ICON_SORT_DOWN,
               true
           );
-        default:
+          default:  
+            return null; // unreachable statement
+        } 
+      } catch (IllegalArgumentException exception) {
           return new Action(
               Action.EVENT_NONE,
               new Action.Parameter[]{},

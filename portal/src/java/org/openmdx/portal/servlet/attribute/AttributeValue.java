@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValue.java,v 1.94 2010/02/04 11:25:03 wfro Exp $
+ * Name:        $Id: AttributeValue.java,v 1.95 2010/05/16 09:39:39 wfro Exp $
  * Description: AttributeValue
- * Revision:    $Revision: 1.94 $
+ * Revision:    $Revision: 1.95 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/04 11:25:03 $
+ * Date:        $Date: 2010/05/16 09:39:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -770,7 +770,7 @@ implements Serializable {
                         		p.write("<div class=\"fieldSpanned\" id=\"", id, "\" ", styleModifier, ">");
                         	}
                             if(isWikiText) {
-                            	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};{</script>");
+                            	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};</script>");
                             }
                             else {
 	                            this.application.getPortalExtension().renderTextValue(

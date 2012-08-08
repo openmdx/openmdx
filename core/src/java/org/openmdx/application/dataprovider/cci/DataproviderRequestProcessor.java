@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataproviderRequestProcessor.java,v 1.6 2010/04/15 10:19:37 hburger Exp $
+ * Name:        $Id: DataproviderRequestProcessor.java,v 1.8 2010/06/02 13:39:35 hburger Exp $
  * Description: RequestCollection class
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/15 10:19:37 $
+ * Date:        $Date: 2010/06/02 13:39:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,9 +60,7 @@ import javax.resource.cci.MappedRecord;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.AttributeSpecifier;
-import org.openmdx.base.query.Directions;
-import org.openmdx.base.query.FilterProperty;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
@@ -591,7 +589,7 @@ public final class DataproviderRequestProcessor
             AttributeSelectors.NO_ATTRIBUTES,
             0,
             Integer.MAX_VALUE,
-            Directions.ASCENDING
+            SortOrder.ASCENDING.code()
         );
     }
 
@@ -624,8 +622,6 @@ public final class DataproviderRequestProcessor
      *
      * @exception   ServiceException
      *              if no valid request can be added
-     *
-     * @see org.openmdx.base.query.Directions
      */
     @SuppressWarnings("unchecked")
     public List addFindRequest(
@@ -678,8 +674,6 @@ public final class DataproviderRequestProcessor
      *
      * @exception   ServiceException
      *              if no valid request can be added
-     *
-     * @see org.openmdx.base.query.Directions
      */
     @SuppressWarnings("unchecked")
     public List addFindRequest(
@@ -743,8 +737,6 @@ public final class DataproviderRequestProcessor
      *
      * @exception   ServiceException
      *              if no valid request can be added
-     *
-     * @see org.openmdx.base.query.Directions
      */
     public void addFindRequest(
         Path referenceFilter,
@@ -892,6 +884,7 @@ public final class DataproviderRequestProcessor
     }
 
     //------------------------------------------------------------------------
+    @Override
     public Object clone(  
     ){
         return new DataproviderRequestProcessor(

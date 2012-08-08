@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.1 2009/08/28 12:42:51 hburger Exp $
-= Description: openMDX/EJB Test
-= Revision:    $Revision: 1.1 $
-= Date:        $Date: 2009/08/28 12:42:51 $
+= Name:        $Id: build.xml,v 1.4 2010/06/07 15:44:40 hburger Exp $
+= Description: openMDX/Test-EJB  Build File
+= Revision:    $Revision: 1.4 $
+= Date:        $Date: 2010/06/07 15:44:40 $
 = Copyright:   (c) 2003-2004 OMEX AG
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -57,13 +57,13 @@
 	xmlns:antcontrib="antlib:net.sf.antcontrib"
 	xmlns:jpox="http://www.jpox.org"
 >
-	<description>Builds the openMDX/Test.Core component</description>
-	<property name="project.specification.title" value="openMDX/EJB-Test"/>
+	<description>Builds the openMDX/EJB Test component</description>
+	<property name="project.specification.title" value="openMDX/Test-EJB"/>
 
 	<property name="model.transformation.class.path" value="project.lib.classpath"/>
 
 	<!-- Slash separated platform list, the last entry being the default -->
-	<property name="project.platform.list" value="jre-1.5"/>
+	<property name="project.platform.list" value="jre-1.6"/>
 
 	<!-- Included Ant Projects -->
 	<import file="../ant/etc/ant/build-properties.xml"/>
@@ -123,7 +123,7 @@
 		depends="distribution-init,deliverables"
 	>
 		<openmdx:archive 
-			destfile="${distribution.dir}/openmdx-${project.implementation.version}-test.core.${build.target.platform}."
+			destfile="${distribution.dir}/openmdx-${project.implementation.version}-test-ejb.${build.target.platform}."
 			format="${distribution.format}"
 			checksum="MD5"
 		>

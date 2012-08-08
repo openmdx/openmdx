@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMI1ReferenceResolver.java,v 1.1 2009/01/13 02:10:41 wfro Exp $
+ * Name:        $Id: XMI1ReferenceResolver.java,v 1.2 2010/06/18 13:09:46 hburger Exp $
  * Description: XMI1 Reference Resolver
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:41 $
+ * Date:        $Date: 2010/06/18 13:09:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,6 +61,7 @@ import java.util.Stack;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.openmdx.application.mof.externalizer.xmi.uml1.UML1AssociationEnd;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1Comment;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1Generalization;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1TagDefinition;
@@ -118,6 +119,11 @@ public class XMI1ReferenceResolver
   ) {
       return (String)this.projects.get(packageName);
   }
+
+	//---------------------------------------------------------------------------
+	public UML1AssociationEnd lookupAssociationEnd(String xmiId) {
+		return null; // used in XMI 2 only
+	}
 
     //---------------------------------------------------------------------------
     private void error(

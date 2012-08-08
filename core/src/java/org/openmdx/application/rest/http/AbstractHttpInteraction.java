@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractHttpInteraction.java,v 1.5 2010/03/23 09:14:18 hburger Exp $
+ * Name:        $Id: AbstractHttpInteraction.java,v 1.7 2010/05/26 12:21:50 wfro Exp $
  * Description: Abstract HTTP Interaction
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 09:14:18 $
+ * Date:        $Date: 2010/05/26 12:21:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,9 +50,8 @@
  */
 package org.openmdx.application.rest.http;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -70,6 +69,7 @@ import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.rest.spi.RestFormat;
 import org.openmdx.base.rest.spi.RestFormat.Target;
+import org.openmdx.base.text.conversion.URITransformation;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -81,19 +81,20 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
      * Constructor 
      *
      * @param connection
+     * @param contextURL
      */
     protected AbstractHttpInteraction(
         Connection connection,
-        String uri
+        String contextURL
     ) {
         super(connection);
-        this.uri = uri.endsWith("/") ? uri : uri + '/';
+        this.contextURL = contextURL.endsWith("/") ? contextURL.substring(0, contextURL.length() - 1) : contextURL;
     }
 
     /**
-     * The HTTP interaction's URI
+     * The HTTP interaction's context URL
      */
-    public final String uri;
+    protected final String contextURL;
     
     /**
      * The interaction spec to create (virtual) connection objects
@@ -141,27 +142,14 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
      * @param resourceIdentifier
      * 
      * @return the XRI based URL
-     *  
-     * @throws ServiceException
      */
-    protected URL toURL(
+    protected String toRequestURL(
         Path resourceIdentifier
     ) throws ServiceException{
         String xri = resourceIdentifier.toXRI();
-        try {
-            return new URL(
-                uri + xri.substring(xri.charAt(14) == '*' ? 15 : 14)
-            );
-        } catch (MalformedURLException exception) {
-            throw new ServiceException(
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.TRANSFORMATION_FAILURE,
-                "XRI based URL can't be created",
-                new BasicException.Parameter("uri", uri),
-                new BasicException.Parameter("xri", xri)
-            );
-        }
+        return this.contextURL + '/' + URITransformation.encode(
+            xri.substring(xri.charAt(14) == '*' ? 15 : 14)
+        );
     }
 
     /**
@@ -240,6 +228,10 @@ public abstract class AbstractHttpInteraction extends AbstractRestInteraction {
             ) : new ServiceException(
                 cause
             );
+        } else {
+            try {
+                message.getResponseBody().close();
+            } catch (IOException e) {}
         }
         return status >= 200 && status < 300;
     }

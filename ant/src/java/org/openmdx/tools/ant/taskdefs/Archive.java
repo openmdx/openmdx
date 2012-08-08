@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Archive.java,v 1.24 2007/01/19 15:54:55 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Archive.java,v 1.25 2010/06/04 22:22:49 hburger Exp $
  * Description: Ant Archive Task
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/19 15:54:55 $
+ * Date:        $Date: 2010/06/04 22:22:49 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -616,6 +615,7 @@ public class Archive
 	/* (non-Javadoc)
 	 * @see org.apache.tools.ant.Task#execute()
 	 */
+	@Override
 	public void execute() throws BuildException {
 		if(isUpToDate()) {
 			this.log(
@@ -1086,7 +1086,8 @@ public class Archive
         /* (non-Javadoc)
     	 * @see org.apache.tools.ant.taskdefs.Zip#zipFile(java.io.InputStream, org.apache.tools.zip.ZipOutputStream, java.lang.String, long, java.io.File, int)
     	 */
-    	protected void zipFile(
+    	@Override
+		protected void zipFile(
     		InputStream in, 
     		ZipOutputStream zOut, 
     		String vPath, 
@@ -1195,7 +1196,8 @@ public class Archive
         /* (non-Javadoc)
     	 * @see org.apache.tools.ant.taskdefs.Zip#zipFile(java.io.InputStream, org.apache.tools.zip.ZipOutputStream, java.lang.String, long, java.io.File, int)
     	 */
-    	protected void zipFile(
+    	@Override
+		protected void zipFile(
     		InputStream in, 
     		ZipOutputStream zOut, 
     		String vPath, 
@@ -1419,6 +1421,7 @@ public class Archive
 		/**
 		 * @param destFile The destFile to set.
 		 */
+		@Override
 		public void setDestFile(File destFile) {
 			super.setDestFile(
 				this.destFile = destFile
@@ -1428,6 +1431,7 @@ public class Archive
 		/* (non-Javadoc)
 		 * @see org.apache.tools.ant.taskdefs.Tar#tarFile(java.io.File, org.apache.tools.tar.TarOutputStream, java.lang.String, org.apache.tools.ant.taskdefs.Tar.TarFileSet)
 		 */
+		@Override
 		protected void tarFile(
 			File file, 
 			TarOutputStream tOut, 
@@ -1573,6 +1577,7 @@ public class Archive
 		/* (non-Javadoc)
 		 * @see org.openmdx.tools.ant.taskdefs.Archive#getDestFile()
 		 */
+		@Override
 		public File getTempDir(
 		) {
 			return this.parent.getTempDir();
@@ -1609,6 +1614,7 @@ public class Archive
 		/* (non-Javadoc)
 		 * @see org.openmdx.tools.ant.taskdefs.Archive#getDestFile()
 		 */
+		@Override
 		protected File getDestFile(
 		) throws BuildException {
 			File destFile = super.getDestFile();
@@ -1632,6 +1638,7 @@ public class Archive
 		/* (non-Javadoc)
 		 * @see org.openmdx.tools.ant.taskdefs.Archive#setDestFile(java.io.File)
 		 */
+		@Override
 		public void setDestFile(File destFile) {
 			this.tempFile = false;
 			super.setDestFile(destFile);
@@ -1649,6 +1656,7 @@ public class Archive
 		/* (non-Javadoc)
 		 * @see org.openmdx.tools.ant.taskdefs.Archive#execute()
 		 */
+		@Override
 		public void execute() throws BuildException {
 			Archive parent = getParent();
 			File parentFile = parent.getDestFile();

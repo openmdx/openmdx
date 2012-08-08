@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Switch_2.java,v 1.12 2010/03/23 09:09:37 hburger Exp $
+ * Name:        $Id: Switch_2.java,v 1.16 2010/08/06 12:04:04 hburger Exp $
  * Description: REST Router
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 09:09:37 $
+ * Date:        $Date: 2010/08/06 12:04:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,6 @@
  */
 package org.openmdx.base.accessor.rest.spi;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -61,11 +60,14 @@ import javax.resource.cci.Interaction;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
-import org.openmdx.base.accessor.rest.spi.VirtualObjects_2.VirtualObjectProvider;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.resource.cci.RestFunction;
 import org.openmdx.base.resource.spi.Port;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.cci.ObjectRecord;
+import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -83,10 +85,10 @@ public class Switch_2 implements Port {
      * @throws ResourceException 
      */
     public Switch_2(
-        VirtualObjects_2 virtualObjects, 
+        BasicCache_2 virtualObjects, 
         Map<Path,Port> destinations
     ) throws ResourceException{
-        this.virtualObjectPlugIn = virtualObjects;
+        this.cachingPlugIn = virtualObjects;
         this.destinations = destinations; 
     }
     
@@ -98,7 +100,7 @@ public class Switch_2 implements Port {
     /**
      * Virtual object port
      */
-    protected final VirtualObjects_2 virtualObjectPlugIn;
+    protected final BasicCache_2 cachingPlugIn;
     
     
     //------------------------------------------------------------------------
@@ -122,7 +124,7 @@ public class Switch_2 implements Port {
     /**
      * Switching Interaction
      */
-    class SwitchingInteraction extends AbstractRestInteraction implements VirtualObjects_2_0 {
+    class SwitchingInteraction extends AbstractRestInteraction implements CacheAccessor_2_0 {
        
         /**
          * Constructor 
@@ -135,40 +137,38 @@ public class Switch_2 implements Port {
         ) throws ResourceException{
             super(connection);
             this.enlisted.put(
-                Switch_2.this.virtualObjectPlugIn, 
-                this.virtualObjectProvider  = Switch_2.this.virtualObjectPlugIn.getInteraction(connection)
+                Switch_2.this.cachingPlugIn, 
+                this.cachingInteraction = Switch_2.this.cachingPlugIn.getInteraction(connection)
             );
         }
         
         /**
          * The virtual object provider instance
          */
-        private final VirtualObjectProvider virtualObjectProvider;
+        private final BasicCache_2.CachingInteraction cachingInteraction;
         
         /**
          * The enlisted interactions
          */
         private final ConcurrentMap<Port,Interaction> enlisted = new ConcurrentHashMap<Port,Interaction>();
 
+        
         /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.rest.spi.VirtualObjects_2_0#sowSeed(org.openmdx.base.naming.Path, java.lang.String)
+         * @see org.openmdx.base.accessor.rest.spi.CacheAccessor_2_0#getDataStoreCache()
          */
-        @Override
-        public void putSeed(
-            Path xri, 
-            String objectClass
-        ) throws ResourceException {
-            this.virtualObjectProvider.putSeed(xri, objectClass);
+    //  @Override
+        public DataStoreCache_2_0 getDataStoreCache(
+        ) throws ServiceException {
+            return this.cachingInteraction.getDataStoreCache();
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.rest.spi.VirtualObjects_2_0#isVirtual(org.openmdx.base.naming.Path)
+         * @see org.openmdx.base.accessor.rest.spi.CacheProvider_2_0#getCache()
          */
-        @Override
-        public boolean isVirtual(
-            Path xri
-        ) {
-            return this.virtualObjectProvider.isVirtual(xri);
+    //  @Override
+        public ManagedConnectionCache_2_0 getManagedConnectionCache(
+        ) throws ServiceException {
+            return this.cachingInteraction.getManagedConnectionCache();
         }
 
         /**
@@ -183,8 +183,13 @@ public class Switch_2 implements Port {
         protected Port getDestination(
             Path xri
         ) throws ResourceException {
-            if(this.virtualObjectProvider.isVirtual(xri)) {
-                return Switch_2.this.virtualObjectPlugIn;
+            if(!xri.isTransientObjectId()) try {
+                if(this.cachingInteraction.getManagedConnectionCache().isAvailable(null, xri)) {
+                    return Switch_2.this.cachingPlugIn;
+                }
+            } catch (ServiceException exception) {
+                throw new ResourceException(exception);
+                // TODO Auto-generated catch block
             }
             for(Map.Entry<Path,Port> entry : Switch_2.this.destinations.entrySet()) {
                 if(xri.isLike(entry.getKey())) {
@@ -201,13 +206,13 @@ public class Switch_2 implements Port {
                             "xri", 
                             xri
                         ),
-                        new BasicException.Parameter(
-                            "final-objects", 
-                            Switch_2.this.virtualObjectPlugIn.getFinalPattern() == null ? null : Arrays.asList(Switch_2.this.virtualObjectPlugIn.getFinalPattern())
-                        ),
+//                        new BasicException.Parameter(
+//                            "final-objects", 
+//                            Switch_2.this.virtualObjectPlugIn.getFinalPattern() == null ? null : Arrays.asList(Switch_2.this.virtualObjectPlugIn.getFinalPattern())
+//                        ),
                         new BasicException.Parameter(
                             "destinations", 
-                            destinations.keySet())
+                            Switch_2.this.destinations.keySet())
                     )
                 )
             );
@@ -225,17 +230,13 @@ public class Switch_2 implements Port {
         protected Interaction getInteraction(
             Path xri
         ) throws ResourceException {
-            Port destination = getDestination(xri);
+            Port destination = this.getDestination(xri);
             Interaction interaction = this.enlisted.get(destination);
-            if(interaction == null) {
-                Interaction enlisted = this.enlisted.putIfAbsent(
-                    destination,
-                    interaction = destination.getInteraction(super.getConnection())
-                );
-                return enlisted == null ? interaction : enlisted;
-            } else {
-                return interaction;
-            }
+            return interaction == null ? Maps.putUnlessPresent(
+                this.enlisted,
+                destination,
+                destination.getInteraction(super.getConnection())
+            ) : interaction;
         }
         
         /* (non-Javadoc)
@@ -249,7 +250,20 @@ public class Switch_2 implements Port {
             Record output
         ) throws ServiceException {
             try {
-                return getInteraction(xri).execute(ispec, input, output);
+                Interaction interaction = this.getInteraction(xri);
+                boolean executed = interaction.execute(ispec, input, output);
+                if(
+                    executed && 
+                    interaction != this.cachingInteraction && 
+                    ispec.getFunction() == RestFunction.GET && 
+                    output instanceof ResultRecord
+                ){
+                    ManagedConnectionCache_2_0 cache = this.cachingInteraction.getManagedConnectionCache(); 
+                    for(Object object : (ResultRecord)output) {
+                        cache.put(null, (ObjectRecord)object);
+                    }
+                }
+                return executed;
             } catch(ResourceException e) {
                 throw new ServiceException(e);
             }

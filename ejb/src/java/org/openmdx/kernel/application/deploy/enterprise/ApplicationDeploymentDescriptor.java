@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ApplicationDeploymentDescriptor.java,v 1.3 2010/04/09 09:33:38 hburger Exp $
+ * Name:        $Id: ApplicationDeploymentDescriptor.java,v 1.4 2010/06/04 22:44:59 hburger Exp $
  * Description: Application Deployment Descriptor
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/09 09:33:38 $
+ * Date:        $Date: 2010/06/04 22:44:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -96,7 +96,8 @@ public class ApplicationDeploymentDescriptor
         );
     }
 
-    public void parseXml(
+    @Override
+	public void parseXml(
         Element element,
         Report report
     ) {
@@ -215,7 +216,8 @@ public class ApplicationDeploymentDescriptor
         }
     }
 
-    public void parseOpenMdxXml(
+    @Override
+	public void parseOpenMdxXml(
         Element element,
         Report report
     ) {
@@ -235,7 +237,8 @@ public class ApplicationDeploymentDescriptor
         return verify();
     }
 
-    public void verify(
+    @Override
+	public void verify(
         Report report
     ) {
         super.verify(report);
@@ -554,7 +557,8 @@ public class ApplicationDeploymentDescriptor
      *
      * @return Returns the expanded.
      */
-    public final boolean isExpanded() {
+    @Override
+	public final boolean isExpanded() {
         return this.expanded;
     }
 

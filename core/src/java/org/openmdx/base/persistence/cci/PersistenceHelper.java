@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceHelper.java,v 1.18 2010/03/23 15:34:26 hburger Exp $
+ * Name:        $Id: PersistenceHelper.java,v 1.23 2010/06/30 13:10:33 hburger Exp $
  * Description: PersistenceHelper 
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 15:34:26 $
+ * Date:        $Date: 2010/06/30 13:10:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,10 +64,12 @@ import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.spi.Container;
+import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.ExtentCollection;
+import org.openmdx.base.persistence.spi.QueryExtension;
 import org.openmdx.base.persistence.spi.TransientContainerId;
-import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.AnyTypePredicate;
@@ -121,21 +123,6 @@ public class PersistenceHelper {
     }
 
     /**
-     * Tells whether a container is persistent
-     * 
-     * @param object a container
-     * 
-     * @return <code>true</code> if the container is persistent
-     */
-    public static boolean isPersistent(
-        Object object
-    ){
-        return object instanceof Container ? 
-            ((Container)object).openmdxjdoIsPersistent() :
-            JDOHelper.isPersistent(object);
-    }
-        
-    /**
      * Return the container's id
      * 
      * @param container a container
@@ -145,7 +132,7 @@ public class PersistenceHelper {
     public static Path getContainerId(
         Object container
     ){
-        return container instanceof Container ? ((Container)container).openmdxjdoGetContainerId() : null;
+        return container instanceof PersistenceCapableCollection ? ((PersistenceCapableCollection)container).openmdxjdoGetContainerId() : null;
     }
 
     /**
@@ -158,7 +145,7 @@ public class PersistenceHelper {
     public static TransientContainerId getTransientContainerId(
         Object container
     ){
-        return container instanceof Container ? ((Container)container).openmdxjdoGetTransientContainerId() : null;
+        return container instanceof PersistenceCapableCollection ? ((PersistenceCapableCollection)container).openmdxjdoGetTransientContainerId() : null;
     }
     
     /**
@@ -198,6 +185,21 @@ public class PersistenceHelper {
     }
 
     /**
+     * Create and register a query extension
+     * 
+     * @param query the query to be amended
+     * 
+     * @return the new query extension 
+     */
+    public static Extension newQueryExtension(
+        AnyTypePredicate query
+    ){
+        Extension queryExtension = new QueryExtension();
+        ((Query)query).addExtension(Queries.QUERY_EXTENSION, queryExtension);
+        return queryExtension;
+    }
+    
+    /**
      * Retrieve a candidate collection
      * 
      * @param extent the extent
@@ -221,8 +223,8 @@ public class PersistenceHelper {
     ){
         ((RefQuery_1_0)query).refAddValue(
             SystemAttributes.OBJECT_INSTANCE_OF,
-            Quantifier.THERE_EXISTS.code(),
-            FilterOperators.IS_IN,
+            Quantifier.THERE_EXISTS,
+            ConditionType.IS_IN,
             Arrays.asList(classes)
         );
     }

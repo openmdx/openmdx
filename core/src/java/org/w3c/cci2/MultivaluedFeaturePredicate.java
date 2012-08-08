@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MultivaluedFeaturePredicate.java,v 1.2 2008/05/06 09:24:27 hburger Exp $
+ * Name:        $Id: MultivaluedFeaturePredicate.java,v 1.4 2010/06/21 17:43:30 hburger Exp $
  * Description: Multi-Valued Feature Predicate
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/06 09:24:27 $
+ * Date:        $Date: 2010/06/21 17:43:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006, OMEX AG, Switzerland
+ * Copyright (c) 2006-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -69,5 +69,15 @@ public interface MultivaluedFeaturePredicate {
      * Test the collection's size
      */
     ComparableTypePredicate<java.lang.Integer> size();
+
+    /**
+     * This method is deprecated to avoid its erroneous use..
+     * 
+     * @deprecated to avoid erroneous use 
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Deprecated
+    boolean equals(Object obj);
 
 }

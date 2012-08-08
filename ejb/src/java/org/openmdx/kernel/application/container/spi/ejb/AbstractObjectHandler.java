@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractObjectHandler.java,v 1.3 2009/08/25 17:23:05 hburger Exp $
+ * Name:        $Id: AbstractObjectHandler.java,v 1.4 2010/06/04 22:45:00 hburger Exp $
  * Description: Abstract Enterprise Java Bean Object Invocation Handler
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/08/25 17:23:05 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -90,7 +90,8 @@ abstract class AbstractObjectHandler<H extends AbstractHomeHandler>
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
-    public Object invoke(
+    @Override
+	public Object invoke(
         Object proxy, 
         Method method, 
         Object[] args
@@ -117,7 +118,8 @@ abstract class AbstractObjectHandler<H extends AbstractHomeHandler>
     /* (non-Javadoc)
      * @see java.rmi.server.RemoteObject#toString()
      */
-    public String toString() {
+    @Override
+	public String toString() {
         StringBuilder reply = new StringBuilder(
             getClass().getName()
         ).append(

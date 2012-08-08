@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Structures.java,v 1.29 2010/04/16 12:35:36 hburger Exp $
+ * Name:        $Id: Structures.java,v 1.30 2010/05/05 15:07:04 wfro Exp $
  * Description: Structures 
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 12:35:36 $
+ * Date:        $Date: 2010/05/05 15:07:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -597,7 +597,7 @@ public class Structures {
                         } else if (value.getClass().isArray()) {
                             c = ArraysExtension.asList(value);
                         } else throw new IllegalArgumentException(
-                            "Mmember '" + this.metaData.names[slot] + 
+                            "Member '" + this.metaData.names[slot] + 
                             "' requires either a collection or array value"
                         );
                         int s = c.size();
@@ -622,7 +622,7 @@ public class Structures {
                         } else if (value instanceof Map<?,?>) {
                             a = toSparseArray((Map<?,?>)value);
                         } else throw new IllegalArgumentException(
-                            "Mmember '" + this.metaData.names[slot] + 
+                            "Member '" + this.metaData.names[slot] + 
                             "' requires a map value with numeric keys"
                         );
                         int s = a.size();

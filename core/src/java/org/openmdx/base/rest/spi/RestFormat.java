@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestFormat.java,v 1.5 2010/04/08 17:30:37 wfro Exp $
- * Description: RecordFormat 
- * Revision:    $Revision: 1.5 $
+ * Name:        $Id: RestFormat.java,v 1.20 2010/08/06 12:01:47 hburger Exp $
+ * Description: REST Format
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/08 17:30:37 $
+ * Date:        $Date: 2010/08/06 12:01:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,7 @@
  */
 package org.openmdx.base.rest.spi;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInput;
@@ -59,7 +60,6 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -73,7 +73,6 @@ import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -82,10 +81,9 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.openmdx.base.accessor.rest.spi.ControlObjects_2;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.io.HttpHeaderFieldContent;
-import org.openmdx.base.io.HttpHeaderFieldValue;
 import org.openmdx.base.io.ObjectInputStream;
 import org.openmdx.base.io.ObjectOutputStream;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -105,6 +103,7 @@ import org.openmdx.base.wbxml.WBXMLReader;
 import org.openmdx.base.xml.stream.CharacterWriter;
 import org.openmdx.base.xml.stream.LargeObjectWriter;
 import org.openmdx.base.xml.stream.XMLOutputFactories;
+import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.id.UUIDs;
@@ -125,7 +124,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
- * RecordFormat
+ * REST Format
  */
 public class RestFormat {
 
@@ -151,6 +150,7 @@ public class RestFormat {
      */
     private static final ThreadLocal<XMLReader> xmlReaders = new ThreadLocal<XMLReader>() {
 
+        @Override
         protected XMLReader initialValue() {
             try {
                 SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
@@ -169,6 +169,7 @@ public class RestFormat {
      */
     private static final ThreadLocal<XMLReader> wbxmlReaders = new ThreadLocal<XMLReader>() {
 
+        @Override
         protected XMLReader initialValue() {
             try {
                 return new WBXMLReader(new WBXMLPlugIn());
@@ -184,11 +185,28 @@ public class RestFormat {
     private static final ConcurrentMap<String,XMLOutputFactory> xmlOutputFactories = new ConcurrentHashMap<String, XMLOutputFactory>();
 
     /**
+     * Convert the path info into a resource identifier
+     * 
+     * @param pathInfo
+     * 
+     * @return the XRI corresponding to the path info
+     */
+    public static Path toResourceIdentifier(
+        String pathInfo
+    ){  
+        return new Path(
+            (pathInfo.startsWith("/@openmdx") ? "" : pathInfo.startsWith("/!") ? "xri://@openmdx" : "xri://@openmdx*") + 
+            pathInfo.substring(1)
+        );
+    }
+    
+    /**
      * Retrieve an XML Reader instance
      * 
-     * @param wbxml
+     * @param source
      * 
      * @return an XML Reader instance
+     * 
      * @throws SAXNotSupportedException 
      * @throws SAXNotRecognizedException 
      */
@@ -196,11 +214,11 @@ public class RestFormat {
         Source source
     ) throws SAXNotRecognizedException, SAXNotSupportedException {
         if(source.isWBXML()) {
-            XMLReader xmlReader = wbxmlReaders.get();
+            XMLReader xmlReader = RestFormat.wbxmlReaders.get();
             xmlReader.setFeature(WBXMLReader.EXHAUST, source.isToBeExhausted());
             return xmlReader;
         } else {
-            return xmlReaders.get();
+            return RestFormat.xmlReaders.get();
         }
     }
 
@@ -210,24 +228,18 @@ public class RestFormat {
      * @param mimeType
      * 
      * @return a MIME type specific XML output factory
+     * 
+     * @throws XMLStreamException if no factory can be provided for the given MIME type
      */
     public static XMLOutputFactory getOutputFactory(
         String mimeType
-    ){
-        int pos;
-        if((pos = mimeType.indexOf(";")) > 0) {
-            mimeType = mimeType.substring(0, pos);
-        }
-        XMLOutputFactory xmlOutputFactory = xmlOutputFactories.get(mimeType);
-        if(xmlOutputFactory == null) {
-            XMLOutputFactory concurrent = xmlOutputFactories.putIfAbsent(
-                mimeType, 
-                xmlOutputFactory = XMLOutputFactories.newInstance(mimeType)
-            );
-            return concurrent == null ? xmlOutputFactory : concurrent;
-        } else {
-            return xmlOutputFactory;
-        }
+    ) throws XMLStreamException {
+        XMLOutputFactory xmlOutputFactory = RestFormat.xmlOutputFactories.get(mimeType);
+        return xmlOutputFactory == null ? Maps.putUnlessPresent(
+            RestFormat.xmlOutputFactories,
+            mimeType,
+            XMLOutputFactories.newInstance(mimeType)
+        ) : xmlOutputFactory;
     }
     
     /**
@@ -249,9 +261,10 @@ public class RestFormat {
     ) throws ServiceException {
         try {
             StandardHandler handler = new StandardHandler(source);
-            XMLReader reader = getReader(source);
+            XMLReader reader = RestFormat.getReader(source);
             reader.setContentHandler(handler);
             reader.parse(source.getBody());
+            source.close();
             return handler.getValue(xri);
         } catch (IOException exception) {
             throw new ServiceException(exception);
@@ -276,9 +289,10 @@ public class RestFormat {
     ) throws ServiceException {
         try {
             StandardHandler handler = new StandardHandler(target, source);
-            XMLReader reader = getReader(source);
+            XMLReader reader = RestFormat.getReader(source);
             reader.setContentHandler(handler);
             reader.parse(source.getBody());
+            source.close();
         } catch (IOException exception) {
             throw new ServiceException(exception);
         } catch (SAXException exception) {
@@ -303,9 +317,10 @@ public class RestFormat {
     ) throws ServiceException {
         try {
             ExceptionHandler handler = new ExceptionHandler();
-            XMLReader reader = getReader(source);
+            XMLReader reader = RestFormat.getReader(source);
             reader.setContentHandler(handler);
             reader.parse(source.getBody());
+            source.close();
             return handler.getValue();
         } catch (IOException exception) {
             throw new ServiceException(exception);
@@ -317,55 +332,18 @@ public class RestFormat {
     }
 
     /**
-     * Retrieve the base URL
+     * Tells whether the given MIME type requires a binary stream
      * 
-     * @return the base URL
+     * @param mimeType
+     * 
+     * @return <code>true</code> if the given MIME type requires a binary stream
      */
-    public static String getBase(
-        HttpServletRequest request
-    ) {
-        StringBuffer hrefPrefix = request.getRequestURL();
-        hrefPrefix.setLength(hrefPrefix.indexOf(request.getServletPath()));
-        return hrefPrefix.append('/').toString();
+    public static boolean isBinary(
+        String mimeType
+    ){
+        return "application/vnd.openmdx.wbxml".equals(mimeType);
     }
-
-    /**
-     * Provide a <code>parse()</code> source
-     * 
-     * @param source
-     *            the HTTP request
-     * 
-     * @return a <code>Source</code>
-     * 
-     * @throws ServiceException
-     */
-    public static Source asSource(
-        HttpServletRequest request
-    ) throws ServiceException {
-        try {
-            HttpHeaderFieldContent contentType = new HttpHeaderFieldValue(
-                request.getHeaders("Content-Type")
-            ).getPreferredContent(
-                "application/xml;charset=UTF-8"
-            );
-            String mimeType = contentType.getValue();
-            String encoding = contentType.getParameterValue("charset", null);
-            InputSource inputSource = "application/vnd.openmdx.wbxml".equals(mimeType) ? new InputSource(
-                request.getInputStream()
-            ) : new InputSource (
-                request.getReader()
-            );
-            inputSource.setEncoding(encoding);
-            return new Source(
-                getBase(request), 
-                inputSource, 
-                mimeType
-            );
-        } catch (IOException exception) {
-            throw new ServiceException(exception);
-        }
-    }
-
+    
     /**
      * Provide a <code>parse()</code> source
      * 
@@ -398,7 +376,7 @@ public class RestFormat {
             @Override
             protected XMLStreamWriter newWriter(
             ) throws XMLStreamException {
-                return getOutputFactory(
+                return RestFormat.getOutputFactory(
                     "application/vnd.openmdx.wbxml"
                 ).createXMLStreamWriter(
                     output instanceof OutputStream ? (OutputStream) output : new ObjectOutputStream(output)
@@ -421,7 +399,7 @@ public class RestFormat {
         Object_2Facade source
     ) throws ServiceException {
         Path resourceIdentifier = source.getPath();
-        printRecord(
+        RestFormat.printRecord(
             target,
             0,
             resourceIdentifier,
@@ -443,7 +421,7 @@ public class RestFormat {
         Target target, 
         Query_2Facade source
     ) throws ServiceException {
-        printRecord(
+        RestFormat.printRecord(
             target, 
             0, 
             null, // XRI
@@ -484,7 +462,7 @@ public class RestFormat {
             }
             for (Object record : source) {
                 Object_2Facade object = Object_2Facade.newInstance((MappedRecord) record);
-                printRecord(
+                RestFormat.printRecord(
                     target, 
                     1, 
                     object.getPath(), 
@@ -514,7 +492,7 @@ public class RestFormat {
         Target target, 
         MessageRecord source
     ) throws ServiceException {
-        printRecord(
+        RestFormat.printRecord(
             target, 
             0, 
             source.getPath(), 
@@ -909,7 +887,7 @@ public class RestFormat {
     /**
      * Source
      */
-    public static class Source {
+    public static class Source implements Closeable {
 
         /**
          * Constructor 
@@ -919,34 +897,38 @@ public class RestFormat {
         Source(
             InputSource body
         ){
-            this.base = "./";
+            this.contextURL = ".";
             this.body = body;
             this.wbxml = true;
             this.exhaust = false;
+            this.closeable = null;
         }
         
         /**
          * Constructor
          * 
-         * @param uri
+         * @param contextURL
          * @param body
          * @param mimeType
+         * @param closeable 
          */
         public Source(
-            String uri, 
+            String contextURL, 
             InputSource body, 
-            String mimeType
+            String mimeType, 
+            Closeable closeable
         ) {
-            this.base = uri;
+            this.contextURL = contextURL;
             this.body = body;
-            this.wbxml = "application/vnd.openmdx.wbxml".equals(mimeType);
+            this.wbxml = isBinary(mimeType);
             this.exhaust = true;
+            this.closeable = closeable;
         }
         
         /**
          * The HREF prefix
          */
-        protected final String base;
+        protected final String contextURL;
 
         /**
          * The input source
@@ -964,29 +946,31 @@ public class RestFormat {
         private final boolean exhaust;
         
         /**
+         * 
+         */
+        protected final Closeable closeable;
+        
+        /**
          * Retrieve the resource identifier for a given href URL
          * 
-         * @param url
-         *            the href URL
+         * @param hrefURL the href URL
          * 
          * @return the XRI for the given href URL
          */
         protected Path getXRI(
-            String url
+            String hrefURL
         ) throws ServiceException {
-            if (url.startsWith(this.base)) {
-                String xri = url.substring(this.base.length());
-                return new Path((xri.startsWith("!") ? "xri://@openmdx"
-                    : "xri://@openmdx*")
-                    + xri
+            if (hrefURL.startsWith(this.contextURL)) {
+                return toResourceIdentifier(
+                    hrefURL.substring(this.contextURL.length())
                 );
             } else
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
                     "The URL does not start with the expected base URL",
-                    new BasicException.Parameter("base", this.base),
-                    new BasicException.Parameter("url", url)
+                    new BasicException.Parameter("contextURL", this.contextURL),
+                    new BasicException.Parameter("url", hrefURL)
                );
         }
 
@@ -1017,6 +1001,19 @@ public class RestFormat {
         protected boolean isToBeExhausted() {
             return this.exhaust;
         }
+        
+        /**
+         * Close the source 
+         * 
+         * @throws ServiceException
+         */
+        public void close(
+        ) throws IOException{
+            if(this.closeable != null) {
+                this.closeable.close();
+            }
+        }
+        
     }
     
 
@@ -1047,7 +1044,8 @@ public class RestFormat {
          * @return an XMLStreamException
          */
         protected static XMLStreamException toXMLStreamException(
-            Exception exception) {
+            Exception exception
+        ) {
             BasicException cause = BasicException.toExceptionStack(exception);
             return new XMLStreamException(cause.getMessage(), cause);
         }
@@ -1255,7 +1253,7 @@ public class RestFormat {
         }
 
         @SuppressWarnings("unchecked")
-        @Override
+    @Override
         public void endElement(String uri, String localName, String name)
         throws SAXException {
             try {
@@ -1341,7 +1339,7 @@ public class RestFormat {
         }
 
         @SuppressWarnings("unchecked")
-        @Override
+    @Override
         public void startElement(
             String uri,
             String localName,
@@ -1782,19 +1780,19 @@ public class RestFormat {
         /* (non-Javadoc)
          * @see org.openmdx.base.xml.stream.LargeObjectWriter#writeBinaryData(byte[], int, int)
          */
-        @Override
+    //  @Override
         public void writeBinaryData(
             byte[] data, 
             int offset, 
             int length
         ) throws XMLStreamException {
-            this.binaryData = offset == 0 && length == data.length ? data : Arrays.copyOfRange(data, offset, offset + length);           
+            this.binaryData = offset == 0 && length == data.length ? data : ArraysExtension.copyOfRange(data, offset, offset + length);           
         }
 
         /* (non-Javadoc)
          * @see org.openmdx.base.xml.stream.LargeObjectWriter#writeBinaryData(org.w3c.cci2.BinaryLargeObject)
          */
-        @Override
+    //  @Override
         public void writeBinaryData(
             BinaryLargeObject data
         ) throws XMLStreamException {
@@ -1804,7 +1802,7 @@ public class RestFormat {
         /* (non-Javadoc)
          * @see org.openmdx.base.xml.stream.LargeObjectWriter#writeCharacterData(org.w3c.cci2.CharacterLargeObject)
          */
-        @Override
+    //  @Override
         public void writeCharacterData(
             CharacterLargeObject data
         ) throws XMLStreamException {

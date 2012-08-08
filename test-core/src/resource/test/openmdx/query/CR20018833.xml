@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.6.0_17" class="java.beans.XMLDecoder">
+	<object class="org.openmdx.base.query.Filter">
+		<void property="condition">
+			<array class="org.openmdx.base.query.Condition" length="21">
+				<void index="0">
+					<object class="org.openmdx.base.query.IsBetweenCondition">
+						<void property="feature">
+							<string>fBetween</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+						<void property="lower">
+							<string>Lower</string>
+						</void>
+						<void property="quantor">
+							<short>1</short>
+						</void>
+						<void property="upper">
+							<string>Upper</string>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="2">
+								<void index="0">
+									<string>Lower</string>
+								</void>
+								<void index="1">
+									<string>Upper</string>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="1">
+					<object class="org.openmdx.base.query.IsBetweenCondition">
+						<void property="feature">
+							<string>fOutside</string>
+						</void>
+						<void property="lower">
+							<string>Lower</string>
+						</void>
+						<void property="quantor">
+							<short>1</short>
+						</void>
+						<void property="upper">
+							<string>Upper</string>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="2">
+								<void index="0">
+									<string>Lower</string>
+								</void>
+								<void index="1">
+									<string>Upper</string>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="2">
+					<object class="org.openmdx.base.query.IsGreaterCondition">
+						<void property="feature">
+							<string>fGreater</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+						<void property="quantor">
+							<short>1</short>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="1">
+								<void index="0">
+									<int>-1000</int>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="3">
+					<object class="org.openmdx.base.query.IsGreaterCondition">
+						<void property="feature">
+							<string>fGreater</string>
+						</void>
+						<void property="quantor">
+							<short>1</short>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="1">
+								<void index="0">
+									<int>1000</int>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="4">
+					<object class="org.openmdx.base.query.IsGreaterOrEqualCondition">
+						<void property="feature">
+							<string>fGreaterOrEqual</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+						<void property="quantor">
+							<short>1</short>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="1">
+								<void index="0">
+									<double>-9.999999999999123E12</double>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="5">
+					<object class="org.openmdx.base.query.IsGreaterOrEqualCondition">
+						<void property="feature">
+							<string>fGreaterOrEqual</string>
+						</void>
+						<void property="quantor">
+							<short>1</short>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="1">
+								<void index="0">
+									<double>9.9999999999123E10</double>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="6">
+					<object class="org.openmdx.base.query.IsInCondition">
+						<void property="feature">
+							<string>fIsIn</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+						<void property="quantor">
+							<short>1</short>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="2">
+								<void index="0">
+									<boolean>false</boolean>
+								</void>
+								<void index="1">
+									<boolean>true</boolean>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="7">
+					<object class="org.openmdx.base.query.IsInCondition">
+						<void property="feature">
+							<string>fIsIn</string>
+						</void>
+						<void property="quantor">
+							<short>1</short>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="2">
+								<void index="0">
+									<boolean>false</boolean>
+								</void>
+								<void index="1">
+									<boolean>true</boolean>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="8">
+					<object class="org.openmdx.base.query.IsLikeCondition">
+						<void property="feature">
+							<string>fIsLike</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+						<void property="quantor">
+							<short>1</short>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="2">
+								<void index="0">
+									<string>uri:@openmdx:a.b.c/:*/This/%</string>
+								</void>
+								<void index="1">
+									<string>uri:@openmdx:a.b.c/:*/That/%</string>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="9">
+					<object class="org.openmdx.base.query.IsLikeCondition">
+						<void property="feature">
+							<string>fIsUnlike</string>
+						</void>
+						<void property="quantor">
+							<short>1</short>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="2">
+								<void index="0">
+									<string>uri:@openmdx:a.b.c/:*/This/%</string>
+								</void>
+								<void index="1">
+									<string>uri:@openmdx:a.b.c/:*/That/%</string>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="10">
+					<object class="org.openmdx.base.query.SoundsLikeCondition">
+						<void property="feature">
+							<string>fSoundsLike</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+						<void property="quantor">
+							<short>1</short>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="2">
+								<void index="0">
+									<string>Mueller</string>
+								</void>
+								<void index="1">
+									<string>Maeder</string>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="11">
+					<object class="org.openmdx.base.query.SoundsLikeCondition">
+						<void property="feature">
+							<string>fSoundsUnlike</string>
+						</void>
+						<void property="quantor">
+							<short>1</short>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="2">
+								<void index="0">
+									<string>Mueller</string>
+								</void>
+								<void index="1">
+									<string>Maeder</string>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="12">
+					<object class="org.openmdx.base.query.AnyTypeCondition">
+						<void property="feature">
+							<string>createdAt</string>
+						</void>
+						<void property="quantor">
+							<short>2</short>
+						</void>
+						<void property="name">
+							<string>IS_NOT_IN</string>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="0" />
+						</void>
+					</object>
+				</void>
+				<void index="13">
+					<object class="org.openmdx.base.query.PiggyBackCondition">
+						<void property="feature">
+							<string>context:a8dd7004-6d06-11df-870c-e13ee044bf6a:object_class</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="1">
+								<void index="0">
+									<string>org:openmdx:compatibility:datastore1:QueryFilter</string>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="14">
+					<object class="org.openmdx.base.query.PiggyBackCondition">
+						<void property="feature">
+							<string>context:a8dd7004-6d06-11df-870c-e13ee044bf6a:dateTimeParam</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+					</object>
+				</void>
+				<void index="15">
+					<object class="org.openmdx.base.query.PiggyBackCondition">
+						<void property="feature">
+							<string>context:a8dd7004-6d06-11df-870c-e13ee044bf6a:dateParam</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+					</object>
+				</void>
+				<void index="16">
+					<object class="org.openmdx.base.query.PiggyBackCondition">
+						<void property="feature">
+							<string>context:a8dd7004-6d06-11df-870c-e13ee044bf6a:decimalParam</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+					</object>
+				</void>
+				<void index="17">
+					<object class="org.openmdx.base.query.PiggyBackCondition">
+						<void property="feature">
+							<string>context:a8dd7004-6d06-11df-870c-e13ee044bf6a:booleanParam</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="1">
+								<void index="0">
+									<boolean>true</boolean>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="18">
+					<object class="org.openmdx.base.query.PiggyBackCondition">
+						<void property="feature">
+							<string>context:a8dd7004-6d06-11df-870c-e13ee044bf6a:stringParam</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+					</object>
+				</void>
+				<void index="19">
+					<object class="org.openmdx.base.query.PiggyBackCondition">
+						<void property="feature">
+							<string>context:a8dd7004-6d06-11df-870c-e13ee044bf6a:clause</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="1">
+								<void index="0">
+									<string>SELECT something FROM somewhere WHERE b0 = ? AND i0 = ? AND i1 = ? AND i2 = ?</string>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+				<void index="20">
+					<object class="org.openmdx.base.query.PiggyBackCondition">
+						<void property="feature">
+							<string>context:a8dd7004-6d06-11df-870c-e13ee044bf6a:integerParam</string>
+						</void>
+						<void property="fulfil">
+							<boolean>true</boolean>
+						</void>
+						<void property="value">
+							<array class="java.lang.Object" length="3">
+								<void index="0">
+									<int>1</int>
+								</void>
+								<void index="1">
+									<int>2</int>
+								</void>
+								<void index="2">
+									<int>3</int>
+								</void>
+							</array>
+						</void>
+					</object>
+				</void>
+			</array>
+		</void>
+		<void property="orderSpecifier">
+			<array class="org.openmdx.base.query.OrderSpecifier" length="2">
+				<void index="0">
+					<object class="org.openmdx.base.query.OrderSpecifier">
+						<void property="feature">
+							<string>order_ASC</string>
+						</void>
+						<void property="order">
+							<short>1</short>
+						</void>
+					</object>
+				</void>
+				<void index="1">
+					<object class="org.openmdx.base.query.OrderSpecifier">
+						<void property="feature">
+							<string>order_DESC</string>
+						</void>
+						<void property="order">
+							<short>-1</short>
+						</void>
+					</object>
+				</void>
+			</array>
+		</void>
+	</object>
+</java> 

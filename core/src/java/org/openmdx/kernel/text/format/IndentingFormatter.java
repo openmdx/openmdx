@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMEX, http://www.openmdx.org/
- * Name:        $Id: IndentingFormatter.java,v 1.7 2009/04/28 13:58:52 hburger Exp $
+ * Name:        $Id: IndentingFormatter.java,v 1.9 2010/06/21 17:34:45 hburger Exp $
  * Description: Intending Formatter
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/28 13:58:52 $
+ * Date:        $Date: 2010/06/21 17:34:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -83,6 +83,7 @@ public class IndentingFormatter
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         return toString(this.source);
     }
@@ -208,10 +209,12 @@ public class IndentingFormatter
             appendObject(target,value);
         }
         while(
-                j<target.length()
-        )if(
-                target.charAt(j++)=='\n'
-        )target.insert(j++,'\t');
+            j<target.length()
+        ) {
+            if(target.charAt(j++)=='\n') {
+                target.insert(j++,'\t');
+            }
+        }
     }
 
     /**

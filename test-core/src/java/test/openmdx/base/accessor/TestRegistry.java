@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestRegistry.java,v 1.1 2010/04/23 13:21:51 hburger Exp $
+ * Name:        $Id: TestRegistry.java,v 1.2 2010/06/24 16:54:15 hburger Exp $
  * Description: Registry Test 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/23 13:21:51 $
+ * Date:        $Date: 2010/06/24 16:54:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -166,11 +166,6 @@ public class TestRegistry {
          */
         private final Path persistentObjectId = new Path(this.transientObjectId);
 
-        /**
-         * Pay-Load
-         */
-        private final byte[] data = new byte[10000];
-        
         /*
          * (non-Javadoc)
          * 

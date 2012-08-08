@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractConnection_2.java,v 1.8 2010/03/19 12:32:54 hburger Exp $
+ * Name:        $Id: AbstractConnection_2.java,v 1.9 2010/06/02 13:45:10 hburger Exp $
  * Description: Abstract Connectoon
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:32:54 $
+ * Date:        $Date: 2010/06/02 13:45:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -291,6 +291,7 @@ public abstract class AbstractConnection_2 extends AbstractConnection {
         /* (non-Javadoc)
          * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record, javax.resource.cci.Record)
          */
+        @Override
         public boolean execute(
             InteractionSpec ispec,
             Record input,
@@ -306,6 +307,7 @@ public abstract class AbstractConnection_2 extends AbstractConnection {
         /* (non-Javadoc)
          * @see javax.resource.cci.Interaction#execute(javax.resource.cci.InteractionSpec, javax.resource.cci.Record)
          */
+        @Override
         public Record execute(
             InteractionSpec ispec, 
             Record input

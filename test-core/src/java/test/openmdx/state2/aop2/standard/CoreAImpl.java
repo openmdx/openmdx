@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CoreAImpl.java,v 1.4 2009/04/07 17:24:17 hburger Exp $
+ * Name:        $Id: CoreAImpl.java,v 1.5 2010/06/03 15:58:28 hburger Exp $
  * Description: CoraAImpl 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/07 17:24:17 $
+ * Date:        $Date: 2010/06/03 15:58:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -79,6 +79,7 @@ public class CoreAImpl
     /* (non-Javadoc)
      * @see javax.jdo.listener.LoadCallback#jdoPostLoad()
      */
+    @Override
     public void jdoPostLoad() {
         System.out.println("Loaded");
     }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: URLContextHomeHandle.java,v 1.1 2009/01/12 12:49:24 wfro Exp $
+ * Name:        $Id: URLContextHomeHandle.java,v 1.2 2010/06/04 22:45:00 hburger Exp $
  * Description: URL Context based HomeHandle
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/12 12:49:24 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -134,7 +134,8 @@ class URLContextHomeHandle implements HomeHandle {
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
-    public boolean equals(Object object) {
+    @Override
+	public boolean equals(Object object) {
     	if(!(object instanceof URLContextHomeHandle)) return false;
     	URLContextHomeHandle that = (URLContextHomeHandle) object;
     	return 
@@ -145,14 +146,16 @@ class URLContextHomeHandle implements HomeHandle {
     /* (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */
-    public int hashCode() {
+    @Override
+	public int hashCode() {
         return this.jndiName.hashCode();
     }
 
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
-    public String toString() {
+    @Override
+	public String toString() {
         return getClass().getName() + ": " + this.jndiName;
     }
 

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SpecialResourceIdentifiers.java,v 1.1 2009/02/11 19:05:25 hburger Exp $
+ * Name:        $Id: SpecialResourceIdentifiers.java,v 1.2 2010/06/25 17:09:28 hburger Exp $
  * Description: Special Resource Identifiers 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/02/11 19:05:25 $
+ * Date:        $Date: 2010/06/25 17:09:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,6 +50,8 @@
  */
 package org.openmdx.base.naming;
 
+import java.util.regex.Pattern;
+
 
 /**
  * Special Resource Identifiers
@@ -74,4 +76,22 @@ public class SpecialResourceIdentifiers {
      */
     public static final Path EXTENT_OBJECTS = new Path("xri://@openmdx*($..)/provider/($..)/segment/($..)/extent/($..)");    
 
+    /**
+     * An escaped dot
+     */
+    private final static Pattern ESCAPED_DOT = Pattern.compile("\\.".toString(), Pattern.LITERAL);
+    
+    /**
+     * Unescape a JDO-escaped xri
+     * 
+     * @param xri
+     * 
+     * @return the unescaped XRI
+     */
+    public static String unescapeResourceIdentifier(
+        String xri
+    ){
+        return xri.indexOf('\\') < 0 ? xri : ESCAPED_DOT.matcher(xri).replaceAll(".");
+    }
+    
 }

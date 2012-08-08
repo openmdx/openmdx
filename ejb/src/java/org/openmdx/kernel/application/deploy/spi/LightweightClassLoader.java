@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightClassLoader.java,v 1.5 2010/04/09 09:33:38 hburger Exp $
+ * Name:        $Id: LightweightClassLoader.java,v 1.6 2010/06/04 22:45:00 hburger Exp $
  * Description: Lightweight Class Loader
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/09 09:33:38 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -268,6 +268,7 @@ public class LightweightClassLoader extends URLClassLoader
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
+	@Override
 	public String toString() {
 		return 
 			type + " Class Loader (" + shortDescription +

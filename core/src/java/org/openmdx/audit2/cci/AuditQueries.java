@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AuditQueries.java,v 1.8 2010/02/11 14:30:11 hburger Exp $
+ * Name:        $Id: AuditQueries.java,v 1.11 2010/06/22 07:13:52 hburger Exp $
  * Description: Audit Queries 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/11 14:30:11 $
+ * Date:        $Date: 2010/06/22 07:13:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,6 +52,7 @@ package org.openmdx.audit2.cci;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -71,19 +72,22 @@ import org.openmdx.audit2.spi.Qualifiers;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.jmi1.ExtentCapable;
 import org.openmdx.base.jmi1.Modifiable;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.ExtentCollection;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.Directions;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.IsGreaterOrEqualCondition;
 import org.openmdx.base.query.IsInCondition;
+import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.Container;
 
 /**
  * Audit Queries
@@ -120,7 +124,7 @@ public class AuditQueries {
         PersistenceManager persistenceManager
     ){
         return (Segment) persistenceManager.getObjectById(
-            getConfiguration(persistenceManager).getAuditSegmentId()
+            AuditQueries.getConfiguration(persistenceManager).getAuditSegmentId()
         );
     }
     
@@ -159,15 +163,14 @@ public class AuditQueries {
      * 
      * @return the units of work any of the given objects is involved in
      */
-    @SuppressWarnings("unchecked")
     public static Collection<UnitOfWork> getUnitOfWorkInvolvingObject(
         Date from,
         Date to,
         Modifiable... involvedObjects
     ){
-        PersistenceManager persistenceManager = getPersistenceManager(involvedObjects);
-        Configuration configuration = getConfiguration(persistenceManager);
-        Segment auditSegment = getAuditSegment(persistenceManager);
+        PersistenceManager persistenceManager = AuditQueries.getPersistenceManager(involvedObjects);
+        Configuration configuration = AuditQueries.getConfiguration(persistenceManager);
+        Segment auditSegment = AuditQueries.getAuditSegment(persistenceManager);
         if(configuration.isAudit1Persistence()) {
             Object[] involved = new Path[involvedObjects.length];
             for(
@@ -179,16 +182,14 @@ public class AuditQueries {
             }
             List<Condition> conditions = new ArrayList<Condition>();
             conditions.add(
-                new IsInCondition(
-                    Quantifier.THERE_EXISTS.code(),
-                    SystemAttributes.OBJECT_INSTANCE_OF,
+                new IsInstanceOfCondition(
                     true,
                     "org:openmdx:compatibility:audit1:UnitOfWork"
                 )
             );
             conditions.add(
                 new IsLikeCondition(
-                    Quantifier.THERE_EXISTS.code(),
+                    Quantifier.THERE_EXISTS,
                     "involved",
                     true,
                     involved
@@ -197,7 +198,7 @@ public class AuditQueries {
             if(from != null){
                 conditions.add(
                     new IsGreaterOrEqualCondition(
-                        Quantifier.THERE_EXISTS.code(),
+                        Quantifier.THERE_EXISTS,
                         SystemAttributes.CREATED_AT,
                         true,
                         from
@@ -207,25 +208,23 @@ public class AuditQueries {
             if(to != null){
                 conditions.add(
                     new IsGreaterOrEqualCondition(
-                        Quantifier.THERE_EXISTS.code(),
+                        Quantifier.THERE_EXISTS,
                         SystemAttributes.CREATED_AT,
                         false,
                         to
                     )
                 );
             }
-            RefContainer unitsOfWork = (RefContainer) auditSegment.getUnitOfWork(); 
-            return (Collection<UnitOfWork>) unitsOfWork.refGetAll(
+            return auditSegment.<UnitOfWork>getUnitOfWork().getAll(
                 new Filter(
-                    conditions.toArray(
-                        new Condition[conditions.size()]
-                    ),
-                    new OrderSpecifier[]{
+                    conditions,
+                    Collections.singletonList(
                         new OrderSpecifier(
                             SystemAttributes.CREATED_AT,
-                            Directions.ASCENDING
+                            SortOrder.ASCENDING
                         )
-                    }
+                    ),
+                    null // extension
                 )
             );
         } else {
@@ -240,18 +239,15 @@ public class AuditQueries {
             } catch (ServiceException exception) {
                 throw new RuntimeServiceException(exception);
             }
-            RefContainer extent = (RefContainer) auditSegment.getExtent();
-            List<?> involvements = extent.refGetAll(
-                new Filter(
-                    new Condition[]{
-                        new IsInCondition(
-                            Quantifier.THERE_EXISTS.code(),
-                            SystemAttributes.OBJECT_INSTANCE_OF,
-                            true,
+            Container<Involvement> extent = auditSegment.getExtent();
+            {
+                List<Involvement> involvements = extent.getAll(
+                    new Filter(
+                        new IsInstanceOfCondition(
                             "org:openmdx:audit2:Involvement"
                         ),
                         new IsLikeCondition(
-                            Quantifier.THERE_EXISTS.code(),
+                            Quantifier.THERE_EXISTS,
                             SystemAttributes.OBJECT_IDENTITY,
                             true,
                             ExtentCollection.toIdentityPattern(
@@ -259,69 +255,66 @@ public class AuditQueries {
                             )
                         ),
                         new IsLikeCondition(
-                            Quantifier.THERE_EXISTS.code(),
+                            Quantifier.THERE_EXISTS,
                             "beforeImage",
                             true,
                             involved
                         )
-                    }
-                )
-            );
-            Involvements: for(Object i : involvements) {
-                Involvement involvement = (Involvement) i;
-                for(Modifiable involvedObject : involvedObjects){
-                    String xri = involvement.getObjectId();
-                    if(involvedObject.refMofId().equals(xri)){
-                        UnitOfWork unitOfWork = involvement.getUnitOfWork();
-                        if(
-                            (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                            (to == null || to.after(unitOfWork.getCreatedAt()))
-                        ){
-                            unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
+                    )
+                );
+                Involvements: for(Involvement involvement : involvements) {
+                    for(Modifiable involvedObject : involvedObjects){
+                        String xri = involvement.getObjectId();
+                        if(involvedObject.refMofId().equals(xri)){
+                            UnitOfWork unitOfWork = involvement.getUnitOfWork();
+                            if(
+                                (from == null || !from.after(unitOfWork.getCreatedAt())) &&
+                                (to == null || to.after(unitOfWork.getCreatedAt()))
+                            ){
+                                unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
+                            }
+                            continue Involvements;
                         }
-                        continue Involvements;
                     }
                 }
             }
-            involvements = extent.refGetAll(
-                new Filter(
-                    new Condition[]{
-                        new IsInCondition(
-                            Quantifier.THERE_EXISTS.code(),
-                            SystemAttributes.OBJECT_INSTANCE_OF,
-                            true,
-                            "org:openmdx:audit2:Involvement"
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS.code(),
-                            SystemAttributes.OBJECT_IDENTITY,
-                            true,
-                            ExtentCollection.toIdentityPattern(
-                                auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
+            {
+                List<Involvement> involvements = extent.getAll(
+                    new Filter(
+                        new Condition[]{
+                            new IsInstanceOfCondition(
+                                "org:openmdx:audit2:Involvement"
+                            ),
+                            new IsLikeCondition(
+                                Quantifier.THERE_EXISTS,
+                                SystemAttributes.OBJECT_IDENTITY,
+                                true,
+                                ExtentCollection.toIdentityPattern(
+                                    auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
+                                )
+                            ),
+                            new IsLikeCondition(
+                                Quantifier.THERE_EXISTS,
+                                "afterImage",
+                                true,
+                                involved
                             )
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS.code(),
-                            "afterImage",
-                            true,
-                            involved
-                        )
-                    }
-                )
-            );
-            Involvements: for(Object i : involvements) {
-                Involvement involvement = (Involvement) i;
-                for(Modifiable involvedObject : involvedObjects){
-                    String xri = involvement.getObjectId();
-                    if(involvedObject.refMofId().equals(xri)){
-                        UnitOfWork unitOfWork = involvement.getUnitOfWork();
-                        if(
-                            (from == null || !from.after(unitOfWork.getCreatedAt())) &&
-                            (to == null || to.after(unitOfWork.getCreatedAt()))
-                        ){
-                            unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
                         }
-                        continue Involvements;
+                    )
+                );
+                Involvements: for(Involvement involvement : involvements) {
+                    for(Modifiable involvedObject : involvedObjects){
+                        String xri = involvement.getObjectId();
+                        if(involvedObject.refMofId().equals(xri)){
+                            UnitOfWork unitOfWork = involvement.getUnitOfWork();
+                            if(
+                                (from == null || !from.after(unitOfWork.getCreatedAt())) &&
+                                (to == null || to.after(unitOfWork.getCreatedAt()))
+                            ){
+                                unitsOfWork.put(unitOfWork.getCreatedAt(), unitOfWork);
+                            }
+                            continue Involvements;
+                        }
                     }
                 }
             }
@@ -342,7 +335,6 @@ public class AuditQueries {
      * 
      * @return the selected units of work
      */
-    @SuppressWarnings("unchecked")
     public static Collection<UnitOfWork> getUnitOfWorkInvolvingObject(
         Date from,
         Date to,
@@ -357,16 +349,13 @@ public class AuditQueries {
             if(configuration.isAudit1Persistence()) { 
                 List<Condition> conditions = new ArrayList<Condition>();
                 conditions.add(
-                    new IsInCondition(
-                        Quantifier.THERE_EXISTS.code(),
-                        SystemAttributes.OBJECT_INSTANCE_OF,
-                        true,
+                    new IsInstanceOfCondition(
                         "org:openmdx:compatibility:audit1:UnitOfWork"
                     )
                 );
                 conditions.add(
                     new IsLikeCondition(
-                        Quantifier.THERE_EXISTS.code(),
+                        Quantifier.THERE_EXISTS,
                         "involved",
                         true,
                         pattern.getBase().endsWith("%") ? pattern : pattern.getChild("%")
@@ -375,7 +364,7 @@ public class AuditQueries {
                 if(from != null){
                     conditions.add(
                         new IsGreaterOrEqualCondition(
-                            Quantifier.THERE_EXISTS.code(),
+                            Quantifier.THERE_EXISTS,
                             SystemAttributes.CREATED_AT,
                             true,
                             from
@@ -385,60 +374,53 @@ public class AuditQueries {
                 if(to != null){
                     conditions.add(
                         new IsGreaterOrEqualCondition(
-                            Quantifier.THERE_EXISTS.code(),
+                            Quantifier.THERE_EXISTS,
                             SystemAttributes.CREATED_AT,
                             false,
                             to
                         )
                     );
                 }
-                RefContainer unitsOfWork = (RefContainer) auditSegment.getUnitOfWork(); 
-                return (Collection<UnitOfWork>) unitsOfWork.refGetAll(
+                return auditSegment.<UnitOfWork>getUnitOfWork().getAll(
                     new Filter(
-                        conditions.toArray(
-                            new Condition[conditions.size()]
-                        ),
-                        new OrderSpecifier[]{
+                        conditions,
+                        Collections.singletonList(
                             new OrderSpecifier(
                                 SystemAttributes.CREATED_AT,
-                                Directions.ASCENDING
+                                SortOrder.ASCENDING
                             )
-                        }
+                        ),
+                        null // extension
                     )
                 );
             } else {
                 SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
-                RefContainer extent = (RefContainer) auditSegment.getExtent();
+                Container<ExtentCapable> extent = auditSegment.getExtent();
                 Path involved;
                 try {
                     involved = Qualifiers.getAudit2ImageId(configuration, pattern, null);
                 } catch (ServiceException exception) {
                     throw new RuntimeServiceException(exception);
                 }
-                List<?> involvements = extent.refGetAll(
+                List<?> involvements = extent.getAll(
                     new Filter(
-                        new Condition[]{
-                            new IsInCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                SystemAttributes.OBJECT_INSTANCE_OF,
-                                true,
-                                "org:openmdx:audit2:Involvement"
-                            ),
-                            new IsLikeCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                SystemAttributes.OBJECT_IDENTITY,
-                                true,
-                                ExtentCollection.toIdentityPattern(
-                                    auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
-                                )
-                            ),
-                            new IsLikeCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                "beforeImage",
-                                true,
-                                involved
+                        new IsInstanceOfCondition(
+                            "org:openmdx:audit2:Involvement"
+                        ),
+                        new IsLikeCondition(
+                            Quantifier.THERE_EXISTS,
+                            SystemAttributes.OBJECT_IDENTITY,
+                            true,
+                            ExtentCollection.toIdentityPattern(
+                                auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
                             )
-                        }
+                        ),
+                        new IsLikeCondition(
+                            Quantifier.THERE_EXISTS,
+                            "beforeImage",
+                            true,
+                            involved
+                        )
                     )
                 );
                 Involvements: for(Object i : involvements) {
@@ -454,17 +436,14 @@ public class AuditQueries {
                         continue Involvements;
                     }
                 }
-                involvements = extent.refGetAll(
+                involvements = extent.getAll(
                     new Filter(
                         new Condition[]{
-                            new IsInCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                SystemAttributes.OBJECT_INSTANCE_OF,
-                                true,
+                            new IsInstanceOfCondition(
                                 "org:openmdx:audit2:Involvement"
                             ),
                             new IsLikeCondition(
-                                Quantifier.THERE_EXISTS.code(),
+                                Quantifier.THERE_EXISTS,
                                 SystemAttributes.OBJECT_IDENTITY,
                                 true,
                                 ExtentCollection.toIdentityPattern(
@@ -472,7 +451,7 @@ public class AuditQueries {
                                 )
                             ),
                             new IsLikeCondition(
-                                Quantifier.THERE_EXISTS.code(),
+                                Quantifier.THERE_EXISTS,
                                 "afterImage",
                                 true,
                                 involved
@@ -564,19 +543,16 @@ public class AuditQueries {
             } catch (ServiceException exception) {
                 throw new RuntimeServiceException(exception);
             }
-            RefContainer extent = (RefContainer) auditSegment.getExtent();
+            RefContainer<?> extent = (RefContainer<?>) auditSegment.getExtent();
             List<Condition> conditions = new ArrayList<Condition>();
             conditions.add(
-                new IsInCondition(
-                    Quantifier.THERE_EXISTS.code(),
-                    SystemAttributes.OBJECT_INSTANCE_OF,
-                    true,
+                new IsInstanceOfCondition(
                     "org:openmdx:audit2:Involvement"
                 )
             );
             conditions.add(
                 new IsLikeCondition(
-                    Quantifier.THERE_EXISTS.code(),
+                    Quantifier.THERE_EXISTS,
                     SystemAttributes.OBJECT_IDENTITY,
                     true,
                     ExtentCollection.toIdentityPattern(
@@ -586,7 +562,7 @@ public class AuditQueries {
             );
             conditions.add(
                 new IsLikeCondition(
-                    Quantifier.THERE_EXISTS.code(),
+                    Quantifier.THERE_EXISTS,
                     "afterImage",
                     true,
                     involved
@@ -594,7 +570,7 @@ public class AuditQueries {
             );
             conditions.add(
                 new IsLikeCondition(
-                    Quantifier.THERE_EXISTS.code(),
+                    Quantifier.THERE_EXISTS,
                     "beforeImage",
                     true,
                     involved
@@ -603,18 +579,16 @@ public class AuditQueries {
             if(configuration.isModifiedFeaturePersistent()) {
                 conditions.add(
                     new IsInCondition(
-                        Quantifier.THERE_EXISTS.code(),
+                        Quantifier.THERE_EXISTS,
                         "modifiedFeature",
                         true,
                         attributes
                     )
                 );
             }
-            List<?> involvements = extent.refGetAll(
-                new Filter(
-                    conditions.toArray(new Condition[conditions.size()])
-                )
-            );
+            Filter filter = new Filter();
+            filter.getCondition().addAll(conditions);
+            List<?> involvements = extent.refGetAll(filter);
             Involvements: for(Object i : involvements) {
                 Involvement involvement = (Involvement) i;
                 String xri = involvement.getObjectId();
@@ -701,7 +675,7 @@ public class AuditQueries {
             } else {
                 SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
                 Segment auditSegment = getAuditSegment(persistenceManager);
-                RefContainer extent = (RefContainer) auditSegment.getExtent();
+                RefContainer<?> extent = (RefContainer<?>) auditSegment.getExtent();
                 Path involved;
                 try {
                     involved = Qualifiers.getAudit2ImageId(configuration, pattern, null);
@@ -710,34 +684,29 @@ public class AuditQueries {
                 }
                 List<?> involvements = extent.refGetAll(
                     new Filter(
-                        new Condition[]{
-                            new IsInCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                SystemAttributes.OBJECT_INSTANCE_OF,
-                                true,
-                                "org:openmdx:audit2:Involvement"
-                            ),
-                            new IsLikeCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                SystemAttributes.OBJECT_IDENTITY,
-                                true,
-                                ExtentCollection.toIdentityPattern(
-                                    auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
-                                )
-                            ),
-                            new IsLikeCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                "afterImage",
-                                false,
-                                involved
-                            ),
-                            new IsLikeCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                "beforeImage",
-                                true,
-                                involved
+                        new IsInstanceOfCondition(
+                            "org:openmdx:audit2:Involvement"
+                        ),
+                        new IsLikeCondition(
+                            Quantifier.THERE_EXISTS,
+                            SystemAttributes.OBJECT_IDENTITY,
+                            true,
+                            ExtentCollection.toIdentityPattern(
+                                auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
                             )
-                        }
+                        ),
+                        new IsLikeCondition(
+                            Quantifier.THERE_EXISTS,
+                            "afterImage",
+                            false,
+                            involved
+                        ),
+                        new IsLikeCondition(
+                            Quantifier.THERE_EXISTS,
+                            "beforeImage",
+                            true,
+                            involved
+                        )
                     )
                 );
                 Involvements: for(Object i : involvements) {
@@ -809,36 +778,31 @@ public class AuditQueries {
                 throw new RuntimeServiceException(exception);
             }
             Segment auditSegment = getAuditSegment(persistenceManager);
-            RefContainer extent = (RefContainer) auditSegment.getExtent();
+            RefContainer<?> extent = (RefContainer<?>) auditSegment.getExtent();
             List<?> involvements = extent.refGetAll(
                 new Filter(
-                    new Condition[]{
-                        new IsInCondition(
-                            Quantifier.THERE_EXISTS.code(),
-                            SystemAttributes.OBJECT_INSTANCE_OF,
-                            true,
-                            "org:openmdx:audit2:Involvement"
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS.code(),
-                            SystemAttributes.OBJECT_IDENTITY,
-                            true,
-                            ExtentCollection.toIdentityPattern(
-                                auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
-                            )
-                        ),
-                        new IsInCondition(
-                            Quantifier.FOR_ALL.code(),
-                            "beforeImage",
-                            true
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS.code(),
-                            "afterImage",
-                            true,
-                            involved
+                    new IsInstanceOfCondition(
+                        "org:openmdx:audit2:Involvement"
+                    ),
+                    new IsLikeCondition(
+                        Quantifier.THERE_EXISTS,
+                        SystemAttributes.OBJECT_IDENTITY,
+                        true,
+                        ExtentCollection.toIdentityPattern(
+                            auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
                         )
-                    }
+                    ),
+                    new IsInCondition(
+                        Quantifier.FOR_ALL,
+                        "beforeImage",
+                        true
+                    ),
+                    new IsLikeCondition(
+                        Quantifier.THERE_EXISTS,
+                        "afterImage",
+                        true,
+                        involved
+                    )
                 )
             );
             Involvements: for(Object i : involvements) {
@@ -897,7 +861,7 @@ public class AuditQueries {
                 Path pattern = extentCollection.getPattern();
                 SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
                 Segment auditSegment = getAuditSegment(persistenceManager);
-                RefContainer extent = (RefContainer) auditSegment.getExtent();
+                RefContainer<?> extent = (RefContainer<?>) auditSegment.getExtent();
                 Path involved;
                 try {
                     involved = Qualifiers.getAudit2ImageId(configuration, pattern, null);
@@ -906,33 +870,28 @@ public class AuditQueries {
                 }
                 List<?> involvements = extent.refGetAll(
                     new Filter(
-                        new Condition[]{
-                            new IsInCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                SystemAttributes.OBJECT_INSTANCE_OF,
-                                true,
-                                "org:openmdx:audit2:Involvement"
-                            ),
-                            new IsLikeCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                SystemAttributes.OBJECT_IDENTITY,
-                                true,
-                                ExtentCollection.toIdentityPattern(
-                                    auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
-                                )
-                            ),
-                            new IsInCondition(
-                                Quantifier.FOR_ALL.code(),
-                                "beforeImage",
-                                true
-                            ),
-                            new IsLikeCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                "afterImage",
-                                true,
-                                involved
+                        new IsInstanceOfCondition(
+                            "org:openmdx:audit2:Involvement"
+                        ),
+                        new IsLikeCondition(
+                            Quantifier.THERE_EXISTS,
+                            SystemAttributes.OBJECT_IDENTITY,
+                            true,
+                            ExtentCollection.toIdentityPattern(
+                                auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
                             )
-                        }
+                        ),
+                        new IsInCondition(
+                            Quantifier.FOR_ALL,
+                            "beforeImage",
+                            true
+                        ),
+                        new IsLikeCondition(
+                            Quantifier.THERE_EXISTS,
+                            "afterImage",
+                            true,
+                            involved
+                        )
                     )
                 );
                 Involvements: for(Object i : involvements) {
@@ -1006,36 +965,31 @@ public class AuditQueries {
                 throw new RuntimeServiceException(exception);
             }
             Segment auditSegment = getAuditSegment(persistenceManager);
-            RefContainer extent = (RefContainer) auditSegment.getExtent();
+            RefContainer<?> extent = (RefContainer<?>) auditSegment.getExtent();
             List<?> involvements = extent.refGetAll(
                 new Filter(
-                    new Condition[]{
-                        new IsInCondition(
-                            Quantifier.THERE_EXISTS.code(),
-                            SystemAttributes.OBJECT_INSTANCE_OF,
-                            true,
-                            "org:openmdx:audit2:Involvement"
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS.code(),
-                            SystemAttributes.OBJECT_IDENTITY,
-                            true,
-                            ExtentCollection.toIdentityPattern(
-                                auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
-                            )
-                        ),
-                        new IsInCondition(
-                            Quantifier.FOR_ALL.code(),
-                            "afterImage",
-                            true
-                        ),
-                        new IsLikeCondition(
-                            Quantifier.THERE_EXISTS.code(),
-                            "beforeImage",
-                            true,
-                            involved
+                    new IsInstanceOfCondition(
+                        "org:openmdx:audit2:Involvement"
+                    ),
+                    new IsLikeCondition(
+                        Quantifier.THERE_EXISTS,
+                        SystemAttributes.OBJECT_IDENTITY,
+                        true,
+                        ExtentCollection.toIdentityPattern(
+                            auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
                         )
-                    }
+                    ),
+                    new IsInCondition(
+                        Quantifier.FOR_ALL,
+                        "afterImage",
+                        true
+                    ),
+                    new IsLikeCondition(
+                        Quantifier.THERE_EXISTS,
+                        "beforeImage",
+                        true,
+                        involved
+                    )
                 )
             );
             Involvements: for(Object i : involvements) {
@@ -1098,7 +1052,7 @@ public class AuditQueries {
             } else {
                 SortedMap<Date,UnitOfWork> unitsOfWork = new TreeMap<Date,UnitOfWork>();
                 Segment auditSegment = getAuditSegment(persistenceManager);
-                RefContainer extent = (RefContainer) auditSegment.getExtent();
+                RefContainer<?> extent = (RefContainer<?>) auditSegment.getExtent();
                 Path involved;
                 try {
                     involved = Qualifiers.getAudit2ImageId(configuration, pattern, null);
@@ -1107,33 +1061,28 @@ public class AuditQueries {
                 }
                 List<?> involvements = extent.refGetAll(
                     new Filter(
-                        new Condition[]{
-                            new IsInCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                SystemAttributes.OBJECT_INSTANCE_OF,
-                                true,
-                                "org:openmdx:audit2:Involvement"
-                            ),
-                            new IsLikeCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                SystemAttributes.OBJECT_IDENTITY,
-                                true,
-                                ExtentCollection.toIdentityPattern(
-                                    auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
-                                )
-                            ),
-                            new IsInCondition(
-                                Quantifier.FOR_ALL.code(),
-                                "afterImage",
-                                true
-                            ),
-                            new IsLikeCondition(
-                                Quantifier.THERE_EXISTS.code(),
-                                "beforeImage",
-                                true,
-                                involved
+                        new IsInstanceOfCondition(
+                            "org:openmdx:audit2:Involvement"
+                        ),
+                        new IsLikeCondition(
+                            Quantifier.THERE_EXISTS,
+                            SystemAttributes.OBJECT_IDENTITY,
+                            true,
+                            ExtentCollection.toIdentityPattern(
+                                auditSegment.refGetPath().getDescendant("unitOfWork", ":*", "involvement", ":*")
                             )
-                        }
+                        ),
+                        new IsInCondition(
+                            Quantifier.FOR_ALL,
+                            "afterImage",
+                            true
+                        ),
+                        new IsLikeCondition(
+                            Quantifier.THERE_EXISTS,
+                            "beforeImage",
+                            true,
+                            involved
+                        )
                     )
                 );
                 Involvements: for(Object i : involvements) {

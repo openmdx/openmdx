@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingCollection.java,v 1.14 2009/01/11 21:28:59 wfro Exp $
+ * Name:        $Id: MarshallingCollection.java,v 1.16 2010/07/01 16:24:13 hburger Exp $
  * Description: Marshalling Collection
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/11 21:28:59 $
+ * Date:        $Date: 2010/07/01 16:24:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -146,7 +146,15 @@ public class MarshallingCollection<E>
         this.delegate = delegate;
     }
     
-    
+    /* (non-Javadoc)
+     * @see java.util.AbstractCollection#toString()
+     */
+    @Override
+    public String toString() {
+        return this.getDelegate().toString();
+    }
+
+        
     //------------------------------------------------------------------------
     // Implements Collection
     //------------------------------------------------------------------------
@@ -154,6 +162,7 @@ public class MarshallingCollection<E>
     /* (non-Javadoc)
      * @see java.util.Collection#clear()
      */
+    @Override
     public void clear() {
         getDelegate().clear();
     }
@@ -161,6 +170,7 @@ public class MarshallingCollection<E>
     /* (non-Javadoc)
      * @see java.util.Collection#add(java.lang.Object)
      */
+    @Override
     public boolean add(
         E element
     ) {
@@ -177,6 +187,7 @@ public class MarshallingCollection<E>
     /* (non-Javadoc)
      * @see java.util.Collection#contains(java.lang.Object)
      */
+    @Override
     public boolean contains(
         Object element
     ) {
@@ -200,10 +211,12 @@ public class MarshallingCollection<E>
     /* (non-Javadoc)
      * @see java.util.Collection#isEmpty()
      */
+    @Override
     public boolean isEmpty() {
         return getDelegate().isEmpty();
     }
     
+    @Override
     public Iterator<E> iterator(
     ) {
         return new MarshallingIterator(
@@ -214,6 +227,7 @@ public class MarshallingCollection<E>
     /* (non-Javadoc)
      * @see java.util.Collection#remove(java.lang.Object)
      */
+    @Override
     public boolean remove(
         Object element
     ) {
@@ -234,6 +248,7 @@ public class MarshallingCollection<E>
         }        
     }
 
+    @Override
     public int size(
     ) {
         return getDelegate().size();

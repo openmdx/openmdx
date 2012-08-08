@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ConcurrentWeakRegistry.java,v 1.3 2010/04/15 10:21:28 hburger Exp $
+ * Name:        $Id: ConcurrentWeakRegistry.java,v 1.6 2010/08/06 12:01:03 hburger Exp $
  * Description: Concurrent Weak Registry
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/15 10:21:28 $
+ * Date:        $Date: 2010/08/06 12:01:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -135,7 +135,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.Cache#clear()
      */
-    @Override
+//  @Override
     public void clear() {
         //
         // No need to evict stale entries before clearance
@@ -146,7 +146,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.Registry#close()
      */
-    @Override
+//  @Override
     public void close() {
         clear();
         this.delegate = null;
@@ -158,7 +158,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
      * 
      * @see org.openmdx.base.collection.Cache#get(java.lang.Object)
      */
-    @Override
+//  @Override
     public V get(K key) {
         WeakReference<V> v = getDelegate().get(key); 
         return v == null ? null : v.get();
@@ -167,7 +167,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.Cache#remove(java.lang.Object)
      */
-    @Override
+//  @Override
     public V remove(K key) {
         WeakReference<V> v = getDelegate().remove(key); 
         return v == null ? null : v.get();
@@ -176,18 +176,18 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.Cache#putIfAbsent(java.lang.Object, java.lang.Object)
      */
-    @Override
-    public V putIfAbsent(K key, V value) {
+//  @Override
+    public V putUnlessPresent(K key, V value) {
         WeakReference<V> v = new WeakReference<V>(value, this.queue);
         ConcurrentMap<K,WeakReference<V>> delegate = getDelegate();
         WeakReference<V> c = delegate.putIfAbsent(key, v);
         if(c == null) {
-            return null;
+            return value;
         } else {
             V concurrent = c.get();
             if(concurrent == null) {
                 delegate.put(key, v);
-                return null;
+                return value;
             } else {
                 return concurrent;
             }
@@ -197,7 +197,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.Cache#put(java.lang.Object, java.lang.Object)
      */
-    @Override
+//  @Override
     public V put(K key, V value) {
         WeakReference<V> v = new WeakReference<V>(value, this.queue);
         WeakReference<V> c = getDelegate().put(key, v);
@@ -210,7 +210,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
      * *
      * @return a collection with the objects managed by the cache
      */
-    @Override
+//  @Override
     public Set<V> values(
     ){
         return this.values;
@@ -250,7 +250,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
-        @Override
+    //  @Override
         public boolean hasNext() {
             while(this.next == null && this.delegate.hasNext()) {
                 this.next = this.delegate.next().get();
@@ -261,7 +261,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
         /* (non-Javadoc)
          * @see java.util.Iterator#next()
          */
-        @Override
+    //  @Override
         public V next() {
             if(hasNext()) {
                 V next = this.next;
@@ -275,7 +275,7 @@ public class ConcurrentWeakRegistry<K,V> implements Registry<K, V> {
         /* (non-Javadoc)
          * @see java.util.Iterator#remove()
          */
-        @Override
+    //  @Override
         public void remove() {
             this.delegate.remove();
         }

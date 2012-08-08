@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: URLInputStream.java,v 1.1 2009/01/15 15:10:19 hburger Exp $
+ * Name:        $Id: URLInputStream.java,v 1.2 2010/06/02 13:46:07 hburger Exp $
  * Description: URL Input Stream
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/15 15:10:19 $
+ * Date:        $Date: 2010/06/02 13:46:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -98,6 +98,7 @@ public class URLInputStream extends InputStream {
 	 * @throws IOException
 	 * @see java.io.InputStream#available()
 	 */
+    @Override
 	public int available() throws IOException {
 		return getDelegate().available();
 	}
@@ -106,6 +107,7 @@ public class URLInputStream extends InputStream {
 	 * @throws IOException
 	 * @see java.io.InputStream#close()
 	 */
+    @Override
 	public void close() throws IOException {
 		getDelegate().close();
 	}
@@ -114,6 +116,7 @@ public class URLInputStream extends InputStream {
 	 * @param readlimit
 	 * @see java.io.InputStream#mark(int)
 	 */
+    @Override
 	public void mark(int readlimit) {
 		try {
 			getDelegate().mark(readlimit);
@@ -126,6 +129,7 @@ public class URLInputStream extends InputStream {
 	 * @return
 	 * @see java.io.InputStream#markSupported()
 	 */
+    @Override
 	public boolean markSupported() {
 		try {
 			return getDelegate().markSupported();
@@ -139,6 +143,7 @@ public class URLInputStream extends InputStream {
 	 * @throws IOException
 	 * @see java.io.InputStream#read()
 	 */
+    @Override
 	public int read() throws IOException {
 		return getDelegate().read();
 	}
@@ -151,6 +156,7 @@ public class URLInputStream extends InputStream {
 	 * @throws IOException
 	 * @see java.io.InputStream#read(byte[], int, int)
 	 */
+    @Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		return getDelegate().read(b, off, len);
 	}
@@ -161,6 +167,7 @@ public class URLInputStream extends InputStream {
 	 * @throws IOException
 	 * @see java.io.InputStream#read(byte[])
 	 */
+    @Override
 	public int read(byte[] b) throws IOException {
 		return getDelegate().read(b);
 	}
@@ -169,6 +176,7 @@ public class URLInputStream extends InputStream {
 	 * @throws IOException
 	 * @see java.io.InputStream#reset()
 	 */
+    @Override
 	public void reset() throws IOException {
 		getDelegate().reset();
 	}
@@ -179,6 +187,7 @@ public class URLInputStream extends InputStream {
 	 * @throws IOException
 	 * @see java.io.InputStream#skip(long)
 	 */
+    @Override
 	public long skip(long n) throws IOException {
 		return getDelegate().skip(n);
 	}
@@ -187,6 +196,7 @@ public class URLInputStream extends InputStream {
 	 * @return
 	 * @see java.lang.Object#toString()
 	 */
+    @Override
 	public String toString() {
 		return getClass().getName() + ": " + this.url;
 	}

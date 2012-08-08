@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataproviderReply.java,v 1.10 2010/03/23 09:16:10 hburger Exp $
+ * Name:        $Id: DataproviderReply.java,v 1.11 2010/06/07 08:47:27 hburger Exp $
  * Description: DataproviderReply class
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 09:16:10 $
+ * Date:        $Date: 2010/06/07 08:47:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,7 @@
  */
 package org.openmdx.application.dataprovider.cci;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.resource.ResourceException;
@@ -65,7 +66,7 @@ import org.openmdx.base.rest.cci.ResultRecord;
 /**
  * Dataprovider Reply
  */
-public class DataproviderReply {
+public class DataproviderReply implements Serializable {
 
     /**
      * Constructor 

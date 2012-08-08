@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefQuery_1_0.java,v 1.3 2009/12/20 18:42:47 wfro Exp $
+ * Name:        $Id: RefQuery_1_0.java,v 1.4 2010/05/26 13:25:43 hburger Exp $
  * Description: RefFilter_1_0 interface
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/20 18:42:47 $
+ * Date:        $Date: 2010/05/26 13:25:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,90 +50,77 @@
  */
 package org.openmdx.base.accessor.jmi.cci;
 
-import java.io.Serializable;
 import java.util.Collection;
 
 import javax.jdo.Query;
 
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.Filter;
+import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.query.SortOrder;
 
 /**
  * The RefQuery_1_0 is an extension to JMI and allows to query the Collections
  * returned by JMI methods.
  */
-public interface RefQuery_1_0 extends Query, Serializable {
+public interface RefQuery_1_0 extends Query {
 
   /**
    * This operation allows to set a filter value with the semantics
-   * <quantor> <fieldName> <operator> <values>. The value constants for
-   * the quantor and operator parameters are implementation-specific.
+   * &lt;quantifier&gt; &lt;fieldName&gt; &lt;operator&gt; &lt;values&gt;. 
    */
-  public void refAddValue(
+  void refAddValue(
     String featureName,
-    short quantor,
-    short operator,
+    Quantifier quantifier,
+    ConditionType operator,
     Collection<?> values
   );
 
   /**
-   * Allows to specify the sort order for a field.
-   */
-  public void refAddValue(
-    String featureName,
-    short order
-  );
-
-  /**
-   * Allows to specify the sort order for a field.
-   * 
-   * @param featureDef
-   * @param index
-   * @param order
-   */
-  void refAddValue(
-    ModelElement_1_0 featureDef,
-    int index,
-    short order
-  );
-  
-  /**
-   * Allows to specify the sort order for a field.
-   * 
-   * @param featureDef
-   * @param index
-   * @param order
-   */
-  void refAddValue(
-    String featureName,
-    int index,
-    short order
-  );
-  
-  /**
    * This operation allows to set a filter value with the semantics
-   * <quantor> <fieldName> <operator> <values>. The value constants for
-   * the quantor and operator parameters are implementation-specific.
+   * &lt;quantifier&gt; &lt;fieldName&gt; &lt;operator&gt; &lt;values&gt;. 
    * 
    * @param featureDef
-   * @param quantor
+   * @param quantifier
    * @param operator
    * @param values
    */
   void refAddValue(
     ModelElement_1_0 featureDef,
-    short quantor,
-    short operator,
+    Quantifier quantifier,
+    ConditionType operator,
     Collection<?> values
   );
 
   /**
-   * Returns the collection of added filter properties, i.e. attributes
-   * added with refAddValue(fieldName, quantor, operator).
+   * Allows to specify the sort order for a field.
    * 
-   * @return a collection of filter properties
+   * @param featureName
+   * @param order
    */
-  public Filter refGetFilter(
+  void refAddValue(
+    String featureName,
+    SortOrder order
+  );
+
+  /**
+   * Allows to specify the sort order for a field.
+   * 
+   * @param featureDef
+   * @param order
+   */
+  void refAddValue(
+    ModelElement_1_0 featureDef,
+    SortOrder order
+  );
+  
+  /**
+   * Returns the collection of added conditions and order instructions.
+   * 
+   * @return a filter
+   */
+  Filter refGetFilter(
   );
 
   /**
@@ -141,7 +128,7 @@ public interface RefQuery_1_0 extends Query, Serializable {
    * 
    * @return the filter's MOF id
    */
-  public String refMofId();
+  String refMofId();
     
 }
 

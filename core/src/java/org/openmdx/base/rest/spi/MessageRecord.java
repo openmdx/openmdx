@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: MessageRecord.java,v 1.3 2010/03/23 19:06:05 hburger Exp $
+ * Name:        $Id: MessageRecord.java,v 1.5 2010/06/02 13:45:10 hburger Exp $
  * Description: ObjectRecord 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 19:06:05 $
+ * Date:        $Date: 2010/06/02 13:45:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -123,7 +123,7 @@ public class MessageRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getBody()
      */
-    @Override
+//  @Override
     public MappedRecord getBody() {
         return this.body;
     }
@@ -131,7 +131,7 @@ public class MessageRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getDestination()
      */
-    @Override
+//  @Override
     public Path getPath() {
         return this.path;
     }
@@ -139,7 +139,7 @@ public class MessageRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#setBody(javax.resource.cci.MappedRecord)
      */
-    @Override
+//  @Override
     public void setBody(MappedRecord body) {
         if(body != null) {
             this.body = body;
@@ -153,7 +153,7 @@ public class MessageRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#setDestination(org.openmdx.base.naming.Path)
      */
-    @Override
+//  @Override
     public void setPath(Path destination) {
         this.path = destination;
     }
@@ -161,7 +161,7 @@ public class MessageRecord
     /* (non-Javadoc)
      * @see javax.resource.cci.Record#getRecordName()
      */
-    @Override
+//  @Override
     public String getRecordName() {
         return NAME;
     }
@@ -172,6 +172,7 @@ public class MessageRecord
      * @param index the index
      * @return the value
      */
+    @Override
     protected Object get(
         int index
     ){
@@ -190,6 +191,7 @@ public class MessageRecord
      * 
      * @return the old value
      */
+    @Override
     protected void put(
         int index,
         Object value
@@ -216,7 +218,7 @@ public class MessageRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getTarget()
      */
-    @Override
+//  @Override
     public Path getTarget() {
         return this.hasId() ? this.path.getParent() : this.path;
     }
@@ -224,7 +226,7 @@ public class MessageRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getMessageId()
      */
-    @Override
+//  @Override
     public String getMessageId() {
         return this.hasId() ? this.path.getBase() : null;
     }
@@ -232,7 +234,7 @@ public class MessageRecord
     /* (non-Javadoc)
      * @see org.openmdx.base.rest.cci.MessageRecord#getCorellationId()
      */
-    @Override
+//  @Override
     public String getCorellationId() {
         String messageId = getMessageId();
         int d = Math.max(

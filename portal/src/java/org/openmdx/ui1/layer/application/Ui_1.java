@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Ui_1.java,v 1.83 2010/03/23 17:31:35 wfro Exp $
+ * Name:        $Id: Ui_1.java,v 1.87 2010/06/08 13:00:17 hburger Exp $
  * Description: Ui_1 plugin
- * Revision:    $Revision: 1.83 $
+ * Revision:    $Revision: 1.87 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 17:31:35 $
+ * Date:        $Date: 2010/06/08 13:00:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -76,6 +76,7 @@ import javax.resource.cci.MappedRecord;
 
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
@@ -91,8 +92,8 @@ import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
-import org.openmdx.base.query.AttributeSpecifier;
-import org.openmdx.base.query.Directions;
+import org.openmdx.base.query.SortOrder;
+import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
@@ -1008,6 +1009,11 @@ public class Ui_1 extends Standard_1 {
     	Object_2Facade definitionFacade;
         try {
 	        fieldFacade = Object_2Facade.newInstance(field);
+	        if(fieldFacade.getValue() == null) {
+	        	fieldFacade.setValue(
+	        		Records.getRecordFactory().createMappedRecord("org:openmdx:ui1:Element")	        		
+	        	);
+	        }
 	        definitionFacade = Object_2Facade.newInstance(definition);
         }
         catch (ResourceException e) {
@@ -1788,7 +1794,7 @@ public class Ui_1 extends Standard_1 {
             AttributeSelectors.ALL_ATTRIBUTES,
             0,
             Integer.MAX_VALUE,
-            Directions.ASCENDING
+            SortOrder.ASCENDING.code()
         );
         for(MappedRecord additionalDefinition: additionalElementDefinitions) {
         	MappedRecord target;
@@ -1842,7 +1848,7 @@ public class Ui_1 extends Standard_1 {
             AttributeSelectors.ALL_ATTRIBUTES,
             0,
             Integer.MAX_VALUE,
-            Directions.ASCENDING
+            SortOrder.ASCENDING.code()
         );
         for(
             Iterator<MappedRecord> j = alternateElementDefinitions.iterator();
@@ -2586,7 +2592,7 @@ public class Ui_1 extends Standard_1 {
 	            AttributeSelectors.ALL_ATTRIBUTES,
 	            0,
 	            Integer.MAX_VALUE,
-	            Directions.ASCENDING
+	            SortOrder.ASCENDING.code()
 	        );
 	        for(MappedRecord additionalInspectorDefinition: additionalInspectorDefinitions) {
 	        	MappedRecord target = Object_2Facade.newInstance(
@@ -2871,7 +2877,7 @@ public class Ui_1 extends Standard_1 {
 		                null,
 		                0,
 		                Integer.MAX_VALUE,
-		                Directions.ASCENDING,
+		                SortOrder.ASCENDING.code(),
 		                AttributeSelectors.ALL_ATTRIBUTES,
 		                null
 		        	);
@@ -2907,7 +2913,7 @@ public class Ui_1 extends Standard_1 {
 		                null,
 		                0,
 		                Integer.MAX_VALUE,
-		                Directions.ASCENDING,
+		                SortOrder.ASCENDING.code(),
 		                AttributeSelectors.ALL_ATTRIBUTES,
 		                null
 		        	);
@@ -2952,7 +2958,7 @@ public class Ui_1 extends Standard_1 {
 	                null,
 	                0,
 	                Integer.MAX_VALUE,
-	                Directions.ASCENDING,
+	                SortOrder.ASCENDING.code(),
 	                AttributeSelectors.ALL_ATTRIBUTES,
 	                null
 	        	);
@@ -3314,13 +3320,8 @@ public class Ui_1 extends Standard_1 {
 
     protected static final String TAB_TYPE_OPERATION = "org:openmdx:ui1:OperationTab";
 
-    protected static final List REFERENCES_TO_EXCLUDE = Arrays.asList(
-        new String[]{
-            "view",
-            "org:openmdx:base:Segment:extent",
-            "org:openmdx:base:ViewCapable:view",
-            "org:openmdx:base:ContextCapable:context"
-        }
+    protected static final List<String> REFERENCES_TO_EXCLUDE = Arrays.asList(
+        "org:openmdx:base:Segment:extent"
     );  
     protected Map<Path,Map<String,MappedRecord>> existingElementDefinitions =
         new HashMap<Path,Map<String,MappedRecord>>();

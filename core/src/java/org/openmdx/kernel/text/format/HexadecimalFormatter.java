@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: HexadecimalFormatter.java,v 1.3 2009/12/31 13:09:56 wfro Exp $
+ * Name:        $Id: HexadecimalFormatter.java,v 1.4 2010/06/02 13:46:07 hburger Exp $
  * Description: Hexadecmial Formatter
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/31 13:09:56 $
+ * Date:        $Date: 2010/06/02 13:46:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -247,6 +247,7 @@ public class HexadecimalFormatter {
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         return this.digits < 0 ?
             "null" :

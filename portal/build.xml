@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.57 2010/04/30 13:05:19 wfro Exp $
+= Name:        $Id: build.xml,v 1.59 2010/06/07 15:41:03 hburger Exp $
 = Description: ant build for openMDX/Portal
-= Revision:    $Revision: 1.57 $
-= Date:        $Date: 2010/04/30 13:05:19 $
+= Revision:    $Revision: 1.59 $
+= Date:        $Date: 2010/06/07 15:41:03 $
 = Copyright:   (c) 2004-2010 OMEX AG
 =======================================================================
  *

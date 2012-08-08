@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: OperationAwareLayer_1.java,v 1.15 2010/03/24 15:50:53 hburger Exp $
+ * Name:        $Id: OperationAwareLayer_1.java,v 1.16 2010/06/02 13:42:04 hburger Exp $
  * Description: Stream Operation Aware Layer_1_0 Implementation
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/24 15:50:53 $
+ * Date:        $Date: 2010/06/02 13:42:04 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -83,6 +83,7 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
     }
     
     //-----------------------------------------------------------------------
+    @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {

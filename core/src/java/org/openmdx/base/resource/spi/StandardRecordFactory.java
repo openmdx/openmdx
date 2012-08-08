@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StandardRecordFactory.java,v 1.10 2010/04/16 18:24:04 hburger Exp $
+ * Name:        $Id: StandardRecordFactory.java,v 1.11 2010/06/02 10:50:06 hburger Exp $
  * Description: Java Connector Architecture: Extended Record Factory Implementation
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 18:24:04 $
+ * Date:        $Date: 2010/06/02 10:50:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -113,7 +113,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      * @exception NotSupportedException
      *            Operation not supported
      */
-    @Override
+//  @Override
     public MappedRecord createMappedRecord(
         String recordName
     ) throws ResourceException {
@@ -142,7 +142,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      * @exception NotSupportedException
      *            Operation not supported
      */
-    @Override
+//  @Override
     public IndexedRecord createIndexedRecord(
         String recordName
     ) throws ResourceException {
@@ -189,7 +189,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      * @exception	NullPointerException
      *						if <code>values</code> is null.
      */
-    @Override
+//  @Override
     public MappedRecord asMappedRecord(
         String recordName,
         String recordShortDescription,
@@ -207,7 +207,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ExtendedRecordFactory#singletonMappedRecord(java.lang.String, java.lang.String, java.lang.Object, java.lang.Object)
      */
-    @Override
+//  @Override
     public MappedRecord singletonMappedRecord(
         String recordName,
         String recordShortDescription,
@@ -249,7 +249,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      * @exception	NullPointerException
      *						if <code>values</code> is null.
      */
-    @Override
+//  @Override
     public IndexedRecord asIndexedRecord(
         String recordName,
         String recordShortDescription,
@@ -283,7 +283,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.cci.ExtendedRecordFactory#singletonIndexedRecord(java.lang.String, java.lang.String, java.lang.Object)
      */
-    @Override
+//  @Override
     public IndexedRecord singletonIndexedRecord(
         String recordName,
         String recordShortDescription,

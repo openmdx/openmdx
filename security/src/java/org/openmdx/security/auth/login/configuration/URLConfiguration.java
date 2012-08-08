@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: URLConfiguration.java,v 1.2 2010/03/17 16:35:00 hburger Exp $
+ * Name:        $Id: URLConfiguration.java,v 1.3 2010/06/04 22:41:44 hburger Exp $
  * Description: URL Configuration
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/17 16:35:00 $
+ * Date:        $Date: 2010/06/04 22:41:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -153,6 +153,7 @@ public class URLConfiguration extends Configuration {
      *		application, or null if this application has no configured
      *		LoginModules.
      */
+    @Override
     public synchronized AppConfigurationEntry[] getAppConfigurationEntry (
 		String applicationName
 	){
@@ -283,6 +284,7 @@ public class URLConfiguration extends Configuration {
      * @exception SecurityException if the caller does not have permission
      *				to refresh the Configuration.
      */
+    @Override
     public synchronized void refresh(
 	) {		
 		try {
@@ -470,7 +472,8 @@ public class URLConfiguration extends Configuration {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
-	@SuppressWarnings("unchecked")
+	@Override
+    @SuppressWarnings("unchecked")
     public String toString() {
 		try {
 			MappedRecord reply = Records.getRecordFactory().createMappedRecord(

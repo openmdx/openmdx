@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1.java,v 1.16 2010/04/16 09:46:58 hburger Exp $
+ * Name:        $Id: Dataprovider_1.java,v 1.17 2010/08/06 12:25:39 hburger Exp $
  * Description: The dataprovider kernel
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 09:46:58 $
+ * Date:        $Date: 2010/08/06 12:25:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -311,11 +311,9 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
         Object path
     ){
         return
-        path == null ? 
-            null : 
-                path instanceof Path ? 
-                    (Path)path : 
-                        new Path(path.toString());
+            path == null ? null : 
+            path instanceof Path ? (Path)path : 
+            new Path(path.toString());
     }
     
     /**

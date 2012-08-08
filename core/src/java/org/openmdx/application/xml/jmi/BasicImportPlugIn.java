@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: BasicImportPlugIn.java,v 1.6 2009/12/17 14:40:30 wfro Exp $
+ * Name:        $Id: BasicImportPlugIn.java,v 1.7 2010/06/22 07:05:47 hburger Exp $
  * Description: Basic Import Plug-In
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/17 14:40:30 $
+ * Date:        $Date: 2010/06/22 07:05:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -175,7 +175,7 @@ public class BasicImportPlugIn implements ImportPlugIn {
         if(!JDOHelper.isPersistent(refObject)) {
             Path containerId = objectId.getParent();
             String qualifier = objectId.getBase();
-            RefContainer refContainer = (RefContainer) persistenceManager.getObjectById(containerId);
+            RefContainer<?> refContainer = (RefContainer<?>) persistenceManager.getObjectById(containerId);
             if(qualifier.startsWith("!")) {
                 refContainer.refAdd(
                     QualifierType.PERSISTENT,

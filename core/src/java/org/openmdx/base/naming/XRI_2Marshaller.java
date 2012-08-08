@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XRI_2Marshaller.java,v 1.9 2009/09/11 14:29:24 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: XRI_2Marshaller.java,v 1.12 2010/06/25 17:09:28 hburger Exp $
  * Description: Path/ObjectId Marshaller 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/11 14:29:24 $
+ * Date:        $Date: 2010/06/25 17:09:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -310,7 +310,7 @@ public final class XRI_2Marshaller
     public Object unmarshal (
         Object charSequence
     ) throws ServiceException {
-        String xriString = charSequence.toString();
+        String xriString = SpecialResourceIdentifiers.unescapeResourceIdentifier(charSequence.toString());
         try {
             boolean treeWildcard = xriString.endsWith(")/($...)");
             List<Segment> segments = getObjectIdentifier(false, xriString);
@@ -912,7 +912,7 @@ public final class XRI_2Marshaller
                         throw new RuntimeServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.TRANSFORMATION_FAILURE,
-                            "The sub-segment contains a character which is not a vlaid xri-pchar",
+                            "The sub-segment contains a character which is not a valid xri-pchar",
                             new BasicException.Parameter("subSegment", subSegment),
                             new BasicException.Parameter("position", pos),
                             new BasicException.Parameter("character", c)
@@ -1040,6 +1040,7 @@ public final class XRI_2Marshaller
         final String xriSegment;
         final List<String> xriSubSegments;
 
+        @Override
         public String toString(){
             return this.xriSegment;
         }

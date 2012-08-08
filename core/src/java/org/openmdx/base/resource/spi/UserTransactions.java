@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: UserTransactions.java,v 1.7 2009/09/29 15:50:46 hburger Exp $
+ * Name:        $Id: UserTransactions.java,v 1.8 2010/08/06 12:02:30 hburger Exp $
  * Description: User Transaction Support
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/29 15:50:46 $
+ * Date:        $Date: 2010/08/06 12:02:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,10 +50,11 @@
  */
 package org.openmdx.base.resource.spi;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.resource.ResourceException;
 import javax.transaction.UserTransaction;
+
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.naming.ComponentEnvironment;
 
 /**
  * Transaction Factory
@@ -156,9 +157,6 @@ public class UserTransactions {
     
     /**
      * Acquire the user transaction
-     * <p>
-     * TODO Eliminate the lightweight container specific code by using
-     * application client conformant JUnit tests
      * 
      * @return the user transaction
      * 
@@ -167,16 +165,13 @@ public class UserTransactions {
     public static UserTransaction getUserTransaction(
     ) throws ResourceException {
         try {
-            return (UserTransaction) new InitialContext(
-            ).lookup(
-            	"java:comp/UserTransaction"
-            );
-        } catch (NamingException exception) {
+            return ComponentEnvironment.lookup(UserTransaction.class);
+        } catch (BasicException exception) {
             throw new ResourceException(
                 "User transaction acquisition failure",
                 exception
             );
         }
     }
-        
+    
 }

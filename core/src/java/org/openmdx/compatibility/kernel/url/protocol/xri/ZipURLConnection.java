@@ -13,6 +13,8 @@ import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.Permission;
+import java.util.List;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -23,53 +25,52 @@ import org.openmdx.kernel.url.protocol.XriAuthorities;
 
 /**
  * An delegating URLConnection support class.
- *
- * @todo resolve 1.4 specific issues.
  */
 public class ZipURLConnection extends JarURLConnection {
 
-	/**
-	 * 
-	 */
-	protected URL xri;
-	
-	/**
-	 * 
-	 */
-	protected JarURLConnection delegateConnection;
-	   
-	/**
-	 * Constructor 
-	 * 
-	 * @param xri
-	 * @param url
-	 * 
-	 * @throws IOException
-	 */
-	private ZipURLConnection(
-	    final URL xri,
-	    final URL url
-	) throws IOException {
-	      super(url);	      
-	      this.xri = xri;
-	      delegateConnection = (JarURLConnection)url.openConnection();
-	}
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param xri
-	 * @throws IOException
-	 */
-	public ZipURLConnection(
-	    final URL xri
-	) throws IOException {
-	      this(xri,toURL(xri));
-	}
+    /**
+     * Constructor 
+     * 
+     * @param xri
+     * @param url
+     * 
+     * @throws IOException
+     */
+    private ZipURLConnection(
+        final URL xri,
+        final URL url
+    ) throws IOException {
+        super(url);	      
+        this.xri = xri;
+        delegateConnection = (JarURLConnection)url.openConnection();
+    }
 
-	private final static URL toURL(
-	    final URL xri
-	) throws MalformedURLException, IOException {
+    /**
+     * Constructor
+     * 
+     * @param xri
+     * @throws IOException
+     */
+    public ZipURLConnection(
+        final URL xri
+    ) throws IOException {
+        this(xri,toURL(xri));
+    }
+
+    /**
+     * 
+     */
+    protected URL xri;
+
+    /**
+     * 
+     */
+    protected JarURLConnection delegateConnection;
+
+
+    private final static URL toURL(
+        final URL xri
+    ) throws MalformedURLException, IOException {
         String path = xri.getFile();
         int i = path.lastIndexOf(XRI_2Protocols.ZIP_SEPARATOR);
         if(i < 0) throw new MalformedURLException(
@@ -77,13 +78,13 @@ public class ZipURLConnection extends JarURLConnection {
         );
         return new URL(
             JAR_PREFIX + path.substring(XriAuthorities.ZIP_AUTHORITY.length() + 2, i) + 
-			JAR_SEPARATOR + path.substring(i + XRI_2Protocols.ZIP_SEPARATOR.length())
+            JAR_SEPARATOR + path.substring(i + XRI_2Protocols.ZIP_SEPARATOR.length())
         );
-	}
+    }
 
-	//------------------------------------------------------------------------
-	// Extends JarURLConnection
-	//------------------------------------------------------------------------
+    //------------------------------------------------------------------------
+    // Extends JarURLConnection
+    //------------------------------------------------------------------------
 
     /**
      * As defined by JarURLConnection.
@@ -111,6 +112,7 @@ public class ZipURLConnection extends JarURLConnection {
      *
      * @return the entry name for this connection, if any.  
      */
+    @Override
     public String getEntryName() {
         return this.delegateConnection.getEntryName();
     }
@@ -129,6 +131,7 @@ public class ZipURLConnection extends JarURLConnection {
      *
      * @see #connect
      */
+    @Override
     public JarFile getJarFile(
     ) throws IOException {
         return this.delegateConnection.getJarFile();
@@ -148,10 +151,11 @@ public class ZipURLConnection extends JarURLConnection {
      *
      * @see #getJarFile
      */
+    @Override
     public Manifest getManifest() throws IOException {
         return this.delegateConnection.getManifest();
     }
-        
+
     /**  
      * Return the JAR entry object for this connection, if any. This
      * method returns null if the JAR file URL corresponding to this
@@ -169,6 +173,7 @@ public class ZipURLConnection extends JarURLConnection {
      * @see #getJarFile
      * @see #getJarEntry
      */
+    @Override
     public JarEntry getJarEntry(
     ) throws IOException {
         return this.delegateConnection.getJarEntry();
@@ -186,11 +191,12 @@ public class ZipURLConnection extends JarURLConnection {
      *
      * @see #getJarEntry
      */
+    @Override
     public Attributes getAttributes(
     ) throws IOException {
         return this.delegateConnection.getAttributes();
     }
-  
+
     /**    
      * Returns the main Attributes for the JAR file for this
      * connection.
@@ -204,11 +210,12 @@ public class ZipURLConnection extends JarURLConnection {
      * @see #getJarFile
      * @see #getManifest 
      */
+    @Override
     public Attributes getMainAttributes(
     ) throws IOException { 
         return this.delegateConnection.getMainAttributes();
     }
-   
+
     /**
      * Return the Certificate object for this connection if the URL
      * for it points to a JAR file entry, null otherwise. This method 
@@ -225,202 +232,233 @@ public class ZipURLConnection extends JarURLConnection {
      *
      * @see #getJarEntry
      */
+    @Override
     public java.security.cert.Certificate[] getCertificates(
     ) throws IOException {
         return this.delegateConnection.getCertificates();
     }
 
-	    
-	//------------------------------------------------------------------------
-	// Extends URLConnection
-	//------------------------------------------------------------------------
 
-   public void connect() throws IOException
-   {
-   	  try {
-          delegateConnection.connect();
- 	  } catch (IOException ioException) {
- 	  	  throw new IOException(
- 	  	      this.xri + ": " + ioException.getMessage()
- 	  	  );
- 	  }
-   }
-   
-   public URL getURL() {
-      return delegateConnection.getURL();
-   }
+    //------------------------------------------------------------------------
+    // Extends URLConnection
+    //------------------------------------------------------------------------
 
-   public int getContentLength() {
-      return delegateConnection.getContentLength();
-   }
-
-   public String getContentType() {
-      return delegateConnection.getContentType();
-   }
-
-   public String getContentEncoding() {
-      return delegateConnection.getContentEncoding();
-   }
-
-   public long getExpiration() {
-      return delegateConnection.getExpiration();
-   }
-
-   public long getDate() {
-      return delegateConnection.getDate();
-   }
-
-   public long getLastModified() {
-      return delegateConnection.getLastModified();
-   }
-
-   public String getHeaderField(String name) {
-      return delegateConnection.getHeaderField(name);
-   }
-
-   /* This is specific to 1.4
-   public Map getHeaderFields() {
-      return delegateConnection.getHeaderFields();
-   }
-   */
-   
-   public int getHeaderFieldInt(String name, int _default) {
-      return delegateConnection.getHeaderFieldInt(name, _default);
-   }
-
-   public long getHeaderFieldDate(String name, long _default) {
-      return delegateConnection.getHeaderFieldDate(name, _default);
-   }
-
-   public String getHeaderFieldKey(int n) {
-      return delegateConnection.getHeaderFieldKey(n);
-   }
-
-   public String getHeaderField(int n) {
-      return delegateConnection.getHeaderField(n);
-   }
-
-   public Object getContent() throws IOException {
-   	  try {
-          return delegateConnection.getContent();
- 	  } catch (IOException ioException) {
- 	  	  throw new IOException(
- 	  	      this.xri + ": " + ioException.getMessage()
- 	  	  );
- 	  }
-   }
-
-   @SuppressWarnings("unchecked")
-public Object getContent(Class[] classes) throws IOException {
-   	  try {
-          return delegateConnection.getContent(classes);
- 	  } catch (IOException ioException) {
- 	  	  throw new IOException(
- 	  	      this.xri + ": " + ioException.getMessage()
- 	  	  );
- 	  }
-   }
-
-   public Permission getPermission() throws IOException {
-   	  try {
-          return delegateConnection.getPermission();
- 	  } catch (IOException ioException) {
- 	  	  throw new IOException(
- 	  	      this.xri + ": " + ioException.getMessage()
- 	  	  );
- 	  }
-   }
-
-   public InputStream getInputStream() throws IOException {
-   	  try{
-	      return delegateConnection.getInputStream();
-   	  } catch (IOException ioException) {
-   	  	  throw new IOException(
-   	  	      this.xri + ": " + ioException.getMessage()
-   	  	  );
-   	  }
-   }
-
-   public OutputStream getOutputStream() throws IOException {
-   	  try {
-   	  	  return delegateConnection.getOutputStream();
- 	  } catch (IOException ioException) {
- 	  	  throw new IOException(
- 	  	      this.xri + ": " + ioException.getMessage()
- 	  	  );
- 	  }
-   }
-
-   public String toString() {
-      return super.toString() + "{ " + delegateConnection + " }";
-   }
-
-   public void setDoInput(boolean doinput) {
-      delegateConnection.setDoInput(doinput);
-   }
-   
-   public boolean getDoInput() {
-      return delegateConnection.getDoInput();
-   }
-
-   public void setDoOutput(boolean dooutput) {
-      delegateConnection.setDoOutput(dooutput);
+    @Override
+    public void connect() throws IOException
+    {
+        try {
+            delegateConnection.connect();
+        } catch (IOException ioException) {
+            throw new IOException(
+                this.xri + ": " + ioException.getMessage()
+            );
+        }
     }
 
-   public boolean getDoOutput() {
-      return delegateConnection.getDoOutput();
-   }
+    @Override
+    public URL getURL() {
+        return delegateConnection.getURL();
+    }
 
-   public void setAllowUserInteraction(boolean allowuserinteraction) {
-      delegateConnection.setAllowUserInteraction(allowuserinteraction);
-   }
+    @Override
+    public int getContentLength() {
+        return delegateConnection.getContentLength();
+    }
 
-   public boolean getAllowUserInteraction() {
-      return delegateConnection.getAllowUserInteraction();
-   }
+    @Override
+    public String getContentType() {
+        return delegateConnection.getContentType();
+    }
 
-   public void setUseCaches(boolean usecaches) {
-      delegateConnection.setUseCaches(usecaches);
-   }
+    @Override
+    public String getContentEncoding() {
+        return delegateConnection.getContentEncoding();
+    }
 
-   public boolean getUseCaches() {
-      return delegateConnection.getUseCaches();
-   }
+    @Override
+    public long getExpiration() {
+        return delegateConnection.getExpiration();
+    }
 
-   public void setIfModifiedSince(long ifmodifiedsince) {
-      delegateConnection.setIfModifiedSince(ifmodifiedsince);
-   }
+    @Override
+    public long getDate() {
+        return delegateConnection.getDate();
+    }
 
-   public long getIfModifiedSince() {
-      return delegateConnection.getIfModifiedSince();
-   }
+    @Override
+    public long getLastModified() {
+        return delegateConnection.getLastModified();
+    }
 
-   public boolean getDefaultUseCaches() {
-      return delegateConnection.getDefaultUseCaches();
-   }
+    @Override
+    public String getHeaderField(String name) {
+        return delegateConnection.getHeaderField(name);
+    }
 
-   public void setDefaultUseCaches(boolean defaultusecaches) {
-      delegateConnection.setDefaultUseCaches(defaultusecaches);
-   }
+    @Override
+    public Map<String,List<String>> getHeaderFields() {
+        return delegateConnection.getHeaderFields();
+    }
 
-   public void setRequestProperty(String key, String value) {
-      delegateConnection.setRequestProperty(key, value);
-   }
+    @Override
+    public int getHeaderFieldInt(String name, int _default) {
+        return delegateConnection.getHeaderFieldInt(name, _default);
+    }
 
-   /* This is specific to 1.4
-   public void addRequestProperty(String key, String value) {
-      delegateConnection.addRequestProperty(key, value);
-   }
-   */
-   
-   public String getRequestProperty(String key) {
-      return delegateConnection.getRequestProperty(key);
-   }
+    @Override
+    public long getHeaderFieldDate(String name, long _default) {
+        return delegateConnection.getHeaderFieldDate(name, _default);
+    }
 
-   /* This is specific to 1.4
-   public Map getRequestProperties() {
-      return delegateConnection.getRequestProperties();
-   }
-   */
+    @Override
+    public String getHeaderFieldKey(int n) {
+        return delegateConnection.getHeaderFieldKey(n);
+    }
+
+    @Override
+    public String getHeaderField(int n) {
+        return delegateConnection.getHeaderField(n);
+    }
+
+    @Override
+    public Object getContent() throws IOException {
+        try {
+            return delegateConnection.getContent();
+        } catch (IOException ioException) {
+            throw new IOException(
+                this.xri + ": " + ioException.getMessage()
+            );
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Object getContent(Class[] classes) throws IOException {
+        try {
+            return delegateConnection.getContent(classes);
+        } catch (IOException ioException) {
+            throw new IOException(
+                this.xri + ": " + ioException.getMessage()
+            );
+        }
+    }
+
+    @Override
+    public Permission getPermission() throws IOException {
+        try {
+            return delegateConnection.getPermission();
+        } catch (IOException ioException) {
+            throw new IOException(
+                this.xri + ": " + ioException.getMessage()
+            );
+        }
+    }
+
+    @Override
+    public InputStream getInputStream() throws IOException {
+        try{
+            return delegateConnection.getInputStream();
+        } catch (IOException ioException) {
+            throw new IOException(
+                this.xri + ": " + ioException.getMessage()
+            );
+        }
+    }
+
+    @Override
+    public OutputStream getOutputStream() throws IOException {
+        try {
+            return delegateConnection.getOutputStream();
+        } catch (IOException ioException) {
+            throw new IOException(
+                this.xri + ": " + ioException.getMessage()
+            );
+        }
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + "{ " + delegateConnection + " }";
+    }
+
+    @Override
+    public void setDoInput(boolean doinput) {
+        delegateConnection.setDoInput(doinput);
+    }
+
+    @Override
+    public boolean getDoInput() {
+        return delegateConnection.getDoInput();
+    }
+
+    @Override
+    public void setDoOutput(boolean dooutput) {
+        delegateConnection.setDoOutput(dooutput);
+    }
+
+    @Override
+    public boolean getDoOutput() {
+        return delegateConnection.getDoOutput();
+    }
+
+    @Override
+    public void setAllowUserInteraction(boolean allowuserinteraction) {
+        delegateConnection.setAllowUserInteraction(allowuserinteraction);
+    }
+
+    @Override
+    public boolean getAllowUserInteraction() {
+        return delegateConnection.getAllowUserInteraction();
+    }
+
+    @Override
+    public void setUseCaches(boolean usecaches) {
+        delegateConnection.setUseCaches(usecaches);
+    }
+
+    @Override
+    public boolean getUseCaches() {
+        return delegateConnection.getUseCaches();
+    }
+
+    @Override
+    public void setIfModifiedSince(long ifmodifiedsince) {
+        delegateConnection.setIfModifiedSince(ifmodifiedsince);
+    }
+
+    @Override
+    public long getIfModifiedSince() {
+        return delegateConnection.getIfModifiedSince();
+    }
+
+    @Override
+    public boolean getDefaultUseCaches() {
+        return delegateConnection.getDefaultUseCaches();
+    }
+
+    @Override
+    public void setDefaultUseCaches(boolean defaultusecaches) {
+        delegateConnection.setDefaultUseCaches(defaultusecaches);
+    }
+
+    @Override
+    public void setRequestProperty(String key, String value) {
+        delegateConnection.setRequestProperty(key, value);
+    }
+
+    @Override
+    public void addRequestProperty(String key, String value) {
+        delegateConnection.addRequestProperty(key, value);
+    }
+
+    @Override
+    public String getRequestProperty(String key) {
+        return delegateConnection.getRequestProperty(key);
+    }
+
+    @Override
+    public Map<String,List<String>> getRequestProperties() {
+        return delegateConnection.getRequestProperties();
+    }
 
 }

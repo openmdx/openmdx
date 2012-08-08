@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractComparator.java,v 1.2 2009/05/16 22:17:52 wfro Exp $
+ * Name:        $Id: AbstractComparator.java,v 1.4 2010/06/02 13:42:04 hburger Exp $
  * Description: Abstract Comparator
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:52 $
+ * Date:        $Date: 2010/06/02 13:42:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,10 +55,9 @@ import java.util.Iterator;
 
 import javax.resource.ResourceException;
 
+import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.query.AttributeSpecifier;
-import org.openmdx.base.query.Directions;
-import org.openmdx.base.query.Orders;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.Records;
 
 
@@ -103,13 +102,13 @@ public abstract class AbstractComparator<E> implements Comparator<E> {
             boolean ln, rn;
             Object lv, rv;
             int greaterThanResult = 0; 
-            switch (specifier.order()){
-                case Orders.ANY : 
+            switch (SortOrder.valueOf(specifier.order())){
+                case UNSORTED : 
                     continue specifications;
-                case Directions.ASCENDING : 
+                case ASCENDING : 
                     greaterThanResult = +1;
                     break;
-                case Directions.DESCENDING : 
+                case DESCENDING : 
                     greaterThanResult = -1;
                     break;
             }
@@ -145,6 +144,7 @@ public abstract class AbstractComparator<E> implements Comparator<E> {
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString() {
         try {
             return Records.getRecordFactory().asIndexedRecord(

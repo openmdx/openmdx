@@ -11,11 +11,11 @@
 	<eis-type>LDAP</eis-type>
 	<version>3.0</version>
 	<resourceadapter>
-	<managedconnectionfactory-class>org.openmdx.resource.ldap.v3.URLConnectionFactory</managedconnectionfactory-class>
-	<connectionfactory-interface>org.openmdx.resource.ldap.cci.ConnectionFactory</connectionfactory-interface>
+	<managedconnectionfactory-class>org.openmdx.resource.ldap.ldif.ManagedConnectionFactory</managedconnectionfactory-class>
+	<connectionfactory-interface>org.openmdx.resource.cci.ConnectionFactory</connectionfactory-interface>
 	<connectionfactory-impl-class>org.openmdx.resource.ldap.spi.ConnectionFactory</connectionfactory-impl-class>
-		<connection-interface>org.openmdx.resource.ldap.cci.Connection</connection-interface>
-		<connection-impl-class>org.openmdx.resource.ldap.spi.Connection</connection-impl-class>
+		<connection-interface>netscape.ldap.LDAPv3</connection-interface>
+		<connection-impl-class>org.openmdx.resource.ldap.ldif.Connection</connection-impl-class>
 		<transaction-support>NoTransaction</transaction-support>
 		<config-property>
 			<description>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestNamingRemote.java,v 1.1 2009/04/03 15:08:16 hburger Exp $
+ * Name:        $Id: TestNamingRemote.java,v 1.2 2010/06/04 22:39:41 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/03 15:08:16 $
+ * Date:        $Date: 2010/06/04 22:39:41 $
  * ====================================================================
  *
  * This software is published under the GNU Lesser General Public
@@ -65,6 +65,7 @@ public class TestNamingRemote extends TestSuite {
 	/* (non-Javadoc)
 	 * @see junit.framework.Test#run(junit.framework.TestResult)
 	 */
+	@Override
 	public void run(TestResult result) {
 		setUp(result);
 		if(!result.shouldStop()) try {

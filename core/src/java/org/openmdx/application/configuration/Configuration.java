@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Configuration.java,v 1.6 2009/12/30 19:09:51 wfro Exp $
+ * Name:        $Id: Configuration.java,v 1.8 2010/08/06 12:26:25 hburger Exp $
  * Description: Configuration
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/30 19:09:51 $
+ * Date:        $Date: 2010/08/06 12:26:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -76,7 +76,7 @@ import org.w3c.cci2.SparseArray;
  * itself. 
  */
 public class Configuration
-implements Cloneable, MultiLineStringRepresentation
+    implements Cloneable, MultiLineStringRepresentation
 {
 
     /**
@@ -154,9 +154,9 @@ implements Cloneable, MultiLineStringRepresentation
     ){
         if (! containsEntry(entryName)) return false;
         final Object value = values(entryName).get(0);
-        return 
-        value instanceof Boolean && ((Boolean)value).booleanValue() ||
-        "true".equalsIgnoreCase(value.toString());
+        return (
+            value instanceof Boolean && ((Boolean)value).booleanValue() 
+        ) || "true".equalsIgnoreCase(value.toString());
     } 
 
     /**
@@ -307,14 +307,12 @@ implements Cloneable, MultiLineStringRepresentation
      */
     public BasicException.Parameter[] toExceptionParameters (
     ){
-        final BasicException.Parameter[] target = new BasicException.Parameter[
-                                                                               this.entries.size()
-                                                                               ];
+        final BasicException.Parameter[] target = new BasicException.Parameter[this.entries.size()];
         final Iterator<String> iterator = this.entries.keySet().iterator();
         for(
-                int index = 0;
-                index < target.length;
-                index++
+            int index = 0;
+            index < target.length;
+            index++
         ){
             final String name = iterator.next();
             target[index] = new BasicException.Parameter(
@@ -339,6 +337,7 @@ implements Cloneable, MultiLineStringRepresentation
      *
      * @return the dataprovider object's string representation
      */
+    @Override
     public String toString (
     ){
         return IndentingFormatter.toString(this.entries);
@@ -356,6 +355,7 @@ implements Cloneable, MultiLineStringRepresentation
      *
      * @return    a clone of this instance.
      */
+    @Override
     public Object clone(  
     ){
         return new Configuration(this);

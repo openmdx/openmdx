@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsAutocompleter.java,v 1.34 2009/10/12 13:06:49 wfro Exp $
+ * Name:        $Id: FindObjectsAutocompleter.java,v 1.35 2010/05/26 15:06:18 hburger Exp $
  * Description: ListAutocompleteControl 
- * Revision:    $Revision: 1.34 $
+ * Revision:    $Revision: 1.35 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/12 13:06:49 $
+ * Date:        $Date: 2010/05/26 15:06:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,7 +61,7 @@ import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.FilterOperators;
+import org.openmdx.base.query.ConditionType;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
@@ -85,7 +85,7 @@ public class FindObjectsAutocompleter
         String filterByType,
         String[] filterByFeature,
         String[] filterByLabel,
-        int[] filterOperator,
+        ConditionType[] filterOperator,
         String[] orderByFeature
     ) {
         this.target = target;
@@ -140,7 +140,7 @@ public class FindObjectsAutocompleter
             parameters.add(
                 new Action.Parameter(
                     Action.PARAMETER_FILTER_OPERATOR,
-                    FilterOperators.toString(this.filterOperator[i])
+                    this.filterOperator[i].toString()
                 )
             );
             // orderByByFeature
@@ -255,7 +255,7 @@ public class FindObjectsAutocompleter
     private final String filterByType;
     private final String[] filterByFeature;
     private final String[] filterByLabel;
-    private final int[] filterOperator;
+    private final ConditionType[] filterOperator;
     private final String[] orderByFeature;
     private final Action[] findObjectsActions;
     

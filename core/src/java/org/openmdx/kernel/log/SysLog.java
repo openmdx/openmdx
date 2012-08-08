@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SysLog.java,v 1.19 2009/04/01 13:33:33 hburger Exp $
+ * Name:        $Id: SysLog.java,v 1.21 2010/08/27 16:12:14 hburger Exp $
  * Description: Former Log API
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/01 13:33:33 $
+ * Date:        $Date: 2010/08/27 16:12:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -105,8 +105,6 @@ public class SysLog {
      * 
      * @param level
      * @param pattern 
-     * @param pattern
-     * @param logSource TODO
      * @param arguments
      */
     public static void log(
@@ -116,7 +114,11 @@ public class SysLog {
     ){
         Logger logger = LoggerFactory.getLogger();
         if(logger.isLoggable(level)) {
-            LogRecord record = new ForeignLogRecord(THIS, level, pattern);
+            LogRecord record = new ForeignLogRecord(
+                SysLog.THIS, 
+                level, 
+                pattern
+            );
             record.setParameters(arguments);
             logger.log(record);
         }
@@ -186,7 +188,7 @@ public class SysLog {
 		String logString,
 		Object logObj
     ){
-        log(Level.SEVERE, "{0}|{1}|{2}", "Sys", logString, logObj);
+        log(Level.SEVERE, "Sys|{0}|{1}", logString, logObj);
     }
 
     /**
@@ -209,7 +211,7 @@ public class SysLog {
         String logString,
         Throwable logObj
     ){
-        log(Level.SEVERE, logObj, "{0}|{1}", "Sys", logString);
+        log(Level.SEVERE, logObj, "Sys|{0}", logString);
     }
 
     /**
@@ -223,7 +225,7 @@ public class SysLog {
      * @see #criticalError(String, Object, int)
      */
     public static void criticalError(String logString) {
-        log(Level.SEVERE, "{0}|{1}", "Sys", logString);
+        log(Level.SEVERE, "Sys|{0}", logString);
     }
 
 	/**
@@ -246,7 +248,7 @@ public class SysLog {
 		String logString,
 		Object logObj
 	){
-        log(Level.SEVERE, "{0}|{1}|{2}", "Sys", logString, logObj);
+        log(Level.SEVERE, "Sys|{0}|{1}", logString, logObj);
     }
 
     /**
@@ -269,7 +271,7 @@ public class SysLog {
         String logString,
         Throwable logObj
     ){
-        log(Level.SEVERE, logObj, "{0}|{1}", "Sys", logString);
+        log(Level.SEVERE, logObj, "Sys|{0}", logString);
     }
 
 	/**
@@ -285,7 +287,7 @@ public class SysLog {
     public static void error(
         String logString
     ){
-        log(Level.SEVERE, "{0}|{1}", "Sys", logString);
+        log(Level.SEVERE, "Sys|{0}", logString);
     }
 
     /**
@@ -308,7 +310,7 @@ public class SysLog {
 		String logString,
 		Object logObj
     ){
-        log(Level.WARNING, "{0}|{1}|{2}", "Sys", logString, logObj);
+        log(Level.WARNING, "Sys|{0}|{1}", logString, logObj);
     }
 
     /**
@@ -331,7 +333,7 @@ public class SysLog {
         String logString,
         Throwable logObj
     ){
-        log(Level.WARNING, logObj, "{0}|{1}", "Sys", logString);
+        log(Level.WARNING, logObj, "Sys|{0}", logString);
     }
 
     /**
@@ -347,7 +349,7 @@ public class SysLog {
     public static void warning(
         String logString
     ){
-        log(Level.WARNING, "{0}|{1}", "Sys", logString);
+        log(Level.WARNING, "Sys|{0}", logString);
     }
 
     /**
@@ -370,7 +372,7 @@ public class SysLog {
 		String logString,
 		Object logObj
     ){
-        log(Level.INFO, "{0}|{1}|{2}", "Sys", logString, logObj);
+        log(Level.INFO, "Sys|{0}|{1}", logString, logObj);
     }
 
     /**
@@ -393,7 +395,7 @@ public class SysLog {
         String logString,
         Throwable logObj
     ){
-        log(Level.INFO, logObj, "{0}|{1}", "Sys", logString);
+        log(Level.INFO, logObj, "Sys|{0}", logString);
     }
 
     /**
@@ -409,7 +411,7 @@ public class SysLog {
     public static void info(
         String logString
     ){
-        log(Level.INFO, "{0}|{1}", "Sys", logString);
+        log(Level.INFO, "Sys|{0}", logString);
 	}
 
     /**
@@ -432,7 +434,7 @@ public class SysLog {
 		String logString,
 		Object logObj
     ){
-        log(Level.FINE, "{0}|{1}|{2}", "Sys", logString, logObj);
+        log(Level.FINE, "Sys|{0}|{1}", logString, logObj);
     }
 
     /**
@@ -455,7 +457,7 @@ public class SysLog {
         String logString,
         Throwable logObj
     ){
-        log(Level.FINE, logObj, "{0}|{1}", "Sys", logString);
+        log(Level.FINE, logObj, "Sys|{0}", logString);
     }
 
     /**
@@ -471,7 +473,7 @@ public class SysLog {
     public static void detail(
         String logString
     ){
-        log(Level.FINE, "{0}|{1}", "Sys", logString);
+        log(Level.FINE, "Sys|{0}", logString);
     }
 
     /**
@@ -494,7 +496,7 @@ public class SysLog {
 		String logString,
 		Object logObj
 	){
-        log(Level.FINEST, "{0}|{1}|{2}", "Sys", logString, logObj);
+        log(Level.FINEST, "Sys|{0}|{1}", logString, logObj);
     }
 
     /**
@@ -517,7 +519,7 @@ public class SysLog {
         String logString,
         Throwable logObj
     ){
-        log(Level.FINEST, logObj, "{0}|{1}", "Sys", logString);
+        log(Level.FINEST, logObj, "Sys|{0}", logString);
     }
 
     /**
@@ -533,7 +535,7 @@ public class SysLog {
     public static void trace(
         String logString
     ){
-        log(Level.FINEST, "{0}|{1}", "Sys", logString);
+        log(Level.FINEST, "Sys|{0}", logString);
     }
 
     /**
@@ -551,7 +553,7 @@ public class SysLog {
         String logString, 
         long elapsedTime
     ){
-        log(Level.INFO, "{0} Performance|{1}|Elapsed time: {2} ms", "Sys", logString, elapsedTime);
+        log(Level.INFO, "Sys Performance|{0}|Elapsed time: {1} ms", logString, elapsedTime);
     }
 
     /**
@@ -567,7 +569,7 @@ public class SysLog {
         String 	group, 
         String 	record
     ) {
-        log(Level.INFO, "{0} Statistics|Group {1}|{2}", "Sys", group, record);
+        log(Level.INFO, "Sys Statistics|Group {0}|{1}", group, record);
    	}
 
     static {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DbObject.java,v 1.4 2009/08/19 17:19:30 hburger Exp $
+ * Name:        $Id: DbObject.java,v 1.6 2010/06/21 09:48:40 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/08/19 17:19:30 $
+ * Date:        $Date: 2010/06/21 09:48:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,11 +60,11 @@ import java.util.Set;
 
 import javax.resource.cci.MappedRecord;
 
+import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.FilterProperty;
 
 /**
  * DbObject provides methods for type-specific object access.
@@ -411,6 +411,7 @@ public abstract class DbObject
    * 
    * @deprecated not supported/required anymore by database plugin.
    */
+  @Deprecated
   public abstract void createMultiValuedObject(
       MappedRecord object
   ) throws ServiceException;
@@ -424,6 +425,7 @@ public abstract class DbObject
    * @deprecated supportsObjectReplacement not supported by Database plugin
    *             anymore. A DbObject must support object replacement.
    */
+  @Deprecated
   public abstract boolean supportsObjectReplacement();
 
   /**

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BasicException.java,v 1.42 2010/01/13 15:04:14 hburger Exp $
+ * Name:        $Id: BasicException.java,v 1.43 2010/06/02 13:45:39 hburger Exp $
  * Description: Basic Exception
- * Revision:    $Revision: 1.42 $
+ * Revision:    $Revision: 1.43 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/13 15:04:14 $
+ * Date:        $Date: 2010/06/02 13:45:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -1743,6 +1743,7 @@ public final class BasicException extends Exception {
          * @return  <code>true<code> if the given object is a Parameter, too, and
          * if it has the same name as this parameter.
          */
+        @Override
         public boolean equals (
             Object object
         ){
@@ -1758,6 +1759,7 @@ public final class BasicException extends Exception {
          *
          * @return a String
          */
+        @Override
         public String toString()
         {
             return this.name + " = " + this.value;
@@ -1770,6 +1772,7 @@ public final class BasicException extends Exception {
          *
          * @return a hash code value for this object.
          */
+        @Override
         public int hashCode()
         {
             return this.name.hashCode();

@@ -3,17 +3,16 @@
  *
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: build.xml,v 1.106 2010/01/11 13:54:52 wfro Exp $
+ * Name:        $Id: build.xml,v 1.107 2010/06/07 12:59:22 hburger Exp $
  * Description: Ant master build file for openMDX
- * Revision:    $Revision: 1.106 $
+ * Revision:    $Revision: 1.107 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/11 13:54:52 $
+ * Date:        $Date: 2010/06/07 12:59:22 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -59,9 +58,20 @@
 	<!-- * -projecthelp -->
 	<!-- ******************************************************************* -->
 	<target name="-projecthelp" description="Print project help information">
-		<java classname="org.apache.tools.ant.launch.Launcher">
-			<arg value="-projecthelp" />
-			<arg path="${ant.file}" />
+		<java
+	        classname="org.apache.tools.ant.launch.Launcher"
+	        fork="true"
+	        failonerror="true"
+	        dir="${basedir}"
+	        timeout="4000000"
+	        taskname="help"
+		>
+		    <classpath>
+		        <pathelement location="${ant.home}/lib/ant-launcher.jar"/>
+		    </classpath>
+		    <arg value="-buildfile"/>
+		    <arg file="${ant.file}"/>
+		    <arg value="-projecthelp"/>
 		</java>
 	</target>	
 
@@ -100,6 +110,9 @@
 		<condition property="include.test-security">
 			<available file="build.xml" filepath="test-security"/>
 		</condition>
+		<condition property="include.test-ejb">
+			<available file="build.xml" filepath="test-ejb"/>
+		</condition>
 	</target>
 	
 	<!-- ******************************************************************* -->
@@ -124,15 +137,12 @@
 		<ant inheritAll="false" dir="openejb" target="${ant.target}"/>
 	</target>
 	<target name="-test-core" depends="-init" if="include.test-core">
-		<ant inheritAll="false" dir="test-core">
-			<target name="clean"/>
-			<target name="distribution"/>		
-		</ant>
+		<ant inheritAll="false" dir="test-core"  target="${ant.target}"/>
 	</target>    
 	<target name="-test-security" depends="-init" if="include.test-security">
-		<ant inheritAll="false" dir="test-security">
-			<target name="clean"/>
-			<target name="distribution"/>		
-		</ant>
+		<ant inheritAll="false" dir="test-security" target="${ant.target}"/>
+	</target>    
+	<target name="-test-ejb" depends="-init" if="include.test-ejb">
+		<ant inheritAll="false" dir="test-ejb" target="${ant.target}"/>
 	</target>    
 </project>

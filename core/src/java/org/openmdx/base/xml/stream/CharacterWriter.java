@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: CharacterWriter.java,v 1.1 2010/02/18 14:31:23 hburger Exp $
+ * Name:        $Id: CharacterWriter.java,v 1.2 2010/06/02 09:22:56 hburger Exp $
  * Description: Character Writer 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/18 14:31:23 $
+ * Date:        $Date: 2010/06/02 09:22:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,7 +56,6 @@ import java.io.Writer;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-
 /**
  * Writes character data to the underlying XML Stream
  */
@@ -73,6 +72,9 @@ public class CharacterWriter extends Writer {
         this.delegate = delegate;
     }
     
+    /**
+     * The character writer delegates to an XML stream writer
+     */
     private final XMLStreamWriter delegate;
     
     /* (non-Javadoc)
@@ -84,7 +86,11 @@ public class CharacterWriter extends Writer {
         try {
             this.delegate.close();
         } catch (XMLStreamException exception) {
-            throw new IOException(exception);
+        	throw (IOException) new IOException(
+        		"Unable to close character writer"
+            ).initCause(
+            	exception
+            );
         }
     }
 
@@ -97,7 +103,11 @@ public class CharacterWriter extends Writer {
         try {
             this.delegate.flush();
         } catch (XMLStreamException exception) {
-            throw new IOException(exception);
+        	throw (IOException) new IOException(
+        		"Unable to flush character writer"
+            ).initCause(
+            	exception
+            );
         }
     }
 
@@ -106,12 +116,18 @@ public class CharacterWriter extends Writer {
      */
     @Override
     public void write(
-        char[] cbuf, int off, int len
+        char[] cbuf, 
+        int off, 
+        int len
     ) throws IOException {
         try {
             this.delegate.writeCharacters(cbuf, off, len);
         } catch (XMLStreamException exception) {
-            throw new IOException(exception);
+        	throw (IOException) new IOException(
+        		"Unable to write to character writer"
+            ).initCause(
+            	exception
+            );
         }
     }
 

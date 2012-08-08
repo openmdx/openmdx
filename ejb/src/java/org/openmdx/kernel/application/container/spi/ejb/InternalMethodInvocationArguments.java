@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: InternalMethodInvocationArguments.java,v 1.6 2009/12/31 14:12:35 wfro Exp $
+ * Name:        $Id: InternalMethodInvocationArguments.java,v 1.7 2010/06/04 22:45:00 hburger Exp $
  * Description: Value Holder
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/31 14:12:35 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -120,7 +120,8 @@ public class InternalMethodInvocationArguments {
     private static ThreadLocal<InternalMethodInvocationArguments> instances = 
         new ThreadLocal<InternalMethodInvocationArguments>() {
         
-        protected synchronized InternalMethodInvocationArguments initialValue() {
+        @Override
+		protected synchronized InternalMethodInvocationArguments initialValue() {
             return new InternalMethodInvocationArguments();
         }
     };
@@ -350,7 +351,8 @@ public class InternalMethodInvocationArguments {
          * @throws  ClassNotFoundException if class of a serialized object cannot
          *      be found
          */
-        protected Class<?> resolveClass(
+        @Override
+		protected Class<?> resolveClass(
             ObjectStreamClass desc
         ) throws IOException, ClassNotFoundException {
             try {

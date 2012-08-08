@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractConnection.java,v 1.6 2010/04/27 17:10:46 hburger Exp $
+ * Name:        $Id: AbstractConnection.java,v 1.8 2010/08/09 13:14:53 hburger Exp $
  * Description: Abstract Connection
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 17:10:46 $
+ * Date:        $Date: 2010/08/09 13:14:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -73,10 +73,36 @@ public abstract class AbstractConnection implements Connection {
      * @param connectionSpec 
      */
     protected AbstractConnection(
-        RestConnectionSpec connectionSpec
+        final RestConnectionSpec connectionSpec
     ){
         this.closed = false;
         this.connectionSpec = connectionSpec;
+        this.metaData = new ConnectionMetaData(){
+            /**
+             * It's an openMDX connection
+             */
+            public String getEISProductName(
+            ) throws ResourceException {
+                return "openMDX/REST";
+            }
+
+            /**
+             * with the given openMDX version
+             */
+            public String getEISProductVersion(
+            ) throws ResourceException {
+                return Version.getSpecificationVersion();
+            }
+
+            /**
+             * Use the stringified principal chain
+             */
+            public String getUserName(
+            ) throws ResourceException {
+                return connectionSpec == null ? null : connectionSpec.getUserName();
+            }
+            
+        };
     }
 
     /**
@@ -87,7 +113,7 @@ public abstract class AbstractConnection implements Connection {
     /**
      * The inbound connection's meta data
      */
-    private ConnectionMetaData metaData;
+    private final ConnectionMetaData metaData;
     
     /**
      * Tells whether the 
@@ -107,43 +133,16 @@ public abstract class AbstractConnection implements Connection {
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#getMetaData()
      */
-    @Override
+//  @Override
     public final ConnectionMetaData getMetaData(
     ) throws ResourceException {
-        if(this.metaData == null) {
-            this.metaData = new ConnectionMetaData(){
-                /**
-                 * It's an openMDX connection
-                 */
-                public String getEISProductName(
-                ) throws ResourceException {
-                    return "openMDX/REST";
-                }
-
-                /**
-                 * with the given openMDX version
-                 */
-                public String getEISProductVersion(
-                ) throws ResourceException {
-                    return Version.getSpecificationVersion();
-                }
-
-                /**
-                 * Use the stringified principal chain
-                 */
-                public String getUserName(
-                ) throws ResourceException {
-                    return getConnectionSpec().getUserName();
-                }
-            };
-        }
         return this.metaData;
     }
 
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#getResultSetInfo()
      */
-    @Override
+//  @Override
     public final ResultSetInfo getResultSetInfo(
     ) throws ResourceException {
         throw ResourceExceptions.initHolder( 
@@ -180,10 +179,10 @@ public abstract class AbstractConnection implements Connection {
     /* (non-Javadoc)
      * @see javax.resource.cci.Connection#close()
      */
-    @Override
+//  @Override
     public void close(
     ) throws ResourceException {
-        assertOpen();
+        this.assertOpen();
         this.closed = true;
     }
 

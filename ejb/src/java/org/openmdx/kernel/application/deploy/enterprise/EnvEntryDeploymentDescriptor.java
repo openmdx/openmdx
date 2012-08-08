@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: EnvEntryDeploymentDescriptor.java,v 1.3 2009/09/07 13:03:03 hburger Exp $
+ * Name:        $Id: EnvEntryDeploymentDescriptor.java,v 1.4 2010/06/04 22:44:59 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 13:03:03 $
+ * Date:        $Date: 2010/06/04 22:44:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,7 +68,8 @@ public class EnvEntryDeploymentDescriptor
   extends AbstractConfiguration
 {
 
-  public void parseXml(
+  @Override
+public void parseXml(
     Element element,
     Report report
   ) {
@@ -78,7 +79,8 @@ public class EnvEntryDeploymentDescriptor
     value = getElementContent(getOptionalChild(element, "env-entry-value", report));
   }
 
-  public void parseOpenMdxXml(
+  @Override
+public void parseOpenMdxXml(
     Element element,
     Report report
   ) {
@@ -174,7 +176,8 @@ public class EnvEntryDeploymentDescriptor
       }
   }
 
-  public void verify(
+  @Override
+public void verify(
     Report report
   ) {
     super.verify(report);

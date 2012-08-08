@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePaneControl.java,v 1.194 2010/04/27 08:29:13 wfro Exp $
+ * Name:        $Id: ReferencePaneControl.java,v 1.195 2010/07/22 23:18:23 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.194 $
+ * Revision:    $Revision: 1.195 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 08:29:13 $
+ * Date:        $Date: 2010/07/22 23:18:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -127,16 +127,16 @@ public class ReferencePaneControl
         ) {
           org.openmdx.ui1.jmi1.Tab tab = (org.openmdx.ui1.jmi1.Tab)pane.getMember().get(i);
           org.openmdx.ui1.jmi1.ObjectContainer objectContainer = (org.openmdx.ui1.jmi1.ObjectContainer)tab.getMember().get(0);
-          String title = 
-              localeAsIndex < tab.getTitle().size() ? 
-                  tab.getTitle().get(0).startsWith(WebKeys.TAB_GROUPING_CHARACTER) && !tab.getTitle().get(localeAsIndex).startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? 
-                      WebKeys.TAB_GROUPING_CHARACTER + tab.getTitle().get(localeAsIndex) :
-                      tab.getTitle().get(localeAsIndex) :
-                  tab.getTitle().get(0);
-          String toolTip = 
-              localeAsIndex < tab.getToolTip().size() ? 
-                  tab.getToolTip().get(localeAsIndex) : 
-                  title;              
+          String title = localeAsIndex < tab.getTitle().size() ? 
+              tab.getTitle().get(0).startsWith(WebKeys.TAB_GROUPING_CHARACTER) && !tab.getTitle().get(localeAsIndex).startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? 
+                  WebKeys.TAB_GROUPING_CHARACTER + tab.getTitle().get(localeAsIndex) :
+                	  tab.getTitle().get(localeAsIndex) :
+                		  !tab.getTitle().isEmpty() ? 
+                			  tab.getTitle().get(0) :
+                				  "NA";
+          String toolTip = localeAsIndex < tab.getToolTip().size() ? 
+              tab.getToolTip().get(localeAsIndex) : 
+            	  title;              
           references.add(
               new Action(
                   Action.EVENT_SELECT_REFERENCE,

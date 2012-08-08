@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SpecificationMapping_1.java,v 1.2 2010/04/17 12:49:08 hburger Exp $
+ * Name:        $Id: SpecificationMapping_1.java,v 1.4 2010/08/06 12:23:42 hburger Exp $
  * Description: Implementation Mapper 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/17 12:49:08 $
+ * Date:        $Date: 2010/08/06 12:23:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,6 +63,7 @@ import javax.jmi.reflect.RefStruct;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
@@ -152,11 +153,11 @@ class SpecificationMapping_1  {
         } 
         try {            
             descriptor = new PackageDescriptor(qualifiedName);
-            PackageDescriptor concurrent = this.packageDescriptors.putIfAbsent(
+            return Maps.putUnlessPresent(
+                this.packageDescriptors,
                 descriptor.nestedPackageName, 
                 descriptor
             );
-            return concurrent == null ? descriptor : concurrent;
         } catch (ServiceException exception) {
             this.packageDescriptors.put(
                 qualifiedName.intern(),
@@ -191,11 +192,11 @@ class SpecificationMapping_1  {
         } 
         try {            
             descriptor = new StructureDescriptor(qualifiedName);
-            StructureDescriptor concurrent = this.structureDescriptors.putIfAbsent(
+            return Maps.putUnlessPresent(
+                this.structureDescriptors,
                 descriptor.qualifiedName, 
                 descriptor
             );
-            return concurrent == null ? descriptor : concurrent;
         } catch (ServiceException exception) {
             this.structureDescriptors.put(
                 qualifiedName.intern(),
@@ -351,11 +352,11 @@ class SpecificationMapping_1  {
             } catch (Exception exception) {
                 constructor = this.defaultExceptionConstructor;
             }
-            Constructor<? extends RefException> concurrent = this.exceptionConstructors.putIfAbsent(
+            return Maps.putUnlessPresent(
+                this.exceptionConstructors,
                 qualifiedExceptionName.intern(),
                 constructor
             );
-            return concurrent == null ? constructor : concurrent;
         } else {
             return constructor;
         }
@@ -563,6 +564,8 @@ class SpecificationMapping_1  {
         private FeatureMapper terminalFeatureMapper;
         
         private FeatureMapper nonTerminalFeatureMapper;
+
+        private FeatureMapper queryFeatureMapper;
         
         private Class<? extends RefClass> classInterface;
         
@@ -592,41 +595,60 @@ class SpecificationMapping_1  {
             }
             return this.classInterface;
         }
-        
+
         /**
-         * Retrieve the feature mapper lazily
+         * Retrieve the ClassDef
          * 
-         * @return the terminal feature mapper
+         * @return the ClassDef
          * 
-         * @throws ServiceException
+         * @throws ServiceException 
          */
-        FeatureMapper getTerminalFeatureMapper(
-        ) throws ServiceException {
-            if(this.terminalFeatureMapper == null) {
-                this.terminalFeatureMapper = new FeatureMapper(
-                    Model_1Factory.getModel().getElement(this.qualifiedClassName),
-                    Jmi1Class_1_0.class
-                );
-            }
-            return this.terminalFeatureMapper;
+        ModelElement_1_0 getClassDef(
+        ) throws ServiceException{
+            return Model_1Factory.getModel().getElement(this.qualifiedClassName);
         }
         
         /**
          * Retrieve the feature mapper lazily
          * 
-         * @return the non-terminal feature mapper
+         * @param type the feature mapper type
          * 
-         * @throws ServiceException
+         * @return the requested feature mapper
+         * 
+         * @throws ServiceException in case of failure
          */
-        FeatureMapper getNonTerminalFeatureMapper(
-        ) throws ServiceException{
-            if(this.nonTerminalFeatureMapper == null) {
-                this.nonTerminalFeatureMapper = new FeatureMapper(
-                    Model_1Factory.getModel().getElement(this.qualifiedClassName),
-                    this.jmi1Interface
-                );
+        FeatureMapper getFeatureMapper(
+            FeatureMapper.Type type
+        ) throws ServiceException {
+            switch(type) {
+                case TEMRINAL:
+                    if(this.terminalFeatureMapper == null) {
+                        this.terminalFeatureMapper = new FeatureMapper(
+                            getClassDef(),
+                            Jmi1Class_1_0.class
+                        );
+                    }
+                    return this.terminalFeatureMapper;
+                case NON_TERMINAL:
+                    if(this.nonTerminalFeatureMapper == null) {
+                        this.nonTerminalFeatureMapper = new FeatureMapper(
+                            getClassDef(),
+                            this.jmi1Interface
+                        );
+                    }
+                    return this.nonTerminalFeatureMapper;
+                case QUERY:
+                    if(this.queryFeatureMapper == null) {
+                        this.queryFeatureMapper = new FeatureMapper(
+                            getClassDef(),
+                            this.queryInterface
+                        );
+                    }
+                    return this.queryFeatureMapper;
+                default:
+                    return null;
             }
-            return this.nonTerminalFeatureMapper;
+            
         }
 
     }

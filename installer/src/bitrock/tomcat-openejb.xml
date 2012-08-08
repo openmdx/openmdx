@@ -3,14 +3,14 @@
     <fullName>Tomcat + OpenEJB</fullName>
     <version>6.0.26</version>
     <installerFilename></installerFilename>
-    <readmeFile>../../image/openmdx-tomcat-ejb/README</readmeFile>
-    <licenseFile>../../image/openmdx-tomcat-ejb/LICENSE</licenseFile>
-    <logoImage>../../image/openmdx-tomcat-ejb/logo.png</logoImage>
-    <splashImage>../../image/openmdx-tomcat-ejb/splash.gif</splashImage>
-    <postInstallationScript>${installdir}/installer/openmdx-tomcat-ejb/bin/postinstallation.sh</postInstallationScript>
+    <readmeFile>../../image/openmdx-tomcat-ejb/tomcat-openejb/README</readmeFile>
+    <licenseFile>../../image/openmdx-tomcat-ejb/tomcat-openejb/LICENSE</licenseFile>
+    <logoImage>../../image/openmdx-tomcat-ejb/tomcat-openejb/logo.png</logoImage>
+    <splashImage>../../image/openmdx-tomcat-ejb/tomcat-openejb/splash.gif</splashImage>
+    <postInstallationScript>${installdir}/tomcat-openejb/installer/bin/postinstallation.sh</postInstallationScript>
     <showPostInstallationScriptResult>1</showPostInstallationScriptResult>
     <enableRollback>1</enableRollback>
-    <uninstallerDirectory>${installdir}/installer/openmdx-tomcat-ejb</uninstallerDirectory>
+    <uninstallerDirectory>${installdir}/tomcat-openejb/installer</uninstallerDirectory>
     <componentList>
         <component>
             <name>default</name>
@@ -83,35 +83,23 @@
                         <distributionDirectory>
                             <origin>../../image/openmdx-tomcat-ejb/bin</origin>
                         </distributionDirectory>
-                        <distributionFile>
-                            <origin>../../image/openmdx-tomcat-ejb/favicon.ico</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>../../image/openmdx-tomcat-ejb/README</origin>
-                        </distributionFile>
-                        <distributionFile>
-                            <origin>../../image/openmdx-tomcat-ejb/LICENSE</origin>
-                        </distributionFile>
                         <distributionDirectory>
-                            <origin>../../image/openmdx-tomcat-ejb/installer</origin>
+                            <origin>../../image/openmdx-tomcat-ejb/tomcat-openejb</origin>
                         </distributionDirectory>
-                        <distributionFile>
-                            <origin>../../image/openmdx-tomcat-ejb/tomcat-openejb.ico</origin>
-                        </distributionFile>
                     </distributionFileList>
                     <shortcutList>
                         <shortcut>
                             <comment>Uninstall</comment>
-                            <exec>${installdir}/installer/openmdx-tomcat-ejb/${uninstallerName}</exec>
+                            <exec>${installdir}/tomcat-openejb/installer/${uninstallerName}</exec>
                             <icon></icon>
                             <name>Uninstall ${product_fullname} (${tomcat_http_port})</name>
-                            <path>${installdir}/installer/openmdx-tomcat-ejb/</path>
+                            <path>${installdir}/tomcat-openejb/installer/</path>
                             <platforms>all</platforms>
                             <runInTerminal>0</runInTerminal>
-                            <windowsExec>${installdir}/installer/openmdx-tomcat-ejb/${uninstallerName}.exe</windowsExec>
+                            <windowsExec>${installdir}/tomcat-openejb/installer/${uninstallerName}.exe</windowsExec>
                             <windowsExecArgs></windowsExecArgs>
                             <windowsIcon></windowsIcon>
-                            <windowsPath>${installdir}/installer/openmdx-tomcat-ejb/</windowsPath>
+                            <windowsPath>${installdir}/tomcat-openejb/installer/</windowsPath>
                         </shortcut>
                         <shortcut>
                             <comment>Start Tomcat + OpenEJB ${product_version} (${tomcat_http_port})</comment>
@@ -208,10 +196,10 @@
                     <comment>Uninstall ${product_fullname} (${tomcat_http_port})</comment>
                     <name>Uninstall ${product_fullname} (${tomcat_http_port})</name>
                     <runInTerminal>0</runInTerminal>
-                    <windowsExec>${installdir}/installer/openmdx-tomcat-ejb/${uninstallerName}.exe</windowsExec>
+                    <windowsExec>${installdir}/tomcat-openejb/installer/${uninstallerName}.exe</windowsExec>
                     <windowsExecArgs></windowsExecArgs>
                     <windowsIcon></windowsIcon>
-                    <windowsPath>${installdir}/installer/openmdx-tomcat-ejb/</windowsPath>
+                    <windowsPath>${installdir}/tomcat-openejb/installer/</windowsPath>
                 </startMenuShortcut>
                 <startMenuShortcut>
                     <comment>Stop Tomcat + OpenEJB ${product_version} (${tomcat_http_port})</comment>
@@ -328,7 +316,7 @@
     </parameterList>
     <platformOptionsList>
         <platformOptions>
-            <postInstallationScript>${installdir}/installer/openmdx-tomcat-ejb/bin/postinstallation.bat</postInstallationScript>
+            <postInstallationScript>${installdir}/tomcat-openejb/installer/bin/postinstallation.bat</postInstallationScript>
             <postInstallationScriptArguments></postInstallationScriptArguments>
             <platform>windows</platform>
         </platformOptions>

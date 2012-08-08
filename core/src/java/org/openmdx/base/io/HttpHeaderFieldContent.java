@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: HttpHeaderFieldContent.java,v 1.4 2010/03/19 12:32:54 hburger Exp $
+ * Name:        $Id: HttpHeaderFieldContent.java,v 1.7 2010/06/02 13:44:39 hburger Exp $
  * Description: HTTP Header Field Content 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:32:54 $
+ * Date:        $Date: 2010/06/02 13:44:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -92,11 +92,13 @@ public final class HttpHeaderFieldContent implements Comparable<HttpHeaderFieldC
                 (eoa = header.indexOf(';', ++boa)) > 0;
                 boa = eoa
             ){
-                addParameter(header.substring(boa, eoa).trim());
+                this.addParameter(header.substring(boa, eoa).trim());
             }
-            addParameter(header.substring(boa).trim());
+            this.addParameter(header.substring(boa).trim());
         }
-        this.order = minor - toQuality(getParameterValue("q",null));
+        this.order = minor - HttpHeaderFieldContent.toQuality(
+            this.getParameterValue("q",null)
+        );
     }
     
     /**
@@ -190,7 +192,7 @@ public final class HttpHeaderFieldContent implements Comparable<HttpHeaderFieldC
     /* (non-Javadoc)
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
-    @Override
+//  @Override
     public int compareTo(
         HttpHeaderFieldContent that
     ) {

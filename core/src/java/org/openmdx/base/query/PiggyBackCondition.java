@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PiggyBackCondition.java,v 1.5 2010/03/31 14:39:23 hburger Exp $
- * Description: PiggyBackCondition
- * Revision:    $Revision: 1.5 $
+ * Name:        $Id: PiggyBackCondition.java,v 1.8 2010/06/21 17:33:11 hburger Exp $
+ * Description: Piggy-Back Condition
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/31 14:39:23 $
+ * Date:        $Date: 2010/06/21 17:33:11 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,69 +45,88 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.query;
 
-import java.io.Serializable;
 
-
-public class PiggyBackCondition
-    extends Condition
-    implements Serializable, Cloneable {
-
+/**
+ * Required to decode legacy XML data
+ * 
+ * @deprecated use {@link org.openmdx.base.query.Extension}
+ */
+@Deprecated
+public class PiggyBackCondition extends Condition {
+    
+    /**
+     * Required to decode legacy XML data
+     * 
+     * @deprecated use {@link org.openmdx.base.query.Extension}
+     */
+    @Deprecated
     public PiggyBackCondition(
     ) {
-        super(
-            EMPTY_OBJECT_ARRAY
-        );
+        super();
     }
-  
-    public PiggyBackCondition(
+
+    /**
+     * Constructor 
+     *
+     * @param feature
+     * @param values
+     */
+    private PiggyBackCondition(
         String feature,
         Object... values
     ) {
         super(
             null,
             feature,
-            true,
             values
         );
     }
 
-    public String getName(
-    ) {
-        return "PIGGY_BACK";
-    }
-
-    public Object getValue(
-        int index
-    ) {
-        return this.values[index];
-    }
-
-    public Object[] getValue(
-    ) {
-        return this.values;
-    }
-
-    public void setValue(
-        Object... values
-    ) {
-        this.values = values;
-    }
-
-    public void setValue(
-        int index,
-        Object value
-    ) {
-        this.values[index] = value;
-    }
-
-    //-----------------------------------------------------------------------
-    // Members
-    //-----------------------------------------------------------------------
+    /**
+     * Implements <code>Serializable</code>
+     */
     private static final long serialVersionUID = -734596366612105605L;
+
+    /**
+     * Clone the condition
+     * 
+     * @return a clone
+     */
+    @Override
+    public PiggyBackCondition clone(
+    ) throws CloneNotSupportedException {
+        return new PiggyBackCondition(
+            this.getFeature(), 
+            this.getValue()
+        );
+    }
+
+    /**
+     * Retrieve the condition's type
+     * 
+     * @return <code>null</code>
+     */
+    @Override
+    public ConditionType getType(
+    ) {
+        return null;
+    }
+
+    /**
+     * Required to decode legacy XML data
+     * 
+     * @deprecated
+     */
+    @Deprecated
+    public void setFulfil(
+        boolean fulfil
+    ) {
+        // ignored
+    }
 
 }

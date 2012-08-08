@@ -33,7 +33,7 @@ import java.util.Set;
  * Exceptions include <code>BidiMap</code> implementations, as they require unique values.
  *
  * @since Commons Collections 3.1
- * @version $Revision: 1.1 $ $Date: 2009/05/26 12:40:49 $
+ * @version $Revision: 1.2 $ $Date: 2010/06/02 13:44:25 $
  * 
  * @author Stephen Colebourne
  */
@@ -148,10 +148,12 @@ public final class MapBackedSet implements Set, Serializable {
         return map.keySet().toArray(array);
     }
 
+    @Override
     public boolean equals(Object obj) {
         return map.keySet().equals(obj);
     }
 
+    @Override
     public int hashCode() {
         return map.keySet().hashCode();
     }

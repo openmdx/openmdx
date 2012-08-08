@@ -1,7 +1,7 @@
 /*
  * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/StackKeyedObjectPool.java,v $
- * $Revision: 1.5 $
- * $Date: 2008/03/21 18:42:15 $
+ * $Revision: 1.6 $
+ * $Date: 2010/06/02 13:46:51 $
  *
  * ====================================================================
  *
@@ -84,7 +84,7 @@ import org.openmdx.uses.org.apache.commons.pool.KeyedPoolableObjectFactory;
  * artificial limits.
  *
  * @author Rodney Waldhoff
- * @version $Id: StackKeyedObjectPool.java,v 1.5 2008/03/21 18:42:15 hburger Exp $
+ * @version $Id: StackKeyedObjectPool.java,v 1.6 2010/06/02 13:46:51 hburger Exp $
  */
 @SuppressWarnings("unchecked")
 public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedObjectPool {
@@ -166,6 +166,7 @@ public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedOb
         _activeCount = new HashMap();
     }
 
+    @Override
     public synchronized Object borrowObject(Object key) throws Exception {
         Object obj = null;
         Stack stack = (Stack)(_pools.get(key));
@@ -191,6 +192,7 @@ public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedOb
         return obj;
     }
 
+    @Override
     public synchronized void returnObject(Object key, Object obj) throws Exception {
         decrementActiveCount(key);
         if(null == _factory || _factory.validateObject(key,obj)) {
@@ -223,6 +225,7 @@ public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedOb
         }
     }
 
+    @Override
     public synchronized void invalidateObject(Object key, Object obj) throws Exception {
         decrementActiveCount(key);
         if(null != _factory) {
@@ -231,6 +234,7 @@ public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedOb
         notifyAll(); // _totalActive has changed
     }
 
+    @Override
     public void addObject(Object key) throws Exception {
         Object obj = _factory.makeObject(key);
         synchronized(this) {
@@ -239,18 +243,22 @@ public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedOb
         }
     }
 
+    @Override
     public int getNumIdle() {
         return _totIdle;
     }
 
+    @Override
     public int getNumActive() {
         return _totActive;
     }
 
+    @Override
     public int getNumActive(Object key) {
         return getActiveCount(key);
     }
 
+    @Override
     public synchronized int getNumIdle(Object key) {
         try {
             return((Stack)(_pools.get(key))).size();
@@ -259,6 +267,7 @@ public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedOb
         }
     }
 
+    @Override
     public synchronized void clear() {
         Iterator it = _pools.keySet().iterator();
         while(it.hasNext()) {
@@ -271,6 +280,7 @@ public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedOb
         _activeCount.clear();
     }
 
+    @Override
     public synchronized void clear(Object key) {
         Stack stack = (Stack)(_pools.remove(key));
         destroyStack(key,stack);
@@ -296,6 +306,7 @@ public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedOb
         }
     }
 
+    @Override
     public synchronized String toString() {
         StringBuffer buf = new StringBuffer();
         buf.append(getClass().getName());
@@ -310,6 +321,7 @@ public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedOb
         return buf.toString();
     }
 
+    @Override
     public synchronized void close() throws Exception {
         clear();
         _pools = null;
@@ -317,6 +329,7 @@ public class StackKeyedObjectPool extends BaseKeyedObjectPool implements KeyedOb
         _activeCount = null;
     }
 
+    @Override
     public synchronized void setFactory(KeyedPoolableObjectFactory factory) throws IllegalStateException {
         if(0 < getNumActive()) {
             throw new IllegalStateException("Objects are already active");

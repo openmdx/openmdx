@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.37 2010/03/31 14:40:36 hburger Exp $
+ * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.39 2010/08/06 12:23:42 hburger Exp $
  * Description: Jmi1StructInvocationHandler 
- * Revision:    $Revision: 1.37 $
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/31 14:40:36 $
+ * Date:        $Date: 2010/08/06 12:23:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2007-2008, OMEX AG, Switzerland
+ * Copyright (c) 2007-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -72,8 +72,8 @@ import javax.resource.cci.MappedRecord;
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.TreeSparseArray;
@@ -102,7 +102,7 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
      * @param delegate
      */
     public Jmi1StructInvocationHandler(
-        RefPackage_1_0 refPackage,
+        Jmi1Package_1_0 refPackage,
         MappedRecord delegate
     ) {
         this.refPackage = refPackage;
@@ -117,13 +117,11 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
         String structName = this.delegate.getRecordName();
         ConcurrentMap<String,ModelElement_1_0> fields = allFields.get(structName);
         if(fields == null) {
-            ConcurrentMap<String,ModelElement_1_0> concurrent = allFields.putIfAbsent(
+            fields = Maps.putUnlessPresent(
+                allFields,
                 structName, 
-                fields = new ConcurrentHashMap<String,ModelElement_1_0>()
+                new ConcurrentHashMap<String,ModelElement_1_0>()
             );
-            if(concurrent != null) {
-                fields = concurrent;
-            }
         }
         ModelElement_1_0 fieldDef = fields.get(methodName);
         if(fieldDef == null) {
@@ -346,6 +344,6 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
     protected final static ConcurrentMap<String,ConcurrentMap<String,ModelElement_1_0>> allFields = 
         new ConcurrentHashMap<String,ConcurrentMap<String,ModelElement_1_0>>();
     protected final MappedRecord delegate;
-    protected final RefPackage_1_0 refPackage;
+    protected final Jmi1Package_1_0 refPackage;
 
 }

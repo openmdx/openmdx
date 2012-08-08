@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: XMLOutputFactories.java,v 1.5 2010/03/19 12:32:54 hburger Exp $
+ * Name:        $Id: XMLOutputFactories.java,v 1.6 2010/05/18 00:32:43 hburger Exp $
  * Description: XML Output Factory Builder
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:32:54 $
+ * Date:        $Date: 2010/05/18 00:32:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,6 +59,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
@@ -99,7 +100,7 @@ public class XMLOutputFactories {
     public static boolean isSupported(
         String mimeType
     ){
-        return classes.containsKey(mimeType);
+        return XMLOutputFactories.configuration.containsKey(mimeType);
     }
         
     /**
@@ -108,16 +109,18 @@ public class XMLOutputFactories {
      * @param mimeType
      * 
      * @return a new XML Output Factory
+     * 
+     * @throws XMLStreamException if no factory can be provided for the given MIME type
      */
     public static XMLOutputFactory newInstance(
         String mimeType
-    ){
-        Class<? extends XMLOutputFactory> factoryClass = classes.get(mimeType);
+    ) throws XMLStreamException {
+        Class<? extends XMLOutputFactory> factoryClass = XMLOutputFactories.classes.get(mimeType);
         if(factoryClass == null) {
-            String factoryName = configuration.getProperty(mimeType);
+            String factoryName = XMLOutputFactories.configuration.getProperty(mimeType);
             if(factoryName == null) {
                 throw BasicException.initHolder(
-                    new IllegalArgumentException(
+                    new XMLStreamException(
                         "No XMLOutputFactory configured for the given MIME type",
                         BasicException.newEmbeddedExceptionStack(
                             BasicException.Code.DEFAULT_DOMAIN,
@@ -128,13 +131,13 @@ public class XMLOutputFactories {
                );
             }
             try {
-                classes.put(
+                XMLOutputFactories.classes.put(
                     mimeType,
                     factoryClass = Classes.getApplicationClass(factoryName)
                 );
             } catch (ClassNotFoundException exception) {
                 throw BasicException.initHolder(
-                    new IllegalArgumentException(
+                    new XMLStreamException(
                         "XMLOutputFactory class for the given MIME type not found",
                         BasicException.newEmbeddedExceptionStack(
                             exception,
@@ -155,7 +158,7 @@ public class XMLOutputFactories {
             return factory;
         } catch (Exception exception) {
             throw BasicException.initHolder(
-                new IllegalArgumentException(
+                new XMLStreamException(
                     "XMLOutputFactory class for the given MIME type could not be instantiated",
                     BasicException.newEmbeddedExceptionStack(
                         exception,

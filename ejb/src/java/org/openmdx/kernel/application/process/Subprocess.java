@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Subprocess.java,v 1.1 2009/10/08 15:24:52 hburger Exp $
+ * Name:        $Id: Subprocess.java,v 1.2 2010/06/04 22:45:00 hburger Exp $
  * Description: SubProcess
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/08 15:24:52 $
+ * Date:        $Date: 2010/06/04 22:45:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -202,6 +202,7 @@ public class Subprocess extends Thread {
     /* (non-Javadoc)
 	 * @see java.lang.Runnable#run()
 	 */
+	@Override
 	public void run() {
 		try {
 			this.process.waitFor();
@@ -256,6 +257,7 @@ public class Subprocess extends Thread {
 	/**
 	 * Kills the subprocess
 	 */
+	@Override
 	public void destroy() {
 		this.process.destroy();
 	}
@@ -288,6 +290,7 @@ public class Subprocess extends Thread {
 		/* (non-Javadoc)
 		 * @see java.lang.Runnable#run()
 		 */
+		@Override
 		public void run() {
 			try {
 				for(

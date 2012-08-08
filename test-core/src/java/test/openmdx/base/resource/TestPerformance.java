@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestPerformance.java,v 1.8 2010/03/19 12:34:36 hburger Exp $
+ * Name:        $Id: TestPerformance.java,v 1.10 2010/06/03 15:58:06 hburger Exp $
  * Description: class TestPerformance
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:34:36 $
+ * Date:        $Date: 2010/06/03 15:58:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -18,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
  * distribution.
- * 
+ *   
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -60,7 +60,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 
@@ -80,6 +79,7 @@ import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.RestFormat;
 import org.openmdx.base.text.conversion.UUIDConversion;
+import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.state2.spi.DateStateContexts;
 import org.xml.sax.InputSource;
@@ -97,7 +97,7 @@ public class TestPerformance {
 
             private BinarySink sink = new BinarySink();
             private boolean prolog = true;
-            
+
             /* (non-Javadoc)
              * @see test.openmdx.base.resource.TestPerformance.SerializationTest#reset()
              */
@@ -136,38 +136,38 @@ public class TestPerformance {
                 target.flush();
                 return this.sink.size();
             }
-            
+
         },
-//      new SerializationTest("XML (UTF-16)"){
-//          
-//          private RestFormat restFormat = new RestFormat();
-//          private UTF16Sink sink = new UTF16Sink();
-//            
-//          /* (non-Javadoc)
-//           * @see test.openmdx.base.resource.TestPerformance.SerializationTest#deserialize()
-//           */
-//          @Override
-//          public void deserialize() throws Exception {
-//              RestFormat.Source bIn = sink.asSource();
-//              IndexedRecord resultSet = Records.getRecordFactory().createIndexedRecord(ResultRecord.NAME);
-//              this.restFormat.parseResponse(resultSet, bIn);
-//          }
-//
-//          /* (non-Javadoc)
-//           * @see test.openmdx.base.resource.TestPerformance.SerializationTest#serialize()
-//           */
-//          @Override
-//          public int serialize() throws Exception {
-//              this.sink.reset();
-//              restFormat.format(sink, BASE, resultSet);
-//              return this.sink.size();
-//          }
-//      
-//      },
+        //      new SerializationTest("XML (UTF-16)"){
+        //          
+        //          private RestFormat restFormat = new RestFormat();
+        //          private UTF16Sink sink = new UTF16Sink();
+        //            
+        //          /* (non-Javadoc)
+        //           * @see test.openmdx.base.resource.TestPerformance.SerializationTest#deserialize()
+        //           */
+        //          @Override
+        //          public void deserialize() throws Exception {
+        //              RestFormat.Source bIn = sink.asSource();
+        //              IndexedRecord resultSet = Records.getRecordFactory().createIndexedRecord(ResultRecord.NAME);
+        //              this.restFormat.parseResponse(resultSet, bIn);
+        //          }
+        //
+        //          /* (non-Javadoc)
+        //           * @see test.openmdx.base.resource.TestPerformance.SerializationTest#serialize()
+        //           */
+        //          @Override
+        //          public int serialize() throws Exception {
+        //              this.sink.reset();
+        //              restFormat.format(sink, BASE, resultSet);
+        //              return this.sink.size();
+        //          }
+        //      
+        //      },
         new SerializationTest("XML (UTF-8)"){
-            
+
             private UTF8Sink sink = new UTF8Sink();
-            
+
             /* (non-Javadoc)
              * @see test.openmdx.base.resource.TestPerformance.SerializationTest#deserialize()
              */
@@ -212,10 +212,10 @@ public class TestPerformance {
                 RestFormat.format(sink, BASE, resultSet);
                 return this.sink.size();
             }
-            
+
         }
     };
-    
+
     @Test
     public void testSerialization(
     ) throws Exception {
@@ -298,17 +298,17 @@ public class TestPerformance {
             }
         }
     }
-     
+
     static abstract class SerializationTest {
-        
+
         SerializationTest(
             String name
         ){
             this.name = name;
         }
-        
+
         private final String name;
-        
+
         private long elapsedTimeForSerialization;
         private long elapsedTimeForDeserialization;
         private long byteCount;
@@ -319,14 +319,14 @@ public class TestPerformance {
             this.elapsedTimeForDeserialization = 0l;
             this.byteCount = 0l;
         }
-        
+
         protected abstract int serialize(
             IndexedRecord resultSet
         ) throws Exception;
-        
+
         protected abstract void deserialize(
         ) throws Exception;
-        
+
         protected void run(
             IndexedRecord data
         ) throws Exception {
@@ -337,7 +337,7 @@ public class TestPerformance {
             deserialize();
             this.elapsedTimeForDeserialization += System.nanoTime() - deserializationStart;
         }
-        
+
         protected void epilog(
         ){
             System.out.println(name + " processing a result set with " + SIZE + " objects");
@@ -346,7 +346,7 @@ public class TestPerformance {
             System.out.println("\ttotal: " + ((elapsedTimeForDeserialization+elapsedTimeForDeserialization) / 1000 / LOOP) + " \u00b5s");
             System.out.println("\tdata: " + (byteCount / LOOP) + " bytes");
         }
-        
+
     }
 
     static class WBXMLSink extends RestFormat.Target {
@@ -361,7 +361,7 @@ public class TestPerformance {
         private static final String MIME_TYPE = "application/vnd.openmdx.wbxml";
 
         private final BinarySink sink = new BinarySink();
-        
+
         /* (non-Javadoc)
          * @see org.openmdx.application.rest.http.RestFormat.Target#newWriter()
          */
@@ -370,25 +370,26 @@ public class TestPerformance {
         ) throws XMLStreamException {
             return RestFormat.getOutputFactory(MIME_TYPE).createXMLStreamWriter(sink);
         }
-        
+
         @Override
         public void reset() {
             super.reset();
             this.sink.reset();
         }
-        
+
         RestFormat.Source asSource(){
             return new RestFormat.Source(
                 getBase(),
                 new InputSource(sink.asSource()),
-                MIME_TYPE
+                MIME_TYPE, 
+                null
             );
         }
-     
+
         int size(){
             return sink.size();
         }
-        
+
     }
 
     static class UTF16Sink extends RestFormat.Target {
@@ -401,9 +402,9 @@ public class TestPerformance {
         }
 
         private final StringWriter sink = new StringWriter();
-        
+
         private static final String MIME_TYPE = "text/xml";
-        
+
         /* (non-Javadoc)
          * @see org.openmdx.application.rest.http.RestFormat.Target#newWriter()
          */
@@ -412,29 +413,30 @@ public class TestPerformance {
         ) throws XMLStreamException {
             return RestFormat.getOutputFactory(MIME_TYPE).createXMLStreamWriter(sink);
         }
-        
+
         @Override
         public void reset() {
             super.reset();
             this.sink.getBuffer().setLength(0);
         }
-        
+
         RestFormat.Source asSource(){
             return new RestFormat.Source(
                 getBase(),
                 new InputSource(
                     new StringReader(sink.getBuffer().toString())
                 ),
-                MIME_TYPE
+                MIME_TYPE, 
+                null
             );
         }
-     
+
         int size(){
             return 2 * this.sink.getBuffer().length();
         }
-        
+
     }
-    
+
     static class UTF8Sink extends RestFormat.Target {
 
         /**
@@ -447,7 +449,7 @@ public class TestPerformance {
         private static final String MIME_TYPE = "application/xml";
 
         private final BinarySink sink = new BinarySink();
-        
+
         /* (non-Javadoc)
          * @see org.openmdx.application.rest.http.RestFormat.Target#newWriter()
          */
@@ -458,29 +460,30 @@ public class TestPerformance {
                 new UTF8Writer(sink)
             );
         }
-        
+
         @Override
         public void reset() {
             super.reset();
             this.sink.reset();
         }
-        
+
         RestFormat.Source asSource(){
             InputSource source = new InputSource(this.sink.asSource());
             source.setEncoding("UTF-8");
             return new RestFormat.Source(
                 getBase(),
                 source,
-                MIME_TYPE
+                MIME_TYPE, 
+                null
             );
         }
-     
+
         int size(){
             return this.sink.size();
         }
-        
+
     }
-    
+
     /**
      * Binary Buffer
      */
@@ -520,13 +523,16 @@ public class TestPerformance {
          *
          * @param   b   the byte to be written.
          */
-        public void write(int b) {
-        int newcount = count + 1;
-        if (newcount > buf.length) {
-                buf = Arrays.copyOf(buf, Math.max(buf.length << 1, newcount));
-        }
-        buf[count] = (byte)b;
-        count = newcount;
+        @Override
+        public void write(
+            int b
+        ) {
+            int newcount = count + 1;
+            if (newcount > buf.length) {
+                buf = ArraysExtension.copyOf(buf, Math.max(buf.length << 1, newcount));
+            }
+            buf[count] = (byte)b;
+            count = newcount;
         }
 
         /**
@@ -537,38 +543,43 @@ public class TestPerformance {
          * @param   off   the start offset in the data.
          * @param   len   the number of bytes to write.
          */
-        public void write(byte b[], int off, int len) {
-        if ((off < 0) || (off > b.length) || (len < 0) ||
-                ((off + len) > b.length) || ((off + len) < 0)) {
-            throw new IndexOutOfBoundsException();
-        } else if (len == 0) {
-            return;
-        }
+        @Override
+        public void write(
+            byte b[], 
+            int off, 
+            int len
+        ) {
+            if ((off < 0) || (off > b.length) || (len < 0) ||
+                    ((off + len) > b.length) || ((off + len) < 0)) {
+                throw new IndexOutOfBoundsException();
+            } else if (len == 0) {
+                return;
+            }
             int newcount = count + len;
             if (newcount > buf.length) {
-                buf = Arrays.copyOf(buf, Math.max(buf.length << 1, newcount));
+                buf = ArraysExtension.copyOf(buf, Math.max(buf.length << 1, newcount));
             }
             System.arraycopy(b, off, buf, count, len);
             count = newcount;
         }
 
         public void reset() {
-        count = 0;
+            count = 0;
         }
 
         InputStream asSource(
         ){
             return new BinarySource(this.buf, 0, this.count);
         }
-        
+
         int size(){
             return count;
         }
     }
 
-    
+
     static class BinarySource extends InputStream {
-        
+
         protected byte buf[];
 
         protected int pos;
@@ -578,67 +589,82 @@ public class TestPerformance {
         protected int count;
 
         public BinarySource(byte buf[]) {
-        this.buf = buf;
+            this.buf = buf;
             this.pos = 0;
-        this.count = buf.length;
+            this.count = buf.length;
         }
 
         public BinarySource(byte buf[], int offset, int length) {
-        this.buf = buf;
+            this.buf = buf;
             this.pos = offset;
-        this.count = Math.min(offset + length, buf.length);
+            this.count = Math.min(offset + length, buf.length);
             this.mark = offset;
         }
 
-        public int read() {
-        return (pos < count) ? (buf[pos++] & 0xff) : -1;
+        @Override
+        public int read(
+        ) {
+            return (pos < count) ? (buf[pos++] & 0xff) : -1;
         }
 
-        public int read(byte b[], int off, int len) {
-        if (b == null) {
-            throw new NullPointerException();
-        } else if (off < 0 || len < 0 || len > b.length - off) {
-            throw new IndexOutOfBoundsException();
-        }
-        if (pos >= count) {
-            return -1;
-        }
-        if (pos + len > count) {
-            len = count - pos;
-        }
-        if (len <= 0) {
-            return 0;
-        }
-        System.arraycopy(buf, pos, b, off, len);
-        pos += len;
-        return len;
-        }
-
-        public long skip(long n) {
-        if (pos + n > count) {
-            n = count - pos;
-        }
-        if (n < 0) {
-            return 0;
-        }
-        pos += n;
-        return n;
+        @Override
+        public int read(
+            byte b[], 
+            int off, 
+            int len
+        ) {
+            if (b == null) {
+                throw new NullPointerException();
+            } else if (off < 0 || len < 0 || len > b.length - off) {
+                throw new IndexOutOfBoundsException();
+            }
+            if (pos >= count) {
+                return -1;
+            }
+            if (pos + len > count) {
+                len = count - pos;
+            }
+            if (len <= 0) {
+                return 0;
+            }
+            System.arraycopy(buf, pos, b, off, len);
+            pos += len;
+            return len;
         }
 
-        public int available() {
-        return count - pos;
+        @Override
+        public long skip(
+            long n
+        ) {
+            if (pos + n > count) {
+                n = count - pos;
+            }
+            if (n < 0) {
+                return 0;
+            }
+            pos += n;
+            return n;
         }
 
+        @Override
+        public int available(
+        ) {
+            return count - pos;
+        }
+
+        @Override
         public boolean markSupported() {
-        return true;
+            return true;
         }
 
+        @Override
         public void mark(int readAheadLimit) {
-        mark = pos;
+            mark = pos;
         }
 
+        @Override
         public void reset() {
-        pos = mark;
+            pos = mark;
         }
 
     }

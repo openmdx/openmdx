@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AccessMode.java,v 1.1 2009/01/09 23:22:16 hburger Exp $
+ * Name:        $Id: AccessMode.java,v 1.3 2010/07/09 13:52:41 hburger Exp $
  * Description: Access 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/09 23:22:16 $
+ * Date:        $Date: 2010/07/09 13:52:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -56,7 +56,19 @@ package org.openmdx.state2.aop1;
  */
 enum AccessMode {
 
+    /**
+     * Ask for a specific state
+     */
+    UNDERLYING_STATE,
+    
+    /**
+     * Provide states for query
+     */
     FOR_QUERY,
+    
+    /**
+     * Provide states for update
+     */
     FOR_UPDATE
 
 }

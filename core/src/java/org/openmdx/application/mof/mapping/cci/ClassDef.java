@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ClassDef.java,v 1.3 2009/05/16 22:17:49 wfro Exp $
+ * Name:        $Id: ClassDef.java,v 1.5 2010/06/21 09:49:15 hburger Exp $
  * Description: VelocityClassDef class
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:49 $
+ * Date:        $Date: 2010/06/21 09:49:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -158,6 +158,7 @@ public class ClassDef
   /**
    * @deprecated Use {@link #ClassDef(String,String,String,Set,boolean,boolean,List,ModelElement_1_0, Model_1_0, MetaData_1_0)} instead
    */
+  @Deprecated
   public ClassDef(
     String name,
     String qualifiedName,
@@ -200,6 +201,7 @@ public class ClassDef
   /* (non-Javadoc)
    * @see org.openmdx.model1.mapping.ClassifierDef#getSupertypes()
    */
+  @Override
   public List getSupertypes() {
       if(
           super.supertypes == null &&
@@ -217,6 +219,7 @@ public class ClassDef
   /* (non-Javadoc)
    * @see java.lang.Object#equals(java.lang.Object)
    */
+  @Override
   public boolean equals(Object that) {
     return 
         that instanceof ClassDef && 
@@ -226,6 +229,7 @@ public class ClassDef
   /* (non-Javadoc)
    * @see java.lang.Object#hashCode()
    */
+  @Override
  public int hashCode() {
     return this.classDef.hashCode();
   }

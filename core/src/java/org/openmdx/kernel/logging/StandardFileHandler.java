@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StandardFileHandler.java,v 1.2 2009/04/01 13:33:33 hburger Exp $
+ * Name:        $Id: StandardFileHandler.java,v 1.3 2010/06/02 13:46:07 hburger Exp $
  * Description: Direct File Handler 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/01 13:33:33 $
+ * Date:        $Date: 2010/06/02 13:46:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -243,6 +243,7 @@ public class StandardFileHandler extends FileHandler {
      * @exception  SecurityException  if a security manager exists and if
      *             the caller does not have <tt>LoggingPermission("control")</tt>.
      */
+    @Override
     protected synchronized void setOutputStream(
         OutputStream out
     ) throws SecurityException {
@@ -269,6 +270,7 @@ public class StandardFileHandler extends FileHandler {
      * @exception  UnsupportedEncodingException if the named encoding is
      *      not supported.
      */
+    @Override
     public void setEncoding(
         String encoding
     ) throws SecurityException, java.io.UnsupportedEncodingException {

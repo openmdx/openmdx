@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ElementFilter.java,v 1.6 2005/11/20 16:41:14 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ElementFilter.java,v 1.7 2010/06/04 22:16:17 hburger Exp $
  * Description: element Filter
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/11/20 16:41:14 $
+ * Date:        $Date: 2010/06/04 22:16:17 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -212,7 +211,8 @@ public class ElementFilter
      *
      * @exception  IOException  If an I/O error occurs
      */
-    public int read() throws IOException {    	
+    @Override
+	public int read() throws IOException {    	
     	int c0;
     	if(this.content == null) {
     		c0 = super.read();
@@ -350,6 +350,7 @@ public class ElementFilter
 		/* (non-Javadoc)
 		 * @see org.apache.tools.ant.types.FilterSet#addFilter(org.apache.tools.ant.types.FilterSet.Filter)
 		 */
+		@Override
 		public synchronized void addFilter(Filter filter) {
 			addFilter(filter.getToken(), filter.getValue());
 		}
@@ -357,6 +358,7 @@ public class ElementFilter
 		/* (non-Javadoc)
 		 * @see org.apache.tools.ant.types.FilterSet#addFilter(java.lang.String, java.lang.String)
 		 */
+		@Override
 		public synchronized void addFilter(String token, String value) {
 			this.mapping.put(token, value);
 		}

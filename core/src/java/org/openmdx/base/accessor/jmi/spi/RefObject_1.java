@@ -1,15 +1,15 @@
 /*
  * ==================================================================== 
- * Name: $Id: RefObject_1.java,v 1.130 2010/04/16 18:24:20 hburger Exp $ 
+ * Name: $Id: RefObject_1.java,v 1.134 2010/06/22 07:13:54 hburger Exp $ 
  * Description: RefObject_1 class 
- * Revision: $Revision: 1.130 $ 
- * Owner: OMEX AG, Switzerland,
- *        http://www.omex.ch Date: $Date: 2010/04/16 18:24:20 $
+ * Revision: $Revision: 1.134 $ 
+ * Owner: OMEX AG, Switzerland, http://www.omex.ch 
+ * Date: $Date: 2010/06/22 07:13:54 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -112,9 +112,9 @@ import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
-import org.openmdx.base.query.FilterOperators;
-import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.query.Quantors;
+import org.openmdx.base.query.Filter;
+import org.openmdx.base.query.IsInCondition;
+import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
@@ -181,8 +181,6 @@ class RefObject_1
     );
     
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[] {};
-    private static final String OPENMDX_2_JDO = "This JDO operation is not supported by openMDX";
-
     private transient RefObject metaObject = null;
     private transient ModelElement_1_0 refClassDef = null;
 
@@ -382,13 +380,13 @@ class RefObject_1
                     return value;
                 } 
                 else if (model.isStructureType(type)) {
-                    return refOutermostPackage().refCreateStruct((Record)value);
+                    return this.refOutermostPackage().refCreateStruct((Record)value);
                 } 
                 else if (
                     model.isClassType(type) || 
                         PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
                 ) {
-                    return refOutermostPackage().marshal(value);
+                    return this.refOutermostPackage().marshal(value);
                 } 
                 else {
                     return value;
@@ -450,7 +448,7 @@ class RefObject_1
                     model.isClassType(type) || 
                     PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
                 ) {
-                    return new MarshallingList(refOutermostPackage(), values);
+                    return new MarshallingList(this.refOutermostPackage(), values);
                 } 
                 else {
                     return values;
@@ -509,7 +507,7 @@ class RefObject_1
                     model.isClassType(type) || 
                     PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
                 ) {
-                    return new MarshallingSet(refOutermostPackage(), values);
+                    return new MarshallingSet(this.refOutermostPackage(), values);
                 } 
                 else {
                     return values;
@@ -556,7 +554,7 @@ class RefObject_1
                     model.isClassType(type) || 
                     PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
                 ) {
-                    return new MarshallingSortedMap(refOutermostPackage(), values);
+                    return new MarshallingSortedMap(this.refOutermostPackage(), values);
                 } 
                 else {
                     return values;
@@ -566,7 +564,7 @@ class RefObject_1
             else if (Multiplicities.MAP.equals(multiplicity)) {
                 Container_1_0 values = this.object.objGetContainer(featureName);
                 return values == null ? null : new MarshallingMap(
-                    refOutermostPackage(),
+                    this.refOutermostPackage(),
                     values
                 );
             } 
@@ -622,24 +620,24 @@ class RefObject_1
                 Container_1_0 container = ((RefObject_1_0)qualifier).refDelegate().objGetContainer(
                     qualifierName
                 ).subMap(
-                    new FilterProperty[] {
-                        new FilterProperty(
-                            Quantors.THERE_EXISTS,
+                    new Filter(
+                        new IsInCondition(
+                            Quantifier.THERE_EXISTS,
                             exposedEndName,
-                            FilterOperators.IS_IN,
+                            true, // IS_IN,
                             this.object.jdoGetObjectId()
                         )
-                    }
+                    )
                 );
                 return new RefContainer_1(
-                    refOutermostPackage(), 
+                    this.refOutermostPackage(), 
                     container
                 );
             }
 
             // Primitive type or null qualifier
             else {
-                RefRootPackage_1 rootPkg = refOutermostPackage();
+                RefRootPackage_1 rootPkg = this.refOutermostPackage();
                 ModelElement_1_0 exposedEnd = model.getElement(
                     featureDef.objGetValue("exposedEnd")
                 );
@@ -842,7 +840,7 @@ class RefObject_1
                 ){
                     this.object.objSetValue(
                         featureName, 
-                        refOutermostPackage().unmarshal(value)
+                        this.refOutermostPackage().unmarshal(value)
                     );
                 } 
                 else {
@@ -1048,7 +1046,7 @@ class RefObject_1
                 new BasicException.Parameter("operation", featureDef)
             ); 
         }
-        RefPackage_1_0 refPackage = refOutermostPackage();
+        RefPackage_1_0 refPackage = this.refOutermostPackage();
         RefStruct_1_0 input = (RefStruct_1_0) (
             args.size() == 1 && args.get(0) instanceof RefStruct_1_0 ? args.get(0) :
             this.refOutermostPackage().refCreateStruct(qualifiedNameInParamType,args)
@@ -1061,7 +1059,7 @@ class RefObject_1
             this.object.execute(
                 InteractionSpecs.newMethodInvocationSpec(
                     (String) featureDef.objGetValue("name"),
-                    getInteractionVerb(Boolean.TRUE.equals(featureDef.objGetValue("isQuery")))
+                    this.getInteractionVerb(Boolean.TRUE.equals(featureDef.objGetValue("isQuery")))
                 ),
                 input.refDelegate(),
                 output.refDelegate()
@@ -1083,7 +1081,7 @@ class RefObject_1
     private int getInteractionVerb(
         boolean query
     ) {
-        return !query && jdoGetPersistenceManager().currentTransaction().getOptimistic() ? 
+        return !query && this.jdoGetPersistenceManager().currentTransaction().getOptimistic() ? 
             InteractionSpec.SYNC_SEND :
             InteractionSpec.SYNC_SEND_RECEIVE;
     }
@@ -1152,44 +1150,34 @@ class RefObject_1
         String featureName, 
         String qualifier
     ) {
-        Object map = null;
-        Object value = null;
         try {
-            map = this.getValue(this.getFeature(featureName), null);
-        }  catch (ServiceException e) {
-            throw new JmiServiceException(e, this);
-        }
-        if (map instanceof Map<?,?>) {
-            value = ((Map<?,?>) map).get(qualifier);
-        }  else if (map instanceof RefContainer) {
-            try {
-                if(qualifier.startsWith("!")) {
-                    value = ((RefContainer)map).refGet(RefContainer.PERSISTENT, qualifier.substring(1)); 
-                } else if(qualifier.startsWith("*")) {
-                    value = ((RefContainer)map).refGet(RefContainer.REASSIGNABLE, qualifier.substring(1)); 
-                } else {
-                    value = ((RefContainer)map).refGet(RefContainer.REASSIGNABLE, qualifier); 
-                }
-            } catch (RuntimeServiceException exception) {
-                throw new JmiServiceException(exception, this);
+            Object map = this.getValue(this.getFeature(featureName), null);
+            if (map instanceof Map<?,?>) {
+                return ((Map<?,?>) map).get(qualifier);
             }
-        }  else {
-            throw new JmiServiceException(
-                new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED,
-                    "index must be 0 in case of a non-collection value",
-                    new BasicException.Parameter("feature", featureName),
-                    new BasicException.Parameter("value", map)
-                ), 
-                this
+            if (map instanceof RefContainer<?>){
+                RefContainer<?> container = (RefContainer<?>)map;
+                return
+                    qualifier.startsWith("!") ? container.refGet(RefContainer.PERSISTENT, qualifier.substring(1)) :
+                    qualifier.startsWith("*") ? container.refGet(RefContainer.REASSIGNABLE, qualifier.substring(1)) :
+                    container.refGet(RefContainer.REASSIGNABLE, qualifier); 
+            }
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "index must be 0 in case of a non-collection value",
+                new BasicException.Parameter("feature", featureName),
+                new BasicException.Parameter("value", map)
             );
+        } catch (RuntimeServiceException exception) {
+            throw new JmiServiceException(exception, this);
+        }  catch (ServiceException exception) {
+            throw new JmiServiceException(exception, this);
         }
-        return value;
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public Object refGetValue(
         String featureName, 
         Object qualifier
@@ -1228,7 +1216,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public long refGetValue(
         String featureName,
         Object value,
@@ -1253,7 +1241,7 @@ class RefObject_1
         Object value
     ) {
         try {
-            Object viewContext = refOutermostPackage().refInteractionSpec();
+            Object viewContext = this.refOutermostPackage().refInteractionSpec();
             Object values = viewContext == null ? this.getValue(this.getFeature(featureName), null) : null;
 
             // set indexed element in case of Colletion values. For convencience
@@ -1312,7 +1300,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public void refSetValue(
         String featureName,
         Object newValue,
@@ -1437,7 +1425,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public boolean refIsInstanceOf(
         RefObject objType,
         boolean considerSubtypes
@@ -1462,31 +1450,31 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public RefClass refClass(
     ) {
         return this.refClass;
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public RefFeatured refImmediateComposite(
     ) {
         Path path = this.refGetPath();
         return path == null || path.size() == 1 ? 
             null : 
-            refOutermostPackage().refObject(path.getPrefix(path.size() - 2));
+            this.refOutermostPackage().refObject(path.getPrefix(path.size() - 2));
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public RefFeatured refOutermostComposite(
     ) {
         throw new UnsupportedOperationException();
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public void refDelete(
     ) {
         try {
@@ -1502,7 +1490,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public Object refGetValue(
         RefObject feature
     ) {
@@ -1519,7 +1507,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public Object refGetValue(
         String featureName
     ) {
@@ -1535,7 +1523,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public void refSetValue(
         RefObject feature, 
         Object value
@@ -1552,7 +1540,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public void refSetValue(
         String featureName, 
         Object value
@@ -1568,7 +1556,7 @@ class RefObject_1
 
     // -------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     final public Object refInvokeOperation(
         RefObject requestedOperation,
         List args
@@ -1617,9 +1605,9 @@ class RefObject_1
             //
             // Try to map to a user-defined exception.
             //
-            return refOutermostPackage().refMapping().getExceptionConstructor(
+            return this.refOutermostPackage().refMapping().getExceptionConstructor(
                 exceptionType, 
-                refImmediatePackage().refMofId()
+                this.refImmediatePackage().refMofId()
             ).newInstance(
                 new ServiceException(cursor)
             );
@@ -1634,7 +1622,7 @@ class RefObject_1
     }
     
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     final public Object refInvokeOperation(
         String operationName, 
         List args
@@ -1645,7 +1633,7 @@ class RefObject_1
                 args
             );
         } catch (ServiceException exception) {
-            throw toRefException(exception);
+            throw this.toRefException(exception);
         } catch (RuntimeServiceException e) {
             throw new JmiServiceException(e, this);
         }
@@ -1656,7 +1644,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public RefObject refMetaObject(
     ) {
         try {
@@ -1673,7 +1661,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public RefPackage refImmediatePackage(
     ) {
         return "org:openmdx:base:Authority".equals(this.refClass().refMofId())
@@ -1682,14 +1670,14 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public RefRootPackage_1 refOutermostPackage(
     ) {
         return (RefRootPackage_1) this.refClass().refOutermostPackage();
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public String refMofId(
     ) {
         Path identity = this.object.jdoGetObjectId();
@@ -1698,7 +1686,7 @@ class RefObject_1
 
     // -------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     final public Collection refVerifyConstraints(
         boolean deepVerify
     ) {
@@ -1718,7 +1706,7 @@ class RefObject_1
                 ServiceException serviceException = violationIterator.next();
                 boolean thisElementInError = 
                     thisElement != null && 
-                    thisElement.equals(getElementInError(serviceException));
+                    thisElement.equals(this.getElementInError(serviceException));
                 violationTarget[i] = thisElementInError 
                 ? new JmiServiceException(serviceException, this)
                 : new JmiServiceException(serviceException);
@@ -1744,7 +1732,7 @@ class RefObject_1
     // -------------------------------------------------------------------------
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public Path refGetPath(
     ) {
         try {
@@ -1755,7 +1743,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     public Set<String> refDefaultFetchGroup(
     ) {
         try {
@@ -1778,7 +1766,7 @@ class RefObject_1
 
     // -------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     final public void refInitialize(
         boolean setRequiredToNull,
         boolean setOptionalToNull
@@ -1807,7 +1795,7 @@ class RefObject_1
                         Multiplicities.MULTI_VALUE.equals(multiplicity) || 
                         Multiplicities.SPARSEARRAY.equals(multiplicity)
                     ) {
-                        this.setValue(featureDef, EMPTY_OBJECT_ARRAY);
+                        this.setValue(featureDef, RefObject_1.EMPTY_OBJECT_ARRAY);
                     } 
                     else if (Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
                         if (setRequiredToNull) {
@@ -1889,7 +1877,7 @@ class RefObject_1
 
     // -------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     final public void refInitialize(
         RefObject source
     ) {
@@ -1918,7 +1906,7 @@ class RefObject_1
 
     // -------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     final public void refAddValue(
         String featureName,
         Object qualifier,
@@ -1981,7 +1969,7 @@ class RefObject_1
     }
 
     // -------------------------------------------------------------------------
-    @Override
+//  @Override
     final public ObjectView_1_0 refDelegate(
     ) {
         return this.object;
@@ -1995,7 +1983,7 @@ class RefObject_1
     private void refSetOutermostPackage(
         RefPackage newPackage
     ) {
-        RefRootPackage_1 oldPackage = refOutermostPackage(); 
+        RefRootPackage_1 oldPackage = this.refOutermostPackage(); 
         if (oldPackage != newPackage) {
             oldPackage.unregister(this.object);
             this.refClass = newPackage.refClass(
@@ -2035,7 +2023,7 @@ class RefObject_1
         java.io.ObjectInputStream stream
     ) throws java.io.IOException, ClassNotFoundException {
         stream.defaultReadObject();
-        refOutermostPackage().register(
+        this.refOutermostPackage().register(
             this.object,
             this
         );
@@ -2049,7 +2037,7 @@ class RefObject_1
     @Override
     public String toString(
     ) {
-        return getClass().getName() + " delegating to " + this.object;
+        return this.getClass().getName() + " delegating to " + this.object;
     }
 
     // -------------------------------------------------------------------------
@@ -2084,12 +2072,12 @@ class RefObject_1
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object,
      *      int[])
      */
-    @Override
+//  @Override
     public void jdoCopyFields(
         Object other, 
         int[] fieldNumbers
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2099,12 +2087,12 @@ class RefObject_1
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer,
      *      java.lang.Object)
      */
-    @Override
+//  @Override
     public void jdoCopyKeyFieldsFromObjectId(
         ObjectIdFieldConsumer fm,
         Object oid
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2113,11 +2101,11 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
      */
-    @Override
+//  @Override
     public void jdoCopyKeyFieldsToObjectId(
         Object oid
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2127,12 +2115,12 @@ class RefObject_1
      * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier,
      *      java.lang.Object)
      */
-    @Override
+//  @Override
     public void jdoCopyKeyFieldsToObjectId(
         ObjectIdFieldSupplier fm, 
         Object oid
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2141,7 +2129,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoGetObjectId()
      */
-    @Override
+//  @Override
     public Object jdoGetObjectId(
     ) {
         return this.object.jdoIsPersistent() ? this.object.jdoGetObjectId() : null;
@@ -2153,7 +2141,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoGetPersistenceManager()
      */
-    @Override
+//  @Override
     public PersistenceManager jdoGetPersistenceManager(
     ) {
         return refOutermostPackage().refPersistenceManager();
@@ -2165,7 +2153,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoGetTransactionalObjectId()
      */
-    @Override
+//  @Override
     public Object jdoGetTransactionalObjectId(
     ) {
         return this.object.jdoGetTransactionalObjectId();
@@ -2177,7 +2165,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
      */
-    @Override
+//  @Override
     public Object jdoGetVersion(
     ) {
         return this.object.jdoGetVersion();
@@ -2189,7 +2177,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDeleted()
      */
-    @Override
+//  @Override
     public boolean jdoIsDeleted(
     ) {
         return this.object.jdoIsDeleted();
@@ -2201,7 +2189,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
      */
-    @Override
+//  @Override
     public boolean jdoIsDetached(
     ) {
         return this.object.jdoIsDetached();
@@ -2213,7 +2201,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsDirty()
      */
-    @Override
+//  @Override
     public boolean jdoIsDirty(
     ) {
         return this.object.jdoIsDirty();
@@ -2225,7 +2213,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsNew()
      */
-    @Override
+//  @Override
     public boolean jdoIsNew(
     ) {
         return this.object.jdoIsNew();
@@ -2237,7 +2225,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsPersistent()
      */
-    @Override
+//  @Override
     public boolean jdoIsPersistent(
     ) {
         return this.object.jdoIsPersistent();
@@ -2249,7 +2237,7 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoIsTransactional()
      */
-    @Override
+//  @Override
     public boolean jdoIsTransactional(
     ) {
         return this.object.jdoIsTransactional();
@@ -2261,11 +2249,11 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
      */
-    @Override
+//  @Override
     public void jdoMakeDirty(
         String fieldName
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2275,12 +2263,12 @@ class RefObject_1
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager,
      *      java.lang.Object)
      */
-    @Override
+//  @Override
     public PersistenceCapable jdoNewInstance(
         StateManager sm, 
         Object oid
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2289,11 +2277,11 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
      */
-    @Override
+//  @Override
     public PersistenceCapable jdoNewInstance(
         StateManager sm
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2302,10 +2290,10 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
      */
-    @Override
+//  @Override
     public Object jdoNewObjectIdInstance(
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2314,11 +2302,11 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
      */
-    @Override
+//  @Override
     public Object jdoNewObjectIdInstance(
         Object o
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2327,11 +2315,11 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
      */
-    @Override
+//  @Override
     public void jdoProvideField(
         int fieldNumber
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2340,11 +2328,11 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
      */
-    @Override
+//  @Override
     public void jdoProvideFields(
         int[] fieldNumbers
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2353,11 +2341,11 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
      */
-    @Override
+//  @Override
     public void jdoReplaceField(
         int fieldNumber
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2366,11 +2354,11 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
      */
-    @Override
+//  @Override
     public void jdoReplaceFields(
         int[] fieldNumbers
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2379,10 +2367,10 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
      */
-    @Override
+//  @Override
     public void jdoReplaceFlags(
     ) {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     // -------------------------------------------------------------------------
@@ -2391,11 +2379,11 @@ class RefObject_1
      * 
      * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
      */
-    @Override
+//  @Override
     public void jdoReplaceStateManager(
         StateManager sm
     ) throws SecurityException {
-        throw new UnsupportedOperationException(OPENMDX_2_JDO);
+        throw new UnsupportedOperationException("This JDO operation is not supported by openMDX");
     }
 
     //--------------------------------------------------------------------
@@ -2405,12 +2393,12 @@ class RefObject_1
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.Cloneable#openmdxjdoClone()
      */
-    @Override
+//  @Override
     public RefObject openmdxjdoClone() {
         try {
             return this.refClass().refCreateInstance(
                 Collections.singletonList(
-                    refDelegate().openmdxjdoClone()
+                    this.refDelegate().openmdxjdoClone()
                 )
             );
         } catch (Exception exception) {

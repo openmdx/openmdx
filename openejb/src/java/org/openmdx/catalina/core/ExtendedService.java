@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/OpenEJB, http://www.openmdx.org/
- * Name:        $Id: ExtendedService.java,v 1.2 2009/11/13 16:51:20 wfro Exp $
+ * Name:        $Id: ExtendedService.java,v 1.3 2010/06/21 23:33:25 wfro Exp $
  * Description: ExtendedService
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/13 16:51:20 $
+ * Date:        $Date: 2010/06/21 23:33:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,6 +56,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.AccessControlException;
+import java.util.Date;
 
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleException;
@@ -169,14 +170,17 @@ public class ExtendedService extends StandardService {
     ) {
     	boolean success = true;
         // Start our defined Connectors second
+    	System.out.println(new Date() + "  ExtendedService: starting connectors");
         synchronized(this.connectors) {
             for (int i = 0; i < this.connectors.length; i++) {
                 if (this.connectors[i] instanceof Lifecycle) {
                 	try {
                 		((Lifecycle)this.connectors[i]).start();                		
+                    	System.out.println(new Date() + "  ExtendedService: Starting connector " + connectors[i].getPort() + " OK");
                 	}
             		// Ignore. Connectors can be started later with command 'startConnectors'                	
                 	catch(Exception e) {
+                    	System.out.println(new Date() + "  ExtendedService: Starting connector " + connectors[i].getPort() + " FAILED. Message is " + e.getMessage());
                 		success = false;
                 	}
                 }
@@ -205,13 +209,17 @@ public class ExtendedService extends StandardService {
     //-----------------------------------------------------------------------
     protected void stopConnectors(
     ) throws LifecycleException {
+    	System.out.println(new Date() + "  ExtendedService: Stopping connectors");
         synchronized (this.connectors) {
             for (int i = 0; i < this.connectors.length; i++) {
                 if (this.connectors[i] instanceof Lifecycle) {
                 	try {
                 		((Lifecycle)this.connectors[i]).stop();
+                    	System.out.println(new Date() + "  ExtendedService: Stopping connector " + connectors[i].getPort() + " OK");
                 	}
-                   	catch(Exception e) {}
+                   	catch(Exception e) {
+                    	System.out.println(new Date() + "  ExtendedService: Stopping connector " + connectors[i].getPort() + " FAILED. Message is " + e.getMessage());                   	
+                   	}
                 }
             }
         }

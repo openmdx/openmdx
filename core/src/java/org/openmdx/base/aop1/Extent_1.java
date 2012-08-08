@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Extent_1.java,v 1.18 2010/01/26 15:42:08 hburger Exp $
+ * Name:        $Id: Extent_1.java,v 1.23 2010/07/01 15:56:25 hburger Exp $
  * Description: Extent
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:42:08 $
+ * Date:        $Date: 2010/07/01 15:56:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.jdo.FetchPlan;
+import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
@@ -65,15 +66,15 @@ import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.cci.PersistenceHelper;
-import org.openmdx.base.persistence.spi.Container;
 import org.openmdx.base.persistence.spi.TransientContainerId;
+import org.openmdx.base.query.Filter;
+import org.openmdx.base.query.OrderSpecifier;
 
 /**
  * org::openmdx::base aware extent
  */
 public class Extent_1 
-    implements Container, Serializable, Container_1_0, Delegating_1_0<Container_1_0> 
+    implements Serializable, Container_1_0, Delegating_1_0<Container_1_0> 
 {
 
     /**
@@ -103,17 +104,28 @@ public class Extent_1
         return this.parent.getModel();
     }
     
+//  @Override
     public Path openmdxjdoGetContainerId() {
-        return PersistenceHelper.getContainerId(objGetDelegate());
+        return this.objGetDelegate().openmdxjdoGetContainerId();
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#getContainerId()
      */
+//  @Override
     public TransientContainerId openmdxjdoGetTransientContainerId() {
-        return PersistenceHelper.getTransientContainerId(objGetDelegate());
+        return this.objGetDelegate().openmdxjdoGetTransientContainerId();
     }
     
+/* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
+     */
+    @Override
+    public PersistenceManager openmdxjdoGetPersistenceManager() {
+        return this.objGetDelegate().openmdxjdoGetPersistenceManager();
+    }
+
+    //  @Override
     public boolean openmdxjdoIsPersistent() {
         return true;
     }
@@ -121,13 +133,15 @@ public class Extent_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#retrieve()
      */
-    public void retrieveAll(FetchPlan fetchPlan) {
+//  @Override
+    public void openmdxjdoRetrieve(FetchPlan fetchPlan) {
         throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#superSet()
      */
+//  @Override
     public Container_1_0 container() {
         return this;
     }
@@ -135,20 +149,23 @@ public class Extent_1
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.FilterableMap#subMap(java.lang.Object)
      */
-    public Container_1_0 subMap(Object filter) {
-        return objGetDelegate().subMap(filter);
+//  @Override
+    public Container_1_0 subMap(Filter filter) {
+        return this.objGetDelegate().subMap(filter);
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.collection.FilterableMap#values(java.lang.Object)
      */
-    public List<DataObject_1_0> values(Object criteria) {
-        return objGetDelegate().values(criteria);
+//  @Override
+    public List<DataObject_1_0> values(OrderSpecifier... criteria) {
+        return this.objGetDelegate().values(criteria);
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#clear()
      */
+//  @Override
     public void clear() {
         throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
@@ -156,17 +173,19 @@ public class Extent_1
     /* (non-Javadoc)
      * @see java.util.Map#containsKey(java.lang.Object)
      */
+//  @Override
     public boolean containsKey(Object key) {
-        return objGetDelegate().containsKey(key);
+        return this.objGetDelegate().containsKey(key);
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#containsValue(java.lang.Object)
      */
+//  @Override
     public boolean containsValue(Object value) {
         if(value instanceof DataObject_1_0) try {
             DataObject_1_0 object = (DataObject_1_0) value;
-            if(getModel().isInstanceof(object, "org:openmdx:base:ExtentCapable")){
+            if(this.getModel().isInstanceof(object, "org:openmdx:base:ExtentCapable")){
                 Path candidate = object.jdoGetObjectId();
                 Path parent = this.parent.jdoGetObjectId();
                 return 
@@ -183,6 +202,7 @@ public class Extent_1
     /* (non-Javadoc)
      * @see java.util.Map#entrySet()
      */
+//  @Override
     public Set<java.util.Map.Entry<String, DataObject_1_0>> entrySet() {
         throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
@@ -190,13 +210,15 @@ public class Extent_1
     /* (non-Javadoc)
      * @see java.util.Map#get(java.lang.Object)
      */
+//  @Override
     public DataObject_1_0 get(Object key) {
-        return objGetDelegate().get(key);
+        return this.objGetDelegate().get(key);
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#isEmpty()
      */
+//  @Override
     public boolean isEmpty() {
         throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
@@ -204,6 +226,7 @@ public class Extent_1
     /* (non-Javadoc)
      * @see java.util.Map#keySet()
      */
+//  @Override
     public Set<String> keySet() {
         throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
@@ -211,6 +234,7 @@ public class Extent_1
     /* (non-Javadoc)
      * @see java.util.Map#put(java.lang.Object, java.lang.Object)
      */
+//  @Override
     public DataObject_1_0 put(String key, DataObject_1_0 value) {
         throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
@@ -218,6 +242,7 @@ public class Extent_1
     /* (non-Javadoc)
      * @see java.util.Map#putAll(java.util.Map)
      */
+//  @Override
     public void putAll(Map<? extends String, ? extends DataObject_1_0> m) {
         throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
@@ -225,6 +250,7 @@ public class Extent_1
     /* (non-Javadoc)
      * @see java.util.Map#remove(java.lang.Object)
      */
+//  @Override
     public DataObject_1_0 remove(Object key) {
         throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
@@ -232,6 +258,7 @@ public class Extent_1
     /* (non-Javadoc)
      * @see java.util.Map#size()
      */
+//  @Override
     public int size() {
         throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
@@ -239,25 +266,39 @@ public class Extent_1
     /* (non-Javadoc)
      * @see java.util.Map#values()
      */
+//  @Override
     public Collection<DataObject_1_0> values() {
+        throw new UnsupportedOperationException("This operation must not be applied to an extent");
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoEvict()
+     */
+//  @Override
+    public void openmdxjdoEvict(
+        boolean allMembers, boolean allSubSets
+    ) {
         throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.Container_1_0#refreshAll()
      */
-    public void refreshAll() {
+//  @Override
+    public void openmdxjdoRefresh() {
         throw new UnsupportedOperationException("This operation must not be applied to an extent");
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.Delegating_1_0#objGetDelegate()
      */
+//  @Override
     public Container_1_0 objGetDelegate(
     ){
         return this.container;
     }
     
+//  @Override
     public boolean isRetrieved() {
         return false;
     }

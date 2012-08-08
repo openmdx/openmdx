@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/DeferredFileOutputStream.java,v 1.4 2004/06/29 07:40:54 wfro Exp $
- * $Revision: 1.4 $
- * $Date: 2004/06/29 07:40:54 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/DeferredFileOutputStream.java,v 1.5 2010/06/02 13:46:30 hburger Exp $
+ * $Revision: 1.5 $
+ * $Date: 2010/06/02 13:46:30 $
  *
  * ====================================================================
  *
@@ -76,7 +76,7 @@ import java.io.OutputStream;
  *
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  *
- * @version $Id: DeferredFileOutputStream.java,v 1.4 2004/06/29 07:40:54 wfro Exp $
+ * @version $Id: DeferredFileOutputStream.java,v 1.5 2010/06/02 13:46:30 hburger Exp $
  */
 public class DeferredFileOutputStream
     extends ThresholdingOutputStream
@@ -144,6 +144,7 @@ public class DeferredFileOutputStream
      *
      * @exception IOException if an error occurs.
      */
+    @Override
     protected OutputStream getStream() throws IOException
     {
         return currentOutputStream;
@@ -158,6 +159,7 @@ public class DeferredFileOutputStream
      *
      * @exception IOException if an error occurs.
      */
+    @Override
     protected void thresholdReached() throws IOException
     {
         byte[] data = memoryOutputStream.toByteArray();

@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataproviderRequest.java,v 1.24 2010/03/31 14:32:43 hburger Exp $
+ * Name:        $Id: DataproviderRequest.java,v 1.27 2010/06/02 13:39:35 hburger Exp $
  * Description: DataproviderRequest
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/31 14:32:43 $
+ * Date:        $Date: 2010/06/02 13:39:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -69,12 +69,12 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.AnyTypeCondition;
-import org.openmdx.base.query.AttributeSpecifier;
 import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.Directions;
 import org.openmdx.base.query.Filter;
-import org.openmdx.base.query.FilterProperty;
 import org.openmdx.base.query.OrderSpecifier;
+import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.cci.RestFunction;
@@ -110,7 +110,7 @@ public class DataproviderRequest {
             NO_FILTER_PROPERTIES,
             0,
             Integer.MAX_VALUE,
-            Directions.ASCENDING,
+            SortOrder.ASCENDING.code(),
             attributeSelector,
             attributeSpecifier
         );
@@ -188,16 +188,17 @@ public class DataproviderRequest {
                 this.setFilter(
                     queryFacade,
                     new Filter(
-                        filter,
-                        attributeSpecifier
+                        FilterProperty.toCondition(filter),
+                        AttributeSpecifier.toOrderSpecifier(attributeSpecifier),
+                        null // extension
                     )            
                 );
                 // direction
-                switch(direction) {
-                    case Directions.ASCENDING:
+                switch(SortOrder.valueOf(direction)) {
+                    case ASCENDING:
                         queryFacade.setPosition(position);
                         break;
-                    case Directions.DESCENDING:
+                    case DESCENDING:
                         queryFacade.setPosition(-(1 + position));
                         break;
                 }
@@ -387,7 +388,7 @@ public class DataproviderRequest {
                 );
                 if(filter != null) {        
                     // cachedAttributeFilter
-                    List<FilterProperty> filterProperties = Filter.getFilterProperties(filter);
+                    List<FilterProperty> filterProperties = FilterProperty.getFilterProperties(filter);
                     this.attributeFilter = filterProperties.isEmpty() ?
                         NO_FILTER_PROPERTIES :
                             filterProperties.toArray(new FilterProperty[filterProperties.size()]);
@@ -442,14 +443,13 @@ public class DataproviderRequest {
             if(filter == null) {
                 filter = new Filter();
             }
-            List<Condition> conditions = new ArrayList<Condition>(
-                Arrays.asList(filter.getCondition())
-            );
-            conditions.add(
-                new AnyTypeCondition(filterProperty)
-            );
-            filter.setCondition(
-                conditions.toArray(new Condition[conditions.size()])
+            filter.getCondition().add(
+                new AnyTypeCondition(
+                    Quantifier.valueOf(filterProperty.quantor()),
+                    filterProperty.name(),
+                    ConditionType.valueOf(filterProperty.operator()),
+                    filterProperty.getValues()
+                )
             );
             this.setFilter(
                 facade,
@@ -481,23 +481,18 @@ public class DataproviderRequest {
             this.attributeFilter = null;
             Query_2Facade facade = Query_2Facade.newInstance(this.object); 
             Filter filter = this.getFilter(facade);
-            if(filter == null) return;
-            List<Condition> conditions = new ArrayList<Condition>(Arrays.asList(filter.getCondition()));
-            for(Iterator<Condition> i = conditions.iterator(); i.hasNext(); ) {
-                Condition condition = i.next();
-                if(condition.getFeature().equals(feature)) {
-                    i.remove();
+            if(filter != null) {
+                for(Iterator<Condition> i = filter.getCondition().iterator(); i.hasNext(); ) {
+                    if(i.next().getFeature().equals(feature)) {
+                        i.remove();
+                    }
                 }
+                this.setFilter(
+                    facade,
+                    filter
+                );
             }
-            filter.setCondition(
-                conditions.toArray(new Condition[conditions.size()])
-            );
-            this.setFilter(
-                facade,
-                filter
-            );
-        }
-        catch(ResourceException e) {
+        } catch(ResourceException e) {
             throw new ServiceException(e);
         }
     }
@@ -553,17 +548,10 @@ public class DataproviderRequest {
     ) throws ServiceException {
         try {
             Number position = Query_2Facade.newInstance(this.object).getPosition();
-            if(position == null) {
-                return Directions.ASCENDING;
-            } 
-            else if(position.intValue() >= 0) {
-                return Directions.ASCENDING;
-            } 
-            else {
-                return Directions.DESCENDING;
-            }            
-        }
-        catch(ResourceException e) {
+            return (
+                position == null || position.intValue() >= 0 ? SortOrder.ASCENDING : SortOrder.DESCENDING
+            ).code();
+        } catch(ResourceException e) {
             throw new ServiceException(e);
         }
     }
@@ -636,6 +624,7 @@ public class DataproviderRequest {
     /* (non-Javadoc)
      * @see java.lang.Object#clone()
      */
+    @Override
     public Object clone(
     ) throws CloneNotSupportedException {
         return new DataproviderRequest(this);

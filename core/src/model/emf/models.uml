@@ -33,12 +33,6 @@
   <eAnnotations xmi:id="_dkHFIEcDEd-o1OTPw_6HJg" source="org.openmdx.compatibility.audit1">
     <references xmi:type="uml:Package" href="org.openmdx.compatibility.audit1.uml#_3C7B8A60016D3EC4B01F0206"/>
   </eAnnotations>
-  <eAnnotations xmi:id="_iqz5MEcDEd-o1OTPw_6HJg" source="org.openmdx.compatibility.datastore1">
-    <references xmi:type="uml:Package" href="org.openmdx.compatibility.datastore1.uml#_SeNosB19EdyPsfP_gjYckQ"/>
-  </eAnnotations>
-  <eAnnotations xmi:id="_nHnbsEcDEd-o1OTPw_6HJg" source="org.openmdx.compatibility.sequence1">
-    <references xmi:type="uml:Package" href="org.openmdx.compatibility.sequence1.uml#_3C7B8A60016D41C3075B0029"/>
-  </eAnnotations>
   <eAnnotations xmi:id="_rmL4wEcDEd-o1OTPw_6HJg" source="org.openmdx.generic1">
     <references xmi:type="uml:Package" href="org.openmdx.generic1.uml#_3C7B8A60016D3FF13E0E02A5"/>
   </eAnnotations>

@@ -1,7 +1,7 @@
 /*
- * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/DiskFileUpload.java,v 1.4 2008/03/21 18:42:11 hburger Exp $
- * $Revision: 1.4 $
- * $Date: 2008/03/21 18:42:11 $
+ * $Header: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/fileupload/DiskFileUpload.java,v 1.5 2010/06/02 13:46:30 hburger Exp $
+ * $Revision: 1.5 $
+ * $Date: 2010/06/02 13:46:30 $
  *
  * ====================================================================
  *
@@ -89,7 +89,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author <a href="mailto:martinc@apache.org">Martin Cooper</a>
  * @author Sean C. Sullivan
  *
- * @version $Id: DiskFileUpload.java,v 1.4 2008/03/21 18:42:11 hburger Exp $
+ * @version $Id: DiskFileUpload.java,v 1.5 2010/06/02 13:46:30 hburger Exp $
  */
 @SuppressWarnings("unchecked")
 public class DiskFileUpload
@@ -142,6 +142,7 @@ public class DiskFileUpload
      *
      * @return The factory class for new file items.
      */
+    @Override
     public FileItemFactory getFileItemFactory()
     {
         return fileItemFactory;
@@ -155,6 +156,7 @@ public class DiskFileUpload
      *
      * @param factory The factory class for new file items.
      */
+    @Override
     public void setFileItemFactory(FileItemFactory factory)
     {
         this.fileItemFactory = (DefaultFileItemFactory) factory;

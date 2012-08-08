@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefMetaObject_1.java,v 1.4 2009/01/13 17:33:49 wfro Exp $
+ * Name:        $Id: RefMetaObject_1.java,v 1.5 2010/06/02 13:43:29 hburger Exp $
  * Description: RefMetaObject_1 class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 17:33:49 $
+ * Date:        $Date: 2010/06/02 13:43:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -211,6 +211,7 @@ public class RefMetaObject_1
   }
 
   //-------------------------------------------------------------------------
+  @Override
   public boolean equals(
     Object other
   ) {
@@ -218,6 +219,7 @@ public class RefMetaObject_1
   }
 
   //-------------------------------------------------------------------------
+  @Override
   public int hashCode(
   ) {
     return this.elementDef.hashCode();

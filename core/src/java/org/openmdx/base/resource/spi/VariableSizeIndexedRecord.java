@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VariableSizeIndexedRecord.java,v 1.12 2010/03/19 12:32:54 hburger Exp $
+ * Name:        $Id: VariableSizeIndexedRecord.java,v 1.14 2010/06/02 13:45:10 hburger Exp $
  * Description: JCA: variable-size IndexedRecord implementation
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:32:54 $
+ * Date:        $Date: 2010/06/02 13:45:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -162,7 +162,7 @@ public class VariableSizeIndexedRecord
      *
      * @return  String representing name of the Record
      */
-    @Override
+//  @Override
     public final String getRecordName(
     ){
         return this.recordName;
@@ -174,7 +174,7 @@ public class VariableSizeIndexedRecord
      * @param name
      *        Name of the Record
      */
-    @Override
+//  @Override
     public final void setRecordName(
         String name
     ){
@@ -187,7 +187,7 @@ public class VariableSizeIndexedRecord
      *
      * @return   String representing a short description of the Record
      */
-    @Override
+//  @Override
     public final String getRecordShortDescription(
     ){
         return this.description;
@@ -200,7 +200,7 @@ public class VariableSizeIndexedRecord
      * @param description
      *        Description of the Record
      */
-    @Override
+//  @Override
     public final void setRecordShortDescription(
         String description
     ){

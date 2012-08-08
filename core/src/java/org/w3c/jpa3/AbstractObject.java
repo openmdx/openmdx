@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractObject.java,v 1.16 2010/04/09 10:38:24 wfro Exp $
+ * Name:        $Id: AbstractObject.java,v 1.17 2010/06/02 15:34:32 hburger Exp $
  * Description: JPA AbstractObject 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/09 10:38:24 $
+ * Date:        $Date: 2010/06/02 15:34:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -391,12 +391,12 @@ public abstract class AbstractObject implements Serializable {
                 int next = 0;
                 int current = -1;
 
-                @Override
+            //  @Override
                 public final boolean hasNext() {
                     return this.next < size();
                 }
     
-                @Override
+            //  @Override
                 public final E next() {
                     if(this.next >= size()) {
                         throw new NoSuchElementException();
@@ -405,7 +405,7 @@ public abstract class AbstractObject implements Serializable {
                     }
                 }
     
-                @Override
+            //  @Override
                 public final void remove() {
                     if(this.current < 0) {
                         throw new IllegalStateException();
@@ -727,7 +727,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.List#size()
          */
-        @Override
+    //  @Override
         public abstract int size();
 
         /**
@@ -763,7 +763,7 @@ public abstract class AbstractObject implements Serializable {
        /* (non-Javadoc)
          * @see java.util.SortedMap#comparator()
          */
-        @Override
+    //  @Override
         public Comparator<? super Integer> comparator() {
             return null;
         }
@@ -771,7 +771,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.SortedMap#entrySet()
          */
-        @Override
+    //  @Override
         public Set<java.util.Map.Entry<Integer, E>> entrySet() {
             return new AbstractSet<Entry<Integer,E>>() {
 
@@ -783,7 +783,7 @@ public abstract class AbstractObject implements Serializable {
                         Map.Entry<Integer, S> current = null;
                         private Map.Entry<Integer, S> prefetched = null;
                         
-                        @Override
+                    //  @Override
                         public boolean hasNext() {
                             while(this.prefetched == null && this.delegate.hasNext()) {
                                 Map.Entry<Integer, S> candidate = this.delegate.next();
@@ -794,24 +794,24 @@ public abstract class AbstractObject implements Serializable {
                             return this.prefetched != null;
                         }
                         
-                        @Override
+                    //  @Override
                         public Map.Entry<Integer, E> next() {
                             if(hasNext()) {
                                 this.current = this.prefetched;
                                 this.prefetched = null;
                                 return new Map.Entry<Integer, E>(){
 
-                                    @Override
+                                //  @Override
                                     public Integer getKey() {
                                         return current.getKey();
                                     }
 
-                                    @Override
+                                //  @Override
                                     public E getValue() {
                                         return SlicedMap.this.getValue(current.getValue());
                                     }
 
-                                    @Override
+                                //  @Override
                                     public E setValue(E value) {
                                         if(value == null) {
                                             remove();
@@ -832,7 +832,7 @@ public abstract class AbstractObject implements Serializable {
                             }
                         }
 
-                        @Override
+                    //  @Override
                         public void remove() {
                             if(this.current == null) {
                                 throw new IllegalStateException("No current element");
@@ -858,7 +858,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.SortedMap#firstKey()
          */
-        @Override
+    //  @Override
         public Integer firstKey() {
             Iterator<Map.Entry<Integer, E>> entries = entrySet().iterator();
             if(entries.hasNext()) {
@@ -871,14 +871,13 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.SortedMap#headMap(java.lang.Object)
          */
-        @Override
+    //  @Override
         public SortedMap<Integer, E> headMap(Integer toKey) {
             final SlicedMap<E,S> delegate = this;
             
             return new SlicedMap<E,S>(
                 delegate.slices.headMap(toKey)
             ){
-
                 @Override
                 protected E getValue(S slice) {
                     return delegate.getValue(slice);
@@ -917,7 +916,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.SortedMap#keySet()
          */
-        @Override
+    //  @Override
         public Set<Integer> keySet() {
             final Set<Map.Entry<Integer, E>> entries = entrySet();
             return new AbstractSet<Integer>(){
@@ -927,17 +926,17 @@ public abstract class AbstractObject implements Serializable {
                     final Iterator<Map.Entry<Integer, E>> delegate = entries.iterator();
                     return new Iterator<Integer>(){
 
-                        @Override
+                    //  @Override
                         public boolean hasNext() {
                             return delegate.hasNext();
                         }
 
-                        @Override
+                    //  @Override
                         public Integer next() {
                             return delegate.next().getKey();
                         }
 
-                        @Override
+                    //  @Override
                         public void remove() {
                             delegate.remove();
                         }
@@ -956,7 +955,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.SortedMap#lastKey()
          */
-        @Override
+    //  @Override
         public Integer lastKey() {
             Iterator<Map.Entry<Integer, E>> entries = entrySet().iterator();
             Map.Entry<Integer, E> cursor = null;
@@ -973,7 +972,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.SortedMap#subMap(java.lang.Object, java.lang.Object)
          */
-        @Override
+    //  @Override
         public SortedMap<Integer, E> subMap(Integer fromKey, Integer toKey) {
             final SlicedMap<E,S> delegate = this;
             
@@ -1019,7 +1018,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.SortedMap#tailMap(java.lang.Object)
          */
-        @Override
+    //  @Override
         public SortedMap<Integer, E> tailMap(Integer fromKey) {
             final SlicedMap<E,S> delegate = this;
             
@@ -1065,7 +1064,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.SortedMap#values()
          */
-        @Override
+    //  @Override
         public Collection<E> values() {
             final Set<Map.Entry<Integer, E>> entries = entrySet();
             return new AbstractCollection<E>(){
@@ -1075,17 +1074,17 @@ public abstract class AbstractObject implements Serializable {
                     final Iterator<Map.Entry<Integer, E>> delegate = entries.iterator();
                     return new Iterator<E>(){
 
-                        @Override
+                    //  @Override
                         public boolean hasNext() {
                             return delegate.hasNext();
                         }
 
-                        @Override
+                    //  @Override
                         public E next() {
                             return delegate.next().getValue();
                         }
 
-                        @Override
+                    //  @Override
                         public void remove() {
                             delegate.remove();
                         }
@@ -1104,7 +1103,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.Map#clear()
          */
-        @Override
+    //  @Override
         public void clear() {
             for(Map.Entry<Integer,S> e : this.slices.entrySet()) {
                 setValue(e.getValue(), null);
@@ -1115,7 +1114,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.Map#containsKey(java.lang.Object)
          */
-        @Override
+    //  @Override
         public boolean containsKey(Object key) {
             return get(key) != null;
         }
@@ -1123,7 +1122,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.Map#containsValue(java.lang.Object)
          */
-        @Override
+    //  @Override
         public boolean containsValue(Object value) {
             if(value != null) {
                 for(Map.Entry<Integer,S> e : this.slices.entrySet()) {
@@ -1138,7 +1137,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.Map#get(java.lang.Object)
          */
-        @Override
+    //  @Override
         public E get(Object key) {
             S slice = this.slices.get(key);
             return slice == null ? null : getValue(slice);
@@ -1147,7 +1146,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.Map#isEmpty()
          */
-        @Override
+    //  @Override
         public boolean isEmpty() {
             return size() == 0;
         }
@@ -1155,7 +1154,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.Map#put(java.lang.Object, java.lang.Object)
          */
-        @Override
+    //  @Override
         public E put(Integer key, E value) {
             if(value == null) {
                 return remove(key);
@@ -1185,7 +1184,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.Map#putAll(java.util.Map)
          */
-        @Override
+    //  @Override
         public void putAll(Map<? extends Integer, ? extends E> m) {
             for(Map.Entry<? extends Integer, ? extends E> e : m.entrySet()) {
                 put(e.getKey(), e.getValue());
@@ -1195,7 +1194,7 @@ public abstract class AbstractObject implements Serializable {
         /* (non-Javadoc)
          * @see java.util.Map#remove(java.lang.Object)
          */
-        @Override
+    //  @Override
         public E remove(Object key) {
             S slice = this.slices.get(key);
             if(slice == null) {

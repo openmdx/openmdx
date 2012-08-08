@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SegmentReferencesForeignPersonImpl.java,v 1.1 2009/09/17 16:23:01 hburger Exp $
+ * Name:        $Id: SegmentReferencesForeignPersonImpl.java,v 1.2 2010/05/27 09:12:30 hburger Exp $
  * Description: SegmentReferencesForgeignPerson 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/17 16:23:01 $
+ * Date:        $Date: 2010/05/27 09:12:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -86,7 +86,7 @@ public class SegmentReferencesForeignPersonImpl
     private final Segment segment;
     
     private static final String UNMODIFIABLE = 
-        "This shared assoication shall by unmodifiable by implementation";
+        "This implementation shall make the shared assoication unmodifiable";
     
     
     /* (non-Javadoc)

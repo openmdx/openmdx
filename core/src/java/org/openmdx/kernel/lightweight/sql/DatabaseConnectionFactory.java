@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DatabaseConnectionFactory.java,v 1.1 2009/09/09 10:05:50 hburger Exp $
+ * Name:        $Id: DatabaseConnectionFactory.java,v 1.3 2010/08/03 14:02:32 hburger Exp $
  * Description: Database Connection Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/09 10:05:50 $
+ * Date:        $Date: 2010/08/03 14:02:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -73,9 +73,7 @@ import org.openmdx.kernel.resource.spi.ShareableConnectionManager;
  * Database Connection Factory
  */
 @SuppressWarnings("unchecked")
-public class DatabaseConnectionFactory
-implements DataSource
-{
+public class DatabaseConnectionFactory implements DataSource {
 
     /**
      * Constructor
@@ -95,8 +93,8 @@ implements DataSource
             Collections.EMPTY_SET,
             DatabaseConnection.class
         ) : connectionManager;
-            this.managedConnectionFactory = managedConnectionFactory;
-            this.connectionRequestInfo = connectionRequestInfo;
+        this.managedConnectionFactory = managedConnectionFactory;
+        this.connectionRequestInfo = connectionRequestInfo;
     }
 
 
@@ -128,6 +126,7 @@ implements DataSource
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
+    @Override
     public String toString(
     ) {
         return getClass().getName() + ": " + this.connectionRequestInfo;

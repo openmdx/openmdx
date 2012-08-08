@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RefRootPackage_1.java,v 1.196 2010/04/19 11:25:21 hburger Exp $
+ * Name:        $Id: RefRootPackage_1.java,v 1.209 2010/08/09 13:12:05 hburger Exp $
  * Description: RefRootPackage_1 class
- * Revision:    $Revision: 1.196 $
+ * Revision:    $Revision: 1.209 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/19 11:25:21 $
+ * Date:        $Date: 2010/08/09 13:12:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -100,7 +100,6 @@ import org.oasisopen.jmi1.RefContainer;
 import org.omg.mof.spi.AbstractNames;
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
-import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObjectManager_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
@@ -113,6 +112,7 @@ import org.openmdx.base.accessor.spi.Delegating_1_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.collection.ConcurrentWeakRegistry;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.Registry;
 import org.openmdx.base.collection.Sets;
@@ -125,18 +125,20 @@ import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.Queries;
 import org.openmdx.base.persistence.spi.AbstractPersistenceManager;
 import org.openmdx.base.persistence.spi.MarshallingInstanceLifecycleListener;
+import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.SharedObjects;
+import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Selector;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
-import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 import org.w3c.jpa3.AbstractObject;
 import org.w3c.spi.StateAccessor;
 
@@ -294,7 +296,7 @@ public class RefRootPackage_1
         PersistenceCapable key,
         RefObject value
     ){
-        this.registry.putIfAbsent(key, value);
+        this.registry.putUnlessPresent(key, value);
     }
     
     /**
@@ -315,9 +317,9 @@ public class RefRootPackage_1
     /* (non-Javadoc)
      * @see java.beans.ExceptionListener#exceptionThrown(java.lang.Exception)
      */
-    @Override
+//  @Override
     public void exceptionThrown(Exception cause) {
-        throw toInvalidObjectException(cause);
+        throw this.toInvalidObjectException(cause);
     }
 
     /**
@@ -337,7 +339,7 @@ public class RefRootPackage_1
     }
     
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public Object unmarshal(
         Object source
     ) throws ServiceException {
@@ -361,7 +363,7 @@ public class RefRootPackage_1
     }
     
     //-------------------------------------------------------------------------  
-    @Override
+//  @Override
     public Object marshal(
         Object source
     ) throws ServiceException {
@@ -372,7 +374,7 @@ public class RefRootPackage_1
         } else if (source instanceof Record) {
             return this.refCreateStruct((Record)source);
         } else {
-            RefRootPackage_1 refPackage = refPackage(getInteractionsSpec(source));
+            RefRootPackage_1 refPackage = this.refPackage(getInteractionsSpec(source));
             if(refPackage == this){
                 if(source instanceof PersistenceCapable) {
                     PersistenceCapable pc = (PersistenceCapable) source;
@@ -382,7 +384,7 @@ public class RefRootPackage_1
                         if(RefRootPackage_1.this.isTerminal()) {
                             className = ((DataObject_1_0)source).objGetClass();
                             if(className == null){
-                                if(refInteractionSpec() == null) throw new ServiceException(
+                                if(this.refInteractionSpec() == null) throw new ServiceException(
                                   BasicException.Code.DEFAULT_DOMAIN,
                                   BasicException.Code.NOT_FOUND,
                                   "Object class can not be determined",
@@ -404,13 +406,12 @@ public class RefRootPackage_1
                         } else {
                             className = this.implementationMapper.getModelClassName(source.getClass().getInterfaces()[0]);
                         }
-                        RefObject concurrent = this.registry.putIfAbsent(
+                        return this.registry.putUnlessPresent(
                             pc,
-                            target = refClass(className).refCreateInstance(
+                            this.refClass(className).refCreateInstance(
                                 Collections.singletonList(source)
                             )
                         );
-                        return concurrent == null ? target : concurrent;
                     } else {
                         return target;
                     }
@@ -431,7 +432,7 @@ public class RefRootPackage_1
             if(this.refModel().containsSharedAssociation(resourceIdentifier)){
                 String qualifier = resourceIdentifier.getBase();
                 boolean persistent = qualifier.startsWith("!");
-                return (RefObject) refContainer(
+                return this.refContainer(
                     resourceIdentifier.getParent(), 
                     null
                 ).refGet(
@@ -452,47 +453,17 @@ public class RefRootPackage_1
         }
     }
 
-    /**
-     * Retrieve a transient object
-     * 
-     * @param transientObjectId
-     * 
-     * @return the transient object
-     * 
-     * @throws JDOUserException
-     */
-    @Override
-    public RefObject refObject(
-        UUID transientObjectId
-    ) {
-        try {
-            return (RefObject)this.marshal(
-                this.refDelegate().getObjectById(transientObjectId, true)
-            );
-        } catch(ServiceException e) {
-            throw new JDOUserException(
-                e.getCause().getDescription(),
-                e.getCause()
-            );
-        } catch(RuntimeServiceException e) {
-            throw new JDOUserException(
-                e.getCause().getDescription(),
-                e.getCause()
-            );
-        }
-    }
-    
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_0#refContainer(org.openmdx.compatibility.base.naming.Path)
      */
     @Override
-    public RefContainer refContainer(
+    public <C extends RefContainer<?>> C refContainer(
         Path resourceIdentifier,
-        Class<org.w3c.cci2.Container<RefObject>> containerClass
+        Class<C> containerClass
     ) {
         try {
             if(this.refModel().containsSharedAssociation(resourceIdentifier)) {
-                return (RefContainer) refObject(
+                return (C) this.refObject(
                     resourceIdentifier.getParent()
                 ).refGetValue(
                     resourceIdentifier.getBase()
@@ -508,11 +479,10 @@ public class RefRootPackage_1
                         resourceIdentifier.getBase()
                     )
                 );
-                return Classes.<RefContainer>newProxyInstance(
-                    new Jmi1ContainerInvocationHandler(null, container),
-                    containerClass == null ? org.w3c.cci2.Container.class : containerClass, 
-                    RefContainer.class, 
-                    org.openmdx.base.persistence.spi.Container.class,
+                return Classes.<C>newProxyInstance(
+                    new Jmi1ContainerInvocationHandler((Marshaller)null, container),
+                    containerClass == null ? RefContainer.class : containerClass, 
+                    PersistenceCapableCollection.class,
                     Serializable.class
                 );
             } else {
@@ -521,18 +491,16 @@ public class RefRootPackage_1
                     false
                 );
                 RefPackage_1_0 delegate = (RefPackage_1_0) authority.refOutermostPackage();
-                RefContainer container = delegate.refContainer(
-                    resourceIdentifier, 
-                    containerClass
-                );
-                return Classes.<RefContainer>newProxyInstance(
+                return Classes.<C>newProxyInstance(
                     new Jmi1ContainerInvocationHandler(
                         new Jmi1ObjectInvocationHandler.StandardMarshaller(this),
-                        container
+                        delegate.refContainer(
+                            resourceIdentifier, 
+                            containerClass
+                        )
                     ),
-                    containerClass == null ? org.w3c.cci2.Container.class : containerClass, 
-                    RefContainer.class, 
-                    org.openmdx.base.persistence.spi.Container.class,
+                    containerClass == null ? RefContainer.class : containerClass, 
+                    PersistenceCapableCollection.class,
                     Serializable.class
                 );
             }
@@ -576,19 +544,20 @@ public class RefRootPackage_1
         String nestedPackageName
     ) {
         RefPackage refPackage = this.packages.get(nestedPackageName);
-        if(refPackage == null) try {
-            int i = nestedPackageName.indexOf(JMI1_PACKAGE_NAME_INDICATOR);
-            RefPackage concurrent = this.packages.putIfAbsent(
-                nestedPackageName.intern(),
-                refPackage = i < 0 ? refMapping().newPackage(this, nestedPackageName) : refPackage(nestedPackageName.substring(0, i).replace('.', ':'))
-            );
-            if(concurrent != null) {
-                refPackage = concurrent;
-            }
-        } catch (ServiceException exception) {
-            throw new JmiServiceException(exception);
+        if(refPackage == null) {
+            try {
+                int i = nestedPackageName.indexOf(JMI1_PACKAGE_NAME_INDICATOR);
+                return Maps.putUnlessPresent(
+                    this.packages,
+                    nestedPackageName.intern(),
+                    i < 0 ? this.refMapping().newPackage(this, nestedPackageName) : this.refPackage(nestedPackageName.substring(0, i).replace('.', ':'))
+                );
+            } catch (ServiceException exception) {
+                throw new JmiServiceException(exception);
+            } 
+        } else { 
+            return refPackage;
         }
-        return refPackage;
     }
 
     //-------------------------------------------------------------------------
@@ -648,9 +617,20 @@ public class RefRootPackage_1
                 );
             }
             if(refPackage == null) {
+                PersistenceManager_1_0 delegate = this.isTerminal() ?
+                    this.delegate :
+                    ((Delegating_1_0<RefPackage_1_0>)this.delegate).objGetDelegate().refPersistenceManager();
+                refPackage = new RefRootPackage_1(
+                    this.viewManager,
+                    interactionSpec,
+                    delegate.getPersistenceManager(interactionSpec), 
+                    this.implementationMapper,
+                    this.userObjects,
+                    this.persistenceManagerFactory
+                );
                 RefRootPackage_1 oldPackage = this.viewManager.put(
                     interactionSpec,
-                    refPackage = this.newRefPackage(interactionSpec) 
+                    refPackage
                 );
                 if(oldPackage != null) {
                     return oldPackage;
@@ -673,33 +653,6 @@ public class RefRootPackage_1
         }
     }
 
-    /**
-     * Create a context specific RefPackage
-     * 
-     * @param viewContext
-     * 
-     * @return a context specific RefPackage
-     */
-    protected RefRootPackage_1 newRefPackage(
-        InteractionSpec viewContext
-    ) {
-        try {
-            PersistenceManager_1_0 delegate = this.isTerminal() ?
-                this.delegate :
-                ((Delegating_1_0<RefPackage_1_0>)this.delegate).objGetDelegate().refPersistenceManager();
-            return new RefRootPackage_1(
-                this.viewManager,
-                viewContext,
-                delegate.getPersistenceManager(viewContext), 
-                this.implementationMapper,
-                this.userObjects,
-                this.persistenceManagerFactory
-            );
-        } catch(Exception e) {
-            throw new JmiServiceException(e);
-        }
-    }
-    
     /**
      * Retrieve the delegate
      * 
@@ -844,7 +797,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefObject#refClass()
          */
-        @Override
+    //  @Override
         public RefClass refClass(
         ) {
             throw this.cause;
@@ -853,7 +806,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefObject#refDelete()
          */
-        @Override
+    //  @Override
         public void refDelete() {
             throw this.cause;
         }
@@ -861,14 +814,14 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefObject#refImmediateComposite()
          */
-        @Override
+    //  @Override
         public RefFeatured refImmediateComposite() {
             if(this.objectId == null) {
                 throw this.cause;
             } else {
                 int s = this.objectId.size() - 2;
                 return s > 0 ? 
-                    (RefFeatured)refPersistenceManager().getObjectById(this.objectId.getPrefix(s), false) : 
+                    (RefFeatured)RefRootPackage_1.this.refPersistenceManager().getObjectById(this.objectId.getPrefix(s), false) : 
                         null;
             }
         }
@@ -876,7 +829,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefObject#refIsInstanceOf(javax.jmi.reflect.RefObject, boolean)
          */
-        @Override
+    //  @Override
         public boolean refIsInstanceOf(
             RefObject objType, 
             boolean considerSubtypes
@@ -887,13 +840,13 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefObject#refOutermostComposite()
          */
-        @Override
+    //  @Override
         public RefFeatured refOutermostComposite() {
             if(this.objectId == null) {
                 throw this.cause;
             } else {
                 return this.objectId.size() > 2 ?
-                    (RefFeatured)refPersistenceManager().getObjectById(this.objectId.getPrefix(1), false) : 
+                    (RefFeatured)RefRootPackage_1.this.refPersistenceManager().getObjectById(this.objectId.getPrefix(1), false) : 
                         null;
             }
         }
@@ -901,7 +854,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefFeatured#refGetValue(javax.jmi.reflect.RefObject)
          */
-        @Override
+    //  @Override
         public Object refGetValue(RefObject feature) {
             throw this.cause;
         }
@@ -909,7 +862,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefFeatured#refGetValue(java.lang.String)
          */
-        @Override
+    //  @Override
         public Object refGetValue(String featureName) {
             throw this.cause;
         }
@@ -917,7 +870,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefFeatured#refInvokeOperation(javax.jmi.reflect.RefObject, java.util.List)
          */
-        @Override
+    //  @Override
         public Object refInvokeOperation(
             RefObject requestedOperation, 
             List args
@@ -928,7 +881,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefFeatured#refInvokeOperation(java.lang.String, java.util.List)
          */
-        @Override
+    //  @Override
         public Object refInvokeOperation(
             String requestedOperation, 
             List args
@@ -939,7 +892,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefFeatured#refSetValue(javax.jmi.reflect.RefObject, java.lang.Object)
          */
-        @Override
+    //  @Override
         public void refSetValue(RefObject feature, Object value) {
             throw this.cause;
         }
@@ -947,7 +900,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefFeatured#refSetValue(java.lang.String, java.lang.Object)
          */
-        @Override
+    //  @Override
         public void refSetValue(String featureName, Object value) {
             throw this.cause;
         }
@@ -955,7 +908,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefBaseObject#refImmediatePackage()
          */
-        @Override
+    //  @Override
         public RefPackage refImmediatePackage() {
             throw this.cause;
         }
@@ -963,7 +916,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefBaseObject#refMetaObject()
          */
-        @Override
+    //  @Override
         public RefObject refMetaObject() {
             throw this.cause;
         }
@@ -971,7 +924,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefBaseObject#refMofId()
          */
-        @Override
+    //  @Override
         public String refMofId() {
             return this.objectId.toXRI();
         }
@@ -979,7 +932,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefBaseObject#refOutermostPackage()
          */
-        @Override
+    //  @Override
         public RefPackage refOutermostPackage() {
             return RefRootPackage_1.this;
         }
@@ -987,7 +940,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jmi.reflect.RefBaseObject#refVerifyConstraints(boolean)
          */
-        @Override
+    //  @Override
         public Collection refVerifyConstraints(boolean deepVerify) {
             throw this.cause;
         }
@@ -1027,17 +980,17 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
          */
-        @Override
+    //  @Override
         public Object invoke(
             Object proxy, 
             Method method, 
             Object[] args
         ) throws Throwable {
-            Method primaryMethod = getPrimaryMethod(method);
+            Method primaryMethod = this.getPrimaryMethod(method);
             try {
                 return primaryMethod != null ?
-                    primaryMethod.invoke(primary, args) :
-                        method.invoke(secondary, args);
+                    primaryMethod.invoke(this.primary, args) :
+                        method.invoke(this.secondary, args);
             } catch (InvocationTargetException exception) {
                 throw exception.getCause();
             }
@@ -1061,12 +1014,12 @@ public class RefRootPackage_1
                 primaryMethod = null;
                 tested = false;
             } else {
-                primaryMethod = mapping.get(secondaryMethod);
-                tested = primaryMethod != null || mapping.containsKey(secondaryMethod); 
+                primaryMethod = this.mapping.get(secondaryMethod);
+                tested = primaryMethod != null || this.mapping.containsKey(secondaryMethod); 
             }
             if(!tested) {
                 try {
-                    primaryMethod = primary.getClass().getMethod(
+                    primaryMethod = this.primary.getClass().getMethod(
                         secondaryMethod.getName(), 
                         secondaryMethod.getParameterTypes()
                     );                    
@@ -1122,17 +1075,20 @@ public class RefRootPackage_1
 
         private final Transaction transaction;
         
-        /**
-         * Only a subset of the JDO methods is already implemented 
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.AbstractPersistenceManager#getUserObject(java.lang.Object)
          */
-        private static final String OPENMDX_2_JDO = "This JDO operation is not yet supported";
+        @Override
+        public Object getUserObject(Object key) {
+            return key == RefPackage.class ? RefRootPackage_1.this : super.getUserObject(key);
+        }
 
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.AbstractPersistenceManager#close()
          */
         @Override
         public void close() {
-            if(!isClosed()) {
+            if(!this.isClosed()) {
                 super.close();
                 RefRootPackage_1.this.close();
             }
@@ -1141,7 +1097,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#currentTransaction()
          */
-        @Override
+    //  @Override
         public Transaction currentTransaction(
         ) {
             return this.transaction;
@@ -1150,15 +1106,27 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#evict(java.lang.Object)
          */
-        @Override
+    //  @Override
         public void evict(Object pc) {
             // The hint is ignored at the moment...
         }
 
         /* (non-Javadoc)
-         * @see javax.jdo.PersistenceManager#evictAll()
+         * @see org.openmdx.base.persistence.spi.AbstractPersistenceManager#evictAll(java.util.Collection)
          */
         @Override
+        public void evictAll(Collection pcs) {
+            if(pcs instanceof PersistenceCapableCollection) {
+                ((PersistenceCapableCollection)pcs).openmdxjdoEvict(true, true);
+            } else {
+                super.evictAll(pcs);
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jdo.PersistenceManager#evictAll()
+         */
+    //  @Override
         public void evictAll(
         ) {
             RefRootPackage_1.this.refDelegate().evictAll();
@@ -1167,7 +1135,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getManagedObjects()
          */
-        @Override
+    //  @Override
         public Set getManagedObjects(
         ) {
             return new MarshallingSet(
@@ -1179,7 +1147,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet)
          */
-        @Override
+    //  @Override
         public Set getManagedObjects(
             EnumSet<ObjectState> states
         ) {
@@ -1192,12 +1160,12 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getManagedObjects(java.lang.Class[])
          */
-        @Override
+    //  @Override
         public Set getManagedObjects(
             final Class... classes
         ) {
             return Sets.subSet(
-                getManagedObjects(),
+                this.getManagedObjects(),
                 new Selector (){
 
                     public boolean accept(Object candidate) {
@@ -1216,13 +1184,13 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet, java.lang.Class[])
          */
-        @Override
+    //  @Override
         public Set getManagedObjects(
             final EnumSet<ObjectState> states, 
             final Class... classes
         ) {
             return Sets.subSet(
-                getManagedObjects(states),
+                this.getManagedObjects(states),
                 new Selector (){
 
                     public boolean accept(Object candidate) {
@@ -1241,7 +1209,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#refresh(java.lang.Object)
          */
-        @Override
+    //  @Override
         public void refresh(Object pc) {
             Object objectId = JDOHelper.getObjectId(pc);
             if(objectId != null) {
@@ -1255,7 +1223,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#refreshAll()
          */
-        @Override
+    //  @Override
         public void refreshAll(
         ) {
             RefRootPackage_1.this.refDelegate().refreshAll();
@@ -1268,19 +1236,8 @@ public class RefRootPackage_1
         public void refreshAll(
             Collection pcs
         ) {
-            if(pcs instanceof RefContainer) {
-                String refMofId = ((RefContainer)pcs).refMofId();
-                if(refMofId == null) {
-                    super.refreshAll(pcs);
-                } else if (RefRootPackage_1.this.isTerminal()) {
-                    PersistenceManager_1_0 delegate = RefRootPackage_1.this.refDelegate();
-                    Container_1_0 container =  (Container_1_0) delegate.getObjectById(new Path(refMofId));
-                    container.refreshAll();
-                } else {
-                    PersistenceManager_1_0 delegate = RefRootPackage_1.this.refDelegate();
-                    RefContainer container =  (RefContainer) delegate.getObjectById(new Path(refMofId));
-                    delegate.refreshAll(container);
-                }
+            if(pcs instanceof PersistenceCapableCollection) {
+                ((PersistenceCapableCollection)pcs).openmdxjdoRefresh();
             } else {
                 super.refreshAll(pcs);
             }
@@ -1289,7 +1246,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery()
          */
-        @Override
+    //  @Override
         public Query newQuery(
         ) {
             throw new UnsupportedOperationException(
@@ -1301,32 +1258,32 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.Object)
          */
-        @Override
+    //  @Override
         public Query newQuery(
             Object compiled
         ) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.String)
          */
-        @Override
+    //  @Override
         public Query newQuery(
             String query
         ) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.String, java.lang.Object)
          */
-        @Override
+    //  @Override
         public Query newQuery(
             String language, 
             Object query
         ) {
-            if(Queries.OPENMDXQL.equals(language)) {
+            if(Queries.QUERY_LANGUAGE.equals(language)) {
                 Query_2Facade openmdxQuery;
                 try {
                     openmdxQuery = Query_2Facade.newInstance((MappedRecord)query);
@@ -1351,9 +1308,9 @@ public class RefRootPackage_1
                 }
                 String queryString = openmdxQuery.getQuery();
                 Path resourceIdentifier = openmdxQuery.getPath();
-                Collection<?> candidates = null;
+                RefContainer<?> candidates = null;
                 if(resourceIdentifier != null) {
-                    candidates = (Collection<?>)RefRootPackage_1.this.refContainer(
+                    candidates = RefRootPackage_1.this.refContainer(
                         resourceIdentifier, 
                         null
                     );
@@ -1401,7 +1358,7 @@ public class RefRootPackage_1
                             BasicException.Code.BAD_PARAMETER,
                             new BasicException.Parameter(
                                 "accepted", 
-                                org.openmdx.base.persistence.cci.Queries.OPENMDXQL
+                                org.openmdx.base.persistence.cci.Queries.QUERY_LANGUAGE
                             ),
                             new BasicException.Parameter(
                                 "actual",
@@ -1416,13 +1373,13 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class)
          */
-        @Override
+    //  @Override
         public Query newQuery(
             Class cls
         ) {       
             try {
                 return RefRootPackage_1.this.refCreateQuery(
-                    implementationMapper.getModelClassName(cls), 
+                    RefRootPackage_1.this.implementationMapper.getModelClassName(cls), 
                     true, // subclasses
                     null // filter 
                 );
@@ -1437,13 +1394,13 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(javax.jdo.Extent)
          */
-        @Override
+    //  @Override
         public Query newQuery(
             Extent cln
         ) {
             try {
                 return RefRootPackage_1.this.refCreateQuery(
-                    implementationMapper.getModelClassName(cln.getCandidateClass()), 
+                    RefRootPackage_1.this.implementationMapper.getModelClassName(cln.getCandidateClass()), 
                     cln.hasSubclasses(),
                     null // filter 
                 );
@@ -1458,47 +1415,47 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.util.Collection)
          */
-        @Override
+    //  @Override
         public Query newQuery(Class cls, Collection cln) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.lang.String)
          */
-        @Override
+    //  @Override
         public Query newQuery(Class cls, String filter) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.util.Collection, java.lang.String)
          */
-        @Override
+    //  @Override
         public Query newQuery(Class cls, Collection cln, String filter) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newQuery(javax.jdo.Extent, java.lang.String)
          */
-        @Override
+    //  @Override
         public Query newQuery(Extent cln, String filter) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newNamedQuery(java.lang.Class, java.lang.String)
          */
-        @Override
+    //  @Override
         public Query newNamedQuery(Class cls, String queryName) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getExtent(java.lang.Class, boolean)
          */
-        @Override
+    //  @Override
         public <T> Extent<T> getExtent(
             Class<T> persistenceCapableClass,
             boolean subclasses
@@ -1509,27 +1466,60 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object, boolean)
          */
-        @Override
+    //  @Override
         public Object getObjectById(
             Object oid, 
             boolean validate
         ) {
             if(oid instanceof UUID) {
-                UUID transientObjectId = (UUID) oid;
-                return RefRootPackage_1.this.refObject(transientObjectId);
-            } else if(oid instanceof Path) try {
-                Path resourceIdentifier = (Path) oid;
-                return resourceIdentifier.size() % 2 == 1 ?
-                    RefRootPackage_1.this.refObject(resourceIdentifier) :
-                    RefRootPackage_1.this.refContainer(resourceIdentifier, null);
-            } catch (JmiServiceException exception) {
-                throw exception.getExceptionCode() == BasicException.Code.NOT_FOUND ? new JDOObjectNotFoundException(
-                    "Object not found",
-                    exception.getCause()
-                ) : new JDOUserException(
-                    "Unable to get object",
-                    exception.getCause()
-                );
+                try {
+                    return RefRootPackage_1.this.marshal(
+                        RefRootPackage_1.this.refDelegate().getObjectById(oid)
+                    );
+                } catch(ServiceException e) {
+                    throw new JDOUserException(
+                        e.getCause().getDescription(),
+                        e.getCause()
+                    );
+                } catch(RuntimeServiceException e) {
+                    throw new JDOUserException(
+                        e.getCause().getDescription(),
+                        e.getCause()
+                    );
+                }
+            } else if(oid instanceof Path) {
+                try {
+                    Path resourceIdentifier = (Path) oid;
+                    return resourceIdentifier.size() % 2 == 1 ?
+                        RefRootPackage_1.this.refObject(resourceIdentifier) :
+                        RefRootPackage_1.this.refContainer(resourceIdentifier, null);
+                } catch (JmiServiceException exception) {
+                    throw exception.getExceptionCode() == BasicException.Code.NOT_FOUND ? new JDOObjectNotFoundException(
+                        "Object not found",
+                        exception.getCause()
+                    ) : new JDOUserException(
+                        "Unable to get object",
+                        exception.getCause()
+                    );
+                }
+            } else if (oid instanceof TransientContainerId) {
+                TransientContainerId resourceIdentifier = (TransientContainerId) oid;
+                try {
+                    RefObject parent = (RefObject) RefRootPackage_1.this.marshal(
+                        RefRootPackage_1.this.refDelegate().getObjectById(resourceIdentifier.getParent())
+                    );
+                    return parent.refGetValue(resourceIdentifier.getFeature());
+                } catch (ServiceException exception) {
+                    throw new JDOUserException(
+                        exception.getCause().getDescription(),
+                        exception.getCause()
+                    );
+                } catch(RuntimeServiceException exception) {
+                    throw new JDOUserException(
+                        exception.getCause().getDescription(),
+                        exception.getCause()
+                    );
+                }
             }
             throw oid == null ? BasicException.initHolder(
                 new JDOFatalUserException(
@@ -1555,15 +1545,15 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Object)
          */
-        @Override
+    //  @Override
         public Object getObjectById(Object oid) {
-            return getObjectById(oid, true);
+            return this.getObjectById(oid, true);
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getObjectId(java.lang.Object)
          */
-        @Override
+    //  @Override
         public Object getObjectId(Object pc) {
             return pc instanceof PersistenceCapable ?
                 ((PersistenceCapable)pc).jdoGetObjectId() :
@@ -1573,7 +1563,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getTransactionalObjectId(java.lang.Object)
          */
-        @Override
+    //  @Override
         public Object getTransactionalObjectId(Object pc) {
             return pc instanceof PersistenceCapable ?
                 ((PersistenceCapable)pc).jdoGetTransactionalObjectId() :
@@ -1583,7 +1573,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#newObjectIdInstance(java.lang.Class, java.lang.Object)
          */
-        @Override
+    //  @Override
         public Object newObjectIdInstance(Class pcClass, Object key) {
             return new Path(key.toString());
         }
@@ -1591,11 +1581,11 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.AbstractPersistenceManager#newInstance(java.lang.Class)
          */
-        @Override
+    //  @Override
         public <T> T newInstance(Class<T> pcClass) {
             try {
                 return (T) RefRootPackage_1.this.refClass(
-                    implementationMapper.getModelClassName(pcClass)
+                    RefRootPackage_1.this.implementationMapper.getModelClassName(pcClass)
                 ).refCreateInstance(
                     null
                 );
@@ -1607,10 +1597,10 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#makePersistent(java.lang.Object)
          */
-        @Override
+    //  @Override
         public <T> T makePersistent(T pc) {
             if(pc instanceof AbstractObject) {
-                if(getCopyOnAttach()) {
+                if(this.getCopyOnAttach()) {
                     AbstractObject source = (AbstractObject) pc;
                     RefObject target;
                     Path xri = (Path) JDOHelper.getTransactionalObjectId(source);
@@ -1628,7 +1618,7 @@ public class RefRootPackage_1
                             JDOHelper.getTransactionalObjectId(dataObject)
                         );
                         if(JDOHelper.isDirty(pc)) try { 
-                            copy(
+                            this.copy(
                                 target,
                                 source,
                                 false //  // JPA -> JMI
@@ -1646,7 +1636,7 @@ public class RefRootPackage_1
                         //
                         try {
                             target = this.newInstance(
-                                refMapping().getInstanceInterface(pc.getClass())
+                                RefRootPackage_1.this.refMapping().getInstanceInterface(pc.getClass())
                             );
                             copy(
                                 target,
@@ -1690,7 +1680,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#deletePersistent(java.lang.Object)
          */
-        @Override
+    //  @Override
         public void deletePersistent(
             Object pc
         ) {
@@ -1718,9 +1708,9 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#makeTransient(java.lang.Object, boolean)
          */
-        @Override
+    //  @Override
         public void makeTransient(Object pc, boolean useFetchPlan) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
@@ -1728,21 +1718,21 @@ public class RefRootPackage_1
          */
         @Override
         public void makeTransientAll(Collection pcs, boolean useFetchPlan) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#makeTransientAll(java.lang.Object[], boolean)
          */
-        @Override
+//      @Override
         public void makeTransientAll(Object[] pcs, boolean useFetchPlan) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#makeTransactional(java.lang.Object)
          */
-        @Override
+    //  @Override
         public void makeTransactional(Object pc) {
             Object objectId = JDOHelper.getObjectId(pc);
             if(objectId != null) {
@@ -1756,15 +1746,15 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#makeNontransactional(java.lang.Object)
          */
-        @Override
+    //  @Override
         public void makeNontransactional(Object pc) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#retrieve(java.lang.Object, boolean)
          */
-        @Override
+    //  @Override
         public void retrieve(Object pc, boolean useFetchPlan) {
             Object objectId = JDOHelper.getObjectId(pc);
             if(objectId != null) {
@@ -1784,19 +1774,10 @@ public class RefRootPackage_1
             Collection pcs, 
             boolean useFetchPlan
         ) {
-            if(pcs instanceof RefContainer) {
-                String refMofId = ((RefContainer)pcs).refMofId();
-                if(refMofId == null) {
-                    super.retrieveAll(pcs, useFetchPlan);
-                } else { 
-                    PersistenceManager_1_0 delegate = RefRootPackage_1.this.refDelegate();
-                    Object container = delegate.getObjectById(new Path(refMofId));
-                    if (RefRootPackage_1.this.isTerminal()) {
-                        ((Container_1_0)container).retrieveAll(useFetchPlan ? getFetchPlan() : null);
-                    } else {
-                        delegate.retrieveAll((Collection)container, useFetchPlan);
-                    }
-                }
+            if(pcs instanceof PersistenceCapableCollection) {
+                ((PersistenceCapableCollection)pcs).openmdxjdoRetrieve(
+                    useFetchPlan ? PersistenceManager_1.this.getFetchPlan() : null
+                );
             } else {
                 super.retrieveAll(pcs, useFetchPlan);
             }
@@ -1805,7 +1786,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getObjectIdClass(java.lang.Class)
          */
-        @Override
+    //  @Override
         public Class<Path> getObjectIdClass(Class cls) {
             return RefObject_1_0.class.isAssignableFrom(cls) ? Path.class : null;
         }
@@ -1813,12 +1794,12 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#detachCopy(java.lang.Object)
          */
-        @Override
+    //  @Override
         public <T> T detachCopy(T pc) {
             if(JDOHelper.getPersistenceManager(pc) == this) {
                 RefObject_1_0 jmiObject = (RefObject_1_0) pc;
                 try {
-                    AbstractObject jpaObject = refMapping(
+                    AbstractObject jpaObject = RefRootPackage_1.this.refMapping(
                     ).getClassMapping(
                         jmiObject.refClass().refMofId()
                     ).getInstanceClass(
@@ -1865,23 +1846,23 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#flush()
          */
-        @Override
+    //  @Override
         public void flush() {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            RefRootPackage_1.this.refDelegate().flush();          
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#checkConsistency()
          */
-        @Override
+    //  @Override
         public void checkConsistency() {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getFetchPlan()
          */
-        @Override
+    //  @Override
         public FetchPlan getFetchPlan() {
             return RefRootPackage_1.this.refDelegate().getFetchPlan();
         }
@@ -1889,15 +1870,15 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getSequence(java.lang.String)
          */
-        @Override
+    //  @Override
         public Sequence getSequence(String name) {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);            
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");            
         }
 
         /* (non-Javadoc)
          * @see org.openmdx.base.object.spi.AbstractPersistenceManager#getDataStoreConnection()
          */
-        @Override
+    //  @Override
         public JDOConnection getDataStoreConnection() {
             return RefRootPackage_1.this.refDelegate().getDataStoreConnection();
         }
@@ -1905,7 +1886,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getMultithreaded()
          */
-        @Override
+    //  @Override
         public boolean getMultithreaded(
         ){
             return this.getPersistenceManagerFactory().getMultithreaded();
@@ -1914,7 +1895,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#setMultithreaded(boolean)
          */
-        @Override
+    //  @Override
         public void setMultithreaded(boolean flag) {
             if(flag != getMultithreaded()) throw new javax.jdo.JDOUnsupportedOptionException(
                 "The " + ConfigurableProperty.Multithreaded.qualifiedName() + 
@@ -1925,9 +1906,9 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see javax.jdo.PersistenceManager#getServerDate()
          */
-        @Override
+    //  @Override
         public Date getServerDate() {
-            throw new UnsupportedOperationException(OPENMDX_2_JDO);
+            throw new UnsupportedOperationException("This JDO operation is not yet supported");
         }
 
         /**
@@ -1955,7 +1936,6 @@ public class RefRootPackage_1
             );
             for(Map.Entry<String, ModelElement_1_0> entry : modelAttributes.entrySet()) {
                 ModelElement_1_0 attributeDef = entry.getValue();
-                if("org:openmdx:base:ContextCapable:context".equals(attributeDef.objGetValue("qualifiedName"))) continue;
                 boolean reference = model.isReferenceType(attributeDef);
                 String jmiFeature = entry.getKey();
                 String jpaFeature = reference ? jmiFeature + "_Id" : jmiFeature;
@@ -2139,7 +2119,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.generic.spi.Delegating_1_0#objGetDelegate()
          */
-        @Override
+    //  @Override
         public RefRootPackage_1 objGetDelegate(
         ) {
             return RefRootPackage_1.this;
@@ -2148,7 +2128,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getPersistenceManager(javax.resource.cci.InteractionSpec)
          */
-        @Override
+    //  @Override
         public PersistenceManager_1_0 getPersistenceManager(
             InteractionSpec interactionSpec
         ) {
@@ -2158,7 +2138,7 @@ public class RefRootPackage_1
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getFeatureReplacingObjectById(java.lang.Object, java.lang.String)
          */
-        @Override
+    //  @Override
         public Object getFeatureReplacingObjectById(
             UUID transientObjectId,
             String featureName

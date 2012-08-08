@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefClass_1.java,v 1.82 2010/04/19 11:25:21 hburger Exp $
+ * Name:        $Id: RefClass_1.java,v 1.83 2010/06/02 15:43:16 hburger Exp $
  * Description: RefClass_1 class
- * Revision:    $Revision: 1.82 $
+ * Revision:    $Revision: 1.83 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/19 11:25:21 $
+ * Date:        $Date: 2010/06/02 15:43:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -118,7 +118,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     }
     
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public String refMofId(
     ) throws JmiException {
         return this.qualifiedClassName;
@@ -126,7 +126,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
 
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     public RefObject refCreateInstance(
         List iargs
     ) {
@@ -254,7 +254,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * operation is not supported.
      */
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     public Collection refAllOfType() {
         throw new UnsupportedOperationException();
     }
@@ -265,7 +265,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * operation is not supported.
      */
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     public Collection refAllOfClass() {
         throw new UnsupportedOperationException();
     }
@@ -275,7 +275,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * The call is delegated to the refImmediatePackage().
      */
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     public final RefStruct refCreateStruct(
         RefObject structType,
         List args
@@ -291,7 +291,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * The call is delegated to the refImmediatePackage().
      */
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     public final RefStruct refCreateStruct(
         String structName,
         List args
@@ -306,7 +306,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     /**
      * The call is delegated to the refImmediatePackage().
      */
-    @Override
+//  @Override
     public final RefEnum refGetEnum(
     RefObject enumType,
         String literalName
@@ -321,7 +321,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     /**
      * The call is delegated to the refImmediatePackage().
      */
-    @Override
+//  @Override
     public final RefEnum refGetEnum(
         String enumName,
         String literalName
@@ -341,7 +341,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. This operation
      * is not supported.
      */
-    @Override
+//  @Override
     public void refSetValue(
         RefObject feature,
         Object value
@@ -354,7 +354,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. This operation
      * is not supported.
      */
-    @Override
+//  @Override
     public void refSetValue(
         String featureName,
         Object value
@@ -367,7 +367,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. This operation
      * is not supported.
      */
-    @Override
+//  @Override
     public Object refGetValue(
         RefObject feature
     ) throws JmiException {
@@ -379,7 +379,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. This operation
      * is not supported.
      */
-    @Override
+//  @Override
     public Object refGetValue(
         String featureName
     ) throws JmiException {
@@ -391,7 +391,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. This operation
      * is not supported.
      */
-    @Override
+//  @Override
     @SuppressWarnings("unchecked")
     public Object refInvokeOperation(
         RefObject requestedOperation,
@@ -405,7 +405,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. This operation
      * is not supported.
      */
-    @Override
+//  @Override
     @SuppressWarnings("unchecked")
     public Object refInvokeOperation(
         String operationName,
@@ -422,7 +422,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     /**
      * Returns the ModelElement_1_0 of this class.
      */
-    @Override
+//  @Override
     public RefObject refMetaObject(
     ) {
         try {
@@ -438,14 +438,14 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public final RefPackage refImmediatePackage(
     ) {
         return this.immediatePackage;
     }
 
     //-------------------------------------------------------------------------
-    @Override
+//  @Override
     public final RefRootPackage_1 refOutermostPackage(
     ) {
         return (RefRootPackage_1) this.immediatePackage.refOutermostPackage();
@@ -457,7 +457,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * is always successful.
      */
     @SuppressWarnings("unchecked")
-    @Override
+//  @Override
     public Collection refVerifyConstraints(
         boolean deepVerify
     ) {
@@ -471,7 +471,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * 
      * @throws JDOFatalUserException 
      */
-    @Override
+//  @Override
     public Class<?> getDelegateClass (
     ) {
         return this.mapping.getInstanceInterface();
@@ -481,14 +481,14 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.Jmi1Class#hasLegacyDelegate()
      */
-    @Override
+//  @Override
     public boolean isTerminal(
     ) {
         return this.immediatePackage.isTerminal();
     }
 
     //------------------------------------------------------------------------
-    @Override
+//  @Override
     public StandardMarshaller getMarshaller(
     ) {
         if(this.marshaller == null) {

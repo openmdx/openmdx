@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ImplementationMapping_1.java,v 1.7 2010/04/17 12:49:08 hburger Exp $
+ * Name:        $Id: ImplementationMapping_1.java,v 1.11 2010/06/03 17:04:12 hburger Exp $
  * Description: Implementation Mapper 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/17 12:49:08 $
+ * Date:        $Date: 2010/06/03 17:04:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -135,7 +135,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.Mapping_1_0#newPackage(org.openmdx.base.accessor.jmi.spi.Jmi1Package_1_0, java.lang.String)
      */
-    @Override
+//  @Override
     public RefPackage newPackage(
         Jmi1Package_1_0 outermostPackage,
         String qualifiedName
@@ -181,7 +181,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.Mapping_1_0#newStruct(org.openmdx.base.accessor.jmi.spi.Jmi1Package_1_0, javax.resource.cci.MappedRecord)
      */
-    @Override
+//  @Override
     public RefStruct newStruct(
         Jmi1Package_1_0 outermostPackage,
         Record delegate
@@ -201,7 +201,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
             return Classes.<RefStruct>newProxyInstance(
                 new Jmi1StructInvocationHandler(
                     outermostPackage,
-                    asMappedRecord(
+                    ImplementationMapping_1.asMappedRecord(
                         descriptor.members, 
                         (IndexedRecord) delegate
                     )
@@ -217,19 +217,22 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         );
     }
 
-    @Override
+//  @Override
     public FeatureMapper getFeatureMapper(
         String qualifiedClassName,
-        boolean terminal
+        FeatureMapper.Type type
     ) throws ServiceException {
-       SpecificationMapping_1.SpecificationDescriptor descriptor = this.specificationMapping.getSpecificationDescriptor(qualifiedClassName);
-       return terminal ? descriptor.getTerminalFeatureMapper() : descriptor.getNonTerminalFeatureMapper();
+       return this.specificationMapping.getSpecificationDescriptor(
+           qualifiedClassName
+       ).getFeatureMapper(
+           type
+       );
     }
     
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.mof.cci.Mapping_1_0#getClassName(java.lang.Class)
      */
-    @Override
+//  @Override
     public String getModelClassName(
         Class<?> javaClass
     ) throws ServiceException {
@@ -239,7 +242,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.Mapping_1_0#getInstanceInterface(java.lang.Class)
      */
-    @Override
+//  @Override
     public Class<? extends RefObject> getInstanceInterface(
         Class<?> javaClass
     ) throws ServiceException {
@@ -249,7 +252,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.Mapping_1_0#getClassMapping(java.lang.String)
      */
-    @Override
+//  @Override
     public ImplementationDescriptor getClassMapping(
         String qualifiedClassName
     ) throws ServiceException {
@@ -257,17 +260,19 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         ImplementationDescriptor implementationDescriptor = this.implementationDescriptors.get(key);
         if(implementationDescriptor == null) {
             List<AspectImplementationDescriptor> aspectImplementationClasses;
-            List<Class<?>> mixedInInterfaces;
-            if(aspectImplementationPackageNames == null) {
+            List<Class<?>> mixedInInterfaces = this.next == null ? Collections.<Class<?>>emptyList(
+            ) : Arrays.asList(
+                this.next.getClassMapping(qualifiedClassName).mixedInInterfaces
+            );
+            if(this.aspectImplementationPackageNames == null) {
                 aspectImplementationClasses = Collections.emptyList(); 
-                mixedInInterfaces = Collections.emptyList();
             } else {
                 //
                 // Aspect Implementation Classes
                 //
                 aspectImplementationClasses = new ArrayList<AspectImplementationDescriptor>();
                 for(Object supertypePath : Model_1Factory.getModel().getElement(qualifiedClassName).objGetList("allSupertype")){                    
-                    AspectImplementationDescriptor descriptor = getAspectDescriptor(((Path)supertypePath).getBase());
+                    AspectImplementationDescriptor descriptor = this.getAspectDescriptor(((Path)supertypePath).getBase());
                     if(descriptor != null) {
                         ImplementationDescriptor.add(descriptor, aspectImplementationClasses);
                     }
@@ -275,12 +280,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
                 //
                 // Mixed-in Interfaces
                 //
-                mixedInInterfaces = new ArrayList<Class<?>>();
-                if(this.next != null) {
-                    mixedInInterfaces.addAll(
-                        Arrays.asList(this.next.getClassMapping(qualifiedClassName).mixedInInterfaces)
-                    );
-                }
+                mixedInInterfaces = new ArrayList<Class<?>>(mixedInInterfaces);
                 for(AspectImplementationDescriptor aspectImplementationClass : aspectImplementationClasses) {
                     for(Class<?> mixedInInterface : Classes.getInterfaces(aspectImplementationClass.implementationClass)){
                         ImplementationDescriptor.add(mixedInInterface, mixedInInterfaces);
@@ -388,7 +388,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.Mapping_1_0#getExceptionConstructor(java.lang.String,java.lang.String)
      */
-    @Override
+//  @Override
     public Constructor<? extends RefException> getExceptionConstructor(
         String qualifiedExceptionName,
         String qualifiedPackageName
@@ -411,9 +411,11 @@ class ImplementationMapping_1 implements Mapping_1_0 {
 
         /**
          * Constructor 
-         * @param queryInterface TODO
-         * @param qualifiedClassName
-         * @throws ServiceException
+         *
+         * @param interfaceDescriptor
+         * @param aspectDescriptors
+         * @param mixedInInterfaces
+         * @param combinedInterfaces
          */
         ImplementationDescriptor(
             SpecificationMapping_1.SpecificationDescriptor interfaceDescriptor,
@@ -463,7 +465,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#getAspectImplementationDescriptors()
          */
-        @Override
+    //  @Override
         public AspectImplementationDescriptor[] getAspectImplementationDescriptors(
         ) {
             return this.aspectImplementationDescriptors;
@@ -472,7 +474,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#getInstanceInterface()
          */
-        @Override
+    //  @Override
         public Class<? extends RefObject> getInstanceInterface() {
             return this.interfaceDescriptor.jmi1Interface;
         }
@@ -480,7 +482,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#isMixedInInterfaces(java.lang.Class)
          */
-        @Override
+    //  @Override
         public boolean isMixedInInterfaces(
             Class<?> declaringClass
         ) {
@@ -513,7 +515,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.ClassMapping_1_0#getInstanceClass()
          */
-        @Override
+    //  @Override
         public Class<? extends AbstractObject> getInstanceClass(
         ) throws ServiceException {
             return this.interfaceDescriptor.jpa3Class;
@@ -522,7 +524,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#newClass(org.openmdx.base.accessor.jmi.spi.Jmi1Package_1_0)
          */
-        @Override
+    //  @Override
         public Jmi1Class_1_0 newClass(
             Jmi1Package_1_0 refPackage
         ) throws ServiceException {
@@ -531,14 +533,14 @@ class ImplementationMapping_1 implements Mapping_1_0 {
                     this.interfaceDescriptor.qualifiedClassName,
                     refPackage
                 ),
-                getClassInterfaces()
+                this.getClassInterfaces()
             );
         }
 
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#newInstance(org.openmdx.base.accessor.jmi.spi.Jmi1Class_1_0, javax.jdo.spi.PersistenceCapable)
          */
-        @Override
+    //  @Override
         public RefObject_1_0 newInstance(
             Jmi1Class_1_0 refClass,
             PersistenceCapable delegate
@@ -552,7 +554,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#newInstance(InvocationHandler)
          */
-        @Override
+    //  @Override
         public RefQuery_1_0 newQuery(
             InvocationHandler invocationHandler
         ) {
@@ -631,7 +633,7 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         /* (non-Javadoc)
          * @see org.openmdx.base.accessor.jmi.spi.Jmi1Mapping_1_0#getInvocationDescriptor(java.lang.reflect.Method)
          */
-        @Override
+    //  @Override
         public InvocationDescriptor getInvocationDescriptor(
             Method method
         ){

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1Accessor.java,v 1.12 2010/03/23 16:31:58 hburger Exp $
+ * Name:        $Id: Model_1Accessor.java,v 1.13 2010/06/21 09:48:54 hburger Exp $
  * Description: Wrapper for a org::omg::model1 compliant in-process dataprovider.
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 16:31:58 $
+ * Date:        $Date: 2010/06/21 09:48:54 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -89,6 +89,7 @@ public class Model_1Accessor {
        * performed on the populated dataprovider.
        * @deprecated Use {@link #Model_1Accessor(String,String)} instead
        */
+      @Deprecated
       public Model_1Accessor(
         String providerName
       ) throws ServiceException {

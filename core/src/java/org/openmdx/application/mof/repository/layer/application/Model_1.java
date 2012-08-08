@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.24 2010/03/23 19:06:41 hburger Exp $
+ * Name:        $Id: Model_1.java,v 1.27 2010/06/02 13:42:46 hburger Exp $
  * Description: model1 application plugin
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 19:06:41 $
+ * Date:        $Date: 2010/06/02 13:42:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -81,6 +81,7 @@ import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
+import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.mof.cci.ModelAttributes;
@@ -95,10 +96,9 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.query.Directions;
-import org.openmdx.base.query.FilterOperators;
-import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.query.Quantors;
+import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
@@ -116,6 +116,7 @@ public class Model_1 extends Layer_1 {
     }
     
     // --------------------------------------------------------------------------
+    @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {
@@ -333,9 +334,9 @@ public class Model_1 extends Layer_1 {
             Object_2Facade.getPath(namespace).getParent(),
             new FilterProperty[]{
                 new FilterProperty(
-                    Quantors.THERE_EXISTS,
+                    Quantifier.THERE_EXISTS.code(),
                     "container",
-                    FilterOperators.IS_IN,
+                    ConditionType.IS_IN.code(),
                     Object_2Facade.getPath(namespace)
                 )        
             },
@@ -343,7 +344,7 @@ public class Model_1 extends Layer_1 {
             null,
             0,
             Integer.MAX_VALUE,
-            Directions.ASCENDING
+            SortOrder.ASCENDING.code()
         );
     }
 
@@ -1325,7 +1326,7 @@ public class Model_1 extends Layer_1 {
                         null,
                         0,
                         Integer.MAX_VALUE,
-                        Directions.ASCENDING
+                        SortOrder.ASCENDING.code()
                     );
                     for(
                         Iterator<MappedRecord> j = elements.iterator();

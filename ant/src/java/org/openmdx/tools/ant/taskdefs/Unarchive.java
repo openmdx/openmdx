@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Unarchive.java,v 1.5 2005/12/19 12:53:10 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Unarchive.java,v 1.6 2010/06/04 22:22:48 hburger Exp $
  * Description: Ant Unarchive Task
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/12/19 12:53:10 $
+ * Date:        $Date: 2010/06/04 22:22:48 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -204,6 +203,7 @@ public class Unarchive extends Task {
 	/* (non-Javadoc)
 	 * @see org.apache.tools.ant.Task#execute()
 	 */
+	@Override
 	public void execute() throws BuildException {
 		getDelegate().execute();
 	}
@@ -593,7 +593,8 @@ public class Unarchive extends Task {
          * 
          * @param encoding the character encoding
          */
-        public void setEncoding(
+        @Override
+		public void setEncoding(
         	String encoding
         ){
         	if(

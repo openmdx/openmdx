@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LayerConfigurationEntries.java,v 1.5 2010/01/14 12:55:12 wfro Exp $
+ * Name:        $Id: LayerConfigurationEntries.java,v 1.6 2010/06/04 19:31:30 hburger Exp $
  * Description: Generated constants for LayerConfigurationEntries
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/14 12:55:12 $
+ * Date:        $Date: 2010/06/04 19:31:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -75,10 +75,4 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
    */
   static public final String OPTIMISTIC_LOCKING = "optimisticLocking";
   
-  /**
-   * Defines whether "instance of state" filter properties may be substituted by
-   * core filter properties.
-   */
-  static public final String DISABLE_STATE_FILTER_SUBSTITUATION = "disableStateFilterSubstitution";
-
 }

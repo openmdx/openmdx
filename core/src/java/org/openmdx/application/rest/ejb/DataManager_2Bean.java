@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataManager_2Bean.java,v 1.5 2010/04/26 16:05:49 hburger Exp $
+ * Name:        $Id: DataManager_2Bean.java,v 1.6 2010/08/09 13:01:20 hburger Exp $
  * Description: Data Manager 2 Bean 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/26 16:05:49 $
+ * Date:        $Date: 2010/08/09 13:01:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,11 +52,19 @@ package org.openmdx.application.rest.ejb;
 
 import java.io.Serializable;
 import java.rmi.RemoteException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
+import javax.naming.Binding;
+import javax.naming.InitialContext;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
@@ -66,6 +74,8 @@ import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.Record;
 
 import org.openmdx.application.rest.spi.InboundConnectionFactory_2;
+import org.openmdx.base.collection.Maps;
+import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
@@ -81,11 +91,14 @@ public class DataManager_2Bean implements SessionBean {
     private static final long serialVersionUID = -1593128027032912087L;
 
     /**
+     * A reference to the shared connection factory
+     */
+    private ConnectionFactory connectionFactory;
+    
+    /**
      * The connection factory is shared among the bean the instances
      */
-    private static final ConnectionFactory connectionFactory = InboundConnectionFactory_2.newInstance(
-        "EntityManagerFactory"
-    );
+    private static final ConcurrentMap<String,ConnectionFactory> connectionFactories = new ConcurrentHashMap<String, ConnectionFactory>();
     
     /**
      * A connection is established when the bean is created
@@ -127,7 +140,6 @@ public class DataManager_2Bean implements SessionBean {
         }
     }
 
-    //-----------------------------------------------------------------------
     /**
      * Disconnect from the entity manager
      */
@@ -148,8 +160,7 @@ public class DataManager_2Bean implements SessionBean {
             }
         }
     }
-    
-    //-----------------------------------------------------------------------
+
     /**
      * A {@link Connection_2Home#create()} invocation leads here
      * 
@@ -160,6 +171,45 @@ public class DataManager_2Bean implements SessionBean {
     public void ejbCreate(
         ConnectionSpec connectionSpec
     ) throws CreateException {
+        String name = "jdo:EntityManagerFactory";        
+        Map<String,Object> overrides = new HashMap<String, Object>();
+        try {
+            Bindings: for(
+                NamingEnumeration<Binding> e = new InitialContext().listBindings("java:comp/env");
+                e.hasMore();
+             ){
+                Binding b = e.nextElement();
+                for(ConfigurableProperty p : ConfigurableProperty.values()){
+                    if(p.name().equals(b.getName())) {
+                        if(p != ConfigurableProperty.Name) {
+                            overrides.put(p.qualifiedName(), b.getObject());
+                        } else if(DataManager_2Bean.connectionFactories.containsKey(name = (String)b.getObject())) {
+                            break Bindings;
+                        }
+                        continue Bindings;
+                    }
+                }
+             }
+        } catch (NamingException exception) {
+            throw Throwables.initCause(
+                new CreateException("Unable to retrieve the entity manager configuration"),
+                exception, // cause
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
+                new BasicException.Parameter(
+                    "context", 
+                    "java:comp/env"
+                )
+            );
+        }
+        this.connectionFactory = DataManager_2Bean.connectionFactories.get(name);
+        if(this.connectionFactory == null) {
+            this.connectionFactory = Maps.putUnlessPresent(
+                DataManager_2Bean.connectionFactories,
+                name,
+                InboundConnectionFactory_2.newInstance(name, overrides)
+            );
+        }
         try {
             this.connectionSpec = (RestConnectionSpec) connectionSpec;
         } catch (ClassCastException exception) {
@@ -181,46 +231,55 @@ public class DataManager_2Bean implements SessionBean {
         connect();
     }
 
-    //-----------------------------------------------------------------------
+    
+    //------------------------------------------------------------------------
+    // Implements SessionBean
+    //------------------------------------------------------------------------
+    
     /* (non-Javadoc)
      * @see javax.ejb.SessionBean#ejbActivate()
      */
+//  @Override
     public void ejbActivate(
     ) throws EJBException, RemoteException {
         // TODO restore unit of work
         connect();
     }
 
-    //-----------------------------------------------------------------------
     /* (non-Javadoc)
      * @see javax.ejb.SessionBean#ejbPassivate()
      */
+//  @Override
     public void ejbPassivate(
     ) throws EJBException, RemoteException {
         // TODO save unit of work
         disconnect();
     }
 
-    //-----------------------------------------------------------------------
     /* (non-Javadoc)
      * @see javax.ejb.SessionBean#ejbRemove()
      */
+//  @Override
     public void ejbRemove(
     ) throws EJBException, RemoteException {
         disconnect();
     }
 
-    //-----------------------------------------------------------------------
     /* (non-Javadoc)
      * @see javax.ejb.SessionBean#setSessionContext(javax.ejb.SessionContext)
      */
+//  @Override
     public void setSessionContext(
         SessionContext sessionContext
     ) throws EJBException, RemoteException {
 //      this.sessionContext = sessionContext;
     }
 
-    //-----------------------------------------------------------------------
+    
+    //------------------------------------------------------------------------
+    // Provides Connection 2.0
+    //------------------------------------------------------------------------
+    
     /**
      * Connection 2.0's execute method
      * 

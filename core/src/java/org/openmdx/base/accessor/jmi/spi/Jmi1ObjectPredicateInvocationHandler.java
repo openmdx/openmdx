@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ObjectPredicateInvocationHandler.java,v 1.5 2009/12/28 01:08:14 wfro Exp $
+ * Name:        $Id: Jmi1ObjectPredicateInvocationHandler.java,v 1.8 2010/06/02 13:43:29 hburger Exp $
  * Description: Jmi1ObjectPredicateInvocationHandler 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/28 01:08:14 $
+ * Date:        $Date: 2010/06/02 13:43:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,9 +58,8 @@ import java.util.Collections;
 
 import org.openmdx.base.query.AnyTypeCondition;
 import org.openmdx.base.query.Condition;
-import org.openmdx.base.query.FilterOperators;
-import org.openmdx.base.query.FilterProperty;
-import org.openmdx.base.query.Quantors;
+import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.Quantifier;
 import org.w3c.cci2.AnyTypePredicate;
 
 /**
@@ -79,6 +78,7 @@ public class Jmi1ObjectPredicateInvocationHandler extends Jmi1QueryInvocationHan
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
+    @Override
     public Object invoke(
         Object proxy, 
         Method method, 
@@ -168,14 +168,12 @@ public class Jmi1ObjectPredicateInvocationHandler extends Jmi1QueryInvocationHan
                 }
             }
             if(!exists) {
-                this.predicate.getQuery().refGetFilter().addCondition(
+                this.predicate.getQuery().refGetFilter().getCondition().add(
                     new AnyTypeCondition(
-                        new FilterProperty(
-                            Quantors.THERE_EXISTS,
-                            featureName,
-                            FilterOperators.IS_IN,
-                            new Object[]{super.getQuery().refGetFilter()}
-                        )                            
+                        Quantifier.THERE_EXISTS,
+                        featureName,
+                        ConditionType.IS_IN,
+                        super.getQuery().refGetFilter()
                     )
                 );
             }

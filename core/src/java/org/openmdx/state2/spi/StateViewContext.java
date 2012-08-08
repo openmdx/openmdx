@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StateViewContext.java,v 1.10 2010/01/03 14:59:51 wfro Exp $
+ * Name:        $Id: StateViewContext.java,v 1.11 2010/07/07 11:01:43 hburger Exp $
  * Description: AbstractStateContext 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 14:59:51 $
+ * Date:        $Date: 2010/07/07 11:01:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,7 +69,11 @@ public abstract class StateViewContext<V>
      * Constructor 
      *
      * @param viewKind
-     * @param existsAt
+     * @param validAt 
+     * @param existsAt the transaction time point, or <code>null</code> for an up-to-date view
+     * @param lowerBound
+     * @param upperBound
+     * @param includeUpperBound
      */
     protected StateViewContext(
         ViewKind viewKind, 

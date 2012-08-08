@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Object_1.java,v 1.2 2009/11/04 16:00:14 hburger Exp $
- * Description: Removable_1 
- * Revision:    $Revision: 1.2 $
+ * Name:        $Id: Object_1.java,v 1.3 2010/06/30 13:12:21 hburger Exp $
+ * Description: Stated Object Interceptor
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/04 16:00:14 $
+ * Date:        $Date: 2010/06/30 13:12:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,7 +64,7 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
- * Removable
+ * Stated Object Interceptor
  */
 public class Object_1 extends Interceptor_1 {
 

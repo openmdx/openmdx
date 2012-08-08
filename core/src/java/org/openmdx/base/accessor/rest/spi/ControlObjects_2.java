@@ -1,15 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ControlObjects_2.java,v 1.2 2010/01/08 18:49:40 hburger Exp $
- * Description: ControlObjects_2 
- * Revision:    $Revision: 1.2 $
+ * Name:        $Id: ControlObjects_2.java,v 1.3 2010/05/06 07:57:50 hburger Exp $
+ * Description: Control Objects 
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/08 18:49:40 $
+ * Date:        $Date: 2010/05/06 07:57:50 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2010, OMEX AG, Switzerland
  * All rights reserved.
@@ -49,15 +48,12 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.accessor.rest.spi;
 
 import org.openmdx.base.naming.Path;
 
-
 /**
- * ControlObjects_2
- *
+ * Control Objects 2
  */
 public class ControlObjects_2 {
 

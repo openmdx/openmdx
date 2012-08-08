@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HttpClient.java,v 1.2 2010/03/15 04:59:56 hburger Exp $
+ * Name:        $Id: HttpClient.java,v 1.3 2010/06/02 09:18:13 hburger Exp $
  * Description: HTTP Client
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/15 04:59:56 $
+ * Date:        $Date: 2010/06/02 09:18:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -134,7 +134,11 @@ public class HttpClient {
         		}
         	}
         } catch (URISyntaxException exception) {
-        	throw new IOException("Cookie propagation failure", exception);
+        	throw (IOException) new IOException(
+        		"Cookie propagation failure"
+        	).initCause(
+        		exception
+        	); 
         }
         return connection;
     }
@@ -153,7 +157,11 @@ public class HttpClient {
         if(this.cookieHandler != null) try {
         	this.cookieHandler.put(connection.getURL().toURI(), connection.getHeaderFields());
         } catch (URISyntaxException exception) {
-        	throw new IOException("Cookie retrieval failure", exception);
+        	throw (IOException) new IOException(
+    			"Cookie retrieval failure"
+        	).initCause(
+        		exception
+        	); 
         }
     	return responseCode;
     }

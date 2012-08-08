@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: HttpHeaderFieldValue.java,v 1.2 2010/02/27 22:11:27 hburger Exp $
+ * Name:        $Id: HttpHeaderFieldValue.java,v 1.6 2010/06/02 13:44:39 hburger Exp $
  * Description: HTTP Header Field Value 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/27 22:11:27 $
+ * Date:        $Date: 2010/06/02 13:44:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -70,17 +70,28 @@ public class HttpHeaderFieldValue implements Iterable<HttpHeaderFieldContent>{
     public HttpHeaderFieldValue(
         Enumeration<?> headers
     ){
-        for(
-            float minorOrder = 0.0f;
-            headers.hasMoreElements();
-            minorOrder += 1.0 / 1048576.0 
-        ) {
+        List<String> values = new ArrayList<String>();
+        while(headers.hasMoreElements()) {
+            String value = headers.nextElement().toString();
+            int begin = 0;
+            for(
+                int end = value.indexOf(',');
+                end >= 0;
+                begin = end + 1, end = value.indexOf(',', begin)
+            ){
+                values.add(value.substring(begin, end).trim());
+            }
+            values.add(value.substring(begin).trim());
+        }
+        float minorOrder = 0.0f;
+        for(String value : values) {
             this.content.add(
                 new HttpHeaderFieldContent(
-                    headers.nextElement().toString().trim(),
+                    value,
                     minorOrder
                 )
             );
+            minorOrder += 1.0 / 1048576.0;
         }
         Collections.sort(this.content); 
     }
@@ -94,7 +105,7 @@ public class HttpHeaderFieldValue implements Iterable<HttpHeaderFieldContent>{
     /* (non-Javadoc)
      * @see java.lang.Iterable#iterator()
      */
-    @Override
+//  @Override
     public Iterator<HttpHeaderFieldContent> iterator() {
         return this.content.iterator();
     }
@@ -122,5 +133,14 @@ public class HttpHeaderFieldValue implements Iterable<HttpHeaderFieldContent>{
     ) {
         return this.content.toString();
     }
-    
+
+    /**
+     * Tells whether there is no content
+     * 
+     * @return <code>true</code> if there is no content
+     */
+    public boolean isEmpty(){
+        return this.content.isEmpty();
+    }
+
 }

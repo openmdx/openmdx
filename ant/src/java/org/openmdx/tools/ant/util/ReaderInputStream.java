@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ReaderInputStream.java,v 1.3 2005/11/19 17:51:16 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ReaderInputStream.java,v 1.4 2010/06/04 22:27:36 hburger Exp $
  * Description: Reader InputStream
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/11/19 17:51:16 $
+ * Date:        $Date: 2010/06/04 22:27:36 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -49,7 +48,6 @@
  * This product includes or is based on software developed by other
  * organizations as listed in the NOTICE file.
  */
-
 package org.openmdx.tools.ant.util;
 
 import java.io.IOException;
@@ -115,7 +113,8 @@ public class ReaderInputStream extends InputStream {
     /* (non-Javadoc)
      * @see java.io.InputStream#read()
      */
-    public synchronized int read(
+    @Override
+	public synchronized int read(
     ) throws IOException {
         return this.buffer.read(this.binaryBuf, 0, 1) == 0 ? -1 : this.binaryBuf[0];
     }
@@ -123,7 +122,8 @@ public class ReaderInputStream extends InputStream {
     /* (non-Javadoc)
      * @see java.io.InputStream#read(byte[], int, int)
      */
-    public synchronized int read(byte[] b, int off, int len) throws IOException {
+    @Override
+	public synchronized int read(byte[] b, int off, int len) throws IOException {
         if (b == null) throw new NullPointerException();
         if (
             off < 0 || 
@@ -139,14 +139,16 @@ public class ReaderInputStream extends InputStream {
     /* (non-Javadoc)
      * @see java.io.InputStream#available()
      */
-    public synchronized int available() throws IOException {
+    @Override
+	public synchronized int available() throws IOException {
         return this.buffer.available();
     }
 
     /* (non-Javadoc)
      * @see java.io.InputStream#close()
      */
-    public void close() throws IOException {
+    @Override
+	public void close() throws IOException {
         this.buffer.close();
     }
 
@@ -269,7 +271,8 @@ public class ReaderInputStream extends InputStream {
         /* (non-Javadoc)
          * @see java.io.OutputStream#write(int)
          */
-        public void write(int b) throws IOException {
+        @Override
+		public void write(int b) throws IOException {
             this.binaryBuf[0] = (byte) b;
             write(this.binaryBuf, 0, 1);
         }
@@ -277,7 +280,8 @@ public class ReaderInputStream extends InputStream {
         /* (non-Javadoc)
          * @see java.io.OutputStream#write(byte[], int, int)
          */
-        public void write(byte[] b, int off, int len) throws IOException {
+        @Override
+		public void write(byte[] b, int off, int len) throws IOException {
             int primaryAvailable = this.primaryLength - this.primaryCount;
             if(primaryAvailable > len) {
                 System.arraycopy(b, off, this.primaryBuf, this.primaryCount, len);
@@ -303,7 +307,8 @@ public class ReaderInputStream extends InputStream {
         /* (non-Javadoc)
          * @see java.io.OutputStream#close()
          */
-        public void close() throws IOException {
+        @Override
+		public void close() throws IOException {
             if(this.textSource != null) this.textSource.close();
             this.textSource = null;
             this.textSink = null;

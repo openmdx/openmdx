@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AnyTypeCondition.java,v 1.3 2009/05/15 00:26:36 hburger Exp $
- * Description: AnyTypeCondition 
- * Revision:    $Revision: 1.3 $
+ * Name:        $Id: AnyTypeCondition.java,v 1.7 2010/06/01 09:00:06 hburger Exp $
+ * Description: Any Type Condition
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/15 00:26:36 $
+ * Date:        $Date: 2010/06/01 09:00:06 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,65 +48,88 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.query;
 
 
 /**
- * AnyTypeCondition
- *
+ * Any Type Condition
  */
 public class AnyTypeCondition extends Condition {
 
     /**
      * Constructor 
-     *
-     * @deprecated for encoding and decoding
      */
-    public AnyTypeCondition(){
+    public AnyTypeCondition(
+    ){
         super();
     }
-    
-    //-----------------------------------------------------------------------
+
+    /**
+     * Constructor 
+     *
+     * @param quantifier
+     * @param feature
+     * @param type
+     * @param values
+     */
     public AnyTypeCondition(
-        FilterProperty p
+        Quantifier quantifier,
+        String feature,
+        ConditionType type,
+        Object... values
     ) {
         super(
-            p.quantor(),
-            p.name(),
-            p.operator() >= 0,
-            p.getValues()
+            quantifier, 
+            feature, 
+            values
         );
-        this.name = FilterOperators.toString(p.operator());
+        this.type = type;
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = -4515329101711432198L;
+
+    /**
+     * The predicate type
+     */
+    private ConditionType type;
+
+    /**
+     * Clone the condition
+     * 
+     * @return a clone
+     */
+    @Override
+    public AnyTypeCondition clone(
+    ) throws CloneNotSupportedException {
+        return new AnyTypeCondition(
+            this.getQuantifier(), 
+            this.getFeature(), 
+            this.getType(), 
+            this.getValue()
+        );
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.query.Condition#getName()
      */
     @Override
-    public String getName(
+    public ConditionType getType(
     ) {
-        return this.name;
+        return this.type;
     }
 
     /**
-     * Set the condition name
+     * Set the condition type by name
      * 
      * @param name
-     * 
-     * @deprecated For encoding and decoding
      */
     public void setName(
         String name
     ){
-        this.name = name;
+        this.type = ConditionType.valueOf(name);
     }
-    
-    //-----------------------------------------------------------------------
-    // Members
-    //-----------------------------------------------------------------------    
-    private static final long serialVersionUID = -1838250727743324443L;
-    protected String name;
     
 }

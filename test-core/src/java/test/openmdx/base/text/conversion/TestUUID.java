@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestUUID.java,v 1.3 2009/11/06 16:35:00 hburger Exp $
- * Description: TestUUID 
- * Revision:    $Revision: 1.3 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: TestUUID.java,v 1.4 2010/06/03 15:58:15 hburger Exp $
+ * Description: Test UUID 
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/06 16:35:00 $
+ * Date:        $Date: 2010/06/03 15:58:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2010, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -48,7 +48,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package test.openmdx.base.text.conversion;
 
 import static org.junit.Assert.assertEquals;
@@ -302,6 +301,7 @@ public class TestUUID {
         /* (non-Javadoc)
          * @see org.openmdx.base.id.spi.TimeBasedUUIDProvider#getClockSequence()
          */
+        @Override
         protected int getClockSequence() {
             return this.source.clockSequence();
         }
@@ -309,6 +309,7 @@ public class TestUUID {
         /* (non-Javadoc)
          * @see org.openmdx.base.id.spi.TimeBasedUUIDProvider#getNode()
          */
+        @Override
         protected long getNode() {
             return this.source.node();
         }
@@ -316,6 +317,7 @@ public class TestUUID {
         /* (non-Javadoc)
          * @see org.openmdx.base.id.spi.TimeBasedUUIDProvider#getTimestamp()
          */
+        @Override
         protected long getTimestamp() {
             return this.source.timestamp();
         }

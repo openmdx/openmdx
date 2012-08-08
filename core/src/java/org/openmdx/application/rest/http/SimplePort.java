@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SimplePort.java,v 1.9 2010/03/19 12:32:55 hburger Exp $
+ * Name:        $Id: SimplePort.java,v 1.22 2010/06/02 15:04:32 hburger Exp $
  * Description: Simple Port 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/19 12:32:55 $
+ * Date:        $Date: 2010/06/02 15:04:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,8 +50,10 @@
  */
 package org.openmdx.application.rest.http;
 
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
 import java.net.HttpURLConnection;
@@ -60,6 +62,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
+import java.util.List;
+import java.util.Map;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
@@ -76,10 +81,9 @@ import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.spi.RestFormat;
 import org.openmdx.base.rest.spi.RestFormat.Source;
 import org.openmdx.base.rest.spi.RestFormat.Target;
+import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.kernel.exception.BasicException;
 import org.xml.sax.InputSource;
-
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 /**
  * The Simple Port depends on the JDK's URL functionality only
@@ -94,9 +98,19 @@ public class SimplePort implements Port {
     }
 
     /**
+     * Use UTF-8 encoding
+     */
+    private final static String CHARACTER_ENCODING = "UTF-8";
+    
+    /**
+     * Use "text/xml" as pretty printing default value.
+     */
+    private final static String DEFAULT_MIME_TYPE = "text/xml";
+    
+    /**
      * The REST server's URI
      */
-    private String uri;
+    private String contextURL;
 
     /**
      * The BASIC authentication user name
@@ -116,10 +130,16 @@ public class SimplePort implements Port {
     /**
      * The MIME type, one of<ul>
      * <li>text/xml (default)
+     * <li>application/xml
      * <li>application/vnd.openmdx.wbxml
      * </ul>
      */
-    private String mimeType = "text/xml"; 
+    private String mimeType = DEFAULT_MIME_TYPE; 
+    
+    /**
+     * The content type is evaluated lazily
+     */
+    private String contentType = null;
     
     /**
      * Retrieve the MIME type.
@@ -128,6 +148,18 @@ public class SimplePort implements Port {
      */
     public String getMimeType() {
         return this.mimeType;
+    }
+    
+    /**
+     * Retrieve the content type.
+     *
+     * @return Returns the content type.
+     */
+    protected String getContentType(){
+        if(this.contentType == null) {
+            this.contentType = this.mimeType + ";charset=" + CHARACTER_ENCODING; 
+        }
+        return this.contentType;
     }
     
     /**
@@ -142,6 +174,7 @@ public class SimplePort implements Port {
         String mimeType
     ) {
         this.mimeType = mimeType; 
+        this.contentType = null;
     }
 
     /**
@@ -150,20 +183,20 @@ public class SimplePort implements Port {
      * @return Returns the uri.
      */
     public String getUri() {
-        return this.uri;
+        return this.contextURL;
     }
     
     /**
      * Set uri.
      * 
-     * @param uri The uri to set.
+     * @param contextURL The uri to set.
      */
     public void setUri(
-        String uri
+        String contextURL
     ) {
-        this.uri =
-            uri == null || uri.endsWith("/") ? uri : 
-            uri + '/';
+        this.contextURL =
+            contextURL == null || !contextURL.endsWith("/") ? contextURL : 
+            contextURL.substring(0, contextURL.length() - 1);
     }
     
     /**
@@ -211,10 +244,11 @@ public class SimplePort implements Port {
      * 
      * @throws UnsupportedEncodingException
      */
-    protected String getAuthorization() throws UnsupportedEncodingException{
+    protected String getAuthorization(
+    ) throws UnsupportedEncodingException {
         if(this.authorization == null && this.userName != null && !"".equals(this.userName)) {
             this.authorization = "BASIC " + Base64.encode(
-                (getUserName() + ":" + (this.password == null ? "" : this.password)).getBytes("UTF-8")
+                (getUserName() + ":" + (this.password == null ? "" : this.password)).getBytes(CHARACTER_ENCODING)
             );        
         }
         return this.authorization;
@@ -223,10 +257,11 @@ public class SimplePort implements Port {
     /* (non-Javadoc)
      * @see org.openmdx.base.resource.spi.Port#getInteraction(javax.resource.cci.Connection)
      */
+//  @Override
     public Interaction getInteraction(
         Connection connection
     ) throws ResourceException {
-        return new SimpleInteraction(connection, this.uri);
+        return new SimpleInteraction(connection, this.contextURL);
     }
 
     /**
@@ -238,17 +273,17 @@ public class SimplePort implements Port {
          * Constructor 
          *
          * @param connection
-         * @param uri
+         * @param contextURL
          * 
          * @throws ResourceException 
          */
         protected SimpleInteraction(
             Connection connection,
-            String uri
+            String contextURL
         ) throws ResourceException {
-            super(connection, uri);
+            super(connection, contextURL);
             try {
-                this.cookieURI = new URI(uri);
+                this.cookieURI = new URI(contextURL);
             } catch (URISyntaxException exception) {
                 throw new ResourceException(exception);
             }
@@ -272,7 +307,10 @@ public class SimplePort implements Port {
             RestInteractionSpec ispec, 
             Path xri
         ) throws ServiceException {
-            return new SimpleMessage(ispec, xri, null);
+            switch(ispec.getFunction()){
+                case GET: case DELETE: return new MessageWithoutBody(ispec, xri);
+                default: return new MessageWithBody(ispec, xri, null);     
+            }
         }
 
         /* (non-Javadoc)
@@ -282,7 +320,7 @@ public class SimplePort implements Port {
         protected void open(
         ) throws ResourceException {
             try {
-                new SimpleMessage(
+                new MessageWithBody(
                     CONNECT_SPEC, 
                     CONNECT_XRI, 
                     "UserName=" + getConnectionUserName()
@@ -295,7 +333,7 @@ public class SimplePort implements Port {
         /**
          * Simple Message
          */
-        class SimpleMessage implements Message {
+        private abstract class AbstractMessage implements Message, Closeable {
     
             /**
              * Constructor 
@@ -303,93 +341,116 @@ public class SimplePort implements Port {
              * @param interactionSpec
              * @param xri
              */
-            SimpleMessage(
+            AbstractMessage(
                 RestInteractionSpec interactionSpec, 
-                Path xri,
-                String query
+                Path xri
             ) throws ServiceException {
                 this.interactionSpec = interactionSpec;
-                String servletPath = xri.toXRI();
-                String url = uri + servletPath.substring(
-                    servletPath.charAt(14) == '!' ? 14 : 15
-                );
-                try {
-                    URLConnection urlConnection = new URL(
-                        query == null ? url : url + '?' + query
-                    ).openConnection();
-                    if(urlConnection instanceof HttpURLConnection) {
-                        this.urlConnection = (HttpURLConnection) new URL(url).openConnection();
-                    } else {
-                        throw new ServiceException(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.NOT_SUPPORTED,
-                            "Unexpected URL connection",
-                            new BasicException.Parameter("expected", HttpURLConnection.class.getName()),
-                            new BasicException.Parameter("actual", urlConnection == null ? null : urlConnection.getClass().getName())
-                        );
-                    }
-                } catch (MalformedURLException exception) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        "Can't create an URL for the given URI/XRI pair",
-                        new BasicException.Parameter("uri", uri),
-                        new BasicException.Parameter("xri", servletPath),
-                        new BasicException.Parameter("url", url)
-                    );
-                } catch (IOException exception) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        "Can't open a connection for the given URL",
-                        new BasicException.Parameter("uri", uri),
-                        new BasicException.Parameter("xri", servletPath),
-                        new BasicException.Parameter("url", url)
-                    );
-                }
-                int interactionVerb = interactionSpec.getInteractionVerb();
-                this.urlConnection.setDoOutput(interactionVerb != InteractionSpec.SYNC_RECEIVE && query == null);
-                this.urlConnection.setDoInput(interactionVerb != InteractionSpec.SYNC_SEND);
+                this.url = SimpleInteraction.this.toRequestURL(xri);
             }
     
-            private final RestInteractionSpec interactionSpec;
+            /**
+             * The URL or URL prefix
+             */
+            protected final String url;
             
-            private final HttpURLConnection urlConnection;
+            /**
+             * The REST interaction specification
+             */
+            protected final RestInteractionSpec interactionSpec;
             
+            /**
+             * The lazily created URL connection
+             */
+            protected HttpURLConnection urlConnection;
+            
+            /**
+             * The lazily created request body 
+             */
             private Target requestBody = null;
             
+            /**
+             * The lazily created response body 
+             */
             private Source responseBody = null;
+
+            /**
+             * Provide the request body
+             * 
+             * @return the request body
+             */
+            protected abstract Target newRequestBody(
+            ) throws IOException;
             
-            protected OutputStream getOutputStream(
-            ) throws IOException{
-                return this.urlConnection.getOutputStream();
+            /**
+             * Create a response body
+             * 
+             * @return a new response body
+             */
+            protected Source newResponseBody(
+            ) throws IOException {
+                return new Source(
+                    getUri(),
+                    new InputSource(this.urlConnection.getInputStream()),
+                    getMimeType(), 
+                    this
+                );                    
+            }
+
+            /**
+             * Close the request body if it exists
+             * 
+             * @return <code>true</code> if there exists a request body
+             *  
+             * @throws ServiceException
+             */
+            protected boolean closeRequestBody(
+            ) throws ServiceException {
+                boolean exists = this.requestBody != null; 
+                if(exists) try {
+                    this.requestBody.close();
+                } catch (XMLStreamException exception) {
+                    throw new ServiceException (
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.PROCESSING_FAILURE,
+                        "Could not process REST request"
+                    );
+                }
+                return exists;
             }
             
-            /* (non-Javadoc)
-             * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#execute()
+            /**
+             * Return the query string
+             * 
+             * @return the URL encoded query string
              */
-            public int execute(
+            protected String getQueryString(
             ) throws ServiceException {
                 try {
-                    this.urlConnection.setRequestMethod(
-                        this.interactionSpec.getFunctionName()
-                    );
-                    String authorization = getAuthorization();
-                    if(authorization != null) {
-                        setRequestField("Authorization", authorization);
-                    }
-                    SimpleInteraction.this.cookieHandler.get(
-                        SimpleInteraction.this.cookieURI, 
-                        this.urlConnection.getRequestProperties()
-                    );
-                    setRequestField(
-                        "interaction-verb", 
-                        Integer.toString(this.interactionSpec.getInteractionVerb())
-                    );
-                    if(this.requestBody != null) {
-                        this.requestBody.close();
-                    }
-                    this.urlConnection.connect();
+                    return this.requestBody == null ? null : RestFormat.isBinary(getMimeType()) ?
+                        // Do not URL encode Base64 encoded binary body
+                        this.requestBody.toString() :
+                            // URL encode if text
+                            URLEncoder.encode(
+                                this.requestBody.toString(),
+                                CHARACTER_ENCODING
+                            );
+                } catch (Exception exception) {
+                    throw new ServiceException(exception);
+                }
+            }
+            
+            /**
+             * Retrieve the response code
+             * 
+             * @return the response code
+             * 
+             * @throws ServiceException
+             */
+            protected int getResponseCode(
+            ) throws ServiceException{
+                try {
                     int status = this.urlConnection.getResponseCode();
                     SimpleInteraction.this.cookieHandler.put(
                         SimpleInteraction.this.cookieURI,
@@ -403,77 +464,347 @@ public class SimplePort implements Port {
                         BasicException.Code.PROCESSING_FAILURE,
                         "Could not process REST request"
                     );
-                } catch (XMLStreamException exception) {
-                    throw new ServiceException (
-                        exception,
+                }
+            }
+            
+            /**
+             * Open a connection for the given URL
+             * 
+             * @param url
+             * 
+             * @throws ServiceException
+             */
+            protected void openConnection(
+                String url
+            ) throws ServiceException{
+                try {
+                    URLConnection urlConnection = new URL(url).openConnection();
+                    if(urlConnection instanceof HttpURLConnection) {
+                        this.urlConnection = (HttpURLConnection)urlConnection;
+                    } else {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED,
+                            "Unexpected URL connection",
+                            new BasicException.Parameter("expected", HttpURLConnection.class.getName()),
+                            new BasicException.Parameter("actual", urlConnection == null ? null : urlConnection.getClass().getName())
+                        );
+                    }
+                    this.urlConnection.setRequestMethod(
+                        this.interactionSpec.getFunctionName()
+                    );
+                    setRequestField(
+                        "Accept",
+                        getContentType()
+                    );
+                    String authorization = getAuthorization();
+                    if(authorization != null) {
+                        setRequestField("Authorization", authorization);
+                    }
+                    Map<String, List<String>> cookies = SimpleInteraction.this.cookieHandler.get(
+                        SimpleInteraction.this.cookieURI, 
+                        this.urlConnection.getRequestProperties()
+                    );
+                    for(Map.Entry<String, List<String>> entry : cookies.entrySet()) {
+                        String key = entry.getKey();
+                        if("Cookie2".equals(key)) {
+                            StringBuilder values = new StringBuilder();
+                            String separator = "";
+                            for(String value : entry.getValue()) {
+                                values.append(separator).append(value);
+                                separator = "; ";
+                            }
+                            setRequestField(key, values.toString());
+                        } else {
+                            for(String value : entry.getValue()) {
+                                setRequestField(key, value);
+                            }
+                        }
+                    }
+                    setRequestField(
+                        "interaction-verb", 
+                        Integer.toString(this.interactionSpec.getInteractionVerb())
+                    );
+                } catch (MalformedURLException exception) {
+                    throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.PROCESSING_FAILURE,
-                        "Could not process REST request"
+                        BasicException.Code.BAD_PARAMETER,
+                        "Can't create an URL for the given URI/XRI pair",
+                        new BasicException.Parameter("contextURL", SimpleInteraction.this.contextURL),
+                        new BasicException.Parameter("url", url)
+                    );
+                } catch (IOException exception) {
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        "Can't open a connection for the given URL",
+                        new BasicException.Parameter("contextURL", SimpleInteraction.this.contextURL),
+                        new BasicException.Parameter("url", url)
                     );
                 }
             }
-    
+            
             /* (non-Javadoc)
              * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#getRequestBody()
              */
-            public Target getRequestBody(
+        //  @Override
+            public final Target getRequestBody(
             ) throws ServiceException {
-                if(this.requestBody == null) {
-                    this.requestBody = new Target(
-                        getUri()
-                    ){
-                       
-                        /* (non-Javadoc)
-                         * @see org.openmdx.application.rest.http.RestFormat.Target#newWriter()
-                         */
-                        @Override
-                        protected XMLStreamWriter newWriter(
-                        ) throws XMLStreamException {
-                            try {
-                                return RestFormat.getOutputFactory(getMimeType()).createXMLStreamWriter(getOutputStream());
-                            } catch (IOException exception) {
-                                throw toXMLStreamException(exception);
-                            }
-                        }
-                    };
-                    
+                if(this.requestBody == null) try {
+                    this.requestBody = newRequestBody();
+                } catch (IOException exception) {
+                    throw new ServiceException(exception);
                 }
                 return this.requestBody;
             }
-    
+
             /* (non-Javadoc)
              * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#getResponseBody()
              */
-            public Source getResponseBody(
+        //  @Override
+            public final Source getResponseBody(
             ) throws ServiceException {
                 if(this.responseBody == null) try {
-                    this.responseBody = new Source(
-                        getUri(),
-                        new InputSource(this.urlConnection.getInputStream()),
-                        getMimeType()
-                    );
+                    this.responseBody = newResponseBody();
                 } catch (IOException exception) {
                     throw new ServiceException(exception);
                 }
                 return this.responseBody;
             }
-    
+
             /* (non-Javadoc)
              * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#getResponseField(java.lang.String)
              */
-            public String getResponseField(String key) {
+        //  @Override
+            public final String getResponseField(String key) {
                 return this.urlConnection.getHeaderField(key);
             }
     
             /* (non-Javadoc)
              * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#setRequestField(java.lang.String, java.lang.String)
              */
-            public void setRequestField(String key, String value) {
+        //  @Override
+            public final void setRequestField(String key, String value) {
                 this.urlConnection.setRequestProperty(key, value);
+            }
+
+            /* (non-Javadoc)
+             * @see java.io.Closeable#close()
+             */
+        //  @Override
+            public void close(
+            ) throws IOException {
+                if(this.urlConnection != null) {
+                    this.urlConnection.disconnect();
+                }
             }
             
         }
         
+        /**
+         * Message with body
+         */
+        class MessageWithBody extends AbstractMessage {
+    
+            /**
+             * Constructor 
+             *
+             * @param interactionSpec
+             * @param xri
+             */
+            MessageWithBody(
+                RestInteractionSpec interactionSpec, 
+                Path xri,
+                String query
+            ) throws ServiceException {
+                super(interactionSpec, xri);
+                openConnection(
+                    query == null ? url : url + '?' + query
+                );
+                this.urlConnection.setDoOutput(
+                    interactionSpec.getInteractionVerb() != InteractionSpec.SYNC_RECEIVE && 
+                    query == null
+                );
+            }
+    
+            /* (non-Javadoc)
+             * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#execute()
+             */
+        //  @Override
+            public int execute(
+            ) throws ServiceException {
+                super.closeRequestBody();
+                return super.getResponseCode();
+            }
+    
+            /**
+             * Create a request body
+             * 
+             * @return a new request body
+             */
+            @Override
+            protected Target newRequestBody(
+            ) throws IOException {
+                return new Target(
+                    getUri()
+                ){
+                   
+                    /* (non-Javadoc)
+                     * @see org.openmdx.application.rest.http.RestFormat.Target#newWriter()
+                     */
+                    @Override
+                    protected XMLStreamWriter newWriter(
+                    ) throws XMLStreamException {
+                        String contentType = getContentType();
+                        setRequestField(
+                            "Content-Type",
+                            contentType
+                        );
+                        try {
+                            return RestFormat.getOutputFactory(
+                                getMimeType()
+                            ).createXMLStreamWriter(
+                                MessageWithBody.this.urlConnection.getOutputStream()
+                            );
+                        } catch (IOException exception) {
+                            throw toXMLStreamException(exception);
+                        }
+                    }
+                    
+                };
+            }
+    
+        }
+
+        /**
+         * Message without body
+         */
+        class MessageWithoutBody extends AbstractMessage {
+    
+            /**
+             * Constructor 
+             *
+             * @param interactionSpec
+             * @param xri
+             */
+            MessageWithoutBody(
+                RestInteractionSpec interactionSpec, 
+                Path xri
+            ) throws ServiceException {
+                super(interactionSpec, xri);
+            }
+                
+            /* (non-Javadoc)
+             * @see org.openmdx.application.rest.http.AbstractHttpInteraction.Message#execute()
+             */
+        //  @Override
+            public int execute(
+            ) throws ServiceException {
+                super.openConnection(
+                    super.closeRequestBody() ? this.url + '?' + super.getQueryString() : this.url
+                );
+                return super.getResponseCode();
+            }
+    
+            /**
+             * Create a request body
+             * 
+             * @return a new request body
+             */
+            @Override
+            protected Target newRequestBody(
+            ) throws IOException {
+                final String mimeType = getMimeType();
+                return RestFormat.isBinary(mimeType) ? new Target(
+                    getUri()
+                ){
+                   
+                    /**
+                     * The body must be buffered as it will be used to build the URL's query string
+                     */
+                    private final BinaryStream target = new BinaryStream();
+                    
+                    /* (non-Javadoc)
+                     * @see org.openmdx.application.rest.http.RestFormat.Target#newWriter()
+                     */
+                    @Override
+                    protected XMLStreamWriter newWriter(
+                    ) throws XMLStreamException {
+                        return RestFormat.getOutputFactory(
+                            mimeType
+                        ).createXMLStreamWriter(
+                            this.target
+                        );
+                    }
+
+                    /* (non-Javadoc)
+                     * @see java.lang.Object#toString()
+                     */
+                    @Override
+                    public String toString() {
+                        return this.target.toString();
+                    }
+                    
+                } : new Target(
+                    getUri()
+                ){
+                   
+                    /**
+                     * The body must be buffered as it will be used to build the URL's query string
+                     */
+                    private final StringWriter target = new StringWriter();
+                    
+                    /* (non-Javadoc)
+                     * @see org.openmdx.application.rest.http.RestFormat.Target#newWriter()
+                     */
+                    @Override
+                    protected XMLStreamWriter newWriter(
+                    ) throws XMLStreamException {
+                        return RestFormat.getOutputFactory(
+                            mimeType
+                        ).createXMLStreamWriter(
+                            this.target
+                        );
+                    }
+
+                    /* (non-Javadoc)
+                     * @see java.lang.Object#toString()
+                     */
+                    @Override
+                    public String toString() {
+                        return this.target.toString();
+                    }
+                    
+                };
+            }
+        
+        }
+        
     }
 
+    
+    //------------------------------------------------------------------------
+    // Class BinaryStream
+    //------------------------------------------------------------------------
+    
+    /**
+     * Binary Stream
+     */
+    static class BinaryStream extends ByteArrayOutputStream {
+
+        /* (non-Javadoc)
+         * @see java.io.ByteArrayOutputStream#toString()
+         */
+        @Override
+        public synchronized String toString(
+        ) {
+            return Base64.encode(
+                this.buf,
+                0,
+                this.count
+            );
+        }
+
+    }
+    
 }
