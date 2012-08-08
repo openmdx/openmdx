@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowErrorsControl.java,v 1.13 2008/05/01 21:43:57 wfro Exp $
+ * Name:        $Id: ShowErrorsControl.java,v 1.16 2008/11/10 10:20:11 wfro Exp $
  * Description: ReferencePaneRenderer
  * Revision:    $AttributePaneRenderer: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:57 $
+ * Date:        $Date: 2008/11/10 10:20:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,19 +51,19 @@
  *
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
- *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
  * 
  */
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.attribute.DateValue;
 
 public class ShowErrorsControl
     extends Control
@@ -73,14 +73,12 @@ public class ShowErrorsControl
     public ShowErrorsControl(
         String id,
         String locale,
-        int localeAsIndex,
-        ControlFactory controlFactory
+        int localeAsIndex
     ) {
         super(
             id,
             locale,
-            localeAsIndex,
-            controlFactory
+            localeAsIndex
         );
     }
     
@@ -95,8 +93,21 @@ public class ShowErrorsControl
         ApplicationContext app = p.getApplicationContext();
         if(app.getErrorMessages().size() > 0) {
            p.write("<table class=\"tableError\">");
+           SimpleDateFormat dateTimeFormat = DateValue.getLocalizedDateTimeFormatter(
+               null, 
+               true, 
+               app
+           );
+           String formattedDateTime = dateTimeFormat.format(new Date());
+           String separator = " | ";
            p.write("  <tr>");
            p.write("    <td class=\"cellErrorLeft\">Error</td>");
+           p.write("    <td class=\"cellErrorRight\">");
+           p.write(formattedDateTime.replace(" ", separator), separator, dateTimeFormat.getTimeZone().getID());
+           p.write("    </td>");
+           p.write("  </tr>");
+           p.write("  <tr>");
+           p.write("    <td class=\"cellErrorLeft\"></td>");
            p.write("    <td class=\"cellErrorRight\">");
            for(int i = 0; i < app.getErrorMessages().size(); i++) {
              p.write("      " + app.getErrorMessages().get(i), "<br />");

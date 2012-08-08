@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PageEpilogControl.java,v 1.64 2008/06/01 11:26:18 wfro Exp $
+ * Name:        $Id: PageEpilogControl.java,v 1.70 2008/11/10 10:20:11 wfro Exp $
  * Description: PageEpilogControl 
- * Revision:    $Revision: 1.64 $
+ * Revision:    $Revision: 1.70 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/01 11:26:18 $
+ * Date:        $Date: 2008/11/10 10:20:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -85,14 +82,12 @@ public class PageEpilogControl
     public PageEpilogControl(
         String id,
         String locale,
-        int localeAsIndex,
-        ControlFactory controlFactory
+        int localeAsIndex
     ) {
         super(
             id,
             locale,
-            localeAsIndex,
-            controlFactory
+            localeAsIndex
         );
     }
     
@@ -119,9 +114,6 @@ public class PageEpilogControl
             app
         );        
         boolean editMode = view instanceof EditObjectView;
-        String guiLook = app.getCurrentGuiMode();
-        boolean noLayoutManager = 
-            guiLook.equals(WebKeys.SETTING_GUI_MODE_BASIC);
         
         int currentChartId = p.getProperty(HtmlPage.PROPERTY_CHART_ID) != null
             ? ((Integer)p.getProperty(HtmlPage.PROPERTY_CHART_ID)).intValue()
@@ -144,7 +136,14 @@ public class PageEpilogControl
         // multi-valued Strings
         p.write("    var multiValuedHigh = 1; // 0..multiValuedHigh-1");
         p.write("");
-        p.write("    function editstrings_onchange_checkbox(checkbox, field) {");
+        p.write("    var popup_", EditObjectControl.EDIT_STRINGS, " = null;");
+        p.write("    var popup_", EditObjectControl.EDIT_NUMBERS, " = null;");
+        p.write("    var popup_", EditObjectControl.EDIT_DATES, " = null;");
+        p.write("    var popup_", EditObjectControl.EDIT_DATETIMES, " = null;");
+        p.write("    var popup_", EditObjectControl.EDIT_BOOLEANS, " = null;");
+        p.write("    var popup_", EditObjectControl.EDIT_CODES, " = null;");
+        p.write("");        
+        p.write("    function ", EditObjectControl.EDIT_STRINGS, "_onchange_checkbox(checkbox, field) {");
         p.write("      if(!checkbox.checked) {");
         p.write("        field.value = \"*\";");
         p.write("      }");
@@ -153,17 +152,17 @@ public class PageEpilogControl
         p.write("      }");
         p.write("    }");
         p.write("");
-        p.write("    editstrings_maxLength = 2147483647;");
-        p.write("    function editstrings_onchange_field(checkbox, field) {");
+        p.write("    ", EditObjectControl.EDIT_STRINGS, "_maxLength = 2147483647;");
+        p.write("    function ", EditObjectControl.EDIT_STRINGS, "_onchange_field(checkbox, field) {");
         p.write("      if(field.value.length > 0) {");
         p.write("        checkbox.checked = true;");
-        p.write("        if(field.value.length > editstrings_maxLength) {");
-        p.write("          field.value = field.value.substr(0, editstrings_maxLength)");
+        p.write("        if(field.value.length > ", EditObjectControl.EDIT_STRINGS, "_maxLength) {");
+        p.write("          field.value = field.value.substr(0, ", EditObjectControl.EDIT_STRINGS, "_maxLength)");
         p.write("        }");
         p.write("      }");
         p.write("    }");
         p.write("");
-        p.write("    function editstrings_click_OK() {");
+        p.write("    function ", EditObjectControl.EDIT_STRINGS, "_click_OK() {");
         p.write("      var nFields = 0;");
         p.write("      for (i=0;i<multiValuedHigh;i++) {");
         p.write("        if($('editstringIsSelected_' + i).checked) {");
@@ -175,16 +174,10 @@ public class PageEpilogControl
         p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editstringIsSelected_' + i).checked ? $('editstringField_' + i).value : \"#NULL\");");
         p.write("      }");
         p.write("      POPUP_FIELD.value = values;");
-        p.write("      editstrings_click_Cancel();");
+        p.write("      popup_", EditObjectControl.EDIT_STRINGS, ".hide();");
         p.write("    }");
         p.write("");
-        p.write("    function editstrings_click_Cancel() {");
-        p.write("      var IfrRef = document.getElementById('DivShim');");
-        p.write("      IfrRef.style.display = 'none';");
-        p.write("      shownPopup.style.display =  'none';");
-        p.write("    }");
-        p.write("");
-        p.write("    function editstrings_on_load() {");
+        p.write("    function ", EditObjectControl.EDIT_STRINGS, "_on_load() {");
         p.write("      var i = 0;");
         p.write("      while ($('editstringrow' + i)) {");
         p.write("        var toBeRemoved = $('editstringrow' + i);");
@@ -221,7 +214,7 @@ public class PageEpilogControl
         p.write("      templateRow.style.display = 'none';");
         p.write("    }");
         // multi-valued Numbers
-        p.write("    function editnumbers_onchange_checkbox(checkbox, field) {");
+        p.write("    function ", EditObjectControl.EDIT_NUMBERS, "_onchange_checkbox(checkbox, field) {");
         p.write("      if(!checkbox.checked) {");
         p.write("        field.value = \"0.00\";");
         p.write("      }");
@@ -230,11 +223,11 @@ public class PageEpilogControl
         p.write("      }");
         p.write("    }");
         p.write("");
-        p.write("    function editnumbers_onchange_field(checkbox, field) {");
+        p.write("    function ", EditObjectControl.EDIT_NUMBERS, "_onchange_field(checkbox, field) {");
         p.write("      checkbox.checked = field.value.length > 0;");
         p.write("    }");
         p.write("");
-        p.write("    function editnumbers_click_OK() {");
+        p.write("    function ", EditObjectControl.EDIT_NUMBERS, "_click_OK() {");
         p.write("      var nFields = 0;");
         p.write("      for (i=0;i<multiValuedHigh;i++) {");
         p.write("        if($('editnumberIsSelected_' + i).checked) {");
@@ -246,16 +239,10 @@ public class PageEpilogControl
         p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editnumberIsSelected_' + i).checked ? $('editnumberField_' + i).value : \"\");");
         p.write("      }");
         p.write("      POPUP_FIELD.value = values;");
-        p.write("      editnumbers_click_Cancel();");
+        p.write("      popup_", EditObjectControl.EDIT_NUMBERS, ".hide();");
         p.write("    }");
         p.write("");
-        p.write("    function editnumbers_click_Cancel() {");
-        p.write("      var IfrRef = document.getElementById('DivShim');");
-        p.write("      IfrRef.style.display = 'none';");
-        p.write("      shownPopup.style.display =  'none';");
-        p.write("    }");
-        p.write("");
-        p.write("    function editnumbers_on_load() {");
+        p.write("    function ", EditObjectControl.EDIT_NUMBERS, "_on_load() {");
         p.write("      var i = 0;");
         p.write("      while ($('editnumberrow' + i)) {");
         p.write("        var toBeRemoved = $('editnumberrow' + i);");
@@ -292,17 +279,17 @@ public class PageEpilogControl
         p.write("      templateRow.style.display = 'none';");
         p.write("    }");        
         // multi-valued Dates
-        p.write("    function editdates_onchange_checkbox(checkbox, field) {");
+        p.write("    function ", EditObjectControl.EDIT_DATES, "_onchange_checkbox(checkbox, field) {");
         p.write("      if(checkbox.checked) {");
         p.write("        field.value = \"\";");
         p.write("      }");
         p.write("    }");
         p.write("");
-        p.write("    function editdates_onchange_field(checkbox, field) {");
+        p.write("    function ", EditObjectControl.EDIT_DATES, "_onchange_field(checkbox, field) {");
         p.write("      checkbox.checked = field.value.length > 0;");
         p.write("    }");
         p.write("");
-        p.write("    function editdates_click_OK() {");
+        p.write("    function ", EditObjectControl.EDIT_DATES, "_click_OK() {");
         p.write("      var nFields = 0;");
         p.write("      for (i=0;i<multiValuedHigh;i++) {");
         p.write("        if($('editdateIsSelected_' + i).checked) {");
@@ -314,16 +301,10 @@ public class PageEpilogControl
         p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editdateIsSelected_' + i).checked ? $('editdateField_' + i).value : \"\");");
         p.write("      }");
         p.write("      POPUP_FIELD.value = values;");
-        p.write("      editdates_click_Cancel();");
+        p.write("      popup_", EditObjectControl.EDIT_DATES, ".hide();");
         p.write("    }");
         p.write("");
-        p.write("    function editdates_click_Cancel() {");
-        p.write("      var IfrRef = document.getElementById('DivShim');");
-        p.write("      IfrRef.style.display = 'none';");
-        p.write("      shownPopup.style.display =  'none';");
-        p.write("    }");
-        p.write("");
-        p.write("    function editdates_on_load() {");
+        p.write("    function ", EditObjectControl.EDIT_DATES, "_on_load() {");
         p.write("      var i = 0;");
         p.write("      while ($('editdaterow' + i)) {");
         p.write("        var toBeRemoved = $('editdaterow' + i);");
@@ -373,17 +354,17 @@ public class PageEpilogControl
         p.write("      templateRow.style.display = 'none';");
         p.write("    }");
         // multi-valued dateTime        
-        p.write("    function editdatetimes_onchange_checkbox(checkbox, field) {");
+        p.write("    function ", EditObjectControl.EDIT_DATETIMES, "_onchange_checkbox(checkbox, field) {");
         p.write("      if(checkbox.checked) {");
         p.write("        field.value = \"\";");
         p.write("      }");
         p.write("    }");
         p.write("");
-        p.write("    function editdatetimes_onchange_field(checkbox, field) {");
+        p.write("    function ", EditObjectControl.EDIT_DATETIMES, "_onchange_field(checkbox, field) {");
         p.write("      checkbox.checked = field.value.length > 0;");
         p.write("    }");
         p.write("");
-        p.write("    function editdatetimes_click_OK() {");
+        p.write("    function ", EditObjectControl.EDIT_DATETIMES, "_click_OK() {");
         p.write("      var nFields = 0;");
         p.write("      for (i=0;i<multiValuedHigh;i++) {");
         p.write("        if($('editdatetimeIsSelected_' + i).checked) {");
@@ -395,16 +376,10 @@ public class PageEpilogControl
         p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editdatetimeIsSelected_' + i).checked ? $('editdatetimeField_' + i).value : \"\");");
         p.write("      }");
         p.write("      POPUP_FIELD.value = values;");
-        p.write("      editdatetimes_click_Cancel();");
+        p.write("      popup_", EditObjectControl.EDIT_DATETIMES, ".hide();");
         p.write("    }");
         p.write("");
-        p.write("    function editdatetimes_click_Cancel() {");
-        p.write("      var IfrRef = document.getElementById('DivShim');");
-        p.write("      IfrRef.style.display = 'none';");
-        p.write("      shownPopup.style.display =  'none';");
-        p.write("    }");
-        p.write("");
-        p.write("    function editdatetimes_on_load() {");
+        p.write("    function ", EditObjectControl.EDIT_DATETIMES, "_on_load() {");
         p.write("      var i = 0;");
         p.write("      while ($('editdatetimerow' + i)) {");
         p.write("        var toBeRemoved = $('editdatetimerow' + i);");
@@ -454,7 +429,7 @@ public class PageEpilogControl
         p.write("      templateRow.style.display = 'none';");
         p.write("    }");
         // multi-valued Booleans
-        p.write("    function editbooleans_onchange_checkbox(checkbox, field) {");
+        p.write("    function ", EditObjectControl.EDIT_BOOLEANS, "_onchange_checkbox(checkbox, field) {");
         p.write("      if(!checkbox.checked) {");
         p.write("        field.checked = true;");
         p.write("      }");
@@ -463,11 +438,11 @@ public class PageEpilogControl
         p.write("      }");
         p.write("    }");
         p.write("");
-        p.write("    function editbooleans_onchange_field(checkbox, field) {");
+        p.write("    function ", EditObjectControl.EDIT_BOOLEANS, "_onchange_field(checkbox, field) {");
         p.write("      checkbox.checked = true;");
         p.write("    }");
         p.write("");
-        p.write("    function editbooleans_click_OK() {");
+        p.write("    function ", EditObjectControl.EDIT_BOOLEANS, "_click_OK() {");
         p.write("      var nFields = 0;");
         p.write("      for (i=0;i<multiValuedHigh;i++) {");
         p.write("        if($('editbooleanIsSelected_' + i).checked) {");
@@ -479,16 +454,10 @@ public class PageEpilogControl
         p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editbooleanIsSelected_' + i).checked ? $('editbooleanField_' + i).checked : \"\");");
         p.write("      }");
         p.write("      POPUP_FIELD.value = values;");
-        p.write("      editbooleans_click_Cancel();");
+        p.write("      popup_", EditObjectControl.EDIT_BOOLEANS, ".hide();");
         p.write("    }");
         p.write("");
-        p.write("    function editbooleans_click_Cancel() {");
-        p.write("      var IfrRef = document.getElementById('DivShim');");
-        p.write("      IfrRef.style.display = 'none';");
-        p.write("      shownPopup.style.display =  'none';");
-        p.write("    }");
-        p.write("");
-        p.write("    function editbooleans_on_load() {");
+        p.write("    function ", EditObjectControl.EDIT_BOOLEANS, "_on_load() {");
         p.write("      var i = 0;");
         p.write("      while ($('editbooleanrow' + i)) {");
         p.write("        var toBeRemoved = $('editbooleanrow' + i);");
@@ -525,7 +494,7 @@ public class PageEpilogControl
         p.write("      templateRow.style.display = 'none';");
         p.write("    }");
         // multi-valued Codes
-        p.write("    function editcodes_onchange_checkbox(checkbox, field) {");
+        p.write("    function ", EditObjectControl.EDIT_CODES, "_onchange_checkbox(checkbox, field) {");
         p.write("      if(checkbox.checked) {");
         p.write("        field.value = POPUP_OPTIONS[1];");
         p.write("      }");
@@ -534,11 +503,11 @@ public class PageEpilogControl
         p.write("      }");
         p.write("    }");
         p.write("");
-        p.write("    function editcodes_onchange_field(checkbox, field) {");
+        p.write("    function ", EditObjectControl.EDIT_CODES, "_onchange_field(checkbox, field) {");
         p.write("      checkbox.checked = field.value.length > 0;");
         p.write("    }");
         p.write("");
-        p.write("    function editcodes_click_OK() {");
+        p.write("    function ", EditObjectControl.EDIT_CODES, "_click_OK() {");
         p.write("      var nFields = 0;");
         p.write("      for (i=0;i<multiValuedHigh;i++) {");
         p.write("        if($('editcodeIsSelected_' + i).checked) {");
@@ -550,16 +519,10 @@ public class PageEpilogControl
         p.write("        if(i < nFields) values += (i==0 ? \"\" : \"\\n\") + ($('editcodeIsSelected_' + i).checked ? $('editcodeField_' + i).value : \"\");");
         p.write("      }");
         p.write("      POPUP_FIELD.value = values;");
-        p.write("      editcodes_click_Cancel();");
+        p.write("      popup_", EditObjectControl.EDIT_CODES, ".hide();");
         p.write("    }");
         p.write("");
-        p.write("    function editcodes_click_Cancel() {");
-        p.write("      var IfrRef = document.getElementById('DivShim');");
-        p.write("      IfrRef.style.display = 'none';");
-        p.write("      shownPopup.style.display =  'none';");
-        p.write("    }");
-        p.write("");
-        p.write("    function editcodes_on_load() {");
+        p.write("    function ", EditObjectControl.EDIT_CODES, "_on_load() {");
         p.write("      var i = 0;");
         p.write("      while ($('editcoderow' + i)) {");
         p.write("        var toBeRemoved = $('editcoderow' + i);");
@@ -635,81 +598,6 @@ public class PageEpilogControl
             p.write("  weekNumbers  : true");
             p.write("});");
         }
-        // Layout
-        p.write("initLayout = function(){");
-        p.write("    return {");
-        p.write("      init : function(){");
-        // No layout in edit mode
-        if(!editMode) {
-            // Breadcrums / Select parent actions
-            if(noLayoutManager) {
-                p.write("      var breadcrum = \"\";");                
-            }
-            else {
-                p.write("      var breadcrum = \"&nbsp;&nbsp;&nbsp;&nbsp;\";");
-            }
-            Action[] selectParentActions = view.getSelectParentAction();
-            for(int i = 0; i < selectParentActions .length; i++) {
-                Action selectParentAction = selectParentActions[i];
-                if(selectParentAction != null) {
-                    String breadcrum = new StringBuilder(
-                        i > 0 ? " > " : "" 
-                    ).append(
-                         "<a href=\"#\""
-                    ).append(
-                        p.getOnClick("javascript:this.href=", p.getEvalHRef(selectParentAction), ";")
-                    ).append(                        
-                        ">"
-                    ).append(
-                        selectParentAction.getTitle()
-                    ).append(
-                        "</a>"
-                    ).toString();
-                    p.write("      breadcrum = breadcrum + \"", breadcrum.toString().replaceAll("\"", "\\\\\""), "\";");
-                }
-            }
-            if(noLayoutManager) {
-                p.write("      $('inspBreadcrum').innerHTML = breadcrum;");                
-            }
-            else {
-                p.write("        layout = new YAHOO.ext.BorderLayout(document.body, {");
-                p.write("                     hideOnLayout: true,");
-                p.write("                     north: {");
-                p.write("                        split:false,");
-                p.write("                        initialSize: ", Integer.toString(this.panelSizeNorth), ",");
-                p.write("                        titlebar: true,");
-                p.write("                        collapsible: true");
-                p.write("                     },");
-                p.write("                     west: {");
-                p.write("                        split:false,");
-                p.write("                        initialSize: ", Integer.toString(this.panelSizeWest), ",");
-                p.write("                        titlebar: true,");
-                p.write("                        collapsible: true");
-                p.write("                     },");
-                p.write("                     center: {");
-                p.write("                        titlebar: true,");
-                p.write("                        autoScroll: true");
-                p.write("                     }");
-                p.write("        });");
-                p.write("      layout.beginUpdate();");
-                p.write("      layout.add('north',  new YAHOO.ext.ContentPanel('header',     {title: '', fitToFrame:true,  closable:false}));");
-                p.write("      layout.add('west',   new YAHOO.ext.ContentPanel('navigation', {title: '', fitToFrame:false,  closable:false}));");
-                p.write("      layout.add('center', new YAHOO.ext.ContentPanel('content',    {title: breadcrum, fitToFrame:true, closable:false}));");
-                p.write("      $('header').parentNode.style.overflow = 'visible'; // required to show fly-out menues [IE bug]");
-                p.write("      $('navigation').parentNode.style.overflow = 'visible'; // required to show fly-out menues [IE bug]");
-                if(view.getPanelState("north") == PanelControl.PANEL_STATE_HIDE) {
-                    p.write("      layout.getRegion('north').collapse(false);");
-                }
-                if(view.getPanelState("west") == PanelControl.PANEL_STATE_HIDE) {
-                    p.write("      layout.getRegion('west').collapse(false);");
-                }
-                p.write("      layout.getRegion('north').addListener('expanded', function(){new Ajax.Request(", p.getEvalHRef(view.getSetPanelStateAction("north", PanelControl.PANEL_STATE_SHOW)), ", {asynchronous:true});});");
-                p.write("      layout.getRegion('north').addListener('collapsed', function(){new Ajax.Request(", p.getEvalHRef(view.getSetPanelStateAction("north", PanelControl.PANEL_STATE_HIDE)), ", {asynchronous:true});});");
-                p.write("      layout.getRegion('west').addListener('expanded', function(){new Ajax.Request(", p.getEvalHRef(view.getSetPanelStateAction("west", PanelControl.PANEL_STATE_SHOW)), ", {asynchronous:true});});");
-                p.write("      layout.getRegion('west').addListener('collapsed', function(){new Ajax.Request(", p.getEvalHRef(view.getSetPanelStateAction("west", PanelControl.PANEL_STATE_HIDE)), ", {asynchronous:true});});");
-                p.write("");
-            }
-        }
         // No grid panels in edit mode
         if(!editMode) {
             ShowObjectView showView = (ShowObjectView)view;
@@ -751,22 +639,14 @@ public class PageEpilogControl
                 }
             }
             p.write("");
-            if(!noLayoutManager) {
-                p.write("      layout.endUpdate();");
-            }
         }
-        p.write("    }");
-        p.write("  }");
-        p.write("}();");
-        p.write("YAHOO.ext.SSL_SECURE_URL = '", p.getHttpServletRequest().getContextPath(), "/blank.html';");
-        p.write("YAHOO.ext.EventManager.ieDeferSrc = YAHOO.ext.SSL_SECURE_URL;");
-        p.write("YAHOO.ext.UpdateManager.defaults.indicatorText = \"<div class='loading-indicator'>&nbsp;</div>\";");
-        p.write("YAHOO.ext.UpdateManager.defaults.timeout = 60;");        
-        p.write("YAHOO.ext.BasicDialog.prototype.syncHeightBeforeShow = true;");
-        p.write("YAHOO.ext.EventManager.onDocumentReady(initLayout.init, initLayout, true);");
+//        p.write("YAHOO.ext.SSL_SECURE_URL = '", p.getHttpServletRequest().getContextPath(), "/blank.html';");
+//        p.write("YAHOO.ext.EventManager.ieDeferSrc = YAHOO.ext.SSL_SECURE_URL;");
+//        p.write("YAHOO.ext.UpdateManager.defaults.indicatorText = \"<div class='loading-indicator'>&nbsp;</div>\";");
+//        p.write("YAHOO.ext.UpdateManager.defaults.timeout = 60;");        
+//        p.write("YAHOO.ext.BasicDialog.prototype.syncHeightBeforeShow = true;");
         // Declare variables for layout and grid panels. This way they can be accessed controls
         if(!editMode) {
-            p.write("var layout = null;");
             ShowObjectView showView = (ShowObjectView)view;
             int nReferencePanes = showView.getReferencePane().length;
             for(int i = 0; i < nReferencePanes; i++) {

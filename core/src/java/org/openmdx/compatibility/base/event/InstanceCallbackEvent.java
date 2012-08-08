@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: InstanceCallbackEvent.java,v 1.1 2008/04/29 14:52:17 hburger Exp $
+ * Name:        $Id: InstanceCallbackEvent.java,v 1.2 2008/09/09 14:20:00 hburger Exp $
  * Description: openMDX: Instance Callback Event
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/29 14:52:17 $
+ * Date:        $Date: 2008/09/09 14:20:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,8 +53,9 @@ package org.openmdx.compatibility.base.event;
 import java.beans.PropertyChangeListener;
 import java.util.EventObject;
 
-import org.openmdx.kernel.collection.ArraysExtension;
-import org.openmdx.kernel.text.format.IndentingFormatter;
+import javax.resource.ResourceException;
+
+import org.openmdx.base.resource.Records;
 
 /**
  * openMDX
@@ -143,18 +144,19 @@ public class InstanceCallbackEvent extends EventObject {
      */
     public String toString(
     ) {
-        return getClass().getName() + IndentingFormatter.toString(
-    		ArraysExtension.asMap(
-                new String[]{
-                    "type",
-                    "object"
-                }, 
+        try {
+            return Records.getRecordFactory().asMappedRecord(
+                getClass().getName(), // recordName, 
+                null, // recordShortDescription
+                TO_STRING_FIELDS,
                 new Object[]{
             		EVENT_DESCRIPTION[this.type],
                     this.source
                 }
-        	)
-        );
+            ).toString();
+        } catch (ResourceException exception) {
+            return super.toString();
+        }
     }
 
 
@@ -162,10 +164,15 @@ public class InstanceCallbackEvent extends EventObject {
     // Constant Field Values
     //------------------------------------------------------------------------
 
+    private static final String[] TO_STRING_FIELDS = {
+        "type",
+        "object"
+    };
+    
     /**
      * 
      */
-    private static final String[] EVENT_DESCRIPTION = new String[]{
+    private static final String[] EVENT_DESCRIPTION = {
         "post-load",
         "post-reload",
         "pre-clear",

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ViewsCache.java,v 1.2 2008/04/04 17:01:13 hburger Exp $
+ * Name:        $Id: ViewsCache.java,v 1.4 2008/09/10 09:31:01 wfro Exp $
  * Description: ViewsCache 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:13 $
+ * Date:        $Date: 2008/09/10 09:31:01 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -77,9 +74,9 @@ public class ViewsCache {
         Number viewsCacheSize
     ) {
         this.views = new LRUMap(
-            viewsCacheSize == null
-            ? DEFAULT_VIEWS_CACHE_SIZE
-                : viewsCacheSize.intValue()
+            viewsCacheSize == null ? 
+                DEFAULT_VIEWS_CACHE_SIZE : 
+                viewsCacheSize.intValue()
         );
     }
 

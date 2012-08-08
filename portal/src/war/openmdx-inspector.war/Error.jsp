@@ -2,35 +2,35 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Error.jsp,v 1.7 2007/11/15 18:52:22 wfro Exp $
+ * Name:        $Id: Error.jsp,v 1.9 2008/10/15 22:17:47 wfro Exp $
  * Description: Error.jsp
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/15 18:52:22 $
+ * Date:        $Date: 2008/10/15 22:17:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
- * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ *
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or
  * without modification, are permitted provided that the following
  * conditions are met:
- * 
+ *
  * * Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer.
- * 
+ *
  * * Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in
  * the documentation and/or other materials provided with the
  * distribution.
- * 
+ *
  * * Neither the name of the openMDX team nor the names of its
  * contributors may be used to endorse or promote products derived
  * from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -44,9 +44,9 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- * 
+ *
  * ------------------
- * 
+ *
  * This product includes software developed by the Apache Software
  * Foundation (http://www.apache.org/).
  */
@@ -58,50 +58,51 @@
   <meta http-equiv="Expires" content="0">
   <title>Error Page</title>
 </head>
-
 <%@ page import="
 java.util.*,
 java.net.*,
 java.io.*,
 javax.servlet.*
 " %>
-
-
 <body>
 <%
-  request.setCharacterEncoding("UTF-8");
-
-  // get locale
-  System.out.println(new Date() + ": Error: requestURL=" + request.getRequestURL());
-  String locale = request.getParameter("locale");
-  if(locale == null) {
-      try {
-          locale = (String)request.getSession().getAttribute("locale");  
-      } catch(Exception e) {}
-  }
-  String timezone = request.getParameter("timezone");
-  if(timezone == null) {
-      try {
-          timezone = (String)request.getSession().getAttribute("timezone");  
-      } catch(Exception e) {}
-  }
-  System.out.println(new Date() + ": Error: locale=" + locale + "; timezone=" + timezone);
-  
-  // invalidate sesion
-  try { 
-      request.getSession().invalidate();
-  } catch(Exception e) {}
-  
-  // forward to Login
-  String cookieMissingHint = request.isRequestedSessionIdFromCookie()
-    ? ""
-    : "&cookieError=true";
-  try {
-      request.getSession().setAttribute("loginFailed", "true");
-      request.getSession().setAttribute("locale", locale);
-      request.getSession().setAttribute("timezone", timezone);
-  } catch(Exception e) {}
-  response.sendRedirect(request.getContextPath() + "/Login?locale=" + locale + (timezone == null ? "" : "&timezone=" + URLEncoder.encode(timezone)) + cookieMissingHint);  
+	request.setCharacterEncoding("UTF-8");
+	// Get locale
+	String locale = request.getParameter("locale");
+	if(locale == null) {
+		try {
+			locale = (String)request.getSession().getAttribute("locale");
+		} 
+		catch(Exception e) {}
+	}
+	String timezone = request.getParameter("timezone");
+	if(timezone == null) {
+		try {
+			timezone = (String)request.getSession().getAttribute("timezone");
+		} 
+		catch(Exception e) {}
+	}
+	System.out.println(new Date() + ": Error: login failed; locale=" + locale + "; timezone=" + timezone + "; requestURL=" + request.getRequestURL());
+	// Invalidate sesion
+	try {
+		request.getSession().invalidate();
+	} 
+	catch(Exception e) {}
+	// Forward to Login
+	String cookieMissingHint = request.isRequestedSessionIdFromCookie() ? 
+		"" : 
+		"&cookieError=true";
+	try {
+		request.getSession().setAttribute("loginFailed", "true");
+		request.getSession().setAttribute("locale", locale);
+		request.getSession().setAttribute("timezone", timezone);
+	} 
+	catch(Exception e) {}
+	response.sendRedirect(
+		request.getContextPath() + "/Login?locale=" + locale +
+		(timezone == null ? "" : "&timezone=" + URLEncoder.encode(timezone)) + 
+		cookieMissingHint
+	);
 %>
 </body>
 </html>

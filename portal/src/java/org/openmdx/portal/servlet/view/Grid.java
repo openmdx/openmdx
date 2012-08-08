@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Grid.java,v 1.48 2008/04/04 11:55:30 hburger Exp $
+ * Name:        $Id: Grid.java,v 1.55 2008/12/17 15:10:13 wfro Exp $
  * Description: GridControl
- * Revision:    $Revision: 1.48 $
+ * Revision:    $Revision: 1.55 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:55:30 $
+ * Date:        $Date: 2008/12/17 15:10:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.view;
 
@@ -114,7 +111,6 @@ import org.openmdx.portal.servlet.Filters;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
-import org.openmdx.portal.servlet.attribute.AttributeValueFactory;
 import org.openmdx.portal.servlet.attribute.FieldDef;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 import org.openmdx.portal.servlet.control.GridControl;
@@ -158,9 +154,19 @@ public abstract class Grid
             );
             // Default filter
             String defaultFilterPropertyName = control.getPropertyName(
-                control.getQualifiedReferenceName(),
+                control.getContainerId(),
                 GridControl.PROPERTY_DEFAULT_FILTER
             );
+            // Fallback to old-style property name for default filter
+            if(
+                (application.getSettings().getProperty(defaultFilterPropertyName) == null) &&
+                (baseFilterId.indexOf(":") < 0) 
+            ) {
+                defaultFilterPropertyName = control.getPropertyName(
+                    control.getQualifiedReferenceName(),
+                    GridControl.PROPERTY_DEFAULT_FILTER
+                );                
+            }
             // Override DEFAULT filter, if at least ALL and DEFAULT filter are defined
             // and settings contains a default filter declaration
             Filter defaultFilter = null;
@@ -330,10 +336,9 @@ public abstract class Grid
                                     );
                                 }
                                 else {
-                                    templateRow[j+1] = control.getControlFactory().getAttributeValueFactory().getAttributeValue(
+                                    templateRow[j+1] = application.createAttributeValue(
                                         fieldDef,
-                                        templateRowObject,
-                                        application
+                                        templateRowObject
                                     );
                                 }
                             }
@@ -595,7 +600,7 @@ public abstract class Grid
               null,
               this.currentFilter.getCondition(),
               this.currentFilter.getOrderSpecifier(),
-              new Object[]{this.getGridControl().getQualifiedReferenceName(), this.view.getApplicationContext().getCurrentUserRole(), this.view.getObjectReference().refMofId()} 
+              new Object[]{this.getGridControl().getContainerId(), this.view.getApplicationContext().getCurrentUserRole(), this.view.getObjectReference().refMofId()} 
           );
           ByteArrayOutputStream bs = new ByteArrayOutputStream();
           XMLEncoder encoder = new XMLEncoder(bs);
@@ -604,7 +609,7 @@ public abstract class Grid
           Properties settings = this.view.getApplicationContext().getSettings();
           settings.setProperty(
               this.getGridControl().getPropertyName(
-                  this.getGridControl().getQualifiedReferenceName(),
+                  this.getGridControl().getContainerId(),
                   GridControl.PROPERTY_DEFAULT_FILTER
               ),
               Base64.encode(bs.toByteArray())
@@ -713,7 +718,13 @@ public abstract class Grid
           this.currentRow = firstRow;          
           this.currentPageSize = newPageSize;
     
-          int nCols = gridControl.getColumnFilterSetActions().length;    
+          int nCols = Math.min(
+              gridControl.getShowMaxMember(),
+              Math.min(
+                  gridControl.getObjectContainer().getMember().size(),
+                  Grid.MAX_COLUMNS
+              )
+          ) + 1;
           while(i.hasNext()) {
               RefObject_1_0 rowObject = (RefObject_1_0)i.next();
               Object[] row = new Object[nCols];      
@@ -731,8 +742,6 @@ public abstract class Grid
                   application
               );
               row[0] = objRef;               
-              AttributeValueFactory valueFactory = this.control.getControlFactory().getAttributeValueFactory();
-              
               for(int j = 1; j < nCols; j++) {
                   org.openmdx.ui1.jmi1.ValuedField fieldDef = (org.openmdx.ui1.jmi1.ValuedField)gridControl.getObjectContainer().getMember().get(j-1);
                   // special treatment of identity
@@ -751,7 +760,10 @@ public abstract class Grid
                       );
                   }
                   else {
-                      row[j] = valueFactory.getAttributeValue(fieldDef, rowObject, application);
+                      row[j] = application.createAttributeValue(
+                          fieldDef, 
+                          rowObject
+                      );
                   }
               }
               rows.add(row);
@@ -906,7 +918,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             true,
-            null
+            (Object[])null
           );
         offset = 2;                      
       }
@@ -916,7 +928,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             false,
-            null
+            (Object[])null
           );
         offset = 2;
       }
@@ -926,7 +938,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             false,
-            null
+            (Object[])null
           );
         offset = 2;
       }
@@ -936,7 +948,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             false,
-            null
+            (Object[])null
           );
         offset = 1;
       }
@@ -946,7 +958,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             true,
-            null
+            (Object[])null
           );
         offset = 1;
       }
@@ -956,7 +968,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             true,
-            null
+            (Object[])null
           );
         offset = 1;
       }
@@ -966,7 +978,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             true,
-            null
+            (Object[])null
           );
         offset = 1;
       }
@@ -976,7 +988,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             true,
-            null
+            (Object[])null
           );
         offset = 1;
       }
@@ -986,7 +998,7 @@ public abstract class Grid
             Quantors.THERE_EXISTS,
             feature,
             false,
-            null
+            (Object[])null
           );
         offset = 2;
       }
@@ -1096,7 +1108,7 @@ public abstract class Grid
                     Quantors.THERE_EXISTS,
                     column.getFeatureName(),
                     true,
-                    null
+                    (Object[])null
                   );
                 List values = new ArrayList();
                 StringTokenizer orExpr = new StringTokenizer(andExpr.nextToken().trim(), ";");
@@ -1149,7 +1161,7 @@ public abstract class Grid
                     Quantors.THERE_EXISTS,
                     column.getFeatureName(),
                     true,
-                    null
+                    (Object[])null
                   );
                 List values = new ArrayList();
                 StringTokenizer orExpr = new StringTokenizer(andExpr.nextToken().trim(), ";");
@@ -1297,22 +1309,20 @@ public abstract class Grid
                               conditions.add(
                                   new PiggyBackCondition(
                                       SystemAttributes.CONTEXT_PREFIX + queryFilterContext + SystemAttributes.OBJECT_CLASS, 
-                                      new String[]{Database_1_Attributes.QUERY_FILTER_CLASS}
+                                      Database_1_Attributes.QUERY_FILTER_CLASS
                                   )                          
                               );
                               conditions.add(
                                   new PiggyBackCondition(
                                       SystemAttributes.CONTEXT_PREFIX + queryFilterContext + Database_1_Attributes.QUERY_FILTER_CLAUSE, 
-                                      new String[]{clause}
+                                      clause
                                   )                          
                               );
                               String stringParam = this.getWildcardFilterValue(andExpr.trim(), application);                      
                               conditions.add(
                                   new PiggyBackCondition(
                                       SystemAttributes.CONTEXT_PREFIX + queryFilterContext + Database_1_Attributes.QUERY_FILTER_STRING_PARAM, 
-                                      new String[]{
-                                          (stringParam.startsWith("(?i)") ? stringParam.substring(4) : stringParam).toUpperCase()
-                                      }
+                                      stringParam.startsWith("(?i)") ? stringParam.substring(4) : stringParam
                                   )                          
                               );
                           }
@@ -1322,7 +1332,7 @@ public abstract class Grid
                                       Quantors.THERE_EXISTS,
                                       column.getFeatureName(),
                                       true,
-                                      null
+                                      (Object[])null
                                   );
                               List values = new ArrayList();
                               StringTokenizer orExpr = new StringTokenizer(andExpr.trim(), ";");
@@ -1362,7 +1372,7 @@ public abstract class Grid
               null,
               (Condition[])conditions.toArray(new Condition[conditions.size()]),
               new OrderSpecifier[]{},
-              new Object[]{this.getGridControl().getQualifiedReferenceName(), this.view.getApplicationContext().getCurrentUserRole(), this.view.getObjectReference().refMofId()}               
+              new Object[]{this.getGridControl().getContainerId(), this.view.getApplicationContext().getCurrentUserRole(), this.view.getObjectReference().refMofId()}               
           );
           break;
         }

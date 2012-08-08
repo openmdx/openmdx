@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DbObject.java,v 1.25 2008/05/15 23:33:23 wfro Exp $
+ * Name:        $Id: DbObject.java,v 1.27 2008/12/01 10:50:16 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/15 23:33:23 $
+ * Date:        $Date: 2008/12/01 10:50:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -121,6 +121,7 @@ public abstract class DbObject
 
     this.conn = conn;
     this.database = database;
+    this.resourceIdentifier = accessPath;
     if(accessPath.size() % 2 == 1) {
       this.objectId = accessPath.getBase();
       this.reference = accessPath.getParent();
@@ -150,6 +151,7 @@ public abstract class DbObject
     this.database = database;
     this.conn = conn;
     this.dbObjectConfiguration = typeConfiguration;
+    this.resourceIdentifier = null;
     this.objectId = null;
     this.objectIdValues = null;
     this.reference = null;
@@ -177,6 +179,12 @@ public abstract class DbObject
   public Path getReference(
   ) {
     return this.reference;
+  }
+
+  //---------------------------------------------------------------------------
+  public Path getResourceIdentifier(
+  ) {
+    return this.resourceIdentifier;
   }
 
   //---------------------------------------------------------------------------  
@@ -269,9 +277,11 @@ public abstract class DbObject
    * Example: StandardDbObject maps the column 'object_rid' with the help
    * of the _REF table to the object reference.
    */
-  public abstract Path getObjectReference(
+  public Path getObjectReference(
     FastResultSet frs
-  ) throws SQLException, ServiceException;
+  ) throws SQLException, ServiceException {
+      throw new UnsupportedOperationException(); 
+  }
   
   /**
    * Maps the row frs (which corresponds to an object slice) to the object
@@ -281,9 +291,32 @@ public abstract class DbObject
    * Example: StandardDbObject returns the value of the column 
    * 'object_oid'.
    */
-  public abstract String getObjectId(
+  public String getObjectId(
     FastResultSet frs
-  ) throws SQLException;
+  ) throws SQLException, ServiceException{
+      throw new UnsupportedOperationException(); 
+  }
+
+  /**
+   * A subclass has to override either getResourceIdentifier() (the preferred way)
+   * or both getObjectReference() and getObjectId() (the deprecated way).
+   * <p><em>
+   * Note:</br>
+   * Failing to do either leads to an <code>UnsupportedOperationException</code>!
+   * </em>
+   * 
+   * @param frs fast result set
+   * 
+   * @return the resource identifier
+   * 
+   * @throws SQLException
+   * @throws ServiceException
+   */
+  public Path getResourceIdentifier(
+      FastResultSet frs
+  ) throws SQLException, ServiceException{
+     return getObjectReference(frs).getChild(getObjectId(frs));
+  }
   
   /**
    * Maps the row frs (which corresponds to an object slice) to the object slice
@@ -433,8 +466,9 @@ public abstract class DbObject
   protected final AbstractDatabase_1 database;
   protected final Connection conn;
   
-  protected final String objectId;
-  protected final Path reference;
+  private final String objectId;
+  private final Path reference;
+  private final Path resourceIdentifier;
 
 }
 

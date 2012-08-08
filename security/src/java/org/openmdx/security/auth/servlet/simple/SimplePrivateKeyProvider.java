@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SimplePrivateKeyProvider.java,v 1.6 2006/08/22 16:41:36 hburger Exp $
+ * Name:        $Id: SimplePrivateKeyProvider.java,v 1.7 2008/09/11 10:47:30 hburger Exp $
  * Description: Simple Key Provider
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/22 16:41:36 $
+ * Date:        $Date: 2008/09/11 10:47:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -70,116 +70,115 @@ import org.openmdx.security.auth.servlet.spi.AbstractHandler;
  * Simple <code>KeyPovider</code>
  */
 public class SimplePrivateKeyProvider 
-    extends AbstractHandler 
-    implements KeyProvider 
+extends AbstractHandler 
+implements KeyProvider 
 {
-    
-    //------------------------------------------------------------------------
-    // Extends AbstractProvider
-    //------------------------------------------------------------------------
 
-    /* (non-Javadoc)
-     * @see org.openmdx.application.security.auth.servlet.spi.AbstractHandler#init()
-     */
-    protected void init(
-    ) throws ServletException {
-        String keyStoreType = getInitParameter(
-            "keystore-type",
-            "JKS"
-        );
-        String keyStoreFileName = getInitParameter(
-            "keystore-filename",
-            "C:\\opt\\BEA\\weblogic92\\server\\lib\\DemoIdentity.jks"
-        ); 
-        String keyStorePassPhrase  = getInitParameter(
-            "keystore-passphrase",
-            "DemoIdentityKeyStorePassPhrase"
-        );
-        this.privateKeyAlias = getInitParameter(
-            "private-key-alias",
-            "DemoIdentity"
-        );
-        String privateKeyPassPhrase = getInitParameter(
-            "private-key-passphrase",
-            "DemoIdentityPassPhrase"
-        );
-        try {
-            this.keyStore = KeyStore.getInstance(keyStoreType);   
-            this.keyStore.load(
-                new FileInputStream(keyStoreFileName),
-                keyStorePassPhrase.toCharArray()
-            );
-            this.key = this.keyStore.getKey(
-                this.privateKeyAlias,
-                privateKeyPassPhrase.toCharArray()
-            );
-            if(isDebug()) {
-                log("$Id: SimplePrivateKeyProvider.java,v 1.6 2006/08/22 16:41:36 hburger Exp $");
-                log("keystore-type: " + keyStoreType);
-                log("keystore-filename: " + keyStoreFileName);
-                log("private-key-alias: " + this.privateKeyAlias);
-                log("keystore-passphrase: n/a");
-                log("private-key-passphrase: n/a");
-            }
-        } catch (Exception exception) {
-            throw (UnavailableException) Throwables.initCause(
-                new UnavailableException(
-                    "Private key provider acquisition failed"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ACTIVATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("info", "$Id: SimplePrivateKeyProvider.java,v 1.6 2006/08/22 16:41:36 hburger Exp $"),
-                    new BasicException.Parameter("name", getServletName()),
-                    new BasicException.Parameter("keystore-type", keyStoreType),
-                    new BasicException.Parameter("keystore-passphrase", "n/a"),
-                    new BasicException.Parameter("private-key-alias", getAlias()),
-                    new BasicException.Parameter("private-key-passphrase", "n/a")
-                }, null
-            );
-        }
-    }
+	//------------------------------------------------------------------------
+	// Extends AbstractProvider
+	//------------------------------------------------------------------------
 
-    
-    //------------------------------------------------------------------------
-    // Implements KeyProvider
-    //------------------------------------------------------------------------
-    
-    /**
-     * The <code>Key</code>'s alias
-     */
-    private String privateKeyAlias;
+	/* (non-Javadoc)
+	 * @see org.openmdx.application.security.auth.servlet.spi.AbstractHandler#init()
+	 */
+	protected void init(
+	) throws ServletException {
+		String keyStoreType = getInitParameter(
+				"keystore-type",
+				"JKS"
+		);
+		String keyStoreFileName = getInitParameter(
+				"keystore-filename",
+				"C:\\opt\\BEA\\weblogic92\\server\\lib\\DemoIdentity.jks"
+		); 
+		String keyStorePassPhrase  = getInitParameter(
+				"keystore-passphrase",
+				"DemoIdentityKeyStorePassPhrase"
+		);
+		this.privateKeyAlias = getInitParameter(
+				"private-key-alias",
+				"DemoIdentity"
+		);
+		String privateKeyPassPhrase = getInitParameter(
+				"private-key-passphrase",
+				"DemoIdentityPassPhrase"
+		);
+		try {
+			this.keyStore = KeyStore.getInstance(keyStoreType);   
+			this.keyStore.load(
+					new FileInputStream(keyStoreFileName),
+					keyStorePassPhrase.toCharArray()
+			);
+			this.key = this.keyStore.getKey(
+					this.privateKeyAlias,
+					privateKeyPassPhrase.toCharArray()
+			);
+			if(isDebug()) {
+				log("$Id: SimplePrivateKeyProvider.java,v 1.7 2008/09/11 10:47:30 hburger Exp $");
+				log("keystore-type: " + keyStoreType);
+				log("keystore-filename: " + keyStoreFileName);
+				log("private-key-alias: " + this.privateKeyAlias);
+				log("keystore-passphrase: n/a");
+				log("private-key-passphrase: n/a");
+			}
+		} catch (Exception exception) {
+			throw (UnavailableException) Throwables.initCause(
+					new UnavailableException(
+							"Private key provider acquisition failed"
+					),
+					exception,
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.ACTIVATION_FAILURE,
+					null,
+					new BasicException.Parameter("info", "$Id: SimplePrivateKeyProvider.java,v 1.7 2008/09/11 10:47:30 hburger Exp $"),
+					new BasicException.Parameter("name", getServletName()),
+					new BasicException.Parameter("keystore-type", keyStoreType),
+					new BasicException.Parameter("keystore-passphrase", "n/a"),
+					new BasicException.Parameter("private-key-alias", getAlias()),
+					new BasicException.Parameter("private-key-passphrase", "n/a")
+			);
+		}
+	}
 
-    /**
-     * This provider's <code>KeyStore</code>
-     */
-    private KeyStore keyStore;
 
-    /**
-     * This provider's <code>Key</code>'
-     */
-    private Key key;
+	//------------------------------------------------------------------------
+	// Implements KeyProvider
+	//------------------------------------------------------------------------
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.security.pki.KeyProvider#getAlias()
-     */
-    public String getAlias() {
-        return this.privateKeyAlias;
-    }
+	/**
+	 * The <code>Key</code>'s alias
+	 */
+	private String privateKeyAlias;
 
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.security.pki.KeyProvider#getKey()
-     */
-    public Key getKey() throws KeyException {
-        return this.key;
-    }
+	/**
+	 * This provider's <code>KeyStore</code>
+	 */
+	private KeyStore keyStore;
+
+	/**
+	 * This provider's <code>Key</code>'
+	 */
+	private Key key;
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.kernel.security.pki.KeyProvider#getAlias()
+	 */
+	public String getAlias() {
+		return this.privateKeyAlias;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.kernel.security.pki.KeyProvider#getKey()
+	 */
+	public Key getKey() throws KeyException {
+		return this.key;
+	}
 
 	public Certificate getCertificate() throws GeneralSecurityException {
 		return this.keyStore.getCertificate(getAlias());
 	}
 
-	
+
 	//------------------------------------------------------------------------
 	// Implements Connection
 	//------------------------------------------------------------------------

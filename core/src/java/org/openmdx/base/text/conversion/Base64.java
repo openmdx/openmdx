@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Base64.java,v 1.6 2007/10/10 17:16:04 hburger Exp $
+ * Name:        $Id: Base64.java,v 1.8 2008/10/08 17:39:40 wfro Exp $
  * Description: BASE64 encode/decode
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 17:16:04 $
+ * Date:        $Date: 2008/10/08 17:39:40 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,6 +53,7 @@ package org.openmdx.base.text.conversion;
 
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
 
@@ -291,9 +292,14 @@ public class Base64 {
     /**
      * Outputs base64 representation of the specified byte array to a character stream.
      */
-    public static void encode(byte[] data, int off, int len, Writer writer) throws IOException {
+    private static void encode(
+        byte[] data, 
+        int off, 
+        int len, 
+        Writer writer,
+        char[] tmp
+    ) throws IOException {
         if (len <= 0)  return;
-        char[] out = new char[4];
         int rindex = off;
         int rest = len-off;
         int output = 0;
@@ -301,11 +307,11 @@ public class Base64 {
             int i = ((data[rindex]&0xff)<<16)
                 +((data[rindex+1]&0xff)<<8)
                 +(data[rindex+2]&0xff);
-            out[0] = S_BASE64CHAR[i>>18];
-            out[1] = S_BASE64CHAR[(i>>12)&0x3f];
-            out[2] = S_BASE64CHAR[(i>>6)&0x3f];
-            out[3] = S_BASE64CHAR[i&0x3f];
-            writer.write(out, 0, 4);
+            tmp[0] = S_BASE64CHAR[i>>18];
+            tmp[1] = S_BASE64CHAR[(i>>12)&0x3f];
+            tmp[2] = S_BASE64CHAR[(i>>6)&0x3f];
+            tmp[3] = S_BASE64CHAR[i&0x3f];
+            writer.write(tmp, 0, 4);
             rindex += 3;
             rest -= 3;
             output += 4;
@@ -314,19 +320,48 @@ public class Base64 {
         }
         if (rest == 1) {
             int i = data[rindex]&0xff;
-            out[0] = S_BASE64CHAR[i>>2];
-            out[1] = S_BASE64CHAR[(i<<4)&0x3f];
-            out[2] = S_BASE64PAD;
-            out[3] = S_BASE64PAD;
-            writer.write(out, 0, 4);
+            tmp[0] = S_BASE64CHAR[i>>2];
+            tmp[1] = S_BASE64CHAR[(i<<4)&0x3f];
+            tmp[2] = S_BASE64PAD;
+            tmp[3] = S_BASE64PAD;
+            writer.write(tmp, 0, 4);
         } else if (rest == 2) {
             int i = ((data[rindex]&0xff)<<8)+(data[rindex+1]&0xff);
-            out[0] = S_BASE64CHAR[i>>10];
-            out[1] = S_BASE64CHAR[(i>>4)&0x3f];
-            out[2] = S_BASE64CHAR[(i<<2)&0x3f];
-            out[3] = S_BASE64PAD;
-            writer.write(out, 0, 4);
+            tmp[0] = S_BASE64CHAR[i>>10];
+            tmp[1] = S_BASE64CHAR[(i>>4)&0x3f];
+            tmp[2] = S_BASE64CHAR[(i<<2)&0x3f];
+            tmp[3] = S_BASE64PAD;
+            writer.write(tmp, 0, 4);
         }
     }
+    
+    /**
+     * Outputs base64 representation of the specified byte array to a character stream.
+     */
+    public static void encode(
+        byte[] data, 
+        int off, 
+        int len, 
+        Writer writer
+    ) throws IOException {
+        char[] tmp = new char[4];
+        encode(data, off, len, writer, tmp);
+    }
+    
+    /**
+     * Outputs base64 representation of the specified byte array to a character stream.
+     */
+    public static void encode(
+        InputStream data, 
+        Writer writer
+    ) throws IOException {
+        char[] tmp = new char[4];
+        byte[] bytes = new byte[3];
+        int len = 0;
+        while((len = data.read(bytes, 0, 3)) != -1) {
+            encode(bytes, 0, len, writer, tmp);            
+        }
+    }
+    
 }
 

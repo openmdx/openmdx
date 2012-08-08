@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AssociationDef.java,v 1.1 2008/04/04 01:37:44 hburger Exp $
+ * Name:        $Id: AssociationDef.java,v 1.2 2008/10/13 14:08:51 hburger Exp $
  * Description: VelocityClassDef class
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 01:37:44 $
+ * Date:        $Date: 2008/10/13 14:08:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -75,7 +75,7 @@ public class AssociationDef extends ElementDef {
             (String)associationDef.values("name").get(0),
             (String)associationDef.values("qualifiedName").get(0),
             (String)associationDef.values("annotation").get(0),
-            new HashSet<String>(associationDef.values("stereotype"))
+            new HashSet<Object>(associationDef.values("stereotype"))
         );      
         SparseList content = associationDef.values("content");
         this.ends = new AssociationEndDef[]{

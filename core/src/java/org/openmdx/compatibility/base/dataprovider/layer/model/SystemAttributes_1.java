@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SystemAttributes_1.java,v 1.7 2008/03/21 18:46:24 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: SystemAttributes_1.java,v 1.8 2008/10/14 00:27:08 hburger Exp $
  * Description: Handle the BasicObjects' Attributes
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:46:24 $
+ * Date:        $Date: 2008/10/14 00:27:08 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.layer.model;
 
@@ -68,7 +67,6 @@ import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 /**
  * Handle the BasicObjects' Attributes.
  */
-@SuppressWarnings("unchecked")
 public class SystemAttributes_1
     extends BeforeImageCachingLayer_1 
 {
@@ -110,14 +108,11 @@ public class SystemAttributes_1
         DataproviderRequest[] requests
     ) throws ServiceException {
         String at = header.getRequestedAt();
-        if(at == null) at = DateFormat.getInstance().format(new Date());
-        List by = header.getPrincipalChain();
-        for(
-            int index = 0;
-            index < requests.length;
-            index++
-        ){
-            DataproviderRequest request = requests[index];
+        if(at == null) {
+            at = DateFormat.getInstance().format(new Date());
+        }
+        List<String> by = header.getPrincipalChain();
+        for(DataproviderRequest request : requests){
             switch(request.operation()) {
                 case DataproviderOperations.OBJECT_CREATION:
                     // exclude Authority, Provider, Segment
@@ -159,8 +154,8 @@ public class SystemAttributes_1
      * 
      * @return the - maybe truncated - principal chain
      */
-    private List limit(
-        List principals
+    private List<String> limit(
+        List<String> principals
     ){
         return this.principalLimit < principals.size() ?
             principals.subList(0, this.principalLimit) :

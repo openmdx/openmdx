@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Datums.java,v 1.3 2007/10/10 16:06:11 hburger Exp $
+ * Name:        $Id: Datums.java,v 1.4 2008/09/10 08:55:24 hburger Exp $
  * Description: Oracle SQL Datum Conversions
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:11 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -128,7 +128,7 @@ public class Datums {
                 } catch (InvocationTargetException exception) {
                     throw exception.getTargetException() instanceof Exception ?
                         (Exception) exception.getTargetException() :
-                        exception;
+                            exception;
                 }
             } else {
                 if(oracleToJdbc == null) oracleToJdbc = Classes.getApplicationClass(
@@ -142,20 +142,18 @@ public class Datums {
                 } catch (InvocationTargetException exception) {
                     throw exception.getTargetException() instanceof Exception ?
                         (Exception) exception.getTargetException() :
-                        exception;
-              }
-          }          
+                            exception;
+                }
+            }          
         } catch (Exception exception) {
             throw (SQLException) Throwables.initCause(
                 new SQLException(Datums.class.getName() + "'s unification attempt failed"),
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("class", datum.getClass().getName()),
-                    new BasicException.Parameter("value", datum.toString())
-                },
-                "Could not convert db object to JDBC object"
+                "Could not convert db object to JDBC object",
+                new BasicException.Parameter("class", datum.getClass().getName()),
+                new BasicException.Parameter("value", datum.toString())
             );
         } else {
             return datum;
@@ -177,12 +175,12 @@ public class Datums {
      * oracle.sql.Datum.toJdbc()
      */
     private static Method oracleToJdbc;
-    
+
     /**
      * oracle.sql.TIMESTAMPTZ.toBytes()
      */
     private static Method oracleToBytes;
-    
+
     /**
      * UTC time zone instance
      */

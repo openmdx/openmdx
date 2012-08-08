@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExceptionMapper.java,v 1.10 2008/02/15 17:24:06 hburger Exp $
+ * Name:        $Id: ExceptionMapper.java,v 1.11 2008/11/11 15:40:59 wfro Exp $
  * Description: Exception Template 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/15 17:24:06 $
+ * Date:        $Date: 2008/11/11 15:40:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -80,7 +80,7 @@ public class ExceptionMapper
             packageSuffix,
             metaData
         );
-        this.exceptionDef = new ExceptionDef(exceptionDef, model, false);
+        this.exceptionDef = new ExceptionDef(exceptionDef, model);
     }
     
     //-----------------------------------------------------------------------

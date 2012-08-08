@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Loader.java,v 1.8 2008/04/04 17:01:12 hburger Exp $
+ * Name:        $Id: Loader.java,v 1.10 2008/11/11 23:22:35 wfro Exp $
  * Description: Loader
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:12 $
+ * Date:        $Date: 2008/11/11 23:22:35 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.loader;
 
@@ -86,18 +83,25 @@ public class Loader {
    * Map last path component to segment name, i.e. path
    * ../WEB-INF/config/ui/Root will be mapped to segment Root
    */ 
-  protected String getSegmentName(
+  protected String[] getSegmentName(
       String path
   ) {
-      if(path.endsWith("/")) path = path.substring(0, path.length() - 1);
-      return path.substring(path.lastIndexOf("/") + 1);
+      if(path.endsWith("/")) {
+          path = path.substring(0, path.length() - 1);
+      }
+      path = path.substring(path.lastIndexOf("/") + 1);
+      if(!Character.isDigit(path.charAt(0))) {
+          path = "0-" + path;
+      }
+      return path.split("-");
   }
   
   //-------------------------------------------------------------------------
   protected String getAdminPrincipal(
       String path
   ) {
-      return this.roleMapper.getAdminPrincipal(this.getSegmentName(path));
+      String[] segmentName = this.getSegmentName(path);
+      return this.roleMapper.getAdminPrincipal(segmentName[segmentName.length-1]);
   }
   
   //-------------------------------------------------------------------------

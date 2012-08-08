@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XRI_2Marshaller.java,v 1.14 2008/03/21 18:48:02 hburger Exp $
+ * Name:        $Id: XRI_2Marshaller.java,v 1.17 2008/09/09 14:20:00 hburger Exp $
  * Description: Path/ObjectId Marshaller 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:48:02 $
+ * Date:        $Date: 2008/09/09 14:20:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,9 +50,13 @@
  */
 package org.openmdx.compatibility.base.naming;
 
+import java.util.Iterator;
+
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
+import org.openmdx.kernel.url.protocol.XRI_2Protocols;
+import org.openmdx.kernel.url.protocol.XriAuthorities;
 import org.openxri.AuthorityPath;
 import org.openxri.XRI;
 import org.openxri.XRIParseException;
@@ -82,6 +86,11 @@ public final class XRI_2Marshaller
     final static private Marshaller instance = new XRI_2Marshaller();
     
     /**
+     * xri://@openmdx
+     */
+    final static String[] ROOT = {};
+    
+    /**
      * Return the singleton
      */ 
     static public Marshaller getInstance(
@@ -107,7 +116,7 @@ public final class XRI_2Marshaller
     ) throws ServiceException {
         if (charSequences == null) return null;
         Object[]segments = (Object[])charSequences;        
-        StringBuilder oid = new StringBuilder("xri://@openmdx");
+        StringBuilder oid = new StringBuilder(XRI_2Protocols.OPENMDX_PREFIX);
         char separator = '*';
         for(
             int i = 0;
@@ -133,26 +142,55 @@ public final class XRI_2Marshaller
                             "($...)"
                         );
                     } else {
-                        encode(
-                            segment.substring(0, segment.length() - 1),
-                            oid, // target
-                            i == 0, // authority
-                            "($./", // prefix
-                            ")/($...)" // suffix
-                        );
+                        XRISegment xriSegment = new XRISegment(segment);
+                        StringBuilder target = new StringBuilder();
+                        boolean first = true;
+                        for(
+                             Iterator<XRISubSegment> j = xriSegment.getSubSegmentIterator();
+                             j.hasNext();
+                             first = false
+                        ){
+                             XRISubSegment subSegment = j.next();
+                             String value = subSegment.toString(!first);
+                             if(j.hasNext()) {
+                                 target.append(value);
+                             } else {
+                                 if(!first) {
+                                     target.append('*');
+                                 }
+                                 if (value.length() > 1) {
+                                     target.append(
+                                         "($."
+                                     ).append(
+                                         subSegment.isPersistant() ? '!' : '*'
+                                     ).append(
+                                         value.substring(0, value.length() - 1)
+                                     ).append(
+                                         ")*"
+                                     );
+                                 }
+                                 encode(
+                                     target.toString(), // source
+                                     oid, // target
+                                     i == 0, // authority
+                                     "", // prefix
+                                     "($..)/($...)" // suffix
+                                 );
+                             }
+                        }
                     }
                 } else if (segment.startsWith(":") && segment.endsWith("*")) {
                     if (segment.length() == 2) {
                         oid.append(
-                            "($.)"
+                            "($..)"
                         );
                     } else {
                         encode(
                             segment.substring(1, segment.length() - 1),
                             oid, // target
                             i == 0, // authority
-                            "($./", // prefix
-                            ")" // suffix
+                            "($.*", // prefix
+                            ")*($..)" // suffix
                         );
                     }
                 } else {
@@ -170,7 +208,7 @@ public final class XRI_2Marshaller
                     oid.append(
                         '('
                     ).append(
-                        xRef
+                        xRef.toString().substring(XRI_2Protocols.SCHEME_PREFIX.length())
                     ).append(
                         ')'
                     );
@@ -209,16 +247,16 @@ public final class XRI_2Marshaller
         String suffix
     ){
         oid.append(prefix);
-        String subSegment = authority ? 
+        String segment = authority ? 
             source.replace(':', '.') : 
             source.replace('=', ':');
         if(isCaseExactString(source)) {
-            appendCaseExactString(oid, subSegment);
+            appendCaseExactString(oid, segment);
         } else try {
-            new XRISubSegment('*' + subSegment, true);
-            oid.append(subSegment);
+            new XRISegment(segment);
+            oid.append(segment);
         } catch (XRIParseException exception) {
-            appendCaseExactString(oid, subSegment);
+            appendCaseExactString(oid, segment);
         }
         oid.append(suffix);
     }
@@ -240,13 +278,15 @@ public final class XRI_2Marshaller
         boolean treeWildcard = xriString.endsWith(")/($...)");
         XRI xri = new XRI(xriString);
         String authority = xri.getAuthorityPath().toString();
-        if("@openmdx".equals(authority)) return new String[]{};
+        if(XriAuthorities.OPENMDX_AUTHORITY.equals(authority)) return ROOT;
         XRIPath path = xri.getXRIPath();        
         String[] reply = new String[
             path == null ? 1 : path.getNumSegments() + (treeWildcard ? 0 : 1)
         ];
         reply[0] = authority.substring(9).replaceAll(
             "\\(\\$\\.\\.\\.\\)", "%"
+        ).replaceAll(
+            "\\(\\$\\.\\.\\)", ":*"
         ).replaceAll(
             "\\(\\$\\./([^\\)]+)\\)",
             "\1:*"
@@ -262,12 +302,14 @@ public final class XRI_2Marshaller
             i < reply.length;
             i++
         ) {
-            XRISegment segment = path.getSegmentAt(i - 1); 
+            XRISegment segment = path.getSegmentAt(i - 1);
+            int jLimit = segment.getNumSubSegments();
+            boolean subSegmentsWildcard = segment.getSubSegmentAt(jLimit - 1).toString().equals("*($..)");
             StringBuilder target = new StringBuilder();
             boolean parameter = false;
             boolean wildcard = false;
             SubSegments: for(
-                int j = 0, jLimit = segment.getNumSubSegments(); 
+                int j = 0; 
                 j < jLimit;
                 j++
             ) {                                
@@ -283,8 +325,9 @@ public final class XRI_2Marshaller
                 }
                 String delimiter = 
                     wasParameter ? "=" :
-                    j == 0 ? "" :
-                    ":";
+                    subSegment.isPersistant() ? "!" :
+                    j == 0 ? "" : 
+                    "*";
                 parameter = false;
                 XRef xRef = subSegment.getXRef();
                 if(xRef == null) {
@@ -300,26 +343,13 @@ public final class XRI_2Marshaller
                             if("$..".equals(xrefAuthority)) {
                                 if(i + 1 == reply.length && treeWildcard) {
                                     target.append(":%");
-                                } else if(!wasWildcard) {
-                                    if(j > 0) target.insert(0, ':');
+                                } else if(j == 0) {
                                     target.append(":*");
+                                } else if(!wasWildcard) {
+                                    target.append(subSegment);
                                 }
                             } else if ("$.".equals(xrefAuthority)) {
-                                XRIPath xriPath = xriReference.getXRIPath();
-                                if(i + 1 == reply.length && treeWildcard) {
-                                    if(xriPath != null) target.append(
-                                        xriPath.toString().substring(1)
-                                    );
-                                    target.append('%');
-                                    break SubSegments;
-                                } else {
-                                    target.append(":");
-                                    if(xriPath != null) target.append(
-                                        xriPath.toString().substring(1)
-                                    );
-                                    target.append('*');
-                                }
-                                wildcard = true;
+                                target.append(subSegment);
                             } else if (xrefAuthority.startsWith("$.*")) {
                                 if(i + 1 == reply.length && treeWildcard) {
                                     target.append(
@@ -328,7 +358,7 @@ public final class XRI_2Marshaller
                                         '%'
                                     );
                                     break SubSegments;
-                                } else {
+                                } else if (j + 2 == jLimit && subSegmentsWildcard) {
                                     target.append(
                                         ':'
                                     ).append(
@@ -336,8 +366,10 @@ public final class XRI_2Marshaller
                                     ).append(
                                         '*'
                                     );
+                                    wildcard = true;
+                                } else {
+                                    target.append(subSegment);
                                 }
-                                wildcard = true;
                             } else if (xrefAuthority.startsWith("$.!")) {
                                 if(i + 1 == reply.length && treeWildcard) {
                                     target.append(
@@ -346,7 +378,7 @@ public final class XRI_2Marshaller
                                         '%'
                                     );
                                     break SubSegments;
-                                } else {
+                                } else if (j + 1 == jLimit && subSegmentsWildcard) {
                                     target.append(
                                         ':'
                                     ).append(
@@ -354,16 +386,19 @@ public final class XRI_2Marshaller
                                     ).append(
                                         '*'
                                     );
-                                }                                   
-                                wildcard = true;
+                                    wildcard = true;
+                                } else {
+                                    target.append(subSegment);
+                                }
                             } else if ("$...".equals(xrefAuthority)) {
                                 target.append('%');
-                            } else if (xrefAuthority.startsWith("@openmdx")) {
+                            } else if (xrefAuthority.startsWith(XriAuthorities.OPENMDX_AUTHORITY)) {
+                                String embeddedXri = source.substring(1, source.length() - 1);
                                 target.append(
                                     delimiter
                                 ).append(
                                     new Path(
-                                        source.substring(1, source.length() - 1)
+                                        embeddedXri.startsWith(XRI_2Protocols.SCHEME_PREFIX) ? embeddedXri : XRI_2Protocols.SCHEME_PREFIX + embeddedXri
                                     )
                                 );
                             } else {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: BadParameterException.java,v 1.9 2008/02/08 16:51:26 hburger Exp $
+ * Name:        $Id: BadParameterException.java,v 1.12 2008/10/06 17:34:52 hburger Exp $
  * Description: SPICE Exceptions: Bad Parameter Exception 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:26 $
+ * Date:        $Date: 2008/10/06 17:34:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,6 +55,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.BasicException.Parameter;
 
 
 /**
@@ -79,9 +80,11 @@ public class BadParameterException
     public BadParameterException(
         Exception cause
     ) {
-        this.exceptionStack = BasicException.toStackedException(
-            cause,
-            this
+        super.initCause(
+            BasicException.toStackedException(
+                cause,
+                this
+            )
         );
     }
 
@@ -91,19 +94,37 @@ public class BadParameterException
      * @param cause
      * @param parameters
      * @param description
+     * @deprecated Use {@link #BadParameterException(Exception,String,BasicException.Parameter[])} instead
      */
     public BadParameterException(
         Exception cause,
         BasicException.Parameter[] parameters,
         String description
     ){
-        this.exceptionStack = new BasicException(
-            cause,
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.BAD_PARAMETER,
-            parameters,
-            description,
-			this
+        this(cause, description, parameters);
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param cause
+     * @param description
+     * @param parameters
+     */
+    public BadParameterException(
+        Exception cause,
+        String description,
+        Parameter... parameters
+    ){
+        super.initCause(
+            new BasicException(
+                cause,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                parameters,
+                description,
+    			this
+            )
         );
     }
 
@@ -112,23 +133,15 @@ public class BadParameterException
     //------------------------------------------------------------------------
 
     /**
-     * @deprecated use getExceptionStack()
-     * 
-     * @return the StackedException wrapped by this object.
-     */
-    public final BasicException getStackedException (
-    ) {
-        return getExceptionStack();
-    }
-
-    /**
      * Return a StackedException, this exception object's cause.
      * 
      * @return the StackedException wrapped by this object.
+     * 
+     * @deprecated use getCause()
      */
     public BasicException getExceptionStack (
     ) {
-        return this.exceptionStack;
+        return getCause();
     }
 
     /**
@@ -138,9 +151,10 @@ public class BadParameterException
      */
     public String getExceptionDomain()
     {
-        return this.exceptionStack == null ? 
+        BasicException exceptionStack = getCause();
+        return exceptionStack == null ? 
             BasicException.Code.DEFAULT_DOMAIN : 
-            this.exceptionStack.getExceptionDomain();
+            exceptionStack.getExceptionDomain();
     }
 
     /**
@@ -150,9 +164,10 @@ public class BadParameterException
      */
     public int getExceptionCode()
     {
-        return this.exceptionStack == null ? 
+        BasicException exceptionStack = getCause();
+        return exceptionStack == null ? 
             BasicException.Code.GENERIC : 
-            this.exceptionStack.getExceptionCode();
+            exceptionStack.getExceptionCode();
     }
 
 	/**
@@ -169,16 +184,11 @@ public class BadParameterException
 	public BasicException getCause(
 	    String exceptionDomain
 	){
-        return this.exceptionStack == null ? 
+        BasicException exceptionStack = getCause();
+        return exceptionStack == null ? 
             null : 
-            this.exceptionStack.getCause(exceptionDomain);
+            exceptionStack.getCause(exceptionDomain);
 	}
-
-    /**
-     * The exception stack
-     */
-    private BasicException exceptionStack;
-         
 
     //------------------------------------------------------------------------
     // Extends Throwable
@@ -189,10 +199,11 @@ public class BadParameterException
      */
     public String getMessage(
     ){
-        return this.exceptionStack == null ?
+        BasicException exceptionStack = getCause();
+        return exceptionStack == null ?
             super.getMessage() : 
-            this.exceptionStack.getMessage() + ": " +
-            this.exceptionStack.getDescription();
+            exceptionStack.getMessage() + ": " +
+            exceptionStack.getDescription();
     }
     
     /**
@@ -203,35 +214,11 @@ public class BadParameterException
      * @return a multiline representation of this exception.
      */     
     public String toString(){
+        BasicException exceptionStack = getCause();
         return 
-            this.exceptionStack == null ?
+            exceptionStack == null ?
             super.toString() : 
-            super.toString() + '\n' + this.exceptionStack;
-    }
-
-    /**
-     * Initializes the cause of this throwable to the specified value. 
-     * (The cause is the throwable that caused this throwable to get thrown.) 
-     * 
-     * @param   cause
-     *          the cause (which is saved for later retrieval by the
-     *          getCause() method). (A null value is permitted, and indicates 
-     *          that the cause is nonexistent or unknown.) 
-     *
-     * @return      a reference to this RuntimeServiceException instance. 
-     *
-     * @exception   IllegalArgumentException
-     *              if cause is this throwable.
-     *              (A throwable cannot be its own cause.) 
-     * @exception   IllegalStateException
-     *              if the cause is already set.
-     */     
-    public Throwable initCause(
-        Throwable cause
-    ){
-        throw new IllegalStateException(
-            "A BadParameterException's cause can't be changed"
-        );
+            super.toString() + '\n' + exceptionStack;
     }
 
     /**
@@ -240,19 +227,20 @@ public class BadParameterException
      *
      * @return Throwable  The exception cause.
      */
-    public Throwable getCause(
+    public final BasicException getCause(
     ){
-        return this.exceptionStack;
+        return (BasicException) super.getCause();
     }
 
     /* (non-Javadoc)
      * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
      */
     public void printStackTrace(PrintStream s) {
-        if(this.exceptionStack == null){
+        BasicException exceptionStack = getCause();
+        if(exceptionStack == null){
             super.printStackTrace(s);
         } else {
-            this.exceptionStack.printStack(this, s, true);
+            exceptionStack.printStack(this, s, true);
         }
     }
 
@@ -260,10 +248,11 @@ public class BadParameterException
      * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
      */
     public void printStackTrace(PrintWriter s) {
-        if(this.exceptionStack == null){
+        BasicException exceptionStack = getCause();
+        if(exceptionStack == null){
             super.printStackTrace(s);
         } else {
-            this.exceptionStack.printStack(this, s, true);
+            exceptionStack.printStack(this, s, true);
         }
     }
 

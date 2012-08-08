@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: GenericPrincipals.java,v 1.3 2007/10/10 16:06:08 hburger Exp $
+ * Name:        $Id: GenericPrincipals.java,v 1.4 2008/11/07 17:47:42 hburger Exp $
  * Description: Principal Types
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:08 $
+ * Date:        $Date: 2008/11/07 17:47:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,7 +65,7 @@ public class GenericPrincipals {
     /**
      * The principal constants' prefix
      */
-    protected static final String PREFIX = "openMDX."; // "org.openmdx.security.authentication.";
+    protected static final String PREFIX = "openMDX."; 
 
     /**
      * Denotes an authenticated user

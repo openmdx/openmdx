@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RemoteDeployment.java,v 1.9 2008/03/21 18:28:07 hburger Exp $
+ * Name:        $Id: RemoteDeployment.java,v 1.11 2008/12/16 15:25:50 hburger Exp $
  * Description: Remote Deployment
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:28:07 $
+ * Date:        $Date: 2008/12/16 15:25:50 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -251,9 +251,9 @@ public class RemoteDeployment implements Deployment {
         if(source == null || source.length == 0) return null;
         StringBuilder target = new StringBuilder().append(source[0]);
         for(
-            int i = 1;
-            i < source.length;
-            i++
+                int i = 1;
+                i < source.length;
+                i++
         ) target.append(' ').append(source[i]);
         return target.toString();
     }
@@ -268,13 +268,13 @@ public class RemoteDeployment implements Deployment {
         BasicException.Parameter[] parameters = new BasicException.Parameter[this.properties.size()];
         int i = 0;
         for(
-            Iterator j = this.properties.entrySet().iterator();
-            j.hasNext();
+                Iterator j = this.properties.entrySet().iterator();
+                j.hasNext();
         ){
             Map.Entry e = (Entry) j.next();
             parameters[i++] = new BasicException.Parameter(
                 e.getKey().toString(),
-                e.getValue().toString()
+                e.getValue()
             );
         }
         return parameters;
@@ -297,8 +297,8 @@ public class RemoteDeployment implements Deployment {
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.DEACTIVATION_FAILURE,
-                getExceptionParameters(),
-                "Destruction of lightweight container failed"
+                "Destruction of lightweight container failed",
+                getExceptionParameters()
             );
         } finally {
             this.container = null;
@@ -332,22 +332,22 @@ public class RemoteDeployment implements Deployment {
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
-                getExceptionParameters(),
-                "Deployment in lightweight container failed"
+                "Deployment in lightweight container failed",
+                getExceptionParameters()
             );
         } catch (Exception exception) {
             this.exception = new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
-                getExceptionParameters(),
-                "Forking lightweight container process faild"
+                "Forking lightweight container process faild",
+                getExceptionParameters()
             );
         }
         if(this.exception != null) throw exception;
         String providerURL = "//localhost:" +
-            this.properties.get(Contexts.REGISTRY_PORT) + '/' +
-            this.properties.get(Contexts.NAMING_SERVICE);
+        this.properties.get(Contexts.REGISTRY_PORT) + '/' +
+        this.properties.get(Contexts.NAMING_SERVICE);
         try {
             Properties environment = new Properties();
             environment.put(
@@ -364,11 +364,9 @@ public class RemoteDeployment implements Deployment {
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.CREATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("container", container),
-                    new BasicException.Parameter(Context.PROVIDER_URL, providerURL)
-                },
-                "Initial context creation failed"
+                "Initial context creation failed",
+                new BasicException.Parameter("container", container),
+                new BasicException.Parameter(Context.PROVIDER_URL, providerURL)
             );
         }
     }

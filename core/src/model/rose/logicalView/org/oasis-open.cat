@@ -1,0 +1,108 @@
+
+(object Petal
+    version    	50
+    _written   	"Rose 8.3.0407.2800"
+    charSet    	0)
+
+(object Class_Category "oasis-open"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"4022002100C9"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "xri"
+	    quid       	"4022008801A4"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"4022009D00B3"
+		    exportControl 	"Public")))
+	(object Class "XRI"
+	    quid       	"45DAF43701A5"
+	    stereotype 	"primitive"))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Alias"
+	    quid       	"4022005503E5"
+	    title      	"Alias"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::org::oasis-open::xri" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(344, 184)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(97, 123)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	494
+			justify    	0
+			label      	"xri")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@1
+			location   	(97, 82)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	494
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"4022008801A4"
+		    width      	512
+		    height     	225
+		    annotation 	8)
+		(object ClassView "Class" "Logical View::org::oasis-open::XRI" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(922, 184)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(672, 123)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	500
+			justify    	0
+			label      	"XRI")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@2
+			location   	(672, 82)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	500
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"45DAF43701A5"
+		    width      	518
+		    height     	225
+		    annotation 	8)))))

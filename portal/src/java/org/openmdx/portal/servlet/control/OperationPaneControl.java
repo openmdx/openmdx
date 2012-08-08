@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationPaneControl.java,v 1.75 2008/05/01 21:43:57 wfro Exp $
+ * Name:        $Id: OperationPaneControl.java,v 1.79 2008/11/12 10:36:53 wfro Exp $
  * Description: UiBasedOperationPaneControl class
- * Revision:    $Revision: 1.75 $
+ * Revision:    $Revision: 1.79 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:57 $
+ * Date:        $Date: 2008/11/12 10:36:53 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -107,11 +104,9 @@ public class OperationPaneControl
             id,
             locale,
             localeAsIndex,
-            controlFactory,
             pane,
             paneIndex
         );
-
         int tabIndex = 0;
         // Operations
         List<OperationTabControl> operationTabs = new ArrayList<OperationTabControl>();
@@ -259,7 +254,7 @@ public class OperationPaneControl
                                 stringifiedValue = valueHolder instanceof TextValue
                                 ? ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue
                                     : stringifiedValue;
-                                String widthModifier = v > 0 ? "" : "width=\"" + (100/nCols) + "%\"";                                    
+                                String widthModifier = "";                                    
                                 String readonlyModifier = valueHolder.isChangeable() ? "" : "readonly";
                                 String disabledModifier = valueHolder.isChangeable() ? "" : "disabled";                        
                                 String lockedModifier = valueHolder.isChangeable() ? "" : "Locked";
@@ -268,8 +263,8 @@ public class OperationPaneControl
                                 if(value instanceof ObjectReference) {
                                     Action selectAction = ((ObjectReference)value).getSelectObjectAction();
                                     Action selectAndEditAction = ((ObjectReference)value).getSelectAndEditObjectAction();
-                                    p.write("<td class=\"label\"><span class=\"nw\">", label, "</span></td>");
-                                    p.write("<td class=\"valueL\" ", widthModifier, "><div class=\"field\" title=\"", selectAction.getToolTip(), "\"><a href=\"\"" + p.getOnClick("javascript:this.href=", p.getEvalHRef(selectAction), ";") + ">", selectAction.getTitle(), "</a> [<a href=\"\"", p.getOnClick("javascript:this.href=", p.getEvalHRef(selectAndEditAction), ";") + ">", texts.getEditTitle(), "</a>]</div></td>");
+                                    p.write("<td class=\"label\"><span class=\"nw\">", label, ":</span></td>");
+                                    p.write("<td class=\"valueL\" ", widthModifier, "><div class=\"field\" title=\"", selectAction.getToolTip(), "\"><a href=\"\" onmouseover=\"javascript:this.href=", p.getEvalHRef(selectAction), ";onmouseover=function(){};\">", selectAction.getTitle(), "</a> [<a href=\"\" onclick=\"javascript:this.href=", p.getEvalHRef(selectAndEditAction), ";\">", texts.getEditTitle(), "</a>]</div></td>");
                                 }
                                 // other types
                                 else {
@@ -309,7 +304,7 @@ public class OperationPaneControl
                 p.write("<div class=\"panelResult\" style=\"display: block;\">");
                 p.write("  <table class=\"opFieldGroup\">");
                 p.write("    <td class=\"label\"><span class=\"nw\">", selectAction.getTitle(), ":</span></td>");
-                p.write("    <td class=\"valueL\"><div class=\"field\" title=\"", selectAction.getToolTip(), "\"><a href=\"\"" + p.getOnClick("javascript:this.href=", p.getEvalHRef(selectAction), ";") + ">", selectAction.getToolTip(), "</a> [<a href=\"\"", p.getOnClick("javascript:this.href=", p.getEvalHRef(editAction), ";") + ">", texts.getEditTitle(), "</a>]</div></td>");
+                p.write("    <td class=\"valueL\"><div class=\"field\" title=\"", selectAction.getToolTip(), "\"><a href=\"\" onmouseover=\"javascript:this.href=", p.getEvalHRef(selectAction), ";onmouseover=function(){};\">", selectAction.getToolTip(), "</a> [<a href=\"\" onclick=\"javascript:this.href=", p.getEvalHRef(editAction), ";\">", texts.getEditTitle(), "</a>]</div></td>");
                 p.write("  </table>");
                 p.write("</div>");
             }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Database_1_Attributes.java,v 1.4 2007/10/19 23:13:32 wfro Exp $
+ * Name:        $Id: Database_1_Attributes.java,v 1.6 2008/12/15 15:17:24 wfro Exp $
  * Description: Database_1_Attributes 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/19 23:13:32 $
+ * Date:        $Date: 2008/12/15 15:17:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -113,5 +113,16 @@ public class Database_1_Attributes {
    * the by byte count of the result set. 
    */
   public static final String HINT_COLUMN_SELECTOR = "/*!COLUMNS ";
-    
+
+  /**
+   * Hint for qualifying the dbObject used in queries. The format can be one of the following
+   * <ul>
+   *   <li>string not starting with 'xri:' in this case the string is interpreted as
+   *       suffix and appended to the query object.
+   *   <li>string starting with 'xri:' in this case the string is interpreted as Path. The
+   *       path is mapped to its dbObject and dbObject.getTableName() is appended to the
+   *       query object.
+   */
+  public static final String HINT_DBOBJECT = "/*!DBOBJECT ";
+  
 }

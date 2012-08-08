@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Bean.java,v 1.1 2005/07/11 23:35:56 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Dataprovider_1Bean.java,v 1.2 2008/09/09 10:05:04 hburger Exp $
  * Description: A Dataprovider Service for WAS
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/07/11 23:35:56 $
+ * Date:        $Date: 2008/09/09 10:05:04 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,15 +45,14 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.application.dataprovider.transport.ejb.websphere;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.application.cci.DbConnectionManager_1_0;
 import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.kernel.log.SysLog;
 
 /**
  * A Dataprovider Service for IBM WebSphere Application Server
@@ -75,9 +73,9 @@ public class Dataprovider_1Bean
         Configuration dataproviderConfiguration
     ) throws ServiceException {
         synchronized(javax.naming.Context.class) {
-            SysLog.trace("WAS 5.0 FP 4 Patch: synchronized DataSource lookup ...");
+            logger.trace("WAS 5.0 FP 4 Patch: synchronized DataSource lookup ...");
             super.getDataSources(dataproviderConfiguration);
-            SysLog.trace("WAS 5.0 FP 4 Patch: synchronized DataSource lookup done");
+            logger.trace("WAS 5.0 FP 4 Patch: synchronized DataSource lookup done");
         }
     }
 

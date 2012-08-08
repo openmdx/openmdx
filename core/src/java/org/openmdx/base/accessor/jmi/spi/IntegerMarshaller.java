@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: IntegerMarshaller.java,v 1.9 2008/04/09 12:34:01 hburger Exp $
+ * Name:        $Id: IntegerMarshaller.java,v 1.11 2008/09/26 15:27:16 hburger Exp $
  * Description: IntegerMarshaller class
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:01 $
+ * Date:        $Date: 2008/09/26 15:27:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,84 +51,79 @@
 package org.openmdx.base.accessor.jmi.spi;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
-import org.openmdx.kernel.exception.BasicException;
 
-
-//---------------------------------------------------------------------------
 /**
  * Number <-> Integer marshaller. Marshals objects which are instance of
  * Number to the specific type Integer (which is also a Number).
  */
-public class IntegerMarshaller
-  implements Marshaller, ReluctantUnmarshalling {
+public class IntegerMarshaller extends NormalizingMarshaller {
 
-  //-------------------------------------------------------------------------
-  private IntegerMarshaller(
-  ) {
-      super();
-  }
-  
-  //-------------------------------------------------------------------------
-  public static IntegerMarshaller getInstance(
-    boolean forward
-  ) {
-    return IntegerMarshaller.instance;
-  }
-  
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object marshal(
-    Object source
-  ) throws ServiceException {
-    try {
-        return source == null
-          ? null
-          : new Integer(((Number)source).intValue());
-    } 
-    catch (RuntimeException e) {
-        throw new ServiceException(
-            e,
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.TRANSFORMATION_FAILURE, 
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Could not marshal source to Integer"
-        );
+    /**
+     * Constructor 
+     */
+    private IntegerMarshaller(
+    ) {
+        // Avoid external instantiation
     }
-  }
-  
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object unmarshal (
-    Object source
-  ) throws ServiceException {
-    try {
-        return source == null
-          ? null
-          : new Integer(((Number)source).intValue());
-    } 
-    catch (RuntimeException e) {
-        throw new ServiceException(
-            e,
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.TRANSFORMATION_FAILURE, 
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Could not unmarshal Integer"
-        );
+
+    /**
+     * A singleton
+     */
+    static private final IntegerMarshaller instance = new IntegerMarshaller();
+
+    /**
+     * @deprecated Use {@link #getInstance()} instead
+     */
+    public static IntegerMarshaller getInstance(
+        boolean forward
+    ) {
+        return getInstance();
     }
-  }
-  
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  static private final IntegerMarshaller instance = new IntegerMarshaller();
+
+    /**
+     * Provide a marshaller instance
+     * 
+     * @return an instance
+     */
+    public static IntegerMarshaller getInstance(
+    ) {
+        return instance;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#normalize(java.lang.Object)
+     */
+    @Override
+    protected Object normalize(
+        Object source
+    ) throws ServiceException{
+        if(keep(source)) {
+            return source;
+        }
+        //
+        // Lenient
+        //
+        try {
+            return new Integer(((Number)source).intValue());
+        } catch (Exception exception) {
+            throw newServiceException(exception, source);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#isLenient()
+     */
+    @Override
+    protected boolean isLenient() {
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#targetClass()
+     */
+    @Override
+    protected Class<?> targetClass() {
+        return Integer.class;
+    }
+    
 }
-  
-//--- End of File -----------------------------------------------------------

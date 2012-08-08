@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightTransaction.java,v 1.10 2008/03/06 00:00:52 hburger Exp $
+ * Name:        $Id: LightweightTransaction.java,v 1.15 2008/10/10 11:08:39 hburger Exp $
  * Description: Lightweight Transaction
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/06 00:00:52 $
+ * Date:        $Date: 2008/10/10 11:08:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -205,7 +205,7 @@ final class LightweightTransaction implements Transaction {
         HeuristicRollbackException, SecurityException, IllegalStateException,
         SystemException {
         
-        //System.out.println(this + "  COMMIT ");
+//        SysLog.detail("COMMIT", Arrays.asList("tx=", this));
         
         if (status == Status.STATUS_MARKED_ROLLBACK) {
             rollback();
@@ -247,12 +247,10 @@ final class LightweightTransaction implements Transaction {
                             new BasicException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.GENERIC,
-                                new BasicException.Parameter[]{
-                                    new BasicException.Parameter("resourceManager", resourceManager),
-                                    new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
-                                    new BasicException.Parameter("transaction", toString())                        
-                                },
-                                "Transaction.commitFail"
+                                "Transaction.commitFail",
+                                new BasicException.Parameter("resourceManager", resourceManager),
+                                new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
+                                new BasicException.Parameter("transaction", toString())                        
                             ).appendCause(e)
                         );
                         fail = true;
@@ -277,12 +275,10 @@ final class LightweightTransaction implements Transaction {
                             new BasicException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.GENERIC,
-                                new BasicException.Parameter[]{
-                                    new BasicException.Parameter("resourceManager", resourceManager),
-                                    new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
-                                    new BasicException.Parameter("transaction", toString())
-                                },
-                                "Transaction.prepareFail"
+                                "Transaction.prepareFail",
+                                new BasicException.Parameter("resourceManager", resourceManager),
+                                new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
+                                new BasicException.Parameter("transaction", toString())
                             ).appendCause(e)
                         );
                         fail = true;
@@ -311,12 +307,10 @@ final class LightweightTransaction implements Transaction {
                                     new BasicException(
                                         BasicException.Code.DEFAULT_DOMAIN,
                                         BasicException.Code.GENERIC,
-                                        new BasicException.Parameter[]{
-                                            new BasicException.Parameter("resourceManager", resourceManager),
-                                            new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
-                                            new BasicException.Parameter("xid", this.xid)
-                                        },
-                                        "Transaction.rollbackFail"
+                                        "Transaction.rollbackFail",
+                                        new BasicException.Parameter("resourceManager", resourceManager),
+                                        new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
+                                        new BasicException.Parameter("xid", this.xid)
                                     ).appendCause(e)
                                 )
                             ); 
@@ -340,12 +334,10 @@ final class LightweightTransaction implements Transaction {
                                     new BasicException(
                                         BasicException.Code.DEFAULT_DOMAIN,
                                         BasicException.Code.GENERIC,
-                                        new BasicException.Parameter[]{
-                                            new BasicException.Parameter("resourceManager", resourceManager),
-                                            new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
-                                            new BasicException.Parameter("transaction", toString())
-                                        },
-                                        "Transaction.commitFail"
+                                        "Transaction.commitFail",
+                                        new BasicException.Parameter("resourceManager", resourceManager),
+                                        new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
+                                        new BasicException.Parameter("transaction", toString())
                                     ).appendCause(e)
                                 )
                             );
@@ -400,7 +392,7 @@ final class LightweightTransaction implements Transaction {
     public boolean delistResource(XAResource xaRes, int flag)
         throws IllegalStateException, SystemException {
         
-        //System.out.println(this + "  DELIST " + xaRes);
+//        SysLog.detail("DELIST", Arrays.asList("tx=", this, "xaRes=", xaRes));
         
         // Check status ACTIVE
         if (status != Status.STATUS_ACTIVE)
@@ -428,12 +420,10 @@ final class LightweightTransaction implements Transaction {
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.GENERIC,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("xaResource", xaRes),
-                        new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
-                        new BasicException.Parameter("transaction", toString())
-                    },
-                    "Transaction.delistFail"
+                    "Transaction.delistFail",
+                    new BasicException.Parameter("xaResource", xaRes),
+                    new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
+                    new BasicException.Parameter("transaction", toString())
                 )
             );
             return false;
@@ -442,7 +432,7 @@ final class LightweightTransaction implements Transaction {
         if (flag == XAResource.TMSUSPEND)
             suspendedResources.put(xaRes, xid);
         
-        //System.out.println("Delisted ok(" + this + ") = " + xaRes + " xid: " + xid);
+//        SysLog.detail("Delisted ok", Arrays.asList("tx=", this, "xaRes=", xaRes, "xid=", xid));
         
         return true;
         
@@ -465,7 +455,7 @@ final class LightweightTransaction implements Transaction {
     public boolean enlistResource(XAResource xaRes)
         throws RollbackException, IllegalStateException, SystemException {
         
-        //System.out.println(this + "  ENLIST " + xaRes);
+//        SysLog.detail("ENLIST", Arrays.asList("tx=", this, "xaRes=", xaRes));
         
         if (status == Status.STATUS_MARKED_ROLLBACK)
             throw new RollbackException();
@@ -500,7 +490,7 @@ final class LightweightTransaction implements Transaction {
             }
             branchXid = this.xidFactory.createTransactionBranchId(this.xid, branchCounter++);
             
-            //System.out.println(this + "  Creating new branch for " + xaRes);
+//            SysLog.detail("Creating new branch", Arrays.asList("tx=", this, "xaRes=", xaRes));
             
         } else {
             alreadyEnlisted = true;
@@ -516,7 +506,7 @@ final class LightweightTransaction implements Transaction {
         );
         
         try {
-            //System.out.println("Starting(" + this + ") = " + xaRes + " Branch: " + branchXid + " Flag: " + flag);
+//            SysLog.detail("STARTING", Arrays.asList("tx=", this, "xaRes=", xaRes, "branch=", branchXid, "flag=", flag));
             
             xaRes.start(branchXid, flag);
         } catch (XAException xaException) {
@@ -527,14 +517,12 @@ final class LightweightTransaction implements Transaction {
                 xaException,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("xaResource", xaRes),
-                    new BasicException.Parameter("xaErrorCode", getXAErrorCode(xaException)),
-                    new BasicException.Parameter("transaction", toString()),
-                    new BasicException.Parameter("branch", branchXid),
-                    new BasicException.Parameter("flag", getXAFlag(flag))
-                },
-                null
+                null,
+                new BasicException.Parameter("xaResource", xaRes),
+                new BasicException.Parameter("xaErrorCode", getXAErrorCode(xaException)),
+                new BasicException.Parameter("transaction", toString()),
+                new BasicException.Parameter("branch", branchXid),
+                new BasicException.Parameter("flag", getXAFlag(flag))
             );
         }
         
@@ -565,7 +553,7 @@ final class LightweightTransaction implements Transaction {
     public void rollback()
         throws SecurityException, IllegalStateException, SystemException {
         
-        //System.out.println(this + "  ROLLBACK ");
+//        SysLog.detail("ROLLBACK", Arrays.asList("tx=", this));
         
         // Check status ACTIVE
         if (status != Status.STATUS_ACTIVE && status != Status.STATUS_MARKED_ROLLBACK)
@@ -588,12 +576,10 @@ final class LightweightTransaction implements Transaction {
                         new BasicException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.GENERIC,
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("resourceManager", resourceManager),
-                                new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
-                                new BasicException.Parameter("transaction", toString())
-                            },
-                            "Transaction.rollbackFail"
+                            "Transaction.rollbackFail",
+                            new BasicException.Parameter("resourceManager", resourceManager),
+                            new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
+                            new BasicException.Parameter("transaction", toString())
                         ).appendCause(e)
                     )
                 );

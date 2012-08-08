@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ScriptControl.java,v 1.7 2008/05/02 16:19:05 wfro Exp $
+ * Name:        $Id: ScriptControl.java,v 1.8 2008/11/10 10:20:11 wfro Exp $
  * Description: ScriptControl 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/02 16:19:05 $
+ * Date:        $Date: 2008/11/10 10:20:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,14 +61,12 @@ public class ScriptControl extends Control {
     public ScriptControl(
         String id,
         String locale,
-        int localeAsIndex,
-        ControlFactory controlFactory        
+        int localeAsIndex
     ) {
         super(
             id,
             locale,
-            localeAsIndex,
-            controlFactory
+            localeAsIndex
         );
     }
 

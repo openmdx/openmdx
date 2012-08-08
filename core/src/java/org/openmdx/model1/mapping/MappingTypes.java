@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MappingTypes.java,v 1.12 2007/10/10 16:06:11 hburger Exp $
+ * Name:        $Id: MappingTypes.java,v 1.13 2008/11/11 15:40:46 wfro Exp $
  * Description: MappingTypes 
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:11 $
+ * Date:        $Date: 2008/11/11 15:40:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,6 @@ public class MappingTypes {
     //------------------------------------------------------------------------
     // openMDX 1 formats
     //------------------------------------------------------------------------
-    public static final String JMI_OPENMDX_1 = "jmi.openmdx-1";
     public static final String UML_OPENMDX_1 = "uml.openmdx-1";
     public static final String UML2_OPENMDX_1 = "uml2.openmdx-1";
     public static final String TOGETHER_OPENMDX_1 = "together.openmdx-1";

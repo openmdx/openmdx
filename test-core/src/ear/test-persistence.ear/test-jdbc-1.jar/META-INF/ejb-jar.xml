@@ -13,7 +13,7 @@
 			<env-entry>
 				<env-entry-name>KERNEL/exposedPath[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>xri:@openmdx:org.openmdx.test/provider/Generic</env-entry-value>
+				<env-entry-value>xri://@openmd*org.openmdx.test/provider/Generic</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/namespaceId</env-entry-name>
@@ -34,11 +34,6 @@
 				<env-entry-name>KERNEL/modelPackage[2]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>org:oasis_open</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[3]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:view1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
@@ -83,7 +78,7 @@
 			<env-entry>
 				<env-entry-name>PERSISTENCE/type[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>xri:@openmdx:org.openmdx.test/provider/:*/segment/:*/cb/:*/slb/:*</env-entry-value>
+				<env-entry-value>xri://@openmdx*org.openmdx.test/provider/($..)/segment/($..)/cb/($..)/slb/($..)</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>PERSISTENCE/dbObject[0]</env-entry-name>
@@ -124,7 +119,7 @@
 			<env-entry>
 				<env-entry-name>PERSISTENCE/pathMacroValue[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>xri:@openmdx:org.openmdx.test/provider/Sliced/segment/s0</env-entry-value>
+				<env-entry-value>xri://@openmdx*org.openmdx.test/provider/Sliced/segment/s0</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>PERSISTENCE/pathMacroName[1]</env-entry-name>
@@ -134,7 +129,7 @@
 			<env-entry>
 				<env-entry-name>PERSISTENCE/pathMacroValue[1]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>xri:@openmdx:org.openmdx.test/provider/Generic/segment/s0</env-entry-value>
+				<env-entry-value>xri://@openmdx*org.openmdx.test/provider/Generic/segment/s0</env-entry-value>
 			</env-entry>
 			<resource-ref>
 				<res-ref-name>jdbc/datasource[0]</res-ref-name>
@@ -152,7 +147,7 @@
 			<env-entry>
 				<env-entry-name>KERNEL/exposedPath[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>xri:@openmdx:org.openmdx.test/provider/Sliced</env-entry-value>
+				<env-entry-value>xri://@openmdx*org.openmdx.test/provider/Sliced</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/namespaceId</env-entry-name>
@@ -182,12 +177,7 @@
 			<env-entry>
 				<env-entry-name>KERNEL/modelPackage[2]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:oasis_open</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[3]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:view1</env-entry-value>
+				<env-entry-value>org:oasis-open</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
@@ -228,7 +218,7 @@
 			<env-entry>
 				<env-entry-name>PERSISTENCE/type[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>xri:@openmdx:org.openmdx.test/provider/:*/segment/:*/cb/:*/slb/:*</env-entry-value>
+				<env-entry-value>xri://@openmdx*org.openmdx.test/provider/($..)/segment/($..)/cb/($..)/slb/($..)</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>PERSISTENCE/dbObject[0]</env-entry-name>
@@ -254,7 +244,7 @@
 			<env-entry>
 				<env-entry-name>PERSISTENCE/type[1]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>xri:@openmdx:org.openmdx.test/provider/:*/segment/:*/cb/:*</env-entry-value>
+				<env-entry-value>xri://@openmdx*org.openmdx.test/provider/($..)/segment/($..)/cb/($..)</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>PERSISTENCE/dbObject[1]</env-entry-name>
@@ -311,7 +301,7 @@
 			<env-entry>
 				<env-entry-name>PERSISTENCE/pathMacroValue[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>xri:@openmdx:org.openmdx.test/provider/Sliced/segment/s0</env-entry-value>
+				<env-entry-value>xri://@openmdx*org.openmdx.test/provider/Sliced/segment/s0</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>PERSISTENCE/pathMacroName[1]</env-entry-name>
@@ -321,7 +311,7 @@
 			<env-entry>
 				<env-entry-name>PERSISTENCE/pathMacroValue[1]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>xri:@openmdx:org.openmdx.test/provider/Generic/segment/s0</env-entry-value>
+				<env-entry-value>xri://@openmdx*org.openmdx.test/provider/Generic/segment/s0</env-entry-value>
 			</env-entry>
 			<!-- string macros -->
 			<!-- 0 -->

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ProductImpl.java,v 1.2 2008/04/25 15:28:43 hburger Exp $
+ * Name:        $Id: ProductImpl.java,v 1.4 2008/11/14 10:25:10 hburger Exp $
  * Description: ProductImpl 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 15:28:43 $
+ * Date:        $Date: 2008/11/14 10:25:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,7 +53,6 @@ package org.openmdx.test.app1.aop2.standard;
 import java.math.BigDecimal;
 
 import javax.jdo.JDOFatalDataStoreException;
-import javax.jdo.JDOHelper;
 
 import org.openmdx.base.aop2.standard.AbstractObject;
 import org.openmdx.test.app1.jmi1.Product;
@@ -88,8 +87,9 @@ public class ProductImpl extends AbstractObject {
                 "PriceCalculator missing"
             );
         } else {
+            Product same = sameObject();
             return priceCalculator.getPrice(
-                sameObject().refMofId()
+                same.refMofId()
             );
         }
     }

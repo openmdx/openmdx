@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestJdbcDriverUrlProperties.java,v 1.4 2006/01/13 19:29:52 hburger Exp $
+ * Name:        $Id: TestJdbcDriverUrlProperties.java,v 1.5 2008/11/21 17:22:14 hburger Exp $
  * Description: JDBC URL Properties Test
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/01/13 19:29:52 $
+ * Date:        $Date: 2008/11/21 17:22:14 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,10 +52,8 @@
 package org.openmdx.test.kernel.application.deploy;
 
 import java.net.URL;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Map.Entry;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -156,11 +154,7 @@ public class TestJdbcDriverUrlProperties extends TestCase {
     protected String findDriver(
         String url
     ){
-        for(
-            Iterator i = this.mapping.entrySet().iterator();
-            i.hasNext();
-        ){
-            Map.Entry e = (Entry) i.next();
+        for(Map.Entry<Object,Object> e : this.mapping.entrySet()) {
             if(url.startsWith((String) e.getValue())) return (String) e.getKey();
         }
         return null;

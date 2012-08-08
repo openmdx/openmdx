@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ExtendedIOException.java,v 1.9 2005/02/21 13:07:59 hburger Exp $
+ * Name:        $Id: ExtendedIOException.java,v 1.11 2008/10/06 17:34:52 hburger Exp $
  * Description: Extended IO Exception 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/02/21 13:07:59 $
+ * Date:        $Date: 2008/10/06 17:34:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,12 +67,6 @@ public class ExtendedIOException
 {
 
     /**
-     * 
-     */
-    private static final long serialVersionUID = 3258132457529488434L;
-
-
-    /**
      * Constructor
      * 
      * @param cause
@@ -81,11 +75,18 @@ public class ExtendedIOException
         Exception cause
     ) {
         super();
-        this.exceptionStack = BasicException.toStackedException(
-            cause,
-            this
+        super.initCause(
+            BasicException.toStackedException(
+                cause,
+                this
+            )
         );
     }
+
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 4413080750191868008L;
 
 
     //------------------------------------------------------------------------
@@ -93,23 +94,15 @@ public class ExtendedIOException
     //------------------------------------------------------------------------
 
     /**
-     * @deprecated use getExceptionStack()
-     * 
-     * @return the StackedException wrapped by this object.
-     */
-    public final BasicException getStackedException (
-    ) {
-        return getExceptionStack();
-    }
-
-    /**
      * Return a StackedException, this exception object's cause.
      * 
      * @return the StackedException wrapped by this object.
+     * 
+     * @deprecated use getCause()
      */
     public BasicException getExceptionStack (
     ) {
-        return this.exceptionStack;
+        return getCause();
     }
 
     /**
@@ -119,9 +112,10 @@ public class ExtendedIOException
      */
     public String getExceptionDomain()
     {
-        return this.exceptionStack == null ? 
+        BasicException exceptionStack = getCause();
+        return exceptionStack == null ? 
             BasicException.Code.DEFAULT_DOMAIN : 
-            this.exceptionStack.getExceptionDomain();
+            exceptionStack.getExceptionDomain();
     }
 
     /**
@@ -131,9 +125,10 @@ public class ExtendedIOException
      */
     public int getExceptionCode()
     {
-        return this.exceptionStack == null ? 
+        BasicException exceptionStack = getCause();
+        return exceptionStack == null ? 
             BasicException.Code.GENERIC : 
-            this.exceptionStack.getExceptionCode();
+            exceptionStack.getExceptionCode();
     }
 
 	/**
@@ -150,16 +145,11 @@ public class ExtendedIOException
 	public BasicException getCause(
 	    String exceptionDomain
 	){
-        return this.exceptionStack == null ? 
+        BasicException exceptionStack = getCause();
+        return exceptionStack == null ? 
             null : 
-            this.exceptionStack.getCause(exceptionDomain);
+            exceptionStack.getCause(exceptionDomain);
 	}
-
-    /**
-     * The exception stack
-     */
-    private BasicException exceptionStack;
-         
 
     //------------------------------------------------------------------------
     // Extends Throwable
@@ -170,10 +160,11 @@ public class ExtendedIOException
      */
     public String getMessage(
     ){
-        return this.exceptionStack == null ?
+        BasicException exceptionStack = getCause();
+        return exceptionStack == null ?
             super.getMessage() : 
-            this.exceptionStack.getMessage() + ": " +
-            this.exceptionStack.getDescription();
+            exceptionStack.getMessage() + ": " +
+            exceptionStack.getDescription();
     }
     
     /**
@@ -184,35 +175,11 @@ public class ExtendedIOException
      * @return a multiline representation of this exception.
      */     
     public String toString(){
+        BasicException exceptionStack = getCause();
         return 
-            this.exceptionStack == null ?
+            exceptionStack == null ?
             super.toString() : 
-            super.toString() + '\n' + this.exceptionStack;
-    }
-
-    /**
-     * Initializes the cause of this throwable to the specified value. 
-     * (The cause is the throwable that caused this throwable to get thrown.) 
-     * 
-     * @param   cause
-     *          the cause (which is saved for later retrieval by the
-     *          getCause() method). (A null value is permitted, and indicates 
-     *          that the cause is nonexistent or unknown.) 
-     *
-     * @return      a reference to this RuntimeServiceException instance. 
-     *
-     * @exception   IllegalArgumentException
-     *              if cause is this throwable.
-     *              (A throwable cannot be its own cause.) 
-     * @exception   IllegalStateException
-     *              if the cause is already set.
-     */     
-    public Throwable initCause(
-        Throwable cause
-    ){
-        throw new IllegalStateException(
-            "An ExtendedIllegalArgumentException's cause can't be changed"
-        );
+            super.toString() + '\n' + exceptionStack;
     }
 
     /**
@@ -221,19 +188,20 @@ public class ExtendedIOException
      *
      * @return Throwable  The exception cause.
      */
-    public Throwable getCause(
+    public final BasicException getCause(
     ){
-        return this.exceptionStack;
+        return (BasicException) super.getCause();
     }
 
     /* (non-Javadoc)
      * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
      */
     public void printStackTrace(PrintStream s) {
-        if(this.exceptionStack == null){
+        BasicException exceptionStack = getCause();
+        if(exceptionStack == null){
             super.printStackTrace(s);
         } else {
-            this.exceptionStack.printStack(this, s, true);
+            exceptionStack.printStack(this, s, true);
         }
     }
 
@@ -241,10 +209,11 @@ public class ExtendedIOException
      * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
      */
     public void printStackTrace(PrintWriter s) {
-        if(this.exceptionStack == null){
+        BasicException exceptionStack = getCause();
+        if(exceptionStack == null){
             super.printStackTrace(s);
         } else {
-            this.exceptionStack.printStack(this, s, true);
+            exceptionStack.printStack(this, s, true);
         }
     }
 

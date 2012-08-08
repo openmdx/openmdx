@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Classes.java,v 1.15 2008/07/04 13:39:40 hburger Exp $
+ * Name:        $Id: Classes.java,v 1.17 2008/11/25 17:47:50 hburger Exp $
  * Description: Application Framework: Classes 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/04 13:39:40 $
+ * Date:        $Date: 2008/11/25 17:47:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -332,21 +332,44 @@ public class Classes
     }
 
     /**
-     * Retrieve the interfaces implemented by a given object instance
+     * Combine the interfaces
      * 
-     * @param object the instance
+     * @param append
+     * @param prepend
      * 
-     * @return the interfaces implemented by the given object instance
+     * @return the combined interfaces
      */
-    public static Set<Class<?>> combineInterfaces(
-        Object object,
+    public static Class<?>[] combineInterfaces(
+        Set<Class<?>> append,
         Class<?>... prepend
     ){
-        Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>(
-            Arrays.asList(prepend)
-        );
+        if(append.isEmpty()) {
+            return prepend;
+        } else {
+            Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>(
+                Arrays.asList(prepend)
+            );
+            interfaces.addAll(append);
+            return interfaces.toArray(
+                new Class<?>[interfaces.size()]
+            );
+            
+        }
+    }
+
+    /**
+     * Retrieve the interfaces implemented by an object class 
+     * 
+     * @param objectClass
+     * 
+     * @return the interfaces implemented by the given object class
+     */
+    public static Set<Class<?>> getInterfaces(
+        Class<?> objectClass
+    ){
+        Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
         for(
-            Class<?> currentClass = object.getClass();
+            Class<?> currentClass = objectClass;
             currentClass != null;
             currentClass = currentClass.getSuperclass()
         ){
@@ -356,7 +379,8 @@ public class Classes
         }
         return interfaces;
     }
-
+    
+    
     //------------------------------------------------------------------------
     // Instance Factory
     //------------------------------------------------------------------------

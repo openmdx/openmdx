@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Mapper_1.java,v 1.55 2008/06/28 00:21:25 hburger Exp $
+ * Name:        $Id: Mapper_1.java,v 1.59 2008/11/11 17:53:17 wfro Exp $
  * Description: Mapper_1
- * Revision:    $Revision: 1.55 $
+ * Revision:    $Revision: 1.59 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:25 $
+ * Date:        $Date: 2008/11/11 17:53:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -98,8 +98,8 @@ import org.openmdx.model1.mapping.plugin.StandardObjectRepositoryMetadataPlugin;
 
 //---------------------------------------------------------------------------
 public class Mapper_1
-    extends AbstractMapper_1 
-    implements Mapper_1_1
+extends AbstractMapper_1 
+implements Mapper_1_1
 {
 
     //---------------------------------------------------------------------------  
@@ -130,21 +130,19 @@ public class Mapper_1
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ACTIVATION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("format", MappingTypes.JDO2),
-                        new BasicException.Parameter("packageSuffix", packageSuffix),
-                        new BasicException.Parameter("fileExtension", fileExtension),
-                        new BasicException.Parameter("plugIn", plugIn),
-                    },
-                    "Could not load object repository metadata plugin"
+                    "Could not load object repository metadata plugin",
+                    new BasicException.Parameter("format", MappingTypes.JDO2),
+                    new BasicException.Parameter("packageSuffix", packageSuffix),
+                    new BasicException.Parameter("fileExtension", fileExtension),
+                    new BasicException.Parameter("plugIn", plugIn)
                 );
             }
         } else {
             this.format = 
                 MappingTypes.CCI2.equals(mappingFormat) ? Format.CCI2 :
-                MappingTypes.JMI1.equals(mappingFormat) ? Format.JMI1 :
-                MappingTypes.JDO2.equals(mappingFormat) ? Format.JDO2 :
-                null;
+                    MappingTypes.JMI1.equals(mappingFormat) ? Format.JMI1 :
+                        MappingTypes.JDO2.equals(mappingFormat) ? Format.JDO2 :
+                            null;
             this.objectRepositoryMetadataPlugin = new StandardObjectRepositoryMetadataPlugin();
         }
     }
@@ -178,13 +176,12 @@ public class Mapper_1
         this.processedAttributes.add(attributeDef);
         try {
             if(
-                this.format == Format.JDO2 ||
-                VisibilityKind.PUBLIC_VIS.equals(attributeDef.values("visibility").get(0))
+                    this.format == Format.JDO2 ||
+                    VisibilityKind.PUBLIC_VIS.equals(attributeDef.values("visibility").get(0))
             ) {    
                 AttributeDef mAttributeDef = new AttributeDef(
                     attributeDef,
-                    this.model,
-                    false // openmdx1
+                    this.model
                 );       
                 ClassDef mClassDef = new ClassDef(
                     classDef,
@@ -196,8 +193,8 @@ public class Mapper_1
                 // setter/getter interface only if modelAttribute.container = modelClass. 
                 // Otherwise inherit from super interfaces.
                 if(
-                    this.format == Format.JDO2 ||
-                    attributeDef.values("container").get(0).equals(classDef.path())
+                        this.format == Format.JDO2 ||
+                        attributeDef.values("container").get(0).equals(classDef.path())
                 ){
                     // query interface
                     if(queryMapper != null) {
@@ -366,10 +363,10 @@ public class Mapper_1
         DataproviderObject association = (DataproviderObject)this.model.getElement(
             referencedEnd.values("container").get(0)
         );
-        
+
         SysLog.trace("referencedEnd", referencedEnd);
         SysLog.trace("association", association);
-        
+
         // setter/getter interface only if modelAttribute.container = modelClass. 
         // Otherwise inherit from super interfaces.
         boolean includeInClass = 
@@ -400,8 +397,8 @@ public class Mapper_1
                 String newMultiplicity = 
                     qualifierTypes.size() == 1 && 
                     PrimitiveTypes.STRING.equals(((Path)qualifierTypes.get(0)).getBase()) ? 
-                    Multiplicities.MAP : 
-                    Multiplicities.MULTI_VALUE;
+                        Multiplicities.MAP : 
+                            Multiplicities.MULTI_VALUE;
                 SysLog.trace("Adjust multiplicity to " + Multiplicities.MULTI_VALUE, newMultiplicity);
                 // 0..n association        
                 // set multiplicity to 0..n, this ensures that the instance creator uses
@@ -442,22 +439,22 @@ public class Mapper_1
                     // JDO fields for references stored as attributes
                     //
                     if(
-                        includeInClass && 
-                        this.format == Format.JDO2 &&
-                        !instanceMapper.isTransient(mReferenceDef)
+                            includeInClass && 
+                            this.format == Format.JDO2 &&
+                            !instanceMapper.isTransient(mReferenceDef)
                     ){
                         if(qualifierNames.isEmpty()) {
                             if(
-                                Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ||
-                                Multiplicities.SINGLE_VALUE.equals(multiplicity)
+                                    Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ||
+                                    Multiplicities.SINGLE_VALUE.equals(multiplicity)
                             ){
                                 jdoMetaDataMapper.mapReference(mReferenceDef);
                                 ormMetaDataMapper.mapReference(mReferenceDef);
                             } else if(
-                                Multiplicities.LIST.equals(multiplicity) ||
-                                Multiplicities.SET.equals(multiplicity) ||
-                                Multiplicities.MULTI_VALUE.equals(multiplicity) ||
-                                Multiplicities.SPARSEARRAY.equals(multiplicity)
+                                    Multiplicities.LIST.equals(multiplicity) ||
+                                    Multiplicities.SET.equals(multiplicity) ||
+                                    Multiplicities.MULTI_VALUE.equals(multiplicity) ||
+                                    Multiplicities.SPARSEARRAY.equals(multiplicity)
                             ){
                                 jdoSliceMetaDataMapper.mapReference(mReferenceDef);
                                 ormSliceMetaDataMapper.mapReference(mReferenceDef);
@@ -538,15 +535,15 @@ public class Mapper_1
                         // qualifier is optional if not complex
                         //
                         if(
-                            includeInClass &&
-                            instanceMapper != null
+                                includeInClass &&
+                                instanceMapper != null
                         ){
                             if(this.model.referenceIsStoredAsAttribute(referenceDef)) {
                                 instanceMapper.mapReferenceGet0_nNoQuery(mReferenceDef, inherited);                  
                             } else {
                                 if(
-                                    this.format == Format.JDO2 &&
-                                    !instanceMapper.isTransient(mReferenceDef)
+                                        this.format == Format.JDO2 &&
+                                        !instanceMapper.isTransient(mReferenceDef)
                                 ) {
                                     jdoMetaDataMapper.mapReference(mReferenceDef);
                                     ormMetaDataMapper.mapReference(mReferenceDef);
@@ -585,11 +582,9 @@ public class Mapper_1
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.ASSERTION_FAILURE,
-                                new BasicException.Parameter[]{
-                                    new BasicException.Parameter("reference", referenceDef.path()),
-                                    new BasicException.Parameter("qualifier", qualifierNames.get(0))
-                                },
-                                "reference with non-primitive, ambiguous qualifier cannot be stored as attribute"
+                                "reference with non-primitive, ambiguous qualifier cannot be stored as attribute",
+                                new BasicException.Parameter("reference", referenceDef.path()),
+                                new BasicException.Parameter("qualifier", qualifierNames.get(0))
                             );
                         }
                     }  
@@ -649,8 +644,7 @@ public class Mapper_1
             try {
                 OperationDef mOperationDef = new OperationDef(
                     operationDef,
-                    this.model, 
-                    false // openmdx1
+                    this.model 
                 );
                 if(includeInClass) {
                     instanceMapper.mapOperation(mOperationDef);
@@ -748,20 +742,19 @@ public class Mapper_1
         List<AttributeDef> allAttributes = new ArrayList<AttributeDef>();
         List<AttributeDef> requiredAttributes = new ArrayList<AttributeDef>();
         for(
-            Iterator<ModelElement_1_0> i = this.processedAttributes.iterator();
-            i.hasNext();
+                Iterator<ModelElement_1_0> i = this.processedAttributes.iterator();
+                i.hasNext();
         ) {
             ModelElement_1_0 attributeDef = i.next();
             // attribute member of class, non-derived and public
             if(
-                ((supertypeDef == null) || !supertypeDef.values("feature").contains(attributeDef.path())) &&
-                !((Boolean)attributeDef.values("isDerived").get(0)).booleanValue() &&
-                VisibilityKind.PUBLIC_VIS.equals(attributeDef.values("visibility").get(0))
+                    ((supertypeDef == null) || !supertypeDef.values("feature").contains(attributeDef.path())) &&
+                    !((Boolean)attributeDef.values("isDerived").get(0)).booleanValue() &&
+                    VisibilityKind.PUBLIC_VIS.equals(attributeDef.values("visibility").get(0))
             ) {
                 AttributeDef att = new AttributeDef(
                     attributeDef,
-                    this.model,
-                    false // openmdx1
+                    this.model
                 );
                 allAttributes.add(att);
                 // required attribute
@@ -824,26 +817,25 @@ public class Mapper_1
             List<StructuralFeatureDef> structuralFeatures = new ArrayList<StructuralFeatureDef>();
             List<OperationDef> operations = new ArrayList<OperationDef>();
             for(
-                Iterator<?> i = classDef.values("feature").iterator();
-                i.hasNext();
+                    Iterator<?> i = classDef.values("feature").iterator();
+                    i.hasNext();
             ) {
                 ModelElement_1_0 feature = this.model.getElement(i.next());
                 if(
-                    VisibilityKind.PUBLIC_VIS.equals(feature.values("visibility").get(0))
+                        VisibilityKind.PUBLIC_VIS.equals(feature.values("visibility").get(0))
                 ) {
                     if(
-                        feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE)
+                            feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE)
                     ) {
                         structuralFeatures.add(
                             new AttributeDef(
                                 feature, 
-                                this.model,
-                                false // openmdx1
+                                this.model
                             )
                         );
                     }
                     else if(
-                        feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)
+                            feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)
                     ) {
                         ModelElement_1_0 referencedEnd = this.model.getElement(
                             feature.values("referencedEnd").get(0)
@@ -852,26 +844,24 @@ public class Mapper_1
                         // skip references for which a qualifier exists and the qualifier is
                         // not a primitive type
                         if(
-                            qualifierTypes.isEmpty() ||
-                            this.model.isPrimitiveType(qualifierTypes.get(0))
+                                qualifierTypes.isEmpty() ||
+                                this.model.isPrimitiveType(qualifierTypes.get(0))
                         ) {
                             structuralFeatures.add(
                                 new ReferenceDef(
                                     feature,
-                                    model, 
-                                    false // openmdx1
+                                    this.model 
                                 )
                             );
                         }
                     }
                     else if(
-                        feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION)
+                            feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION)
                     ) {
                         operations.add(
                             new OperationDef(
                                 feature,
-                                this.model, 
-                                false // openmdx1
+                                this.model 
                             )
                         );
                     }
@@ -881,8 +871,8 @@ public class Mapper_1
         boolean classIsAbstract = ((Boolean)classDef.values("isAbstract").get(0)).booleanValue();
         try {
             if (
-                this.format == Format.JMI1 &&
-                !classIsAbstract
+                    this.format == Format.JMI1 &&
+                    !classIsAbstract
             ) {  
                 // standard creators
                 mapObjectCreator(
@@ -894,12 +884,11 @@ public class Mapper_1
                 SysLog.trace("creators for", classDef.path());
                 SysLog.trace("supertypes", classDef.values("allSupertype"));
                 for(
-                    Iterator<?> i = classDef.values("allSupertype").iterator();
-                    i.hasNext();
+                        Iterator<?> i = classDef.values("allSupertype").iterator();
+                        i.hasNext();
                 ) {
                     ModelElement_1_0 supertype = this.model.getDereferencedType(
-                        i.next(),
-                        false // openmdx1
+                        i.next()
                     );
                     if(!supertype.path().equals(classDef.path())) {
                         SysLog.trace("creating", supertype.path());
@@ -996,8 +985,7 @@ public class Mapper_1
         try {
             AttributeDef mStructureFieldDef = new AttributeDef(
                 structureFieldDef,
-                this.model,
-                false // openmdx1
+                this.model
             );
             StructDef mStructDef = new StructDef(
                 classDef,
@@ -1157,9 +1145,9 @@ public class Mapper_1
      * @throws ServiceException
      */
     public void externalize(
-      String qualifiedPackageName,
-      org.openmdx.model1.accessor.basic.cci.Model_1_3 model,
-      ZipOutputStream os
+        String qualifiedPackageName,
+        org.openmdx.model1.accessor.basic.cci.Model_1_3 model,
+        ZipOutputStream os
     ) throws ServiceException {
         externalize(
             qualifiedPackageName,
@@ -1192,14 +1180,10 @@ public class Mapper_1
         String openmdxjdoMetadataDirectory
     ) throws ServiceException {
 
-        SysLog.trace("starting...");
-
+        SysLog.trace("Exporting", qualifiedPackageName);
         super.model = model;
         this.metaData = new MetaData_2(openmdxjdoMetadataDirectory);
-
         List<ModelElement_1_0> packagesToExport = this.getMatchingPackages(qualifiedPackageName);
-        SysLog.detail("exporting packages " + packagesToExport);
-
         final boolean jmi1 = this.format == Format.JMI1;
         final boolean cci2 = this.format == Format.CCI2;
         final boolean jdo2 = this.format == Format.JDO2;
@@ -1227,11 +1211,10 @@ public class Mapper_1
             CharArrayWriter jdoSliceMetaDataWriter = jdo2 ? new CharArrayWriter() : null;
             CharArrayWriter ormSliceMetaDataWriter = jdo2 ? new CharArrayWriter() : null;
             Writer structWriter = jdo2 ? null : new OutputStreamWriter(structFile);
-
-            // export matching packages
+            // Export matching packages
             for(
-                    Iterator<ModelElement_1_0> pkgs = packagesToExport.iterator(); 
-                    pkgs.hasNext();
+                Iterator<ModelElement_1_0> pkgs = packagesToExport.iterator(); 
+                pkgs.hasNext();
             ) {
                 ModelElement_1_0 currentPackage = pkgs.next();
                 String currentPackageName = (String)currentPackage.values("qualifiedName").get(0);
@@ -1320,169 +1303,169 @@ public class Mapper_1
                                             this.packageSuffix,
                                             this.metaData
                                         ) : null;
-                                        InstanceMapper instanceMapper = new InstanceMapper(
-                                            element, 
-                                            instanceWriter, 
-                                            getModel(), 
-                                            this.format, 
-                                            this.packageSuffix,
-                                            this.metaData
-                                        );
-                                        InterfaceMapper interfaceMapper = jdo2 && instanceMapper.hasSPI() ? new InterfaceMapper(
-                                            element, 
-                                            interfaceWriter, 
-                                            getModel(), 
-                                            Format.SPI2,
-                                            Names.SPI2_PACKAGE_SUFFIX,
-                                            this.metaData
-                                        ) : null;
-                                        MetaDataMapper jdoMetaDataMapper = jdo2 ? new MetaDataMapper(
-                                            element, 
-                                            jdoMetaDataWriter, 
-                                            getModel(), 
-                                            this.format, 
-                                            this.packageSuffix,
-                                            null, // innerClass
-                                            false, // orm
-                                            this.metaData, new StandardObjectRepositoryMetadataPlugin()
-                                        ) : null;
-                                        MetaDataMapper jdoSliceMetaDataMapper = jdo2 ? new MetaDataMapper(
-                                            element, 
-                                            jdoSliceMetaDataWriter, 
-                                            getModel(), 
-                                            this.format, 
-                                            this.packageSuffix,
-                                            InstanceMapper.SLICE_CLASS_NAME, 
-                                            false, // orm
-                                            this.metaData, new StandardObjectRepositoryMetadataPlugin()
-                                        ) : null;
-                                        MetaDataMapper ormMetaDataMapper = jdo2 ? new MetaDataMapper(
-                                            element, 
-                                            ormMetaDataWriter, 
-                                            getModel(), 
-                                            this.format, 
-                                            this.packageSuffix,
-                                            null, // innerClass
-                                            true, // orm
-                                            this.metaData, new StandardObjectRepositoryMetadataPlugin()
-                                        ) : null;
-                                        MetaDataMapper ormSliceMetaDataMapper = jdo2 ? new MetaDataMapper(
-                                            element, 
-                                            ormSliceMetaDataWriter, 
-                                            getModel(), 
-                                            this.format, 
-                                            this.packageSuffix,
-                                            InstanceMapper.SLICE_CLASS_NAME, 
-                                            true, // orm
-                                            this.metaData, new StandardObjectRepositoryMetadataPlugin()
-                                        ) : null;
-                                        QueryMapper queryMapper = cci2 ? new QueryMapper(
-                                            queryWriter, 
-                                            getModel(), 
-                                            this.format, 
-                                            this.packageSuffix, this.metaData
-                                        ) : null;
-                                        this.mapBeginClass(
-                                            element,
-                                            classMapper,
-                                            instanceMapper, 
-                                            interfaceMapper,
-                                            jdoMetaDataMapper, 
-                                            jdoSliceMetaDataMapper, 
-                                            ormMetaDataMapper, 
-                                            ormSliceMetaDataMapper
-                                        );                
-                                        this.mapBeginQuery(
-                                            mClassDef,
-                                            queryMapper
-                                        );                
-                                        // get class features
-                                        for(Object f : getFeatures(element, instanceMapper, false)) {
-                                            ModelElement_1_0 feature = f instanceof ModelElement_1_0 ? 
-                                                (ModelElement_1_0) f :
-                                                    getModel().getElement(f);  
-                                                SysLog.trace("processing class feature", feature.path());
+                                            InstanceMapper instanceMapper = new InstanceMapper(
+                                                element, 
+                                                instanceWriter, 
+                                                getModel(), 
+                                                this.format, 
+                                                this.packageSuffix,
+                                                this.metaData
+                                            );
+                                            InterfaceMapper interfaceMapper = jdo2 && instanceMapper.hasSPI() ? new InterfaceMapper(
+                                                element, 
+                                                interfaceWriter, 
+                                                getModel(), 
+                                                Format.SPI2,
+                                                Names.SPI2_PACKAGE_SUFFIX,
+                                                this.metaData
+                                            ) : null;
+                                                MetaDataMapper jdoMetaDataMapper = jdo2 ? new MetaDataMapper(
+                                                    element, 
+                                                    jdoMetaDataWriter, 
+                                                    getModel(), 
+                                                    this.format, 
+                                                    this.packageSuffix,
+                                                    null, // innerClass
+                                                    false, // orm
+                                                    this.metaData, new StandardObjectRepositoryMetadataPlugin()
+                                                ) : null;
+                                                    MetaDataMapper jdoSliceMetaDataMapper = jdo2 ? new MetaDataMapper(
+                                                        element, 
+                                                        jdoSliceMetaDataWriter, 
+                                                        getModel(), 
+                                                        this.format, 
+                                                        this.packageSuffix,
+                                                        InstanceMapper.SLICE_CLASS_NAME, 
+                                                        false, // orm
+                                                        this.metaData, new StandardObjectRepositoryMetadataPlugin()
+                                                    ) : null;
+                                                        MetaDataMapper ormMetaDataMapper = jdo2 ? new MetaDataMapper(
+                                                            element, 
+                                                            ormMetaDataWriter, 
+                                                            getModel(), 
+                                                            this.format, 
+                                                            this.packageSuffix,
+                                                            null, // innerClass
+                                                            true, // orm
+                                                            this.metaData, new StandardObjectRepositoryMetadataPlugin()
+                                                        ) : null;
+                                                            MetaDataMapper ormSliceMetaDataMapper = jdo2 ? new MetaDataMapper(
+                                                                element, 
+                                                                ormSliceMetaDataWriter, 
+                                                                getModel(), 
+                                                                this.format, 
+                                                                this.packageSuffix,
+                                                                InstanceMapper.SLICE_CLASS_NAME, 
+                                                                true, // orm
+                                                                this.metaData, new StandardObjectRepositoryMetadataPlugin()
+                                                            ) : null;
+                                                                QueryMapper queryMapper = cci2 ? new QueryMapper(
+                                                                    queryWriter, 
+                                                                    getModel(), 
+                                                                    this.format, 
+                                                                    this.packageSuffix, this.metaData
+                                                                ) : null;
+                                                                    this.mapBeginClass(
+                                                                        element,
+                                                                        classMapper,
+                                                                        instanceMapper, 
+                                                                        interfaceMapper,
+                                                                        jdoMetaDataMapper, 
+                                                                        jdoSliceMetaDataMapper, 
+                                                                        ormMetaDataMapper, 
+                                                                        ormSliceMetaDataMapper
+                                                                    );                
+                                                                    this.mapBeginQuery(
+                                                                        mClassDef,
+                                                                        queryMapper
+                                                                    );                
+                                                                    // get class features
+                                                                    for(Object f : getFeatures(element, instanceMapper, false)) {
+                                                                        ModelElement_1_0 feature = f instanceof ModelElement_1_0 ? 
+                                                                            (ModelElement_1_0) f :
+                                                                                getModel().getElement(f);  
+                                                                            SysLog.trace("processing class feature", feature.path());
 
-                                                if(feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE)) {
-                                                    this.mapAttribute(
-                                                        element,
-                                                        feature,
-                                                        queryMapper,
-                                                        instanceMapper, 
-                                                        jdoMetaDataMapper, 
-                                                        jdoSliceMetaDataMapper, 
-                                                        ormMetaDataMapper, 
-                                                        ormSliceMetaDataMapper
-                                                    );
-                                                } else if(feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)) {
-                                                    this.mapReference(
-                                                        element,
-                                                        feature,
-                                                        queryMapper,
-                                                        instanceMapper, 
-                                                        jdoMetaDataMapper, 
-                                                        jdoSliceMetaDataMapper, 
-                                                        ormMetaDataMapper, 
-                                                        ormSliceMetaDataMapper, 
-                                                        false // inherited
-                                                    );
-                                                } else if(feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION)) {
-                                                    this.mapOperation(
-                                                        element,
-                                                        feature,
-                                                        instanceMapper, 
-                                                        jdoMetaDataMapper, 
-                                                        jdoMetaDataMapper, 
-                                                        jdoSliceMetaDataMapper
-                                                    );
-                                                }
-                                        }                
-                                        this.mapEndQuery(
-                                            queryMapper
-                                        );                
-                                        this.mapEndClass(
-                                            element,
-                                            classMapper,
-                                            instanceMapper, 
-                                            interfaceMapper,
-                                            jdoMetaDataMapper, 
-                                            jdoSliceMetaDataMapper, 
-                                            ormMetaDataMapper, 
-                                            ormSliceMetaDataMapper
-                                        );                
-                                        instanceWriter.flush();
-                                        String elementName = instanceMapper.getClassName();
-                                        //                                    Identifier.CLASS_PROXY_NAME.toIdentifier(
-                                        //                                        (String)element.values("name").get(0)
-                                        //                                    );
-                                        this.addToZip(zip, instanceFile, element, elementName, "." + this.fileExtension);                
-                                        if(jdo2){
-                                            jdoMetaDataWriter.flush();
-                                            this.addToZip(zip, jdoMetaDataFile, element, elementName, ".jdo");
-                                            ormMetaDataWriter.flush();
-                                            this.addToZip(zip, ormMetaDataFile, element, elementName, "-" + this.objectRepositoryMetadataPlugin.getMappingName() + ".orm");
-                                            if(interfaceMapper != null ){
-                                                interfaceWriter.flush();
-                                                this.addToZip(
-                                                    zip,
-                                                    interfaceFile,
-                                                    element,
-                                                    elementName,
-                                                    "." + this.fileExtension,
-                                                    true, 
-                                                    Names.SPI2_PACKAGE_SUFFIX
-                                                );
-                                            }
-                                        }                
-                                        if(cci2) {
-                                            queryWriter.flush();
-                                            this.addToZip(zip, queryFile, element, elementName, "Query." + this.fileExtension);
-                                        }
+                                                                            if(feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ATTRIBUTE)) {
+                                                                                this.mapAttribute(
+                                                                                    element,
+                                                                                    feature,
+                                                                                    queryMapper,
+                                                                                    instanceMapper, 
+                                                                                    jdoMetaDataMapper, 
+                                                                                    jdoSliceMetaDataMapper, 
+                                                                                    ormMetaDataMapper, 
+                                                                                    ormSliceMetaDataMapper
+                                                                                );
+                                                                            } else if(feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.REFERENCE)) {
+                                                                                this.mapReference(
+                                                                                    element,
+                                                                                    feature,
+                                                                                    queryMapper,
+                                                                                    instanceMapper, 
+                                                                                    jdoMetaDataMapper, 
+                                                                                    jdoSliceMetaDataMapper, 
+                                                                                    ormMetaDataMapper, 
+                                                                                    ormSliceMetaDataMapper, 
+                                                                                    false // inherited
+                                                                                );
+                                                                            } else if(feature.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.OPERATION)) {
+                                                                                this.mapOperation(
+                                                                                    element,
+                                                                                    feature,
+                                                                                    instanceMapper, 
+                                                                                    jdoMetaDataMapper, 
+                                                                                    jdoMetaDataMapper, 
+                                                                                    jdoSliceMetaDataMapper
+                                                                                );
+                                                                            }
+                                                                    }                
+                                                                    this.mapEndQuery(
+                                                                        queryMapper
+                                                                    );                
+                                                                    this.mapEndClass(
+                                                                        element,
+                                                                        classMapper,
+                                                                        instanceMapper, 
+                                                                        interfaceMapper,
+                                                                        jdoMetaDataMapper, 
+                                                                        jdoSliceMetaDataMapper, 
+                                                                        ormMetaDataMapper, 
+                                                                        ormSliceMetaDataMapper
+                                                                    );                
+                                                                    instanceWriter.flush();
+                                                                    String elementName = instanceMapper.getClassName();
+                                                                    //                                    Identifier.CLASS_PROXY_NAME.toIdentifier(
+                                                                    //                                        (String)element.values("name").get(0)
+                                                                    //                                    );
+                                                                    this.addToZip(zip, instanceFile, element, elementName, "." + this.fileExtension);                
+                                                                    if(jdo2){
+                                                                        jdoMetaDataWriter.flush();
+                                                                        this.addToZip(zip, jdoMetaDataFile, element, elementName, ".jdo");
+                                                                        ormMetaDataWriter.flush();
+                                                                        this.addToZip(zip, ormMetaDataFile, element, elementName, "-" + this.objectRepositoryMetadataPlugin.getMappingName() + ".orm");
+                                                                        if(interfaceMapper != null ){
+                                                                            interfaceWriter.flush();
+                                                                            this.addToZip(
+                                                                                zip,
+                                                                                interfaceFile,
+                                                                                element,
+                                                                                elementName,
+                                                                                "." + this.fileExtension,
+                                                                                true, 
+                                                                                Names.SPI2_PACKAGE_SUFFIX
+                                                                            );
+                                                                        }
+                                                                    }                
+                                                                    if(cci2) {
+                                                                        queryWriter.flush();
+                                                                        this.addToZip(zip, queryFile, element, elementName, "Query." + this.fileExtension);
+                                                                    }
 
-                                        if(jmi1 && !isAbstract) {
-                                            classWriter.flush();
-                                            this.addToZip(zip, classFile, element, elementName, "Class." + this.fileExtension);
-                                        } 
+                                                                    if(jmi1 && !isAbstract) {
+                                                                        classWriter.flush();
+                                                                        this.addToZip(zip, classFile, element, elementName, "Class." + this.fileExtension);
+                                                                    } 
                                     }
                                 }
                             }
@@ -1574,7 +1557,7 @@ public class Mapper_1
                             }
                             // org:omg:model1:Exception
                             else if(
-                                    element.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.EXCEPTION)
+                                element.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.EXCEPTION)
                             ) {   
                                 SysLog.trace("processing exception", element.path());
                                 if(!jdo2) {  
@@ -1697,23 +1680,23 @@ public class Mapper_1
             String[] components = packageName.split(":");
             StringBuilder resource = new StringBuilder();
             for(
-                 int i = 0;
-                 i < components.length;
-                 i++
+                    int i = 0;
+                    i < components.length;
+                    i++
             ){
                 resource.append(
                     i == 0 ? "" :
-                    i == components.length - 1 ? "/xmi1/" :
-                    "/"
+                        i == components.length - 1 ? "/xmi1/" :
+                            "/"
                 ).append(
                     components[i]
                 );
-                
+
             }
             return artifactIsInArchive(resource.append(".xml"));
         }
     }
-    
+
     /**
      * Test whether the given JDO metadata is in an archive
      * 
@@ -1730,18 +1713,18 @@ public class Mapper_1
             String[] components = className.split(":");
             StringBuilder resource = new StringBuilder();
             for(
-                 int i = 0;
-                 i < components.length;
-                 i++
+                    int i = 0;
+                    i < components.length;
+                    i++
             ){
                 resource.append(
                     i == 0 ? "" :
-                    i == components.length - 1 ? "/jdo2/" :
-                    "/"
+                        i == components.length - 1 ? "/jdo2/" :
+                            "/"
                 ).append(
                     components[i]
                 );
-                
+
             }
             return artifactIsInArchive(resource.append(".jdo"));
         }
@@ -1776,7 +1759,7 @@ public class Mapper_1
     private final static Collection<String> EXCLUDED_PACKAGES = Arrays.asList(
         "org:omg:PrimitiveTypes:PrimitiveTypes" // due to a conflict between jmi and jmi1 
     );
-    
+
     /**
      * Classes not to be processed
      */
@@ -1786,12 +1769,12 @@ public class Mapper_1
      * 
      */
     private MetaData_1_0 metaData;
-    
+
     /**
      * 
      */
     private final ObjectRepositoryMetadataPlugin objectRepositoryMetadataPlugin;
-    
+
 }
 
 //--- End of File -----------------------------------------------------------

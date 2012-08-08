@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: AbstractPersistenceManager.jt,v 1.4 2008/06/05 17:43:44 hburger Exp $
+ * Name:        $Id: AbstractPersistenceManager.jt,v 1.5 2008/11/07 18:57:19 hburger Exp $
  * Description: Abstract PersistenceManager
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/05 17:43:44 $
+ * Date:        $Date: 2008/11/07 18:57:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,9 +51,9 @@ package org.openmdx.base.object.spi;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.jdo.Extent;
 import javax.jdo.JDOException;
@@ -127,7 +127,7 @@ public abstract class AbstractPersistenceManager
     /**
      * 
      */
-    private final Map<Object,Object> userObjects = new HashMap<Object,Object>();
+    private final ConcurrentMap<Object,Object> userObjects = new ConcurrentHashMap<Object,Object>();
 
     /**
      * Provide the instance life-cycle notifier
@@ -668,14 +668,14 @@ public abstract class AbstractPersistenceManager
      * @see javax.jdo.PersistenceManager#setUserObject(java.lang.Object)
      */
     public void setUserObject(Object o) {
-        putUserObject(null, o);
+        this.userObjects.put(null, o);
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getUserObject()
      */
     public Object getUserObject() {
-        return getUserObject(null);
+        return this.userObjects.get(null);
     }
 
     /* (non-Javadoc)

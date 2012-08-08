@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2004-2007 QOS.ch
+ * Copyright (c) 2004-2008 QOS.ch
  * All rights reserved.
  * 
  * Permission is hereby granted, free  of charge, to any person obtaining
@@ -37,34 +37,23 @@ import java.util.Vector;
 import org.slf4j.Marker;
 
 /**
- * An almost trivial implementation of the {@link Marker} interface.
- * 
- * <p>
- * <code>BasicMarker</code> lets users specify marker information. However, it
- * does not offer any useful operations on that information.
- * 
- * <p>
- * Simple logging systems which ignore marker data, just return instances of
- * this class in order to conform to the SLF4J API.
+ * A simple implementation of the {@link Marker} interface.
  * 
  * @author Ceki G&uuml;lc&uuml;
  * @author Joern Huxhorn
- * ______________________________________________________________________
- *
- * Copyright (c) 2007, OMEX AG, Switzerland
- * All rights reserved.
- * 
- * JAVA 5 support added
  */
 public class BasicMarker implements Marker {
 
   private static final long serialVersionUID = 1803952589649545191L;
 
-  final String name;
-  List<Marker> children;
-  final static private List<Marker> NO_CHILDREN = Collections.emptyList();
+  private final String name;
+  private List<Marker> referenceList;
+  private static final List<Marker> NO_REFERENCES = Collections.emptyList();
 
   BasicMarker(String name) {
+    if (name == null) {
+      throw new IllegalArgumentException("A merker name cannot be null");
+    }
     this.name = name;
   }
 
@@ -72,49 +61,56 @@ public class BasicMarker implements Marker {
     return name;
   }
 
-  public synchronized void add(Marker child) {
-    if (child == null) {
-      throw new NullPointerException(
-          "Null children cannot be added to a Marker.");
-    }
-    if (children == null) {
-      children = new Vector<Marker>();
+  public synchronized void add(Marker reference) {
+    if (reference == null) {
+      throw new IllegalArgumentException(
+          "A null value cannot be added to a Marker as reference.");
     }
 
-    // no point in adding the child multiple times
-    if (children.contains(child)) {
+    // no point in adding the reference multiple times
+    if (this.contains(reference)) {
+      return;
+
+    } else if (reference.contains(this)) { // avoid recursion
+      // a potential reference should not its future "parent" as a reference
       return;
     } else {
-      // add the child
-      children.add(child);
+      // let's add the reference
+      if (referenceList == null) {
+        referenceList = new Vector<Marker>();
+      }
+      referenceList.add(reference);
     }
 
   }
 
-  public synchronized boolean hasChildren() {
-    return ((children != null) && (children.size() > 0));
+  public synchronized boolean hasReferences() {
+    return ((referenceList != null) && (referenceList.size() > 0));
+  }
+  
+  public boolean hasChildren() {
+    return hasReferences();
   }
 
   public synchronized Iterator<Marker> iterator() {
-      return (
-         children == null ? NO_CHILDREN : children
-      ).iterator();
+    return (
+        referenceList == null ? NO_REFERENCES : referenceList
+    ).iterator();
   }
 
-  public synchronized boolean remove(Marker markerToRemove) {
-    if (children == null) {
+  public synchronized boolean remove(Marker referenceToRemove) {
+    if (referenceList == null) {
       return false;
     }
 
-    int size = children.size();
+    int size = referenceList.size();
     for (int i = 0; i < size; i++) {
-      Marker m = children.get(i);
-      if (m == markerToRemove) {
-        children.remove(i);
+      Marker m = referenceList.get(i);
+      if (referenceToRemove.equals(m)) {
+        referenceList.remove(i);
         return true;
       }
     }
-    // could not find markerToRemove
     return false;
   }
 
@@ -123,14 +119,14 @@ public class BasicMarker implements Marker {
       throw new IllegalArgumentException("Other cannot be null");
     }
 
-    if (this == other) {
+    if (this.equals(other)) {
       return true;
     }
 
-    if (hasChildren()) {
-      for (int i = 0; i < children.size(); i++) {
-        Marker child = children.get(i);
-        if (child.contains(other)) {
+    if (hasReferences()) {
+      for (int i = 0; i < referenceList.size(); i++) {
+        Marker ref = referenceList.get(i);
+        if (ref.contains(other)) {
           return true;
         }
       }
@@ -150,10 +146,10 @@ public class BasicMarker implements Marker {
       return true;
     }
 
-    if (hasChildren()) {
-      for (int i = 0; i < children.size(); i++) {
-        Marker child = children.get(i);
-        if (child.contains(name)) {
+    if (hasReferences()) {
+      for (int i = 0; i < referenceList.size(); i++) {
+        Marker ref = referenceList.get(i);
+        if (ref.contains(name)) {
           return true;
         }
       }
@@ -165,19 +161,34 @@ public class BasicMarker implements Marker {
   private static String CLOSE = " ]";
   private static String SEP = ", ";
 
-  public String toString() {
 
-    if (!this.hasChildren()) {
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (!(obj instanceof Marker))
+      return false;
+
+    final Marker other = (Marker) obj;
+    return name.equals(other.getName());
+  }
+
+  public int hashCode() {
+    return name.hashCode();
+  }
+
+  public String toString() {
+    if (!this.hasReferences()) {
       return this.getName();
     }
-
     Iterator<Marker> it = this.iterator();
-    Marker child;
+    Marker reference;
     StringBuffer sb = new StringBuffer(this.getName());
     sb.append(' ').append(OPEN);
     while (it.hasNext()) {
-      child = it.next();
-      sb.append(child.getName());
+      reference = it.next();
+      sb.append(reference.getName());
       if (it.hasNext()) {
         sb.append(SEP);
       }

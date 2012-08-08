@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: BasicPreferencesFactory.java,v 1.1 2006/10/09 17:02:04 hburger Exp $
+ * Name:        $Id: BasicPreferencesFactory.java,v 1.2 2008/11/04 10:01:29 hburger Exp $
  * Description: Basic Preferences Factory 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/09 17:02:04 $
+ * Date:        $Date: 2008/11/04 10:01:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,7 +53,6 @@ package org.openmdx.base.configuration.spi;
 import java.util.prefs.Preferences;
 
 import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.compatibility.base.naming.PathComponent;
 
 
 /**
@@ -103,13 +102,10 @@ public class BasicPreferencesFactory
     ){
         Path path = new Path(xri);
         if(path.isLike(PREFERENCES_1_SEGMENT_PATTERN)) {            
-            PathComponent provider = path.getComponent(2);
-            if(
-                provider.size() == 2 &&
-                "Java".equals(provider.get(0)) 
-            ){
-                String javaProvider = provider.get(1);
-                if ("Preferences".equals(provider.get(1)))  {
+            String provider = path.get(2);
+            if(provider.startsWith("Java*")){
+                String javaProvider = provider.substring("Java*".length());
+                if ("Preferences".equals(javaProvider))  {
                     String segment = path.get(4);
                     if("System".equals(segment)) {
                         return Preferences.systemRoot();
@@ -137,14 +133,14 @@ public class BasicPreferencesFactory
                 "Path " + path.toXri() + " does not refer to a Java preferences provider"
             );
         } else throw new IllegalArgumentException(
-            "Path " + path.toXri() + " does not refer to an org::openmdx::preferences1 segment"
+            "Path " + path.toXRI() + " does not refer to an org::openmdx::preferences1 segment"
         );
     }
 
     /**
      * org::openmdx::preferences1 segment pattern<ul>
      * <li><i>as XRI 1:</i> xri:@openmdx:org.openmdx.preferences1/provider/*&#42;/segment/*&#42;
-     * <li><i>as XRI 2:</i> <b>xri://@openmdx*org.openmdx.preferences1/provider/$(..)/segment/($..)</b>
+     * <li><i>as XRI 2:</i> <b>xri://@openmdx*org.openmdx.preferences1/provider/($..)/segment/($..)</b>
      * <li><i>as Path:</i> org::openmdx::preferences1/provider/::&#42;/segment/::&#42;
      * <li><i>as URI:</i> spice://org:openmdx:preferences1/provider/:&#42;/segment/:&#42;
      * </ul>
@@ -168,14 +164,14 @@ public class BasicPreferencesFactory
 
     /**
      * The container preferences segment has the following default value:<ul>
-     * <li><b>"xri://@openmdx*org.openmdx.preferences1/provider/Java*Properties/segment/System*(xri://+resource/org/openmdx/prefs/container/preferences.properties)"</b>
+     * <li><b>"xri://@openmdx*org.openmdx.preferences1/provider/Java*Properties/segment/(+resource/org/openmdx/prefs/container/preferences.properties)"</b>
      * </ul>
      * 
      * @see BasicPreferencesFactory#CONTAINER_SEGMENT_PROPERTY
      */
     protected final static String CONTAINER_SEGMENT = System.getProperty(
         CONTAINER_SEGMENT_PROPERTY,
-        "xri://@openmdx*org.openmdx.preferences1/provider/Java*Properties/segment/System*(xri://+resource/org/openmdx/prefs/container/preferences.properties)"
+        "xri://@openmdx*org.openmdx.preferences1/provider/Java*Properties/segment/(+resource/org/openmdx/prefs/container/preferences.properties)"
     );
     
     /**
@@ -189,7 +185,7 @@ public class BasicPreferencesFactory
 
     /**
      * The application preferences segment has the following default value:<ul>
-     * <li><b>xri://@openmdx*org.openmdx.preferences1/provider/Java*Properties/segment/(xri://+resource/org/openmdx/prefs/application/preferences.properties)</b>
+     * <li><b>xri://@openmdx*org.openmdx.preferences1/provider/Java*Properties/segment/(+resource/org/openmdx/prefs/application/preferences.properties)</b>
      * </ul>
      * 
      * @see BasicPreferencesFactory#APPLICATION_SEGMENT_PROPERTY
@@ -210,14 +206,14 @@ public class BasicPreferencesFactory
 
     /**
      * The module preferences segment has the following default value:<ul>
-     * <li><b>xri://@openmdx*org.openmdx.preferences1/provider/Java*Properties/segment/(xri://+resource/org/openmdx/prefs/module/preferences.properties)</b>
+     * <li><b>xri://@openmdx*org.openmdx.preferences1/provider/Java*Properties/segment/(+resource/org/openmdx/prefs/module/preferences.properties)</b>
      * </ul>
      * 
      * @see BasicPreferencesFactory#MODULE_SEGMENT_PROPERTY
      */
     protected final static String MODULE_SEGMENT = System.getProperty(
         MODULE_SEGMENT_PROPERTY,
-        "xri://@openmdx*org.openmdx.preferences1/provider/Java*Properties/segment/(xri://+resource/org/openmdx/prefs/module/preferences.properties)"
+        "xri://@openmdx*org.openmdx.preferences1/provider/Java*Properties/segment/(+resource/org/openmdx/prefs/module/preferences.properties)"
     );
 
 
@@ -241,32 +237,32 @@ public class BasicPreferencesFactory
         COMPONENT_SEGMENT_PROPERTY,
         "xri://@openmdx*org.openmdx.preferences1/provider/Java*Naming/segment/(java:comp/env)"
     );
-
-
+    
+    
     //------------------------------------------------------------------------
     // Implements ContextSensitivePreferencesFactory
     //------------------------------------------------------------------------
 
     /**
-     * This factory's container node may be cached as it iscontext aware
+     * This factory's container node may be cached as it is context aware
      */
     private Preferences containerNode = null;
     
     /**
-     * This factory's application node may be cached as it iscontext aware
+     * This factory's application node may be cached as it is context aware
      */
     private Preferences applicationNode = null;
     
     /**
-     * This factory's module node may be cached as it iscontext aware
+     * This factory's module node may be cached as it is context aware
      */
     private Preferences moduleNode = null;
     
     /**
-     * This factory's component node may be cached as it iscontext aware
+     * This factory's component node may be cached as it is context aware
      */
     private Preferences componentNode = null;
-    
+
     /* (non-Javadoc)
      * @see java.util.prefs.PreferencesFactory#systemRoot()
      */
@@ -303,5 +299,5 @@ public class BasicPreferencesFactory
             this.componentNode = getSegment(COMPONENT_SEGMENT, true) :
             this.componentNode;
     }
-    
+
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1.java,v 1.23 2008/06/27 13:56:09 hburger Exp $
+ * Name:        $Id: Dataprovider_1.java,v 1.26 2008/11/27 16:46:56 hburger Exp $
  * Description: The dataprovider kernel
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/27 13:56:09 $
+ * Date:        $Date: 2008/11/27 16:46:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,9 +60,7 @@ import java.util.Map;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.application.cci.ConfigurationProvider_1_0;
-import org.openmdx.compatibility.base.application.cci.Configuration_1_0;
 import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.application.spi.ConfigurationProviderAdapter_1;
 import org.openmdx.compatibility.base.collection.SparseList;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderLayers;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
@@ -92,34 +90,6 @@ public class Dataprovider_1
 
     /**
      * Constructor
-     *
-     * @param       dataproviderConfiguration
-     *              The configuration shared by all layers
-     * @param       configurationProvider
-     *              The configurationProvider provides the configurations for
-     *              the kernel and the individual layers.
-     * @param       self 
-     *              A self reference
-     *
-     * @exception   ServiceException
-     *              If the instantiation of the dataprovider fails
-     *
-     * @deprecated  Configuration_1_0 superseeded by ConfigurationProvider_1_0
-     */
-    public Dataprovider_1(
-        Configuration dataproviderConfiguration,
-        Configuration_1_0 configurationProvider, 
-        Dataprovider_1_0 self
-    ) throws ServiceException {
-        this(
-            dataproviderConfiguration, 
-            new ConfigurationProviderAdapter_1(configurationProvider), 
-            self
-        );
-    }
-
-    /**
-     * Constructor
      * 
      * @param       dataproviderConfiguration
      *              The configuration shared by all layers
@@ -128,7 +98,6 @@ public class Dataprovider_1
      *              the kernel and the individual layers.
      * @param       self 
      *              A self reference
-     *
      * @exception   ServiceException
      *              If the instantiation of the dataprovider fails
      */
@@ -138,21 +107,21 @@ public class Dataprovider_1
         Dataprovider_1_0 self
     ) throws ServiceException {
         super(configurationProvider);
-        
+
         String namespace = super.kernelConfiguration.getFirstValue(
             SharedConfigurationEntries.NAMESPACE_ID
         );
         super.kernelConfiguration.getFirstValue(
             SharedConfigurationEntries.PERSISTENCE_MANAGER_BINDING
         );
-        
+
         try {
             this.logger.trace (
                 "Creating kernel for namespace \"{}\"",
                 namespace,
                 kernelConfiguration
             );
-        
+
             // Prepare layer statistics objects
             LayerStatistics_1_0[] layerStatistics = namespaceStatistics.get(namespace);
             if(layerStatistics == null) synchronized(namespaceStatistics){
@@ -160,19 +129,19 @@ public class Dataprovider_1
                 if(layerStatistics == null) {
                     layerStatistics = new LayerStatistics_1_0[LAYERS];
                     for(
-                        short layer = DataproviderLayers.PERSISTENCE;
-                        layer <= DataproviderLayers.INTERCEPTION;
-                        layer++
+                            short layer = DataproviderLayers.PERSISTENCE;
+                            layer <= DataproviderLayers.INTERCEPTION;
+                            layer++
                     ) layerStatistics[layer] = new LayerStatistics_1();
                     namespaceStatistics.put(namespace, layerStatistics);
                 }
             }
-    
+
             // Get dataprovider configuration
 
             // LAYER_STATISTICS
             dataproviderConfiguration.values(
-              SharedConfigurationEntries.LAYER_STATISTICS
+                SharedConfigurationEntries.LAYER_STATISTICS
             ).addAll(
                 Arrays.asList(layerStatistics)
             );
@@ -184,46 +153,46 @@ public class Dataprovider_1
 
             // EXPOSED_PATH
             SparseList<Path> exposedPaths = dataproviderConfiguration.values(
-              SharedConfigurationEntries.EXPOSED_PATH
+                SharedConfigurationEntries.EXPOSED_PATH
             );
             for(
-                ListIterator<?> iterator = kernelConfiguration.values(
-                    SharedConfigurationEntries.EXPOSED_PATH
-                ).populationIterator();
-                iterator.hasNext();
+                    ListIterator<?> iterator = kernelConfiguration.values(
+                        SharedConfigurationEntries.EXPOSED_PATH
+                    ).populationIterator();
+                    iterator.hasNext();
             ) exposedPaths.set(
                 iterator.nextIndex(),
                 toPath(iterator.next())
             );
-    
+
             // DELEGATION_PATH
             SparseList<Path> delegationPaths = dataproviderConfiguration.values(
-              SharedConfigurationEntries.DELEGATION_PATH
+                SharedConfigurationEntries.DELEGATION_PATH
             );
             for(
-                ListIterator<?> iterator = kernelConfiguration.values(
-                    SharedConfigurationEntries.DELEGATION_PATH
-                ).populationIterator();
-                iterator.hasNext();
+                    ListIterator<?> iterator = kernelConfiguration.values(
+                        SharedConfigurationEntries.DELEGATION_PATH
+                    ).populationIterator();
+                    iterator.hasNext();
             ) delegationPaths.set(
                 iterator.nextIndex(),
                 toPath(iterator.next())
             );
-    
+
             // MODEL
             dataproviderConfiguration.values(
-              SharedConfigurationEntries.MODEL_PACKAGE
+                SharedConfigurationEntries.MODEL_PACKAGE
             ).addAll(
-              kernelConfiguration.values(SharedConfigurationEntries.MODEL_PACKAGE)
+                kernelConfiguration.values(SharedConfigurationEntries.MODEL_PACKAGE)
             );
             dataproviderConfiguration.values(
-              SharedConfigurationEntries.PACKAGE_IMPL
+                SharedConfigurationEntries.PACKAGE_IMPL
             ).addAll(
-              kernelConfiguration.values(SharedConfigurationEntries.PACKAGE_IMPL)
+                kernelConfiguration.values(SharedConfigurationEntries.PACKAGE_IMPL)
             );
             this.model = new Model_1();
             dataproviderConfiguration.values(
-              SharedConfigurationEntries.MODEL
+                SharedConfigurationEntries.MODEL
             ).add(model);
             List<String> modelPackages = new ArrayList<String>();
             for(Object modelPackage : dataproviderConfiguration.values(SharedConfigurationEntries.MODEL_PACKAGE).population()) {
@@ -235,23 +204,23 @@ public class Dataprovider_1
             dataproviderConfiguration.values(
                 SharedConfigurationEntries.DATAPROVIDER_CONNECTION
             ); // Like that even an initially empty entry is sharable
-            
+
             if(self != null) dataproviderConfiguration.values(
                 SharedConfigurationEntries.THIS_DATAPROVIDER
             ).add(
                 self
             );
-            
+
             // Load, configure and activate plug-ins
             Configuration[] layerConfigurations = new Configuration[LAYERS];
             for(
-                short step = LOAD_PLUGIN;
-                step <= ACTIVATE_PLUGIN;
-                step++
+                    short step = LOAD_PLUGIN;
+                    step <= ACTIVATE_PLUGIN;
+                    step++
             ) for(
-                short layer = DataproviderLayers.PERSISTENCE;
-                layer <= DataproviderLayers.INTERCEPTION;
-                layer++
+                    short layer = DataproviderLayers.PERSISTENCE;
+                    layer <= DataproviderLayers.INTERCEPTION;
+                    layer++
             ) try {
                 switch (step) {
                     case LOAD_PLUGIN:
@@ -259,9 +228,9 @@ public class Dataprovider_1
                             DataproviderLayers.toString(layer)
                         );
                         layers[layer]=(Layer_1_0)Classes.getApplicationClass(
-                          className
+                            className
                         ).newInstance();
-                    break;
+                        break;
                     case CONFIGURE_PLUGIN:
                         // Load configuration
                         Configuration layerConfiguration =
@@ -275,40 +244,38 @@ public class Dataprovider_1
                         Map<String,SparseList<?>> target = layerConfiguration.entries();
                         Object name;
                         for(
-                            Iterator<?> names = source.keySet().iterator();
-                            names.hasNext();
+                                Iterator<?> names = source.keySet().iterator();
+                                names.hasNext();
                         ) if (
-                            ! target.containsKey(name = names.next())
+                                ! target.containsKey(name = names.next())
                         ) target.put(name.toString(), source.get(name));
 
                         layerConfigurations[layer] = layerConfiguration;
-                    break;
+                        break;
                     case ACTIVATE_PLUGIN:
                         layers[layer].activate(
                             layer,
                             layerConfigurations[layer],
                             layer == 0 ? null : layers[layer-1]
                         );
-                    break;
+                        break;
                 }
             } catch (Exception exception) {
-                
+
                 String id = DataproviderLayers.toString(layer);
                 String className = kernelConfiguration.getFirstValue(id);
                 throw new ServiceException(
                     exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ACTIVATION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("layer",id),
-                        new BasicException.Parameter("class",className),
-                        new BasicException.Parameter("step",step)
-                    },
-                    "Could not activate " + id + " layer plugin " + className
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ACTIVATION_FAILURE,
+                    "Could not activate " + id + " layer plugin " + className,
+                    new BasicException.Parameter("layer",id),
+                    new BasicException.Parameter("class",className),
+                    new BasicException.Parameter("step",step)
                 ).log();
             }
             logger.debug(
-                "Kernel for namespace \"{}\" created",
+                "Kernel for namespace \"{}\" created: {}",
                 namespace,
                 kernelConfiguration
             );
@@ -318,15 +285,15 @@ public class Dataprovider_1
         } catch (Exception exception) {
             throw new ServiceException(
                 exception,
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ACTIVATION_FAILURE,
-                kernelConfiguration.toExceptionParameters(),
-                "Creation of kernel for namespace \"" + namespace + "\" failed"
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ACTIVATION_FAILURE,
+                "Creation of kernel for namespace \"" + namespace + "\" failed",
+                kernelConfiguration.toExceptionParameters()
             ).log();
         }
     }
 
-    
+
     //------------------------------------------------------------------------
     // Instance Members
     //------------------------------------------------------------------------
@@ -339,7 +306,7 @@ public class Dataprovider_1
      * Initialized when the kernel is ready to act as dataprovider connection.
      */
     private Layer_1_0 delegation = null;
-    
+
     /**
      * The layer instances
      */
@@ -349,8 +316,8 @@ public class Dataprovider_1
      * The logger instance
      */
     private final Logger logger = LoggerFactory.getLogger(Dataprovider_1.class);
-    
-    
+
+
     //------------------------------------------------------------------------
     // Class Members
     //------------------------------------------------------------------------
@@ -359,12 +326,12 @@ public class Dataprovider_1
      * Number of layers
      */
     final static int LAYERS = DataproviderLayers.INTERCEPTION + 1;
-    
+
     /**
      * Plugin activation step
      */
     final private static short LOAD_PLUGIN         = 0;
-    
+
     /**
      * Plugin activation step
      */
@@ -381,91 +348,89 @@ public class Dataprovider_1
     final static Map<String,LayerStatistics_1_0[]> namespaceStatistics = 
         new HashMap<String,LayerStatistics_1_0[]>();
 
-    /**
-     * The toPath method accepts any input class
-     */
-    protected final static Path toPath(
-        Object path
-    ){
-        return
+        /**
+         * The toPath method accepts any input class
+         */
+        protected final static Path toPath(
+            Object path
+        ){
+            return
             path == null ? 
                 null : 
-            path instanceof Path ? 
-                (Path)path : 
-                new Path(path.toString());
-    }
-
-    protected Model_1_0 getModel(){
-        return this.model;
-    }
-    
-    //------------------------------------------------------------------------
-    // Implements Dataprovider_1_0
-    //------------------------------------------------------------------------
-
-    /**
-     * Process a set of working units
-     *
-     * @param    header            the service header
-     * @param    workingUnits    a collection of working units
-     *
-     * @return    a collection of working unit replies
-     */
-    public UnitOfWorkReply[] process(
-        ServiceHeader header,
-        UnitOfWorkRequest[] workingUnits
-    ){
-        this.logger.trace(
-            "{} requested by {}",
-            Arrays.asList(workingUnits),
-            header.getPrincipalChain()
-        );
-        return delegation.process(header, workingUnits);
-    }
-
-
-    //------------------------------------------------------------------------
-    // Implements Dataprivider_1_1Connection
-    //------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection#close()
-     */
-    public void close() {
-        this.delegation = null;
-        for(
-          short layer = DataproviderLayers.INTERCEPTION;
-          layer >= DataproviderLayers.PERSISTENCE;
-          layer--
-        ) if (layers[layer] != null) try {
-          layers[layer].deactivate();
-        } catch (Exception exception) {
-          String id = DataproviderLayers.toString(layer);
-          String className = layers[layer].getClass().getName();
-          new ServiceException(
-            exception,
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.DEACTIVATION_FAILURE,
-            new BasicException.Parameter[]{
-              new BasicException.Parameter("layer", id),
-              new BasicException.Parameter("class", className)
-            },
-            "Could not deactivate " + id + " layer plugin " + className
-          ).log();
+                    path instanceof Path ? 
+                        (Path)path : 
+                            new Path(path.toString());
         }
-    }
 
-    
-    //------------------------------------------------------------------------
-    // Implements LifeCycleObject_1_0
-    //------------------------------------------------------------------------
+        protected Model_1_0 getModel(){
+            return this.model;
+        }
 
-    /**
-     * Deactivates this kernel
-     */
-    public void remove(
-    ){
-        close();
-    }
+        //------------------------------------------------------------------------
+        // Implements Dataprovider_1_0
+        //------------------------------------------------------------------------
+
+        /**
+         * Process a set of working units
+         *
+         * @param    header            the service header
+         * @param    workingUnits    a collection of working units
+         *
+         * @return    a collection of working unit replies
+         */
+        public UnitOfWorkReply[] process(
+            ServiceHeader header,
+            UnitOfWorkRequest... workingUnits
+        ){
+            this.logger.trace(
+                "{} requested by {}",
+                Arrays.asList(workingUnits),
+                header.getPrincipalChain()
+            );
+            return delegation.process(header, workingUnits);
+        }
+
+
+        //------------------------------------------------------------------------
+        // Implements Dataprivider_1_1Connection
+        //------------------------------------------------------------------------
+
+        /* (non-Javadoc)
+         * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection#close()
+         */
+        public void close() {
+            this.delegation = null;
+            for(
+                    short layer = DataproviderLayers.INTERCEPTION;
+                    layer >= DataproviderLayers.PERSISTENCE;
+                    layer--
+            ) if (layers[layer] != null) try {
+                layers[layer].deactivate();
+            } catch (Exception exception) {
+                String id = DataproviderLayers.toString(layer);
+                String className = layers[layer].getClass().getName();
+                new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.DEACTIVATION_FAILURE,
+                    "Could not deactivate " + id + " layer plugin " + className,
+                    new BasicException.Parameter("layer", id),
+                    new BasicException.Parameter("class", className)
+                ).log();
+            }
+        }
+
+
+        //------------------------------------------------------------------------
+        // Implements LifeCycleObject_1_0
+        //------------------------------------------------------------------------
+
+        /**
+         * Deactivates this kernel
+         */
+        public void remove(
+        ){
+            close();
+        }
 
 }

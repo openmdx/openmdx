@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: FeatureMapper.java,v 1.3 2008/06/28 00:21:32 hburger Exp $
+ * Name:        $Id: FeatureMapper.java,v 1.8 2008/11/11 15:37:51 wfro Exp $
  * Description: FeatureMapper
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:32 $
+ * Date:        $Date: 2008/11/11 15:37:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -72,14 +72,14 @@ import org.openmdx.model1.mapping.java.Identifier;
  * Class FeatureMapper
  */
 public class FeatureMapper {
-    
+
     //------------------------------------------------------------------------
     public enum MethodSignature {
-        
+
         DEFAULT, RETURN_IS_VOID, PREDICATE
-        
+
     }
-    
+
     //------------------------------------------------------------------------
     FeatureMapper(
         ModelElement_1_0 classDef,
@@ -97,10 +97,13 @@ public class FeatureMapper {
         if(accessor == null) {
             String accessorName = 'g' + mutatorName.substring(1);
             try {
-                this.collections.putIfAbsent(
+                Method concurrent = this.collections.putIfAbsent(
                     mutatorName,
                     accessor = targetIntf.getMethod(accessorName)
                 );
+                if(concurrent != null) {
+                    accessor = concurrent;
+                }
             } catch (Exception exception) {
                 throw new UnsupportedOperationException(
                     accessorName + " requested by " + mutatorName + "(Collection)",
@@ -110,7 +113,7 @@ public class FeatureMapper {
         }
         return accessor;
     }
-    
+
     //------------------------------------------------------------------------
     Method getAccessor(
         Object feature
@@ -140,16 +143,14 @@ public class FeatureMapper {
                     if(featureDef == null) throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.BAD_MEMBER_NAME,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter ("className", this.classDef.path().getBase()),
-                            new BasicException.Parameter ("featureName", featureName)
-                        },
-                        "Feature not found in model repository"
+                        "Feature not found in model repository",
+                        new BasicException.Parameter ("className", this.classDef.path().getBase()),
+                        new BasicException.Parameter ("featureName", featureName)
                     );
                 }                    
                 String multiplicity = (String)featureDef.values("multiplicity").get(0);
                 boolean isBoolean =
-                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getDereferencedType(featureDef.values("type").get(0)).values("qualifiedName").get(0));
+                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).values("qualifiedName").get(0));
                 boolean isSingleValued = 
                     (Multiplicities.SINGLE_VALUE.equals(multiplicity) || Multiplicities.OPTIONAL_VALUE.equals(multiplicity)); 
                 String beanGetterName = AbstractNames.openmdx2AccessorName(
@@ -160,10 +161,13 @@ public class FeatureMapper {
                 );
                 String accessorName = Identifier.OPERATION_NAME.toIdentifier(beanGetterName);
                 try {
-                    this.accessors.putIfAbsent(
+                    Method concurrent = this.accessors.putIfAbsent(
                         featureName,
                         accessor = targetIntf.getMethod(accessorName)
                     );
+                    if(concurrent != null) {
+                        accessor = concurrent;
+                    }
                 } catch (Exception exception) {
                     throw new UnsupportedOperationException(
                         featureName,
@@ -205,7 +209,7 @@ public class FeatureMapper {
                 }                                    
                 String multiplicity = (String)featureDef.values("multiplicity").get(0);
                 boolean isBoolean =
-                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getDereferencedType(featureDef.values("type").get(0)).values("qualifiedName").get(0));
+                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).values("qualifiedName").get(0));
                 boolean isSingleValued = 
                     (Multiplicities.SINGLE_VALUE.equals(multiplicity) || Multiplicities.OPTIONAL_VALUE.equals(multiplicity));                
                 String beanSetterName = AbstractNames.openmdx2AccessorName(
@@ -217,12 +221,13 @@ public class FeatureMapper {
                 String mutatorName = Identifier.OPERATION_NAME.toIdentifier(beanSetterName);
                 for(Method method : targetIntf.getMethods()) {
                     if(
-                        method.getName().equals(mutatorName) &&
-                        method.getParameterTypes().length == 1 
-                        // Note: The argument type is ignored for the moment 
+                            method.getName().equals(mutatorName) &&
+                            (method.getParameterTypes().length == 1) &&
+                            (method.getReturnType() == void.class)
+                            // Note: The argument type is ignored for the moment 
                     ){
-                        this.mutators.putIfAbsent(featureName, method);
-                        return method;
+                        Method concurrent = this.mutators.putIfAbsent(featureName, method);
+                        return concurrent == null ? method : concurrent;
                     }
                 }
                 throw new UnsupportedOperationException(featureName);
@@ -233,7 +238,7 @@ public class FeatureMapper {
             return mutator;
         }
     }
-    
+
     //------------------------------------------------------------------------
     Method getOperation(
         Object feature
@@ -259,10 +264,10 @@ public class FeatureMapper {
             );
             for(Method method : targetIntf.getMethods()) {
                 if(
-                    method.getName().equals(operationName)
+                        method.getName().equals(operationName)
                 ){
-                    this.operations.putIfAbsent(featureName, method);
-                    return method;
+                    Method concurrent = this.operations.putIfAbsent(featureName, method);
+                    return concurrent == null ? method : concurrent;
                 }
             }
             throw new UnsupportedOperationException(featureName);
@@ -276,23 +281,31 @@ public class FeatureMapper {
         Method source
     ){
         Method oldMethod = mapping.get(source);
-        String methodName = source.getName();
-        int methodArguments = source.getParameterTypes().length;
         if(oldMethod == null) {
+            String methodName = source.getName();
+            Class<?>[] methodArguments = source.getParameterTypes();
             for(Method newMethod : targetIntf.getMethods()) {
                 if(
-                    newMethod.getName().equals(methodName) &&
-                    newMethod.getParameterTypes().length == methodArguments
-                    // Note: The argument types are ignored for the moment 
-                ){
-                    oldMethod = this.mapping.putIfAbsent(source, newMethod);
-                    return oldMethod == null ? newMethod : oldMethod;
+                    (newMethod.getName().equals(methodName)) &&
+                    (newMethod.getParameterTypes().length == methodArguments.length)
+                ) {
+                    boolean areEqual = true;
+                    for(int i = 0; i < methodArguments.length; i++) {
+                        if(!newMethod.getParameterTypes()[i].isAssignableFrom(methodArguments[i])) {
+                            areEqual = false;
+                            break;
+                        }
+                    }
+                    if(areEqual) {
+                        oldMethod = this.mapping.putIfAbsent(source, newMethod);
+                        return oldMethod == null ? newMethod : oldMethod;
+                    }
                 }
             }
         }
         return oldMethod;
     }
-    
+
     //-----------------------------------------------------------------------        
     @SuppressWarnings("unchecked")
     ModelElement_1_0 getFeature(
@@ -302,11 +315,13 @@ public class FeatureMapper {
         String className = (String)this.classDef.values("qualifiedName").get(0);
         ConcurrentMap<String,ModelElement_1_0> features = allFeatures.get(className);
         if(features == null) {
-            allFeatures.putIfAbsent(
+            ConcurrentMap<String,ModelElement_1_0> concurrent = allFeatures.putIfAbsent(
                 className, 
-                new ConcurrentHashMap<String,ModelElement_1_0>()
+                features = new ConcurrentHashMap<String,ModelElement_1_0>()
             );
-            features = allFeatures.get(className);
+            if(concurrent != null) {
+                features = concurrent;
+            }
         }
         if(mode == MethodSignature.RETURN_IS_VOID) {
             methodName = methodName + "@void";            
@@ -428,17 +443,17 @@ public class FeatureMapper {
                 throw new ServiceException (
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.NOT_FOUND, 
+                    "feature not found in class",
                     new BasicException.Parameter [] {
-                      new BasicException.Parameter("method.name", methodName),
-                      new BasicException.Parameter("class.name", className)
-                    },
-                    "feature not found in class"
+                        new BasicException.Parameter("method.name", methodName),
+                        new BasicException.Parameter("class.name", className)
+                    }
                 );                
             }
         }
         return feature;
     }
-        
+
     //------------------------------------------------------------------------
     // Members
     //------------------------------------------------------------------------
@@ -449,7 +464,7 @@ public class FeatureMapper {
     private final ConcurrentMap<String,Method> collections = new ConcurrentHashMap<String,Method>();
     protected final static ConcurrentMap<String,ConcurrentMap<String,ModelElement_1_0>> allFeatures = 
         new ConcurrentHashMap<String,ConcurrentMap<String,ModelElement_1_0>>();
-    
+
     private final ModelElement_1_0 classDef;    
     private final Class<?> targetIntf;    
 

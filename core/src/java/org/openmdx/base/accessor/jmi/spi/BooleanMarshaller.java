@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BooleanMarshaller.java,v 1.9 2008/04/09 12:34:01 hburger Exp $
+ * Name:        $Id: BooleanMarshaller.java,v 1.11 2008/09/25 23:36:59 hburger Exp $
  * Description: BooleanMarshaller class
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:01 $
+ * Date:        $Date: 2008/09/25 23:36:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -92,11 +92,9 @@ public class BooleanMarshaller
             e,
             BasicException.Code.DEFAULT_DOMAIN, 
             BasicException.Code.TRANSFORMATION_FAILURE, 
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Could not marshal source to Boolean"
+            "Could not marshal source to Boolean",
+            new BasicException.Parameter("source", source),
+            new BasicException.Parameter("source class", source.getClass().getName())
         );
     }
   }
@@ -116,11 +114,9 @@ public class BooleanMarshaller
             e,
             BasicException.Code.DEFAULT_DOMAIN, 
             BasicException.Code.TRANSFORMATION_FAILURE, 
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Could not unmarshal Boolean"
+            "Could not unmarshal Boolean",
+            new BasicException.Parameter("source", source),
+            new BasicException.Parameter("source class", source.getClass().getName())
         );
     }
   }

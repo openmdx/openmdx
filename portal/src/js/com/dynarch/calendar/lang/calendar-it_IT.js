@@ -12,11 +12,11 @@
 // full day names
 Calendar._DN = new Array
 ("Domenica",
- "Lunedì",
- "Martedì",
- "Mercoledì",
- "Giovedì",
- "Venerdì",
+ "Lunedi'",
+ "Martedi'",
+ "Mercoledi'",
+ "Giovedi'",
+ "Venerdi'",
  "Sabato",
  "Domenica");
 
@@ -90,7 +90,7 @@ Calendar._TT["ABOUT"] =
 "Scelta della data:\n" +
 "- Usa i tasti \u00ab, \u00bb per scegliere l'anno\n" +
 "- Usa i tasti \u2039, \u203a per scegliere il meseh\n" +
-"- Tieni premuto il tasto del mouse su bottoni per una scelta più veloce.";
+"- Tieni premuto il tasto del mouse su bottoni per una scelta piu' veloce.";
 
 Calendar._TT["ABOUT_TIME"] = "\n\n" +
 "Scelta dell'ora:\n" +
@@ -124,5 +124,5 @@ Calendar._TT["TIME_PART"] = "(Shift-)Click o trascina per cambiare il valore";
 Calendar._TT["DEF_DATE_FORMAT"] = "%Y-%m-%d";
 Calendar._TT["TT_DATE_FORMAT"] = "%a, %b %e";
 
-Calendar._TT["WK"] = "wk";
+Calendar._TT["WK"] = "ST";
 Calendar._TT["TIME"] = "Ora:";

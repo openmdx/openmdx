@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.48 2008/06/28 00:21:28 hburger Exp $
+ * Name:        $Id: Standard_1.java,v 1.56 2008/11/11 15:38:56 wfro Exp $
  * Description: Model layer Standard_1 plugin
- * Revision:    $Revision: 1.48 $
+ * Revision:    $Revision: 1.56 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:28 $
+ * Date:        $Date: 2008/11/11 15:38:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,7 +81,6 @@ import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntrie
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 import org.openmdx.compatibility.base.dataprovider.spi.SystemOperations;
-import org.openmdx.compatibility.base.exception.StackedException;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.base.query.FilterOperators;
 import org.openmdx.compatibility.base.query.FilterProperty;
@@ -108,7 +107,6 @@ import org.openmdx.model1.code.PrimitiveTypes;
  * <li> conversion of strings to Path, where needed. </li>
  * </ul>
  */
-@SuppressWarnings("unchecked")
 public class Standard_1 extends OptimisticLocking_1 {
 
     /* (non-Javadoc)
@@ -129,18 +127,17 @@ public class Standard_1 extends OptimisticLocking_1 {
         //
         // Model
         //
-        List models = configuration.values(SharedConfigurationEntries.MODEL);
+        List<Model_1_0> models = configuration.values(SharedConfigurationEntries.MODEL);
         if (models.isEmpty()) {
             throw new ServiceException(
-                StackedException.DEFAULT_DOMAIN,
-                StackedException.INVALID_CONFIGURATION,
-                null,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.INVALID_CONFIGURATION,
                 "A model must be configured with option '" + 
                 SharedConfigurationEntries.MODEL + 
                 "'"
             );
         } else {
-            this.model = (Model_1_0)models.get(0);
+            this.model = models.get(0);
         }
         //
         // XML Datatype Usage
@@ -154,7 +151,7 @@ public class Standard_1 extends OptimisticLocking_1 {
         this.notifyPreDelete = configuration.isOn(
             LayerConfigurationEntries.NOTIFY_PRE_DELETE
         );
-        
+
     }
 
     // --------------------------------------------------------------------------
@@ -162,10 +159,10 @@ public class Standard_1 extends OptimisticLocking_1 {
      * Tells whether XML datatype formatting is required
      * @return
      */
-    protected boolean useDatatypes(){
+    protected final boolean useDatatypes(){
         return this.datatypeFormat != null;
     }
-    
+
     // --------------------------------------------------------------------------
     /**
      * An object is freed from derived attributes in the RoleObject_1. But if an
@@ -188,7 +185,7 @@ public class Standard_1 extends OptimisticLocking_1 {
             this.removeNonPersistentAttributes(object);
         }
     }
-            
+
     // --------------------------------------------------------------------------
     /**
      * remove the attributes which are in the model as derived
@@ -200,128 +197,129 @@ public class Standard_1 extends OptimisticLocking_1 {
         String objectClassName = this.getObjectClassName(object);
         ModelElement_1_0 objClass = objectClassName == null ?
             null :
-            this.model.getDereferencedType(objectClassName);
-        ArrayList missingClassesForRoles = null; // used for error reporting
+                this.model.getDereferencedType(objectClassName);
+        List<String> missingClassesForRoles = null; // used for error reporting
         if (object != null) {
-          // System.out.println("\n objectClass: " + objectClassName);
-          // create a role dependent map
-          HashMap roleClasses = new HashMap();
+            // System.out.println("\n objectClass: " + objectClassName);
+            // create a role dependent map
+            Map<String,ModelElement_1_0> roleClasses = new HashMap<String,ModelElement_1_0>();
 
-          roleClasses.put(null, objClass);
+            roleClasses.put(null, objClass);
 
-          Map modelAttributes =
-            objClass == null ? null : (Map)objClass.values("attribute").get(0);
+            Map<?,?> modelAttributes =
+                objClass == null ? null : (Map<?,?>)objClass.values("attribute").get(0);
 
-          String attributeName = null;
-          for (Iterator i = object.attributeNames().iterator(); i.hasNext();) {
-            attributeName = (String)i.next();
-            // System.out.println("     " +  attributeName +":"+ object.getValues(attributeName));     
+            String attributeName = null;
+            for (Iterator<String> i = object.attributeNames().iterator(); i.hasNext();) {
+                attributeName = i.next();
+                // System.out.println("     " +  attributeName +":"+ object.getValues(attributeName));     
 
-            // remove derived attributes except the attributes listed below 
-            // NOTE: This is a hack and must be fixed as soon as each layer can have 
-            // its own model, i.e. persistence layer uses persistence model, application 
-            // layer uses application model, etc.
-            if (object.getValues(attributeName) != null
-              && object.getValues(attributeName).size() > 0
-              && !attributeName.equals(SystemAttributes.MODIFIED_AT)
-              && !attributeName.equals(SystemAttributes.MODIFIED_BY)
-              && !attributeName.equals(SystemAttributes.CREATED_AT)
-              && !attributeName.equals(SystemAttributes.CREATED_BY)
-              && !attributeName.equals(SystemAttributes.OBJECT_CLASS)
-              && !attributeName.equals(State_1_Attributes.INVALIDATED_AT)
-              && !attributeName.equals(AbstractState_1.STATE_NUMBER)
-              && !attributeName.equals(AbstractState_1.ID_ATTRIBUTE_NAME)) {
-              int sep = attributeName.indexOf("$");
-              String role = null;
-              if (sep > 0) { // there is a role
-                role = attributeName.substring(0, sep);
-                attributeName = attributeName.substring(sep + 1);
-                roleContained = true;
-              }
-
-              // when roles are present the loading of the correct modelAttributes
-              // has to be done each time
-              if (roleContained) {
-                objClass = (ModelElement_1_0)roleClasses.get(role);
-                if (objClass == null
-                  && !roleClasses.containsKey(role) // entry may be null
-                ) {
-                  if (object
-                    .getValues(
-                      role
-                        + "$"
-                        + SystemAttributes.OBJECT_CLASS)
-                    != null) {
-                    objectClassName =
-                      (String)object
-                        .getValues(
-                          role
-                            + "$"
-                            + SystemAttributes.OBJECT_CLASS)
-                        .get(0);
-                  }
-                  if (objectClassName != null) {
-                    objClass = this.model.getDereferencedType(objectClassName);
-                  }
-                  roleClasses.put(role, objClass);
-                }
-
-                modelAttributes =
-                  objClass == null
-                    ? null
-                    : (Map)objClass.values("attribute").get(0);
-              }
-              if (modelAttributes != null) {
-                if (!SystemAttributes.OBJECT_CLASS.equals(attributeName)) {
-                  ModelElement_1_0 attributeDef = (ModelElement_1_0)modelAttributes.get(attributeName);
-                  // non-modeled attributes are not removed. 
-                  // NOTE: This is a hack and must be fixed as soon as each layer can have 
-                  // its own model, i.e. persistence layer uses persistence model, application 
-                  // layer uses application model, etc.
-                  if (attributeDef == null) {
-                    if(attributeName.equals(SystemAttributes.OBJECT_INSTANCE_OF)) {
-                      i.remove();
+                // remove derived attributes except the attributes listed below 
+                // NOTE: This is a hack and must be fixed as soon as each layer can have 
+                // its own model, i.e. persistence layer uses persistence model, application 
+                // layer uses application model, etc.
+                if (
+                    object.getValues(attributeName) != null
+                    && object.getValues(attributeName).size() > 0
+                    && !attributeName.equals(SystemAttributes.MODIFIED_AT)
+                    && !attributeName.equals(SystemAttributes.MODIFIED_BY)
+                    && !attributeName.equals(SystemAttributes.CREATED_AT)
+                    && !attributeName.equals(SystemAttributes.CREATED_BY)
+                    && !attributeName.equals(SystemAttributes.OBJECT_CLASS)
+                    && !attributeName.equals(State_1_Attributes.INVALIDATED_AT)
+//                  && !attributeName.equals(AbstractState_1.STATE_NUMBER)
+//                  && !attributeName.equals(AbstractState_1.ID_ATTRIBUTE_NAME)
+                 ) {
+                    int sep = attributeName.indexOf("$");
+                    String role = null;
+                    if (sep > 0) { // there is a role
+                        role = attributeName.substring(0, sep);
+                        attributeName = attributeName.substring(sep + 1);
+                        roleContained = true;
                     }
-                  }
-                  // remove derived attributes
-                  else if(
-                      (attributeDef.getValues("isDerived") != null) && 
-                      ((Boolean)attributeDef.getValues("isDerived").get(0)).booleanValue()
-                  ) {
-                    i.remove();
-                  }
-                }
-              }
-              else {
-                if (missingClassesForRoles == null) {
-                  missingClassesForRoles = new ArrayList();
-                }
-                if (role != null && !missingClassesForRoles.contains(role)) {
-                  missingClassesForRoles.add(role);
-                }
-              }
-            }
-            if (missingClassesForRoles != null) {
-              ServiceException warning = new ServiceException(
-                  StackedException.DEFAULT_DOMAIN,
-                  StackedException.ASSERTION_FAILURE,
-                  new BasicException.Parameter[] {
-                     new BasicException.Parameter(
-                      "roles",
-                      missingClassesForRoles
-                    )
-                  },
-                  "No class specified (missing object_class or role.object_class)."
-              ).log();
-              if (this.throwWarning) {
-                throw warning;
-              }
-            }
 
-          }
+                    // when roles are present the loading of the correct modelAttributes
+                    // has to be done each time
+                    if (roleContained) {
+                        objClass = roleClasses.get(role);
+                        if (objClass == null
+                                && !roleClasses.containsKey(role) // entry may be null
+                        ) {
+                            if (object
+                                    .getValues(
+                                        role
+                                        + "$"
+                                        + SystemAttributes.OBJECT_CLASS)
+                                        != null) {
+                                objectClassName =
+                                    (String)object
+                                    .getValues(
+                                        role
+                                        + "$"
+                                        + SystemAttributes.OBJECT_CLASS)
+                                        .get(0);
+                            }
+                            if (objectClassName != null) {
+                                objClass = this.model.getDereferencedType(objectClassName);
+                            }
+                            roleClasses.put(role, objClass);
+                        }
+
+                        modelAttributes =
+                            objClass == null
+                            ? null
+                                : (Map<?,?>)objClass.values("attribute").get(0);
+                    }
+                    if (modelAttributes != null) {
+                        if (!SystemAttributes.OBJECT_CLASS.equals(attributeName)) {
+                            ModelElement_1_0 attributeDef = (ModelElement_1_0)modelAttributes.get(attributeName);
+                            // non-modeled attributes are not removed. 
+                            // NOTE: This is a hack and must be fixed as soon as each layer can have 
+                            // its own model, i.e. persistence layer uses persistence model, application 
+                            // layer uses application model, etc.
+                            if (attributeDef == null) {
+                                if(attributeName.equals(SystemAttributes.OBJECT_INSTANCE_OF)) {
+                                    i.remove();
+                                }
+                            }
+                            // remove derived attributes
+                            else if(
+                                    (attributeDef.getValues("isDerived") != null) && 
+                                    ((Boolean)attributeDef.getValues("isDerived").get(0)).booleanValue()
+                            ) {
+                                i.remove();
+                            }
+                        }
+                    }
+                    else {
+                        if (missingClassesForRoles == null) {
+                            missingClassesForRoles = new ArrayList<String>();
+                        }
+                        if (role != null && !missingClassesForRoles.contains(role)) {
+                            missingClassesForRoles.add(role);
+                        }
+                    }
+                }
+                if (missingClassesForRoles != null) {
+                    ServiceException warning = new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "No class specified (missing object_class or role.object_class).",
+                        new BasicException.Parameter(
+                            "roles",
+                            missingClassesForRoles
+                        )
+
+                    ).log();
+                    if (this.throwWarning) {
+                        throw warning;
+                    }
+                }
+
+            }
         }
     }
-                    
+
     // --------------------------------------------------------------------------
     /**
      * Set object_instanceOf to the object
@@ -329,12 +327,12 @@ public class Standard_1 extends OptimisticLocking_1 {
     private void setInstanceOf(
         DataproviderObject_1_0 object
     ) throws ServiceException {
-        Set classes = getInstanceOf(object);
+        Set<String> classes = getInstanceOf(object);
         if(classes != null) object.clearValues(
             SystemAttributes.OBJECT_INSTANCE_OF
         ).addAll(classes);
     }
-  
+
     // --------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.layer.model.SystemAttributes_1#instanceOfBasicObject(org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject)
@@ -342,10 +340,10 @@ public class Standard_1 extends OptimisticLocking_1 {
     protected boolean isInstanceOfBasicObject(
         DataproviderObject_1_0 object
     ) throws ServiceException {
-        Set classes = getInstanceOf(object);
+        Set<String> classes = getInstanceOf(object);
         return classes != null ?
             classes.contains("org:openmdx:base:BasicObject") :
-            super.isInstanceOfBasicObject(object);
+                super.isInstanceOfBasicObject(object);
     }
 
     // --------------------------------------------------------------------------
@@ -358,33 +356,31 @@ public class Standard_1 extends OptimisticLocking_1 {
      * 
      * @throws ServiceException 
      */
-    protected Set getInstanceOf(
+    protected Set<String> getInstanceOf(
         DataproviderObject_1_0 object
     ) throws ServiceException{
-      String objectClassName = getObjectClassName(object);
-      //
-      // objectClassName may be null if for the attribute selector said
-      // no_attributes, just don't set instanceOf.
-      //
-      if(objectClassName == null) return null;
-      ModelElement_1_0 objClass = this.model.getDereferencedType(objectClassName);
-      if(objClass == null) throw new ServiceException(
-            StackedException.DEFAULT_DOMAIN,
-            StackedException.ASSERTION_FAILURE, 
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("object", object),
-                new BasicException.Parameter("class", objClass)
-            },
-            "class not found"
-      ).log();
+        String objectClassName = getObjectClassName(object);
+        //
+        // objectClassName may be null if for the attribute selector said
+        // no_attributes, just don't set instanceOf.
+        //
+        if(objectClassName == null) return null;
+        ModelElement_1_0 objClass = this.model.getDereferencedType(objectClassName);
+        if(objClass == null) throw new ServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.ASSERTION_FAILURE, 
+            "class not found",
+            new BasicException.Parameter("object", object),
+            new BasicException.Parameter("class", objClass)
+        ).log();
 
-      // evaluate the set of classes
-      Set classes = new HashSet();
-      for (
-          Iterator i = objClass.values("allSupertype").iterator();
-          i.hasNext();
-      ) classes.add(((Path)i.next()).getBase());
-      return classes;
+        // evaluate the set of classes
+        Set<String> classes = new HashSet<String>();
+        for (
+                Iterator<?> i = objClass.values("allSupertype").iterator();
+                i.hasNext();
+        ) classes.add(((Path)i.next()).getBase());
+        return classes;
     }
 
     // --------------------------------------------------------------------------
@@ -403,78 +399,72 @@ public class Standard_1 extends OptimisticLocking_1 {
     private void convertPaths(
         DataproviderObject object
     ) throws ServiceException {
-      ModelElement_1_0 baseObjClass = getObjectClass(object);
-       if(
-          baseObjClass != null &&
-          model.isClassType(baseObjClass)
-       ) {      
-	      ModelElement_1_0 objectClass = null;      
-	      for(
-	        Iterator i = object.attributeNames().iterator();
-	        i.hasNext();
-	      ) {
-	        String attributeName = (String)i.next();
-//	        // no values --> remove attribute
-//	        if(object.getValues(attributeName).size() == 0) {
-//	          i.remove();
-//	        }
-//	        else {
-            if(!object.getValues(attributeName).isEmpty()) {
-	          String role = null;
-	          int sep = attributeName.indexOf("$");
-	          if (sep > 0) {
-	            role = attributeName.substring(0,sep);
-	            attributeName = attributeName.substring(sep + 1);
-	          }                
-	          if(role == null) {
-	            objectClass = baseObjClass;
-	          }
-	          else {
-	            try {
-	              String attributeRoledObjectClass = role + "$" + SystemAttributes.OBJECT_CLASS;
-	              if(object.getValues(attributeRoledObjectClass) == null) {
-	                throw new ServiceException(
-	                    StackedException.DEFAULT_DOMAIN,
-	                    StackedException.ASSERTION_FAILURE, 
-	                    new BasicException.Parameter[]{
-	                      new BasicException.Parameter("object", object),
-	                      new BasicException.Parameter("attribute role object class", attributeRoledObjectClass)
-	                    },
-	                    "object class not set for specified role"
-	                );
-	              }
-	              objectClass = model.getDereferencedType(
-	                object.getValues(attributeRoledObjectClass).get(0)
-	              );
-	            }
-	            catch(ServiceException e) {
-	              if(e.getExceptionCode() == StackedException.NOT_FOUND) {
-	                System.out.println("not found");
-	              }
-	              throw e;
-	            }
-	          }
-	          if(
-	            !objectClass.values("reference").isEmpty() &&
-	            ((HashMap) objectClass.values("reference").get(0)).containsKey(attributeName) &&
-	            (object.getValues(attributeName) != null)
-	          ) {
-	            // it must be a path, convert all values
-	            for(
-	              ListIterator v = object.getValues(attributeName).populationIterator();
-	              v.hasNext(); 
-	            ) {
-	              Object value = v.next();
-	              if(value instanceof String) {
-	                v.set(new Path((String) value));
-	              }
-	            }
-	          }
-	        }
-	      }
-       }
+        ModelElement_1_0 baseObjClass = getObjectClass(object);
+        if(
+                baseObjClass != null &&
+                model.isClassType(baseObjClass)
+        ) {      
+            ModelElement_1_0 objectClass = null;      
+            for(String attributeName :object.attributeNames()){
+//              // no values --> remove attribute
+//              if(object.getValues(attributeName).size() == 0) {
+//              i.remove();
+//              }
+//              else {
+                if(!object.getValues(attributeName).isEmpty()) {
+                    String role = null;
+                    int sep = attributeName.indexOf("$");
+                    if (sep > 0) {
+                        role = attributeName.substring(0,sep);
+                        attributeName = attributeName.substring(sep + 1);
+                    }                
+                    if(role == null) {
+                        objectClass = baseObjClass;
+                    }
+                    else {
+                        try {
+                            String attributeRoledObjectClass = role + "$" + SystemAttributes.OBJECT_CLASS;
+                            if(object.getValues(attributeRoledObjectClass) == null) {
+                                throw new ServiceException(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.ASSERTION_FAILURE, 
+                                    "object class not set for specified role",
+                                    new BasicException.Parameter("object", object),
+                                    new BasicException.Parameter("attribute role object class", attributeRoledObjectClass)
+                                );
+                            }
+                            objectClass = model.getDereferencedType(
+                                object.getValues(attributeRoledObjectClass).get(0)
+                            );
+                        }
+                        catch(ServiceException e) {
+                            if(e.getExceptionCode() == BasicException.Code.NOT_FOUND) {
+                                System.out.println("not found");
+                            }
+                            throw e;
+                        }
+                    }
+                    if(
+                            !objectClass.values("reference").isEmpty() &&
+                            ((Map<?,?>) objectClass.values("reference").get(0)).containsKey(attributeName) &&
+                            (object.getValues(attributeName) != null)
+                    ) {
+                        // it must be a path, convert all values
+                        for(
+                                ListIterator<Object> v = object.getValues(attributeName).populationIterator();
+                                v.hasNext(); 
+                        ) {
+                            Object value = v.next();
+                            if(value instanceof String) {
+                                v.set(new Path((String) value));
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
-                
+
     // --------------------------------------------------------------------------
     /** 
      * Convert values of type path to the their string representation if 
@@ -487,42 +477,42 @@ public class Standard_1 extends OptimisticLocking_1 {
     ) throws ServiceException {
 
         Object value = null;
-    
+
         // Tells if the object contains any paths in attributes, in which case 
         // the persistence layer is still returning paths and the conversion 
         // from strings to path must not be tried
         boolean containsPath = false;
         boolean doConvert = false; // the attribute's values must be converted
         boolean doConvertSet = false; // indicates if doConvert has been set
-    
+
         // iterate through the attributes values until a path is found
         // then check for the right type
-    
+
         for(String attributeName: object.attributeNames()) {
-          doConvert = false;
-          doConvertSet = false;
-          for (ListIterator v =
-            object.getValues(attributeName).populationIterator();
+            doConvert = false;
+            doConvertSet = false;
+            for (ListIterator<Object> v =
+                object.getValues(attributeName).populationIterator();
             v.hasNext() && !(doConvertSet && !doConvert);
             // the values must stay as path
-          ) {
-            value = v.next();
-            if (value instanceof Path) {
-              containsPath = true;
-              if (!doConvertSet) {
-                doConvertSet = true;
-                doConvert = isOfTypePath(attributeName, object);
-              }
-              if (doConvert) {
-                v.set(((Path)value).toUri());
-              }
-    
-            }    
-          }
+            ) {
+                value = v.next();
+                if (value instanceof Path) {
+                    containsPath = true;
+                    if (!doConvertSet) {
+                        doConvertSet = true;
+                        doConvert = isOfTypePath(attributeName, object);
+                    }
+                    if (doConvert) {
+                        v.set(((Path)value).toUri());
+                    }
+
+                }    
+            }
         }
         return containsPath;
     }
-      
+
     // --------------------------------------------------------------------------
     private boolean isOfTypePath(
         String _attributeName, 
@@ -531,103 +521,99 @@ public class Standard_1 extends OptimisticLocking_1 {
         String attributeName = _attributeName;
         ModelElement_1_0 type = null;
         boolean doConvert = false;
-    
+
         // get object class. In case of attribute name with namespace
         // prefix get object_class attribute of same namespace    
-        List typeNameList = null;
+        List<Object> typeNameList = null;
         // TODO: alternate namespace separator for compatibility mode
         if(attributeName.indexOf("$") != -1) {
-          typeNameList = object.getValues(
-            attributeName.substring(
-              0,
-              attributeName.lastIndexOf("$") + 1
-            ) + SystemAttributes.OBJECT_CLASS
-          );
+            typeNameList = object.getValues(
+                attributeName.substring(
+                    0,
+                    attributeName.lastIndexOf("$") + 1
+                ) + SystemAttributes.OBJECT_CLASS
+            );
         }    
         else if(attributeName.indexOf(":") != -1) {
-          typeNameList = object.getValues(
-            attributeName.substring(
-              0,
-              attributeName.lastIndexOf(":") + 1
-            ) + SystemAttributes.OBJECT_CLASS
-          );
+            typeNameList = object.getValues(
+                attributeName.substring(
+                    0,
+                    attributeName.lastIndexOf(":") + 1
+                ) + SystemAttributes.OBJECT_CLASS
+            );
         }
         else {
-          typeNameList = object.getValues(SystemAttributes.OBJECT_CLASS);
+            typeNameList = object.getValues(SystemAttributes.OBJECT_CLASS);
         }
-    
+
         // get unqualified attribute name
         attributeName = attributeName.substring(
-          attributeName.lastIndexOf(":") + 1
+            attributeName.lastIndexOf(":") + 1
         );
         attributeName = attributeName.substring(
-          attributeName.lastIndexOf("$") + 1
+            attributeName.lastIndexOf("$") + 1
         );
-    
+
         if(typeNameList != null && !typeNameList.isEmpty()) {
-          if(typeNameList.get(0) == null) {
-              throw new ServiceException(
-                  StackedException.DEFAULT_DOMAIN,
-                  StackedException.ASSERTION_FAILURE,
-                  new BasicException.Parameter[] {
-                      new BasicException.Parameter("object", object),
-                      new BasicException.Parameter("attribute", attributeName)
-                  },
-                  SystemAttributes.OBJECT_CLASS + " must not be null"
-              );
-          }
-          type = model.getDereferencedType(typeNameList.get(0));
-          if (type != null) {
-            Boolean nonPathType = attributeIsInstanceOf(
-              (Map)type.values("attribute").get(0),
-              attributeName,
-              NON_PATH_TYPES
-            );
-            if(nonPathType == null) {
-                if("object_stateId".equals(attributeName)) {
-                    doConvert = true;
-                } else {
-                    throw new ServiceException(
-                        StackedException.DEFAULT_DOMAIN,
-                        StackedException.ASSERTION_FAILURE,
-                        new BasicException.Parameter[] {
+            if(typeNameList.get(0) == null) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    SystemAttributes.OBJECT_CLASS + " must not be null",
+                    new BasicException.Parameter("object", object),
+                    new BasicException.Parameter("attribute", attributeName)
+                );
+            }
+            type = model.getDereferencedType(typeNameList.get(0));
+            if (type != null) {
+                Boolean nonPathType = attributeIsInstanceOf(
+                    (Map<?,?>)type.values("attribute").get(0),
+                    attributeName,
+                    NON_PATH_TYPES
+                );
+                if(nonPathType == null) {
+                    if("object_stateId".equals(attributeName)) {
+                        doConvert = true;
+                    } else {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.ASSERTION_FAILURE,
+                            "Unknown attribute for object class.",
                             new BasicException.Parameter("attribute", attributeName),
                             new BasicException.Parameter("object_class", typeNameList)
-                        },
-                        "Unknown attribute for object class."
-                    );
-                }            
-            } else {
-                if(nonPathType.booleanValue()) doConvert = true;
+                        );
+                    }            
+                } else {
+                    if(nonPathType.booleanValue()) doConvert = true;
+                }
             }
-          }
         }
         return doConvert;   
     }        
 
     // --------------------------------------------------------------------------
     protected Boolean attributeIsInstanceOf(
-        Map attributeDefs,
+        Map<?,?> attributeDefs,
         String attributeName,
-        Collection candidates
+        Collection<?> candidates
     ) throws ServiceException {
-        ModelElement_1_0 attributeType = (ModelElement_1_0) attributeDefs.get(attributeName);
-        return attributeType == null ? null : Boolean.valueOf(
+        ModelElement_1_0 attributeDef = (ModelElement_1_0) attributeDefs.get(attributeName);
+        return attributeDef == null ? null : Boolean.valueOf(
             candidates.contains(
-                model.getDereferencedType(
-                    attributeType.values("type").get(0)
+                model.getElementType(
+                    attributeDef
                 ).values(
                     "qualifiedName"
                 ).get(
                     0
-               )
+                )
             )
         );
     }
-  
+
     // --------------------------------------------------------------------------
     protected boolean attributeMightBeInstanceOfAnXMLDatatype(
-        Map attributeDefs,
+        Map<?,?> attributeDefs,
         String attributeName
     ) throws ServiceException {
         Boolean xmlDatatype = attributeIsInstanceOf(
@@ -636,8 +622,8 @@ public class Standard_1 extends OptimisticLocking_1 {
             XML_DATATYPE_TYPES
         );
         return xmlDatatype == null ? (
-            SystemAttributes.CREATED_AT.equals(attributeName) ||
-            SystemAttributes.MODIFIED_AT.equals(attributeName)
+                SystemAttributes.CREATED_AT.equals(attributeName) ||
+                SystemAttributes.MODIFIED_AT.equals(attributeName)
         ) : xmlDatatype.booleanValue();
     }
 
@@ -654,17 +640,17 @@ public class Standard_1 extends OptimisticLocking_1 {
         DataproviderRequest request, 
         DataproviderObject object
     ) throws ServiceException {
-      if(object.getValues(SystemAttributes.OBJECT_CLASS) != null) {
-          String objectClass = (String)object.getValues(SystemAttributes.OBJECT_CLASS).get(0);
-          if(
-              this.model.isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") &&
-              (!object.attributeNames().contains(SystemAttributes.OBJECT_IDENTITY) || this.model.isSubtypeOf(objectClass, "org:openmdx:compatibility:role1:Role"))                      
-          ) {
-              object.clearValues(SystemAttributes.OBJECT_IDENTITY).add(
-                  object.path().toXri()
-              );
-          }
-      }      
+        if(object.getValues(SystemAttributes.OBJECT_CLASS) != null) {
+            String objectClass = (String)object.getValues(SystemAttributes.OBJECT_CLASS).get(0);
+            if(
+                    this.model.isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") &&
+                    (!object.attributeNames().contains(SystemAttributes.OBJECT_IDENTITY))                      
+            ) {
+                object.clearValues(SystemAttributes.OBJECT_IDENTITY).add(
+                    object.path().toXri()
+                );
+            }
+        }      
     }
 
     // --------------------------------------------------------------------------
@@ -680,109 +666,109 @@ public class Standard_1 extends OptimisticLocking_1 {
         DataproviderObject object,
         String viewPrefix, 
         boolean touchNonDerivedFeatures, 
-        Set objectFeaturesToBeVerified
+        Set<String> objectFeaturesToBeVerified
     ) throws ServiceException {
         String viewClassAttribute = viewPrefix + SystemAttributes.OBJECT_CLASS;
-        SparseList viewClassValues = object.getValues(viewClassAttribute);
+        SparseList<Object> viewClassValues = object.getValues(viewClassAttribute);
         ModelElement_1_0 classDef = null;
         if(viewClassValues == null) {
-          classDef = null;
-        } else {
-          objectFeaturesToBeVerified.remove(viewClassAttribute);
-          try {
-            ModelElement_1_0 elementDef = this.model.getElement(
-              viewClassValues.get(0)
-            ); 
-            classDef = ModelAttributes.STRUCTURE_TYPE.equals(
-                elementDef.values(SystemAttributes.OBJECT_CLASS).get(0)
-            ) ? null : elementDef;
-          } catch(ServiceException e){
             classDef = null;
-          }
+        } else {
+            objectFeaturesToBeVerified.remove(viewClassAttribute);
+            try {
+                ModelElement_1_0 elementDef = this.model.getElement(
+                    viewClassValues.get(0)
+                ); 
+                classDef = ModelAttributes.STRUCTURE_TYPE.equals(
+                    elementDef.values(SystemAttributes.OBJECT_CLASS).get(0)
+                ) ? null : elementDef;
+            } catch(ServiceException e){
+                classDef = null;
+            }
         }
         if(classDef == null) {
-          for(
-            Iterator i = objectFeaturesToBeVerified.iterator();
-            i.hasNext();
-          ){
-            if(attributeBelongsToView(viewPrefix, (String) i.next())) {
-             i.remove();
+            for(
+                    Iterator<String> i = objectFeaturesToBeVerified.iterator();
+                    i.hasNext();
+            ){
+                if(attributeBelongsToView(viewPrefix, i.next())) {
+                    i.remove();
+                }
             }
-          }
         } else {
-          // Cache scoped features. This reduces string allocations
-          Map scopedFeatures = (Map)this.scopedFeatures.get(viewPrefix);
-          if(scopedFeatures == null) {
-            this.scopedFeatures.put(
-              viewPrefix,
-              scopedFeatures = new HashMap()
-            );
-          }
-          String scopedInstanceOf = (String)scopedFeatures.get(
-            SystemAttributes.OBJECT_INSTANCE_OF
-          );
-          if(scopedInstanceOf == null) {
-            scopedFeatures.put(
-              SystemAttributes.OBJECT_INSTANCE_OF,
-              scopedInstanceOf = viewPrefix + SystemAttributes.OBJECT_INSTANCE_OF
-            );
-          }
-          objectFeaturesToBeVerified.remove(scopedInstanceOf);
-          for(
-            Iterator i = ((Map)classDef.values("allFeature").get(0)).values().iterator();
-            i.hasNext();
-          ) {
-            ModelElement_1_0 featureDef = (ModelElement_1_0)i.next();
-            boolean touch;
-            boolean attribute;
-            if(
-              this.model.isAttributeType(featureDef)
-            ) {
-              attribute = true;
-              touch = touchNonDerivedFeatures && !((Boolean)featureDef.values("isDerived").get(0)).booleanValue();
-            } else if (
-              this.model.isReferenceType(featureDef) && 
-              this.model.referenceIsStoredAsAttribute(featureDef)
-            ) {
-              attribute = true;
-              touch = touchNonDerivedFeatures && !this.model.referenceIsDerived(featureDef); 
-            } else {
-              attribute = false;
-              touch = false;
-            }
-            if(attribute) {
-              String feature = (String) featureDef.values("name").get(0);
-              String scopedFeature = (String)scopedFeatures.get(feature);
-              if(scopedFeature == null) {
-                scopedFeatures.put(
-                  feature,
-                  scopedFeature = viewPrefix + feature
+            // Cache scoped features. This reduces string allocations
+            Map<String,String> scopedFeatures = this.scopedFeatures.get(viewPrefix);
+            if(scopedFeatures == null) {
+                this.scopedFeatures.put(
+                    viewPrefix,
+                    scopedFeatures = new HashMap<String,String>()
                 );
-              }
-              if(touch) {
-                object.values(scopedFeature);
-              }
-              objectFeaturesToBeVerified.remove(scopedFeature);
-              if(State_1_Attributes.INVALIDATED_AT.equals(feature)) {
-                scopedFeature = (String)scopedFeatures.get(AbstractState_1.STATE_NUMBER);
-                if(scopedFeature == null) {
-                  scopedFeatures.put(
-                    AbstractState_1.STATE_NUMBER,
-                    scopedFeature = viewPrefix + AbstractState_1.STATE_NUMBER
-                  );
-                }
-                objectFeaturesToBeVerified.remove(scopedFeature);
-                scopedFeature = (String)scopedFeatures.get(AbstractState_1.ID_ATTRIBUTE_NAME);
-                if(scopedFeature == null) {
-                  scopedFeatures.put(
-                    AbstractState_1.ID_ATTRIBUTE_NAME,
-                    scopedFeature = viewPrefix + AbstractState_1.ID_ATTRIBUTE_NAME
-                  );
-                }
-                objectFeaturesToBeVerified.remove(scopedFeature);
-              }
             }
-          }
+            String scopedInstanceOf = scopedFeatures.get(
+                SystemAttributes.OBJECT_INSTANCE_OF
+            );
+            if(scopedInstanceOf == null) {
+                scopedFeatures.put(
+                    SystemAttributes.OBJECT_INSTANCE_OF,
+                    scopedInstanceOf = viewPrefix + SystemAttributes.OBJECT_INSTANCE_OF
+                );
+            }
+            objectFeaturesToBeVerified.remove(scopedInstanceOf);
+            for(
+                    Iterator<?> i = ((Map<?,?>)classDef.values("allFeature").get(0)).values().iterator();
+                    i.hasNext();
+            ) {
+                ModelElement_1_0 featureDef = (ModelElement_1_0)i.next();
+                boolean touch;
+                boolean attribute;
+                if(
+                        this.model.isAttributeType(featureDef)
+                ) {
+                    attribute = true;
+                    touch = touchNonDerivedFeatures && !((Boolean)featureDef.values("isDerived").get(0)).booleanValue();
+                } else if (
+                        this.model.isReferenceType(featureDef) && 
+                        this.model.referenceIsStoredAsAttribute(featureDef)
+                ) {
+                    attribute = true;
+                    touch = touchNonDerivedFeatures && !this.model.referenceIsDerived(featureDef); 
+                } else {
+                    attribute = false;
+                    touch = false;
+                }
+                if(attribute) {
+                    String feature = (String) featureDef.values("name").get(0);
+                    String scopedFeature = scopedFeatures.get(feature);
+                    if(scopedFeature == null) {
+                        scopedFeatures.put(
+                            feature,
+                            scopedFeature = viewPrefix + feature
+                        );
+                    }
+                    if(touch) {
+                        object.values(scopedFeature);
+                    }
+                    objectFeaturesToBeVerified.remove(scopedFeature);
+//                  if(State_1_Attributes.INVALIDATED_AT.equals(feature)) {
+//                      scopedFeature = scopedFeatures.get(AbstractState_1.STATE_NUMBER);
+//                      if(scopedFeature == null) {
+//                          scopedFeatures.put(
+//                              AbstractState_1.STATE_NUMBER,
+//                              scopedFeature = viewPrefix + AbstractState_1.STATE_NUMBER
+//                          );
+//                      }
+//                      objectFeaturesToBeVerified.remove(scopedFeature);
+//                      scopedFeature = scopedFeatures.get(AbstractState_1.ID_ATTRIBUTE_NAME);
+//                      if(scopedFeature == null) {
+//                          scopedFeatures.put(
+//                              AbstractState_1.ID_ATTRIBUTE_NAME,
+//                              scopedFeature = viewPrefix + AbstractState_1.ID_ATTRIBUTE_NAME
+//                          );
+//                      }
+//                      objectFeaturesToBeVerified.remove(scopedFeature);
+//                    }
+                }
+            }
         }
     }
 
@@ -805,52 +791,42 @@ public class Standard_1 extends OptimisticLocking_1 {
         DataproviderObject object, 
         boolean touchNonDerivedFeatures
     ) throws ServiceException {
-        Set views = new HashSet();
-        Set roles = new HashSet();
+        Set<String> views = new HashSet<String>();
+        Set<String> roles = new HashSet<String>();
         views.add("");
-        Set objectFeaturesToBeVerified = new HashSet(object.attributeNames());
-        for(
-          Iterator i = objectFeaturesToBeVerified.iterator();
-          i.hasNext();
-        ) {
-          String attributeName = (String)i.next();
-          int j = attributeName.lastIndexOf(':');
-          if(j>=0) {
-              views.add(attributeName.substring(0,j+1));
-          } else {
-              j = attributeName.indexOf('$');
-              if(j > 0) {
-                  roles.add(attributeName.substring(0,j+1));
-              }
-          }
+        Set<String> objectFeaturesToBeVerified = new HashSet<String>(object.attributeNames());
+        for(String attributeName : objectFeaturesToBeVerified){
+            int j = attributeName.lastIndexOf(':');
+            if(j>=0) {
+                views.add(attributeName.substring(0,j+1));
+            } else {
+                j = attributeName.indexOf('$');
+                if(j > 0) {
+                    roles.add(attributeName.substring(0,j+1));
+                }
+            }
         }
-        for(
-          Iterator i = views.iterator();
-          i.hasNext();
-        ) {
-          this.adjustEmptyFeatureSet(
-            object,
-            (String)i.next(), 
-            touchNonDerivedFeatures, 
-            objectFeaturesToBeVerified
-          );
-        }
-        for(
-            Iterator i = roles.iterator();
-            i.hasNext();
-          ) {
+        for(String view : views){
             this.adjustEmptyFeatureSet(
-              object,
-              (String)i.next(), 
-              false, // touchNonDerivedFeatures 
-              objectFeaturesToBeVerified
+                object,
+                view, 
+                touchNonDerivedFeatures, 
+                objectFeaturesToBeVerified
             );
-          }
+        }
+        for(String role : roles) {
+            this.adjustEmptyFeatureSet(
+                object,
+                role, 
+                false, // touchNonDerivedFeatures 
+                objectFeaturesToBeVerified
+            );
+        }
         if(!objectFeaturesToBeVerified.isEmpty()) {
-          object.attributeNames().removeAll(objectFeaturesToBeVerified);
+            object.attributeNames().removeAll(objectFeaturesToBeVerified);
         }
     }
-  
+
     //--------------------------------------------------------------------------
     /**
      * Converting<ul>
@@ -865,15 +841,15 @@ public class Standard_1 extends OptimisticLocking_1 {
     private void convertXMLDatatypeValues(
         DataproviderObject_1_0 object
     ) throws ServiceException{
-        for(String attributeName: (Set<String>)object.attributeNames()) {
+        for(String attributeName: object.attributeNames()) {
             for(
-                ListIterator j = object.values(attributeName).populationIterator();
-                j.hasNext();
+                    ListIterator<Object> j = object.values(attributeName).populationIterator();
+                    j.hasNext();
             ) {
                 Object value = j.next();
                 if(
-                    value instanceof Duration || 
-                    value instanceof XMLGregorianCalendar
+                        value instanceof Duration || 
+                        value instanceof XMLGregorianCalendar
                 ) {
                     j.set(this.datatypeFormat.unmarshal(value));
                 } else {
@@ -882,7 +858,7 @@ public class Standard_1 extends OptimisticLocking_1 {
             }
         }
     }
-  
+
     // --------------------------------------------------------------------------
     /**
      * Set known derived features and do some v2 -> v3 compatibility handling.
@@ -897,7 +873,7 @@ public class Standard_1 extends OptimisticLocking_1 {
     ) throws ServiceException {
         // first try converting paths to strings if necessary
         if(!this.convertPathValues(object)) {
-          this.convertPaths(object);                
+            this.convertPaths(object);                
         }
         this.setInstanceOf(object);
         this.setIdentity(request, object);
@@ -905,30 +881,41 @@ public class Standard_1 extends OptimisticLocking_1 {
             object, 
             request.attributeSelector() == AttributeSelectors.ALL_ATTRIBUTES
         );
-        if(useDatatypes()) this.convertXMLDatatypeValues(object);
+        completeDatatypes(object);
     }
-  
+
+    // --------------------------------------------------------------------------
+    protected void completeDatatypes(
+        DataproviderObject object
+    ) throws ServiceException{
+        if(this.useDatatypes()) {
+            this.convertXMLDatatypeValues(object);
+        }
+    }
+    
     // --------------------------------------------------------------------------
     protected DataproviderReply completeReply(
         DataproviderRequest request,
         DataproviderReply reply
     ) throws ServiceException {
-        DataproviderObject[] objects = reply.getObjects();
-        for(
-          int i = 0, iLimit = objects.length;
-          i < iLimit;
-          i++ 
-        ) {
-          this.completeObject(
-              request,
-              objects[i]
-          );
+        for(DataproviderObject object : reply.getObjects()) {
+            completeObject(
+                request,
+                object
+            );
         }
         return reply;
     }
-  
+
     // --------------------------------------------------------------------------
     protected DataproviderRequest prepareRequest(
+        DataproviderRequest request
+    ) throws ServiceException {
+        return prepareDatatypes(request);
+    }
+    
+    // --------------------------------------------------------------------------
+    protected DataproviderRequest prepareDatatypes(
         DataproviderRequest request
     ) throws ServiceException {
         if(
@@ -950,16 +937,12 @@ public class Standard_1 extends OptimisticLocking_1 {
             ) {
                 ModelElement_1_0 objectClass = objectType == null ? 
                     null : 
-                    this.model.getDereferencedType(objectType);
-                Map featureDefs = objectClass == null ?
+                        this.model.getDereferencedType(objectType);
+                Map<?,?> featureDefs = objectClass == null ?
                     null :
-                    (Map) objectClass.values("allFeature").get(0);
+                        (Map<?,?>) objectClass.values("allFeature").get(0);
                 if(featureDefs != null) { 
-                    for(
-                        Iterator i = object.attributeNames().iterator();
-                        i.hasNext();
-                    ) {
-                        String attributeName = (String) i.next();
+                    for(String attributeName : object.attributeNames()) {
                         if(
                             attributeMightBeInstanceOfAnXMLDatatype(
                                 featureDefs,
@@ -967,7 +950,7 @@ public class Standard_1 extends OptimisticLocking_1 {
                             )            
                         ) {
                             for (
-                                ListIterator j = object.values(attributeName).populationIterator();
+                                ListIterator<Object> j = object.values(attributeName).populationIterator();
                                 j.hasNext();                        
                             ) {
                                 j.set(
@@ -981,13 +964,13 @@ public class Standard_1 extends OptimisticLocking_1 {
         }
         if(request.operation() == DataproviderOperations.ITERATION_START) {        
             DataproviderRequest findRequest = request;
-            List mappedFilterProperties = new ArrayList();
+            List<FilterProperty> mappedFilterProperties = new ArrayList<FilterProperty>();
             int typeIndex = -1;
             ModelElement_1_0 classDef = null;
             for(
-                int i = 0;
-                i < request.attributeFilter().length;
-                i++
+                    int i = 0;
+                    i < request.attributeFilter().length;
+                    i++
             ) {
                 FilterProperty requestedFilterProperty = request.attributeFilter()[i];
                 if(SystemAttributes.OBJECT_INSTANCE_OF.equals(requestedFilterProperty.name())) {
@@ -995,28 +978,27 @@ public class Standard_1 extends OptimisticLocking_1 {
                     // Add all subtypes to OBJECT_CLASS
                     //
                     if(
-                        (requestedFilterProperty.operator() == FilterOperators.IS_IN) &&
-                        (requestedFilterProperty.quantor()  == Quantors.THERE_EXISTS) &&
-                        (requestedFilterProperty.getValues().length == 1)  
+                            (requestedFilterProperty.operator() == FilterOperators.IS_IN) &&
+                            (requestedFilterProperty.quantor()  == Quantors.THERE_EXISTS) &&
+                            (requestedFilterProperty.getValues().length == 1)  
                     ) {
                         classDef = this.model.getDereferencedType(requestedFilterProperty.getValue(0));
-                        Set subClasses = new HashSet();
+                        Set<String> subClasses = new HashSet<String>();
                         // Adding the filter property OBJECT_CLASS for BasicObject typically results
                         // in a long list of subclasses which is expensive to process for database 
                         // systems. Eliminating the BasicObject filter could result in returning objects
                         // which are not instance of BasicObject. However this should never happen because
                         // BasicObject's and non-BasicObject's must never be mixed in the same database table.
                         if(
-                            (classDef != null) && 
-                            !"org:openmdx:base:BasicObject".equals(classDef.values("qualifiedName").get(0))
+                                (classDef != null) && 
+                                !"org:openmdx:base:BasicObject".equals(classDef.values("qualifiedName").get(0))
                         ) {
                             typeIndex = i;
-                            Path path = null;                          
                             for(
-                                Iterator subIter = classDef.values("allSubtype").iterator();
-                                subIter.hasNext();
+                                    Iterator<?> subIter = classDef.values("allSubtype").iterator();
+                                    subIter.hasNext();
                             ) {
-                                path = (Path) subIter.next(); 
+                                Path path = (Path) subIter.next(); 
                                 subClasses.add(path.getBase());
                             }                           
                             mappedFilterProperties.add(
@@ -1061,7 +1043,7 @@ public class Standard_1 extends OptimisticLocking_1 {
                     }
                 }
                 if(classDef != null) {
-                    Map featureDefs = (Map)classDef.values("allFeature").get(0); 
+                    Map<?,?> featureDefs = (Map<?,?>)classDef.values("allFeature").get(0); 
                     if (featureDefs != null) {
                         for(int i = 0; i < mappedFilterProperties.size(); i++) {
                             if(i != typeIndex) {
@@ -1090,7 +1072,9 @@ public class Standard_1 extends OptimisticLocking_1 {
             findRequest = new DataproviderRequest(
                 new DataproviderObject(request.path()),
                 DataproviderOperations.ITERATION_START,
-                (FilterProperty[])mappedFilterProperties.toArray(new FilterProperty[mappedFilterProperties.size()]),
+                mappedFilterProperties.toArray(
+                    new FilterProperty[mappedFilterProperties.size()]
+                ),
                 request.position(),
                 request.size(),
                 request.direction(),
@@ -1128,7 +1112,7 @@ public class Standard_1 extends OptimisticLocking_1 {
             super.find(header,prepareRequest(request))
         );
     }
-        
+
     // --------------------------------------------------------------------------
     public DataproviderReply create(
         ServiceHeader header,
@@ -1174,7 +1158,7 @@ public class Standard_1 extends OptimisticLocking_1 {
     ) {
         //
     }
-    
+
     // --------------------------------------------------------------------------
     private void deleteComposites(
         ServiceHeader header,
@@ -1194,14 +1178,11 @@ public class Standard_1 extends OptimisticLocking_1 {
             ).getObject();
             objectClass = this.getObjectClassName(object);
         }
-        Map references = (Map)this.model.getElement(
+        Map<?,?> references = (Map<?,?>)this.model.getElement(
             objectClass
         ).values("reference").get(0);
-        for(
-            Iterator i = references.values().iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 featureDef = (ModelElement_1_0)i.next();
+        for(Object i : references.values()) {
+            ModelElement_1_0 featureDef = (ModelElement_1_0)i;
             ModelElement_1_0 referencedEnd = this.model.getElement(
                 featureDef.values("referencedEnd").get(0)
             );
@@ -1224,12 +1205,12 @@ public class Standard_1 extends OptimisticLocking_1 {
                         null
                     )
                 ).getObjects();
-                List compositeIdentities = new ArrayList();
+                List<Path> compositeIdentities = new ArrayList<Path>();
                 // Remove composites of composites
                 for(
-                    int j = 0;
-                    j < composites.length;
-                    j++
+                        int j = 0;
+                        j < composites.length;
+                        j++
                 ) {
                     DataproviderObject composite = composites[j];
                     this.deleteComposites(
@@ -1241,11 +1222,7 @@ public class Standard_1 extends OptimisticLocking_1 {
                     );
                 }
                 // Remove composites
-                for(
-                    Iterator j = compositeIdentities.iterator();
-                    j.hasNext();
-                ) {
-                    Path compositeIdentity = (Path)j.next();
+                for(Path compositeIdentity : compositeIdentities){
                     if(this.notifyPreDelete) {
                         this.notifyPreDelete(
                             compositeIdentity
@@ -1264,7 +1241,7 @@ public class Standard_1 extends OptimisticLocking_1 {
             }
         }
     }
-  
+
     // --------------------------------------------------------------------------
     public DataproviderReply remove(
         ServiceHeader header,
@@ -1298,7 +1275,7 @@ public class Standard_1 extends OptimisticLocking_1 {
             super.operation(header,prepareRequest(request))
         );
     }
-  
+
     //--------------------------------------------------------------------------
     protected String getObjectClassName(
         DataproviderObject_1_0 object
@@ -1307,12 +1284,12 @@ public class Standard_1 extends OptimisticLocking_1 {
             //
             // OBJECT_CLASS may be null in delete operations
             //
-            SparseList objectClassAttribute = object.getValues(SystemAttributes.OBJECT_CLASS);
+            SparseList<Object> objectClassAttribute = object.getValues(SystemAttributes.OBJECT_CLASS);
             if (objectClassAttribute != null) return (String)objectClassAttribute.get(0);
         }
         return null;
     }
-    
+
     //--------------------------------------------------------------------------
     protected ModelElement_1_0 getObjectClass(
         DataproviderObject_1_0 object
@@ -1320,9 +1297,9 @@ public class Standard_1 extends OptimisticLocking_1 {
         String objectClassName = getObjectClassName(object);
         return objectClassName == null ?
             null :
-            this.model.getDereferencedType(objectClassName);
+                this.model.getDereferencedType(objectClassName);
     }
-    
+
     // --------------------------------------------------------------------------
 
     /* (non-Javadoc)
@@ -1345,22 +1322,22 @@ public class Standard_1 extends OptimisticLocking_1 {
      * In order to reduce String operations in touchNonDerivedFeatures()
      * the map contains scoped feature names. 
      */
-    private final Map scopedFeatures = new HashMap();
-    
+    private final Map<String,Map<String,String>> scopedFeatures = new HashMap<String,Map<String,String>>();
+
     /**
      * Tells whether warnings should be propagated to the client
      * 
      * @see LayerConfigurationEntries#THROW_WARNING
      */
     private boolean throwWarning;
-  
+
     /**
      * If true, calls notifyPreDelete() before an object is removed.
      * notifiyPreDelete() is called for the removed object and recursively
      * for each of its composite objects.   
      */
     private boolean notifyPreDelete;
-    
+
     /**
      * Not <code>null</code> if <code>String</code> values for<ol>
      * <li><code>org::w3c::date</code>
@@ -1375,20 +1352,16 @@ public class Standard_1 extends OptimisticLocking_1 {
      * @see LayerConfigurationEntries#XML_DATATYPES
      */
     private DatatypeFormat datatypeFormat;
-    
-    private final static Collection NON_PATH_TYPES = Arrays.asList(
-        new String[]{
-            PrimitiveTypes.STRING,
-            PrimitiveTypes.ANYURI
-        }
+
+    private final static Collection<String> NON_PATH_TYPES = Arrays.asList(
+        PrimitiveTypes.STRING,
+        PrimitiveTypes.ANYURI
     );
 
-    private final static Collection XML_DATATYPE_TYPES = Arrays.asList(
-        new String[]{
-            PrimitiveTypes.DATE,
-            PrimitiveTypes.DATETIME,
-            PrimitiveTypes.DURATION
-        }
+    private final static Collection<String> XML_DATATYPE_TYPES = Arrays.asList(
+        PrimitiveTypes.DATE,
+        PrimitiveTypes.DATETIME,
+        PrimitiveTypes.DURATION
     );
 
 }

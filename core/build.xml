@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.188 2008/07/02 23:29:12 hburger Exp $
+= Name:        $Id: build.xml,v 1.193 2008/12/15 03:15:35 hburger Exp $
 = Description: openMDX/Core Build File
-= Revision:    $Revision: 1.188 $
-= Date:        $Date: 2008/07/02 23:29:12 $
+= Revision:    $Revision: 1.193 $
+= Date:        $Date: 2008/12/15 03:15:35 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -133,29 +133,21 @@
 	</patternset>
 	<patternset id="openmdx-base.jre-1.5">
 		<patternset refid="openmdx-base.openxri-syntax"/>
-		<include name="net/*/netPackage*"/>
 		<include name="net/*/NetPackage*"/>
-		<include name="net/rfc/*/rfcPackage*"/>
 		<include name="net/rfc/*/RfcPackage*"/>
-		<include name="org/*/orgPackage*"/>
 		<include name="org/*/OrgPackage*"/>
-		<include name="org/ietf/*/ietfPackage*"/>
 		<include name="org/ietf/*/IetfPackage*"/>
-		<include name="org/iso/*/isoPackage*"/>
 		<include name="org/iso/*/IsoPackage*"/>
 		<include name="org/oasisopen/**"/>
-		<include name="org/oasis_open/**"/>
 		<include name="org/omg/**"/>
-		<include name="org/openmdx/*/openmdxPackage*"/>
 		<include name="org/openmdx/*/OpenmdxPackage*"/>
 		<include name="org/openmdx/base/**"/>
 		<include name="org/openmdx/compatibility/base/**"/>
-		<include name="org/openmdx/compatibility/*/compatibilityPackage*"/>
 		<include name="org/openmdx/compatibility/*/CompatibilityPackage*"/>
 		<include name="org/openmdx/*1/**"/>
+		<include name="org/openmdx/*2/**"/>
 		<include name="org/openmdx/compatibility/*1/**"/>
 		<include name="org/openmdx/oracle/base/**"/>
-		<include name="org/un/*/unPackage*"/>
 		<include name="org/un/*/UnPackage*"/>
 		<include name="org/w3c/**"/>
 		<include name="org/xmi/*"/>
@@ -209,12 +201,13 @@
 			    <pathelement location="${basedir}/src/java"/>		    
 			</src>
 			<include name="javax/jmi/**/*.java"/>
-			<include name="org/openmdx/uses/**/*.java"/>
-			<include name="org/openmdx/kernel/**/*.java"/>
 			<include name="org/openmdx/base/**/*.java"/>
-			<include name="org/openmdx/compatibility/kernel/**/*.java"/>
+			<include name="org/openmdx/kernel/**/*.java"/>
+			<include name="org/openmdx/uses/**/*.java"/>
 			<include name="org/openmdx/compatibility/base/**/*.java"/>
+			<include name="org/openmdx/compatibility/kernel/**/*.java"/>
 			<include name="org/openmdx/compatibility/model1/**/*.java"/>
+			<include name="org/openmdx/compatibility/state1/spi/*.java"/>
 			<include name="org/openmdx/model1/**/*.java"/>
 			<include name="org/slf4j/*.java"/>
 			<include name="org/slf4j/helpers/*.java"/>
@@ -227,6 +220,7 @@
 			<exclude name="org/openmdx/base/accessor/jmi/**/*.java"/>
 			<exclude name="org/openmdx/base/accessor/jmi1/**/*.java"/>
 			<exclude name="org/openmdx/base/persistence/**/*.java"/>
+			<exclude name="org/openmdx/base/transport/rest/**/*.java"/>
 			<exclude name="org/openmdx/base/aop2/standard/**/*.java"/>
 			<patternset refid="build.exclude"/>
 			<patternset refid="openmdx-base.openxri-syntax"/>
@@ -509,7 +503,7 @@
 				<include name="${build.target.platform}/core/src/*"/>
 				<exclude name="${build.target.platform}/core/src/*/*.jsl.*"/>
 				<include name="openmdx.version.properties"/>
-				<include name="jre-1.3/ant/lib/*"/>
+				<include name="jre-1.5/ant/lib/*"/>
 				<include name="ant/etc/ant/*"/>
 				<include name="apache/jre-1.2/contribution/lib/*"/>
 				<include name="java2/${build.target.platform}/**"/>

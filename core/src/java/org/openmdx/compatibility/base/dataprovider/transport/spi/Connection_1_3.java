@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Connection_1_3.java,v 1.2 2007/11/04 16:14:56 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Connection_1_3.java,v 1.5 2008/10/14 15:22:15 hburger Exp $
  * Description: Connection interface 1.2 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/04 16:14:56 $
+ * Date:        $Date: 2008/10/14 15:22:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2006, OMEX AG, Switzerland
+ * Copyright (c) 2006-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,8 +49,9 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.compatibility.base.dataprovider.transport.spi;
+
+import java.util.List;
 
 import org.openmdx.compatibility.base.marshalling.CachingMarshaller_1_0;
 import org.openmdx.compatibility.base.naming.Path;
@@ -69,4 +70,11 @@ public interface Connection_1_3
         Path path
     );
 
+    /**
+     * Tells under which principals the unit of work is running
+     * 
+     * @return the principal chain
+     */
+    List<String> getPrincipalChain();
+    
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: OptimisticLocking_1.java,v 1.11 2008/03/21 18:46:21 hburger Exp $
- * Description: OptimisticLocking_1 plugin
- * Revision:    $Revision: 1.11 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: OptimisticLocking_1.java,v 1.13 2008/10/14 00:29:31 hburger Exp $
+ * Description: Optimistic Locking Plug-In
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:46:21 $
+ * Date:        $Date: 2008/10/14 00:29:31 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,34 +67,28 @@ import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
- * This implementation compares the modification timestamp with its
- * counterpart in the object digest.
+ * Optimistic Locking Plug-In
  */
-@SuppressWarnings("unchecked")
-public class OptimisticLocking_1
-    extends SystemAttributes_1 
-{
+public class OptimisticLocking_1 extends SystemAttributes_1 {
 
     /**
-     * 
+     * Tells whether the plug-in is active of inactive.
      */
     private boolean optimisticLocking = false;
-    
+
     /**
      * Calculates and sets an object's digest
+     * 
      * @throws ServiceException 
-     *
-     * @exception   IndexOutOfBoundsException
-     *              If the MODIFED_AT attribute has not been set
      */
     private void propagateDigest(
         DataproviderObject_1_0 object
     ) throws ServiceException{
         if(
-          object.getDigest() != null || // Do not override digest
-          !isInstanceOfBasicObject(object) // relies on BasicObject's modifiedAt feature
+            object.getDigest() != null || // Do not override digest
+            !isInstanceOfBasicObject(object) // relies on BasicObject's modifiedAt feature
         ) return;
-        SparseList modifiedAt = object.getValues(SystemAttributes.MODIFIED_AT);
+        SparseList<?> modifiedAt = object.getValues(SystemAttributes.MODIFIED_AT);
         if(modifiedAt == null) return;
         Object source = modifiedAt.get(0);
         if(source != null) object.setDigest(
@@ -103,19 +97,33 @@ public class OptimisticLocking_1
     }
 
     /**
-     * Verify and object in order to modify or replace it.
-     *
-     * @param       requestImage
-     *              thr object to be verified
-     *
-     * @exception   ServiceException
-     *              Any ServiceException raised by the persistence layer;
-     * @exception   ServiceException EX_OPTIMISTIC_LOCKING
-     *              if the object's digest verification failed
-     * @exception   ServiceException EX_BAD_PARAM
-     *              if the new class is not an instance of the existing one
+     * Propagate the digest
+     * 
+     * @param replies
+     * @throws ServiceException
      */
-    private void verifyDigest(
+    protected void propagateDigest(
+        DataproviderReply[] replies        
+    ) throws ServiceException {
+        if (this.optimisticLocking){
+            for(DataproviderReply reply : replies) {
+                for(DataproviderObject object : reply.getObjects()) {
+                    propagateDigest(object);
+                }
+            }
+        }
+    }
+
+    /**
+     * Verify the digest of an object to be modified
+     * 
+     * @param header
+     * @param request
+     * 
+     * @throws ServiceException CONCURRENT_ACCESS_FAILURE
+     * in case of a digest mismatch.
+     */
+    protected void verifyDigest(
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
@@ -128,25 +136,23 @@ public class OptimisticLocking_1
             ) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN, 
                 BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter(
-                        "path",
-                        request.path()
-                    ),
-                    new BasicException.Parameter(
-                        "beforeImageDigest",
-                        beforeImage.getDigest()
-                    ),
-                    new BasicException.Parameter(
-                        "afterImageDigest",
-                        afterImage.getDigest()
-                    )
-                },
-                "Digest mismatch"
+                "Digest mismatch",
+                new BasicException.Parameter(
+                    "path",
+                    request.path()
+                ),
+                new BasicException.Parameter(
+                    "beforeImageDigest",
+                    beforeImage.getDigest()
+                ),
+                new BasicException.Parameter(
+                    "afterImageDigest",
+                    afterImage.getDigest()
+                )
             );
         }
     }
-    
+
 
     //------------------------------------------------------------------------
     // Implements Layer_1_0
@@ -180,7 +186,9 @@ public class OptimisticLocking_1
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
-        // Verify
+        //
+        // Verify Digest
+        //
         verifyDigest(header,request);
         // Process request
         return super.modify(header,request);
@@ -203,9 +211,13 @@ public class OptimisticLocking_1
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
-        // Verify
+        // 
+        // Verify Digest
+        //
         verifyDigest(header,request);
+        //
         // Process request
+        //
         return super.replace(header,request);
     }
 
@@ -218,18 +230,10 @@ public class OptimisticLocking_1
         DataproviderReply[] replies
     ) throws ServiceException {
         super.epilog(header, requests, replies);
-        if (this.optimisticLocking) for(
-            int i = 0; 
-            i < replies.length;
-            i++
-        ){
-            DataproviderObject[] objects =  replies[i].getObjects(); 
-            for (
-                int j = 0;
-                j < objects.length;
-                j++
-            ) this.propagateDigest(objects[j]);
-        }
+        //
+        // Propagate Digest
+        //
+        propagateDigest(replies);
     }
 
 }

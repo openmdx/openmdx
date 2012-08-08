@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InProcessDeployment.java,v 1.4 2008/03/21 18:28:07 hburger Exp $
+ * Name:        $Id: InProcessDeployment.java,v 1.6 2008/09/10 08:55:26 hburger Exp $
  * Description: In-Process Deployment
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:28:07 $
+ * Date:        $Date: 2008/09/10 08:55:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -91,9 +91,9 @@ public class InProcessDeployment implements Deployment {
     ){
         this(
             connector == null ? null : new String[]{connector},
-            application == null ? null : new String[]{application},
-            detailLog,
-            exceptionLog
+                application == null ? null : new String[]{application},
+                    detailLog,
+                    exceptionLog
         );
     }
 
@@ -145,12 +145,12 @@ public class InProcessDeployment implements Deployment {
      * URL of the resource archives to be deployed
      */
     private  URL[] connectors;
-    
+
     /**
      * URL of the resource archives to be deployed
      */
     private  URL[] applications;
-    
+
     /**
      * The in-process deployment's detail log writer
      */
@@ -170,7 +170,7 @@ public class InProcessDeployment implements Deployment {
      * The in-process lightweight container instance
      */
     private LightweightContainer container = null;
-    
+
     /**
      * Convert a String[] to the corresponding URL[]
      * 
@@ -186,9 +186,9 @@ public class InProcessDeployment implements Deployment {
         if(source == null) return null;
         URL[] target = new URL[source.length];
         for(
-            int i = 0;
-            i < source.length;
-            i++
+                int i = 0;
+                i < source.length;
+                i++
         ) try {
             target[i] = new URL(source[i]);
         } catch (MalformedURLException exception) {
@@ -196,16 +196,14 @@ public class InProcessDeployment implements Deployment {
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("url", source[i]) 
-                },
-                "Could not parse deployment URL"
-           );
+                "Could not parse deployment URL",
+                new BasicException.Parameter("url", source[i]) 
+            );
         }
         return target;
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements Deployment
     //------------------------------------------------------------------------
@@ -221,9 +219,9 @@ public class InProcessDeployment implements Deployment {
                 );
                 List reports = new ArrayList();
                 if(this.connectors != null) for(
-                    int i = 0;
-                    i < this.connectors.length;
-                    i++
+                        int i = 0;
+                        i < this.connectors.length;
+                        i++
                 ) reports.add(
                     log(
                         log(this.connectors[i], "Deploying Connector"),    
@@ -231,9 +229,9 @@ public class InProcessDeployment implements Deployment {
                     )
                 ); 
                 if(this.applications != null) for(
-                    int i = 0;
-                    i < this.applications.length;
-                    i++
+                        int i = 0;
+                        i < this.applications.length;
+                        i++
                 ) reports.addAll(
                     log(
                         log(this.applications[i], "Deploying Application"),    
@@ -241,33 +239,29 @@ public class InProcessDeployment implements Deployment {
                     )
                 ); 
                 for(
-                    Iterator i = reports.iterator();
-                    i.hasNext();
+                        Iterator i = reports.iterator();
+                        i.hasNext();
                 ) if(
-                   ((Report)i.next()).isSuccess()
+                        ((Report)i.next()).isSuccess()
                 ) i.remove();
                 if(! reports.isEmpty()) this.exception = new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.INVALID_CONFIGURATION,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("container", container),
-                        new BasicException.Parameter("connectors", this.connectors),
-                        new BasicException.Parameter("applications", this.applications),
-                        new BasicException.Parameter("failures", reports)
-                    },
-                    "Deployment tool signals invalid configuration"
+                    "Deployment tool signals invalid configuration",
+                    new BasicException.Parameter("container", container),
+                    new BasicException.Parameter("connectors", (Object[])this.connectors),
+                    new BasicException.Parameter("applications", (Object[])this.applications),
+                    new BasicException.Parameter("failures", reports)
                 );
             } catch (Exception exception) {
                 this.exception = new ServiceException(
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ACTIVATION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("container", container),
-                        new BasicException.Parameter("connectors", this.connectors),
-                        new BasicException.Parameter("applications", this.applications)
-                    },
-                    "Deployment tool could not load deployment units"
+                    "Deployment tool could not load deployment units",
+                    new BasicException.Parameter("container", container),
+                    new BasicException.Parameter("connectors", (Object[])this.connectors),
+                    new BasicException.Parameter("applications", (Object[])this.applications)
                 );
             }
             if(this.exception != null) log("Deployment failed", this.exception);
@@ -280,10 +274,8 @@ public class InProcessDeployment implements Deployment {
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.CREATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("container", container)
-                },
-                "Initial context creation failed"
+                "Initial context creation failed",
+                new BasicException.Parameter("container", container)
             );
         }
     }
@@ -295,11 +287,11 @@ public class InProcessDeployment implements Deployment {
         // Nothing to be done for in-process deployment
     }
 
-    
+
     //------------------------------------------------------------------------
     // Logging
     //------------------------------------------------------------------------
-    
+
     /**
      * Log an exception
      * 
@@ -337,7 +329,7 @@ public class InProcessDeployment implements Deployment {
             this.detailLog.println();
         }
     }
-    
+
     /**
      * Log a given report
      * 

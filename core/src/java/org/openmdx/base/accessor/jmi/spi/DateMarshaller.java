@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateMarshaller.java,v 1.15 2008/04/09 12:34:01 hburger Exp $
+ * Name:        $Id: DateMarshaller.java,v 1.18 2008/09/26 15:27:16 hburger Exp $
  * Description: DateMarshaller class
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:01 $
+ * Date:        $Date: 2008/09/26 15:27:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,149 +50,82 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
-import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
-import org.openmdx.kernel.exception.BasicException;
-import org.w3c.cci2.Datatypes;
+import org.w3c.spi.DatatypeFactories;
+import org.w3c.spi.ImmutableDatatype;
 
-//---------------------------------------------------------------------------
 /**
- * Marshals Object -> XMLGregorianCalendar and XMLGregorianCalendar -> Object. 
+ * Normalizes XMLGregorianCalendar 
  */
-public class DateMarshaller
-  extends Datatypes
-  implements Marshaller, ReluctantUnmarshalling 
-{
+public class DateMarshaller extends NormalizingMarshaller {
 
-  //-------------------------------------------------------------------------
-  private DateMarshaller(
-    boolean forward
-  ) {
-    this.forward = forward;
-  }
-
-  //-------------------------------------------------------------------------
-  public static DateMarshaller getInstance(
-    boolean forward
-  ) {
-    return forward
-      ? DateMarshaller.toMarshaller
-      : DateMarshaller.fromMarshaller;
-  }
-
-  //-------------------------------------------------------------------------
-  public Object marshalGeneric(
-    Object source,
-    boolean forward
-  ) throws ServiceException {
-    if(source == null) {
-      return null;
+    /**
+     * Constructor 
+     */
+    private DateMarshaller(
+    ) {
+        // Avoid instantiation
     }
-    if(forward) {
-      try {
-        String date = (String)source;
-        int limit = date.indexOf('T');
-        if(limit >= 0) date = date.substring(0, limit);
-        int length = date.length();
-        switch (length) {
-          case 0: return getFactory().newXMLGregorianCalendarDate(
-            DatatypeConstants.FIELD_UNDEFINED, // year
-            DatatypeConstants.FIELD_UNDEFINED, // month
-            DatatypeConstants.FIELD_UNDEFINED, // day 
-            DatatypeConstants.FIELD_UNDEFINED // timezone
-          );
-          case 1: case 2: return getFactory().newXMLGregorianCalendarDate(
-            DatatypeConstants.FIELD_UNDEFINED, // year
-            DatatypeConstants.FIELD_UNDEFINED, // month
-            Integer.parseInt(date), // day
-            DatatypeConstants.FIELD_UNDEFINED // timezone
-          );
-          case 3: case 4: return getFactory().newXMLGregorianCalendarDate(
-            DatatypeConstants.FIELD_UNDEFINED, // year
-            Integer.parseInt(date.substring(0, length - 2)), // month
-            Integer.parseInt(date.substring(length - 2)), // day
-            DatatypeConstants.FIELD_UNDEFINED // timezone
-          );
-          default: return getFactory().newXMLGregorianCalendarDate(
-            Integer.parseInt(date.substring(0, length - 4)), // year
-            Integer.parseInt(date.substring(length - 4, length - 2)), // month
-            Integer.parseInt(date.substring(length - 2)), // day
-            DatatypeConstants.FIELD_UNDEFINED // timezone
-          );
+
+    /**
+     * A singleton
+     */
+    static private final DateMarshaller instance = new DateMarshaller();
+
+    /**
+     * Provide a marshaller instance
+     * 
+     * @return an instance
+     */
+    public static DateMarshaller getInstance(
+    ) {
+        return instance;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#normalize(java.lang.Object)
+     */
+    @Override
+    protected Object normalize(
+        Object source
+    ) throws ServiceException{
+        if(source instanceof ImmutableDatatype && source instanceof XMLGregorianCalendar) {
+            return ((XMLGregorianCalendar)source).clone();
         }
-      }
-      catch(IllegalArgumentException e) {
-        throw new ServiceException(
-          e,
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.TRANSFORMATION_FAILURE,
-          new BasicException.Parameter [] {
-            new BasicException.Parameter("source", source),
-            new BasicException.Parameter("source class", source.getClass().getName()),
-          },
-          "exception parsing date"
-        );
-      }
+        if(keep(source)) {
+            return source;
+        }
+        //
+        // Lenient
+        //
+        try {
+            String value = (String)source;
+            int limit = value.indexOf('T');
+            return DatatypeFactories.immutableDatatypeFactory(
+            ).newDate(
+                limit < 0 ? value : value.substring(0, limit) 
+            );
+        } catch (Exception exception) {
+            throw newServiceException(exception, source);
+        }
     }
-    else {
-      if(source instanceof XMLGregorianCalendar) {
-        XMLGregorianCalendar date = (XMLGregorianCalendar)source;
-        int year = date.getYear();
-        int month = date.getMonth();
-        int day = date.getDay();
-        return
-          (year < 10 ? "000" : year < 100 ? "00" : year < 1000 ? "0" : "") + year +
-          (month < 10 ? "0" : "") + month +
-          (day < 10 ? "0" : "") + day;
-      }
-      else {
-        throw new ServiceException (
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.TRANSFORMATION_FAILURE,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Can only unmarshal objects of type " + XMLGregorianCalendar.class.getName()
-        );
-      }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#isLenient()
+     */
+    @Override
+    protected boolean isLenient() {
+        return true;
     }
-  }
 
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object marshal(
-    Object source
-  ) throws ServiceException {
-    return marshalGeneric(
-      source,
-      this.forward
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object unmarshal (
-    Object source
-  ) throws ServiceException {
-    return marshalGeneric(
-      source,
-      !this.forward
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private final boolean forward;
-
-  static private final DateMarshaller toMarshaller = new DateMarshaller(true);
-  static private final DateMarshaller fromMarshaller = new DateMarshaller(false);
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#targetClass()
+     */
+    @Override
+    protected Class<?> targetClass() {
+        return XMLGregorianCalendar.class;
+    }    
 
 }
-
-//--- End of File -----------------------------------------------------------

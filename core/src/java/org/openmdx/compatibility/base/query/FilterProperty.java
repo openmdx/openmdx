@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: FilterProperty.java,v 1.9 2008/03/21 20:14:51 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: FilterProperty.java,v 1.15 2008/10/14 16:05:33 hburger Exp $
  * Description: Filter Property
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 20:14:51 $
+ * Date:        $Date: 2008/10/14 16:05:33 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,21 +45,19 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.query;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.resource.ResourceException;
 
 import org.openmdx.base.exception.ExtendedIOException;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.io.DataInput;
 import org.openmdx.base.io.DataOutput;
 import org.openmdx.base.io.Externalizable;
@@ -77,18 +74,17 @@ import org.openmdx.kernel.exception.BasicException;
  * <li>an array of values (its minimal and maximal length is defined by the operator
  * </ol> 
  */
-@SuppressWarnings("unchecked")
 public final class FilterProperty 
-  implements Serializable, Externalizable {
+    implements Serializable, Externalizable 
+{
 
     /**
      * Do NOT use! Required for Externalizable.
-     *
      */
     public FilterProperty(
     ) {        
     }
-    
+
     /**
      * Creates a new FilterProperty
      *
@@ -105,7 +101,7 @@ public final class FilterProperty
         short quantor,
         String name,
         short operator,
-        Object[] values
+        Object... values
     ) {
         this.quantor = quantor;
         this.name = name.intern();
@@ -128,7 +124,7 @@ public final class FilterProperty
         String name,
         short operator
     ) {
-        this(quantor,name,operator,new Object[0]);
+        this(quantor,name,operator,NO_VALUES);
     }
 
     /**
@@ -144,9 +140,9 @@ public final class FilterProperty
      *
      */
     public final String name(){
-      return this.name;
+        return this.name;
     }
-    
+
     /**
      * The operator
      *
@@ -156,7 +152,7 @@ public final class FilterProperty
     ){
         return this.operator;
     }
-     
+
     /**
      * 
      */
@@ -176,14 +172,14 @@ public final class FilterProperty
     /**
      * 
      */
-    public List values(){
+    public List<Object> values(){
         return Arrays.asList(this.values);
     }
-  
+
     //------------------------------------------------------------------------
     // Extends Externalizable
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.io.Externalizable#readExternal(org.openmdx.base.io.DataInput)
      */
@@ -245,11 +241,9 @@ public final class FilterProperty
                     new BasicException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.TRANSFORMATION_FAILURE,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("name", this.name),
-                            new BasicException.Parameter("value", value)
-                        },
-                        "FilterProperty serialization failed"
+                        "FilterProperty serialization failed",
+                        new BasicException.Parameter("name", this.name),
+                        new BasicException.Parameter("value", value)
                     )
                 );                        
             }            
@@ -259,7 +253,7 @@ public final class FilterProperty
     //------------------------------------------------------------------------
     // Extends Object
     //------------------------------------------------------------------------
-    
+
     /**
      * Returns a string representation of the object. In general, the toString
      * method returns a string that "textually represents" this object. The
@@ -275,13 +269,8 @@ public final class FilterProperty
             return Records.getRecordFactory().asMappedRecord(
                 getClass().getName(), 
                 Quantors.toString(quantor()) + ' ' + name() + ' ' + 
-                    FilterOperators.toString(operator()) + ' ' + values(),
-                new String[]{
-                    "quantor",
-                    "name",
-                    "operator",
-                    "values"
-                }, 
+                FilterOperators.toString(operator()) + ' ' + values(),
+                TO_STRING_FIELDS,
                 new Object[]{
                     Quantors.toString(quantor()),
                     name(), 
@@ -290,7 +279,7 @@ public final class FilterProperty
                 }
             ).toString();
         } catch (ResourceException exception) {
-            throw new RuntimeServiceException(exception);
+            return super.toString();
         }
     }
 
@@ -302,9 +291,9 @@ public final class FilterProperty
         if(!(object instanceof FilterProperty)) return false;
         FilterProperty that = (FilterProperty)object; 
         return this.quantor == that.quantor &&
-            this.name.equals(that.name) &&
-            this.operator == that.operator &&
-            valuesAreEqual(this.values, that.values); 
+        this.name.equals(that.name) &&
+        this.operator == that.operator &&
+        valuesAreEqual(this.values, that.values); 
     }
 
     /* (non-Javadoc)
@@ -313,7 +302,7 @@ public final class FilterProperty
     public int hashCode() {
         return this.name.hashCode();
     }
-    
+
     /**
      * Compare the arrays as list or set, depending on the filter operator
      * 
@@ -333,10 +322,9 @@ public final class FilterProperty
             case FilterOperators.IS_NOT_IN: 
             case FilterOperators.IS_UNLIKE: 
             case FilterOperators.SOUNDS_UNLIKE: 
-                return new HashSet(Arrays.asList(left)).equals(
-                    new HashSet(Arrays.asList(right))
-                );
-            
+                List<Object> l = Arrays.asList(left);
+                List<Object> r = Arrays.asList(right);
+                return r.containsAll(l) && l.containsAll(r);
             default:
                 return Arrays.equals(left, right);
         }
@@ -351,10 +339,19 @@ public final class FilterProperty
     private static final byte TC_STRING = 1;
     private static final byte TC_NUMBER = 2;
     private static final byte TC_PATH = 3;
-    
+
     private String name;
     private short operator;
     private short quantor;
     private Object[] values;
+
+    private static final String[] TO_STRING_FIELDS = {
+        "quantor",
+        "name",
+        "operator",
+        "values"
+    };
+
+    private static final Object[] NO_VALUES = {};
 
 }

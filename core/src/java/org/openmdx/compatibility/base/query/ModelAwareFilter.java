@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ModelAwareFilter.java,v 1.4 2008/03/21 20:14:51 hburger Exp $
+ * Name:        $Id: ModelAwareFilter.java,v 1.6 2008/11/10 17:23:45 hburger Exp $
  * Description: Model Aware Filter
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 20:14:51 $
+ * Date:        $Date: 2008/11/10 17:23:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,7 +63,6 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 /**
  * Model Aware Filter
  */
-@SuppressWarnings("unchecked")
 public abstract class ModelAwareFilter 
     extends AbstractFilter
     implements ModelHolder_1_0
@@ -72,7 +71,6 @@ public abstract class ModelAwareFilter
     /**
      * Constructor 
      * 
-     * @param model
      * @param filter
      * 
      * @exception   NullPointerException
@@ -81,7 +79,24 @@ public abstract class ModelAwareFilter
     protected ModelAwareFilter(
         FilterProperty[] filter
     ){
+        this(null, filter);
+    }
+
+    /**
+     * Constructor 
+     * 
+     * @param model 
+     * @param filter
+     * 
+     * @exception   NullPointerException
+     *              if the filter is <code>null</code>
+     */
+    protected ModelAwareFilter(
+        Model_1_0 model, 
+        FilterProperty[] filter
+    ){
         super(filter);
+        this.model = model;
     }
 
     /**
@@ -94,7 +109,7 @@ public abstract class ModelAwareFilter
      * @param objectClass
      * @return
      */
-    protected Iterator newInstanceOfIterator(
+    protected Iterator<String> newInstanceOfIterator(
         String objectClass
     ){
         return new InstanceOfIterator(
@@ -119,7 +134,7 @@ public abstract class ModelAwareFilter
     /**
      * InstanceOfIterator
      */
-    private class InstanceOfIterator implements Iterator {
+    private class InstanceOfIterator implements Iterator<String> {
 
         /**
          * Constructor 
@@ -131,7 +146,7 @@ public abstract class ModelAwareFilter
         ){
             this.objectClass = objectClass;
             try {
-                this.delegate = ModelAwareFilter.this.model == null ? (Collection)
+                this.delegate = ModelAwareFilter.this.model == null ? (Collection<?>)
                     Collections.EMPTY_SET : 
                     ModelAwareFilter.this.model.getElement(
                         this.objectClass
@@ -151,12 +166,12 @@ public abstract class ModelAwareFilter
         /**
          * 
          */
-        private final Collection delegate;
+        private final Collection<?> delegate;
 
         /**
          * 
          */
-        private Iterator iterator = null;
+        private Iterator<?> iterator = null;
         
         /**
          * 
@@ -168,7 +183,7 @@ public abstract class ModelAwareFilter
          * 
          * @return the super-types iterator
          */
-        private Iterator getSupertypeIterator(
+        private Iterator<?> getSupertypeIterator(
         ){
             if(this.iterator == null) {
                 this.iterator = this.delegate.iterator();
@@ -197,7 +212,7 @@ public abstract class ModelAwareFilter
          * 
          * @see java.util.Iterator#next()
          */
-        public Object next() {
+        public String next() {
             if(first){
                 this.first = false;
                 return this.objectClass;

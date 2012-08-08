@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LenientBinder.java,v 1.1 2008/03/13 17:16:04 hburger Exp $
+ * Name:        $Id: LenientBinder.java,v 1.2 2008/11/18 01:30:42 hburger Exp $
  * Description: Lenient Binder
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/13 17:16:04 $
+ * Date:        $Date: 2008/11/18 01:30:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,7 +55,6 @@ import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-
 /**
  * The lenient binder uses a fallback for all classloaders for which the 
  * standard binding fails.
@@ -69,13 +68,18 @@ public abstract class LenientBinder<D,B> {
         String staticBinderName
     ) {
         this.staticBinderName = staticBinderName;
-        this.staticDelegate = getStandardDelegate(getClass().getClassLoader());
+        Class<B> binderClass = getBinderClass(
+            getClass().getClassLoader()
+        );
+        this.staticDelegate = binderClass == null ? null : getStandardDelegate(binderClass);
         if(this.staticDelegate == null) {
             this.fallbackDelegate = getFallbackDelegate();
             this.dynamicDelegates = new WeakHashMap<ClassLoader,D>();
+            this.requestedVersion = null;
         } else {
             this.fallbackDelegate = null;
             this.dynamicDelegates = null;
+            this.requestedVersion = getRequestedVersion(binderClass);
         }
     }
 
@@ -100,6 +104,21 @@ public abstract class LenientBinder<D,B> {
     private final D fallbackDelegate;
 
     /**
+     * The requested API version
+     */
+    private final String requestedVersion;
+
+    /**
+     * ClassLoader Accessor
+     */
+    private static final PrivilegedAction<ClassLoader> classLoaderAccessor = new PrivilegedAction<ClassLoader> () {
+        public ClassLoader run () {
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader(); 
+            return classLoader == null ? LenientBinder.class.getClassLoader() : classLoader;
+        }
+    };        
+        
+    /**
      * Ask the binder for the delegate
      * 
      * @param binder
@@ -119,15 +138,25 @@ public abstract class LenientBinder<D,B> {
     );
     
     @SuppressWarnings("unchecked")
-    private D getStandardDelegate(
+    private Class<B> getBinderClass(
         ClassLoader classLoader
     ){
         try {
-            Class<B> binderClass = (Class<B>) Class.forName(
+           return (Class<B>) Class.forName(
                 this.staticBinderName, // name
                 true, // initialize, 
                 classLoader
             );
+        } catch (ClassNotFoundException ignore) {
+            return null;
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    private D getStandardDelegate(
+        Class<B> binderClass
+    ){
+        try {
             B binderInstance = (B) binderClass.getField(
                 "SINGLETON"
             ).get(
@@ -136,8 +165,6 @@ public abstract class LenientBinder<D,B> {
             return getStandardDelegate(
                 binderInstance
             );
-        } catch (ClassNotFoundException ignore) {
-            return null;
         } catch (Exception exception) {
             Util.reportFailure(
                 "Could not retrieve the field \"" + this.staticBinderName + ".SINGLETON\"",
@@ -147,6 +174,22 @@ public abstract class LenientBinder<D,B> {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private String getRequestedVersion(
+        Class<B> binderClass
+    ){
+        try {
+            Object requestedVersion = binderClass.getField(
+                "REQUESTED_API_VERSION"
+            ).get(
+                null // static
+            );
+            return requestedVersion == null ? null : requestedVersion.toString();
+        } catch (Exception exception) {
+            return null;
+        }
+    }
+    
     /**
      * Return this object and the standard delegate in case of dynamic 
      * and static binding, respectively. 
@@ -166,12 +209,17 @@ public abstract class LenientBinder<D,B> {
      */
     protected final D getDelegate() {
         if(this.staticDelegate == null) {
-            ClassLoader classLoader = getClassLoader();
+            ClassLoader classLoader = AccessController.doPrivileged(classLoaderAccessor);
             synchronized(this.dynamicDelegates) {
                 D delegate = this.dynamicDelegates.get(classLoader);
                 if(delegate == null) {
-                    delegate = getStandardDelegate(classLoader);
-                    if(delegate == null) delegate = this.fallbackDelegate;
+                    Class<B> binderClass = getBinderClass(classLoader);
+                    if(binderClass != null) {
+                        delegate = getStandardDelegate(binderClass);
+                    }
+                    if(delegate == null) {
+                        delegate = this.fallbackDelegate;
+                    }
                     this.dynamicDelegates.put(classLoader, delegate);
                 }
                 return delegate;
@@ -181,23 +229,14 @@ public abstract class LenientBinder<D,B> {
         }
     }
 
-    /** 
-     * Get the context class loader associated with the current thread. 
-     * This is done in a doPrivileged block because it is a secure method.
-     * @return the current thread's context class loader, or this class'
-     * loader if there is no context class loader set. 
+    /**
+     * Retrieve the requested API version
+     * 
+     * @return the requested API version, or <code>null</code> if no 
+     * <code>REQUESTED_API_VERISON</code> field had been defined.
      */
-    private static ClassLoader getClassLoader() {
-        return AccessController.doPrivileged(
-            new PrivilegedAction<ClassLoader> () {
-                public ClassLoader run () {
-                    ClassLoader classLoader = Thread.currentThread().getContextClassLoader(); 
-                    return classLoader == null ? 
-                        LenientBinder.class.getClassLoader() : 
-                        classLoader;
-                }
-            }
-        );
+    public String getRequesteVersion(){
+        return this.requestedVersion;
     }
 
 }

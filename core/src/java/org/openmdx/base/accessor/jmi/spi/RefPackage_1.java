@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1.java,v 1.31 2008/07/06 21:01:46 wfro Exp $
+ * Name:        $Id: RefPackage_1.java,v 1.41 2008/11/07 17:45:15 hburger Exp $
  * Description: RefPackage_1 class
- * Revision:    $Revision: 1.31 $
+ * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/06 21:01:46 $
+ * Date:        $Date: 2008/11/07 17:45:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,6 +63,7 @@ import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.Query;
 import javax.jdo.datastore.JDOConnection;
 import javax.jmi.reflect.RefAssociation;
 import javax.jmi.reflect.RefClass;
@@ -70,6 +71,7 @@ import javax.jmi.reflect.RefEnum;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
+import javax.resource.cci.InteractionSpec;
 
 import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
@@ -77,12 +79,11 @@ import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_4;
+import org.openmdx.base.accessor.jmi.cci.RefPackage_1_5;
 import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.transaction.UnitOfWork_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.exception.StackedException;
 import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
@@ -99,7 +100,8 @@ import org.openmdx.model1.mapping.java.Identifier;
  * members to the immediate and outermost package. Other members are static.
  */
 public abstract class RefPackage_1
-    implements RefPackage_1_4, Serializable {
+    implements RefPackage_1_5, Serializable 
+{
 
     //-------------------------------------------------------------------------
     public RefPackage_1(
@@ -110,11 +112,23 @@ public abstract class RefPackage_1
         this.immediatePackage = immediatePackage;
     }
 
+
+    //-------------------------------------------------------------------------
+    // Implements RefPackage_1_5
+    //-------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_5#evictAll()
+     */
+    public void evictAll() {
+        this.outermostPackage.evictAll();
+    }
     
+
     //-------------------------------------------------------------------------
     // Implements RefPackage_1_4
     //-------------------------------------------------------------------------
-        
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_4#getDelegate()
      */
@@ -158,11 +172,23 @@ public abstract class RefPackage_1
         return this.outermostPackage.getDataStoreConnection();
     }
 
-    
+
     //-------------------------------------------------------------------------
     // Implements RefPackage_1_3
     //-------------------------------------------------------------------------
-        
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_3#close()
+     */
+    public void close() {
+        this.outermostPackage.close();
+    }
+
+
+    //-------------------------------------------------------------------------
+    // Implements RefPackage_1_3
+    //-------------------------------------------------------------------------
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_3#clear()
      */
@@ -181,12 +207,6 @@ public abstract class RefPackage_1
             refDelegate
         );
     }  
-    
-    //-------------------------------------------------------------------------
-    public boolean refUseOpenMdx1ImplLookup(
-    ) {
-        return this.outermostPackage.refUseOpenMdx1ImplLookup();
-    }
 
     //-------------------------------------------------------------------------
     public String refBindingPackageSuffix(
@@ -199,7 +219,7 @@ public abstract class RefPackage_1
     ) {
         return this.outermostPackage.refUserContext();
     }
-    
+
     //-------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_3#refPersistenceManagerFactory()
@@ -208,7 +228,7 @@ public abstract class RefPackage_1
         return this.outermostPackage.refPersistenceManagerFactory();
     }
 
-    
+
     //-------------------------------------------------------------------------
     // Implements RefPackage_1_2
     //-------------------------------------------------------------------------
@@ -217,23 +237,10 @@ public abstract class RefPackage_1
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_2#refViewContext()
      */
-    public Object refViewContext() {
-        return (this.outermostPackage).refViewContext();
+    public InteractionSpec refInteractionSpec() {
+        return (this.outermostPackage).refInteractionSpec();
     }
 
-    //-------------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.jmi.cci.RefPackage_1_2#refObject(java.lang.String, javax.jmi.reflect.RefObject)
-     */
-    public RefObject refCloneObject(
-        String mofId, 
-        RefObject initialValues, boolean allValuesDirty
-    ) {
-        return this.outermostPackage.refCloneObject(
-            null, 
-            initialValues, allValuesDirty
-        );
-    }
 
     //-------------------------------------------------------------------------
     // Implements RefPackage_1_1
@@ -355,51 +362,39 @@ public abstract class RefPackage_1
                 this.outermostPackage.refBindingPackageSuffix() + "." +
                 className;         
             if(structConstructor == null) {
-                Class<?> structClass = null;
-                try {
-                    structClass = Classes.getApplicationClass(qualifiedClassName + "Impl");                
-                    structConstructor = structClass.getConstructor(
-                        new Class[]{
-                            RefPackage_1_0.class,
-                            java.lang.Object.class
-                        }
-                    );                 
-                }
-                catch(ClassNotFoundException e) {
-                    structClass = Jmi1StructInvocationHandler.class;
-                    structConstructor = structClass.getConstructor(
-                        new Class[]{
-                            String.class,
-                            RefPackage_1_0.class,
-                            java.lang.Object.class
-                        }
-                    );                 
-                }
+                Class<?> structClass = Jmi1StructInvocationHandler.class;
+                structConstructor = structClass.getConstructor(
+                    new Class[]{
+                        String.class,
+                        RefPackage_1_0.class,
+                        java.lang.Object.class
+                    }
+                );                 
                 this.structConstructors.put(
                     structName,
                     structConstructor
                 );
             }
-            Object struct = structConstructor.getParameterTypes().length == 2
-                ? structConstructor.newInstance(new Object[]{this, arg})
-                : structConstructor.newInstance(new Object[]{structName, this, arg});
-            if(struct instanceof InvocationHandler) {
-                qualifiedClassName = 
-                    packageName.replace(':', '.') + "." +
-                    this.outermostPackage.refBindingPackageSuffix() + "." +
-                    Identifier.CLASS_PROXY_NAME.toIdentifier(className);                         
-                return (RefStruct)Proxy.newProxyInstance(
-                    this.getClass().getClassLoader(), 
-                    new Class[]{
-                        Classes.getApplicationClass(qualifiedClassName),
-                        RefStruct_1_0.class
-                    },
-                    (InvocationHandler)struct
-                );
-            }
-            else {
-                return (RefStruct)struct;
-            }
+            Object struct = structConstructor.getParameterTypes().length == 2 ? 
+                structConstructor.newInstance(this, arg) : 
+                    structConstructor.newInstance(structName, this, arg);
+                if(struct instanceof InvocationHandler) {
+                    qualifiedClassName = 
+                        packageName.replace(':', '.') + "." +
+                        this.outermostPackage.refBindingPackageSuffix() + "." +
+                        Identifier.CLASS_PROXY_NAME.toIdentifier(className);                         
+                    return (RefStruct)Proxy.newProxyInstance(
+                        this.getClass().getClassLoader(), 
+                        new Class[]{
+                            Classes.getApplicationClass(qualifiedClassName),
+                            RefStruct_1_0.class
+                        },
+                        (InvocationHandler)struct
+                    );
+                }
+                else {
+                    return (RefStruct)struct;
+                }
         }
         catch(InvocationTargetException e) {
             if(e.getTargetException() instanceof Exception) {
@@ -499,16 +494,16 @@ public abstract class RefPackage_1
                     delegateName
                 }
                 : new Object[]{
-                    this,
-                    className.endsWith("Query")
+                        this,
+                        className.endsWith("Query")
                         ? filterClassName.substring(0, filterClassName.lastIndexOf("Query"))
-                        : filterClassName,
-                    filterProperties,
-                    attributeSpecifiers,
-                    delegateFilter, 
-                    delegateQuantor, 
-                    delegateName                            
-                  }
+                            : filterClassName,
+                            filterProperties,
+                            attributeSpecifiers,
+                            delegateFilter, 
+                            delegateQuantor, 
+                            delegateName                            
+                    }
             );
             if(filter instanceof InvocationHandler) {
                 String cciClassName = Identifier.CLASS_PROXY_NAME.toIdentifier(className);
@@ -516,6 +511,7 @@ public abstract class RefPackage_1
                     this.getClass().getClassLoader(), 
                     new Class[]{
                         RefFilter_1_1.class,
+                        Query.class,
                         Classes.getApplicationClass(packageName.replace(':', '.') + "." + Names.CCI2_PACKAGE_SUFFIX + "." + (cciClassName.endsWith("Query") ? cciClassName : cciClassName + "Query"))
                     },
                     (InvocationHandler)filter
@@ -636,9 +632,7 @@ public abstract class RefPackage_1
                             }
                         );
                         refClass = (RefClass)instanceConstructor.newInstance(
-                            new Object[]{
-                                immediatePackage
-                            }
+                            immediatePackage
                         );
                         this.classes.put(
                             qualifiedClassName,
@@ -664,12 +658,10 @@ public abstract class RefPackage_1
                     if(!Names.JMI1_PACKAGE_SUFFIX.equals(bindingPackageSuffix)) {
                         throw new JmiServiceException(
                             new ServiceException(
-                                StackedException.DEFAULT_DOMAIN,
-                                StackedException.NOT_FOUND,
-                                new BasicException.Parameter[]{
-                                    new BasicException.Parameter("binding.name", bindingPackageSuffix)
-                                },
-                                "Unsupported binding. Supported are " + Arrays.asList(Names.JMI1_PACKAGE_SUFFIX)
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.NOT_FOUND,
+                                "Unsupported binding. Supported are " + Arrays.asList(Names.JMI1_PACKAGE_SUFFIX),
+                                new BasicException.Parameter("binding.name", bindingPackageSuffix)
                             )
                         );
                     }
@@ -695,12 +687,10 @@ public abstract class RefPackage_1
             }
             throw new JmiServiceException(
                 new ServiceException(
-                    StackedException.DEFAULT_DOMAIN,
-                    StackedException.NOT_FOUND,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("className", loadedClassName)
-                    },
-                    "unknown class name. Can not get JMI class"
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND,
+                    "unknown class name. Can not get JMI class",
+                    new BasicException.Parameter("className", loadedClassName)
                 )
             );
         }
@@ -764,8 +754,8 @@ public abstract class RefPackage_1
     ) {
         try {
             if(
-                structType instanceof ModelElement_1_0 &&
-                this.refModel().isStructureType(structType)
+                    structType instanceof ModelElement_1_0 &&
+                    this.refModel().isStructureType(structType)
             ) {
                 return this.refCreateStruct(
                     (String)((ModelElement_1_0)structType).values("qualifiedName").get(0),
@@ -774,12 +764,10 @@ public abstract class RefPackage_1
             }
             else {
                 throw new ServiceException (
-                    StackedException.DEFAULT_DOMAIN,
-                    StackedException.ASSERTION_FAILURE,
-                    new BasicException.Parameter[] {
-                        new BasicException.Parameter("structure type", structType)
-                    },
-                    "unsupported structure type. Must be [StructureType]"
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "unsupported structure type. Must be [StructureType]",
+                    new BasicException.Parameter("structure type", structType)
                 );
             }
         }

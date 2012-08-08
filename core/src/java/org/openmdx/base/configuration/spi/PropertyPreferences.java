@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PropertyPreferences.java,v 1.6 2008/03/21 18:29:18 hburger Exp $
+ * Name:        $Id: PropertyPreferences.java,v 1.7 2008/11/04 10:01:29 hburger Exp $
  * Description: Property Preferences 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:29:18 $
+ * Date:        $Date: 2008/11/04 10:01:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -112,7 +112,7 @@ class PropertyPreferences
      * 
      */
     private final String prefix;        
-
+    
     /**
      * Tells whether a given propertyName denotes a key for this node.
      * 
@@ -325,10 +325,18 @@ class PropertyPreferences
                     if("System".equals(subSegment)) {
                         properties = new SystemProperties(properties);
                     } else if (subSegment.startsWith("(") && subSegment.endsWith(")")) {
+                        String uri = subSegment.substring(1, subSegment.length() - 1);
+                        if(
+                            uri.startsWith("=") ||
+                            uri.startsWith("@") ||
+                            uri.startsWith("+") ||
+                            uri.startsWith("$") ||
+                            uri.startsWith("!") 
+                        ) uri = "xri://" + uri;
                         try {
                             properties = new StreamProperties(
                                 properties, 
-                                new URL(subSegment.substring(1, subSegment.length() - 1))
+                                new URL(uri)
                             );
                         } catch (MalformedURLException exception) {
                             throw (IllegalArgumentException) new IllegalArgumentException(
@@ -655,7 +663,11 @@ class PropertyPreferences
                     "Property preferences segment " + this.url
                 );
             } catch (IOException exception) {
-                throw new BackingStoreException(exception);
+                throw (BackingStoreException) new BackingStoreException(
+                    "Cannot save to " + this.url
+                ).initCause(
+                    exception
+                );
             }
         }
 

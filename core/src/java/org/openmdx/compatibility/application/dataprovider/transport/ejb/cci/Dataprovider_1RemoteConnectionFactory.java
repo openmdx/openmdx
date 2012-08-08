@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1RemoteConnectionFactory.java,v 1.8 2008/02/19 13:48:43 hburger Exp $
+ * Name:        $Id: Dataprovider_1RemoteConnectionFactory.java,v 1.9 2008/09/10 08:55:24 hburger Exp $
  * Description: Dataprovider_1RemoteConnectionFactory class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/19 13:48:43 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,7 +59,7 @@ import org.openmdx.kernel.exception.BasicException;
  * Dataprovider_1RemoteConnectionFactory
  */
 public class Dataprovider_1RemoteConnectionFactory
-    implements Dataprovider_1ConnectionFactory
+implements Dataprovider_1ConnectionFactory
 {   
     /**
      * Constructor
@@ -69,7 +69,7 @@ public class Dataprovider_1RemoteConnectionFactory
     ){
         this.home = home;
     }
-    
+
     /**
      * Creates a dataprovider connection with the default registration id and
      * transaction policy. 
@@ -83,13 +83,12 @@ public class Dataprovider_1RemoteConnectionFactory
     ) throws ServiceException {
         try {
             return new Dataprovider_1RemoteConnection<Dataprovider_1_0Remote>(
-                this.home.create()
+                    this.home.create()
             );
         } catch (Exception exception) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
-                null,
                 "Could not create EJB dataprovider object"
             ).log();
         }
@@ -98,10 +97,10 @@ public class Dataprovider_1RemoteConnectionFactory
     //------------------------------------------------------------------------
     // Variables
     //------------------------------------------------------------------------
-    
+
     /**
      * The dataprovider home.
      */
     private final Dataprovider_1Home home;
-    
+
 }

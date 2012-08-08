@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: EnvironmentTestCase.java,v 1.1 2004/07/06 09:38:06 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: EnvironmentTestCase.java,v 1.2 2008/11/21 17:03:29 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/07/06 09:38:06 $
+ * Date:        $Date: 2008/11/21 17:03:29 $
  * ====================================================================
  *
  * This software is published under the GNU Lesser General Public
  * as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
@@ -64,6 +64,7 @@ public class EnvironmentTestCase extends TestCase
     {
 
         Context ctx = new InitialContext();
+        @SuppressWarnings("unchecked")
         Hashtable env = null;
         int       size1, size2;
 
@@ -88,7 +89,7 @@ public class EnvironmentTestCase extends TestCase
 
         Context ctx = new InitialContext();
         Object    value = new Integer(12354);
-        Hashtable env   = null;
+        Hashtable<?,?> env   = null;
 
         ctx.addToEnvironment("EtestAddToEnvironment", value);
 
@@ -107,7 +108,7 @@ public class EnvironmentTestCase extends TestCase
 
         Context ctx = new InitialContext();
         Object    value = new Integer(12098754);
-        Hashtable env   = null;
+        Hashtable<?,?> env   = null;
 
         ctx.addToEnvironment("EtestRemoveFromEnvironment", value);
 

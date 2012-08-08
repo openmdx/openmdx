@@ -1,0 +1,793 @@
+
+(object Petal
+    version    	50
+    _written   	"Rose 8.3.0407.2800"
+    charSet    	0)
+
+(object Class_Category "generic1"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3FF13E0E02A5"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "StringProperty"
+	    quid       	"3CEE63D90383"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3D10AA6D0206"
+		    supplier   	"Logical View::org::openmdx::generic1::Property"
+		    quidu      	"3D106CB603A3"))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "stringValue"
+		    quid       	"3CEE63E60395"
+		    stereotype 	"sparsearray"
+		    type       	"org::w3c::string"
+		    exportControl 	"Public")))
+	(object Class "BooleanProperty"
+	    quid       	"3CEE6428035E"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3D10AA7101B1"
+		    supplier   	"Logical View::org::openmdx::generic1::Property"
+		    quidu      	"3D106CB603A3"))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "booleanValue"
+		    quid       	"3CEE64350118"
+		    stereotype 	"sparsearray"
+		    type       	"org::w3c::boolean"
+		    exportControl 	"Public")))
+	(object Class "UriProperty"
+	    quid       	"3D3D7A7702E3"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3D3D7A8D01A5"
+		    supplier   	"Logical View::org::openmdx::generic1::Property"
+		    quidu      	"3D106CB603A3"))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "uriValue"
+		    quid       	"3D3D7A950002"
+		    stereotype 	"sparsearray"
+		    type       	"org::w3c::anyURI"
+		    exportControl 	"Public")))
+	(object Class "IntegerProperty"
+	    quid       	"3E3E92AF00AF"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3E3E938D0307"
+		    supplier   	"Logical View::org::openmdx::generic1::Property"
+		    quidu      	"3D106CB603A3"))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "integerValue"
+		    quid       	"3E3E92D2007D"
+		    stereotype 	"sparsearray"
+		    type       	"org::w3c::integer"
+		    exportControl 	"Public")))
+	(object Class "Property"
+	    quid       	"3D106CB603A3"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "description"
+		    quid       	"3E2D44BF01DD"
+		    stereotype 	"0..1"
+		    type       	"org::w3c::string"
+		    exportControl 	"Public")
+		(object ClassAttribute "name"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"SPICE"
+			    name       	"isChangeable"
+			    value      	(value Text "false")))
+		    quid       	"417F6C5E02A4"
+		    type       	"org::w3c::string"
+		    exportControl 	"Public"
+		    derived    	TRUE))
+	    abstract   	TRUE)
+	(object Class "PropertySet"
+	    quid       	"3DC93385006B"
+	    documentation 	
+|If a class is a subclass of PropertySet one is able to attach typed name/list pairs to it via the "property" reference.
+	    
+	    stereotype 	"root"
+	    abstract   	TRUE)
+	(object Class "DecimalProperty"
+	    quid       	"3CEE627103D5"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"3D10AA69006F"
+		    supplier   	"Logical View::org::openmdx::generic1::Property"
+		    quidu      	"3D106CB603A3"))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "decimalValue"
+		    quid       	"3CEE62820181"
+		    stereotype 	"sparsearray"
+		    type       	"org::w3c::decimal"
+		    exportControl 	"Public")))
+	(object Association "PropertySetHasProperties"
+	    quid       	"3DC933B30298"
+	    roles      	(list role_list
+		(object Role "property"
+		    quid       	"3DC933B400EB"
+		    label      	"property"
+		    supplier   	"Logical View::org::openmdx::generic1::Property"
+		    quidu      	"3D106CB603A3"
+		    keys       	(list class_attribute_list
+			(object ClassAttribute "name"
+			    quid       	"3DC934170152"
+			    type       	"org::w3c::string"))
+		    client_cardinality 	(value cardinality "0..1")
+		    Containment 	"By Value"
+		    is_navigable 	TRUE)
+		(object Role "propertySet"
+		    quid       	"3DC933B40109"
+		    label      	"propertySet"
+		    supplier   	"Logical View::org::openmdx::generic1::PropertySet"
+		    quidu      	"3DC93385006B"
+		    client_cardinality 	(value cardinality "1..1")
+		    is_aggregate 	TRUE))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Properties"
+	    quid       	"3DC93232024F"
+	    title      	"Properties"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	1009
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::org::openmdx::generic1::StringProperty" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(406, 984)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(50, 917)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	712
+			justify    	0
+			label      	"StringProperty")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3CEE63D90383"
+		    compartment 	(object Compartment
+			Parent_View 	@1
+			location   	(50, 969)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	2
+			max_width  	710)
+		    width      	730
+		    height     	154
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::openmdx::generic1::UriProperty" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2112, 986)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(1762, 919)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	700
+			justify    	0
+			label      	"UriProperty")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3D3D7A7702E3"
+		    compartment 	(object Compartment
+			Parent_View 	@2
+			location   	(1762, 971)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	2
+			max_width  	697)
+		    width      	718
+		    height     	154
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::openmdx::generic1::DecimalProperty" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1730, 1211)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(1334, 1144)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	792
+			justify    	0
+			label      	"DecimalProperty")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3CEE627103D5"
+		    compartment 	(object Compartment
+			Parent_View 	@3
+			location   	(1334, 1196)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	2
+			max_width  	791)
+		    width      	810
+		    height     	154
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::openmdx::generic1::BooleanProperty" @4
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1268, 989)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(868, 922)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	800
+			justify    	0
+			label      	"BooleanProperty")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3CEE6428035E"
+		    compartment 	(object Compartment
+			Parent_View 	@4
+			location   	(868, 974)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	2
+			max_width  	797)
+		    width      	818
+		    height     	154
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::openmdx::generic1::Property" @5
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1225, 587)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@5
+			location   	(925, 500)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	600
+			justify    	0
+			label      	"Property")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3D106CB603A3"
+		    compartment 	(object Compartment
+			Parent_View 	@5
+			location   	(925, 552)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	3
+			max_width  	597)
+		    width      	618
+		    height     	194
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::openmdx::generic1::PropertySet" @6
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1222, 131)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(918, 104)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	608
+			justify    	0
+			label      	"PropertySet")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@6
+			location   	(918, 63)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	608
+			justify    	0
+			label      	"<<root>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3DC93385006B"
+		    width      	626
+		    height     	156
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object AssociationViewNew "PropertySetHasProperties" @7
+		    location   	(1213, 348)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @8
+			Parent_View 	@7
+			location   	(1232, 398)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	1
+			anchor_loc 	1
+			nlines     	1
+			max_width  	380
+			justify    	0
+			label      	"PropertySetHasProperties"
+			pctDist    	0.833333
+			height     	50
+			orientation 	1)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3DC933B30298"
+		    roleview_list 	(list RoleViews
+			(object RoleView "property" @9
+			    Parent_View 	@7
+			    location   	(44, 217)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @10
+				Parent_View 	@9
+				location   	(1316, 465)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	153
+				justify    	0
+				label      	"+property"
+				pctDist    	0.828729
+				height     	103
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3DC933B400EB"
+			    client     	@7
+			    supplier   	@5
+			    vertices   	(list Points
+				(1213, 348)
+				(1213, 489))
+			    line_style 	3
+			    origin_attachment 	(1213, 348)
+			    terminal_attachment 	(1213, 489)
+			    label      	(object SegLabel @11
+				Parent_View 	@9
+				location   	(1154, 465)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	230
+				justify    	0
+				label      	"0..1"
+				pctDist    	0.830882
+				height     	60
+				orientation 	1))
+			(object RoleView "propertySet" @12
+			    Parent_View 	@7
+			    location   	(44, 217)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @13
+				Parent_View 	@12
+				location   	(1341, 300)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	199
+				justify    	0
+				label      	"+propertySet"
+				pctDist    	0.352941
+				height     	128
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"3DC933B40109"
+			    client     	@7
+			    supplier   	@6
+			    vertices   	(list Points
+				(1213, 348)
+				(1213, 208))
+			    line_style 	3
+			    origin_attachment 	(1213, 348)
+			    terminal_attachment 	(1213, 208)
+			    label      	(object SegLabel @14
+				Parent_View 	@12
+				location   	(1156, 298)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	125
+				justify    	0
+				label      	"1..1"
+				pctDist    	0.360902
+				height     	58
+				orientation 	0)
+			    label      	(object SegLabel @15
+				Parent_View 	@12
+				location   	(1213, 237)
+				font       	(object Font
+				    size       	6
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	5
+				anchor_loc 	1
+				nlines     	1
+				max_width  	241
+				justify    	0
+				label      	"name : org::w3c::string"
+				pctDist    	0.900000
+				height     	12
+				orientation 	0))))
+		(object ClassView "Class" "Logical View::org::openmdx::generic1::IntegerProperty" @16
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(831, 1207)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@16
+			location   	(450, 1140)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	762
+			justify    	0
+			label      	"IntegerProperty")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E3E92AF00AF"
+		    compartment 	(object Compartment
+			Parent_View 	@16
+			location   	(450, 1192)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	16777215
+			anchor     	2
+			nlines     	2
+			max_width  	760)
+		    width      	780
+		    height     	154
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object InheritTreeView "" @17
+		    location   	(1232, 806)
+		    line_color 	3342489
+		    fill_color 	13434879
+		    supplier   	@5
+		    vertices   	(list Points
+			(1232, 806)
+			(1232, 684)))
+		(object InheritView "" @18
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3E3E938D0307"
+		    client     	@16
+		    supplier   	@5
+		    vertices   	(list Points
+			(812, 1130)
+			(812, 806))
+		    line_style 	3
+		    origin_attachment 	(812, 1130)
+		    terminal_attachment 	(812, 806)
+		    drawSupplier 	@17)
+		(object InheritView "" @19
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3D10AA69006F"
+		    client     	@3
+		    supplier   	@5
+		    vertices   	(list Points
+			(1707, 1133)
+			(1707, 806))
+		    line_style 	3
+		    origin_attachment 	(1707, 1133)
+		    terminal_attachment 	(1707, 806)
+		    drawSupplier 	@17)
+		(object InheritView "" @20
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3D3D7A8D01A5"
+		    client     	@2
+		    supplier   	@5
+		    vertices   	(list Points
+			(2095, 908)
+			(2095, 806))
+		    line_style 	3
+		    origin_attachment 	(2095, 908)
+		    terminal_attachment 	(2095, 806)
+		    drawSupplier 	@17)
+		(object InheritView "" @21
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3D10AA7101B1"
+		    client     	@4
+		    supplier   	@5
+		    vertices   	(list Points
+			(1235, 911)
+			(1235, 806))
+		    line_style 	3
+		    origin_attachment 	(1235, 911)
+		    terminal_attachment 	(1235, 806)
+		    drawSupplier 	@17)
+		(object InheritView "" @22
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"3D10AA6D0206"
+		    client     	@1
+		    supplier   	@5
+		    vertices   	(list Points
+			(375, 907)
+			(375, 806))
+		    line_style 	3
+		    origin_attachment 	(375, 907)
+		    terminal_attachment 	(375, 806)
+		    drawSupplier 	@17)))
+	(object ClassDiagram "_LICENSE"
+	    quid       	"410407C5029A"
+	    title      	"_LICENSE"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object NoteView @23
+		    location   	(742, 1022)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@23
+			location   	(61, 68)
+			fill_color 	13434879
+			nlines     	46
+			max_width  	1327
+			label      	
+|This software is published under the BSD license
+|as listed below.
+|
+|Copyright (c) 2004, OMEX AG, Switzerland
+|All rights reserved.
+|
+|Redistribution and use in source and binary forms, with or without 
+|modification, are permitted provided that the following conditions 
+|are met:
+|
+|Redistribution and use in source and binary forms, with or
+|without modification, are permitted provided that the following
+|conditions are met:
+|
+|* Redistributions of source code must retain the above copyright
+|notice, this list of conditions and the following disclaimer.
+|
+|* Redistributions in binary form must reproduce the above copyright
+|notice, this list of conditions and the following disclaimer in
+|the documentation and/or other materials provided with the
+|distribution.
+|
+|* Neither the name of OMEX AG nor the names of the contributors
+|to openMDX may be used to endorse or promote products derived
+|from this software without specific prior written permission
+|
+|
+|THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+|CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+|INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+|MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+|DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+|BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+|EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+|TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+|DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+|ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+|OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+|OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+|POSSIBILITY OF SUCH DAMAGE.
+|
+|------------------
+|
+|This product includes software developed by the Apache Software
+|Foundation (http://www.apache.org/).
+			)
+		    line_color 	3342489
+		    fill_color 	16775658
+		    width      	1387
+		    height     	1920)))))

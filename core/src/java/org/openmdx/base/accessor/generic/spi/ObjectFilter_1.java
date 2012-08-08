@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ObjectFilter_1.java,v 1.7 2008/03/19 17:13:11 hburger Exp $
+ * Name:        $Id: ObjectFilter_1.java,v 1.10 2008/11/05 12:53:41 hburger Exp $
  * Description: Object Filter
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:13:11 $
+ * Date:        $Date: 2008/11/05 12:53:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,14 +50,11 @@
  */
 package org.openmdx.base.accessor.generic.spi;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 
 import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.exception.BadParameterException;
 import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.compatibility.base.collection.SparseList;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.compatibility.base.query.ModelAwareFilter;
@@ -66,9 +63,6 @@ import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 /**
  * Object Filter
  */
-@SuppressWarnings({
-    "unchecked", "serial"
-})
 public class ObjectFilter_1 extends ModelAwareFilter {
 
     /**
@@ -86,53 +80,26 @@ public class ObjectFilter_1 extends ModelAwareFilter {
         Model_1_0 model,
         FilterProperty[] filter
     ){
-        this(filter);
-        super.setModel(model);
+        super(model, filter);
     }
 
     /**
-     * Constructor for a sub-class unaware filter
-     * 
-     * @param filter
-     * 
-     * @exception   BadParameterException
-     *              in case of an invalid filter property set
-     * @exception   NullPointerException
-     *              if the filter is <code>null</code>
+     * Implements <code>Serializable</code>
      */
-    public ObjectFilter_1(
-        FilterProperty[] filter
-    ){
-        super(filter);
-    }
-    
+    private static final long serialVersionUID = 875014812028655977L;
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.query.AbstractFilter#getValues(java.lang.Object, java.lang.String)
      */
-    protected Iterator getValues(
+    protected Iterator<?> getValues(
         Object candidate, 
         String attribute
     ){
         try {
-            Object_1_0 object = (Object_1_0)candidate;
-            if(SystemAttributes.OBJECT_INSTANCE_OF.equals(attribute)) {
-                //
-                // Iterate over the class - and its subclasses if the model is not null
-                //
-                return newInstanceOfIterator(object.objGetClass());
-            } else {
-                //
-                // Indirect access to the objects raw value method
-                //
-                Object value = object.objGetValue('?' + attribute);
-                return value == null ?
-                    Collections.EMPTY_SET.iterator() :
-                value instanceof SparseList ?
-                    ((SparseList)value).populationIterator() :
-                value instanceof Collection ?
-                    ((Collection)value).iterator() :
-                    Collections.singleton(value).iterator();
-            }
+            Object_1_5 object = (Object_1_5)candidate;
+            return SystemAttributes.OBJECT_INSTANCE_OF.equals(attribute) ?
+                newInstanceOfIterator(object.objGetClass()) :
+                object.objGetIterable(attribute).iterator();
         } catch (Exception exception){
             new RuntimeServiceException(exception).log();
             return null;

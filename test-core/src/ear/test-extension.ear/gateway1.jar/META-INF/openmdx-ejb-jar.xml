@@ -3,8 +3,8 @@
 <openmdx-ejb-jar>
   	<enterprise-beans>
     	<session>
-      		<ejb-name>NoOrNew</ejb-name>
-			<jndi-name>org/openmdx/test/gateway1/NoOrNew</jndi-name>
+      		<ejb-name>EntityManagerFactory</ejb-name>
+			<local-jndi-name>test/openmdx/datatypes1/EntityManagerFactory</local-jndi-name>
 	      	<pool>
 	        	<initial-capacity>1</initial-capacity>
 	        	<maximum-capacity>10</maximum-capacity>
@@ -12,8 +12,8 @@
 	      	</pool>
     	</session>
     	<session>
-      		<ejb-name>Mandatory</ejb-name>
-			<jndi-name>org/openmdx/test/gateway1/Mandatory</jndi-name>
+      		<ejb-name>Gateway</ejb-name>
+			<local-jndi-name>test/openmdx/datatypes1/Gateway</local-jndi-name>
 	      	<pool>
 	        	<initial-capacity>1</initial-capacity>
 	        	<maximum-capacity>10</maximum-capacity>

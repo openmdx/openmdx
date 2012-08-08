@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePaneControl.java,v 1.139 2008/06/01 11:26:18 wfro Exp $
+ * Name:        $Id: ReferencePaneControl.java,v 1.153 2008/12/12 13:59:46 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.139 $
+ * Revision:    $Revision: 1.153 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/01 11:26:18 $
+ * Date:        $Date: 2008/12/12 13:59:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,15 +52,13 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -72,6 +70,7 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
@@ -100,6 +99,7 @@ public class ReferencePaneControl
     //-------------------------------------------------------------------------
     public ReferencePaneControl(
         String id,
+        int perspective,
         String locale,
         int localeAsIndex,
         ControlFactory controlFactory,
@@ -111,7 +111,6 @@ public class ReferencePaneControl
             id,
             locale,
             localeAsIndex,
-            controlFactory,
             pane,
             paneIndex
         );
@@ -126,13 +125,15 @@ public class ReferencePaneControl
           org.openmdx.ui1.jmi1.Tab tab = (org.openmdx.ui1.jmi1.Tab)pane.getMember().get(i);
           org.openmdx.ui1.jmi1.ObjectContainer objectContainer = (org.openmdx.ui1.jmi1.ObjectContainer)tab.getMember().get(0);
           String title = 
-              localeAsIndex < tab.getTitle().size()
-                  ? tab.getTitle().get(localeAsIndex)
-                  : tab.getTitle().get(0);
+              localeAsIndex < tab.getTitle().size() ? 
+                  tab.getTitle().get(0).startsWith(WebKeys.TAB_GROUPING_CHARACTER) && !tab.getTitle().get(localeAsIndex).startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? 
+                      WebKeys.TAB_GROUPING_CHARACTER + tab.getTitle().get(localeAsIndex) :
+                      tab.getTitle().get(localeAsIndex) :
+                  tab.getTitle().get(0);
           String toolTip = 
-              localeAsIndex < tab.getToolTip().size()
-                  ? tab.getToolTip().get(localeAsIndex)
-                  : title;              
+              localeAsIndex < tab.getToolTip().size() ? 
+                  tab.getToolTip().get(localeAsIndex) : 
+                  title;              
           references.add(
               new Action(
                   Action.EVENT_SELECT_REFERENCE,
@@ -149,7 +150,8 @@ public class ReferencePaneControl
           );      
           this.gridControl[i] = controlFactory.createGridControl(
               Integer.toString(i),
-              locale,
+              perspective,
+              locale,              
               localeAsIndex,
               (org.openmdx.ui1.jmi1.Tab)pane.getMember().get(i),
               this.getPaneIndex(),
@@ -224,15 +226,15 @@ public class ReferencePaneControl
         AppLog.detail("> paint");
        
         ShowObjectView view = (ShowObjectView)p.getView();
-        ApplicationContext app = view.getApplicationContext();
+        ApplicationContext application = view.getApplicationContext();
         ReferencePane referencePane = view.getReferencePane()[this.getPaneIndex()];
-        Texts_1_0 texts = app.getTexts();
-        HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
+        Texts_1_0 texts = application.getTexts();
+        HtmlEncoder_1_0 htmlEncoder = application.getHtmlEncoder();
             
         int paneIndex = this.getPaneIndex();
-        String containerId = view.getContainerElementId() == null
-            ? "gridContent" + Integer.toString(paneIndex)
-            : view.getContainerElementId();
+        String containerId = view.getContainerElementId() == null ? 
+            "gridContent" + Integer.toString(paneIndex) : 
+            view.getContainerElementId();
         
         // View
         int zIndex = (view.getReferencePane().length - this.getPaneIndex()) * 10;
@@ -261,7 +263,7 @@ public class ReferencePaneControl
                     : isGroupTabActive
                         ? "hidden"
                         : "";
-                p.write("  <a href=\"#\" class=\"", tabClass, "\"", p.getOnClick("javascript:gTabSelect(this);new Ajax.Updater('", containerId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});return false;"), ">", tabTitle, "</a>");
+                p.write("  <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:gTabSelect(this);new Ajax.Updater('", containerId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});return false;\">", tabTitle, "</a>");
             }
             p.write("</div>");
             p.write("<div id=\"", containerId, "\" class=\"gContent\" style=\"position:relative;z-index:", Integer.toString(zIndex), ";\">");
@@ -309,7 +311,7 @@ public class ReferencePaneControl
                         Autocompleter_1_0 autocompleter = this.getAutocompleter(
                             objectReference.getObject(),
                             addObjectAction.getParameter("reference"),
-                            app
+                            application
                         );                                
                         p.write("<div id=\"menuOpPanel\" class=\"menuOpPanel\">");
                         p.write("  <table cellspacing=\"0\" cellpadding=\"0\" id=\"menuOp\" width=\"100%\">");
@@ -319,8 +321,8 @@ public class ReferencePaneControl
                         p.write("          <ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
                         p.write("            <li><a href=\"#\" onclick=\"javascript:return false;\">", htmlEncoder.encode(texts.getEditTitle(), false), "&nbsp;&nbsp;&nbsp;</a>");
                         p.write("              <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
-                        p.write("                <li><a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(addObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "=", Action.PARAMETER_OBJECTXRI, "*('+encodeURIComponent($F('", adderFieldId, "'))+')'", updateTabScriptletPost), ">", htmlEncoder.encode(texts.getAddObjectTitle(), false), "</a></li>");
-                        p.write("                <li><a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(removeObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "='+encodeURIComponent(getSelectedGridRows('gridTable", tabId, "',1))", updateTabScriptletPost), ">", htmlEncoder.encode(texts.getRemoveObjectTitle(), false), "</a></li>");
+                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(addObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "=", Action.PARAMETER_OBJECTXRI, "*('+encodeURIComponent($F('", adderFieldId, "'))+')'", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getAddObjectTitle(), false), "</a></li>");
+                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(removeObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "='+encodeURIComponent(getSelectedGridRows('gridTable", tabId, "',1))", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getRemoveObjectTitle(), false), "</a></li>");
                         p.write("              </ul>");
                         p.write("            </li>");
                         p.write("          </ul>");
@@ -339,7 +341,7 @@ public class ReferencePaneControl
                             addObjectAction.getParameter("reference"),
                             lookupId
                         );
-                        CharSequence imgTag = p.getImg("class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_LOOKUP_AUTOCOMPLETE_GRID, "\"", p.getOnClick("OF.findObject(", p.getEvalHRef(findObjectAction), ", $('", adderFieldId, ".Title'), $('", adderFieldId, "'), '", lookupId, "');"));
+                        CharSequence imgTag = p.getImg("class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_LOOKUP_AUTOCOMPLETE_GRID, "\" onclick=\"OF.findObject(", p.getEvalHRef(findObjectAction), ", $('", adderFieldId, ".Title'), $('", adderFieldId, "'), '", lookupId, "');\"");
                         if(autocompleter == null) {
                             p.write("      <input id=\"", adderFieldId, ".Title\" type=\"text\" name=\"", adderFieldId, ".Title\" value=\"\" />");
                             p.write("      <input type=\"hidden\" id=\"", adderFieldId, "\" name=\"", adderFieldId, "\" value=\"\" />");
@@ -377,11 +379,11 @@ public class ReferencePaneControl
                     //
                     p.write("      <td class=\"menuOpPanelActions\">");                    
                     // Page 0
-                    p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(firstPageAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), firstPageAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"|<\""), "</a>");
+                    p.write("        <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(firstPageAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), firstPageAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"|<\""), "</a>");
                     // Page previous
                     if(pagePreviousIsEnabled) {
-                        p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<<\""), "</a>");
-                        p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<\""), "</a>");
+                        p.write("        <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<<\""), "</a>");
+                        p.write("        <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<\""), "</a>");
                     }
                     else {
                         p.write("        ", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"<<\""));
@@ -389,8 +391,8 @@ public class ReferencePaneControl
                     }
                     // Page next
                     if(pageNextIsEnabled) {
-                        p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextAction), " + '&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">\""), "</a>");
-                        p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">>\""), "</a>");
+                        p.write("        <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextAction), " + '&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">\""), "</a>");
+                        p.write("        <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">>\""), "</a>");
                     }
                     else {
                         p.write("        ", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"top\" alt=\">\""));
@@ -402,13 +404,13 @@ public class ReferencePaneControl
                     if((filters.length > 1) && !grid.getShowRows()) {
                         org.openmdx.portal.servlet.Filter filter = filters[0];
                         Action action = grid.getSelectFilterAction(filter);
-                        p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SHOW_GRID_CONTENT, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", htmlEncoder.encode(action.getTitle(), false), "\""), "</a>");
+                        p.write("        <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SHOW_GRID_CONTENT, "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", htmlEncoder.encode(action.getTitle(), false), "\""), "</a>");
                         p.write("        ", p.getImg("border=\"0\" width=\"4\" alt=\"\" src=\"", p.getResourcePath("images/"), "spacer.gif\""));
                     }
                     // 
                     // Show filter table
                     //
-                    p.write("        <a href=\"#\"", p.getOnClick("javascript:ft=$('filterArea", tabId, "');if(ft.style.display!='block'){ft.style.display='block';}else{ft.style.display='none';};try{$('filtervalue", tabId, "').focus();}catch(e){};return false;"), ">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");
+                    p.write("        <a href=\"#\" onclick=\"javascript:ft=$('filterArea", tabId, "');if(ft.style.display!='block'){ft.style.display='block';}else{ft.style.display='none';};try{$('filtervalue", tabId, "').focus();}catch(e){};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");
                     p.write("      </td>");
                     //
                     // Menu
@@ -428,7 +430,7 @@ public class ReferencePaneControl
                         p.write("                <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
                         for(int j = 0; j < grid.getObjectCreator().length; j++) {
                             Action action = grid.getObjectCreator()[j];
-                            p.write("                  <li><a href=\"#\"", p.getOnClick("javascript:this.href=", p.getEvalHRef(action), ";"), ">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;&nbsp;", htmlEncoder.encode(action.getTitle(), false), "</a></li>");
+                            p.write("                  <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "&nbsp;&nbsp;", htmlEncoder.encode(action.getTitle(), false), "</a></li>");
                         }                
                         p.write("                </ul>");
                         p.write("              </li>");
@@ -439,17 +441,17 @@ public class ReferencePaneControl
                         p.write("                <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
                         // In-place edit
                         if(gridControl.inPlaceEditable() && (view.getLookupType() == null)) {
-                            p.write("                  <li><a href=\"#\"", p.getOnClick("javascript:$('editGrid", tabId, "').style.display='block';$('showGrid", tabId, "').style.display='none';$('showGridButtons", tabId, "').style.display='none';"), ">", htmlEncoder.encode(texts.getEditTitle(), false), "</a></li>");
+                            p.write("                  <li><a href=\"#\" onclick=\"javascript:$('editGrid", tabId, "').style.display='block';$('showGrid", tabId, "').style.display='none';$('showGridButtons", tabId, "').style.display='none';\">", htmlEncoder.encode(texts.getEditTitle(), false), "</a></li>");
                         }
                         else {
-                            p.write("                  <li><a href=\"#\"", p.getOnClick("javascript:;"), "><span>", htmlEncoder.encode(texts.getEditTitle(), false), "</span></a></li>");
+                            p.write("                  <li><a href=\"#\" onclick=\"javascript:;\"><span>", htmlEncoder.encode(texts.getEditTitle(), false), "</span></a></li>");
                         }               
                         // Multi-delete
                         if(referencePane.getReferencePaneControl().getIsMultiDeleteEnabled() && (multiDeleteAction != null)) {
-                            p.write("                  <li><a href=\"#\"", p.getOnClick("javascript:var para=getSelectedGridRows('gridTable", tabId, "',1);if(para.length>1) {$('multideleteIDlist", tabId, "').value=para;};document.showForm", tabId, ".submit();"), ">", htmlEncoder.encode(multiDeleteAction.getTitle(), false), "</a></li>");
+                            p.write("                  <li><a href=\"#\" onclick=\"javascript:var para=getSelectedGridRows('gridTable", tabId, "',1);if(para.length>1) {$('multideleteIDlist", tabId, "').value=para;};document.showForm", tabId, ".submit();\">", htmlEncoder.encode(multiDeleteAction.getTitle(), false), "</a></li>");
                         }
                         else {
-                            p.write("                  <li><a href=\"#\"", p.getOnClick("javascript:;"), "><span>", htmlEncoder.encode(texts.getDeleteTitle(), false), "</span></a></li>");                    
+                            p.write("                  <li><a href=\"#\" onclick=\"javascript:;\"><span>", htmlEncoder.encode(texts.getDeleteTitle(), false), "</span></a></li>");                    
                         }
                         p.write("                </ul>");
                         p.write("              </li>");
@@ -463,7 +465,7 @@ public class ReferencePaneControl
                         String pageSize = Integer.toString(DEFAULT_PAGE_SIZES[i]);
                         String showPagesText = texts.getShowRowsText();;
                         showPagesText = showPagesText.replaceAll("\\$\\{0\\}", pageSize);
-                        p.write("                  <li><a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(selectGridTabAction), "+'&amp;pagesize=", pageSize, "'", updateTabScriptletPost, "\""), ">", htmlEncoder.encode(showPagesText, false), "</a></li>");
+                        p.write("                  <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(selectGridTabAction), "+'&amp;pagesize=", pageSize, "'", updateTabScriptletPost, "\">", htmlEncoder.encode(showPagesText, false), "</a></li>");
                     }
                     p.write("                </ul>");
                     p.write("              </li>");
@@ -518,8 +520,8 @@ public class ReferencePaneControl
                   } 
                   if(nSortableColumns > 0) {
                       p.write("        <td class=\"filterInput\">");
-                      p.write("          ", p.getImg("class=\"popUpButton\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_FILTER_HELP, "\" border=\"0\" alt=\"?\" align=\"bottom\"", p.getOnClick("javascript:void(window.open('helpSearch_", app.getCurrentLocaleAsString(), ".html', 'Help', 'fullscreen=no,toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=yes,directories=no,location=no,width=400'));")));
-                      p.write("          <input style=\"margin:0px;\" type=\"text\" name=\"", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, "\" id=\"filtervalue", tabId, "\" value=\"", app.getHtmlEncoder().encode(grid.getCurrentFilterValues(), true), "\" />");
+                      p.write("          ", p.getImg("class=\"popUpButton\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_FILTER_HELP, "\" border=\"0\" alt=\"?\" align=\"bottom\" onclick=\"javascript:void(window.open('helpSearch_", application.getCurrentLocaleAsString(), ".html', 'Help', 'fullscreen=no,toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=yes,directories=no,location=no,width=400'));\""));
+                      p.write("          <input style=\"margin:0px;\" type=\"text\" name=\"", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, "\" id=\"filtervalue", tabId, "\" value=\"", application.getHtmlEncoder().encode(grid.getCurrentFilterValues(), true), "\" />");
                       p.write("          <input style=\"margin:0px;\" id=\"filteradd", tabId, "\" type=\"checkbox\" title=\"", htmlEncoder.encode(texts.getAddFilterTitle(), false), "\">&nbsp;&nbsp;&nbsp;");
                       p.write("        </td>");
                   }
@@ -554,10 +556,10 @@ public class ReferencePaneControl
                       if(!filter.hasParameter()) {
                           Action action = grid.getSelectFilterAction(filter);
                           if(filterGroupName.equals("0")) {
-                              p.write("        <li><a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(action.getTitle(), false), "\""), "</a></li>");
+                              p.write("        <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(action.getTitle(), false), "\""), "</a></li>");
                           } 
                           else {
-                              p.write("        <li><a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"\""), " ", htmlEncoder.encode(texts.getSelectAllText(), false), " ", htmlEncoder.encode(action.getTitle(), false), "</a></li>");
+                              p.write("        <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"\""), " ", htmlEncoder.encode(texts.getSelectAllText(), false), " ", htmlEncoder.encode(action.getTitle(), false), "</a></li>");
                           }
                       }
                   }
@@ -575,7 +577,7 @@ public class ReferencePaneControl
                           Action columnFilterAddAction = gridControl.getColumnFilterAddActions()[j];
                           // Only show if filterable
                           if(columnFilterSetAction.getEvent() != Action.EVENT_NONE) {
-                              p.write("            <li><a href=\"#\"", p.getOnClick("javascript:if($('filteradd", tabId, "').checked) {", updateTabScriptletPre, p.getEvalHRef(columnFilterAddAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, "='+encodeURIComponent($F('filtervalue", tabId, "'))+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "} else {", updateTabScriptletPre, p.getEvalHRef(columnFilterSetAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, "='+encodeURIComponent($F('filtervalue", tabId, "'))+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "};"), ">", htmlEncoder.encode(columnFilterSetAction.getTitle(), false), "</a></li>");
+                              p.write("            <li><a href=\"#\" onclick=\"javascript:if($('filteradd", tabId, "').checked) {", updateTabScriptletPre, p.getEvalHRef(columnFilterAddAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, "='+encodeURIComponent($F('filtervalue", tabId, "'))+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "} else {", updateTabScriptletPre, p.getEvalHRef(columnFilterSetAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, "='+encodeURIComponent($F('filtervalue", tabId, "'))+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "};\">", htmlEncoder.encode(columnFilterSetAction.getTitle(), false), "</a></li>");
                           }
                       }
                       p.write("          </ul>");
@@ -584,8 +586,8 @@ public class ReferencePaneControl
                   // Filter actions
                   Action setCurrentFilterAsDefaultAction = grid.getSetCurrentFilterAsDefaultAction();
                   Action setDefaultFilterOnInitAction = grid.getSetShowGridContentOnInitAction();
-                  p.write("            <li><a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(setCurrentFilterAsDefaultAction), updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), setCurrentFilterAsDefaultAction.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(setCurrentFilterAsDefaultAction.getTitle(), false), "\""), "</a></li>");
-                  p.write("            <li><a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(setDefaultFilterOnInitAction), updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), setDefaultFilterOnInitAction.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"v\" title=\"", htmlEncoder.encode(setDefaultFilterOnInitAction.getTitle(), false), "\""), "</a></li>");
+                  p.write("            <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(setCurrentFilterAsDefaultAction), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), setCurrentFilterAsDefaultAction.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(setCurrentFilterAsDefaultAction.getTitle(), false), "\""), "</a></li>");
+                  p.write("            <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(setDefaultFilterOnInitAction), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), setDefaultFilterOnInitAction.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"v\" title=\"", htmlEncoder.encode(setDefaultFilterOnInitAction.getTitle(), false), "\""), "</a></li>");
                   
                   p.write("          </ul>");
                   p.write("        </td>");
@@ -614,7 +616,7 @@ public class ReferencePaneControl
                   if(j == 0) {
                     p.write("<td class=\"gridColTypeIcon-3\">");
                     p.write("  <table class=\"filterHeader\"><tr><td>");
-                    p.write("    <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(gridAlignmentAction), updateTabScriptletPost), ">", p.getImg("class=\"borderedimg\" src=\"", p.getResourcePath("images/"), gridAlignmentAction.getIconKey(), "\" title=\"", htmlEncoder.encode(gridAlignmentAction.getTitle(), false), "\" align=\"bottom\"", p.getOnMouseOver("javascript:this.className='borderedimghover';"), p.getOnMouseOut("javascript:this.className='borderedimg';"), " alt=\"\""), "</a><input id=\"multiselect", tabId, "\" type=\"checkbox\"", p.getOnClick("javascript:selectGridRows('gridTable", tabId, "',1, this.checked);"), " />");
+                    p.write("    <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(gridAlignmentAction), updateTabScriptletPost, "\">", p.getImg("class=\"borderedimg\" src=\"", p.getResourcePath("images/"), gridAlignmentAction.getIconKey(), "\" title=\"", htmlEncoder.encode(gridAlignmentAction.getTitle(), false), "\" align=\"bottom\"", p.getOnMouseOver("javascript:this.className='borderedimghover';"), p.getOnMouseOut("javascript:this.className='borderedimg';"), " alt=\"\""), "</a><input id=\"multiselect", tabId, "\" type=\"checkbox\" onclick=\"javascript:selectGridRows('gridTable", tabId, "',1, this.checked);\"/>");
                     p.write("  </td></tr></table>");
                     p.write("</td>");
                   }
@@ -644,7 +646,7 @@ public class ReferencePaneControl
                         p.write("<td><div class=\"textfilter\">", columnTitle, "</div></td>");
                     }
                     else {
-                        p.write("<td class=\"filterCell\" title=\"", htmlEncoder.encode(columnFilterSetAction.getToolTip(), false), "\"", p.getOnClick("javascript:if($('filteradd", tabId, "').checked) {", updateTabScriptletPre, p.getEvalHRef(columnFilterAddAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, "='+encodeURIComponent($F('filtervalue", tabId, "'))+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "} else {", updateTabScriptletPre, p.getEvalHRef(columnFilterSetAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, "='+encodeURIComponent($F('filtervalue", tabId, "'))+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "};"), p.getOnMouseOver("javascript:this.className='filterCellhover';"), p.getOnMouseOut("javascript:this.className='filterCell';"), " ><div class=\"textfilter\">", columnTitle, "</div></td>");
+                        p.write("<td class=\"filterCell\" title=\"", htmlEncoder.encode(columnFilterSetAction.getToolTip(), false), "\" onclick=\"javascript:if($('filteradd", tabId, "').checked) {", updateTabScriptletPre, p.getEvalHRef(columnFilterAddAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, "='+encodeURIComponent($F('filtervalue", tabId, "'))+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "} else {", updateTabScriptletPre, p.getEvalHRef(columnFilterSetAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_FILTER_VALUES, "='+encodeURIComponent($F('filtervalue", tabId, "'))+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "};\"", p.getOnMouseOver("javascript:this.className='filterCellhover';"), p.getOnMouseOut("javascript:this.className='filterCell';"), " ><div class=\"textfilter\">", columnTitle, "</div></td>");
                     }
                     // column ordering 
                     Action columnOrderSetAction = grid.getColumnOrderSetAction(
@@ -656,7 +658,7 @@ public class ReferencePaneControl
 
                     // ordering
                     if(columnOrderSetAction.getEvent() != Action.EVENT_NONE) {
-                        p.write("<td>", p.getImg("class=\"borderedimg\" src=\"", p.getResourcePath("images/"), columnOrderSetAction.getIconKey(), "\" title=\"", htmlEncoder.encode(columnOrderSetAction.getTitle(), false), "\" align=\"bottom\"", p.getOnClick("javascript:if($('filteradd", tabId, "') && ($('filteradd", tabId, "').checked)) {", updateTabScriptletPre, p.getEvalHRef(columnOrderAddAction), updateTabScriptletPost, "} else {", updateTabScriptletPre, p.getEvalHRef(columnOrderSetAction), updateTabScriptletPost, "};"), p.getOnMouseOver("javascript:this.className='borderedimghover';"), p.getOnMouseOut("javascript:this.className='borderedimg';"), " alt=\"\""), "</td>");
+                        p.write("<td>", p.getImg("class=\"borderedimg\" src=\"", p.getResourcePath("images/"), columnOrderSetAction.getIconKey(), "\" title=\"", htmlEncoder.encode(columnOrderSetAction.getTitle(), false), "\" align=\"bottom\" onclick=\"javascript:if($('filteradd", tabId, "') && ($('filteradd", tabId, "').checked)) {", updateTabScriptletPre, p.getEvalHRef(columnOrderAddAction), updateTabScriptletPost, "} else {", updateTabScriptletPre, p.getEvalHRef(columnOrderSetAction), updateTabScriptletPost, "};\"", p.getOnMouseOver("javascript:this.className='borderedimghover';"), p.getOnMouseOut("javascript:this.className='borderedimg';"), " alt=\"\""), "</td>");
                     }                      
                     p.write("    </tr>");
                     p.write("  </table>");
@@ -680,7 +682,7 @@ public class ReferencePaneControl
                     // row color
                     String rowColor = null;
                     String rowBackColor = null;
-                    if(app.getPortalExtension().hasGridColours(gridControl.getObjectContainer().getReferencedTypeName())) {
+                    if(application.getPortalExtension().hasGridColours(gridControl.getObjectContainer().getReferencedTypeName())) {
                         for(int k = 0; k < gridControl.getShowMaxMember(); k++) { // to color based on ALL cells, use row.length instead of grid.getShowMaxMember()
                             if((rowBackColor = ((AttributeValue)row[k]).getBackColor()) != null) {
                                 rowColor = ((AttributeValue)row[k]).getColor();
@@ -702,17 +704,10 @@ public class ReferencePaneControl
                         : "style=\"" + styleModifier + "\"";
                     
                     ObjectReference objRow = (ObjectReference)((AttributeValue)row[0]).getValue(true);
-                    String rowLevelId = objRow.getGridRowLevelId();
-                    rowLevelId = rowLevelId == null
-                        ? null
-                        : "gridTable" + tabId + "-" + rowLevelId;
-                    String rowIdModifier = rowLevelId == null
-                        ? ""
-                        : "id=\"" + rowLevelId + "\"";
-                    p.write("<tr class=\"gridTableRow", gridClassNameSuffix, (j % 2 == 0 ? "" : " odd"),  "\" ", styleModifier, " ", rowIdModifier, " >");
+                    p.write("<tr class=\"gridTableRow", gridClassNameSuffix, (j % 2 == 0 ? "" : " odd"),  "\" ", styleModifier, " >");
                     if((objRow != null) && grid.showRowSelectors()) {
                         if((view.getLookupType() != null) && objRow.isInstanceof(view.getLookupType())) {
-                          p.write("<td class=\"gridColTypeCheck\"><input type=\"checkbox\" name=\"objselect\" value=\"\"", p.getOnClick("OF.selectAndClose('", htmlEncoder.encode(objRow.refMofId(), false), "', '", htmlEncoder.encode(objRow.getTitleEscapeQuote(), false), "', '", view.getId(), "', window);"), " /></td>");
+                          p.write("<td class=\"gridColTypeCheck\"><input type=\"checkbox\" name=\"objselect\" value=\"\" onclick=\"OF.selectAndClose('", htmlEncoder.encode(objRow.refMofId(), false), "', '", htmlEncoder.encode(objRow.getTitleEscapeQuote(), false), "', '", view.getId(), "', window);\" /></td>");
                         }
                         else {
                           p.write("<td class=\"gridColTypeCheck\"></td>");
@@ -728,21 +723,29 @@ public class ReferencePaneControl
                             true
                         );
                         stringifiedValue = valueHolder instanceof TextValue
-                          ? ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue
-                          : stringifiedValue;
-                        // null or empty collection
+                            ? ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue
+                            : stringifiedValue;
+                        // iconTag                        
+                        CharSequence iconTag = "";
+                        CharSequence iconSpacer = "";
+                        CharSequence divBegin = "";
+                        CharSequence divEnd = "";
+                        if(valueHolder.getIconKey() != null) {
+                            iconTag = p.getImg("src=\"", p.getResourcePath("images/"), valueHolder.getIconKey(), "\" align=\"absbottom\" border=\"0\" alt=\"\"");
+                            // Spacer only if icon and text
+                            if(stringifiedValue.length() > 0) {
+                                divBegin = "<div>";
+                                divEnd = "</div>";
+                                iconSpacer = p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");
+                            }
+                        }                        
+                        // Null or empty collection
                         if(stringifiedValue.length() == 0) {
-                          stringifiedValue = "&nbsp;";
-                        }
-                        
-                        // iconTag
-                        CharSequence iconTag = valueHolder.getIconKey() == null
-                            ? ""
-                            : "" + p.getImg("src=\"", p.getResourcePath("images/"), valueHolder.getIconKey(), "\" align=\"middle\" border=\"0\" alt=\"\"") + p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");
-    
+                            stringifiedValue = "&nbsp;";
+                        }                        
                         if(value == null) {
-                          p.debug("<!-- null -->");
-                          p.write("<td>",  iconTag, "",  stringifiedValue, "</td>");
+                            p.debug("<!-- null -->");
+                            p.write("<td>", divBegin, iconTag, iconSpacer, stringifiedValue, divEnd, "</td>");
                         }
                         else if(valueHolder instanceof BooleanValue) {
                             String images = "";
@@ -765,7 +768,7 @@ public class ReferencePaneControl
                               }
                             }
                             p.debug("<!-- BooleanValue -->");
-                            p.write("<td>",  iconTag, "",  images, "</td>");
+                            p.write("<td>", images, "</td>");
                         }
                         else if(valueHolder instanceof ObjectReferenceValue) {
                             // Multi-valued
@@ -773,25 +776,41 @@ public class ReferencePaneControl
                                 p.write("<!-- ObjectReferenceValue -->"); // used as tag for multi-delete. Do not write as debug!
                                 p.write("<td>");
                                 boolean isFirst = true;
-                                for(Iterator e = ((Collection)value).iterator(); e.hasNext(); ) {
-                                    ObjectReference objRef = (ObjectReference)e.next();
-                                    Action action = objRef.getSelectObjectAction();
-                                    if(!isFirst) {
-                                        p.write("<br />");                                    
+                                Iterator<?> e = ((Collection)value).iterator();
+                                while(e.hasNext()) {
+                                    try {
+                                        ObjectReference objRef = (ObjectReference)e.next();
+                                        Action action = objRef.getSelectObjectAction();
+                                        if(!isFirst) {
+                                            p.write("<br />");                                    
+                                        }
+                                        // Detailed message as tool tip. Otherwise grid layout will be destroyed
+                                        String title = action.getTitle();
+                                        String toolTip = "";
+                                        if(title.startsWith(ObjectReference.TITLE_PREFIX_NO_PERMISSION)) {
+                                            toolTip = title;                                     
+                                            title = title.substring(0, ObjectReference.TITLE_PREFIX_NO_PERMISSION.length());
+                                        }
+                                        else if(title.startsWith(ObjectReference.TITLE_PREFIX_NOT_ACCESSIBLE)) {
+                                            toolTip = title;                                     
+                                            title = title.substring(0, ObjectReference.TITLE_PREFIX_NOT_ACCESSIBLE.length());
+                                        }
+                                        p.write("<a href=\"\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\" title=\"", htmlEncoder.encode(toolTip, false), "\">", htmlEncoder.encode(title, false), "</a>");
+                                        isFirst = false;
                                     }
-                                    // Detailed message as tool tip. Otherwise grid layout will be destroyed
-                                    String title = action.getTitle();
-                                    String toolTip = "";
-                                    if(title.startsWith(ObjectReference.TITLE_PREFIX_NO_PERMISSION)) {
-                                        toolTip = title;                                     
-                                        title = title.substring(0, ObjectReference.TITLE_PREFIX_NO_PERMISSION.length());
+                                    catch(Exception e0) {
+                                        ServiceException e1 = new ServiceException(e0);
+                                        SysLog.warning(
+                                            "Unable to retrieve (more info at detail level)", 
+                                            Arrays.asList(
+                                                objRow.refMofId(), 
+                                                valueHolder.getFieldDef().featureName, 
+                                                application.getLoginPrincipalId(), 
+                                                e0.getMessage()
+                                            )
+                                        );
+                                        SysLog.detail(e1.getMessage(), e1.getCause());
                                     }
-                                    else if(title.startsWith(ObjectReference.TITLE_PREFIX_NOT_ACCESSIBLE)) {
-                                        toolTip = title;                                     
-                                        title = title.substring(0, ObjectReference.TITLE_PREFIX_NOT_ACCESSIBLE.length());
-                                    }
-                                    p.write("<a href=\"\"", p.getOnClick("javascript:this.href=", p.getEvalHRef(action), ";"), " title=\"", htmlEncoder.encode(toolTip, false), "\">", htmlEncoder.encode(title, false), "</a>");
-                                    isFirst = false;                                
                                 }                            
                                 p.write("</td>");
                             }
@@ -805,11 +824,8 @@ public class ReferencePaneControl
                                     ObjectReference nextObjRef = nextRow == null
                                        ? null
                                        : (ObjectReference)((AttributeValue)nextRow[0]).getValue(true);
-                                    CharSequence expandRowsModifier = (rowLevelId != null) && (nextRow != null) && (nextObjRef.getGridRowNestingLevel() > objRef.getGridRowNestingLevel())
-                                        ? "" + p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_COLLAPSE, "\" border=\"0\" align=\"bottom\" alt=\"*\" title=\"\"", p.getOnClick("javascript:updateCollapsableRows('gridTable", tabId, "', 1, '", rowLevelId, "', ", Integer.toString(objRef.getGridRowNestingLevel()), ", (this.src.indexOf('collapse')>0)); if(this.src.indexOf('collapse')>0) {this.src='", p.getResourcePath("images/"), WebKeys.ICON_EXPAND, "';} else {this.src='", p.getResourcePath("images/"), WebKeys.ICON_COLLAPSE, "';};")) + p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_EXPAND, "\" style=\"display:none;\" border=\"0\" align=\"bottom\" alt=\"*\" title=\"\"")
-                                        : "";            
                                     p.write("<!-- ObjectReferenceValue -->"); // used as tag for multi-delete. Do not write as debug!
-                                    p.write("<td class=\"gridColTypeIcon-3\"><div style=\"float:left;\">", p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" alt=\"\" width=\"", Integer.toString(16*objRef.getGridRowNestingLevel()), "\" height=\"0\""), "<a href=\"#\"", p.getOnMouseOver("javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};"), ">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" style=\"cursor:pointer;\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "</a></div><span id=\"", "gridRow", Long.toString(rowId), "-menu\" class=\"gridMenu\" onclick=\"try{this.parentNode.parentNode.onclick();}catch(e){};\"><a href=\"#\" class=\"gridMenuIndicator\" ", p.getOnClick("javascript:new Ajax.Updater('gridRow", Long.toString(rowId), "-menu', ", p.getEvalHRef(this.getRowMenuAction(objRef.refMofId(), rowId)), ", {asynchronous:true, evalScripts: true, onComplete: function(){}});return false;"), ">", p.getImg("border=\"0\" height=\"16\" width=\"15\" alt=\"\" src=\"", p.getResourcePath("images/"), "spacer.gif\""), "</a>", p.getImg("border=\"0\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" style=\"display:none;\""), "</span>", expandRowsModifier, "</td>");
+                                    p.write("<td class=\"gridColTypeIcon-3\"><table id=\"gm\"<tr><td><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), "</a></td><td><div id=\"", "gridRow", Long.toString(rowId), "-menu\" class=\"gridMenu\" onclick=\"try{this.parentNode.parentNode.onclick();}catch(e){};\"><div class=\"gridMenuIndicator\" onclick=\"javascript:new Ajax.Updater('gridRow", Long.toString(rowId), "-menu', ", p.getEvalHRef(this.getRowMenuAction(objRef.refMofId(), rowId)), ", {asynchronous:true, evalScripts: true, onComplete: function(){}});\">", p.getImg("border=\"0\" height=\"16\" width=\"16\" alt=\"\" src=\"", p.getResourcePath("images/"), "spacer.gif\""), "</div>", p.getImg("border=\"0\" align=\"bottom\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_MENU_DOWN, "\" style=\"display:none;\""), "</div></td></tr></table></td>");
                                 }
                                 // only text in columns > 0
                                 else {
@@ -824,20 +840,29 @@ public class ReferencePaneControl
                                         toolTip = title;                                     
                                         title = title.substring(0, ObjectReference.TITLE_PREFIX_NOT_ACCESSIBLE.length());
                                     }
-                                    p.write("<td><a href=\"\"", p.getOnClick("javascript:this.href=", p.getEvalHRef(action), ";"), " title=\"", htmlEncoder.encode(toolTip, false), "\">");
-                                    app.getPortalExtension().renderTextValue(p, htmlEncoder.encode(title, false));
-                                    p.write("</a></td>");
+                                    if(action.getEvent() == Action.EVENT_NONE) {
+                                        p.write("<td><div title=\"", htmlEncoder.encode(toolTip, false), "\">");
+                                        application.getPortalExtension().renderTextValue(p, htmlEncoder.encode(title, false));
+                                        p.write("</div></td>");
+                                    }
+                                    else {
+                                        p.write("<td><a href=\"\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\" title=\"", htmlEncoder.encode(toolTip, false), "\">");
+                                        application.getPortalExtension().renderTextValue(p, htmlEncoder.encode(title, false));
+                                        p.write("</a></td>");
+                                    }
                                 }
                             }
                         }
                         else {
                           p.debug("<!-- AttributeValue -->");
-                          p.write("<td>",  iconTag, "",  stringifiedValue, "</td>");
+                          p.write("<td>", divBegin, iconTag, iconSpacer);
+                          application.getPortalExtension().renderTextValue(p, stringifiedValue);
+                          p.write(divEnd, "</td>");
                         }
                     }
                     if((objRow != null) && grid.showRowSelectors()) {
                         if((view.getLookupType() != null) && objRow.isInstanceof(view.getLookupType())) {
-                          p.write("<td class=\"gridColTypeCheck\"><input type=\"checkbox\" name=\"objselect\" value=\"\"", p.getOnClick("OF.selectAndClose('", htmlEncoder.encode(objRow.refMofId(), false), "', '", htmlEncoder.encode(objRow.getTitleEscapeQuote(), false), "', '", view.getId(), "', window);"), " /></td>");
+                          p.write("<td class=\"gridColTypeCheck\"><input type=\"checkbox\" name=\"objselect\" value=\"\" onclick=\"javascript:OF.selectAndClose('", htmlEncoder.encode(objRow.refMofId(), false), "', '", htmlEncoder.encode(objRow.getTitleEscapeQuote(), false), "', '", view.getId(), "', window);\" /></td>");
                         }
                         else {
                           p.write("<td class=\"gridColTypeCheck\"></td>");
@@ -858,26 +883,28 @@ public class ReferencePaneControl
                     // Only show pagers if there are more than 10 rows 
                     if(rows.length > 10) {                    
                         if(grid.getAddObjectAction() == null) { 
+                            p.write("        <div id=\"gridPagerBottom\">");
                             // Page 0
-                            p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(firstPageAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), firstPageAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
+                            p.write("          <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(firstPageAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), firstPageAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
                             // Page previous
                             if(pagePreviousIsEnabled) {
-                                p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
-                                p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
+                                p.write("          <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
+                                p.write("          <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pagePreviousAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
                             }
                             else {
-                                p.write("        ", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
-                                p.write("        ", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
+                                p.write("          ", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
+                                p.write("          ", p.getImg("src=\"", p.getResourcePath("images/"), pagePreviousAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
                             }
                             // Page next
                             if(pageNextIsEnabled) {
-                                p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextAction), " + '&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");
-                                p.write("        <a href=\"#\"", p.getOnClick("javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost), ">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
+                                p.write("          <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextAction), " + '&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");
+                                p.write("          <a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(pageNextFastAction), "+'&amp;pagesize='+encodeURIComponent($F('pagesize", tabId, "'))", updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""), "</a>");
                             }
                             else {
-                                p.write("        ", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
-                                p.write("        ", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
+                                p.write("          ", p.getImg("src=\"", p.getResourcePath("images/"), pageNextAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
+                                p.write("          ", p.getImg("src=\"", p.getResourcePath("images/"), pageNextFastAction.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"^\""));
                             }
+                            p.write("        </div>");
                         }
                     }
                 }
@@ -904,7 +931,7 @@ public class ReferencePaneControl
                    p.write("            <input type=\"hidden\" name=\"requestId.submit\" value=\"", view.getRequestId(), "\" />");
                    p.write("            <input type=\"hidden\" name=\"event.submit\" value=\"", Integer.toString(saveAction.getEvent()), "\" />");
                    p.write("            <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(saveAction.getTitle(), false), "\" value=\"", htmlEncoder.encode(saveAction.getTitle(), false), "\" id=\"tr-editForm", tabId, "\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
-                   p.write("            <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(texts.getCancelTitle(), false), "\" value=\"", texts.getCancelTitle(), "\"", p.getOnClick("javascript:$('editGrid", tabId, "').style.display='none'; $('showGrid", tabId, "').style.display='block';$('showGridButtons", tabId, "').style.display='block'; if($('menuCrPanel", tabId, "')) {$('menuCrPanel", tabId, "').style.display='block';}; return false;"), p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
+                   p.write("            <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(texts.getCancelTitle(), false), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('editGrid", tabId, "').style.display='none'; $('showGrid", tabId, "').style.display='block';$('showGridButtons", tabId, "').style.display='block'; if($('menuCrPanel", tabId, "')) {$('menuCrPanel", tabId, "').style.display='block';}; return false;\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
                    p.write("          </div>");
                    p.write("        </td>");                              
                    p.write("      </tr>");
@@ -929,7 +956,7 @@ public class ReferencePaneControl
                        for(int j = 0; j < grid.getObjectCreator().length; j++) {
                            Action action = grid.getObjectCreator()[j];
                            String forClass = action.getParameter(Action.PARAMETER_FOR_CLASS);
-                           p.write("                    <li><a href=\"#\"", p.getOnClick("javascript:rowIndex", tabId, "++;insertGridRow('editGridTable", tabId, "','Cr", tabId, "N-", forClass, "', ", Integer.toString(paneIndex), "*100000);"), ">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"o\" title=\"\""), "&nbsp;&nbsp;", htmlEncoder.encode(action.getTitle(), false), "</a></li>");
+                           p.write("                    <li><a href=\"#\" onclick=\"javascript:rowIndex", tabId, "++;insertGridRow('editGridTable", tabId, "','Cr", tabId, "N-", forClass, "', ", Integer.toString(paneIndex), "*100000);\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"top\" alt=\"o\" title=\"\""), "&nbsp;&nbsp;", htmlEncoder.encode(action.getTitle(), false), "</a></li>");
                        }
                        p.write("                  </ul>");
                        p.write("                </li>");
@@ -1056,7 +1083,7 @@ public class ReferencePaneControl
                               if(k == 0) {
                                 p.debug("<!-- ObjectReference Template -->");
                                 p.write("<td class=\"gridColTypeIconEdit-3\">");
-                                p.write("  ", p.getImg("src=\"", p.getResourcePath("images/"), app.getIconKey(forClass), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_CLONE_SMALL, "\" class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", texts.getCloneTitle(), "\"", p.getOnClick("javascript:rowIndex", tabId, "++;cloneGridRow('editGridTable", tabId, "', this, rowIndex", tabId, "*100, 100);"), p.getOnMouseOver("javascript:this.className='popUpButtonhover';"), p.getOnMouseOut("javascript:this.className='popUpButton';")), p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_DELETE_SMALL, "\" class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getDeleteTitle(), false), "\"", p.getOnClick("javascript:deleteGridRow(this);"), p.getOnMouseOver("javascript:this.className='popUpButtonhover';"), p.getOnMouseOut("javascript:this.className='popUpButton';")));
+                                p.write("  ", p.getImg("src=\"", p.getResourcePath("images/"), application.getIconKey(forClass), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""), p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_CLONE_SMALL, "\" class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", texts.getCloneTitle(), "\" onclick=\"javascript:rowIndex", tabId, "++;cloneGridRow('editGridTable", tabId, "', this, rowIndex", tabId, "*100, 100);\"", p.getOnMouseOver("javascript:this.className='popUpButtonhover';"), p.getOnMouseOut("javascript:this.className='popUpButton';")), p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_DELETE_SMALL, "\" class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getDeleteTitle(), false), "\" onclick=\"javascript:deleteGridRow(this);\"", p.getOnMouseOver("javascript:this.className='popUpButtonhover';"), p.getOnMouseOut("javascript:this.className='popUpButton';")));
                                 p.write("  <input type=\"hidden\" name=\"refMofId[", Integer.toString(templateGridFieldIndex), "]\" tabindex=\"", Integer.toString(templateGridFieldIndex), "\" value=\"", forClass, "\">");
                                 p.write("</td>");
                               }
@@ -1070,7 +1097,7 @@ public class ReferencePaneControl
                                   );
                                   p.debug("<!-- ObjectReference Template -->");
                                   p.write("<td nowrap>");
-                                  p.write("  <table class=\"gridSplit\"><tr><td width=\"100%\"><input type=\"text\" class=\"valueLG\" name=\"", feature, "[", Integer.toString(templateGridFieldIndex), "]", ".Title\" tabindex=\"", Integer.toString(templateGridFieldIndex), "\" value=\"\"></td><td>", p.getImg("class=\"popUpButton\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\" name=\"", feature, "[", Integer.toString(templateGridFieldIndex+1), "]\"", p.getOnClick("javascript:var IDsplit = this.id.split(/[\\[|\\]]/); var tidx = parseInt(IDsplit[1])-1; var par1 = '", feature, "' + '[' + tidx.toString() + ']'; var par2 = par1 + '.Title'; OF.findObject(", p.getEvalHRef(findObjectAction), ", document.forms['editForm", tabId, "'].elements[par2], document.forms['editForm", tabId, "'].elements[par1], '", lookupId, "');")));
+                                  p.write("  <table class=\"gridSplit\"><tr><td width=\"100%\"><input type=\"text\" class=\"valueLG\" name=\"", feature, "[", Integer.toString(templateGridFieldIndex), "]", ".Title\" tabindex=\"", Integer.toString(templateGridFieldIndex), "\" value=\"\"></td><td>", p.getImg("class=\"popUpButton\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\" name=\"", feature, "[", Integer.toString(templateGridFieldIndex+1), "]\" onclick=\"javascript:var IDsplit = this.id.split(/[\\[|\\]]/); var tidx = parseInt(IDsplit[1])-1; var par1 = '", feature, "' + '[' + tidx.toString() + ']'; var par2 = par1 + '.Title'; OF.findObject(", p.getEvalHRef(findObjectAction), ", document.forms['editForm", tabId, "'].elements[par2], document.forms['editForm", tabId, "'].elements[par1], '", lookupId, "');\""));
                                   p.write("  <input type=\"hidden\" class=\"valueLLocked\" name=\"", feature, "[", Integer.toString(templateGridFieldIndex), "]", "\" tabindex=\"", Integer.toString(templateGridFieldIndex+2), "\" value=\"\">");
                                   p.write("  </td></tr></table>");
                                   templateGridFieldIndex = templateGridFieldIndex + 2;
@@ -1155,7 +1182,7 @@ public class ReferencePaneControl
                       ObjectReference objRow = (ObjectReference)((AttributeValue)row[0]).getValue(false);
                       Map objFeatures = null;
                       try {
-                          objFeatures = app.getModel().getAttributeDefs(
+                          objFeatures = application.getModel().getAttributeDefs(
                               ((RefMetaObject_1)objRow.getObject().refMetaObject()).getElementDef(), 
                               false, 
                               true
@@ -1265,8 +1292,8 @@ public class ReferencePaneControl
                               p.write("</td>");
                             }
                             else {
-                              p.debug("<!-- DateValue -->");
-                              p.write("<td class=\"locked\">",  iconTag, "",  stringifiedValueShow, "</td>");
+                                p.debug("<!-- DateValue -->");
+                                p.write("<td class=\"locked\">",  iconTag, "",  stringifiedValueShow, "</td>");
                             }
                         }
                         // CodeValue
@@ -1331,17 +1358,17 @@ public class ReferencePaneControl
                             // Image only in first column
                             if(k == 0) {
                               Action action = ((ObjectReference)value).getSelectObjectAction();
-                              rowIsChangeable = ((ObjectReference)value).getInspector() == null
-                                  ? false
-                                  : ((ObjectReference)value).getInspector().isChangeable(); 
+                              rowIsChangeable = application.getInspector(
+                                  ((ObjectReference)value).getObject().refClass().refMofId()
+                              ).isChangeable(); 
                               p.write("<!-- ObjectReferenceValue -->"); // used as tag for multi-delete. Do not write as debug!
                               p.write("<td class=\"gridColTypeIconEdit-3\">");
-                              p.write(p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" alt=\"\" width=\"", Integer.toString(16*objRow.getGridRowNestingLevel()), "\" height=\"0\""), p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""));
+                              p.write(p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" alt=\"\" height=\"0\""), p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"\""));
                               if(rowIsChangeable) {
                                   if (showCloneOp) {
-                                    p.write(p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_CLONE_SMALL, "\" class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", texts.getCloneTitle(), "\"", p.getOnClick("javascript:rowIndex", tabId, "++;cloneGridRow('editGridTable", tabId, "',this, ", Integer.toString(paneIndex), "*10000, rowIndex", tabId, "*100, 100);"), p.getOnMouseOver("javascript:this.className='popUpButtonhover';"), p.getOnMouseOut("javascript:this.className='popUpButton';")));
+                                    p.write(p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_CLONE_SMALL, "\" class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", texts.getCloneTitle(), "\" onclick=\"javascript:rowIndex", tabId, "++;cloneGridRow('editGridTable", tabId, "',this, ", Integer.toString(paneIndex), "*10000, rowIndex", tabId, "*100, 100);\"", p.getOnMouseOver("javascript:this.className='popUpButtonhover';"), p.getOnMouseOut("javascript:this.className='popUpButton';")));
                                   }
-                                  p.write(p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_DELETE_SMALL, "\" class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getDeleteTitle(), false), "\"", p.getOnClick("javascript:deleteGridRow(this);"), p.getOnMouseOver("javascript:this.className='popUpButtonhover';"), p.getOnMouseOut("javascript:this.className='popUpButton';"), " style=\"display: none;\""));
+                                  p.write(p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_DELETE_SMALL, "\" class=\"popUpButton\" border=\"0\" align=\"bottom\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getDeleteTitle(), false), "\" onclick=\"javascript:deleteGridRow(this);\"", p.getOnMouseOver("javascript:this.className='popUpButtonhover';"), p.getOnMouseOut("javascript:this.className='popUpButton';"), " style=\"display: none;\""));
                               }
                               p.write("  <input type=\"hidden\" name=\"refMofId",  "[", Integer.toString(editGridFieldIndex), "]", "\" tabindex=\"", Integer.toString(editGridFieldIndex), "\" value=\"", objRow.refMofId(), "\">");
                               p.write("</td>");
@@ -1359,7 +1386,7 @@ public class ReferencePaneControl
                                         if(!isFirst) {
                                             p.write("<br />");                                    
                                         }                                
-                                        p.write("<a href=\"\"", p.getOnClick("javascript:this.href=", p.getEvalHRef(action), ";"), ">", htmlEncoder.encode(action.getTitle(), false), "</a>");
+                                        p.write("<a href=\"\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", htmlEncoder.encode(action.getTitle(), false), "</a>");
                                         isFirst = false;                                
                                     }                            
                                     p.write("</td>");
@@ -1374,7 +1401,7 @@ public class ReferencePaneControl
                                             lookupId
                                         );
                                         p.write("<td nowrap>");
-                                        p.write("  <table class=\"gridSplit\"><tr><td width=\"100%\"><input type=\"text\" class=\"valueLG\" name=\"", feature, "[", Integer.toString(editGridFieldIndex), "]", ".Title\" tabindex=\"", Integer.toString(editGridFieldIndex), "\" value=\"", (objectReference == null ? "" : htmlEncoder.encode(objectReference.getTitle(), false)), "\"></td><td>", p.getImg("class=\"popUpButton\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\" name=\"", feature, "[", Integer.toString(editGridFieldIndex+1), "]", "\" id=\"", feature, "[", Integer.toString(editGridFieldIndex+1), "]\"", p.getOnClick("javascript:var IDsplit = this.id.split(/[\\[|\\]]/); var tidx = parseInt(IDsplit[1])-1; var par1 = '", feature, "' + '[' + tidx.toString() + ']'; var par2 = par1 + '.Title'; OF.findObject(", p.getEvalHRef(findObjectAction), ", document.forms['editForm", tabId, "'].elements[par2], document.forms['editForm", tabId, "'].elements[par1], '", lookupId, "');")));
+                                        p.write("  <table class=\"gridSplit\"><tr><td width=\"100%\"><input type=\"text\" class=\"valueLG\" name=\"", feature, "[", Integer.toString(editGridFieldIndex), "]", ".Title\" tabindex=\"", Integer.toString(editGridFieldIndex), "\" value=\"", (objectReference == null ? "" : htmlEncoder.encode(objectReference.getTitle(), false)), "\"></td><td>", p.getImg("class=\"popUpButton\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\" name=\"", feature, "[", Integer.toString(editGridFieldIndex+1), "]", "\" id=\"", feature, "[", Integer.toString(editGridFieldIndex+1), "]\" onclick=\"javascript:var IDsplit = this.id.split(/[\\[|\\]]/); var tidx = parseInt(IDsplit[1])-1; var par1 = '", feature, "' + '[' + tidx.toString() + ']'; var par2 = par1 + '.Title'; OF.findObject(", p.getEvalHRef(findObjectAction), ", document.forms['editForm", tabId, "'].elements[par2], document.forms['editForm", tabId, "'].elements[par1], '", lookupId, "');\""));
                                         p.write("  <input type=\"hidden\" class=\"valueLLocked\" name=\"", feature, "[", Integer.toString(editGridFieldIndex), "]", "\" value=\"", (objectReference == null ? "" : objectReference.refMofId()), "\">");
                                         p.write("  </td></tr></table>");
                                         p.write("</td>");
@@ -1382,7 +1409,7 @@ public class ReferencePaneControl
                                     else {
                                         Action action = ((ObjectReference)value).getSelectObjectAction();
                                         p.write("<!-- ObjectReferenceValue -->"); // used as tag for multi-delete. Do not write as debug!
-                                        p.write("<td class=\"locked\"><a href=\"#\"", p.getOnClick("javascript:this.href=", p.getEvalHRef(action), ";"), ">", htmlEncoder.encode(action.getTitle(), false), "</a></td>");
+                                        p.write("<td class=\"locked\"><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", htmlEncoder.encode(action.getTitle(), false), "</a></td>");
                                     }
                                 }
                             }
@@ -1432,18 +1459,17 @@ public class ReferencePaneControl
                   p.write("  <input type=\"hidden\" name=\"", Action.PARAMETER_PANE, "\" value=\"", saveAction.getParameter(Action.PARAMETER_PANE), "\" />");
                   p.write("  <div style=\"float: right; padding-top:1px;\">");
                   p.write("    <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(saveAction.getTitle(), false), "\" value=\"", htmlEncoder.encode(saveAction.getTitle(), false), "\" id=\"bl-editForm", tabId, "\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
-                  p.write("    <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(texts.getCancelTitle(), false), "\" value=\"", texts.getCancelTitle(), "\"", p.getOnClick("javascript:$('editGrid", tabId, "').style.display='none'; $('showGrid", tabId, "').style.display='block';$('showGridButtons", tabId, "').style.display='block'; if($('menuCrPanel", tabId, "')) {$('menuCrPanel", tabId, "').style.display='block';}; return false;"), p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
+                  p.write("    <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(texts.getCancelTitle(), false), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('editGrid", tabId, "').style.display='none'; $('showGrid", tabId, "').style.display='block';$('showGridButtons", tabId, "').style.display='block'; if($('menuCrPanel", tabId, "')) {$('menuCrPanel", tabId, "').style.display='block';}; return false;\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
                   p.write("  </div>");
                   p.write("  <div style=\"padding-top:1px;\">");
                   p.write("    <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(saveAction.getTitle(), false), "\" value=\"", htmlEncoder.encode(saveAction.getTitle(), false), "\" id=\"br-editForm", tabId, "\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
-                  p.write("    <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(texts.getCancelTitle(), false), "\" value=\"", texts.getCancelTitle(), "\"", p.getOnClick("javascript:$('editGrid", tabId, "').style.display='none'; $('showGrid", tabId, "').style.display='block';$('showGridButtons", tabId, "').style.display='block'; if ($('menuCrPanel", tabId, "')) {$('menuCrPanel", tabId, "').style.display='block';}; return false;"), p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
+                  p.write("    <input class=\"flatsubmit\" type=\"submit\" title=\"", htmlEncoder.encode(texts.getCancelTitle(), false), "\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:$('editGrid", tabId, "').style.display='none'; $('showGrid", tabId, "').style.display='block';$('showGridButtons", tabId, "').style.display='block'; if ($('menuCrPanel", tabId, "')) {$('menuCrPanel", tabId, "').style.display='block';}; return false;\"", p.getOnMouseOver("javascript:this.className='flatsubmithover';"), p.getOnMouseOut("javascript:this.className='flatsubmit';"), " />");
                   p.write("  </div>");
                   p.write(" </form>");
                   p.write("</div>");
                 }                
             }
-        }
-        
+        }        
         AppLog.detail("< paint");
     }
     

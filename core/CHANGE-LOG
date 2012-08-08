@@ -4,6 +4,666 @@
                     =====================================
 
 ==============================================================================
+Version 2.3.0+                                                      2008-12-08
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20018528
+      library-directory 
+                
+      The lightweight container supports the library-directory entry in the
+      application XML
+      * no library-directory entry leads to the default value "lib"
+      * an empty library-directory entry disables the library-directory 
+        feature
+      * a non-empty library-directory entry such as "APP-INF/lib" for example
+        includes all files which are located in the given directory and end 
+        with ".jar" in the application class path 
+       
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+     
+      CR20018521
+      NoClassDefFoundError in BasicException
+      
+      BasicException should not throw a NoClassDefFoundError if the J2EE 
+      exception classes it refers to are not bundled with a client for example. 
+      
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+      none
+      
+      
+==============================================================================
+Version 2.3.0                                                       2008-12-03
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20018518
+      Database: hint DBOBJECT. Hint DBOBJECT allows to qualify the dbobject 
+      (table, view) used for queries. At least it should be possible to add a 
+      suffix.
+      
+      CR20017901
+      Cross Reference Support
+      
+      The flag PERSISTENCE/normalizeObjectIds enables cross-references.
+
+      CR20017901
+      Iterable path
+      
+      org.openmdx.compatibility.base.naming.Path instances are now Iterable.
+      The iterator returns the path components' string representation.
+
+      The method objGetResourceIdentifier() uses the XRI 2 format, i.e.
+      xri://@openmdx*... as opposed to its former spice://... format. 
+            
+      CR20018102
+      A PersistenceManager's Principals
+      
+      The user object with key 
+      org.openmdx.base.persistence.cci.UserObjects.PRINCIPALS
+      ("org.openmdx.security.principals") is of type
+      Set<? extends Principals>.      
+      
+      CR20017901
+      org::openmdx::state2
+      
+      The states' core class is a subclass of 
+      org::openmdx::state2::StateCapable and has the following flags:
+      * transactionTimeUnique
+      * validTimeUnique
+      
+      An object is two dimensional if and only if both flags are off.
+      
+      CR20018001
+      objGetIterable
+      
+      objGetIterable does not care whether a feature is multi-valued or single-valued. 
+        
+      CR20013920
+      org::openmdx::state2 
+      
+      States are now supported as aspects.
+      The are handled by an Object_1_0-Plug-In (as opposed to the former 
+      Layer_1_0-Plug-In).
+      
+      CR20016601
+      InteractionSepc support
+      
+      The ObjectFactory_1_x interfaces must be InteractionSepc aware.
+      
+      CR20017600
+      REST servlet. The servlet allows REST based access to openMDX providers.
+      
+			Object creation                                                                                                     
+			  Method: POST
+			  Url: http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/account			
+			  Body:			
+					<?xml version="1.0"?>
+					<org.openmdx.workshop1.Contact>
+						<lastName>REST</lastName>
+						<firstName>Test #1</firstName>
+					</org.openmdx.workshop1.Contact>
+			
+			Object Retrievals                                                                                                                           
+			  Method: GET
+			  Urls:
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/extent?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=identity().like("xri://@openmdx*org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember/%25");orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=modifiedAt().between(:datetime:20080101T000000.000Z,:datetime:20081001T000000.000Z);orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=modifiedAt().greaterThan(:datetime:20080101T000000.000Z);orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=thereExistsModifiedAt().greaterThan(:date:2008-01-01);orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=thereExistsName().like("D%25, Joe");orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=thereExistsName().elementOf("Joe", "Guest");orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=thereExistsName().equalTo("Guest");orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=thereExistsName().equalTo("Guest")
+			
+			Object modification                                                                                                                        
+				Method: PUT			
+				Url: http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember/2YlAOJYlEd2Y4zv65ePspg
+				Body:			
+					<?xml version="1.0"?>
+					<org.openmdx.workshop1.Contact>
+						<name>Joe</name>
+					</org.openmdx.workshop1.Contact>
+			
+			Operation Invocation                                                                                                             
+				Method: POST			
+				Url: http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/task/T1/assignTeamMember			
+				Body:			
+					<?xml version="1.0"?>
+					<org.openmdx.workshop1.AssignTeamMemberParams>
+						<memberRole>1</memberRole	>
+						<teamMember>xri://@openmdx*org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember/2YlAOJYlEd2Y4zv65ePspg</teamMember>
+					</org.openmdx.workshop1.AssignTeamMemberParams>
+			
+			Object Deletion         
+				Method: DELETE		
+				Url: http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember/2YlAOJYlEd2Y4zv65ePspg
+                 
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+     
+      CR20018512
+      combinedInterfaces
+      
+      The argument of the method combinedInterfaces in the class
+      org.openmdx.compatibility.kernel.application.cci.Classes is now of type
+      Class<?> (as opposed to its former Object type).
+      
+      I.e. you have to replace invocations such as 
+        Classes.combinedInterfaces(object, prepend0, prepend1)
+      by 
+        Classes.combinedInterfaces(object.getClass(), prepend0, prepend1)
+      
+      
+      CR20013920
+      state1 segment
+
+      The class org::opemndx::compatibility::state1::Segment is no longer
+      abstract nor has it the stereotype «root» anymore as it is now a 
+      subclass of org::openmdx::base::Segment.
+
+     
+      CR20013920
+      extent's qualifier
+
+      The qualifier for org::openmdx::base::Segment::extent is now of type org::oasis-open::xri 
+      (as opposed to its former org::w3c::anyURI type).
+
+      CR20017901
+      Resource Identifier
+
+      The standard resource identifier format is the XRI 2 format.
+      * It is used by Object_1_0's method objGetResourceIdentifier(), i.e.
+        xri://@openmdx*... as opposed to its former spice://... format.
+      * It is used by the ExtentCapable's feature identity as well.
+        The identity is now non-null for new objects.
+      * It can be retrieved by the Path's toResourceIdentifier() method.           
+            
+      CR20017901  
+      Stop watch
+      
+      StopWatch_1_0 and StopWatch_1 moved into the package
+      org.openmdx.compatibility.base.dataprovider.exporter as they are not 
+      used anywhere else.
+      
+      
+      CR20018001
+      ObjectFilter_1 
+      
+      ObjectFilter_1 uses objGetIterable (as opposed to its former '?' + attributeName
+      request.       
+        
+      CR20013920 	
+      org::openmdx::state2
+      
+      org::openmdx::compatibiliy::state1::DateState is now a sub-class of
+      org::openmdx::state2::DateState
+      
+      CR20017502
+      System Attribute Handling
+      
+      Moved from Plug-in to Object_1_0.
+      
+      The handling for the following classes and attributes is now a core feature:
+      * org::openmdx::base::Creatable
+          o createdAt
+          o createdBy 
+      * org::openmdx::base::Modifiable
+          o modifiedAt
+          o modifiedBy 
+      * org::openmdx::base::Removable
+          o removedAt
+          o removedBy 
+             
+2.1.  FIXED BUGS
+
+      CR20017903
+      "Normalized" Durations lead to Oracle SQL Failure 
+      
+      Durations are normalized to years/months and hours/minutes/seconds (as 
+      opposed to the former months and seconds normalization).
+      
+      CR20017001
+      Improved exception handling
+
+      The exception stack was printed bottom up instead of top down.
+      
+      CR10008226
+      PIGGY_BACK filter property values
+      
+      Multivalued values are not passed as Object[] but as Object[][].
+      
+      CR20016300
+      Escape wildcard characters in RIDs 
+      
+      Escape SQL wildcard characters for LIKE predicates with RIDs.
+      Indices will be useful even if the RID contains '_', '%' or '\\'.
+
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3.  REMOVED FEATURES
+
+      CR20018411
+      Remove datastore1 model and corresponding implementations.
+      
+      CR20018410
+      Remove deployment1 model and corresponding implementations.
+      
+      CR20018409
+      Remove filter1 model.
+      
+      CR20018408
+      Remove runtime1 model and corresponding implementations.
+      
+      CR20018200
+      Deprecate openMDX 1 JMI mapping.
+      
+      CR20017901  
+      org::openmdx::compatibility:role1
+      
+      The role1 plug-in and its associated tree watch classes have
+      been removed.
+
+      CR20018100
+      Unit Of Work Local User Object 
+      
+      * Remove RefRootPackage_1's deprecated constructors
+      * Remove CCI1_PACKAGE_SUFFIX references and all methods and constructors
+        relaying on it
+      * Remove deprecated package org.openmdx.base.object.jdo
+      * Remove "throw not found if null" support from RefRootPackage_1  
+      * Remove refUseOpenMdx1ImplLookup() support
+      
+      CR20017901
+      org::openmdx::compatibility::state1
+      
+      The class following classes have been removed:
+      * org::openmdx::compatibility::state1::ValidState
+      * org::openmdx::compatibility::state1::StateCapable
+      * org::openmdx::compatibility::state1::StateIncapable
+      
+      CR20013920
+      org::openmdx::compatibility::state1 
+ 
+      state1's Object_1_0 views and the Layer_1_0-Plug-Ins have been removed.
+      
+      CR20016210
+      jmi1 replaces cci 
+      
+      Discontinue legacy API generation
+      
+      CR20013920 	
+      org::openmdx::compatibility::state1
+      
+      The following classes have been removed:
+      * org::openmdx::compatibiliy::state1::DateStateExcludingEnd
+      * org::openmdx::compatibiliy::state1::DateTimeState
+            
+      CR20017503
+      USE_OBJECT_IDENTITY_HINT 
+      
+      Discontinue USE_OBJECT_IDENTITY_HINT support,
+      i.e. reference names must no longer end with the suffix ";use=identity".
+      
+      CR20017501
+      Placeholders
+      
+      Discontinue support for placeholders as path element,
+      i.e. each object's identity is fixed as soon as it is made persistent. 
+      It can't be changed by a server-side plug-in any more.       
+      
+      
+==============================================================================
+Version 2.2.1                                                      2008-10-14
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20017401
+      LoginTimeout 
+      
+      The default login timeout is overridden by a non-0 LoginTimeout 
+      config-property entry:
+
+         <config-property>
+	       <config-property-name>LoginTimeout</config-property-name>
+	       <config-property-type>java.lang.Long</config-property-type>
+	       <config-property-value>2000</config-property-value>
+         </config-property>
+            
+      CR220017300
+      Lightweight Container DataSource
+      
+      Keep Alive Support:
+      
+      * Add pool configuration to openmdx-connector, e.g.
+       
+         <!DOCTYPE 
+           openmdx-connector 
+           PUBLIC "-//openMDX//DTD Connector Extension 1.1//EN" 
+           "http://www.openmdx.org/dtd/openmdx-connector_1_1.dtd"
+         >
+         <openmdx-connector>
+	       <resourceadapter>
+		     <connectionfactory-jndi-name>jdbc/dataproviders</connectionfactory-jndi-name>
+		     <pool>
+		       <maximum-idle>-1</maximum-idle>
+		       <time-between-eviction-runs>100</time-between-eviction-runs>
+			   <test-while-idle>true</test-while-idle>
+		     </pool>
+	       </resourceadapter>
+         </openmdx-connector>
+        
+      * Add validation statement to connector, e.g.
+      
+          <config-property>
+            <config-property-name>ValidationStatement</config-property-name>
+            <config-property-type>java.lang.String</config-property-type>
+            <config-property-value>SELECT GETDATE()</config-property-value>
+          </config-property>
+
+      CR20016204 	
+      newQuery
+      
+      PersistenceManager.newQuery(Class) is now supported and returns a standard
+      cci2 Query object.
+
+      * Usage:
+      
+        Query query = persistenceManager.newQuery(InvoicePosition.class);
+        InvoicePositionQuery invoicePositionQuery = (InvoicePositionQuery) query;
+        // define the predicate with the help of invoicePositionQuery's methods
+        query.setCandidates(container);                
+        List<InvoicePosition> invoicePositions = (List<InvoicePosition>) query.execute();
+      
+      CR20016208
+      DatatypeFactories
+      
+      Provide two static accessors for
+      * an xmlDatatypeFactory()
+      * an immutableDatatypeFactory() 
+      
+      CR20016208
+      Immutable Datatype Factory 
+      
+      Support the following datatypes
+      * Immutable Date instances
+      * Immutable DateTime instances
+      * Normalized Duration instances
+      
+      Note:
+      * an ImmutableDate instance is a subclass of XMLGregorianCalendar such 
+        as XMLGregorianCalendarImpl
+          o a clone of an ImmutableDate instance is an XMLGregorianCalendarImpl
+          o an XMLGregorianCalendarImpl instance may be passed as argument to 
+            an ImmutableDate instance
+          o an ImmutableDate instance must not be passed as argument to an 
+            XMLGregorianCalendarImpl instance
+          o a clone of an ImmutableDate instance may be passed as argument to 
+          an XMLGregorianCalendarImpl instance as it is itself an 
+          XMLGregorianCalendarImpl instance. 
+      * an ImmutableDateTime instance is a subclass of java.util.Date
+          o a clone of an ImmutableDateTime instance is a java.util.Date 
+            instance.
+          o an ImmutableDateTime instance may be passed as an argument to a 
+            java.util.Date instance
+          o a java.util.Date instance may be passed as an argument to am 
+            ImmutableDateTime instance 
+      * All fields of a normalized Duration except the following ones are null
+          o sign
+          o months
+          o seconds 
+            
+      CR20015500
+      ServiceException & RuntimeServiceException Constructors      
+      BasicException.Parameter... arguments may be put at the end of the 
+      argument list.
+        
+      CR20013920
+      base & state2
+      
+      The following model classes have been added
+      * org::openmdx::base::Creatable 
+      * org::openmdx::base::Modifiable
+      * org::openmdx::base::Removable
+      * org::openmdx::base::Aspect 
+      * org::openmdx::state2::BasicState
+      * org::openmdx::state2::DateState
+      * org::openmdx::state2::DateTimeState
+      
+      CR20013920
+      Deployment_1
+      
+      The class org.openmdx.compatibility.base.application.cci.Deployment_1
+      simplifies JUnit set-up.
+           
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20017001
+      Improved exception handling
+
+      * BasicException.Wrapper implementations use their Throwable's cause
+        as BasicException holder, as opposed to their former exceptionStack member.
+      * BasicExcpetions use a StackTraceElements[] member as opposed to their
+        former String[], className, methodName and lineNr members.
+      
+      That's why their serialVersionUID has changed.
+      
+      CR20016209
+      Immutable Datatypes
+      
+      The Object_1_0 API should use immutable datatype instances instead of 
+      their string representation to avoid repeated parsing. 
+      
+      CR20016103
+      PersistenceManagerFactory
+      
+      The PersistenceManagerFactory shall keep week references only to its 
+      PersistenceManagers
+       
+      CR20013920
+      ObjectFactory 1 API
+      
+      The following method has been added to the object factory 1.1 API:
+      * Object_1_0 createAspect(
+          String objectClass,
+          Object_1_0 aspectCapable
+        ) throws ServiceException;
+      
+      CR20013920
+      JMI Context container
+      
+      contextCapable.refGetValue(SystemAttributes.CONTEXT_CAPABLE_CONTEXT)
+      
+2.1.  FIXED BUGS
+
+      CR20016600
+      evictAll
+      
+      Separate evictAll() from clear() 
+      
+      CR20016204 	
+      Query Handler
+      
+      Some incorrect predicate build rules have been corrected.
+      
+      CR20016202
+      XRI URL Handler
+      
+      Parse correctly according to the chapter "Relative XRI References" in
+      
+        OASIS
+        Extensible Resource Identifier (XRI) Syntax V2.0
+        Committee Specification, 14 November 2005
+        (http://docs.oasis-open.org/xri/V2.0)
+            
+      CR20015902
+      refRemove
+      
+      NullPointerException in case of non-existent entry.
+      
+      refRemove should silently return instead of throwing a NullPointerException.
+
+2.2.  DEPRECATED FEATURES
+
+      CR20017001
+      Improved exception handling
+
+      * BasicException.Wrapper.getExceptionStack() has been deprecated in favour
+        of BasicException.Wrapper.getCause()
+
+      CR20013920
+      ObjectFactory 1 API
+      
+      The following Object Factory 1 methods have been deprecated and
+      throw a NOT_SUPPORTED ServiceException upon invocation:
+      * createObject() for views
+      * createObject() for roles
+
+2.3.  REMOVED FEATURES
+      
+      CR20013920
+      view1 & state1
+      
+      The following compatibility mode model packages have been removed:
+      * org::openmdx::compatibility::view1
+      * org::openmdx::compatibility::role1 
+      
+      CR20013920
+      Object Cloning
+      
+      * The class org.openmdx.base.accessor.jmi.spi.CloneObject_1 has been 
+        removed.
+      * The method refCloneObject has been removed from the RefPackage 1.2 API.
+        
+      CR20013920
+      JMI
+      
+      openMDX 1's JMI mapping (in the .cci sub-package) has been removed in 
+      favour of openMDX 2's JMI mapping (in the .jmi1 sub-package).
+       
+      CR20016208
+      Immutable Datatype Factory 
+
+      The deprecated class org.openmdx.base.time.Duration has been removed.
+      
+      CR20016208
+      DateFormat
+      
+      The deprecated public constructor has been made private in favour of
+      the corresponding static factory method.
+
+      CR20017001
+      Improved exception handling
+      
+      The following deprecated classes have been removed:
+      * org.openmdx.compatibility.base.exception.Assertions
+      * org.openmdx.compatibility.base.exception.CommonExceptionCodes
+      * org.openmdx.compatibility.base.exception.CommonExceptions
+      * org.openmdx.compatibility.base.dataprovider.cci.DataproviderExceptions
+      
+      The following class has been removed:
+      * org.openmdx.compatibility.base.exception.StackedException
+
+      The following deprecated method has been removed:
+      * The method getStackedException() in the classes implementing
+        org.openmdx.kernel.exception.BasicException.Wrapper.
+      
+==============================================================================
+Version 2.2.0                                                       2008-09-10
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20015500
+      ServiceException & RuntimeServiceException Constructors
+      
+      BasicException.Paramter... arguments may be put at the end of the 
+      argument list.
+        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20015400
+      Optimize Path. Do not use String[].
+      
+      CR20015500
+      Minimize use of new Object[]. Minimize allocation of Object arrays.
+      
+      CR20015600
+      ObjectFactory_1_0.getUnitOfWork
+      
+      Change the behaviour when the object factory is closed.
+      
+      Throw an ILLEGAL_STATE ServiceException instead of returning null when 
+      the object factory is closed. 
+       
+      CR20014301
+      Read committed only 
+      
+      * Goal
+        The prefix '^' for Object_1_0's feature names excludes transient 
+        values from being returned.
+      * Implementation
+        Only commited values are visible to by Transactional Object 1.0 
+        implementations. 
+
+      20013949
+      Optimized EJB Remote Invocations 
+
+      * Strings and Numbers are no longer serialized and deserialized during
+        intra-VM remote method invocations.
+      * The byte arrays used for serialization and deserialization are
+        re-used on a thread basis. 
+      
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      
+      CR20015500
+      Dataprovider_1TracingBean
+      
+      The Dataprovider_1TracingBean has been deprecated because the Dataprovider_1Bean
+      logs requests and replies at the same level (the debug level, formerly known as
+      detail level)      
+
+2.3.  REMOVED FEATURES
+      
+      CR20015500
+      MappedRecordFormatter
+      
+      The deprecated class MappedRecordFormatter has been removed.
+
+      CR20015500
+      InProcessDeployment
+      
+      The deprecated class 
+      org.openmdx.kernel.application.client.InProcessDeployment has been removed.
+      
+      CR20015601
+      PersistenceCapable_1_1
+      
+      Unused interface 
+      org.openmdx.base.accessor.generic.spi.PersistenceCapable_1_1 removed.
+      
+
+==============================================================================
 Version 2.1.0                                                       2008-07-10
 ==============================================================================
 
@@ -1897,7 +2557,7 @@ Version 1.17.0                                                      2007-05-09
 2.2.  DEPRECATED FEATURES
       
       CR20006588
-      �jdo.Persistence_1
+      …jdo.Persistence_1
       
       The primitiveTypes packages
       * org.omg.primitiveTypes.cci
@@ -2020,7 +2680,7 @@ Version 1.16.1                                                      2007-01-17
 1.    NEW FEATURES
       
       CR20006517
-      M�glichkeit, TIMESTAMP WITH TIMEZONE mit einer konfigurierbaren Zeitzone
+      Möglichkeit, TIMESTAMP WITH TIMEZONE mit einer konfigurierbaren Zeitzone
       zu speichern.
       
       There is new configuration option defining how org:w3c::date and
@@ -2618,7 +3278,7 @@ Version 1.14.3                                                      2006-08-21
       * the jmi.openmdx-1 mapping is based on javax.xml.datatype classes  
       
       CR0003771
-      Key- und Certificate Provider f�r wls 9
+      Key- und Certificate Provider für wls 9
       
       Withg the introduction of the key store resource adapter pattern
       key and certificate provider factories are put into the JNDI tree
@@ -2684,7 +3344,7 @@ Version 1.14.2                                                      2006-08-11
 2.3   REMOVED FEATURES
       
       CR0003771
-      Key- und Certificate Provider f�r wls 9
+      Key- und Certificate Provider für wls 9
       
       Withg the introduction of the key store resource adapter pattern
       key and certificate provider factories are put into the JNDI tree
@@ -3159,8 +3819,8 @@ Version 1.12.0                                                      2006-02-20
       CR0003585
       Classpath URL validation
       
-      An IOException with a message of the form �?ClassLoaderType? classloader 
-      ?ModuleName? can't validate URL �URL�� containing the initial reason as 
+      An IOException with a message of the form «?ClassLoaderType? classloader 
+      ?ModuleName? can't validate URL ‹URL›» containing the initial reason as 
       cause should be thrown.
       
       CR0003587 
@@ -3176,10 +3836,10 @@ Version 1.12.0                                                      2006-02-20
           );
           
       method:
-      * The �values� argument accepts now members of type �Path� in addidtion 
-        to �RefObject_1_0� instances.
-      * For members which are instances of both �State� and �ExtentCapable�
-        �getIdentitiy()� is used as opposed to the usual �refGetPath()�.         
+      * The «values» argument accepts now members of type «Path» in addidtion 
+        to «RefObject_1_0» instances.
+      * For members which are instances of both «State» and «ExtentCapable»
+        «getIdentitiy()» is used as opposed to the usual «refGetPath()».         
       
       CR0003589
       State-parameters in path for object creation
@@ -3325,7 +3985,7 @@ Version 1.11.5                                                      2006-01-06
 			            <void property="value">
 			              <array class="java.lang.String" length="1">
 			                <void index="0">
-			                  <string>org:opencrx:kernel:account1:Contact</string>
+			                  <string>org:openmdx:workshop1:TeamMember</string>
 			                </void>
 			              </array>
 			            </void>
@@ -4976,7 +5636,7 @@ Version 1.8.0                                                       2005-04-10
 			
 			CR0003113
 			Ui_1: support ordering of inspectors.
-			<org.openmdx.ui1.ElementDefinition name="org:opencrx:kernel:account1:Contact">
+			<org.openmdx.ui1.ElementDefinition name="org:openmdx:workshop1:TeamMember">
 				<_object>
 					<active>true</active>
 					<toolTip>
@@ -4985,7 +5645,7 @@ Version 1.8.0                                                       2005-04-10
 					<label>
 						<_item>Contact</_item>
 					</label>
-					<iconKey>org:opencrx:kernel:account1:Contact</iconKey>
+					<iconKey>org:openmdx:workshop1:TeamMember</iconKey>
 					<order>
 						<_item>0</_item>
 						<_item>0</_item>
@@ -5237,7 +5897,7 @@ Version 1.7.0                                                       2005-02-26
         add the principal's name to the principal chain
       * addPrincipalString
         add the principal's string representation to the principal chain
-      * executionContextModifierClass
+      * Â‹executionContextModifierClassÂ›
         the fully qualified name of a class implementing org.openmdx.
         compatibility.base.dataprovider.cci.ExecutionContextModifier_1_0.
 	
@@ -5707,7 +6367,7 @@ Version 1.5.3                                                       2004-12-14
 
       CR0002784       
       Replace moduleID by moduleURI. The openMDX deployment configuration parser relies 
-      on its «module id»s (the module URIs last component) being unique.
+      on its Â«module idÂ»s (the module URIs last component) being unique.
 
 2.1.  FIXED BUGS
 
@@ -5768,7 +6428,7 @@ Version 1.5.3                                                       2004-12-14
 			"::*" 
 			"A::B" 
 			"A::B/::*" 
-			"A::B/Fran\u00e7ois" // "A::B/Fran殩s" 
+			"A::B/Fran\u00e7ois" // "A::B/Franæ®©s" 
 			"A::B/provider/P::Q/segment/S.T/object/RR_1;state=0" 
 			"A::B/provider/P::Q/segment/S.T/object/012345;transient" 
 			"A::B/(xri::@openmdx::B.B0//B1)/C" 
@@ -5793,7 +6453,7 @@ Version 1.5.3                                                       2004-12-14
 			"xri:@openmdx:*" 
 			"xri:@openmdx:A.B" 
 			"xri:@openmdx:A.B/:*" 
-			"xri:@openmdx:A.B/Fran\u00e7ois" // "xri:@openmdx:A.B/Fran殩s" 
+			"xri:@openmdx:A.B/Fran\u00e7ois" // "xri:@openmdx:A.B/Franæ®©s" 
 			"xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/RR_1;state=0" 
 			"xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/012345;transient 
 			"xri:@openmdx:A.B/(xri:@openmdx:B.B0/B1)/C" 
@@ -5809,7 +6469,7 @@ Version 1.5.3                                                       2004-12-14
 			"xri:@openmdx:*" 
 			"xri:@openmdx:A.B" 
 			"xri:@openmdx:A.B/:*" 
-			"xri:@openmdx:A.B/Fran\u00e7ois" // "xri:@openmdx:A.B/Fran殩s" 
+			"xri:@openmdx:A.B/Fran\u00e7ois" // "xri:@openmdx:A.B/Franæ®©s" 
 			"xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/RR_1;state=0" 
 			"xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/012345;transient" 
 			"xri:@openmdx:A.B/(xri:@openmdx:B.B0%2FB1)/C" 
@@ -5825,7 +6485,7 @@ Version 1.5.3                                                       2004-12-14
 			"xri:@openmdx:*" 
 			"xri:@openmdx:A.B" 
 			"xri:@openmdx:A.B/:*" 
-			"xri:@openmdx:A.B/Fran%C3%A7ois" // "xri:@openmdx:A.B/Fran殩s" 
+			"xri:@openmdx:A.B/Fran%C3%A7ois" // "xri:@openmdx:A.B/Franæ®©s" 
 			"xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/RR_1;state=0" 
 			"xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/012345;transient" 
 			"xri:@openmdx:A.B/(xri:@openmdx:B.B0%2FB1)/C" 
@@ -6042,7 +6702,7 @@ Version 1.5.1                                                       2004-10-05
       Non-ASCII characters hsould be escaped as the source files are stored
       with ISO-Latin-1 encoding.
 
-      '«' and '»' have been replaced by their unicode escapes '\u00ab' and 
+      'Â«' and 'Â»' have been replaced by their unicode escapes '\u00ab' and 
       '\u00bb' respectively.
 
 2.2.  DEPRECATED FEATURES
@@ -6367,10 +7027,10 @@ Version 1.4.0                                                       2004-08-18
       You should be able to
       * leave out 
         -Dorg.openmdx.compatibility.base.application.cci.Application.register=
-        startup-class unless you rely on a deployment configuration XML file 
-      * rely upon -Dweblogic.Name=server-name
+        Â‹startup-classÂ› unless you rely on a deployment configuration XML file 
+      * rely upon -Dweblogic.Name=Â‹server-nameÂ›
       * define -Dorg.openmdx.compatibility.base.application.j2ee.domain=
-        domain-name
+        Â‹domain-nameÂ›
          
       
 2.2.  DEPRECATED FEATURES
@@ -6660,7 +7320,7 @@ Version 1.3.4                                                       2004-07-16
       CR0002414
       env entries without values  
       
-      «env» entries without values should be allowed according to the DTD.  
+      Â«envÂ» entries without values should be allowed according to the DTD.  
 
       
 2.2.  DEPRECATED FEATURES
@@ -7012,22 +7672,22 @@ Version 1.3.0                                                       2004-05-06
       
       Separate ViewCapable/"view" from ContextCapable and RoleCapable.  
       
-      Diese îderung beinhaltet folgende Schritte:
+      Diese Ã®derung beinhaltet folgende Schritte:
       1. Wir lassen "view" wie es ist. 
-         Es dient nur zur Unterst� des Modells 
+         Es dient nur zur Unterstï¿½ des Modells 
          org::openmdx::compatibility::audit1.
          Diese Pattern werden wir in openMDX 2 nur noch im Zusammenhang mit 
-         Object_1_0/DataproviderObject unterst� das heisst, die 
-         Anwendungen m�auf org::openmdx::audit2 umsteigen, um die neuen 
-         Infrastrukturkomponenten nutzen zu k�n. 
+         Object_1_0/DataproviderObject unterstï¿½ das heisst, die 
+         Anwendungen mï¿½auf org::openmdx::audit2 umsteigen, um die neuen 
+         Infrastrukturkomponenten nutzen zu kï¿½n. 
       2. Wir entkoppeln "ContextCapable" von "ViewCapable".
-         "ContextCapable" dient zur Unterst� der 
-         Nichtkompatibilit㳳modelle wie org::openmdx::lock1 und 
+         "ContextCapable" dient zur Unterstï¿½ der 
+         Nichtkompatibilitã³³modelle wie org::openmdx::lock1 und 
          org::openmdx::datastore1. 
-         Im DataproviderObject werden ContextCapable-Features durch das Pr㥩x 
+         Im DataproviderObject werden ContextCapable-Features durch das Prã¥©x 
          "context:" ausgezeichnet. 
       3. Wir entkoppeln RoleCapable von "view". 
-         Im DataproviderObject werden RoleCapable-Features durch das Pr㥩x 
+         Im DataproviderObject werden RoleCapable-Features durch das Prã¥©x 
          "role:" ausgezeichnet. 
 
       CR0002226

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StructuralFeatureDef.java,v 1.7 2008/06/28 00:21:26 hburger Exp $
+ * Name:        $Id: StructuralFeatureDef.java,v 1.8 2008/11/11 15:40:46 wfro Exp $
  * Description: VelocityStructuralFeatureDef class
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:26 $
+ * Date:        $Date: 2008/11/11 15:40:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,8 +70,7 @@ public abstract class StructuralFeatureDef
     String qualifiedTypeName,
     String multiplicity,
     Boolean isChangeable,
-    Boolean isDerived, 
-    boolean openmdx1
+    Boolean isDerived 
   ) {
     super(
       name, 
@@ -84,7 +83,6 @@ public abstract class StructuralFeatureDef
     this.multiplicity = multiplicity;
     this.isChangeable = isChangeable;
     this.isDerived = isDerived;
-    this.openmdx1 = openmdx1;
 
     // bean setter/getter names
     boolean forBoolean = PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName);
@@ -92,21 +90,13 @@ public abstract class StructuralFeatureDef
         Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
         Multiplicities.OPTIONAL_VALUE.equals(multiplicity);
     this.beanGenericName = AbstractNames.capitalize(name);
-    this.beanGetterName = openmdx1 ? Names.openmdx1AccessorName(
-        name,
-        true, // forQuery
-        forBoolean
-    ) : AbstractNames.openmdx2AccessorName(
+    this.beanGetterName = AbstractNames.openmdx2AccessorName(
         name,
         true, // forQuery
         forBoolean,
         singleValued
     ); 
-    this.beanSetterName = openmdx1 ? Names.openmdx1AccessorName(
-        name,
-        false, // forQuery
-        forBoolean
-    ) : AbstractNames.openmdx2AccessorName(
+    this.beanSetterName = AbstractNames.openmdx2AccessorName(
         name,
         false, // forQuery
         forBoolean,
@@ -166,6 +156,5 @@ public abstract class StructuralFeatureDef
   private final String beanGetterName;
   private final String beanSetterName;
   private final String beanGenericName;
-  protected final boolean openmdx1;
   
 }

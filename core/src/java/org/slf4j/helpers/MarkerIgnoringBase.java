@@ -22,7 +22,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * ______________________________________________________________________
  *
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * JAVA 5 support added
@@ -41,30 +41,30 @@ import org.slf4j.Marker;
  * 
  * @author Ceki Gulcu
  */
-public abstract class MarkerIgnoringBase implements Logger {
+public abstract class MarkerIgnoringBase extends NamedLoggerBase implements Logger {
 
   public boolean isTraceEnabled(Marker marker) {
     return isTraceEnabled();
   }
   
   public void trace(Marker marker, String msg) {
-    debug(msg);
+    trace(msg);
   }
 
   public void trace(Marker marker, String format, Object arg) {
-    debug(format, arg);
+    trace(format, arg);
   }
 
   public void trace(Marker marker, String format, Object arg1, Object arg2) {
-    debug(format, arg1, arg2);
+    trace(format, arg1, arg2);
   }
 
   public void trace(Marker marker, String format, Object... argArray) {
-    debug(format, argArray);
+    trace(format, argArray);
   }
 
   public void trace(Marker marker, String msg, Throwable t) {
-    debug(msg, t);
+    trace(msg, t);
   }
   
   public boolean isDebugEnabled(Marker marker) {
@@ -165,15 +165,7 @@ public abstract class MarkerIgnoringBase implements Logger {
   }
 
   public String toString() {
-      return new StringBuilder(
-          this.getClass().getName()
-      ).append(
-          '('
-      ).append(
-          getName()
-      ).append(
-          ')'
-      ).toString();
+	  return this.getClass().getName()+"("+getName()+")";
   }
   
 }

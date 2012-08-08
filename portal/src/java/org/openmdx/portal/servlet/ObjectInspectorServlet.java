@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectInspectorServlet.java,v 1.67 2008/07/04 18:32:10 wfro Exp $
+ * Name:        $Id: ObjectInspectorServlet.java,v 1.78 2008/11/27 01:51:26 wfro Exp $
  * Description: ObjectInspectorServlet 
- * Revision:    $Revision: 1.67 $
+ * Revision:    $Revision: 1.78 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/04 18:32:10 $
+ * Date:        $Date: 2008/11/27 01:51:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 
 /**
@@ -114,7 +111,6 @@ import java.util.Map;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
-import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -122,17 +118,19 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
 
 import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.accessor.jmi1.AccessorFactory_2;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_3;
@@ -181,7 +179,7 @@ import org.openmdx.uses.org.apache.commons.fileupload.FileUploadException;
  *   <li>initPrincipal: principal during servlet init for loading codes and data. Default is root.</li>
  *   <li>codeSegment: xri of segment containing codes. This is required if code-to-text
  *       translation must be supported.</li>
- *   <li>evaluator: class implementing the interface org.openmdx.base.application.generic.servlet.Evaluation_1_0.</li>
+ *   <li>evaluator: class implementing the interface org.openmdx.portal.servlet.PortalExtension_1_0.</li>
  *   <li>httpEncoder: class implementing the interface org.openmdx.portal.servlet.HttpEncoder_1_0.</li>
  *   <li>roleMapper: class implementing the interface org.openmdx.portal.servlet.RoleMapper_1_0.</li>
  *   <li>realm: xri of realm containing the security principals.</li>
@@ -207,7 +205,6 @@ import org.openmdx.uses.org.apache.commons.fileupload.FileUploadException;
  *   <li>ejb/data: ejb-ref of an EJB managing the application data.</li>
  * </ul>
  * <p>
- * The servlet may be ported to struts or another html framework in the future.
  */
 
 public class ObjectInspectorServlet 
@@ -328,25 +325,8 @@ public class ObjectInspectorServlet
             log("loading " + WebKeys.CONFIG_ROLE_MAPPER + " failed", e);
         }      
         // Ui config
-        try {
-            Path uiSegmentPath = new Path(this.getInitParameter("uiSegment"));
-            this.uiLoader = new UiLoader(
-                this.getServletContext(),
-                this.roleMapper,
-                this.model,
-                uiSegmentPath.getParent().getParent()
-            );
-            this.uiLoader.load(
-                this.locale
-            );
-            this.uiContext = new UiContext(
-                uiSegmentPath,
-                this.uiLoader.getRepository()
-            );
-        }
-        catch(ServiceException e) {
-            log("loading ui config failed", e);
-        }
+        this.uiProviderPath = new Path(this.getInitParameter("uiSegment")).getPrefix(3);
+        this.reloadUi();
         // Get texts
         try {
             this.textsLoader = new TextsLoader(
@@ -577,9 +557,9 @@ public class ObjectInspectorServlet
             this.applicationName,
             (String)session.getAttribute(WebKeys.LOCALE_KEY),
             (String)session.getAttribute(WebKeys.TIMEZONE_KEY),
-            this.uiContext,
+            this.controlFactory,
             session.getId(),
-            request.getRemoteUser(),
+            request.getUserPrincipal() == null ? null : request.getUserPrincipal().getName(),
             userRole,
             this.realmIdentity,
             this.retrieveByPathPatterns,
@@ -589,7 +569,6 @@ public class ObjectInspectorServlet
             this.htmlEncoder,
             this.filters,
             this.codes,
-            this.textsFactory,
             this.layoutFactory,
             (File)this.getServletContext().getAttribute("javax.servlet.context.tempdir"),
             request.getSession().getId() + "-",
@@ -605,754 +584,786 @@ public class ObjectInspectorServlet
     }
   
     //-------------------------------------------------------------------------
-    protected void refreshUi(
+    synchronized protected void reloadUi(
     ) {
-      try {
-        this.uiLoader.load(
-            this.locale
-        );
-        this.uiContext.reset();
-        this.filterLoader.loadFilters(
-            this.uiContext,
-            this.filters
-        );        
-        this.controlFactory.reset();
-        this.uiRefreshedAt = System.currentTimeMillis();
-      }
-      catch(ServiceException e) {}
-    }
-
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-private void handleRequest(
-    HttpServletRequest request, 
-    HttpServletResponse response
-  ) throws ServletException, IOException {
-      
-    // PERFORMANCE
-    long t0 = System.currentTimeMillis();
-    AppLog.detail("receive request");
-
-    // ObjectInspectorServlet supports UTF-8 encoding only
-    request.setCharacterEncoding("UTF-8");
-    
-    // Session
-    HttpSession session = request.getSession(false);
-    if(session == null) {
-      session = request.getSession(true);
-    }
-    // init views cache for new sessions
-    if(session.getAttribute(WebKeys.VIEW_CACHE_KEY_SHOW) == null) {
-        session.setAttribute(
-            WebKeys.VIEW_CACHE_KEY_SHOW,
-            new ViewsCache(
-                this.getInitParameter("viewsCacheSize") == null
-                    ? null
-                    : new Integer(this.getInitParameter("viewsCacheSize")
-                )
-            )
-        );
-    }
-    if(session.getAttribute(WebKeys.VIEW_CACHE_KEY_EDIT) == null) {
-        session.setAttribute(
-            WebKeys.VIEW_CACHE_KEY_EDIT,
-            new ViewsCache(
-                this.getInitParameter("viewsCacheSize") == null
-                    ? null
-                    : new Integer(this.getInitParameter("viewsCacheSize")
-                )
-            )
-        );
-    }
-    
-    // Dump header
-    AppLog.detail("HEADER");
-    for(Enumeration i = request.getHeaderNames(); i.hasMoreElements(); ) {
-      String name = (String)i.nextElement();
-      for(Enumeration j = request.getHeaders(name); j.hasMoreElements(); ) {
-         AppLog.detail("header", name + "=" + j.nextElement());
-      }
-    }
-    
-    // Dump parameter map
-    AppLog.detail("PARAMETER");
-    for(Iterator i = request.getParameterMap().keySet().iterator(); i.hasNext(); ) {
-      Object key = i.next();
-      AppLog.detail("parameter", key + "=" + Arrays.asList((Object[])request.getParameterMap().get(key)));
-    }
-    
-    // Refresh ui config if required
-    if(
-        ((this.uiRefreshRate > 0) || (this.uiRefreshedAt == 0)) &&
-        (System.currentTimeMillis() > this.uiRefreshedAt + this.uiRefreshRate)
-    ) {
-        this.refreshUi();
-    }
-    
-    // Application
-    ApplicationContext application = (ApplicationContext)session.getAttribute(WebKeys.APPLICATION_KEY);
-    if(application == null) {
         try {
-            session.setAttribute(
-                WebKeys.APPLICATION_KEY,
-                application = this.createApplicationContext(session, request, null)
+            this.uiLoader = new UiLoader(
+                this.getServletContext(),
+                this.roleMapper,
+                this.model,
+                this.uiProviderPath
             );
-        }
-        catch(ServiceException e) {
-            // Log exception and send user to logoff page
-            if(e.getExceptionCode() == BasicException.Code.AUTHORIZATION_FAILURE) {
-                AppLog.warning(e.getMessage(), e.getCause());
+            List<Path> uiSegmentPaths = this.uiLoader.load(
+                this.locale
+            );
+            if(this.uiContext == null) {
+                this.uiContext = new UiContext(
+                    uiSegmentPaths,
+                    this.uiLoader.getRepository()
+                );
             }
             else {
-                AppLog.error(e.getMessage(), e.getCause());                
+                this.uiContext.reset(              
+                    uiSegmentPaths,
+                    this.uiLoader.getRepository()
+                );
             }
-            // Can not get application context. Send to logoff page
-            String[] locales = (String[])request.getParameterMap().get(WebKeys.REQUEST_PARAMETER_LOCALE);
-            ServletContext sc = request.getSession().getServletContext();            
+            if(this.filterLoader != null) {
+                this.filterLoader.loadFilters(
+                    this.uiContext,
+                    this.filters
+                );    
+            }    
+            if(this.controlFactory != null) {
+                this.controlFactory.reset();
+            }
+            this.uiRefreshedAt = System.currentTimeMillis();
+        }
+        catch(ServiceException e) {}
+    }
+
+    //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    private void handleRequest(
+        HttpServletRequest req, 
+        HttpServletResponse res
+    ) throws ServletException, IOException {
+  
+        HttpServletRequestWrapper request = new HttpServletRequestWrapper(req);
+        HttpServletResponseWrapper response = new HttpServletResponseWrapper(res);
+      
+        // PERFORMANCE
+        long t0 = System.currentTimeMillis();
+        AppLog.detail("receive request");
+    
+        // ObjectInspectorServlet supports UTF-8 encoding only
+        request.setCharacterEncoding("UTF-8");
+        
+        // Check Session
+        HttpSession session = request.getSession(false);
+        if(
+            (session == null) ||
+            (request.getUserPrincipal() == null)
+        ) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            ServletContext sc = getServletContext();
             RequestDispatcher rd = sc.getRequestDispatcher(
-                "/Logoff.jsp" + ((locales != null) && (locales.length > 0) ? "?locale=" + locales[0] : "")
-            );
-            rd.forward(
-                request, 
-                response
-            );
+                WebKeys.ERROR_PAGE
+            ); 
+            rd.forward(request, response);     
             return;
         }
-    }
-    Map parameterMap = request.getParameterMap();
-    // Set locale if passed as parameter
-    if(parameterMap.get(WebKeys.REQUEST_PARAMETER_LOCALE) != null) {
-        String[] locales = (String[])parameterMap.get(WebKeys.REQUEST_PARAMETER_LOCALE);
-        if(locales.length > 0) {
-            application.setCurrentLocale(locales[0]);
-        }
-    }
-      
-    // Do file upload if required. Store received files into
-    // temporary folder. handleRequest processes the stored files
-    if(FileUpload.isMultipartContent(request)) {
-      parameterMap = new HashMap();
-      AppLog.detail("multi part content");
-      DiskFileUpload upload = new DiskFileUpload();
-      upload.setHeaderEncoding("UTF-8");
-      try {
-        List items = upload.parseRequest(
-          request,
-          this.requestSizeThreshold,
-          this.requestSizeMax,
-          application.getTempDirectory().getPath()
-        );
-        AppLog.detail("request parsed");
-        for(Iterator i = items.iterator(); i.hasNext(); ) {
-          FileItem item = (FileItem)i.next();
-          if(item.isFormField()) {
-            AppLog.trace("form field=" + item.getFieldName());
-            parameterMap.put(
-              item.getFieldName(),
-              new String[]{item.getString("UTF-8")}
-            );
-          }
-          else {
-            AppLog.trace("file field=" + item.getFieldName());
-            AppLog.trace("contentType=" + item.getContentType());
-            AppLog.trace("isInMemory=" + item.isInMemory());
-            AppLog.trace("sizeInBytes=" +  item.getSize());
-            AppLog.trace("name=" + item.getName());
-            
-            // reset binary
-            if("#NULL".equals(item.getName())) {
-              parameterMap.put(
-                item.getFieldName(),
-                new String[]{item.getName()}
-              );              
-            }
-            // add to parameter map if file received
-            else if(item.getSize() > 0) {
-              parameterMap.put(
-                item.getFieldName(),
-                new String[]{item.getName()}
-              );
-              String location = application.getTempFileName(item.getFieldName(), "");
-              
-              // bytes
-              File outFile = new File(location);
-              
-              // bytes
-              try {
-                item.write(outFile);
-              }
-              catch(Exception e) {
-                new ServiceException(e).log();
-              }
-            
-              // type
-              try {
-                PrintWriter pw = new PrintWriter(
-                  new FileOutputStream(location + ".INFO")
-                );
-                pw.println(item.getContentType());
-                int sep = item.getName().lastIndexOf("/");
-                if(sep < 0) {
-                  sep = item.getName().lastIndexOf("\\");
-                }
-                pw.println(item.getName().substring(sep + 1));
-                pw.close();
-              }
-              catch(Exception e) {
-                new ServiceException(e).log();
-              }
-            }
-          }
-        }
-      }
-      catch(FileUploadException e) {
-        new ServiceException(e).log();
-        AppLog.warning("can not upload file", e.getMessage());
-      }
-    }
-
-    // requestId. The form field has priority over referrer
-    String requestId = 
-      this.getParameter(parameterMap, WebKeys.REQUEST_ID + ".submit") == null
-        ? this.getParameter(parameterMap, WebKeys.REQUEST_ID) == null
-          ? null
-          : this.getParameter(parameterMap, WebKeys.REQUEST_ID)
-        : this.getParameter(parameterMap, WebKeys.REQUEST_ID + ".submit");
-    AppLog.detail(WebKeys.REQUEST_ID, requestId);
-
-    // event. The form field has priority over referer
-    int event = Action.EVENT_NONE;
-    try {
-      event = 
-        this.getParameter(parameterMap, WebKeys.REQUEST_EVENT + ".submit") == null
-          ? this.getParameter(parameterMap, WebKeys.REQUEST_EVENT) == null
-            ? Action.EVENT_NONE
-            : Integer.parseInt(this.getParameter(parameterMap, WebKeys.REQUEST_EVENT))
-          : Integer.parseInt(this.getParameter(parameterMap, WebKeys.REQUEST_EVENT + ".submit"));
-    }
-    catch(Exception e) {}
-    AppLog.detail("event", new Integer(event));
-
-    // get name of pressed button (if any)
-    String buttonName = "";
-    for(Iterator i = parameterMap.keySet().iterator(); i.hasNext(); ) {
-      String name = (String)i.next();
-      if(name.endsWith(".x")) {
-        buttonName = name.substring(0, name.lastIndexOf(".x"));
-        break;
-      }
-    }
-
-    // get parameter (either parameter or name of pressed button)
-    String parameter = null;
-    if(this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER) != null) {
-        parameter = this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER);
-    }
-    else if(this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_ENC) != null) {
-        parameter = 
-            URLDecoder.decode(
-                this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_ENC), 
-                "UTF-8"
-            );
-    }
-    else if(this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_LIST) != null) {
-        // parameter must be parsed and decoded by specific event handler
-        parameter = this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_LIST);
-    }
-    else {
-        parameter = buttonName;
-    }
-    AppLog.detail(WebKeys.REQUEST_PARAMETER, parameter);
-    
-    // Views
-    Long viewsCachedSince = (Long)session.getAttribute(WebKeys.VIEW_CACHE_CACHED_SINCE);
-    ViewsCache showViewsCache = (ViewsCache)session.getAttribute(WebKeys.VIEW_CACHE_KEY_SHOW);
-    ViewsCache editViewsCache = (ViewsCache)session.getAttribute(WebKeys.VIEW_CACHE_KEY_EDIT);
-    if(
-        (viewsCachedSince == null) ||
-        (viewsCachedSince.longValue() < this.uiRefreshedAt)
-    ) {
-        showViewsCache.clearViews(
-            session,
-            this.uiRefreshedAt
-        );
-    }    
-    showViewsCache.removeDirtyViews();
-    // As default action either try to select object defined by target or by parameter
-    AppLog.trace("getting view for requestId", requestId);
-    ObjectView view = requestId == null 
-        ? null 
-        : showViewsCache.getView(requestId) == null
-            ? editViewsCache.getView(requestId)
-            : showViewsCache.getView(requestId);
-    // Check for user role change. EVENT_SET_ROLE explicitly
-    // sets the new role. A selected object can implicitly 
-    // trigger a role change if the segment does not match the
-    // current segment. An implicit role change is only possible
-    // if no requestId is supplied
-    String requestedObjectXri = Action.getParameter(parameter, Action.PARAMETER_OBJECTXRI);
-    Path requestedObjectPath = requestedObjectXri.length() > 0 ? new Path(requestedObjectXri) : null;
-    String newRole = event == Action.EVENT_SET_ROLE
-        ? Action.getParameter(parameter, Action.PARAMETER_NAME)
-        : (requestId != null) || (requestedObjectPath == null) || (requestedObjectPath.size() < 5)
-            ? application.getCurrentUserRole()
-            : application.getCurrentUserRole().substring(0, application.getCurrentUserRole().indexOf("@") + 1) + requestedObjectPath.get(4);
-    // A new application context must be created in case of a role change. 
-    if(!newRole.equals(application.getCurrentUserRole())) {
-        // A role change always resets all current and cached views
-        view = null;
-        showViewsCache.clearViews(
-            session, 
-            this.uiRefreshedAt
-        );
-        try {
+        // init views cache for new sessions
+        if(session.getAttribute(WebKeys.VIEW_CACHE_KEY_SHOW) == null) {
             session.setAttribute(
-                WebKeys.APPLICATION_KEY,
-                application = this.createApplicationContext(
-                    session, 
-                    request, 
-                    newRole
+                WebKeys.VIEW_CACHE_KEY_SHOW,
+                new ViewsCache(
+                    this.getInitParameter("viewsCacheSize") == null ? 
+                        null : 
+                        new Integer(this.getInitParameter("viewsCacheSize")
+                    )
                 )
             );
-            application.createPmControl();
-            application.createPmData();
         }
-        catch(Exception e) {
-            ServiceException e0 = new ServiceException(e);
-            AppLog.warning("Unable to switch to requested role " + requestedObjectPath.get(4), e.getMessage());
-            AppLog.warning(e0.getMessage(), e0.getCause());
+        if(session.getAttribute(WebKeys.VIEW_CACHE_KEY_EDIT) == null) {
+            session.setAttribute(
+                WebKeys.VIEW_CACHE_KEY_EDIT,
+                new ViewsCache(
+                    this.getInitParameter("viewsCacheSize") == null ? 
+                        null : 
+                        new Integer(this.getInitParameter("viewsCacheSize")
+                    )
+                )
+            );
+        }        
+        // Dump header
+        if(AppLog.isTraceOn()) {
+            AppLog.trace("HEADER");
+            for(Enumeration i = request.getHeaderNames(); i.hasMoreElements(); ) {
+                String name = (String)i.nextElement();
+                for(Enumeration j = request.getHeaders(name); j.hasMoreElements(); ) {
+                    AppLog.trace("header", name + "=" + j.nextElement());
+                }
+            }        
+            // Dump parameter map
+            AppLog.trace("PARAMETER");
+            for(Iterator i = request.getParameterMap().keySet().iterator(); i.hasNext(); ) {
+                Object key = i.next();
+                AppLog.trace("parameter", key + "=" + Arrays.asList((Object[])request.getParameterMap().get(key)));
+            }
         }
-    }
-    if(
-        (view == null) &&
-        (event !=  Action.EVENT_FIND_OBJECTS)
-    ) {
-      AppLog.detail("no view or view with empty object, creating default");
-      try {
-          if(requestedObjectPath != null) {
-              try {
+        // Refresh ui config if required
+        if(
+            ((this.uiRefreshRate > 0) || (this.uiRefreshedAt == 0)) &&
+            (System.currentTimeMillis() > this.uiRefreshedAt + this.uiRefreshRate)
+        ) {
+            this.reloadUi();
+        }        
+        // Application
+        ApplicationContext application = (ApplicationContext)session.getAttribute(WebKeys.APPLICATION_KEY);
+        if(application == null) {
+            try {
+                session.setAttribute(
+                    WebKeys.APPLICATION_KEY,
+                    application = this.createApplicationContext(session, request, null)
+                );
+            }
+            catch(ServiceException e) {
+                // Log exception and send user to logoff page
+                if(e.getExceptionCode() == BasicException.Code.AUTHORIZATION_FAILURE) {
+                    AppLog.warning(e.getMessage(), e.getCause());
+                }
+                else {
+                    AppLog.error(e.getMessage(), e.getCause());                
+                }
+                // Can not get application context. Send to logoff page
+                String[] locales = (String[])request.getParameterMap().get(WebKeys.REQUEST_PARAMETER_LOCALE);
+                ServletContext sc = request.getSession().getServletContext();            
+                RequestDispatcher rd = sc.getRequestDispatcher(
+                    "/Logoff.jsp" + ((locales != null) && (locales.length > 0) ? "?locale=" + locales[0] : "")
+                );
+                rd.forward(
+                    request, 
+                    response
+                );
+                return;
+            }
+        }
+        Map parameterMap = request.getParameterMap();
+        // Set locale if passed as parameter
+        if(parameterMap.get(WebKeys.REQUEST_PARAMETER_LOCALE) != null) {
+            String[] locales = (String[])parameterMap.get(WebKeys.REQUEST_PARAMETER_LOCALE);
+            if(locales.length > 0) {
+                application.setCurrentLocale(locales[0]);
+            }
+        }
+          
+        // Do file upload if required. Store received files into
+        // temporary folder. handleRequest processes the stored files
+        if(FileUpload.isMultipartContent(request)) {
+            parameterMap = new HashMap();
+            AppLog.detail("multi part content");
+            DiskFileUpload upload = new DiskFileUpload();
+            upload.setHeaderEncoding("UTF-8");
+            try {
+                List items = upload.parseRequest(
+                    request,
+                    this.requestSizeThreshold,
+                    this.requestSizeMax,
+                    application.getTempDirectory().getPath()
+                );
+                AppLog.detail("request parsed");
+                for(Iterator i = items.iterator(); i.hasNext(); ) {
+                    FileItem item = (FileItem)i.next();
+                    if(item.isFormField()) {
+                        AppLog.trace("form field=" + item.getFieldName());
+                        parameterMap.put(
+                          item.getFieldName(),
+                          new String[]{item.getString("UTF-8")}
+                        );
+                    }
+                    else {
+                        AppLog.trace("file.fieldName", item.getFieldName());
+                        AppLog.trace("file.contentType", item.getContentType());
+                        AppLog.trace("file.isInMemory", item.isInMemory());
+                        AppLog.trace("file.sizeInBytes", item.getSize());
+                        AppLog.trace("file.name", item.getName());                        
+                        // Reset binary
+                        if("#NULL".equals(item.getName())) {
+                            parameterMap.put(
+                                item.getFieldName(),
+                                new String[]{item.getName()}
+                            );              
+                        }
+                        // Add to parameter map if file received
+                        else if(item.getSize() > 0) {
+                            parameterMap.put(
+                                item.getFieldName(),
+                                new String[]{item.getName()}
+                            );
+                            String location = application.getTempFileName(item.getFieldName(), "");
+                            // Bytes
+                            File outFile = new File(location);                          
+                            try {
+                                item.write(outFile);
+                            }
+                            catch(Exception e) {
+                                new ServiceException(e).log();
+                            }                        
+                            // MimeType
+                            try {
+                                PrintWriter pw = new PrintWriter(
+                                  new FileOutputStream(location + ".INFO")
+                                );
+                                pw.println(item.getContentType());
+                                int sep = item.getName().lastIndexOf("/");
+                                if(sep < 0) {
+                                  sep = item.getName().lastIndexOf("\\");
+                                }
+                                pw.println(item.getName().substring(sep + 1));
+                                pw.close();
+                            }
+                            catch(Exception e) {
+                                new ServiceException(e).log();
+                            }
+                        }
+                    }
+                }
+            }
+            catch(FileUploadException e) {
+                ServiceException e0 = new ServiceException(e);
+                SysLog.detail(e.getMessage(), e0);
+                SysLog.warning("Can not upload file", Arrays.asList(e.getMessage(), application.getCurrentUserRole()));
+            }
+        }    
+        // requestId. The form field has priority over referrer
+        String requestId = 
+          this.getParameter(parameterMap, WebKeys.REQUEST_ID + ".submit") == null ? 
+              this.getParameter(parameterMap, WebKeys.REQUEST_ID) == null ? 
+                  null :                       
+                  this.getParameter(parameterMap, WebKeys.REQUEST_ID) : 
+              this.getParameter(parameterMap, WebKeys.REQUEST_ID + ".submit");
+        AppLog.detail(WebKeys.REQUEST_ID, requestId);    
+        // event. The form field has priority over referer
+        int event = Action.EVENT_NONE;
+        try {
+            event = 
+                this.getParameter(parameterMap, WebKeys.REQUEST_EVENT + ".submit") == null ? 
+                    this.getParameter(parameterMap, WebKeys.REQUEST_EVENT) == null ? 
+                        Action.EVENT_NONE : 
+                        Integer.parseInt(this.getParameter(parameterMap, WebKeys.REQUEST_EVENT)) : 
+                    Integer.parseInt(this.getParameter(parameterMap, WebKeys.REQUEST_EVENT + ".submit"));
+        }
+        catch(Exception e) {}
+        AppLog.detail("event", event);    
+        // Get name of pressed button (if any)
+        String buttonName = "";
+        for(Iterator i = parameterMap.keySet().iterator(); i.hasNext(); ) {
+            String name = (String)i.next();
+            if(name.endsWith(".x")) {
+                buttonName = name.substring(0, name.lastIndexOf(".x"));
+                break;
+            }
+        }  
+        // Get parameter (either parameter or name of pressed button)
+        String parameter = null;
+        if(this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER) != null) {
+            parameter = this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER);
+        }
+        else if(this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_ENC) != null) {
+            parameter = 
+                URLDecoder.decode(
+                    this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_ENC), 
+                    "UTF-8"
+                );
+        }
+        else if(this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_LIST) != null) {
+            // parameter must be parsed and decoded by specific event handler
+            parameter = this.getParameter(parameterMap, WebKeys.REQUEST_PARAMETER_LIST);
+        }
+        else {
+            parameter = buttonName;
+        }
+        AppLog.detail(WebKeys.REQUEST_PARAMETER, parameter);        
+        // Views
+        Long viewsCachedSince = (Long)session.getAttribute(WebKeys.VIEW_CACHE_CACHED_SINCE);
+        ViewsCache showViewsCache = (ViewsCache)session.getAttribute(WebKeys.VIEW_CACHE_KEY_SHOW);
+        ViewsCache editViewsCache = (ViewsCache)session.getAttribute(WebKeys.VIEW_CACHE_KEY_EDIT);
+        if(
+            (viewsCachedSince == null) ||
+            (viewsCachedSince.longValue() < this.uiRefreshedAt)
+        ) {
+            showViewsCache.clearViews(
+                session,
+                this.uiRefreshedAt
+            );
+        }    
+        showViewsCache.removeDirtyViews();
+        // As default action either try to select object defined by target or by parameter
+        AppLog.trace("getting view for requestId", requestId);
+        ObjectView view = requestId == null ? 
+            null : 
+            showViewsCache.getView(requestId) == null ? 
+                editViewsCache.getView(requestId) : 
+                showViewsCache.getView(requestId);
+        // Check for user role change. EVENT_SET_ROLE explicitly
+        // sets the new role. A selected object can implicitly 
+        // trigger a role change if the segment does not match the
+        // current segment. An implicit role change is only possible
+        // if no requestId is supplied
+        String requestedObjectXri = Action.getParameter(parameter, Action.PARAMETER_OBJECTXRI);
+        Path requestedObjectIdentity = requestedObjectXri.length() > 0 ? 
+            new Path(requestedObjectXri) : 
+            null;
+        String newRole = event == Action.EVENT_SET_ROLE ? 
+            Action.getParameter(parameter, Action.PARAMETER_NAME) : 
+            (requestId != null) || (requestedObjectIdentity == null) || (requestedObjectIdentity.size() < 5) ? 
+                application.getCurrentUserRole() : 
+                application.getCurrentUserRole().substring(0, application.getCurrentUserRole().indexOf("@") + 1) + requestedObjectIdentity.get(4);
+        // A new application context must be created in case of a role change. 
+        if(
+            (event == Action.EVENT_SET_ROLE) ||            
+            !newRole.equals(application.getCurrentUserRole())
+        ) {
+            // A role change always resets all current and cached views
+            view = null;
+            showViewsCache.clearViews(
+                session, 
+                this.uiRefreshedAt
+            );
+            try {
+                session.setAttribute(
+                    WebKeys.APPLICATION_KEY,
+                    application = this.createApplicationContext(
+                        session, 
+                        request, 
+                        newRole
+                    )
+                );
+                application.createPmControl();
+                application.createPmData();
+            }
+            catch(Exception e) {
+                ServiceException e0 = new ServiceException(e);
+                AppLog.warning("Unable to switch to requested role", Arrays.asList(requestedObjectIdentity.get(4), e.getMessage()));
+                AppLog.warning(e0.getMessage(), e0.getCause());
+            }
+        }
+        if(
+            (view == null) &&
+            (event !=  Action.EVENT_FIND_OBJECTS)
+        ) {
+          AppLog.detail("no view or view with empty object, creating default");
+          try {
+              if(requestedObjectIdentity != null) {
+                  try {
+                      view = new ShowObjectView(
+                          UUIDs.getGenerator().next().toString(),
+                          null,
+                          requestedObjectIdentity,
+                          application,
+                          MapUtils.orderedMap(new HashMap()),
+                          null,
+                          null
+                      );
+                  } 
+                  catch(Exception e) {
+                      ServiceException e0 = new ServiceException(e);
+                      AppLog.warning("can not get object", e.getMessage());
+                      AppLog.detail(e0.getMessage(), e0.getCause());               
+                  }
+              }
+              if(view == null) {
+                  // Try to retrieve home XRI from quick accessors. Locate quick
+                  // accessor with name ending with *
+                  QuickAccessor[] quickAccessors = application.getQuickAccessors();
+                  Path homeObjectIdentity = null;
+                  for(int i = 0; i < quickAccessors.length; i++) {
+                      if(quickAccessors[i].getName().endsWith("*")) {
+                          homeObjectIdentity = quickAccessors[i].getTargetIdentity();
+                          break;
+                      }
+                  }
+                  // If no quick accessor is found fall back to root object 0
+                  if(homeObjectIdentity == null) {
+                      homeObjectIdentity = application.getRootObject()[0].refGetPath();
+                  }              
                   view = new ShowObjectView(
                       UUIDs.getGenerator().next().toString(),
                       null,
-                      requestedObjectPath,
+                      homeObjectIdentity,
                       application,
                       MapUtils.orderedMap(new HashMap()),
                       null,
-                      null,
-                      this.controlFactory
+                      null
                   );
-              } 
-              catch(Exception e) {
-                  ServiceException e0 = new ServiceException(e);
-                  AppLog.warning("can not get object", e.getMessage());
-                  AppLog.detail(e0.getMessage(), e0.getCause());               
               }
-          }
-          if(view == null) {
-              // Try to retrieve home XRI from quick accessors. Locate quick
-              // accessor with name ending with *
-              QuickAccessor[] quickAccessors = application.getQuickAccessors();
-              Path homeObjectIdentity = null;
-              for(int i = 0; i < quickAccessors.length; i++) {
-                  if(quickAccessors[i].getName().endsWith("*")) {
-                      homeObjectIdentity = quickAccessors[i].getTargetIdentity();
-                      break;
+              // Send back a window.location.href. This reloads the page based on this view
+              if(view != null) {
+                  view.createRequestId();
+                  showViewsCache.addView(
+                      view.getRequestId(),
+                      view
+                  );
+                  Action action = view.getObjectReference().getSelectObjectAction();
+                  HtmlPage p = HtmlPageFactory.openPage(
+                      view,
+                      request,
+                      EventHandlerHelper.getWriter(request, response)
+                  );
+                  p.write("<script language=\"javascript\" type=\"text/javascript\">");
+                  String requestURL = request.getRequestURL().toString();
+                  int pos = requestURL.indexOf(WebKeys.SERVLET_NAME);
+                  if(pos > 0) {
+                      p.write("  window.location.href='", requestURL.substring(0, pos), p.getEncodedHRef(action), "';");
                   }
+                  else {
+                      p.write("  window.location.href='", p.getEncodedHRef(action), "';");                      
+                  }
+                  p.write("</script>");
+                  p.close(true);
+                  return;
               }
-              // If no quick accessor is found fall back to root object 0
-              if(homeObjectIdentity == null) {
-                  homeObjectIdentity = application.getRootObject()[0].refGetPath();
-              }              
-              view = new ShowObjectView(
-                  UUIDs.getGenerator().next().toString(),
-                  null,
-                  homeObjectIdentity,
-                  application,
-                  MapUtils.orderedMap(new HashMap()),
-                  null,
-                  null,
-                  this.controlFactory
-              );
           }
-          // Send back a window.location.href. This reloads the page based on this view
-          if(view != null) {
-              view.createRequestId();
-              showViewsCache.addView(
-                  view.getRequestId(),
-                  view
-              );
-              Action action = view.getObjectReference().getSelectObjectAction();
-              HtmlPage p = HtmlPageFactory.openPage(
-                  view,
-                  request,
-                  EventHandlerHelper.getWriter(request, response)
-              );
-              p.write("<script language=\"javascript\" type=\"text/javascript\">");
-              p.write("  window.location.href='", p.getEncodedHRef(action), "';");
-              p.write("</script>");
-              p.close(true);
+          catch(Exception e) {
+              ServiceException e0 = new ServiceException(e);
+              AppLog.warning("can not create ShowObjectView", e.getMessage());
+              AppLog.warning(e0.getMessage(), e0.getCause());
+              session.invalidate();
+              response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+              ServletContext sc = getServletContext();
+              RequestDispatcher rd = sc.getRequestDispatcher(
+                  WebKeys.ERROR_PAGE
+              ); 
+              rd.forward(request, response);     
               return;
           }
-      }
-      catch(Exception e) {
-          ServiceException e0 = new ServiceException(e);
-          AppLog.warning("can not create ShowObjectView", e.getMessage());
-          AppLog.warning(e0.getMessage(), e0.getCause());
-          session.invalidate();
-          response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-          ServletContext sc = getServletContext();
-          RequestDispatcher rd = sc.getRequestDispatcher(
-              WebKeys.ERROR_PAGE
-          ); 
-          rd.forward(request, response);     
-          return;
-      }
-    }
-
-    // performance
-    long t1 = System.currentTimeMillis();
-    AppLog.detail("time (ms) to parse parameters and refresh config: " + (t1-t0));
-    t0 = t1;
-    
-    // EVENT_RELOAD. Refresh application context.
-    if(event == Action.EVENT_RELOAD) {
-        try {            
-            application.createPmControl();
-            application.resetPmData();
-            // Reload codes and data in case the init principal
-            // issues a reload
-            if(this.roleMapper.isRootPrincipal(application.getCurrentUserRole())) {
-                // Reload codes
-                try {
-                    new CodesLoader(
-                        this.getServletContext(), 
-                        this.roleMapper,
-                        this.pmfMetaData              
-                    ).loadCodes(
-                        this.locale
-                    );
-                    this.codes.refresh();
-                }
-                catch(ServiceException e) {
-                    log("code import failed", e);
-                }
-                // Reload data
-                try {
-                    new DataLoader(
-                        this.getServletContext(),
-                        this.roleMapper,
-                        this.pmfMetaData
-                    ).loadData(
-                        "data"
-                    );
-                }
-                catch(ServiceException e) {
-                    log("data import failed", e);
-                }
-                // Reload ui and clear show views cache
-                this.refreshUi();
-                showViewsCache.clearViews(
-                    session,
-                    this.uiRefreshedAt
-                );
-            }
-        }
-        catch(ServiceException e) {
-            throw new ServletException("Can not refresh application", e);
-        } 
-    }
-    
-    // EVENT_DOWNLOAD
-    if(
-        (event == Action.EVENT_DOWNLOAD_FROM_LOCATION) ||
-        (event == Action.EVENT_DOWNLOAD_FROM_FEATURE)
-    ) {
-        String name = Action.getParameter(parameter, Action.PARAMETER_NAME);
-        String mimeType = Action.getParameter(parameter, Action.PARAMETER_MIME_TYPE);
-        AppLog.trace("name", name);
-        AppLog.trace("mimeType", mimeType);
-        response.setContentType(mimeType);
-        response.setHeader("Content-disposition", "attachment;filename=" + name);
-        
-        OutputStream os = response.getOutputStream();
-        // EVENT_DOWNLOAD_FROM_LOCATION
-        if(event == Action.EVENT_DOWNLOAD_FROM_LOCATION) {
-            String location = Action.getParameter(parameter, Action.PARAMETER_LOCATION);
-            AppLog.trace("location", location);
-            InputStream is = new FileInputStream(
-                application.getTempFileName(location, "")
-            );
-            if(is != null) {
-                int b = 0;
-                try {
-                    int length = 0;
-                    while((b = is.read()) >= 0) {
-                        os.write(b);
-                        length++;
+        }    
+        // Performance
+        long t1 = System.currentTimeMillis();
+        AppLog.detail("time (ms) to parse parameters and refresh config", (t1-t0));
+        t0 = t1;        
+        // EVENT_RELOAD. Refresh application context.
+        if(event == Action.EVENT_RELOAD) {
+            try {            
+                application.createPmControl();
+                application.resetPmData();
+                // Reload codes and data in case the init principal
+                // issues a reload
+                if(this.roleMapper.isRootPrincipal(application.getCurrentUserRole())) {
+                    // Codes
+                    try {
+                        new CodesLoader(
+                            this.getServletContext(), 
+                            this.roleMapper,
+                            this.pmfMetaData              
+                        ).loadCodes(
+                            this.locale
+                        );
+                        this.codes.refresh();
                     }
-                    is.close();                  
-                    response.setContentLength(length);
-                } 
+                    catch(ServiceException e) {
+                        log("code import failed", e);
+                    }
+                    // Data
+                    try {
+                        new DataLoader(
+                            this.getServletContext(),
+                            this.roleMapper,
+                            this.pmfMetaData
+                        ).loadData(
+                            "data"
+                        );
+                    }
+                    catch(ServiceException e) {
+                        log("data import failed", e);
+                    }
+                    // Ui
+                    this.reloadUi();
+                    showViewsCache.clearViews(
+                        session,
+                        this.uiRefreshedAt
+                    );
+                    editViewsCache.clearViews(
+                        session,
+                        this.uiRefreshedAt
+                    );                        
+                }
+                EventHandlerHelper.notifyObjectModified(
+                    showViewsCache
+                );                
+            }
+            catch(ServiceException e) {
+                throw new ServletException("Can not refresh application", e);
+            } 
+        }        
+        // EVENT_DOWNLOAD
+        if(
+            (event == Action.EVENT_DOWNLOAD_FROM_LOCATION) ||
+            (event == Action.EVENT_DOWNLOAD_FROM_FEATURE)
+        ) {
+            String name = Action.getParameter(parameter, Action.PARAMETER_NAME);
+            String mimeType = Action.getParameter(parameter, Action.PARAMETER_MIME_TYPE);
+            AppLog.trace("name", name);
+            AppLog.trace("mimeType", mimeType);
+            response.setContentType(mimeType);
+            response.setHeader("Content-disposition", "attachment;filename=" + name);            
+            OutputStream os = response.getOutputStream();
+            // EVENT_DOWNLOAD_FROM_LOCATION
+            if(event == Action.EVENT_DOWNLOAD_FROM_LOCATION) {
+                String location = Action.getParameter(parameter, Action.PARAMETER_LOCATION);
+                AppLog.trace("location", location);
+                InputStream is = new FileInputStream(
+                    application.getTempFileName(location, "")
+                );
+                if(is != null) {
+                    int b = 0;
+                    try {
+                        int length = 0;
+                        while((b = is.read()) >= 0) {
+                            os.write(b);
+                            length++;
+                        }
+                        is.close();                  
+                        response.setContentLength(length);
+                    } 
+                    catch(Exception e) {
+                        ServiceException e0 = new ServiceException(e);
+                        AppLog.warning("can not write stream");
+                        AppLog.warning(e0.getMessage(), e0.getCause());
+                    }
+                }
+            }
+            // EVENT_DOWNLOAD_FROM_FEATURE
+            else {
+                try {
+                    Path objectIdentity = new Path(Action.getParameter(parameter, Action.PARAMETER_OBJECTXRI));
+                    RefObject_1_0 refObj = (RefObject_1_0)application.getPmData().getObjectById(objectIdentity);
+                    String feature = Action.getParameter(parameter, Action.PARAMETER_FEATURE);
+                    ModelElement_1_0 featureDef = application.getModel().getElement(feature);
+                    if(Multiplicities.STREAM.equals(featureDef.values("multiplicity").get(0))) {
+                        long length = refObj.refGetValue(feature, os, 0);
+                        response.setContentLength(new Long(length).intValue());       
+                    }
+                    else {
+                        byte[] bytes = (byte[])refObj.refGetValue(feature);
+                        if(bytes != null) {
+                            for(int i = 0; i < bytes.length; i++) {
+                                os.write(bytes[i]);
+                            }
+                            response.setContentLength(bytes.length);                    
+                        }
+                    }
+                }
                 catch(Exception e) {
                     ServiceException e0 = new ServiceException(e);
                     AppLog.warning("can not write stream");
                     AppLog.warning(e0.getMessage(), e0.getCause());
                 }
             }
+            os.close();
+            // PERFORMANCE
+            t1 = System.currentTimeMillis();
+            AppLog.detail("time (ms) to handle event", (t1-t0));
+            t0 = t1;       
+        }    
+        // FindObjectsEventHandler
+        else if(FindObjectsEventHandler.acceptsEvent(event)) {
+            FindObjectsEventHandler.handleRequest(
+                request,
+                response,
+                application,
+                parameter,
+                (String[])parameterMap.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES)
+            );
+            t1 = System.currentTimeMillis();
+            AppLog.detail("time (ms) to handle find object event", (t1-t0));
+            t0 = t1;                   
+        }    
+        // GridEventHandler
+        else if(GridEventHandler.acceptsEvent(event)) {
+            GridEventHandler.handleEvent(
+                event,
+                view,
+                request,
+                response,
+                application,
+                parameter,
+                parameterMap,
+                showViewsCache
+            );
+            t1 = System.currentTimeMillis();
+            AppLog.detail("time (ms) to handle grid event", (t1-t0));
+            t0 = t1;                   
         }
-        // EVENT_DOWNLOAD_FROM_FEATURE
-        else {
+        // SessionEventHandler
+        else if(SessionEventHandler.acceptsEvent(event)) {
+            SessionEventHandler.handleEvent(
+                event,
+                view,
+                request,
+                response,
+                application,
+                parameter,
+                parameterMap
+            );
+            t1 = System.currentTimeMillis();
+            AppLog.detail("time (ms) to handle session event", (t1-t0));
+            t0 = t1;                       
+        }                
+        // Dispatch event to view    
+        else {                    
+            // handle action and return view for new target
+            AppLog.detail("parameterMap", parameterMap);
+            HandleEventResult result = null;
             try {
-                Path objectIdentity = new Path(Action.getParameter(parameter, Action.PARAMETER_OBJECTXRI));
-                RefObject_1_0 refObj = (RefObject_1_0)application.getPmData().getObjectById(objectIdentity);
-                String feature = Action.getParameter(parameter, Action.PARAMETER_FEATURE);
-                ModelElement_1_0 featureDef = application.getModel().getElement(feature);
-                if(Multiplicities.STREAM.equals(featureDef.values("multiplicity").get(0))) {
-                    long length = refObj.refGetValue(feature, os, 0);
-                    response.setContentLength(new Long(length).intValue());       
-                }
-                else {
-                    byte[] bytes = (byte[])refObj.refGetValue(feature);
-                    if(bytes != null) {
-                        for(int i = 0; i < bytes.length; i++) {
-                            os.write(bytes[i]);
-                        }
-                        response.setContentLength(bytes.length);                    
+                if(view != null) {
+                    view.getApplicationContext().getErrorMessages().clear();
+                    if(LookupObjectEventHandler.acceptsEvent(event)) {
+                        result = LookupObjectEventHandler.handleEvent(
+                            event,
+                            view,
+                            request,
+                            response,
+                            application,
+                            parameter,
+                            parameterMap
+                        );                  
+                    }
+                    else if(ShowObjectEventHandler.acceptsEvent(event)) {
+                        result = ShowObjectEventHandler.handleEvent(
+                            event,
+                            (ShowObjectView)view,
+                            parameter,
+                            session,
+                            parameterMap,
+                            showViewsCache
+                        );
+                    }
+                    else if(EditObjectEventHandler.acceptsEvent(event)) {
+                        result = EditObjectEventHandler.handleEvent(
+                            event,
+                            (EditObjectView)view,
+                            request,
+                            response,
+                            parameter,
+                            session,
+                            parameterMap,
+                            editViewsCache,
+                            showViewsCache
+                        );                  
                     }
                 }
             }
             catch(Exception e) {
-                ServiceException e0 = new ServiceException(e);
-                AppLog.warning("can not write stream");
-                AppLog.warning(e0.getMessage(), e0.getCause());
+                AppLog.warning("handleEvent throws exception", e.getMessage());
+                new ServiceException(e).log();
+            }    
+            // PERFORMANCE
+            t1 = System.currentTimeMillis();
+            AppLog.detail("time (ms) to handle event", (t1-t0));
+            t0 = t1;      
+            if(
+                (result == null) ||
+                (result.getStatusCode() == HandleEventResult.StatusCode.FORWARD)
+            ) {
+                ObjectView nextView = result == null ? 
+                    null : 
+                    result.getView();
+                // No nextView. go back to default view
+                if(nextView == null) {
+                    AppLog.detail("no nextView. Creating default");
+                    try {
+                        nextView = new ShowObjectView(
+                            UUIDs.getGenerator().next().toString(),
+                            null,
+                            application.getRootObject()[0].refGetPath(),
+                            application,
+                            MapUtils.orderedMap(new HashMap()),
+                            null,
+                            null
+                        );
+                    }
+                    catch(Exception e) {
+                        AppLog.warning("Can not get default view", e.getMessage());
+                        new ServiceException(e).log();
+                    }
+                }              
+                // Set next view
+                session.setAttribute(
+                    WebKeys.CURRENT_VIEW_KEY,
+                    nextView
+                );              
+                // Add next view to set of views
+                nextView.createRequestId();
+                if(nextView instanceof ShowObjectView) {
+                    showViewsCache.addView(
+                        nextView.getRequestId(),
+                        nextView
+                    );
+                }
+                else if(nextView instanceof EditObjectView){
+                    editViewsCache.addView(
+                        nextView.getRequestId(),
+                        nextView
+                    );
+                }            
+                // reply
+                ServletContext sc = getServletContext();
+                RequestDispatcher rd = sc.getRequestDispatcher(
+                    "/jsp/" + nextView.getType() + ".jsp" + 
+                    "?" + Action.PARAMETER_REQUEST_ID + "=" + nextView.getRequestId() +
+                    "&" + Action.PARAMETER_SCOPE + "=" + result.getPaintScope().toString()
+                ); 
+                AppLog.detail("forward reply");
+                try {
+                    rd.forward(request, response);
+                }
+                catch(Exception e) {
+                    AppLog.warning("Unable forward request", e.getMessage());
+                }
+                AppLog.detail("done");
             }
         }
-        os.close();
-        // PERFORMANCE
-        t1 = System.currentTimeMillis();
-        AppLog.detail("time (ms) to handle event: " + (t1-t0));
-        t0 = t1;       
     }
-
-    // FindObjectsEventHandler
-    else if(FindObjectsEventHandler.acceptsEvent(event)) {
-        FindObjectsEventHandler.handleRequest(
-            request,
-            response,
-            application,
-            parameter,
-            (String[])parameterMap.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES)
-        );
-        t1 = System.currentTimeMillis();
-        AppLog.detail("time (ms) to handle find object event", new Long(t1-t0));
-        t0 = t1;                   
-    }    
-    // GridEventHandler
-    else if(GridEventHandler.acceptsEvent(event)) {
-        GridEventHandler.handleEvent(
-            event,
-            view,
-            request,
-            response,
-            application,
-            parameter,
-            parameterMap,
-            showViewsCache
-        );
-        t1 = System.currentTimeMillis();
-        AppLog.detail("time (ms) to handle grid event", new Long(t1-t0));
-        t0 = t1;                   
-    }
-    // SessionEventHandler
-    else if(SessionEventHandler.acceptsEvent(event)) {
-        SessionEventHandler.handleEvent(
-            event,
-            view,
-            request,
-            response,
-            application,
-            parameter,
-            parameterMap
-        );
-        t1 = System.currentTimeMillis();
-        AppLog.detail("time (ms) to handle session event", new Long(t1-t0));
-        t0 = t1;                       
-    }
-            
-    // dispatch event to view    
-    else {    
-            
-      // handle action and return view for new target
-      AppLog.detail("parameterMap", parameterMap);
-      HandleEventResult result = null;
-      try {
-          if(view != null) {
-              view.getApplicationContext().getErrorMessages().clear();
-              if(LookupObjectEventHandler.acceptsEvent(event)) {
-                  result = LookupObjectEventHandler.handleEvent(
-                      event,
-                      view,
-                      request,
-                      response,
-                      application,
-                      parameter,
-                      parameterMap
-                  );                  
-              }
-              else if(ShowObjectEventHandler.acceptsEvent(event)) {
-                  result = ShowObjectEventHandler.handleEvent(
-                      event,
-                      (ShowObjectView)view,
-                      parameter,
-                      session,
-                      parameterMap,
-                      showViewsCache
-                  );
-              }
-              else if(EditObjectEventHandler.acceptsEvent(event)) {
-                  result = EditObjectEventHandler.handleEvent(
-                      event,
-                      (EditObjectView)view,
-                      request,
-                      response,
-                      parameter,
-                      session,
-                      parameterMap,
-                      editViewsCache,
-                      showViewsCache
-                  );                  
-              }
-          }
-      }
-      catch(Exception e) {
-          AppLog.warning("handleEvent throws exception", e.getMessage());
-          new ServiceException(e).log();
-      }
-
-      // PERFORMANCE
-      t1 = System.currentTimeMillis();
-      AppLog.detail("time (ms) to handle event", Long.toString(t1-t0));
-      t0 = t1;
   
-      if(
-          (result == null) ||
-          (result.getStatusCode() == HandleEventResult.StatusCode.FORWARD)
-      ) {
-          ObjectView nextView = result == null
-              ? null
-              : result.getView();
-          // No nextView. go back to default view
-          if(nextView == null) {
-              AppLog.detail("no nextView. Creating default");
-              try {
-                  nextView = new ShowObjectView(
-                      UUIDs.getGenerator().next().toString(),
-                      null,
-                      application.getRootObject()[0].refGetPath(),
-                      application,
-                      MapUtils.orderedMap(new HashMap()),
-                      null,
-                      null,
-                      this.controlFactory
-                  );
-              }
-              catch(Exception e) {
-                  AppLog.warning("Can not get default view", e.getMessage());
-                  new ServiceException(e).log();
-              }
-          }
-          
-          // Set next view
-          session.setAttribute(
-              WebKeys.CURRENT_VIEW_KEY,
-              nextView
-          );
-          
-          // Add next view to set of views
-          nextView.createRequestId();
-          if(nextView instanceof ShowObjectView) {
-              showViewsCache.addView(
-                  nextView.getRequestId(),
-                  nextView
-              );
-          }
-          else if(nextView instanceof EditObjectView){
-              editViewsCache.addView(
-                  nextView.getRequestId(),
-                  nextView
-              );
-          }
-        
-          // reply
-          ServletContext sc = getServletContext();
-          RequestDispatcher rd = sc.getRequestDispatcher(
-              "/jsp/" + nextView.getType() + ".jsp" + 
-              "?" + Action.PARAMETER_REQUEST_ID + "=" + nextView.getRequestId() +
-              "&" + Action.PARAMETER_SCOPE + "=" + result.getPaintScope().toString()
-          ); 
-          AppLog.detail("forward reply");
-          rd.forward(request, response);      
-          AppLog.detail("done");
-      }
+    //-------------------------------------------------------------------------
+    public void doGet(
+        HttpServletRequest req, 
+        HttpServletResponse res
+    ) throws ServletException, IOException {
+        this.handleRequest(req, res);
     }
-  }
-  
-  //-------------------------------------------------------------------------
-  public void doGet(
-    HttpServletRequest req, 
-    HttpServletResponse res
-  ) throws ServletException, IOException {
-    this.handleRequest(req, res);
-  }
 
-  //-------------------------------------------------------------------------
-  public void doPost(
-    HttpServletRequest req, 
-    HttpServletResponse res
-  ) throws ServletException, IOException {
-    this.handleRequest(req, res);
-  }
+    //-------------------------------------------------------------------------
+    public void doPost(
+        HttpServletRequest req, 
+        HttpServletResponse res
+    ) throws ServletException, IOException {
+        this.handleRequest(req, res);
+    }
 
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private static final long serialVersionUID = 3257008756679522610L;
+    //-------------------------------------------------------------------------
+    // Variables
+    //-------------------------------------------------------------------------
+    private static final long serialVersionUID = 3257008756679522610L;
 
-  private String applicationName;
-  protected long uiRefreshedAt = 0L;
-  private UiContext uiContext = null;
-  private PersistenceManagerFactory pmfMetaData = null;
-  private PersistenceManagerFactory pmfData = null;
-  private Path realmIdentity;
-  private String userHomeIdentity;
-  private String[] rootObjectIdentities;
-  private PortalExtension_1_0 evaluator = null;
-  private HtmlEncoder_1_0 htmlEncoder = null;
-  private RoleMapper_1_0 roleMapper = null;
-  private Model_1_3 model = null;
-  private List<Path> retrieveByPathPatterns = null;
-  private Map filters = new HashMap();
-  private Codes codes = null;
-  private TextsFactory textsFactory = null;
-  private LayoutFactory layoutFactory = null;
-  private ReportDefinitionFactory reportFactory = null;
-  private WizardDefinitionFactory wizardFactory = null;
-  private ControlFactory controlFactory = null;
-  private int requestSizeThreshold = 100000;
-  private int requestSizeMax = 4000000;
-  private int uiRefreshRate = 0;
-  private String favoritesReference = null;
-  private String[] locale;
-  private Map<String,String> mimeTypeImpls = null;
-  private String exceptionDomain = null;
-  private String filterCriteriaField = null;
-  private String[] filterValuePattern = new String[]{"(?i)",  "%", "%"};
-  private UiLoader uiLoader;
-  private FilterLoader filterLoader;
-  private TextsLoader textsLoader;
-  private LayoutLoader layoutLoader;
-  private ReportsLoader reportsLoader;
-  private WizardsLoader wizardsLoader;
+    private String applicationName;
+    protected long uiRefreshedAt = 0L;
+    private Path uiProviderPath = null;
+    private UiContext uiContext = null;
+    private PersistenceManagerFactory pmfMetaData = null;
+    private PersistenceManagerFactory pmfData = null;
+    private Path realmIdentity;
+    private String userHomeIdentity;
+    private String[] rootObjectIdentities;
+    private PortalExtension_1_0 evaluator = null;
+    private HtmlEncoder_1_0 htmlEncoder = null;
+    private RoleMapper_1_0 roleMapper = null;
+    private Model_1_3 model = null;
+    private List<Path> retrieveByPathPatterns = null;
+    private Map filters = new HashMap();
+    private Codes codes = null;
+    private TextsFactory textsFactory = null;
+    private LayoutFactory layoutFactory = null;
+    private ReportDefinitionFactory reportFactory = null;
+    private WizardDefinitionFactory wizardFactory = null;
+    private ControlFactory controlFactory = null;
+    private int requestSizeThreshold = 100000;
+    private int requestSizeMax = 4000000;
+    private int uiRefreshRate = 0;
+    private String favoritesReference = null;
+    private String[] locale;
+    private Map<String,String> mimeTypeImpls = null;
+    private String exceptionDomain = null;
+    private String filterCriteriaField = null;
+    private String[] filterValuePattern = new String[]{"(?i)",  "%", "%"};
+    private UiLoader uiLoader;
+    private FilterLoader filterLoader;
+    private TextsLoader textsLoader;
+    private LayoutLoader layoutLoader;
+    private ReportsLoader reportsLoader;
+    private WizardsLoader wizardsLoader;
   
 }
 

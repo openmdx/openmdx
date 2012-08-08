@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: EnvEntryDeploymentDescriptor.java,v 1.17 2008/03/21 18:38:43 hburger Exp $
+ * Name:        $Id: EnvEntryDeploymentDescriptor.java,v 1.18 2008/09/09 14:20:00 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:38:43 $
+ * Date:        $Date: 2008/09/09 14:20:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -214,7 +214,6 @@ public class EnvEntryDeploymentDescriptor
   private String type;
   private String value;
   private static final Collection validEnvEntryTypes = Arrays.asList(
-        new String[]{
       "java.lang.String",
       "java.lang.Integer",
       "java.lang.Long",
@@ -224,6 +223,5 @@ public class EnvEntryDeploymentDescriptor
       "java.lang.Short",
       "java.lang.Boolean",
       "java.lang.Character"
-        }
   );
 }

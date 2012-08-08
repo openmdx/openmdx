@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1_0.java,v 1.3 2004/04/02 16:59:01 wfro Exp $
+ * Name:        $Id: Dataprovider_1_0.java,v 1.4 2008/11/27 16:46:56 hburger Exp $
  * Description: spice: generic dataprovider interface
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:01 $
+ * Date:        $Date: 2008/11/27 16:46:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,7 +68,7 @@ public interface Dataprovider_1_0 {
      */
     UnitOfWorkReply[] process(
         ServiceHeader header,
-        UnitOfWorkRequest[] workingUnits
+        UnitOfWorkRequest... workingUnits
     );
 
 }

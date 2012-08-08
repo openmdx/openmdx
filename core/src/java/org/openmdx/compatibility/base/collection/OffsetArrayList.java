@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: OffsetArrayList.java,v 1.15 2008/06/28 00:21:49 hburger Exp $
+ * Name:        $Id: OffsetArrayList.java,v 1.16 2008/09/05 23:18:48 hburger Exp $
  * Description: Sparsely Populated List Implementation
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:49 $
+ * Date:        $Date: 2008/09/05 23:18:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -327,7 +327,7 @@ public class OffsetArrayList<E>
         /**
          * Constructor
          *
-         * @param       index
+         * @param       _index
          *              index of first element to be returned from the list
          *              iterator (by a call to the next method).
          *
@@ -799,7 +799,7 @@ public class OffsetArrayList<E>
      * and it's nonempty.)
      *
      *
-     * @param       index
+     * @param       _index
      *              index at which to insert first element from the specified
      *              collection.
      * @param       c

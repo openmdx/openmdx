@@ -54,7 +54,7 @@ background-color: white;}
 background-color: #CCCCFF;}
                              .menuOpPanel a:hover img {
 background-color: #DDDDDD;}
-                             a.language:hover, a.opTabhover, a.new:hover, a.noIcon:hover, a.noIconhover, .imgfilterhover, input.flatsubmit:hover, input.flatsubmithover, input.selflatsubmit:hover, input.selflatsubmithover, input.classsubmithover, input.imgsubmithover, input.selimgsubmit:hover, input.selimgsubmithover, .panelResult, a.backButton:hover, a.backButton:hover, a.backButtonhover, .gridColTypeCheck, .dragable {
+                             a.language:hover, a.opTabhover, a.new:hover, a.noIcon:hover, a.noIconhover, .imgfilterhover, input.flatsubmit:hover, input.flatsubmithover, input.selflatsubmit:hover, input.selflatsubmithover, input.classsubmithover, input.imgsubmithover, input.selimgsubmit:hover, input.selimgsubmithover, a.backButton:hover, a.backButton:hover, a.backButtonhover, .gridColTypeCheck, .dragable {
 background-color: #F6D66D;}
                              a.tabhover, a.opTab:hover, a.ophover, input.ophover, a.groupTab:hover, a.groupTabhover, .borderedimg:hover, .borderedimghover {
 background-color: #F6D66D;}
@@ -107,7 +107,7 @@ background-color: #CCCCCC;}
 /* BORDER-COLOR defintions */
                              .popUpFrame {
 border-color: white;}
-                             a.language, a.backButton, a.noIcon, .noIcon, input.flatsubmit, input.flatsubmit:hover, input.flatsubmithover, input.selflatsubmit, input.selflatsubmit:hover, input.selflatsubmithover, .opPanel, .panelResult, a.tab, div.SgroupTab, a.groupTab, .popUp, .qualifierPanel, .divImgPopUp {
+                             a.language, a.backButton, a.noIcon, .noIcon, input.flatsubmit, input.flatsubmit:hover, input.flatsubmithover, input.selflatsubmit, input.selflatsubmit:hover, input.selflatsubmithover, .opPanel, a.tab, div.SgroupTab, a.groupTab, .popUp, .qualifierPanel, .divImgPopUp {
 border-color: #555555;}
                              .cellLogin {
 border-color: #CCCCCC;}

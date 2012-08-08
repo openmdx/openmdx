@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ManagedConnection.java,v 1.1 2007/11/26 14:04:34 hburger Exp $
+ * Name:        $Id: ManagedConnection.java,v 1.2 2008/07/24 17:24:03 hburger Exp $
  * Description: Managed LDAP Connection 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/26 14:04:34 $
+ * Date:        $Date: 2008/07/24 17:24:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -276,7 +276,7 @@ public class ManagedConnection
             PrintWriter logWriter = getLogWriter();
             if(logWriter != null) exception.printStackTrace(logWriter);
         } catch (Exception ignore) {
-            // Ensure that thr original exception will be available
+            // Ensure that the original exception will be available
         }
         return exception;
     }

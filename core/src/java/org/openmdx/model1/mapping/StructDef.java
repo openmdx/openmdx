@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StructDef.java,v 1.5 2008/03/21 18:40:17 hburger Exp $
+ * Name:        $Id: StructDef.java,v 1.6 2008/11/11 15:40:46 wfro Exp $
  * Description: VelocityStructDef class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:40:17 $
+ * Date:        $Date: 2008/11/11 15:40:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -78,7 +78,7 @@ public class StructDef
       (String)structDef.values("annotation").get(0),
       new HashSet(structDef.values("stereotype")),
       getSupertypes(structDef, model, openmdx1),
-      getAllFields(structDef, model, openmdx1)
+      getAllFields(structDef, model)
     );
   }
   
@@ -128,8 +128,7 @@ public class StructDef
   //-------------------------------------------------------------------------
   private static List getAllFields(
     ModelElement_1_0 structDef,
-    Model_1_0 model, 
-    boolean openmdx1
+    Model_1_0 model 
   ) throws ServiceException {  
     List fields = new ArrayList();
     for(
@@ -139,8 +138,7 @@ public class StructDef
       fields.add(
         new AttributeDef(
           model.getElement(it.next()),
-          (Model_1_3)model, 
-          openmdx1
+          (Model_1_3)model 
         )
       );
     }

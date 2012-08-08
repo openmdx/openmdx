@@ -1,15 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Path.java,v 1.29 2008/04/25 00:51:25 hburger Exp $
+ * Name:        $Id: Path.java,v 1.41 2008/11/14 10:05:25 hburger Exp $
  * Description: Profile Path 
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 00:51:25 $
+ * Date:        $Date: 2008/11/14 10:05:25 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
@@ -55,7 +54,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.openmdx.base.exception.RuntimeServiceException;
@@ -66,8 +65,9 @@ import org.openmdx.base.io.Externalizable;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.uri.scheme.OpenMDXSchemes;
+import org.openmdx.kernel.url.protocol.XRI_1Protocols;
+import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openxri.XRI;
-
 
 /**
  * The Path class reperesents a data provider path.
@@ -89,17 +89,19 @@ import org.openxri.XRI;
  */
 @SuppressWarnings("unchecked")
 public final class Path
-    implements Comparable, Cloneable, Serializable, Externalizable  
+    implements Comparable, Cloneable, Serializable, Externalizable, Iterable<String>  
 {
-    
+
     /**
-     * Do NOT use! Required for Externalizable.
+     * Implements <code>Externalizable</code>
      * 
+     * @deprecated Do NOT use! 
 s    */
     public Path(
-    ) {        
+    ){        
+        // Required for Externalizable.
     }
-    
+
     /**
      * Creates a new path object given by multiple path components.
      * The path is backed by the components list as long as it is
@@ -115,8 +117,15 @@ s    */
     public Path(
         String[] components
     ){
+        this.setComponents(components);
+    }
+
+    private Path(
+        String components,
+        int size
+    ) {
         this.components = components;
-        checkComponents();
+        this.size = size;
     }
 
     /**
@@ -128,17 +137,17 @@ s    */
      *              in case of marshalling error
      */ 
     public Path (
-        String      charSequence
+        String charSequence
     ){
         this (
             charSequence, 
             charSequence.startsWith(OpenMDXSchemes.URI_PREFIX) ? 
                 UriMarshaller.getInstance() : 
-            charSequence.startsWith("xri:@openmdx") ?
-                XRI_1Marshaller.getInstance() :
-            charSequence.startsWith("xri://@openmdx") ?
-                XRI_2Marshaller.getInstance() :
-                PathMarshaller.getInstance()
+                    charSequence.startsWith(XRI_1Protocols.OPENMDX_PREFIX) ?
+                        XRI_1Marshaller.getInstance() :
+                            charSequence.startsWith(XRI_2Protocols.OPENMDX_PREFIX) ?
+                                XRI_2Marshaller.getInstance() :
+                                    PathMarshaller.getInstance()
         );
     }
 
@@ -158,7 +167,19 @@ s    */
             IriMarshaller.getInstance()
         );
     }
-    
+
+    private void setComponents(
+        String[] components
+    ) {
+        this.checkComponents(components);
+        this.size = components.length;
+        StringBuilder tmp = new StringBuilder();
+        for(int i = 0; i < components.length; i++) {
+            tmp.append(components[i]).append(COMPONENT_SEPARATOR);
+        }
+        this.components = tmp.toString();
+    }
+
     /**
      * Creates a <code>Path</code> object.
      *
@@ -172,62 +193,64 @@ s    */
      *              in case of marshalling error
      */ 
     private Path (
-        String      charSequence,
-        Marshaller  marshaller
+        String charSequence,
+        Marshaller marshaller
     ){
         try {
-            this.components = (String[])marshaller.unmarshal(charSequence); 
-        } catch (ServiceException exception){
+            this.setComponents(
+                (String[])marshaller.unmarshal(charSequence)
+            );
+        } 
+        catch (ServiceException exception){
             throw new RuntimeServiceException(exception);
         }
-        checkComponents();
     }
 
     /**
      * Creates a <code>Path</code> object.
      *
-     * @param  path     The new path will consist of this name's components
+     * @param  that     The new path will consist of this name's components
      */ 
     public Path (
-        Path path
+        Path that
     ){
-        this.components = path.components;
+        this.components = that.components;
+        this.size = that.size;
     }
-
 
     //--------------------------------------------------------------------------
     // Verification
     //--------------------------------------------------------------------------
-    
+
     /**
      * Checks the path components
      *
      * @exception   RuntimeServiceException
      *              if any of the components is null or empty
      */
-    private Path checkComponents(
+    private void checkComponents(
+        String[] components
     ){
-        int size = this.size();
+        int size = components.length;
         for (
-            int index = 0;
-            index < size;
-            index++
+                int index = 0;
+                index < size;
+                index++
         ) {
-            String component = this.components[index];
+            String component = components[index];
             if(
-                component == null || 
-                component.length() == 0
-            ) throw new RuntimeServiceException(
-                BasicException.Code.DEFAULT_DOMAIN, 
-                BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
+                    (component == null) || 
+                    (component.length() == 0)
+            ) {
+                throw new RuntimeServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.BAD_PARAMETER,
+                    "A path component can neither be null nor empty",
                     new BasicException.Parameter("index",index),
                     new BasicException.Parameter("component",component)
-                },
-                "A path component can neither be null nor empty"
-            );
+                );
+            }
         }   
-        return this;
     }
 
     /**
@@ -238,14 +261,14 @@ s    */
      */
     private void checkState(
     ){
-        if (this.readOnly) throw new RuntimeServiceException(
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.ILLEGAL_STATE,
-            null,
-            "This path is in read only state"
-        );
+        if(this.readOnly) {
+            throw new RuntimeServiceException(
+                BasicException.Code.DEFAULT_DOMAIN, 
+                BasicException.Code.ILLEGAL_STATE,
+                "This path is in read only state"
+            );
+        }
     }
-
 
     //--------------------------------------------------------------------------
     // Operations returning a new Path
@@ -260,8 +283,8 @@ s    */
      *              if the path is empty
      */
     public Path getParent(
-    ){
-        return getPrefix(size()-1);
+    ) {
+        return this.getPrefix(this.size - 1);
     }
 
     /**
@@ -277,16 +300,11 @@ s    */
      */
     public Path getChild(
         String component
-    ){
-    int size = this.size();
-        String[] components = new String[size+1];
-        System.arraycopy(
-            this.components, 0, 
-            components, 0, 
-            size
+    ) {
+        return new Path(
+            this.components + component + COMPONENT_SEPARATOR,
+            this.size + 1
         );
-        components[size] = component;
-        return new Path(components);
     }
 
     /**
@@ -303,7 +321,7 @@ s    */
     public Path getChild(
         PathComponent component
     ){
-        return getChild(component.toString());
+        return this.getChild(component.toString());
     }
 
     /**
@@ -319,27 +337,21 @@ s    */
      */
     public Path getDescendant(
         String... suffix
-    ){
-    int size = this.size();
-        String[] components = new String[size+suffix.length];
-        System.arraycopy(
-            this.components, 0, 
-            components, 0, 
-            size
+    ) {
+        StringBuilder components = new StringBuilder(this.components);
+        for(int i = 0; i < suffix.length; i++) {
+            components.append(suffix[i]).append(COMPONENT_SEPARATOR);
+        }        
+        return new Path(
+            components.toString(),
+            this.size + suffix.length
         );
-        System.arraycopy(
-            suffix, 0, 
-            components, size, 
-            suffix.length
-        );
-        return new Path(components);
     }
-
 
     //--------------------------------------------------------------------------
     // Operations not modifying the path
     //--------------------------------------------------------------------------
-    
+
     /**
      * Returns the base of the path. The base is the last component of a path.
      *
@@ -350,7 +362,7 @@ s    */
      */
     public String getBase(
     ){
-        return this.components[this.components.length-1]; 
+        return this.get(this.size - 1);
     }
 
     /**
@@ -362,8 +374,8 @@ s    */
      *              if the path is empty
      */
     public PathComponent getLastComponent(
-    ){
-        return getComponent(size()-1); 
+    ) {
+        return this.getComponent(this.size - 1); 
     }
 
     /**
@@ -379,18 +391,23 @@ s    */
      */
     public PathComponent getComponent(
         int position
-    ){
-        return new PathComponent(get(position)); 
+    ) {
+        return new PathComponent(this.get(position)); 
     }
 
-    /**
-     * Return list of path components.
-     */
     public String[] getComponents(
     ) {
-        return this.components;
+        if(this.components.length() == 0) {
+            return EMPTY_COMPONENTS;
+        }
+        else {
+            return this.components.substring(
+                0, 
+                this.components.length()-1
+            ).split(COMPONENT_SEPARATOR_STRING);
+        }
     }
-    
+
     /**
      * Generates the URI representation of this path. An empty
      * path is represented by "spice:/". The string representation
@@ -402,7 +419,7 @@ s    */
     public String toUri()
     {
         try {
-            return UriMarshaller.getInstance().marshal(this.components).toString();
+            return UriMarshaller.getInstance().marshal(this.getComponents()).toString();
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
         }
@@ -419,7 +436,23 @@ s    */
     public String toXri()
     {
         try {
-            return XRI_1Marshaller.getInstance().marshal(this.components).toString();
+            return XRI_1Marshaller.getInstance().marshal(this.getComponents()).toString();
+        } catch (ServiceException exception) {
+            throw new RuntimeServiceException(exception);
+        }
+    }
+
+    /**
+     * Generates the XRI 2 String representation of this path.
+     * <p> 
+     * The string can be passed to the Path constructor to create a new equivalent path.
+     *
+     * @return   An XRI 2 String representation of this path.
+     */
+    public String toResourceIdentifier(
+    ){
+        try {
+            return XRI_2Marshaller.getInstance().marshal(this.getComponents()).toString();
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
         }
@@ -435,13 +468,9 @@ s    */
      */
     public XRI toXRI(
     ){
-        try {
-            return new XRI(XRI_2Marshaller.getInstance().marshal(this.components).toString());
-        } catch (ServiceException exception) {
-            throw new RuntimeServiceException(exception);
-        }
+        return new XRI(toResourceIdentifier());
     }
-    
+
     /**
      * Generates the XRI 2 based IRI representation of this path.
      *
@@ -455,7 +484,7 @@ s    */
             throw new RuntimeServiceException(exception);
         }
     }
-    
+
     /**
      * Generates an URI refercence for this Path and the given fragment
      * identifier
@@ -472,14 +501,14 @@ s    */
     ){
         return fragmentIdentifier == null ?
             toUri() :
-            toUri() + '#' + fragmentIdentifier;
+                toUri() + '#' + fragmentIdentifier;
     }
 
 
     //--------------------------------------------------------------------------
     // Implements Comparable
     //--------------------------------------------------------------------------
-    
+
     /**
      * Compares this path with another path for order.
      * Returns a negative integer, zero, or a positive integer as this  
@@ -490,29 +519,21 @@ s    */
      * @return      a negative integer, zero, or a positive integer as this 
      *              path is less than, equal to, or greater than the given 
      *              path
-    
+
      * @exception   ClassCastException
      *              if obj is not an instance of Path
      */
-    public int compareTo(Object obj) {
+    public int compareTo(
+        Object obj
+    ) {
         Path that = (Path) obj;
-        int limit = this.size() < that.size() ? this.size() : that.size();
-        for (
-            int cursor = 0;
-            cursor < limit;
-            cursor++
-        ) {
-            int result = this.get(cursor).compareTo(that.get(cursor));
-            if (result != 0) return result;
-        }
-        return this.size() - that.size();
+        return this.components.compareTo(that.components);
     }
-
 
     //--------------------------------------------------------------------------
     // Similar to Name
     //--------------------------------------------------------------------------
-    
+
     /**
      * Returns the number of path components for this path.
      *
@@ -520,9 +541,9 @@ s    */
      */
     public int size()
     {
-        return this.components.length;
+        return this.size;
     }
-    
+
     /**
      * Determines whether this path is empty.
      * An empty path is one with zero components.
@@ -531,9 +552,9 @@ s    */
      */
     public boolean isEmpty()
     {
-        return size() == 0;
+        return this.size == 0;
     }
-    
+
     /**
      * Retrieves a component of this path.
      * 
@@ -548,9 +569,24 @@ s    */
     public String get(
         int position
     ) {
-        return this.components[position];
+        if((position < 0) || (position >= this.size)) {
+            throw new ArrayIndexOutOfBoundsException("position not in 0.." + this.size);
+        }
+        int n = 0;
+        int lastPos = 0;
+        int len = this.components.length();
+        for(int i = 0; i < len; i++) {
+            if(this.components.charAt(i) == COMPONENT_SEPARATOR) {
+                if(n == position) {
+                    return this.components.substring(lastPos, i);
+                }
+                lastPos = i + 1;
+                n++;
+            }
+        }
+        throw new ArrayIndexOutOfBoundsException("position not in 0.." + this.size);
     }
-    
+
     /**
      * Creates a path whose components consist of a prefix of
      * the components of this path. Subsequent changes to this
@@ -569,18 +605,34 @@ s    */
         int position
     ){
         if (
-            position < 0 || 
-            position > size()
-        ) throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER);
-        String[] components = new String[position];
-        System.arraycopy(
-            this.components, 0,
-            components, 0,
-            position
-        );
-        return new Path(components);
+                (position < 0) || 
+                (position > this.size)
+        ) {
+            throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER);
+        }
+        int end = 0;
+        int n = 0;
+        if(position > 0) {
+            int len = this.components.length();
+            for(int i = 0; i < len; i++) {
+                if(this.components.charAt(i) == COMPONENT_SEPARATOR) {
+                    n++;
+                }
+                if(n == position) {
+                    end = i + 1;
+                    break;
+                }
+            }
+        }
+        if(n == position) {
+            return new Path(
+                this.components.substring(0, end),
+                position
+            );
+        }
+        throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER + ": components=[" + this.components + "]; position=" + position);        
     }
-    
+
     /**
      * Creates a suffix of the components in this path.
      * Subsequent changes to this path do not affect the string array that is
@@ -599,20 +651,35 @@ s    */
     public String[] getSuffix(
         int position
     ){
-    int size = this.size();
         if (
-            position < 0 || 
-            position > size
-        ) throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER);
-        String[] components = new String[size-position];
-        System.arraycopy(
-            this.components, position,
-            components, 0,
-            size-position
-        );
-        return components;
+                (position < 0) || 
+                (position > this.size)
+        ) {
+            throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER);
+        }
+        int n = 0;
+        int len = this.components.length();
+        int start = 0;
+        if(position > 0) {
+            for(int i = 0; i < len; i++) {
+                if(this.components.charAt(i) == COMPONENT_SEPARATOR) {
+                    n++;
+                    if(n == position) {
+                        start = i + 1;
+                        break;
+                    }
+                }            
+            }
+        }
+        if(position == n) {
+            String suffix = this.components.substring(start);
+            return suffix.length() == 0 ?
+                EMPTY_COMPONENTS :
+                    suffix.split(COMPONENT_SEPARATOR_STRING);            
+        }
+        throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER);        
     }
-    
+
     /**
      * Determines whether this path starts with a specified prefix.
      * A string array is a prefix if it is equal to getPrefix(prefix.length).
@@ -624,13 +691,23 @@ s    */
     public boolean startsWith(
         String... prefix
     ) {
-        if(prefix.length > size()) return false;
-        for(
-            int index = 0;
-            index < prefix.length;
-            index++
-        ) if(! prefix[index].equals(this.get(index))) return false;
-        return true; 
+        if(prefix.length > this.size) {
+            return false;
+        }
+        int n = 0;
+        int lastPos = 0;
+        int len = this.components.length();
+        for(int i = 0; i < len; i++) {
+            if(this.components.charAt(i) == COMPONENT_SEPARATOR) {
+                String p = prefix[n];
+                if(!this.components.regionMatches(lastPos, p, 0, p.length())) {
+                    return false;
+                }
+                lastPos = i + 1;
+                n++;
+            }            
+        }
+        return true;
     }
 
     /**
@@ -644,9 +721,8 @@ s    */
     public boolean startsWith(
         Path prefix
     ) {
-        return startsWith(prefix.components);
+        return this.components.startsWith(prefix.components);
     }
-
 
     /**
      * Determines whether this path ends with a specified suffix. 
@@ -663,9 +739,9 @@ s    */
         int offset = size() - suffix.length;
         if (offset < 0) return false;
         for(
-            int index = 0;
-            index < suffix.length;
-            index++
+                int index = 0;
+                index < suffix.length;
+                index++
         ) if(! suffix[index].equals(this.get(offset+index))) return false;
         return true; 
     }
@@ -687,7 +763,7 @@ s    */
     public Path addAll(
         String... suffix
     ){
-        return addAll(size(), suffix);
+        return this.addAll(this.size, suffix);
     }
 
     /**
@@ -712,26 +788,33 @@ s    */
         int position,
         String... components
     ){
-        checkState();
-    int size = this.size();
-        String[] buffer = new String[size+components.length];
-        System.arraycopy(
-            this.components, 0,
-            buffer, 0,
-            position
-        );
-        System.arraycopy(
-            components, 0,
-            buffer, position,
-            components.length
-        );
-        System.arraycopy(
-            this.components, position,
-            buffer, position+components.length,
-            size-position
-        );
-        this.components = buffer;       
-        return checkComponents();
+        this.checkState();
+        int n = 0;
+        int end = 0;
+        if(position > 0) {
+            int len = this.components.length();
+            for(int i = 0; i < len; i++) {
+                if(this.components.charAt(i) == COMPONENT_SEPARATOR) {
+                    n++;
+                }
+                if(n == position) {
+                    end = i + 1;
+                    break;
+                }
+            }
+        }
+        if(n == position) {
+            StringBuilder tmp = new StringBuilder(
+                this.components.substring(0, end)
+            );
+            for(String c: components) {
+                tmp.append(c).append(COMPONENT_SEPARATOR);
+            }
+            this.components = tmp.toString();
+            this.size = position + components.length;
+            return this;
+        }
+        throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER + ": components=[" + this.components + "]; position=" + position);                
     }
 
     /**
@@ -748,7 +831,10 @@ s    */
     public Path add(
         String component
     ){
-        return add (size(), component);
+        return this.add(
+            this.size, 
+            component
+        );
     }
 
     /**
@@ -765,7 +851,10 @@ s    */
     public Path add(
         PathComponent component
     ){
-        return add (size(), component);
+        return this.add(
+            this.size, 
+            component
+        );
     }
 
     /**
@@ -791,22 +880,10 @@ s    */
         int position,
         String component
     ){
-        checkState();
-        int size = this.size();
-        String[] components = new String[size+1];
-        System.arraycopy(
-            this.components, 0,
-            components, 0,
-            position
+        return this.addAll(
+            position, 
+            component
         );
-        components[position] = component;
-        System.arraycopy(
-            this.components, position,
-            components, position+1,
-            size-position
-        );
-        this.components = components;
-        return checkComponents();
     }
 
     /**
@@ -832,7 +909,10 @@ s    */
         int position,
         PathComponent component
     ){
-        return add (position, component.toString());
+        return this.add(
+            position, 
+            component.toString()
+        );
     }       
 
     /**
@@ -855,25 +935,30 @@ s    */
     public String remove(
         int position
     ){
-        checkState();
-    int size = this.size();
-        String  component = this.components[position];
-        String[]  components = new String [size-1];
-        System.arraycopy(
-            this.components, 0,
-            components, 0,
-            position
-        );
-        System.arraycopy(
-            this.components, position+1,
-            components, position,
-            size-position-1
-        );
-        this.components = components;
-        return component;
+        this.checkState();
+        int n = 0;
+        int lastPos = 0;
+        int len = this.components.length();
+        for(int i = 0; i < len; i++) {
+            if(this.components.charAt(i) == COMPONENT_SEPARATOR) {
+                if(n == position) {
+                    String component = this.components.substring(
+                        lastPos,
+                        i
+                    );
+                    this.components = 
+                        this.components.substring(0, lastPos) +
+                        this.components.substring(i + 1);
+                    this.size--;
+                    return component;
+                }
+                lastPos = i + 1;
+                n++;           
+            }
+        }
+        throw new ArrayIndexOutOfBoundsException(BAD_COMPONENT_NUMBER);                        
     }
 
-    
     /**
      * Set this path to the same value as another one.
      * Subsequent changes to the components of this path will
@@ -889,76 +974,126 @@ s    */
      *              syntax rules of the path
      */     
     public void setTo(
-      Path source
-    ){
-          checkState();
-      this.components = source.components;
+        Path source
+    ) {
+        this.checkState();
+        this.components = source.components;
+        this.size = source.size;
     }
 
     /**
      * Make this path object unmodifiable
      */
     public void lock(
-    ){
+    ) {
         this.readOnly = true;
     }
-    
+
+    /**
+     * Test whether it is a cross reference or a path component pattern
+     * 
+     * @return <code>true</code> if it is a cross reference pattern
+     */
+    private boolean isCrossReferencePattern(
+    ) {
+        return this.components.indexOf("$.") >= 0;
+    }
+
     /**
      * Determines whether the path corresponds to the pattern.
-     * The following patterns are supported:
-     * - The pattern component ":<prefix>*" matches the corresponding
-     *   path component starting with <prefix>. The pattern component
-     *   ":*" matches therefore the corresponding path component regardless
-     *   of its content.
-     * - Field "%" is only allowed as the last field of the pattern's last 
-     *   path component and matches any number of fields and path components 
-     *   regardless of their content. 
+     * The following patterns are supported:<ul>
+     * <li>The pattern component ":&lt;prefix&gt;*" matches the corresponding
+     *     path component starting with &lt;prefix&gt;. The pattern component
+     *     ":*" matches therefore the corresponding path component regardless
+     *     of its content.
+     * <li>Field "%" is only allowed as the last field of the pattern's last 
+     *     path component and matches any number of fields and path components 
+     *     regardless of their content.
+     * <li>Cross reference pattern {@link Wildcards#isLike(org.openxri.XRIReference, org.openxri.XRIReference)}
+     * </ul> 
      */
     public boolean isLike(
         Path pattern
     ){
-        // Determine the components amount to be checked.
-        int checkIndex;
-        if(pattern.components[pattern.components.length - 1].equals("%")) {
-            checkIndex = pattern.components.length - 1;
-            if(checkIndex > this.components.length) return false;
-        } else if(pattern.components[pattern.components.length - 1].endsWith("%")) {
-            checkIndex = pattern.components.length;
-            if(checkIndex > this.components.length) return false;
+        if(pattern.isCrossReferencePattern()) {
+            return Wildcards.isLike(
+                this.toXRI(), 
+                pattern.toXRI()
+            );
         } else {
-            checkIndex = pattern.components.length;
-            if(pattern.components.length != this.components.length) return false;
-        }        
-        for(
-            int index = 0;
-            index < checkIndex;
-            index++
-        ) {
-            String patternComponent = pattern.components[index];
-            if(patternComponent.endsWith("%")) {
-                String prefix = patternComponent.substring(0, patternComponent.length() - 1);
-                if(!this.components[index].startsWith(prefix)) return false;
-            } else if(patternComponent.startsWith(":") && patternComponent.endsWith("*")) {
-                if(patternComponent.length() == 2) {                
-	                // The pattern ":*" matches everything
-                } else {
-                    // Check for ":<prefix>*".
-                    String prefix = patternComponent.substring(1, patternComponent.length() - 1);
-                    if(!this.components[index].startsWith(prefix)) return false;
+            // Determine the components amount to be checked.
+            int checkIndex;
+            if(pattern.getBase().equals("%")) {
+                checkIndex = pattern.size - 1;
+                if(checkIndex > this.size) {
+                    return false;
                 }
-            } else {
-                // In this case the components should fully match.
-                if(!patternComponent.equals(this.components[index])) return false;
+            } 
+            else if(pattern.components.endsWith(WILDCARD_COMPONENT)) {
+                checkIndex = pattern.size;
+                if(checkIndex > this.size) {
+                    return false;
+                }
+            } 
+            else {
+                checkIndex = pattern.size;
+                if(pattern.size != this.size) {
+                    return false;
+                }
+            }        
+            for(
+                    int index = 0;
+                    index < checkIndex;
+                    index++
+            ) {
+                String patternComponent = pattern.get(index);
+                String component = this.get(index);
+                if(patternComponent.endsWith("%")) {
+                    String prefix = patternComponent.substring(0, patternComponent.length() - 1);
+                    if(!component.startsWith(prefix)) {
+                        return false;
+                    }
+                }
+                else if(patternComponent.startsWith(":") && patternComponent.endsWith("*")) {
+                    if(patternComponent.length() == 2) {                
+                        // The pattern ":*" matches everything
+                    } 
+                    else {
+                        // Check for ":<prefix>*".
+                        String prefix = patternComponent.substring(1, patternComponent.length() - 1);
+                        if(!component.startsWith(prefix)) {
+                            return false;
+                        }
+                    }
+                } 
+                else {
+                    // In this case the components should fully match.
+                    if(!patternComponent.equals(component)) {
+                        return false;
+                    }
+                }
             }
+            return true;
         }
-        return true;
     }
 
     
     //--------------------------------------------------------------------------
+    // Implements Iterable
+    //--------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see java.lang.Iterable#iterator()
+     */
+    public Iterator<String> iterator() {
+        return new SegmentIterator();
+    }
+
+
+    //--------------------------------------------------------------------------
     // Implements Cloneable
     //--------------------------------------------------------------------------
-    
+
     /**
      * Generates a new copy of this path.
      * Subsequent changes to the components of this path will
@@ -966,11 +1101,10 @@ s    */
      *
      * @return    a clone of this instance.
      */
-    public Object clone()  
-    {   
+    public Object clone(
+    ) {   
         return new Path(this);
     }
-
 
     //--------------------------------------------------------------------------
     // Implements Serializable
@@ -986,7 +1120,8 @@ s    */
     private void writeObject(
         java.io.ObjectOutputStream stream
     ) throws java.io.IOException {
-        stream.writeObject(this.components);
+        stream.writeUTF(this.components);
+        stream.writeInt(this.size);
     }
 
     /**
@@ -996,13 +1131,14 @@ s    */
     private void readObject(
         java.io.ObjectInputStream stream
     ) throws java.io.IOException, ClassNotFoundException {
-        this.components = (String[])stream.readObject();
+        this.components = stream.readUTF();
+        this.size = stream.readInt();
     }
 
     //--------------------------------------------------------------------------
     // Externalizable
     //--------------------------------------------------------------------------
-    
+
     //--------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see org.openmdx.base.io.Externalizable#readExternal(org.openmdx.base.io.DataInput)
@@ -1010,7 +1146,8 @@ s    */
     public void readExternal(
         DataInput in
     ) throws IOException {
-        this.components = in.readStrings();
+        this.components = in.readString();
+        this.size = in.readInt();
     }
 
     //--------------------------------------------------------------------------
@@ -1020,7 +1157,8 @@ s    */
     public void writeExternal(
         DataOutput out
     ) throws IOException {
-        out.writeStrings(this.components);
+        out.writeString(this.components);
+        out.writeInt(this.size);
     }
 
     //--------------------------------------------------------------------------
@@ -1039,7 +1177,7 @@ s    */
     {
         try {
             return String.valueOf(
-              PathMarshaller.getInstance().marshal(this.components)
+                PathMarshaller.getInstance().marshal(this.getComponents())
             );
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
@@ -1057,12 +1195,9 @@ s    */
     public boolean equals(
         Object that
     ){
-        return this == that || (
-          that != null && that instanceof Path && Arrays.equals(
-            this.components,
-            ((Path)that).components
-          )
-      );
+        return 
+        (this == that) || 
+        ((that != null) && (that instanceof Path) && this.components.equals(((Path)that).components));
     }
 
     /**
@@ -1075,15 +1210,8 @@ s    */
      * @return the path's hash code
      */
     public int hashCode(
-    ){
-        int hashCode = 1;
-    int size = this.size();
-        for(
-            int index = 0;
-            index < size; 
-            index++
-        ) hashCode = 31 * hashCode + this.components[index].hashCode();
-        return hashCode;
+    ) {
+        return this.components.hashCode();
     }
 
     //--------------------------------------------------------------------------
@@ -1103,9 +1231,8 @@ s    */
     ){
         return source == null ?
             null:
-            (Path[])source.toArray(new Path[source.size()]);
+                (Path[])source.toArray(new Path[source.size()]);
     }
-
 
     //--------------------------------------------------------------------------
     // Variables
@@ -1114,13 +1241,17 @@ s    */
     /**
      * The path's components
      */
-    private transient String[] components;
+    private transient String components;
+    private transient int size;
+    private static char COMPONENT_SEPARATOR = '\u0001';
+    private static String WILDCARD_COMPONENT = "%" + COMPONENT_SEPARATOR;
+    private static final String COMPONENT_SEPARATOR_STRING = Character.toString(COMPONENT_SEPARATOR);
+    private static final String[] EMPTY_COMPONENTS = {};
 
     /**
      * Defines, whether the path can be modified or not
      */
     private transient boolean readOnly = false;
-
 
     //--------------------------------------------------------------------------
     // Constants
@@ -1130,14 +1261,14 @@ s    */
      * Serial Version UID
      */
     static final long serialVersionUID = 8827631310993135122L;
-    
+
     /**
      * A path's URI scheme
      * 
      * @deprecated use org.openmdx.kernel.uri.scheme.OpenMDXSchemes.URI_SCHEME
      */
     public final static String URI_SCHEME = OpenMDXSchemes.URI_SCHEME;
-    
+
     /**
      * An error message in case the number of a component is outside the
      * allowed range.
@@ -1146,4 +1277,52 @@ s    */
         "The component number must be in the range [0,size()]";
 
     
+    //--------------------------------------------------------------------------
+    // Class SegmentIterator
+    //--------------------------------------------------------------------------
+
+    /**
+     * Segment Iterator
+     */
+    class SegmentIterator implements Iterator<String> {
+
+        /**
+         * The next element's index
+         */
+        int nextIndex = 0;
+
+        /**
+         * The current element's index
+         */
+        int currentIndex = -1;
+        
+        /* (non-Javadoc)
+         * @see java.util.Iterator#hasNext()
+         */
+        public boolean hasNext() {
+            return this.nextIndex < Path.this.size();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Iterator#next()
+         */
+        public String next() {
+            return Path.this.get(
+                this.currentIndex = this.nextIndex++
+            );
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.Iterator#remove()
+         */
+        public void remove() {
+            if(this.currentIndex < 0) {
+                throw new IllegalStateException("No current component");
+            }
+            Path.this.remove(this.currentIndex);
+            this.currentIndex = -1;
+        }        
+        
+    }
+
 }

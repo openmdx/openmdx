@@ -15,18 +15,12 @@
 */
 package org.openxri;
 
+import java.util.Vector;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
-import java.util.Iterator;
-import java.util.Vector;
-import org.openxri.RelativeXRI;
-import org.openxri.XRI;
-import org.openxri.XRIAuthority;
-import org.openxri.XRIParseException;
-import org.openxri.XRIReference;
-import org.openxri.XRISegment;
 
 
 /*
@@ -114,7 +108,7 @@ public class XRITest
     */
     public void testRelativeXRIs()
     {
-        Vector oVector = new Vector();
+        Vector<XriTestCase> oVector = new Vector<XriTestCase>();
 
         oVector.add(new XriTestCase("", 0, 0, false));
         oVector.add(new XriTestCase("x", 0, 1, false));
@@ -134,10 +128,7 @@ public class XRITest
         oVector.add(new XriTestCase("./moo!!", 0, 2, false));
         oVector.add(new XriTestCase("./moo://:/:!!", 0, 5, false));
 
-        Iterator oIt = oVector.iterator();
-        while (oIt.hasNext())
-        {
-            XriTestCase oCase = (XriTestCase) oIt.next();
+        for(XriTestCase oCase : oVector) {
             String sXRI = (String) oCase.msVal;
             try
             {
@@ -173,7 +164,7 @@ public class XRITest
     */
     public void testAbsoluteXRIs()
     {
-        Vector oVector = new Vector();
+        Vector<XriTestCase> oVector = new Vector<XriTestCase>();
 
         oVector.add(new XriTestCase("xri://www", 0, 0, true)); // iregname doesn't have to be DNS valid
         oVector.add(new XriTestCase("xri://www.epok.net", 0, 0, true));
@@ -272,11 +263,7 @@ public class XRITest
         oVector.add(
                 new XriTestCase(
                     "xri://!!1234/(+login)", 1, 1, true));
-        
-        Iterator oIt = oVector.iterator();
-        while (oIt.hasNext())
-        {
-            XriTestCase oCase = (XriTestCase) oIt.next();
+        for(XriTestCase oCase : oVector) {
             String sXRI = (String) oCase.msVal;
             try
             {
@@ -312,15 +299,12 @@ public class XRITest
     */
     public void testInvalidRelativeXRIs()
     {
-        Vector oVector = new Vector();
+        Vector<String> oVector = new Vector<String>();
         oVector.add("moo://"); // has colon at beginning
         oVector.add("//x"); // has empty first segment
         oVector.add("*a:b"); // has colon in first xrisegment
 
-        Iterator oIt = oVector.iterator();
-        while (oIt.hasNext())
-        {
-            String sXRI = (String) oIt.next();
+        for(String sXRI : oVector) {
             try
             {
                 checkXRI(sXRI, false);
@@ -350,7 +334,7 @@ public class XRITest
     */
     public void testInvalidAbsoluteXRIs()
     {
-        Vector oVector = new Vector();
+        Vector<String> oVector = new Vector<String>();
         oVector.add(""); // empty
         oVector.add("../!x"); // relative
         oVector.add("xri://a*b*c*d"); // no GCS root
@@ -368,10 +352,8 @@ public class XRITest
         oVector.add("xri://[ah:45]/"); // bad IPv6 address
         oVector.add("xri://!*foo"); // ! community with non-persistent segment
         oVector.add("xri://!foo"); // ! community with non-persistent segment
-        Iterator oIt = oVector.iterator();
-        while (oIt.hasNext())
-        {
-            String sXRI = (String) oIt.next();
+        
+        for(String sXRI : oVector) {
             try
             {
                 checkXRI(sXRI, true);
@@ -400,7 +382,7 @@ public class XRITest
     */
     public void testXRISegments()
     {
-        Vector oVector = new Vector();
+        Vector<String> oVector = new Vector<String>();
 
         oVector.add("moo!&");
         oVector.add("moo!;");
@@ -412,10 +394,7 @@ public class XRITest
         oVector.add("x");
         oVector.add("moo!a*b*c*d");
 
-        Iterator oIt = oVector.iterator();
-        while (oIt.hasNext())
-        {
-            String sSeg = (String) oIt.next();
+        for(String sSeg : oVector) {
             try
             {
                 checkXRISegment(sSeg);
@@ -447,7 +426,7 @@ public class XRITest
     */
     public void testInvalidXRISegments()
     {
-        Vector oVector = new Vector();
+        Vector<String> oVector = new Vector<String>();
 
         oVector.add("");
         oVector.add("xri://@!foo!bar*bix*moo!foo/");
@@ -472,10 +451,7 @@ public class XRITest
         oVector.add("xri://@!foo!bar*bix*moo!foo//");
         oVector.add("xri://@!foo!bar*bix*moo!foo/**x");
 
-        Iterator oIt = oVector.iterator();
-        while (oIt.hasNext())
-        {
-            String sSeg = (String) oIt.next();
+        for(String sSeg : oVector) {
             try
             {
                 checkXRISegment(sSeg);
@@ -661,7 +637,7 @@ public class XRITest
     */
     public void testURIConversion()
     {
-        Vector oVector = new Vector();
+        Vector<XriUriTestCase> oVector = new Vector<XriUriTestCase>();
 
         // no changes
         oVector.add(
@@ -741,10 +717,7 @@ public class XRITest
                     "xri://@example*nopath?q=foo#bar",
                     "xri://@example*nopath?q=foo#bar"));
 
-        Iterator oIt = oVector.iterator();
-        while (oIt.hasNext())
-        {
-            XriUriTestCase oCase = (XriUriTestCase) oIt.next();
+        for(XriUriTestCase oCase : oVector) {
             String sXRI = (String) oCase.msXRI;
             try
             {

@@ -242,7 +242,7 @@ CREATE TABLE audit1_Segment (
 	object_objectid VARCHAR2 (200) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
 	object__class VARCHAR2 (200) NULL ,
-	description VARCHAR2 (200) NULL 
+	description VARCHAR2 (200) NULL
 )
 ;
 
@@ -303,7 +303,7 @@ CREATE TABLE audit_SLICED (
 	given_name VARCHAR2 (200) NULL ,
 	product_group_id VARCHAR2 (200) NULL ,
 	involved VARCHAR2 (200) NULL ,
-	place_of_birth VARCHAR2 (200) NULL 
+	place_of_birth VARCHAR2 (200) NULL
 )
 ;
 
@@ -637,7 +637,7 @@ CREATE TABLE app1_MessageTemplate (
 	created_at VARCHAR2 (20) NULL ,
 	modified_at VARCHAR2 (20) NULL ,
 	created_by VARCHAR2 (100) NULL ,
-	modified_by VARCHAR2 (100) NULL 
+	modified_by VARCHAR2 (100) NULL
 )
 ;
 
@@ -810,17 +810,17 @@ REM OPENMDX_TEST EXTENSION_NATIVE
 	  STATE_VALID_TO DATE, 
 	  SEGMENT VARCHAR2(200), 
 	  P$$SEGMENT_parent__rid VARCHAR2(200), 
-	  P$$SEGMENT_parent__oid VARCHAR2(200), 
+	  P$$SEGMENT_parent__oid VARCHAR2(200),
 	  VALUE1 CHAR(1 CHAR), 
-	  VALUE2 NUMBER, 
+	  VALUE2 NUMBER,
 	  VALUE3 NUMBER, 
-	  VALUE4 NUMBER, 
+	  VALUE4 NUMBER,
 	  VALUE5 NUMBER, 
 	  VALUE9 VARCHAR2(200), 
 	  VALUE10 RAW(2000), 
 	  VALUE11A INTERVAL YEAR (9) TO MONTH, 
 	  VALUE11B INTERVAL DAY (9) TO SECOND (3), 
-	  VALUE6 VARCHAR2(200), 
+	  VALUE6 VARCHAR2(200),
 	  VALUE7 TIMESTAMP (3) WITH TIME ZONE, 
 	  VALUE8 DATE
   ) ;
@@ -844,32 +844,32 @@ REM OPENMDX_TEST EXTENSION_NUMERIC
 	  SEGMENT VARCHAR2(200), 
 	  VALUE1 NUMBER(1,0), 
 	  VALUE2 NUMBER, 
-	  VALUE3 NUMBER, 
+	  VALUE3 NUMBER,
 	  VALUE4 NUMBER, 
 	  VALUE5 NUMBER, 
 	  VALUE9 VARCHAR2(200), 
 	  VALUE10 RAW(2000), 
-	  VALUE11A NUMBER(9,0), 
-	  VALUE11B NUMBER(12,3), 
-	  P$$SEGMENT_parent__rid VARCHAR2(200), 
-	  P$$SEGMENT_parent__oid VARCHAR2(200), 
-	  VALUE6 VARCHAR2(200), 
-	  VALUE7 NUMBER(19,3), 
+	  VALUE11A NUMBER(9,0),
+	  VALUE11B NUMBER(12,3),
+	  P$$SEGMENT_parent__rid VARCHAR2(200),
+	  P$$SEGMENT_parent__oid VARCHAR2(200),
+	  VALUE6 VARCHAR2(200),
+	  VALUE7 NUMBER(19,3),
 	  VALUE8 VARCHAR2(8)
   ) ;
- 
+
 REM OPENMDX_TEST EXTENSION_SEGMENT
 
   DROP TABLE EXTENSION_SEGMENT ;
 
-  CREATE TABLE EXTENSION_SEGMENT (	
-    OBJECT_RID VARCHAR2(200) NOT NULL ENABLE, 
-	  OBJECT_OID VARCHAR2(200) NOT NULL ENABLE, 
-	  OBJECT_IDX NUMBER(*,0) NOT NULL ENABLE, 
-	  OBJECT__CLASS VARCHAR2(200), 
+  CREATE TABLE EXTENSION_SEGMENT (
+    OBJECT_RID VARCHAR2(200) NOT NULL ENABLE,
+	  OBJECT_OID VARCHAR2(200) NOT NULL ENABLE,
+	  OBJECT_IDX NUMBER(*,0) NOT NULL ENABLE,
+	  OBJECT__CLASS VARCHAR2(200),
 	  DESCRIPTION VARCHAR2(200)
   ) ;
- 
+
 REM OPENMDX_TEST state1_NATIVE
 
   DROP TABLE state1_NATIVE ;
@@ -936,10 +936,10 @@ REM OPENMDX_TEST state1_NATIVE
 	long_val INTEGER NULL ,
 	short_val NUMBER(10, 0) NULL ,
 	special_non_stated VARCHAR2 (256) NULL,
-	p$$special_non_stated__rid VARCHAR2 (256) NULL, 
+	p$$special_non_stated__rid VARCHAR2 (256) NULL,
 	p$$special_non_stated__oid VARCHAR2 (256) NULL
 );
- 
+
 REM OPENMDX_TEST datestate1_NATIVE
 
   DROP TABLE datestate1_NATIVE ;
@@ -1007,9 +1007,9 @@ REM OPENMDX_TEST datestate1_NATIVE
 	integer_val NUMBER(10, 0) NULL ,
 	long_val INTEGER NULL ,
 	short_val NUMBER(10, 0) NULL ,
-	special_non_stated VARCHAR2 (256) NULL, 
-	p$$special_non_stated__rid VARCHAR2 (256) NULL, 
-	p$$special_non_stated__oid VARCHAR2 (256) NULL, 
+	special_non_stated VARCHAR2 (256) NULL,
+	p$$special_non_stated__rid VARCHAR2 (256) NULL,
+	p$$special_non_stated__oid VARCHAR2 (256) NULL,
 	state_c VARCHAR2 (256) NULL,
 	p$$state_c__rid VARCHAR2 (256) NULL,
 	p$$state_c__oid VARCHAR2 (256) NULL
@@ -1075,12 +1075,97 @@ REM OPENMDX_TEST nostate1_NATIVE
 	integer_val NUMBER(10, 0) NULL ,
 	long_val INTEGER NULL ,
 	short_val NUMBER(10, 0) NULL ,
-	special_non_stated VARCHAR2 (256) NULL, 
-	p$$special_non_stated__rid VARCHAR2 (256) NULL, 
-	p$$special_non_stated__oid VARCHAR2 (256) NULL, 
+	special_non_stated VARCHAR2 (256) NULL,
+	p$$special_non_stated__rid VARCHAR2 (256) NULL,
+	p$$special_non_stated__oid VARCHAR2 (256) NULL,
 	state_c VARCHAR2 (256) NULL,
 	p$$state_c__rid VARCHAR2 (256) NULL,
 	p$$state_c__oid VARCHAR2 (256) NULL
 );
 
-    
+REM OPENMDX_TEST aspect
+
+  drop table aspect_Segment
+  ;
+
+  drop table aspect_Object
+  ;
+
+  drop table aspect_Object_
+  ;
+
+ CREATE TABLE aspect_Segment (
+	object_id VARCHAR2 (100) NOT NULL ,
+	object__class VARCHAR2 (100) NULL ,
+	description VARCHAR2 (200) NULL
+  )
+  ;
+
+  CREATE TABLE aspect_Object (
+	object_id VARCHAR2 (100) NOT NULL ,
+	object__class VARCHAR2 (100) NULL ,
+	core VARCHAR2 (100) NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL ,
+	created_by_ NUMBER(10, 0) NULL ,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL ,
+	modified_by_ NUMBER(10, 0) NULL ,
+	string VARCHAR2 (200) NULL ,
+	prime_ NUMBER(10, 0) NULL ,
+	url VARCHAR2 (200) NULL
+  )
+  ;
+
+  CREATE TABLE aspect_Object_ (
+	object_id VARCHAR2 (100) NOT NULL ,
+	object_idx INTEGER NOT NULL ,
+	object__class VARCHAR2 (100) NULL ,
+	created_by VARCHAR2 (200) NULL ,
+	modified_by VARCHAR2 (200) NULL ,
+	prime NUMBER(10, 0) NULL
+  )
+  ;
+
+REM OPENMDX_TEST state2_NATIVE
+
+  DROP TABLE state2_NATIVE ;
+
+  CREATE TABLE state2_NATIVE (
+	object_id VARCHAR2 (100) NOT NULL ,
+	object__class VARCHAR2 (100) NULL ,
+	description VARCHAR2 (60) NULL ,
+	core VARCHAR2 (256) NULL ,
+	created_at TIMESTAMP (3) WITH TIME ZONE NULL ,
+	removed_at TIMESTAMP (3) WITH TIME ZONE NULL ,
+	modified_at TIMESTAMP (3) WITH TIME ZONE NULL ,
+	state_valid_from DATE,
+	state_valid_to DATE,
+	state_a VARCHAR2 (256) NULL ,
+	state_n VARCHAR2 (256) NULL ,
+	string_value VARCHAR2 (60) NULL ,
+	uri_value VARCHAR2 (200) NULL ,
+	boolean_value CHAR(1 CHAR) NULL ,
+	date_value DATE NULL ,
+	date_time_value TIMESTAMP (3) WITH TIME ZONE NULL ,
+	decimal_value NUMBER(18, 6) NULL ,
+	duration_value VARCHAR2 (10) NULL ,
+	p$$duration_value_yeartomonth INTERVAL YEAR(9) TO MONTH NULL ,
+	p$$duration_value_daytosecond INTERVAL DAY (9) TO SECOND(3) NULL ,
+	integer_value NUMBER(10, 0) NULL ,
+	long_value INTEGER NULL ,
+	short_value NUMBER(10, 0) NULL
+  );
+
+  DROP TABLE state2_NATIVE_ ;
+
+  CREATE TABLE state2_NATIVE_ (
+	object_id VARCHAR2 (100) NOT NULL ,
+	object_idx INTEGER NOT NULL ,
+	object__class VARCHAR2 (100) NULL ,
+	created_by VARCHAR2 (60) NULL ,
+	removed_by VARCHAR2 (60) NULL ,
+	modified_by VARCHAR2 (60) NULL ,
+	string_list VARCHAR2 (60) NULL ,
+	long_array INTEGER NULL ,
+	state_c VARCHAR2 (256) NULL
+  );
+

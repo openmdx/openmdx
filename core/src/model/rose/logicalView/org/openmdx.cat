@@ -1,0 +1,182 @@
+
+(object Petal
+    version    	45
+    _written   	"Rose 7.6.0109.2314"
+    charSet    	0)
+
+(object Class_Category "openmdx"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3FB3D59203B1"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class_Category "compatibility"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\openmdx\\compatibility.cat"
+	    quid       	"3FF0C2EF0115")
+	(object Class_Category "generic1"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\openmdx\\generic1.cat"
+	    quid       	"3FF13E0E02A5")
+	(object Class_Category "base"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\openmdx\\base.cat"
+	    quid       	"3FB3D5A50029")
+	(object Class_Category "lock1"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\openmdx\\lock1.cat"
+	    quid       	"3FF13E19007A")
+	(object Class_Category "preferences1"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\openmdx\\preferences1.cat"
+	    quid       	"437E024F033F")
+	(object Class_Category "state2"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\openmdx\\state2.cat"
+	    quid       	"491C3652001F")
+	(object Class_Category "role2"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\openmdx\\role2.cat"
+	    quid       	"491C365801D4"))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Contains"
+	    quid       	"400E55220148"
+	    title      	"Contains"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object CategoryView "Logical View::org::openmdx::base" @1
+		    location   	(215, 200)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(71, 116)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"base")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FB3D5A50029"
+		    width      	300
+		    height     	180)
+		(object CategoryView "Logical View::org::openmdx::compatibility" @2
+		    location   	(212, 503)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(68, 419)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"compatibility")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FF0C2EF0115"
+		    width      	300
+		    height     	180)
+		(object CategoryView "Logical View::org::openmdx::generic1" @3
+		    location   	(1031, 839)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(887, 755)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"generic1")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FF13E0E02A5"
+		    width      	300
+		    height     	180)
+		(object CategoryView "Logical View::org::openmdx::lock1" @4
+		    location   	(1432, 842)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(1288, 758)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"lock1")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FF13E19007A"
+		    width      	300
+		    height     	180)
+		(object CategoryView "Logical View::org::openmdx::preferences1" @5
+		    location   	(1320, 234)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@5
+			location   	(1176, 150)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"preferences1")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"437E024F033F"
+		    width      	300
+		    height     	180)))))

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Structures.java,v 1.18 2008/07/04 14:09:29 wfro Exp $
+ * Name:        $Id: Structures.java,v 1.19 2008/09/09 12:00:28 hburger Exp $
  * Description: Structures 
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/04 14:09:29 $
+ * Date:        $Date: 2008/09/09 12:00:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -83,7 +83,7 @@ import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.collection.TreeSparseArray;
-import org.openmdx.base.resource.spi.OrderedRecordFactory;
+import org.openmdx.base.resource.Records;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.model1.mapping.Names;
@@ -700,14 +700,14 @@ public class Structures {
                         Object[] i = (Object[]) v;
                         if (SparseArray.class == t) {
                             if(v == null) {
-                                value = OrderedRecordFactory.getInstance().asMappedRecord(
+                                value = Records.getRecordFactory().asMappedRecord(
                                     MetaData.toType(t),
                                     null, // recordShortDescription 
                                     NO_INDICES,
                                     EMPTY_COLLECTION
                                 );
                             } else {
-                                value = OrderedRecordFactory.getInstance().asMappedRecord(
+                                value = Records.getRecordFactory().asMappedRecord(
                                     MetaData.toType(t),
                                     null, // recordShortDescription 
                                     i[0], // keys
@@ -719,13 +719,13 @@ public class Structures {
                             }
                         } else {
                             if(v == null) {
-                                value = OrderedRecordFactory.getInstance().asIndexedRecord(
+                                value = Records.getRecordFactory().asIndexedRecord(
                                     MetaData.toType(t),
                                     null, // recordShortDescription 
                                     EMPTY_COLLECTION
                                 );
                             } else {
-                                value = OrderedRecordFactory.getInstance().asIndexedRecord(
+                                value = Records.getRecordFactory().asIndexedRecord(
                                     MetaData.toType(t),
                                     null, // recordShortDescription 
                                     toRecordValues(
@@ -745,7 +745,7 @@ public class Structures {
                         values.add(value);                        
                     }
                 }
-                this.record = OrderedRecordFactory.getInstance().asMappedRecord(
+                this.record = Records.getRecordFactory().asMappedRecord(
                     this.metaData.type, 
                     null, // recordShortDescription, 
                     keys.toArray(new String[keys.size()]),

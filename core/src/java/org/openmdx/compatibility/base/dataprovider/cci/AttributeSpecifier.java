@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AttributeSpecifier.java,v 1.15 2008/06/28 00:21:28 hburger Exp $
+ * Name:        $Id: AttributeSpecifier.java,v 1.17 2008/09/10 08:55:22 hburger Exp $
  * Description: openMDX Compatibility Mode: Attribute specifier
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:28 $
+ * Date:        $Date: 2008/09/10 08:55:22 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,7 +57,6 @@ import java.util.Set;
 import javax.resource.ResourceException;
 
 import org.openmdx.base.exception.BadParameterException;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -67,7 +66,7 @@ import org.openmdx.kernel.exception.BasicException;
  */
 @SuppressWarnings("unchecked")
 public final class AttributeSpecifier
-    implements Serializable
+implements Serializable
 {
 
     /**
@@ -97,30 +96,30 @@ public final class AttributeSpecifier
         Set invalid = new HashSet();
 
         if(
-            name == null
+                name == null
         ) invalid.add("position");
         this.name = name;
 
         if(
-            position < 0
+                position < 0
         ) invalid.add("position");
         this.position = position;
 
         if(
-            size < 0
+                size < 0
         ) invalid.add("size");
         this.size = size;
 
         if(
-            direction != Directions.ASCENDING &&
-            direction != Directions.DESCENDING
+                direction != Directions.ASCENDING &&
+                direction != Directions.DESCENDING
         ) invalid.add("direction");
         this.direction = direction;
 
         if(
-            order != Orders.ANY &&
-            order != Directions.ASCENDING &&
-            order != Directions.DESCENDING
+                order != Orders.ANY &&
+                order != Directions.ASCENDING &&
+                order != Directions.DESCENDING
         ) invalid.add("order");
         this.order = order;
 
@@ -128,14 +127,12 @@ public final class AttributeSpecifier
             new BasicException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("name",name),
-                    new BasicException.Parameter("position",position),
-                    new BasicException.Parameter("size",size),
-                    new BasicException.Parameter("direction",direction),
-                    new BasicException.Parameter("order",order)
-                },
-                "Illegal value for arguments " + invalid
+                "Illegal value for arguments " + invalid,
+                new BasicException.Parameter("name",name),
+                new BasicException.Parameter("position",position),
+                new BasicException.Parameter("size",size),
+                new BasicException.Parameter("direction",direction),
+                new BasicException.Parameter("order",order)
             )
         );
     }
@@ -198,7 +195,7 @@ public final class AttributeSpecifier
      * The attribute's name
      */
     final private String name;
-    
+
     /**
      * Get the attribute's name
      *
@@ -213,7 +210,15 @@ public final class AttributeSpecifier
      * Start position of the values to be retrieved
      */ 
     final private int position;
-    
+
+    private static final String[] TO_STRING_FIELDS = {
+        "name",
+        "position",
+        "size",
+        "direction",
+        "order"
+    };
+
     /**
      * Get the start position of the values to be retrieved
      *
@@ -252,14 +257,14 @@ public final class AttributeSpecifier
     public short direction(){
         return this.direction;
     }
-    
+
     /**
      * The sort order
      *
      * @see org.openmdx.compatibility.base.dataprovider.cci.Orders
      */
     final private short order;
-    
+
     /**
      * Get the sort order
      *
@@ -275,7 +280,7 @@ public final class AttributeSpecifier
     //------------------------------------------------------------------------
     // Extends Object
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */
@@ -284,23 +289,17 @@ public final class AttributeSpecifier
             return Records.getRecordFactory().asMappedRecord(
                 getClass().getName(), 
                 name + '[' + position + ']',
-                new String[]{
-                    "name",
-                    "position",
-                    "size",
-                    "direction",
-                    "order"
-                }, 
+                TO_STRING_FIELDS, 
                 new Object[]{
                     name,
-                    new Integer(position), 
-                    new Integer(size), 
+                    Integer.valueOf(position), 
+                    Integer.valueOf(size), 
                     Directions.toString(direction), 
                     Orders.toString(order)
                 }
             ).toString();
         } catch (ResourceException exception) {
-            throw new RuntimeServiceException(exception);
+            return super.toString();
         }
     }
 
@@ -311,11 +310,11 @@ public final class AttributeSpecifier
         if(!(object instanceof AttributeSpecifier)) return false;
         AttributeSpecifier that = (AttributeSpecifier)object;
         return 
-            this.name.equals(that.name) &&
-            this.position == that.position &&
-            this.size == that.size &&
-            this.direction == that.direction &&
-            this.order == that.order;
+        this.name.equals(that.name) &&
+        this.position == that.position &&
+        this.size == that.size &&
+        this.direction == that.direction &&
+        this.order == that.order;
     }
 
     /* (non-Javadoc)

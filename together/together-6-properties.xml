@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: together-6-properties.xml,v 1.6 2007/08/26 20:00:29 wfro Exp $
+= Name:        $Id: together-6-properties.xml,v 1.7 2008/12/17 15:10:49 wfro Exp $
 = Description: Together 6 Platform Properties
-= Revision:    $Revision: 1.6 $
-= Date:        $Date: 2007/08/26 20:00:29 $
+= Revision:    $Revision: 1.7 $
+= Date:        $Date: 2008/12/17 15:10:49 $
 = Copyright:   (c) 2003-2004 OMEX AG
 =======================================================================
 =
@@ -47,6 +47,6 @@
 -->
 <project name="together-6-properties">
 
-	<property name="build.java.platform" value="jre-1.4"/>
+	<property name="build.java.platform" value="jre-1.5"/>
 
 </project>

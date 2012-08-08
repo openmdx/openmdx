@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarkerFactory.java,v 1.8 2008/03/13 17:16:15 hburger Exp $
+ * Name:        $Id: MarkerFactory.java,v 1.9 2008/11/18 01:30:52 hburger Exp $
  * Description: Lenient Marker Factory
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/13 17:16:15 $
+ * Date:        $Date: 2008/11/18 01:30:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -103,11 +103,6 @@ public class MarkerFactory {
     }
 
     /**
-     * The marker factory singleton
-     */
-    private static final IMarkerFactory markerFactory = new LenientFactory().narrow();
-
-    /**
      * Return a Marker instance as specified by the name parameter using the
      * previously bound {@link IMarkerFactory}instance.
      * 
@@ -116,9 +111,19 @@ public class MarkerFactory {
      * @return marker
      */
     public static Marker getMarker(String name) {
-        return MarkerFactory.markerFactory.getMarker(name);
+        return getIMarkerFactory().getMarker(name);
     }
 
+    /**
+     * Create a marker which is detached (even at birth) from the MarkerFactory.
+     *
+     * @return a dangling marker
+     * @since 1.5.1
+     */
+    public static Marker getDetachedMarker(String name) {
+      return getIMarkerFactory().getDetachedMarker(name);
+    }
+        
     /**
      * Return the {@link IMarkerFactory}instance in use.
      * 
@@ -127,8 +132,8 @@ public class MarkerFactory {
      * 
      * @return the IMarkerFactory instance in use
      */
-    public static IMarkerFactory getIMarkerFactory() {
-        return MarkerFactory.markerFactory;
+    public static final IMarkerFactory getIMarkerFactory() {
+        return LenientFactory.SINGLETON;
     }
 
     
@@ -144,7 +149,7 @@ public class MarkerFactory {
      * <li>a BasicMarkerFactory otherwise
      * </ul>
      */
-    static class LenientFactory
+    final static class LenientFactory
         extends LenientBinder<IMarkerFactory,MarkerFactoryBinder>
         implements IMarkerFactory
     {
@@ -153,9 +158,14 @@ public class MarkerFactory {
         /**
          * Constructor 
          */
-        LenientFactory() {
+        private LenientFactory() {
             super("org.slf4j.impl.StaticMarkerBinder");
         }
+        
+        /**
+         * 
+         */
+        final static IMarkerFactory SINGLETON = new LenientFactory().narrow();
 
         /* (non-Javadoc)
          * @see org.slf4j.helpers.LenientBinder#getFallbackDelegate()
@@ -192,6 +202,13 @@ public class MarkerFactory {
          */
         public Marker getMarker(String name) {
             return getDelegate().getMarker(name);
+        }
+
+        /* (non-Javadoc)
+         * @see org.slf4j.IMarkerFactory#getDetachedMarker(java.lang.String)
+         */
+        public Marker getDetachedMarker(String name) {
+            return getDelegate().getDetachedMarker(name);
         }
 
     }

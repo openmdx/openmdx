@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSparseArray.java,v 1.4 2008/04/09 12:33:16 hburger Exp $
+ * Name:        $Id: MarshallingSparseArray.java,v 1.5 2008/10/02 17:32:26 hburger Exp $
  * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:33:16 $
+ * Date:        $Date: 2008/10/02 17:32:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,8 +60,8 @@ import org.openmdx.compatibility.base.marshalling.Marshaller;
 /**
  * A Marshalling Sparse Array
  */
-public class MarshallingSparseArray<E>
-    extends AbstractSparseArray<E> 
+public class MarshallingSparseArray
+    extends AbstractSparseArray<Object> 
     implements Serializable
 {
 
@@ -79,10 +79,10 @@ public class MarshallingSparseArray<E>
      */  
     public MarshallingSparseArray(
         org.openmdx.base.persistence.spi.Marshaller marshaller,
-        SparseArray<?> sparseArray, 
+        SparseArray<Object> sparseArray, 
         Unmarshalling unmarshalling
     ) {
-        this.populationMap = new MarshallingSortedMap<Integer,E>(
+        this.populationMap = new MarshallingSortedMap(
             marshaller,
             sparseArray.populationMap(),
             unmarshalling
@@ -97,9 +97,9 @@ public class MarshallingSparseArray<E>
      */  
     public MarshallingSparseArray(
         org.openmdx.base.persistence.spi.Marshaller marshaller,
-        SparseArray<?> sparseArray
+        SparseArray<Object> sparseArray
     ) {
-        this.populationMap = new MarshallingSortedMap<Integer,E>(
+        this.populationMap = new MarshallingSortedMap(
             marshaller,
             sparseArray.populationMap()
         );
@@ -113,9 +113,9 @@ public class MarshallingSparseArray<E>
      */  
     public MarshallingSparseArray(
         Marshaller marshaller,
-        SparseArray<?> sparseArray
+        SparseArray<Object> sparseArray
     ) {
-        this.populationMap = new MarshallingSortedMap<Integer,E>(
+        this.populationMap = new MarshallingSortedMap(
             marshaller,
             sparseArray.populationMap()
         );
@@ -124,7 +124,7 @@ public class MarshallingSparseArray<E>
     /**
      * 
      */
-    public SortedMap<Integer,E> populationMap(
+    public SortedMap<Integer,Object> populationMap(
     ) {
         return this.populationMap;
     }
@@ -132,6 +132,6 @@ public class MarshallingSparseArray<E>
     /**
      * @serial
      */    
-    protected SortedMap<Integer,E> populationMap;
+    protected SortedMap<Integer,Object> populationMap;
   
 }

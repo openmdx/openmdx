@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PortalExtension_1_0.java,v 1.16 2008/03/18 19:07:57 wfro Exp $
+ * Name:        $Id: PortalExtension_1_0.java,v 1.22 2008/11/12 13:58:29 wfro Exp $
  * Description: Evaluator_1_0
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/18 19:07:57 $
+ * Date:        $Date: 2008/11/12 13:58:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -67,6 +64,7 @@ import javax.jmi.reflect.RefStruct;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.portal.servlet.control.Control;
 import org.openmdx.portal.servlet.control.ControlFactory;
 import org.openmdx.portal.servlet.control.GridControl;
 import org.openmdx.portal.servlet.view.ObjectView;
@@ -90,19 +88,47 @@ public interface PortalExtension_1_0 {
     );
 
     /**
-     * Determines whether the ui element is enabled in the context of view. The result
-     * is typically used in the ui rendering process to determine whether an ui element should
+     * Determines whether the ui element is enabled for the specified object. The result
+     * is used in the rendering process to determine whether an ui element should
      * be rendered as enabled or disabled.
      * 
-     * @param uiElementName qualified name of the ui element
-     * @param refObj evaluate in the context of the object
-     * @param context evaluate in the application context
-     * @return true when the ui element is enabled
+     * @param elementName name of element to be tested (normally qualified ui element name)
+     * @param refObj enable / disable element when rendering this object
+     * @param applicationContext application context
+     * @return true when the element is enabled
      */
     public boolean isEnabled(
-        String uiElementName,
+        String elementName,
         RefObject_1_0 refObj,
-        ApplicationContext context
+        ApplicationContext applicationContext
+    );
+  
+    /**
+     * Determines whether the control is enabled for the specified object. The result
+     * is used in the rendering process to determine whether the control should rendered.
+     * 
+     * @param control to be tested
+     * @param refObj enable / disable element when rendering this object
+     * @param applicationContext application context
+     * @return true when the element is enabled
+     */
+    public boolean isEnabled(
+        Control control,
+        RefObject_1_0 refObj,
+        ApplicationContext applicationContext
+    );
+  
+    /**
+     * Determines whether the specified object is enabled. The object can be a root object,
+     * UI segment, etc.
+     * 
+     * @param refObj enable / disable element when rendering this object
+     * @param applicationContext application context
+     * @return true when the element is enabled
+     */
+    public boolean isEnabled(
+        RefObject_1_0 refObj,
+        ApplicationContext applicationContext
     );
   
     /**
@@ -116,32 +142,6 @@ public interface PortalExtension_1_0 {
     public String getIdentityQueryFilterClause(        
         String qualifiedReferenceName
     );
-    
-    /**
-     * Returns the nesting level for an object shown in a grid. Objects
-     * at root level have a nesting level of 0.
-     * 
-     * @param refObj object for which the nesting level is calculated.
-     * @return nesting level of given object.
-     */
-    public int getGridRowNestingLevel(
-        RefObject_1_0 refObj
-    );
-    
-    /**
-     * Returns the level id for an object shown in a grid. The row level
-     * allows to arrange grid rows in a tree-like structure. The row level
-     * has the format <id level 0>-<id level 1>-<id level 2>, etc. Ids at
-     * level 0 must be unique, ids at level 1 must be unique within level 0,
-     * ids at level 2 must be unique within level 1, etc.
-     * 
-     * @param refObj object for which the row level id is calculated.
-     * @return row level id. Null if no row level is defined for given object.
-     */
-    public String getGridRowLevelId(
-        RefObject_1_0 refObj
-    );
-    
     
     public int getGridPageSize(
         String referencedTypeName
@@ -232,7 +232,6 @@ public interface PortalExtension_1_0 {
         ModelElement_1_0 lookupType,
         RefObject_1_0 startFrom,
         String filterValues,
-        ControlFactory controlFactory,
         ApplicationContext application
     ) throws ServiceException;
     

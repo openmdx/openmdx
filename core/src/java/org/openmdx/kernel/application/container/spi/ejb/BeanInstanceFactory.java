@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BeanInstanceFactory.java,v 1.16 2008/01/25 08:24:50 hburger Exp $
+ * Name:        $Id: BeanInstanceFactory.java,v 1.17 2008/09/10 08:55:20 hburger Exp $
  * Description: Bean Instance Factory
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 08:24:50 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,7 +65,7 @@ import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
  * Bean Instance Factory
  */
 public class BeanInstanceFactory
-    implements PoolableObjectFactory, ContextSwitcher 
+implements PoolableObjectFactory, ContextSwitcher 
 {
 
     /**
@@ -83,8 +83,8 @@ public class BeanInstanceFactory
     public BeanInstanceFactory(
         ClassLoader beanClassLoader,
         Deployment.SessionBean bean, 
-		SessionContext sessionContext, 
-		ContextSwitcher contextSwitcher
+        SessionContext sessionContext, 
+        ContextSwitcher contextSwitcher
     ) throws ClassNotFoundException, SecurityException, NoSuchMethodException{
         this.beanClassLoader = beanClassLoader;
         this.sessionContext = sessionContext;
@@ -107,7 +107,7 @@ public class BeanInstanceFactory
         return this.instanceClass;
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements PoolableObjectFactory
     //------------------------------------------------------------------------
@@ -116,7 +116,7 @@ public class BeanInstanceFactory
      * 
      */
     final Class<SessionBean> instanceClass;
-    
+
     /**
      * 
      */
@@ -137,7 +137,6 @@ public class BeanInstanceFactory
                 exception.getTargetException(),
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
-                null,
                 "EJB instance creation failed"
             );
         } finally {
@@ -149,7 +148,7 @@ public class BeanInstanceFactory
      * @see org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
      */
     public void destroyObject(Object obj) throws Exception {
-       ((SessionBean)obj).ejbRemove();
+        ((SessionBean)obj).ejbRemove();
     }
 
     /* (non-Javadoc)
@@ -158,7 +157,7 @@ public class BeanInstanceFactory
     public boolean validateObject(Object obj) {
         return true;
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory#activateObject(java.lang.Object)
      */
@@ -177,7 +176,7 @@ public class BeanInstanceFactory
      * The EJB's Session Context
      */
     private SessionContext sessionContext = null; 
-    
+
     //------------------------------------------------------------------------
     // Implements ContextSwitcher
     //------------------------------------------------------------------------
@@ -191,7 +190,7 @@ public class BeanInstanceFactory
      * 
      */
     private final ClassLoader beanClassLoader;
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.kernel.application.container.spi.ExtendedEJBHome#setBeanContext()
      */
@@ -199,26 +198,26 @@ public class BeanInstanceFactory
     ) {
         Thread thread = Thread.currentThread();
         Object callerContext = this.externalContextSwitcher == null ?
-        	thread.getContextClassLoader() : 
-        	new Object[] {
-    			this.externalContextSwitcher.setBeanContext(),
-    			thread.getContextClassLoader()
-        	};
-        thread.setContextClassLoader(this.beanClassLoader);
-        return callerContext;
+            thread.getContextClassLoader() : 
+                new Object[] {
+                this.externalContextSwitcher.setBeanContext(),
+                thread.getContextClassLoader()
+            };
+            thread.setContextClassLoader(this.beanClassLoader);
+            return callerContext;
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.kernel.application.container.spi.ExtendedEJBHome#setCallerContext(java.lang.Object)
      */
     public void setCallerContext(Object callerContext) {
-    	if(this.externalContextSwitcher == null) {
+        if(this.externalContextSwitcher == null) {
             Thread.currentThread().setContextClassLoader((ClassLoader) callerContext);
-    	} else {
-    		Object[] callerContexts = (Object[]) callerContext;
+        } else {
+            Object[] callerContexts = (Object[]) callerContext;
             Thread.currentThread().setContextClassLoader((ClassLoader) callerContexts[1]);
             this.externalContextSwitcher.setCallerContext(callerContexts[0]);
-    	}
+        }
     }
 
 }

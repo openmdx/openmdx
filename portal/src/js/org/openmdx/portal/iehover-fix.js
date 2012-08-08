@@ -4,10 +4,9 @@ sfHover = function() {
 	for(i=0; i<ieNavs.length; i++) {
 		var ul = ieNavs[i];
 		// If they have a class of nav add the menu hover.
-		if(ul.className == "nav" || ul.className == "navv")
+		if(ul.className == "nav" || ul.className == "navv" || ul.className == "navigation")
 			setHover(ul);
 	}
-
 }
 
 function setHover(nav) {
@@ -36,7 +35,7 @@ function setHover(nav) {
 			if (ieLIs[i].getElementsByTagName("UL").length>0){
 				ieLIs[i].className+=" sfnode";
 			}
-			
+
 			// Add a sfhover class to the li.
 			ieLIs[i].onmouseover=function() {this.className+=" sfhover";}
 			ieLIs[i].onmouseout=function() {this.className=this.className.replace(' sfhover', '');}
@@ -50,6 +49,11 @@ function setHover(nav) {
 			ieLIs[i].onmouseout=function() {this.className=this.className.replace(' sfhover', '');showSelects()}
 		}
 		ieLIs = document.getElementById('navv').getElementsByTagName('li');
+		for (var i=0; i<ieLIs.length; i++) if (ieLIs[i]) {
+			ieLIs[i].onmouseover=function() {this.className+=" sfhover";hideSelects();}
+			ieLIs[i].onmouseout=function() {this.className=this.className.replace(' sfhover', '');showSelects()}
+		}
+		ieLIs = document.getElementById('navigation').getElementsByTagName('li');
 		for (var i=0; i<ieLIs.length; i++) if (ieLIs[i]) {
 			ieLIs[i].onmouseover=function() {this.className+=" sfhover";hideSelects();}
 			ieLIs[i].onmouseout=function() {this.className=this.className.replace(' sfhover', '');showSelects()}

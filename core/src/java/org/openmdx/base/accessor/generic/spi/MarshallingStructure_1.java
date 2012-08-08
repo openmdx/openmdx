@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MarshallingStructure_1.java,v 1.8 2008/03/19 17:13:11 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: MarshallingStructure_1.java,v 1.11 2008/10/02 17:31:04 hburger Exp $
  * Description: SPICE Basic Accessor Object interface
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:13:11 $
+ * Date:        $Date: 2008/10/02 17:31:04 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.accessor.generic.spi;
 
@@ -64,35 +63,65 @@ import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.collection.MarshallingSparseArray;
 import org.openmdx.compatibility.base.collection.SparseArray;
+import org.openmdx.compatibility.base.marshalling.Marshaller;
 
 
 /**
  * The Structure_1_0 interface.
  */
-@SuppressWarnings("unchecked")
 public class MarshallingStructure_1 
     extends DelegatingStructure_1
     implements Serializable
 {
 
     /**
-     * 
-     */
-    private static final long serialVersionUID = 3258411716403738167L;
-
-    /**
-     * Constructor
+     * Constructor 
      *
-     * @param   the marshaller to be applied to the elements, filter and order
-     *          objects.
-     * @param   The delegate contains unmarshalled elements
-     */   
+     * @param structure
+     * @param marshaller
+     */
     public MarshallingStructure_1(
         Structure_1_0 structure,
         ObjectFactory_1_0 marshaller
     ) {
         super(structure);
         this.marshaller = marshaller;
+    }
+
+    /**
+     * Constructor 
+     * <p>
+     * A subclass must override getMarshaller(String)!
+     *
+     * @param structure
+     */
+    protected MarshallingStructure_1(
+        Structure_1_0 structure
+    ) {
+        this(structure, null);
+    }
+    
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3258411716403738167L;
+
+    /**
+     * The marshaller, unless getMarshaller is overridden;
+     */
+    private ObjectFactory_1_0 marshaller;
+
+    /**
+     * A subclass must override this method if the marshaller is feature dependent.
+     * 
+     * @param feature
+     * 
+     * @return the (maybe feature specific) marshaller
+     */
+    protected Marshaller getMarshaller(
+        String feature
+    ) throws ServiceException {
+        return this.marshaller;
     }
 
     
@@ -115,7 +144,7 @@ public class MarshallingStructure_1
      *
      * @return  the (String) field names contained in this structure
      */
-    public List objFieldNames(
+    public List<String> objFieldNames(
     ){
         return getDelegate().objFieldNames();
     }
@@ -131,46 +160,25 @@ public class MarshallingStructure_1
      * @exception   ServiceException BAD_MEMBER_NAME
      *              if the structure has no such field
      */
+    @SuppressWarnings("unchecked")
     public Object objGetValue(
         String fieldName
     ) throws ServiceException {
-    Object value = getDelegate().objGetValue(fieldName);
-    if(value instanceof List) {
-      return new MarshallingList(
-        this.marshaller,
-        (List)value
-      );
+        Object value = getDelegate().objGetValue(fieldName);
+        Marshaller marshaller = getMarshaller(fieldName);
+        return value instanceof List ? new MarshallingList<Object>(
+            marshaller,
+            (List<?>)value
+        ) : value instanceof Set ? new MarshallingSet<Object>(
+            marshaller,
+            (Set<?>)value
+        ) : value instanceof SparseArray ? new MarshallingSparseArray(
+            marshaller,
+            (SparseArray<Object>)value
+        ) : value instanceof SortedMap ? new MarshallingSortedMap(
+            marshaller,
+            (SortedMap<Integer,Object>)value
+        ) : marshaller.marshal(value);
     }
-    else if(value instanceof Set) {
-      return new MarshallingSet(
-        this.marshaller,
-        (Set)value
-      );
-    }
-    else if(value instanceof SparseArray) {
-      return new MarshallingSparseArray(
-        this.marshaller,
-        (SparseArray)value
-      );
-    }
-    else if(value instanceof SortedMap) {
-      return new MarshallingSortedMap(
-        this.marshaller,
-        (SortedMap)value
-      );
-    }
-    else {
-      return this.marshaller.marshal(value);
-    }
-    }
-
-    //------------------------------------------------------------------------
-    // Instance members
-    //------------------------------------------------------------------------
-
-    /**
-     *
-     */
-    protected ObjectFactory_1_0 marshaller;
 
 }

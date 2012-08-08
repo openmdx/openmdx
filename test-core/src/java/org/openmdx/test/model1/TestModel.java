@@ -49,7 +49,6 @@ public class TestModel
                     "org:w3c",
                     "org:oasis-open",
                     "org:openmdx:base",
-                    "org:openmdx:compatibility:view1",
                     "org:omg:model1"
                 }
             )

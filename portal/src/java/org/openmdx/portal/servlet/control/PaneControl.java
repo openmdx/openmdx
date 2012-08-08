@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PaneControl.java,v 1.8 2007/12/13 18:58:09 wfro Exp $
+ * Name:        $Id: PaneControl.java,v 1.10 2008/11/10 10:20:11 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:58:09 $
+ * Date:        $Date: 2008/11/10 10:20:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -70,15 +67,13 @@ public abstract class PaneControl
         String id,
         String locale,
         int localeAsIndex,
-        ControlFactory controlFactory,
         org.openmdx.ui1.jmi1.Pane pane,
         int paneIndex
     ) {
         super(
             id,
             locale,
-            localeAsIndex,
-            controlFactory
+            localeAsIndex
         );
         this.pane = pane;
         this.paneIndex = paneIndex;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValue.java,v 1.59 2008/04/04 17:01:09 hburger Exp $
+ * Name:        $Id: AttributeValue.java,v 1.68 2008/12/09 14:40:06 wfro Exp $
  * Description: AttributeValue
- * Revision:    $Revision: 1.59 $
+ * Revision:    $Revision: 1.68 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:09 $
+ * Date:        $Date: 2008/12/09 14:40:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 
@@ -80,7 +77,6 @@ import org.openmdx.portal.servlet.Autocompleter_1_0;
 import org.openmdx.portal.servlet.DataBinding_1_0;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.HtmlPage;
-import org.openmdx.portal.servlet.control.EditObjectControl;
 
 public abstract class AttributeValue
 implements Serializable {
@@ -229,20 +225,27 @@ implements Serializable {
         }
         else if(this.object instanceof RefObject_1_0) {
             try {
+                RefObject_1_0 refObj = (RefObject_1_0)this.object;
                 Object value = this.fieldDef.dataBinding.getValue(
-                    (RefObject_1_0)this.object,
+                    refObj,
                     feature
                 );
-                return value == null
-                ? this.getDefaultValue()
-                    : value;
+                if(
+                    !refObj.refIsPersistent() &&
+                    ((value == null) || ((value instanceof Number) && ((Number)value).intValue() == 0))
+                ) {
+                    return this.getDefaultValue();
+                }
+                else {
+                    return value;
+                }
             }
             catch(JmiServiceException e) {
                 if(
                     (e.getExceptionCode() == BasicException.Code.NOT_FOUND) ||
                     (e.getExceptionCode() == BasicException.Code.AUTHORIZATION_FAILURE)
                 ) {
-                    return e.getExceptionStack();
+                    return e.getCause();
                 }
                 else {
                     AppLog.info("can not get feature " + feature + " of object ", ((RefObject_1_0)this.object).refMofId() + ". Reason see log");
@@ -356,7 +359,6 @@ implements Serializable {
                 }
                 catch(Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    SysLog.warning("Error when getting element from collection (more info at detail level)", e0.getMessage());
                     SysLog.detail(e0.getMessage(), e0.getCause());
                 }
                 boolean hasDivTag = false;
@@ -487,8 +489,8 @@ implements Serializable {
         String upperBound = defaultValue;
         // Set upperBound=multiplicity if it is an integer
         if(
-                (this.getMultiplicity().length() > 0) &&
-                Character.isDigit(this.getMultiplicity().charAt(0))
+            (this.getMultiplicity().length() > 0) &&
+            Character.isDigit(this.getMultiplicity().charAt(0))
         ) {
             try {
                 Integer.parseInt(this.getMultiplicity());
@@ -498,6 +500,7 @@ implements Serializable {
         return upperBound;        
     }
 
+    //-------------------------------------------------------------------------
     /**
      * Paints the attribute to p.
      * 
@@ -520,7 +523,6 @@ implements Serializable {
      * 
      * @throws ServiceException
      */
-    //-------------------------------------------------------------------------
     public void paint(
         Attribute attribute,
         HtmlPage p,
@@ -557,7 +559,7 @@ implements Serializable {
                     if(this.isChangeable() && this.isEnabled()) {
                         // Multiline textarea always requires an id for launching HTML editor
                         if(attribute.getSpanRow() > 4) {
-                            p.write("  <div ", p.getOnClick("javascript:loadHTMLedit('", id, "');"), p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/html"), p.getImgType(), "\" border=\"0\" alt=\"o\" title=\"\""), "</div>");
+                            p.write("  <div onclick=\"javascript:loadHTMLedit('", id, "');\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/html"), p.getImgType(), "\" border=\"0\" alt=\"o\" title=\"\""), "</div>");
                         }
                         p.write("  <textarea id=\"", id, "\" name=\"", id, "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"30\" style=\"width:100%;\" class=\"string\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
                     }
@@ -604,16 +606,14 @@ implements Serializable {
                 p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");
             }
             else {
+                boolean isChangeable = this.isChangeable() && this.isEnabled();
+                int maxLength = this instanceof TextValue ? 
+                    Math.min(Short.MAX_VALUE, ((TextValue)this).getMaxLength()) : 
+                    Short.MAX_VALUE;
                 p.write("<td ", rowSpanModifier, ">");
-                p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"multiStringLocked\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
+                p.write("  <textarea id=\"", id, "\" name=\"", id, "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\"", (isChangeable ? "" : "readonly"), " tabindex=\"", Integer.toString(tabIndex), "\" onfocus=\"javascript:checkTextareaLimits(this,", this.getUpperBound("10"), ", ", Integer.toString(maxLength), ");\">", stringifiedValue, "</textarea>");
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, ">");
-                if(this.isChangeable() && this.isEnabled()) {
-                    int maxLength = this instanceof TextValue
-                    ? ((TextValue)this).getMaxLength()
-                        : Integer.MAX_VALUE;
-                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\"" + p.getOnClick("javascript: editstrings_maxLength=" + maxLength, "; multiValuedHigh=", this.getUpperBound("10"), "; return editstrings_showPopup(this.id, '", EditObjectControl.POPUP_EDIT_STRINGS, "', $('", id, "'), new Array());")));
-                }
                 p.write("</td>");
             }
         }
@@ -640,7 +640,6 @@ implements Serializable {
                         else {
                             styleModifier += "height:" + (1.2+(attribute.getSpanRow()-1)*1.5) + "em;\"";
                             p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " ",  styleModifier, ">");
-                            p.write(p.getImg("src=\"", p.getResourcePath("images/inspect_up"), p.getImgType(), "\" border=\"0\" alt=\"o\" title=\"\"", p.getOnClick("javascript:if(document.getElementById('attributeValue')) {document.getElementById('attributeValue').innerHTML=this.nextSibling.innerHTML;}; if (document.getElementById('panelObjX')) {document.getElementById('panelObjX').style.display='block';};"), p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';")));
                             p.write("<div class=\"fieldSpanned\" ", styleModifier, ">");
                             this.application.getPortalExtension().renderTextValue(p, stringifiedValue);
                             p.write("</div>");
@@ -648,9 +647,9 @@ implements Serializable {
                     }
                     else {
                         styleModifier += "\"";
-                        CharSequence iconTag = this.getIconKey() == null
-                            ? ""
-                            : "" + p.getImg("src=\"", p.getResourcePath("images/"), this.getIconKey(), "\" align=\"middle\" border=\"0\" alt=\"\"") + p.getImg("src=\"", p.getResourcePath("images/spacer"), p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");                                                                      
+                        CharSequence iconTag = this.getIconKey() == null ? 
+                            "" : 
+                            "" + p.getImg("src=\"", p.getResourcePath("images/"), this.getIconKey(), "\" align=\"middle\" border=\"0\" alt=\"\"") + p.getImg("src=\"", p.getResourcePath("images/spacer"), p.getImgType(), "\" width=\"5\" height=\"0\" align=\"middle\" border=\"0\" alt=\"\"");                                                                      
                         p.write("<td ",  rowSpanModifier, " class=\"valueL\" ", widthModifier, " ", styleModifier, ">");
                         p.write("<div class=\"field\">", iconTag);
                         this.application.getPortalExtension().renderTextValue(p, stringifiedValue);

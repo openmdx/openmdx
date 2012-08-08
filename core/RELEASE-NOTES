@@ -1,7 +1,7 @@
 Distribution Name: openMDX/Core
-Release Date: 2008-07-10
-Specification Version: 2.1
-Implementation Version: 2.1.0
+Release Date: 2008-12-03
+Specification Version: 2.3
+Implementation Version: 2.3.0
 
 ---------------------------------------------------------------------
 Notes:
@@ -50,517 +50,290 @@ Notes:
 
 0.    SUMMARY
 
-      * Replace openMDX 1 Gateway by openMDX 2 EntityManager
-      * Persistence: support for HSQLDB
-      * Improved CCI2 mapping
-      * Migration to SLF4J logging API
+      * Extend entity / persistence manager. Add infrastructure
+        for persistence-level plugins
+      * Generic REST servlet
+      * Removed old features
+      * Fixed bugs
       
 1.    NEW FEATURES
 
-      CR20012701
-      DBOSlicedWithIdAsKey: add option org.openmdx.persistence.jdbc.useLikeForOidMatching.
-      Option allows to configure whether to use LIKE or <> operators to filter oid patterns.      
+      CR20018518
+      Database: hint DBOBJECT. Hint DBOBJECT allows to qualify the dbobject 
+      (table, view) used for queries. At least it should be possible to add a 
+      suffix.
       
-      CR20012403
-      Add Plug-In Configuration To EntityManager
+      CR20017901
+      Cross Reference Support
       
-      The content of package
-      * org.openmdx.kernel.persistence.spi 
-      has been merged into
-      * org.openmdx.base.persistence.spi 
+      The flag PERSISTENCE/normalizeObjectIds enables cross-references.
+
+      CR20017901
+      Iterable path
+      
+      org.openmdx.compatibility.base.naming.Path instances are now Iterable.
+      The iterator returns the path components' string representation.
+
+      The method objGetResourceIdentifier() uses the XRI 2 format, i.e.
+      xri://@openmdx*... as opposed to its former spice://... format. 
             
-      An entity manager factory configuration could look like this:
-			<env-entry>
-				<env-entry-name>EntityManager/plugIn[0]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>App1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>EntityManager/App1/modelPackage[0]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:test:app1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>EntityManager/App1/packageImpl[0]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.test.app1.aop2.standard</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>EntityManager/App1/modelPackage[1]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:base</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>EntityManager/App1/packageImpl[1]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.base.aop2.standard</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>EntityManager/App1/userObject[0]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>PriceCalculator</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>EntityManager/App1/PriceCalculator/class</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.test.app1.aop2.standard.PriceCalculator</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>EntityManager/App1/PriceCalculator/duration</env-entry-name>
-				<env-entry-type>java.lang.Long</env-entry-type>
-				<env-entry-value>1000</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>EntityManager/userObject[0]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>SharedConfiguration</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>EntityManager/SharedConfiguration/class</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.test.aop2.standard.SharedConfiguration</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>EntityManager/SharedConfiguration/example</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>an entity manager scoped configuration value</env-entry-value>
-			</env-entry>
-
-      A persistence manager factory configuration supports LegacyPlugIn only at the moment:
-			<env-entry>
-				<env-entry-name>PersistenceManager/LegacyPlugIn/modelPackage[0]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:test:app1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>PersistenceManager/LegacyPlugIn/packageImpl[0]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.test.app1.aop2.legacy</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>PersistenceManager/LegacyPlugIn/userObject[0]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>LegacyConfiguration</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>PersistenceManager/LegacyPlugIn/LegacyConfiguration/class</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.test.app1.aop2.legacy.LegacyConfiguration</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>PersistenceManager/LegacyPlugIn/LegacyConfiguration/example</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>a legacy plug-in scoped configuration value</env-entry-value>
-			</env-entry>
-            
-      CR20011100
-      Optimistic_1Bean
-
-      Typical configuration entries for the gateway-Managing EJB are:
-
-        <ejb-name>gateway1-Managing</ejb-name>
-        <home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
-        <remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
-        <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
-        <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction.Optimistic_1Bean</ejb-class>
-        <session-type>Stateless</session-type>
-        <transaction-type>Bean</transaction-type>
-        [...]
-        <env-entry>
-          <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
-          <env-entry-type>java.lang.String</env-entry-type>
-          <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.interception.Entity_1</env-entry-value>
-        </env-entry>
-        <env-entry>
-          <env-entry-name>KERNEL/TYPE</env-entry-name>
-          <env-entry-type>java.lang.String</env-entry-type>
-          <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.type.Standard_1</env-entry-value>
-        </env-entry>
-        <env-entry>
-          <env-entry-name>KERNEL/APPLICATION</env-entry-name>
-          <env-entry-type>java.lang.String</env-entry-type>
-          <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.Layer_1</env-entry-value>
-        </env-entry>
-        <env-entry>
-          <env-entry-name>KERNEL/MODEL</env-entry-name>
-          <env-entry-type>java.lang.String</env-entry-type>
-          <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.Layer_1</env-entry-value>
-        </env-entry>
-        <env-entry>
-          <env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
-          <env-entry-type>java.lang.String</env-entry-type>
-          <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.persistence.delegation.Entity_1</env-entry-value>
-        </env-entry>
-        <env-entry>
-          <env-entry-name>APPLICATION/disableRouter</env-entry-name>
-          <env-entry-type>java.lang.Boolean</env-entry-type>
-          <env-entry-value>true</env-entry-value>
-        </env-entry>
-        <env-entry>
-          <env-entry-name>PERSISTENCE/retrievalSize</env-entry-name>
-          <env-entry-type>java.lang.Integer</env-entry-type>
-          <env-entry-value>1000</env-entry-value>
-        </env-entry>
-
-      CR20012101
-      Database: add DBOSlicedWithParentAndIdAsKey. Add DBO which supports 
-      composed primary key (parent, qualifier, type).
+      CR20018102
+      A PersistenceManager's Principals
       
-      CR20011800
-      Database: support added for HSQLDB 1.8.
+      The user object with key 
+      org.openmdx.base.persistence.cci.UserObjects.PRINCIPALS
+      ("org.openmdx.security.principals") is of type
+      Set<? extends Principals>.      
       
-      CR20010702 
-      CCI2 Container interface 
+      CR20017901
+      org::openmdx::state2
       
-      public interface <associationName> {
-        public interface <referenceName> extends org.w3c.cci2.Container<E> {
-          void add(
-             org.oasisopen.cci2.QualifierType <qualifierName>Type,
-             <qualifierType> <qualifierName>,
-             E <referenceName>
-          );       
-          E get(
-            org.oasisopen.cci2.QualifierType <qualifierName>Type,
-            <qualifierType> <qualifierName>
-          );
-          void remove(
-             org.oasisopen.cci2.QualifierType <qualifierName>Type,
-            <qualifierType> <qualifierName>
-          );
-        }
-      }
+      The states' core class is a subclass of 
+      org::openmdx::state2::StateCapable and has the following flags:
+      * transactionTimeUnique
+      * validTimeUnique
       
-      public interface Container<E> extends Collection<E> {
-        List<E> getAll(
-          AnyTypePredicate predicate
-        );
-        void removeAll(
-          AnyTypePredicate predicate
-        );
-      }
+      An object is two dimensional if and only if both flags are off.
       
-      CR20010702 
-      CCI2 Container interface 
-
-      The interface is implemented by the proxy class only:
-
-      /**
-       * RefContainer
-       */
-      public interface RefContainer {
+      CR20018001
+      objGetIterable
       
-        /**
-         * Adds an object to the container
-         * 
-         * @param arguments there is always an odd number of arguments:
-         * ((REASSIGNABLE|PERSISTENT) identifier)+ value
-         */
-        void refAdd(
-          Object... arguments 
-        );
-    
-        /**
-         * Retrieves an object from the container
-         * 
-         * @param arguments there is always an even number of arguments:
-         * ((REASSIGNABLE|PERSISTENT) identifier)+
-         * 
-         * @return the object
-         */
-        Object refGet(
-          Object... arguments 
-        );
+      objGetIterable does not care whether a feature is multi-valued or single-valued. 
         
-        /**
-         * Removes an object from the container
-         * 
-         * @param arguments there is always an even number of arguments:
-         * ((REASSIGNABLE|PERSISTENT) identifier)+
-         */
-        void refRemove(
-          Object... arguments 
-        );
-        
-        /**
-         * Precedes a persistent sub-segment.
-         */
-        Object PERSISTENT = QualifierType.PERSISTENT;
-    
-        /**
-         * Precedes re-assignable sub-segment.
-         */
-        Object REASSIGABLE = QualifierType.REASSIGNABLE;
-
-        /**
-         * Executes a query 
-         * 
-         * @param query
-         * 
-         * @return the result
-         */
-        List<?> refGetAll(
-            Object query
-        );
-    
-        /**
-         * Executes a query 
-         * 
-         * @param query
-         * 
-         * @return the result
-         */
-        List<?> refRemoveAll(
-           Object query
-        );
-
-      }
-
+      CR20013920
+      org::openmdx::state2 
       
-      CR20010001
-      SLF4J logging
+      States are now supported as aspects.
+      The are handled by an Object_1_0-Plug-In (as opposed to the former 
+      Layer_1_0-Plug-In).
       
-      openMDX 2's logging API is org.slf4j
+      CR20016601
+      InteractionSepc support
       
-      A configuration such as
+      The ObjectFactory_1_x interfaces must be InteractionSepc aware.
       
-        # Example Log Properties
-        handlers= java.util.logging.FileHandler
-        java.util.logging.FileHandler.level = INFO
-        java.util.logging.FileHandler.pattern = %t/junit.%u.log
-        java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatter
+      CR20017600
+      REST servlet. The servlet allows REST based access to openMDX providers.
       
-      leads to a JDK-log file similar to openMDX/1's log files with the 
-      following main differences
-      * The initial line declaring fields missing.
-      * The date/time field is in extended ISO format, i.e. it includes the 
-        characters 'T' and 'Z'.
-      * SysLog's and AppLog's logsource field is not at openMDX/1's default 
-        place but just before the message field.
-      * The thread field contains the log thread id (a number starting with 10) 
-        as opposed to the thread's id or name
-      * The line number field is missing.
-
-      CR20009700 
-      TransactionSynchronizationRegistry 
+			Object creation                                                                                                     
+			  Method: POST
+			  Url: http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/account			
+			  Body:			
+					<?xml version="1.0"?>
+					<org.openmdx.workshop1.Contact>
+						<lastName>REST</lastName>
+						<firstName>Test #1</firstName>
+					</org.openmdx.workshop1.Contact>
+			
+			Object Retrievals                                                                                                                           
+			  Method: GET
+			  Urls:
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/extent?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=identity().like("xri://@openmdx*org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember/%25");orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=modifiedAt().between(:datetime:20080101T000000.000Z,:datetime:20081001T000000.000Z);orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=modifiedAt().greaterThan(:datetime:20080101T000000.000Z);orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=thereExistsModifiedAt().greaterThan(:date:2008-01-01);orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=thereExistsName().like("D%25, Joe");orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=thereExistsName().elementOf("Joe", "Guest");orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=thereExistsName().equalTo("Guest");orderByName().ascending()
+					http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember?position=0&size=50&queryType=org:openmdx:workshop1:TeamMember&query=thereExistsName().equalTo("Guest")
+			
+			Object modification                                                                                                                        
+				Method: PUT			
+				Url: http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember/2YlAOJYlEd2Y4zv65ePspg
+				Body:			
+					<?xml version="1.0"?>
+					<org.openmdx.workshop1.Contact>
+						<name>Joe</name>
+					</org.openmdx.workshop1.Contact>
+			
+			Operation Invocation                                                                                                             
+				Method: POST			
+				Url: http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/task/T1/assignTeamMember			
+				Body:			
+					<?xml version="1.0"?>
+					<org.openmdx.workshop1.AssignTeamMemberParams>
+						<memberRole>1</memberRole	>
+						<teamMember>xri://@openmdx*org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember/2YlAOJYlEd2Y4zv65ePspg</teamMember>
+					</org.openmdx.workshop1.AssignTeamMemberParams>
+			
+			Object Deletion         
+				Method: DELETE		
+				Url: http://localhost:8080/openmdx-rest-CRX/org.openmdx.workshop1/provider/CRX/segment/Standard/teamMember/2YlAOJYlEd2Y4zv65ePspg
       
-      The LightweightContainer supports the TransactionSynchronizationRegistry
-      as defined by JTA 1.1 and Java EE 5 respectively. 
-        
-      CR20007105
-      CollectionMarshaller
-      
-      The org.openmdx.base.persistence.spi.Marshaller interface with its 
-      unmarshal() method throwing now an IllegalArgumentException in case of
-      failure replaces the org.openmdx.base.collection.CollectionMarshaller 
-      interface with its unmarshal() method throwing a ServiceException in 
-      case of failure. 
-
-      CR20007105
-      Gateway as PersistenceManagerFactory
-
-      The PersistenceManagerConnectionFactory is formally declared as an EJB 
-      reference in the web.xml:
-      
-        <ejb-local-ref id="ejb_gateway">
-		  <ejb-ref-name>ejb/gateway</ejb-ref-name>
-          <ejb-ref-type>Session</ejb-ref-type>
-          <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-          <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_2Local</local>
-          <ejb-link>test-gateway.jar#gateway-Mandatory</ejb-link>
-        </ejb-local-ref>
-
-      The PersistenceManagerFactory is formally declared as resource environment
-      reference in the web.xml:
-      
-        <resource-env-ref id="jdo_gateway">
-          <description>JDO Reference to the application's persistence manager factory</description>
-          <resource-env-ref-name>persistence/gateway</resource-env-ref-name>
-          <resource-env-ref-type>javax.jdo.PersistenceManagerFactory</resource-env-ref-type>
-        </resource-env-ref>
-
-      It is resolved in the Tomcat's context XML
-      
-        <Resource
-          name="persistence/gateway"
-          auth="Container"
-          type="javax.jdo.PersistenceManagerFactory"
-          factory="org.openmdx.base.persistence.tomcat.AccessorFactoryBuilder"
-          AccessorFactoryClass="org.openmdx.base.accessor.jmi1.AccessorFactory_2"
-        />
-
-      The persistence manager factory is then acquired like that:
-      
-        public void init(
-        ) throws ServletException {
-          this.persistenceManagerFactory = JDOHelper.getPersistenceManagerFactory(
-            "java:comp/env/persistence/gateway",
-            (Context)null
-          );
-        }
-
-      The changes to the gateway EJB are as following:
-      
-        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_2Local</local>
-        <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Gateway_1Bean</ejb-class>
-     
-        <env-entry>
-          <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
-          <env-entry-type>java.lang.String</env-entry-type>
-          <env-entry-value>org.openmdx.compatibility.runtime1.layer.interception.EntityProviderLayer_1</env-entry-value>
-        </env-entry>
-
-        <assembly-descriptor>
-          <container-transaction>
-            <method>
-              <ejb-name>gateway-Mandatory</ejb-name>
-              <method-name>process</method-name>
-            </method>
-            <trans-attribute>Required</trans-attribute>
-          </container-transaction>
-          <container-transaction>
-            <method>
-              <ejb-name>gateway-Mandatory</ejb-name>
-              <method-name>createEntityManager</method-name>
-            </method>
-            <trans-attribute>Never</trans-attribute>
-          </container-transaction>
-          <container-transaction>
-            <method>
-              <ejb-name>gateway-Mandatory</ejb-name>
-              <method-name>createEntityProvider</method-name>
-            </method>
-            <trans-attribute>Never</trans-attribute>
-          </container-transaction>
-          <container-transaction>
-            <method>
-              <ejb-name>gateway-Mandatory</ejb-name>
-              <method-name>commit</method-name>
-            </method>
-            <trans-attribute>RequiresNew</trans-attribute>
-          </container-transaction>
-        </assembly-descriptor>
-
-      The changes to the provider EJBs are as following:
-
-        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_1Local</local>
-     
-        <assembly-descriptor>
-          <container-transaction>
-            <method>
-              <ejb-name>clock-1</ejb-name>
-              <method-name>process</method-name>
-            </method>
-            <trans-attribute>Required</trans-attribute>
-          </container-transaction>
-          <container-transaction>
-            <method>
-              <ejb-name>clock-1</ejb-name>
-              <method-name>createEntityProvider</method-name>
-            </method>
-            <trans-attribute>Never</trans-attribute>
-          </container-transaction>
-        </assembly-descriptor>
-      
-
+           
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
+     
+      CR20018512
+      combinedInterfaces
       
-      CR20012707
-      ManagerFactory/DataProvider
+      The argument of the method combinedInterfaces in the class
+      org.openmdx.compatibility.kernel.application.cci.Classes is now of type
+      Class<?> (as opposed to its former Object type).
+      
+      I.e. you have to replace invocations such as 
+        Classes.combinedInterfaces(object, prepend0, prepend1)
+      by 
+        Classes.combinedInterfaces(object.getClass(), prepend0, prepend1)
+      
+      
+      CR20013920
+      state1 segment
+
+      The class org::opemndx::compatibility::state1::Segment is no longer
+      abstract nor has it the stereotype «root» anymore as it is now a 
+      subclass of org::openmdx::base::Segment.
+
+     
+      CR20013920
+      extent's qualifier
+
+      The qualifier for org::openmdx::base::Segment::extent is now of type org::oasis-open::xri 
+      (as opposed to its former org::w3c::anyURI type).
+
+      CR20017901
+      Resource Identifier
+
+      The standard resource identifier format is the XRI 2 format.
+      * It is used by Object_1_0's method objGetResourceIdentifier(), i.e.
+        xri://@openmdx*... as opposed to its former spice://... format.
+      * It is used by the ExtentCapable's feature identity as well.
+        The identity is now non-null for new objects.
+      * It can be retrieved by the Path's toResourceIdentifier() method.           
             
-      EJB Interface & Bean Configuration
-      * DataProvider EJB Configuration
-          <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-	      <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
-	      <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
-      * Entity Manager Factory EJB Configuration 
-          <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2LocalHome</local-home>
-	      <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2_0Local</local>
-	      <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.EntityManagerFactory_2Bean</ejb-class>
-      * Gateway EJB Configuration
-          <ejb-name>Gateway</ejb-name>
-	      <home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
-	      <remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
-	      <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
-	      <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
-	      <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction.Gateway_1Bean</ejb-class>                
-       
-      CR20011701 
-      The predicates' equals() methods
-       
-      Deprecate the predicates' equals() methods to avoid its erroneous use 
-      in lieu of equalTo().
-       
-      CR20010001
-      openMDX/Log
-
-      openMDX 1' logging API (SysLog & Applog):
-      * openMDX 1's logging API (org.openmdx.kernel.SysLog and 
-        org.openmdx.application.log.AppLog) delegates to SLF4J now.
-      * openMDX 1's logging implementation has been moved to 
-        org.openmdx.compatibility.kernel.SysLog and 
-        org.openmdx.compatibility.application.log.AppLog. 
-        It is activated by adding slf4j-openmdx1.jar to the same classloader 
-        as openmdx-kernel.jar. 
-
-      CR20009904 
-      PersistenceManager in JBoss
+      CR20017901  
+      Stop watch
       
-      The javax/jdo classes have been moved from openmdx-base.jar to
-      openmdx-kernel.jar.      
-
-
+      StopWatch_1_0 and StopWatch_1 moved into the package
+      org.openmdx.compatibility.base.dataprovider.exporter as they are not 
+      used anywhere else.
+      
+      
+      CR20018001
+      ObjectFilter_1 
+      
+      ObjectFilter_1 uses objGetIterable (as opposed to its former '?' + attributeName
+      request.       
+        
+      CR20013920 	
+      org::openmdx::state2
+      
+      org::openmdx::compatibiliy::state1::DateState is now a sub-class of
+      org::openmdx::state2::DateState
+      
+      CR20017502
+      System Attribute Handling
+      
+      Moved from Plug-in to Object_1_0.
+      
+      The handling for the following classes and attributes is now a core feature:
+      * org::openmdx::base::Creatable
+          o createdAt
+          o createdBy 
+      * org::openmdx::base::Modifiable
+          o modifiedAt
+          o modifiedBy 
+      * org::openmdx::base::Removable
+          o removedAt
+          o removedBy 
+             
 2.1.  FIXED BUGS
 
-      CR20010802
-      StateQuery
+      CR20017903
+      "Normalized" Durations lead to Oracle SQL Failure 
       
-      Un-escape attribute filter values when replacing IS_LIKE by IS_IN.       
+      Durations are normalized to years/months and hours/minutes/seconds (as 
+      opposed to the former months and seconds normalization).
+      
+      CR20017001
+      Improved exception handling
 
-      CR20011501
-      Plugin_1's total reply leads to iteration 
+      The exception stack was printed bottom up instead of top down.
       
-      Recounting must be avoided.
+      CR10008226
+      PIGGY_BACK filter property values
       
-      CR20010003
-      DataproviderObject.values() returns null. DataproviderObject.values() 
-      must return a non-null SparseList<Object>. In case of multiple threads, 
-      the current implementation may return null. DataproviderObject must be 
-      thread-safe because it is used in the Model_1 repository. 
+      Multivalued values are not passed as Object[] but as Object[][].
       
+      CR20016300
+      Escape wildcard characters in RIDs 
+      
+      Escape SQL wildcard characters for LIKE predicates with RIDs.
+      Indices will be useful even if the RID contains '_', '%' or '\\'.
 
 2.2.  DEPRECATED FEATURES
+      none
 
-      CR20008100
-      RefObjectFactory_1
+2.3.  REMOVED FEATURES
+
+      CR20018411
+      Remove datastore1 model and corresponding implementations.
       
-      The class org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1 has been
-      deprecated as it is used by test programs only.
+      CR20018410
+      Remove deployment1 model and corresponding implementations.
+      
+      CR20018409
+      Remove filter1 model.
+      
+      CR20018408
+      Remove runtime1 model and corresponding implementations.
+      
+      CR20018200
+      Deprecate openMDX 1 JMI mapping.
+      
+      CR20017901  
+      org::openmdx::compatibility:role1
+      
+      The role1 plug-in and its associated tree watch classes have
+      been removed.
+
+      CR20018100
+      Unit Of Work Local User Object 
+      
+      * Remove RefRootPackage_1's deprecated constructors
+      * Remove CCI1_PACKAGE_SUFFIX references and all methods and constructors
+        relaying on it
+      * Remove deprecated package org.openmdx.base.object.jdo
+      * Remove "throw not found if null" support from RefRootPackage_1  
+      * Remove refUseOpenMdx1ImplLookup() support
+      
+      CR20017901
+      org::openmdx::compatibility::state1
+      
+      The class following classes have been removed:
+      * org::openmdx::compatibility::state1::ValidState
+      * org::openmdx::compatibility::state1::StateCapable
+      * org::openmdx::compatibility::state1::StateIncapable
+      
+      CR20013920
+      org::openmdx::compatibility::state1 
+ 
+      state1's Object_1_0 views and the Layer_1_0-Plug-Ins have been removed.
+      
+      CR20016210
+      jmi1 replaces cci 
+      
+      Discontinue legacy API generation
+      
+      CR20013920 	
+      org::openmdx::compatibility::state1
+      
+      The following classes have been removed:
+      * org::openmdx::compatibiliy::state1::DateStateExcludingEnd
+      * org::openmdx::compatibiliy::state1::DateTimeState
             
-2.3   REMOVED FEATURES
-
-      CR20008100
-      Application_1_0 & ApplicationController_1_0
+      CR20017503
+      USE_OBJECT_IDENTITY_HINT 
       
-      The deprecated classes Application_1_0 and ApplicationController_1_0 in
-      the package org.openmdx.compatibility.base.application.control
-      have been removed.
-
-      CR20008100
-      InProcessDataproviderConnectionFactory
+      Discontinue USE_OBJECT_IDENTITY_HINT support,
+      i.e. reference names must no longer end with the suffix ";use=identity".
       
-      The deprecated class InProcessDataproviderConnectionFactory
-      in package org.openmdx.compatibility.base.application.cci has been
-      removed.
-
-      CR20008100
-      InstanceCallbacks_1_0 & InstanceCallbackAdapter
+      CR20017501
+      Placeholders
       
-      The deprecated interface InstanceCallbacks_1_0 in package
-      org.openmdx.compatibility.base.accessor.object.cci and the deprecated
-      class InstanceCallbackAdapter in package 
-      org.openmdx.compatibility.base.accessor.object.spi have been removed.
+      Discontinue support for placeholders as path element,
+      i.e. each object's identity is fixed as soon as it is made persistent. 
+      It can't be changed by a server-side plug-in any more.       
 
 ---

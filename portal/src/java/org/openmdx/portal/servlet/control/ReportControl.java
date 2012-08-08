@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportControl.java,v 1.28 2008/05/01 21:43:56 wfro Exp $
+ * Name:        $Id: ReportControl.java,v 1.31 2008/11/10 10:20:11 wfro Exp $
  * Description: UiBasedOperationPaneControl class
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:56 $
+ * Date:        $Date: 2008/11/10 10:20:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -81,8 +78,7 @@ public class ReportControl
         super(
             id,
             locale,
-            localeAsIndex,
-            controlFactory
+            localeAsIndex
         );
         this.reportTabs = new ReportTabControl[reportDefinitions.length];
         for(int i = 0; i < reportDefinitions.length; i++) {
@@ -140,7 +136,6 @@ public class ReportControl
     private static final long serialVersionUID = -5868748717990932512L;
 
     public static final String FRAME_PARAMETERS = "Parameters";
-
     private static final int REPORT_PANE_INDEX = 2000;
     
     private final ReportTabControl[] reportTabs;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MetaData_2.java,v 1.13 2008/06/28 00:21:36 hburger Exp $
+ * Name:        $Id: MetaData_2.java,v 1.14 2008/08/20 23:39:32 hburger Exp $
  * Description: Meta Data Provider
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:36 $
+ * Date:        $Date: 2008/08/20 23:39:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,7 +64,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.openmdx.kernel.url.protocol.XriProtocols;
+import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.xml.EntityMapper;
 import org.openmdx.model1.importer.metadata.ClassMetaData;
 import org.openmdx.model1.importer.metadata.ClassPersistenceModifier;
@@ -389,7 +389,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                             documentPath
                         );    
                         if(documentSource != null) {
-                            documentLocation = XriProtocols.RESOURCE_PREFIX + documentPath;
+                            documentLocation = XRI_2Protocols.RESOURCE_PREFIX + documentPath;
                             logger.info(
                                 "Found .openmdxjdo resource for package {}", 
                                 name
@@ -522,7 +522,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
                         );    
                         if(documentSource != null) {
                             System.out.println("INFO:    Loading meta data for " + Package.this.name + "." + name);
-                            documentLocation = XriProtocols.RESOURCE_PREFIX + documentPath;
+                            documentLocation = XRI_2Protocols.RESOURCE_PREFIX + documentPath;
                             logger.info(
                                 "Found .openmdxjdo resource for class {}.{}", 
                                 Package.this.name, name
@@ -994,7 +994,7 @@ public class MetaData_2 implements MetaData_1_0, MetaData_2_0 {
     static {
         EntityMapper.registerPublicId(
           "-//openMDX//DTD Java Data Objects Metadata Extension 2.0//EN",
-          XriProtocols.RESOURCE_PREFIX + "org/openmdx/model1/importer/jdo2/openmdx-jdo_2_0.dtd"
+          XRI_2Protocols.RESOURCE_PREFIX + "org/openmdx/model1/importer/jdo2/openmdx-jdo_2_0.dtd"
         );
     }
 

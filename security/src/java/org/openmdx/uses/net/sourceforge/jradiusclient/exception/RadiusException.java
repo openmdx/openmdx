@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RadiusException.java,v 1.5 2005/04/26 20:28:50 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: RadiusException.java,v 1.8 2008/10/07 08:51:13 hburger Exp $
  * Description: Radius Exception 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/26 20:28:50 $
+ * Date:        $Date: 2008/10/07 08:51:13 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes or is based on software developed by other
+ * organizations as listed in the NOTICE file.
  */
 package org.openmdx.uses.net.sourceforge.jradiusclient.exception;
 
@@ -55,7 +54,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import org.openmdx.kernel.exception.BasicException;
-
+import org.openmdx.kernel.exception.BasicException.Parameter;
 
 /**
  * Radius Exception
@@ -71,7 +70,7 @@ public class RadiusException
      * @param message
      */
     public RadiusException(String message) {
-        this(null, null, message);
+        this(null, message);
     }
     
     /**
@@ -82,51 +81,42 @@ public class RadiusException
     public RadiusException(
         Exception cause
     ) {
-        this.exceptionStack = BasicException.toStackedException(
-            cause,
-            this
+    	super.initCause(
+        	BasicException.toStackedException(
+	            cause,
+	            this
+	        )
         );
     }
 
-    /**
+	/**
      * Constructor
      * 
      * @param cause
-     * @param message
-     */
-    public RadiusException(
-        Exception cause,
-        String message
-    ){
-        this(cause, null, message);
-    }
-
-    /**
-     * Constructor
-     * 
-     * @param cause
-     * @param parameters
      * @param description
+     * @param parameters
      */
     public RadiusException(
         Exception cause,
-        BasicException.Parameter[] parameters,
-        String description
+        String description,
+        Parameter... parameters
     ){
-        this.exceptionStack = new BasicException(
-            cause,
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.GENERIC,
-            parameters,
-            description,
-			this
+    	super.initCause(
+        	new BasicException(
+	            cause,
+	            BasicException.Code.DEFAULT_DOMAIN,
+	            BasicException.Code.GENERIC,
+	            parameters,
+	            description,
+				this
+			)
         );
     }
 
     /**
 	 * Implements <code>Serializable</code>.
 	 */
-	private static final long serialVersionUID = 3256718472724755511L;
+	private static final long serialVersionUID = 5014284731661341777L;
 
 	
     //------------------------------------------------------------------------
@@ -134,23 +124,15 @@ public class RadiusException
     //------------------------------------------------------------------------
 
     /**
-     * @deprecated use getExceptionStack()
-     * 
-     * @return the StackedException wrapped by this object.
-     */
-    public final BasicException getStackedException (
-    ) {
-        return getExceptionStack();
-    }
-
-    /**
      * Return a StackedException, this exception object's cause.
      * 
      * @return the StackedException wrapped by this object.
+     * 
+     * @deprecated use getCause()
      */
     public BasicException getExceptionStack (
     ) {
-        return this.exceptionStack;
+        return getCause();
     }
 
     /**
@@ -160,9 +142,10 @@ public class RadiusException
      */
     public String getExceptionDomain()
     {
-        return this.exceptionStack == null ? 
+    	BasicException exceptionStack = getCause();
+        return exceptionStack == null ? 
             BasicException.Code.DEFAULT_DOMAIN : 
-            this.exceptionStack.getExceptionDomain();
+            exceptionStack.getExceptionDomain();
     }
 
     /**
@@ -172,9 +155,10 @@ public class RadiusException
      */
     public int getExceptionCode()
     {
-        return this.exceptionStack == null ? 
+    	BasicException exceptionStack = getCause();
+        return exceptionStack == null ? 
             BasicException.Code.GENERIC : 
-            this.exceptionStack.getExceptionCode();
+            exceptionStack.getExceptionCode();
     }
 
 	/**
@@ -191,16 +175,12 @@ public class RadiusException
 	public BasicException getCause(
 	    String exceptionDomain
 	){
-        return this.exceptionStack == null ? 
+    	BasicException exceptionStack = getCause();
+        return exceptionStack == null ? 
             null : 
-            this.exceptionStack.getCause(exceptionDomain);
+            exceptionStack.getCause(exceptionDomain);
 	}
 
-    /**
-     * The exception stack
-     */
-    private BasicException exceptionStack;
-         
 
     //------------------------------------------------------------------------
     // Extends Throwable
@@ -211,10 +191,11 @@ public class RadiusException
      */
     public String getMessage(
     ){
-        return this.exceptionStack == null ?
+    	BasicException exceptionStack = getCause();
+        return exceptionStack == null ?
             super.getMessage() : 
-            this.exceptionStack.getMessage() + ": " +
-            this.exceptionStack.getDescription();
+            exceptionStack.getMessage() + ": " +
+            exceptionStack.getDescription();
     }
     
     /**
@@ -225,56 +206,33 @@ public class RadiusException
      * @return a multiline representation of this exception.
      */     
     public String toString(){
+    	BasicException exceptionStack = getCause();
         return 
-            this.exceptionStack == null ?
+            exceptionStack == null ?
             super.toString() : 
-            super.toString() + '\n' + this.exceptionStack;
-    }
-
-    /**
-     * Initializes the cause of this throwable to the specified value. 
-     * (The cause is the throwable that caused this throwable to get thrown.) 
-     * 
-     * @param   cause
-     *          the cause (which is saved for later retrieval by the
-     *          getCause() method). (A null value is permitted, and indicates 
-     *          that the cause is nonexistent or unknown.) 
-     *
-     * @return      a reference to this RuntimeServiceException instance. 
-     *
-     * @exception   IllegalArgumentException
-     *              if cause is this throwable.
-     *              (A throwable cannot be its own cause.) 
-     * @exception   IllegalStateException
-     *              if the cause is already set.
-     */     
-    public Throwable initCause(
-        Throwable cause
-    ){
-        throw new IllegalStateException(
-            "A BadParameterException's cause can't be changed"
-        );
+            super.toString() + '\n' + exceptionStack;
     }
 
     /**
      * Returns the cause of an exception. The cause actually is the wrapped
      * exception.
      *
-     * @return Throwable  The exception cause.
+     * @return BasicException  The exception cause.
      */
-    public Throwable getCause(
+    public final BasicException getCause(
     ){
-        return this.exceptionStack;
+        return (BasicException) super.getCause();
     }
 
     /* (non-Javadoc)
      * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
      */
     public void printStackTrace(PrintStream s) {
-        if(this.exceptionStack == null){
+    	BasicException exceptionStack = getCause();
+        if(exceptionStack == null){
             super.printStackTrace(s);
         } else {
-            this.exceptionStack.printStack(this, s, true);
+            exceptionStack.printStack(this, s, true);
         }
     }
 
@@ -282,10 +240,11 @@ public class RadiusException
      * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
      */
     public void printStackTrace(PrintWriter s) {
-        if(this.exceptionStack == null){
+    	BasicException exceptionStack = getCause();
+        if(exceptionStack == null){
             super.printStackTrace(s);
         } else {
-            this.exceptionStack.printStack(this, s, true);
+            exceptionStack.printStack(this, s, true);
         }
     }
 

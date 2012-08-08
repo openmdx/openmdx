@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestXRIProtocolHandler.java,v 1.11 2005/08/16 22:33:04 hburger Exp $
+ * Name:        $Id: TestXRIProtocolHandler.java,v 1.13 2008/09/19 23:37:30 hburger Exp $
  * Description: Test XRI Protocol Handler
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/08/16 22:33:04 $
+ * Date:        $Date: 2008/09/19 23:37:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.JarURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -63,7 +64,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.openmdx.kernel.url.protocol.XriProtocols;
+import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 
 /**
  * Test XRI Protocol Handler
@@ -96,6 +97,36 @@ public class TestXRIProtocolHandler
         return new TestSuite(TestXRIProtocolHandler.class);
     }
 
+    /**
+     * The base URL for relative URL tests
+     */
+    protected URL base;
+    
+    /* (non-Javadoc)
+     * @see junit.framework.TestCase#setUp()
+     */
+    @Override
+    protected void setUp(
+    ) throws Exception {
+        this.base = newURL("xri://+resource/!b!b/c*c/(xri://@d*d/e)?q"); 
+    }
+
+    protected static URL newURL(
+        String uri
+    ) throws MalformedURLException{
+        URL url = new URL(uri);
+        assertEquals("Absolute XRI", uri, url.toExternalForm());
+        return url;
+    }
+
+    protected URL assertResolution(
+        String uri,
+        String resolvedURI
+    ) throws MalformedURLException{
+        URL url = new URL(this.base, uri);
+        assertEquals("Resolved XRI", resolvedURI, url.toExternalForm());
+        return url;
+    }
     
     //------------------------------------------------------------------------
     // test +resource authority
@@ -110,9 +141,7 @@ public class TestXRIProtocolHandler
      */
     public void testResourceAuthority1(
     ) throws Exception {
-        URL aResource = new URL(
-            "xri:+resource/org/openmdx/test/kernel/url/resource.txt"
-        );
+        URL aResource = newURL("xri:+resource/org/openmdx/test/kernel/url/resource.txt");
         verifyContent(
             aResource.toString(),
             aResource.openStream(),
@@ -129,9 +158,7 @@ public class TestXRIProtocolHandler
      */
     public void testResourceAuthority2(
     ) throws Exception {
-        URL aResource = new URL(
-            "xri://+resource/org/openmdx/test/kernel/url/resource.txt"
-        );
+        URL aResource = newURL("xri://+resource/org/openmdx/test/kernel/url/resource.txt");
         verifyContent(
             aResource.toString(),
             aResource.openStream(),
@@ -194,27 +221,27 @@ public class TestXRIProtocolHandler
 	    URL zip = getClass().getClassLoader().getResource(ZIP_RESOURCE);
 	    assertNotNull(ZIP_RESOURCE, zip);
 	    assertEquals("File Resource", "file", zip.getProtocol());
-	    URL zipIndex = new URL(XriProtocols.ZIP_PREFIX + zip + XriProtocols.ZIP_SEPARATOR + "index.txt");
+	    URL zipIndex = newURL(XRI_2Protocols.ZIP_PREFIX + zip + XRI_2Protocols.ZIP_SEPARATOR + "index.txt");
 	    assertNotNull("ZAR Index", zipIndex);
 	    assertEquals("ZAR header", "ZIP index", getHeader(zipIndex));
 	    assertTrue("zipIndex connection instance of JarURLConnection ", zipIndex.openConnection() instanceof JarURLConnection);
-	    URL ear = new URL(XriProtocols.ZIP_PREFIX + zip + XriProtocols.ZIP_SEPARATOR + "an.ear");
+	    URL ear = newURL(XRI_2Protocols.ZIP_PREFIX + zip + XRI_2Protocols.ZIP_SEPARATOR + "an.ear");
 	    assertNotNull("EAR", ear);
-	    URL earIndex = new URL(XriProtocols.ZIP_PREFIX + ear + XriProtocols.ZIP_SEPARATOR + "index.txt");
+	    URL earIndex = newURL(XRI_2Protocols.ZIP_PREFIX + ear + XRI_2Protocols.ZIP_SEPARATOR + "index.txt");
 	    assertNotNull("EAR Index", earIndex);
 	    assertEquals("EAR header", "EAR index", getHeader(earIndex));
 	    System.out.println(earIndex.toString());
 	    assertTrue("earIndex connection instance of JarURLConnection ", earIndex.openConnection() instanceof JarURLConnection);
-	    URL war = new URL(XriProtocols.ZIP_PREFIX + ear + XriProtocols.ZIP_SEPARATOR + "a.war");
+	    URL war = newURL(XRI_2Protocols.ZIP_PREFIX + ear + XRI_2Protocols.ZIP_SEPARATOR + "a.war");
 	    assertNotNull("WAR", war);
-	    URL warIndex = new URL(XriProtocols.ZIP_PREFIX + war + XriProtocols.ZIP_SEPARATOR + "index.txt");
+	    URL warIndex = newURL(XRI_2Protocols.ZIP_PREFIX + war + XRI_2Protocols.ZIP_SEPARATOR + "index.txt");
 	    assertNotNull("WAR Index", warIndex);
 	    assertEquals("WAR header", "WAR index", getHeader(warIndex));
 	    System.out.println(warIndex.toString());
 	    assertTrue("warIndex connection instance of JarURLConnection ", earIndex.openConnection() instanceof JarURLConnection);
-	    URL jar = new URL(XriProtocols.ZIP_PREFIX + war + XriProtocols.ZIP_SEPARATOR + "WEB-INF/lib/a.jar");
+	    URL jar = newURL(XRI_2Protocols.ZIP_PREFIX + war + XRI_2Protocols.ZIP_SEPARATOR + "WEB-INF/lib/a.jar");
 	    assertNotNull("JAR", jar);
-	    URL jarIndex = new URL(XriProtocols.ZIP_PREFIX + jar + XriProtocols.ZIP_SEPARATOR + "index.txt");
+	    URL jarIndex = newURL(XRI_2Protocols.ZIP_PREFIX + jar + XRI_2Protocols.ZIP_SEPARATOR + "index.txt");
 	    assertNotNull("JAR Index", jarIndex);
 	    assertEquals("JAR header", "JAR index", getHeader(jarIndex));
 	    System.out.println(jarIndex.toString());
@@ -233,28 +260,28 @@ public class TestXRIProtocolHandler
         URL zip = getClass().getClassLoader().getResource(ZIP_RESOURCE);
         assertNotNull(ZIP_RESOURCE, zip);
         assertEquals("File Resource", "file", zip.getProtocol());
-        URL zipIndex = new URL("xri:+zip.(" + zip + XriProtocols.ZIP_SEPARATOR + "index.txt");
+        URL zipIndex = newURL("xri:+zip.(" + zip + XRI_2Protocols.ZIP_SEPARATOR + "index.txt");
         assertNotNull("ZAR Index", zipIndex);
         assertEquals("ZAR header", "ZIP index", getHeader(zipIndex));
         System.out.println(zipIndex.toString());
         assertTrue("zipIndex connection instance of JarURLConnection ", zipIndex.openConnection() instanceof JarURLConnection);
-        URL ear = new URL("xri:+zip.(" + zip + XriProtocols.ZIP_SEPARATOR + "an.ear");
+        URL ear = newURL("xri:+zip.(" + zip + XRI_2Protocols.ZIP_SEPARATOR + "an.ear");
         assertNotNull("EAR", ear);
-        URL earIndex = new URL("xri:+zip.(" + ear + XriProtocols.ZIP_SEPARATOR + "index.txt");
+        URL earIndex = newURL("xri:+zip.(" + ear + XRI_2Protocols.ZIP_SEPARATOR + "index.txt");
         assertNotNull("EAR Index", earIndex);
         assertEquals("EAR header", "EAR index", getHeader(earIndex));
         System.out.println(earIndex.toString());
         assertTrue("earIndex connection instance of JarURLConnection ", earIndex.openConnection() instanceof JarURLConnection);
-        URL war = new URL("xri:+zip.(" + ear + XriProtocols.ZIP_SEPARATOR + "a.war");
+        URL war = newURL("xri:+zip.(" + ear + XRI_2Protocols.ZIP_SEPARATOR + "a.war");
         assertNotNull("WAR", war);
-        URL warIndex = new URL("xri:+zip.(" + war + XriProtocols.ZIP_SEPARATOR + "index.txt");
+        URL warIndex = newURL("xri:+zip.(" + war + XRI_2Protocols.ZIP_SEPARATOR + "index.txt");
         assertNotNull("WAR Index", warIndex);
         assertEquals("WAR header", "WAR index", getHeader(warIndex));
         System.out.println(warIndex.toString());
         assertTrue("warIndex connection instance of JarURLConnection ", earIndex.openConnection() instanceof JarURLConnection);
-        URL jar = new URL("xri:+zip.(" + war + XriProtocols.ZIP_SEPARATOR + "WEB-INF/lib/a.jar");
+        URL jar = newURL("xri:+zip.(" + war + XRI_2Protocols.ZIP_SEPARATOR + "WEB-INF/lib/a.jar");
         assertNotNull("JAR", jar);
-        URL jarIndex = new URL("xri:+zip.("+ jar + XriProtocols.ZIP_SEPARATOR + "index.txt");
+        URL jarIndex = newURL("xri:+zip.("+ jar + XRI_2Protocols.ZIP_SEPARATOR + "index.txt");
         assertNotNull("JAR Index", jarIndex);
         assertEquals("JAR header", "JAR index", getHeader(jarIndex));
         System.out.println(jarIndex.toString());
@@ -270,7 +297,7 @@ public class TestXRIProtocolHandler
 	 */
 	public void testZipClassLoader(
 	) throws Exception {
-	    URL jar = new URL(XriProtocols.ZIP_PREFIX + XriProtocols.ZIP_PREFIX + XriProtocols.ZIP_PREFIX + getClass().getClassLoader().getResource(ZIP_RESOURCE) + XriProtocols.ZIP_SEPARATOR + "an.ear" + XriProtocols.ZIP_SEPARATOR + "a.war" + XriProtocols.ZIP_SEPARATOR + "WEB-INF/lib/a.jar");
+	    URL jar = newURL(XRI_2Protocols.ZIP_PREFIX + XRI_2Protocols.ZIP_PREFIX + XRI_2Protocols.ZIP_PREFIX + getClass().getClassLoader().getResource(ZIP_RESOURCE) + XRI_2Protocols.ZIP_SEPARATOR + "an.ear" + XRI_2Protocols.ZIP_SEPARATOR + "a.war" + XRI_2Protocols.ZIP_SEPARATOR + "WEB-INF/lib/a.jar");
 	    System.out.println(jar.toString());
 	    ClassLoader classLoader = new URLClassLoader(new URL[]{jar}); 
 	    Object object = Class.forName(
@@ -283,6 +310,66 @@ public class TestXRIProtocolHandler
 	    assertEquals("Load Class From EAR", "Test Class Loading Succeeded", object.toString());
 	}
 
+	public void testNormalExamples(
+	) throws MalformedURLException{
+	    assertResolution("!g!g", "xri://+resource/!b!b/c*c/!g!g");
+	    assertResolution("./!g!g", "xri://+resource/!b!b/c*c/!g!g");
+	    assertResolution("!g!g/", "xri://+resource/!b!b/c*c/!g!g/");
+	    assertResolution("/!g!g", "xri://+resource/!g!g");
+	    //@!g!g = Not a legal relative XRI reference
+	    assertResolution("?y", "xri://+resource/!b!b/c*c/(xri://@d*d/e)?y");
+	    assertResolution("!g!g?y", "xri://+resource/!b!b/c*c/!g!g?y");
+	    assertResolution("#s", "xri://+resource/!b!b/c*c/(xri://@d*d/e)?q#s");
+	    assertResolution("!g!g#s", "xri://+resource/!b!b/c*c/!g!g#s");
+	    assertResolution("!g!g?y#s", "xri://+resource/!b!b/c*c/!g!g?y#s");
+	    assertResolution(";x", "xri://+resource/!b!b/c*c/;x");
+	    assertResolution("!g!g;x", "xri://+resource/!b!b/c*c/!g!g;x");
+	    assertResolution("!g!g;x?y#s", "xri://+resource/!b!b/c*c/!g!g;x?y#s");
+	    assertResolution("", "xri://+resource/!b!b/c*c/(xri://@d*d/e)?q");
+	    assertResolution(".", "xri://+resource/!b!b/c*c/");
+	    assertResolution("./", "xri://+resource/!b!b/c*c/");
+	    assertResolution("..", "xri://+resource/!b!b/");
+	    assertResolution("../", "xri://+resource/!b!b/");
+	    assertResolution("../!g!g", "xri://+resource/!b!b/!g!g");
+	    assertResolution("../..", "xri://+resource/");
+	    assertResolution("../../", "xri://+resource/");
+	    assertResolution("../../!g!g", "xri://+resource/!g!g");
+	}	    
+	
+    public void testAbnormalExamples(
+    ) throws MalformedURLException {
+        //
+        // As in IRIs and URIs, the ".." syntax cannot be used to change the authority component of an XRI.
+        //
+        assertResolution("../../../!g!g", "xri://+resource/!g!g");
+        assertResolution("../../../../!g!g", "xri://+resource/!g!g");
+        //
+        // As in IRIs and URIs, "." and ".." have a special meaning only when they appear as complete path segments.
+        //
+        assertResolution("/./!g!g", "xri://+resource/!g!g");
+        assertResolution("/../!g!g", "xri://+resource/!g!g");
+        assertResolution("!g!g.", "xri://+resource/!b!b/c*c/!g!g.");
+        assertResolution(".!g!g", "xri://+resource/!b!b/c*c/.!g!g");
+        assertResolution("!g!g..", "xri://+resource/!b!b/c*c/!g!g..");
+        assertResolution("..!g!g", "xri://+resource/!b!b/c*c/..!g!g");
+        //
+        //  XRI parsers, like IRI and URI parsers, must be prepared for superfluous or nonsensical uses of "." and "..".
+        //
+        assertResolution("./../!g!g", "xri://+resource/!b!b/!g!g");
+        assertResolution("./!g!g/.", "xri://+resource/!b!b/c*c/!g!g/");
+        assertResolution("!g!g/./h", "xri://+resource/!b!b/c*c/!g!g/h");
+        assertResolution("!g!g/../h", "xri://+resource/!b!b/c*c/h");
+        assertResolution("!g!g;x=1/./y", "xri://+resource/!b!b/c*c/!g!g;x=1/y");
+        assertResolution("!g!g;x=1/../y", "xri://+resource/!b!b/c*c/y");
+        //
+        // XRI parsers, like IRI and URI parsers, must take care to separate the reference's query and/or fragment components from the path component before merging it with the base path and removing dot-segments.
+        //
+        assertResolution("!g!g?y/./x", "xri://+resource/!b!b/c*c/!g!g?y/./x");
+        assertResolution("!g!g?y/../x", "xri://+resource/!b!b/c*c/!g!g?y/../x");
+        assertResolution("!g!g#s/./x", "xri://+resource/!b!b/c*c/!g!g#s/./x");
+        assertResolution("!g!g#s/../x", "xri://+resource/!b!b/c*c/!g!g#s/../x");
+	}
+	
 	/**
 	 * Get the first line
 	 * 

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XRI_1Marshaller.java,v 1.3 2008/03/21 18:48:02 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: XRI_1Marshaller.java,v 1.6 2008/09/10 08:55:28 hburger Exp $
  * Description: Path/XRI Marshaller 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:48:02 $
+ * Date:        $Date: 2008/09/10 08:55:28 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -56,6 +55,8 @@ import java.util.ArrayList;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.url.protocol.XRI_1Protocols;
+import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.url.protocol.XriAuthorities;
 
 /**
@@ -63,7 +64,7 @@ import org.openmdx.kernel.url.protocol.XriAuthorities;
  */
 @SuppressWarnings("unchecked")
 public final class XRI_1Marshaller
-    implements Marshaller
+implements Marshaller
 {
 
     private XRI_1Marshaller(
@@ -96,37 +97,35 @@ public final class XRI_1Marshaller
      *            The array of CharSequences to be marshalled.
      * 
      * @return      A CharSequence containing the marshalled objects.
-   */
+     */
     public Object marshal (
         Object charSequences
     ) throws ServiceException {
         if (charSequences == null) return null;
         Object[]source = (Object[])charSequences;
-        StringBuilder xri = new StringBuilder(OPENMDX_XRI_PREFIX);
+        StringBuilder xri = new StringBuilder(XRI_1Protocols.OPENMDX_PREFIX);
         char delimiter = ':';
         for(
-          int i=0;
-          i<source.length;
+                int i=0;
+                i<source.length;
         ){
             encode(
-                    source[i],
-                    xri.append(delimiter),
-                    i == 0,
-                    ++i == source.length
-                );
+                source[i],
+                xri.append(delimiter),
+                i == 0,
+                ++i == source.length
+            );
             delimiter = '/';
         }
         try {
-                return xri.toString();
+            return xri.toString();
         } catch (IllegalArgumentException e) {
             throw new ServiceException(
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("path", charSequences)
-                },
-                "Path marshalling failed"
+                "Path marshalling failed",
+                new BasicException.Parameter("path", charSequences)
             );
         }
     }
@@ -139,8 +138,8 @@ public final class XRI_1Marshaller
     ){
         String source = charSequence.toString();
         if (
-            source.startsWith(XRI_XREF_PREFIX) &&
-            source.endsWith(XREF_END)
+                source.startsWith(XRI_XREF_PREFIX) &&
+                source.endsWith(XREF_END)
         ) {
             encode(
                 source.substring(XRI_XREF_PREFIX.length()),
@@ -149,8 +148,8 @@ public final class XRI_1Marshaller
                 terminal
             );
         } else if(
-            source.indexOf('/') < 0 ||
-            (source.startsWith(XREF_BEGIN) && source.endsWith(XREF_END))
+                source.indexOf('/') < 0 ||
+                (source.startsWith(XREF_BEGIN) && source.endsWith(XREF_END))
         ) {
             encode(
                 source,
@@ -160,11 +159,11 @@ public final class XRI_1Marshaller
             );
         } else {
             xri.append(
-               '('
+                '('
             ).append(
-               new Path(source).toXri().substring(4)
+                new Path(source).toXri().substring(XRI_1Protocols.SCHEME_PREFIX.length())
             ).append(
-               ')'
+                ')'
             );
         }
     }
@@ -203,55 +202,55 @@ public final class XRI_1Marshaller
             );
             xri.append("**");
         } else {
-                int crossReference = 0;
-                boolean unbalanced = false;
-                for(
+            int crossReference = 0;
+            boolean unbalanced = false;
+            for(
                     int i = 0, l = source.length();
                     i < l;
                     i++
-                ){
-                    char character = source.charAt(i);
-                    switch (character) {
-                        case '(':
-                            ++crossReference;
+            ){
+                char character = source.charAt(i);
+                switch (character) {
+                    case '(':
+                        ++crossReference;
                         break;
-                        case ')':
-                            unbalanced |= --crossReference < 0;
+                    case ')':
+                        unbalanced |= --crossReference < 0;
                         break;
-                    }
                 }
-                unbalanced |= crossReference > 0;
-                for(
+            }
+            unbalanced |= crossReference > 0;
+            for(
                     int i = 0, l = source.length();
                     i < l;
                     i++
-                ){
-                    char character = source.charAt(i);
-                    switch (character) {
-                        case ':':
-                            xri.append(authority ? '.' : ':');
-                            break;
-                        case '%':
-                            xri.append("%25");
-                                break;
-                        case '{': case '}':case '<': case '>': case '[' : case ']':
-                        case ' ': case '"': case '\\': case '^': case '`': case '|':
+            ){
+                char character = source.charAt(i);
+                switch (character) {
+                    case ':':
+                        xri.append(authority ? '.' : ':');
+                        break;
+                    case '%':
+                        xri.append("%25");
+                        break;
+                    case '{': case '}':case '<': case '>': case '[' : case ']':
+                    case ' ': case '"': case '\\': case '^': case '`': case '|':
                         appendTo(xri, character, true);
                         break;
-                        case '(': case ')':
-                        case '#': case '?': case '/':
-                        case ';': case '@': case '&': case '=': case '+': case '$': case ',': // remaining reserved
-                        case '-': case '_': case '.': case '!': case '~': case '*': case '\'': // remaining mark
+                    case '(': case ')':
+                    case '#': case '?': case '/':
+                    case ';': case '@': case '&': case '=': case '+': case '$': case ',': // remaining reserved
+                    case '-': case '_': case '.': case '!': case '~': case '*': case '\'': // remaining mark
+                        xri.append(character);
+                        break;
+                    default:
+                        if(Character.isLetterOrDigit(character)){
                             xri.append(character);
-                            break;
-                        default:
-                            if(Character.isLetterOrDigit(character)){
-                                xri.append(character);
-                            } else {
-                                appendTo(xri, character, "%25");
-                                }
-                    }
+                        } else {
+                            appendTo(xri, character, "%25");
+                        }
                 }
+            }
         }
     }
 
@@ -264,57 +263,45 @@ public final class XRI_1Marshaller
      * @return    A String array containing the unmarshaled sequence
      *                  of objects.
      * @exception ServiceException ILLEGAL_ARGUMENT
-    */
+     */
     public Object unmarshal (
         Object charSequence
     ) throws ServiceException {
         if (charSequence == null) return null;
         String source = charSequence.toString();
-        if(!source.toLowerCase().startsWith(OPENMDX_XRI_PREFIX)) throw new ServiceException (
+        if(!source.toLowerCase().startsWith(XRI_1Protocols.OPENMDX_PREFIX)) throw new ServiceException (
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("xri",source)
-            },
-            "'xri' scheme and '" + XriAuthorities.OPENMDX_AUTHORITY + "' authority expected"
+            "'xri' scheme and '" + XriAuthorities.OPENMDX_AUTHORITY + "' authority expected",
+            new BasicException.Parameter("xri",source)
         );
         ArrayList target = new ArrayList();
-        if(source.length() == OPENMDX_XRI_PREFIX.length()) {
+        if(source.length() == XRI_1Protocols.OPENMDX_PREFIX.length()) {
             // Valid Empty Path
-        } else if (":**".equals(source.substring(OPENMDX_XRI_PREFIX.length()))) {
+        } else if (":**".equals(source.substring(XRI_1Protocols.OPENMDX_PREFIX.length()))) {
             target.add(":*");
         } else try {
             StringBuilder segment = new StringBuilder();
             int crossReference = 0;
             boolean authority = true;
             for(
-              int i = OPENMDX_XRI_PREFIX.length() + 1, limit = source.length();
-              i < limit;
-              i++
+                    int i = XRI_1Protocols.OPENMDX_PREFIX.length() + 1, limit = source.length();
+                    i < limit;
+                    i++
             ){
                 char character = source.charAt(i);
                 switch(character){
                     case '(':
                         ++crossReference;
-                        if(
-                            i + 1 < limit &&
-                            !source.substring(i).startsWith(XREF_BEGIN + XriAuthorities.OPENMDX_AUTHORITY) &&
-                            XRI_GCS.indexOf(source.charAt(i + 1)) > 0
-                        ) {
-                            segment.append(XRI_XREF_PREFIX);
-                        } else {
-                            segment.append(character);
-                        }
+                        segment.append(character);
                         break;
                     case ')':
                         if(--crossReference < 0) throw new ServiceException (
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.BAD_PARAMETER,
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("xri",source),
-                                new BasicException.Parameter("position",i)
-                            },
-                            "More closing than opening parenthesis"
+                            "More closing than opening parenthesis",
+                            new BasicException.Parameter("xri",source),
+                            new BasicException.Parameter("position",i)
                         );
                         segment.append(character);
                         break;
@@ -345,11 +332,9 @@ public final class XRI_1Marshaller
             if(crossReference > 0) throw new ServiceException (
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("xri",source),
-                    new BasicException.Parameter("position", source.length())
-                },
-                "More opening than closing parenthesis"
+                "More opening than closing parenthesis",
+                new BasicException.Parameter("xri",source),
+                new BasicException.Parameter("position", source.length())
             );
             target.add(
                 decode(
@@ -363,10 +348,8 @@ public final class XRI_1Marshaller
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("xri", charSequence)
-                },
-                "XRI to Path conversion failed"
+                "XRI to Path conversion failed",
+                new BasicException.Parameter("xri", charSequence)
             );
         }
         return target.toArray(new String[target.size()]);
@@ -390,9 +373,9 @@ public final class XRI_1Marshaller
             StringBuilder target = new StringBuilder();
             boolean xrefAuthority = true;
             for(
-                int i = OPENMDX_XREF_PREFIX.length(), limit = source.length() - XREF_END.length();
-                i < limit;
-                i++
+                    int i = OPENMDX_XREF_PREFIX.length(), limit = source.length() - XREF_END.length();
+                    i < limit;
+                    i++
             ){
                 char character = source.charAt(i);
                 switch (character) {
@@ -427,20 +410,20 @@ public final class XRI_1Marshaller
         } else if (source.indexOf('%') < 0){
             return source;
         } else {
-                StringBuilder target = new StringBuilder(source.length());
-                for(
+            StringBuilder target = new StringBuilder(source.length());
+            for(
                     int i = 0, limit = source.length();
                     i < limit;
                     i++
-                ){
-                    char character = source.charAt(i);
-                    target.append(
-                        character == '%' && i + 2 < limit ?
-                            (char) Integer.parseInt(source.substring(++i, ++i+1), 0x10) :
+            ){
+                char character = source.charAt(i);
+                target.append(
+                    character == '%' && i + 2 < limit ?
+                        (char) Integer.parseInt(source.substring(++i, ++i+1), 0x10) :
                             character
-                    );
-                }
-                return target.toString();
+                );
+            }
+            return target.toString();
         }
     }
 
@@ -488,12 +471,8 @@ public final class XRI_1Marshaller
 
     private final static String XREF_END = ")";
 
-    private final static String XRI_XREF_PREFIX = XREF_BEGIN + "xri://";
-
-    private final static String OPENMDX_XRI_PREFIX = "xri:" + XriAuthorities.OPENMDX_AUTHORITY;
+    private final static String XRI_XREF_PREFIX = XREF_BEGIN + XRI_2Protocols.SCHEME_PREFIX;
 
     private final static String OPENMDX_XREF_PREFIX = XREF_BEGIN + XriAuthorities.OPENMDX_AUTHORITY + ":";
-
-    private final static String XRI_GCS = "!=@+$";
 
 }

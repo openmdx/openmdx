@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiUtility.java,v 1.4 2008/04/04 11:47:26 hburger Exp $
+ * Name:        $Id: UiUtility.java,v 1.5 2008/08/12 16:38:08 wfro Exp $
  * Description: UiUtility
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2008/04/04 11:47:26 $
+ * Date:        $Date: 2008/08/12 16:38:08 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,9 +53,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.utility;
 import java.beans.ExceptionListener;
@@ -993,7 +990,7 @@ public class UiUtility
   //-------------------------------------------------------------------------    
 
   // The version gets set by CVS
-  private static final String VERSION = "$Revision: 1.4 $";
+  private static final String VERSION = "$Revision: 1.5 $";
   
   // The application name
   private static final String APP_NAME = "UiMapper";

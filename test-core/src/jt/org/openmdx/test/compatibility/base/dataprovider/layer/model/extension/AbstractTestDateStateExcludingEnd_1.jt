@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractTestDateStateExcludingEnd_1.jt,v 1.5 2007/12/17 18:33:38 hburger Exp $
+ * Name:        $Id: AbstractTestDateStateExcludingEnd_1.jt,v 1.6 2008/09/10 18:10:57 hburger Exp $
  * Description: TestState_1 junit class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/17 18:33:38 $
+ * Date:        $Date: 2008/09/10 18:10:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -1299,8 +1299,6 @@ if(requestedAt != null)
                 !SystemAttributes.CREATED_AT.equals(attributeName) &&
                 !SystemAttributes.CREATED_AT.equals(attributeName) &&
                 !SystemAttributes.MODIFIED_AT.equals(attributeName) &&
-                !"roleType".equals(attributeName) &&
-                !attributeName.startsWith(SystemAttributes.VIEW_PREFIX) &&
                 !attributeName.startsWith(SystemAttributes.CONTEXT_PREFIX) &&
                 !attributeName.startsWith(SystemAttributes.OBJECT_IDENTITY)
 //SOID                 && !attributeName.equals(State_1_Attributes.UNDERLYING_STATE)
@@ -4379,7 +4377,7 @@ System.out.println("createdAt: " + nonStated.getCreatedAt());
       result = (DataproviderObject_1_0) executeOperation("get IdOne 2", getOperation, work, null, "01.01.2001", null);
       checkResult(result, "State 1", new String[] { "firstVal" }, "01.01.2001", null);
 
-      ex = new ServiceException(StackedException.DEFAULT_DOMAIN, StackedException.NOT_FOUND, null, null);
+      ex = new ServiceException(StackedException.DEFAULT_DOMAIN, StackedException.NOT_FOUND, null);
       result = (DataproviderObject_1_0) executeOperation("get IdOne 3", getOperation, work, null, "31.12.2000", ex);
 
 
@@ -5013,7 +5011,7 @@ System.out.println("createdAt: " + nonStated.getCreatedAt());
       // now try creating with same id which should work now!
       work = prepareObject("StateA", null, new String[]{"stateA", "IdEx1" + findTestID()}, "O1 State 2", new String[] { "secondVal" }, null );
       setValidity(work, "02.02.2001", "11.11.2001");
-      ex = null; // new ServiceException(StackedException.DOMAIN, StackedException.DUPLICATE, null, null);            
+      ex = null; // new ServiceException(StackedException.DOMAIN, StackedException.DUPLICATE, null);            
       result = (DataproviderObject_1_0) executeOperation("create IdEx1 again", createOperation, work, null, "01.03.2001", ex);
 
       // now remove the first object

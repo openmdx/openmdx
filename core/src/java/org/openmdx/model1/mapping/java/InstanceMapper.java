@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: InstanceMapper.java,v 1.121 2008/07/09 12:35:56 wfro Exp $
+ * Name:        $Id: InstanceMapper.java,v 1.123 2008/11/18 18:18:50 hburger Exp $
  * Description: Instance Mapper 
- * Revision:    $Revision: 1.121 $
+ * Revision:    $Revision: 1.123 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/09 12:35:56 $
+ * Date:        $Date: 2008/11/18 18:18:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -79,7 +79,7 @@ import org.openmdx.model1.mapping.StructuralFeatureDef;
  * InstanceMapper
  */
 public class InstanceMapper
-    extends AbstractClassMapper {
+extends AbstractClassMapper {
 
     //-----------------------------------------------------------------------
     @SuppressWarnings("unchecked")
@@ -100,7 +100,7 @@ public class InstanceMapper
             metaData
         );
         this.localFeatures = new HashMap<String,ModelElement_1_0>(
-            (Map<String,ModelElement_1_0>)classDef.values("allFeature").get(0)
+                (Map<String,ModelElement_1_0>)classDef.values("allFeature").get(0)
         );
         if(isBaseClass()) {            
             this.superFeatures = Collections.emptyMap();
@@ -152,8 +152,8 @@ public class InstanceMapper
         ReferenceDef referenceDef
     ) throws ServiceException {
         if(
-            referenceDef.isChangeable() && 
-            (referenceDef.isComposition() || referenceDef.isShared())
+                referenceDef.isChangeable() && 
+                (referenceDef.isComposition() || referenceDef.isShared())
         ){
             Format format = getFormat();
             if(format == Format.JMI1) { // || format == Format.JDO2
@@ -186,24 +186,47 @@ public class InstanceMapper
                 this.pw.println("    boolean " + referenceDef.getQualifierName() + PERSISTENCY_SUFFIX + ",");            
                 this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName()) + " " + referenceDef.getQualifierName() + ",");
                 this.pw.println("    " + referenceType + " " + valueHolder);        
-//            if(format == Format.JDO2) {
-//                String beanSetterName = Identifier.OPERATION_NAME.toIdentifier(
-//                    getFeatureName(referenceDef.getExposedEndName()),
-//                    null, // removablePrefix
-//                    "addTo", // prependablePrefix
-//                    null, // removableSuffix
-//                    null // appendableSuffix
-//                );
-//                this.pw.println("  ){");
-//                this.pw.println("    ((" + accessorType + ")" + valueHolder + ")." + beanSetterName + "(");
-//                this.pw.println("       this,");
-//                this.pw.println("       " + referenceDef.getQualifierName() + PERSISTENCY_SUFFIX + ",");
-//                this.pw.println("       " + referenceDef.getQualifierName());
-//                this.pw.println("    );");
-//                this.pw.println("  }");
-//            } else {
-                this.pw.println("  );");
-//            }
+//              if(format == Format.JDO2) {
+//                  String beanSetterName = Identifier.OPERATION_NAME.toIdentifier(
+//                      getFeatureName(referenceDef.getExposedEndName()),
+//                      null, // removablePrefix
+//                      "addTo", // prependablePrefix
+//                      null, // removableSuffix
+//                      null // appendableSuffix
+//                  );
+//                  this.pw.println("  ){");
+//                  this.pw.println("    ((" + accessorType + ")" + valueHolder + ")." + beanSetterName + "(");
+//                  this.pw.println("       this,");
+//                  this.pw.println("       " + referenceDef.getQualifierName() + PERSISTENCY_SUFFIX + ",");
+//                  this.pw.println("       " + referenceDef.getQualifierName());
+//                  this.pw.println("    );");
+//                  this.pw.println("  }");
+//              } else {
+                    this.pw.println("  );");
+                    this.pw.println();
+                    this.pw.println("  /**");
+                    this.pw.println(MapperUtils.wrapText(
+                        "   * ",
+                        "Adds the specified element to the set of the values for the reference " +
+                        "<code>" + referenceDef.getName() + "</code> using a reassignable qualifier."
+                    ));
+                    this.pw.println("   * <p>");
+                    this.pw.println(MapperUtils.wrapText(
+                        "   * ",
+                        "<em>Note: This is an extension to the JMI 1 standard.</em>"
+                    ));
+                    if (referenceDef.getAnnotation() != null) {
+                        this.pw.println("   * <p>");
+                        this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
+                    }
+                    this.pw.println("   * @param " + referenceDef.getQualifierName() + " The qualifier attribute value that qualifies the reference to get the element to be appended.");
+                    this.pw.println("   * @param " + valueHolder + " The element to be appended.");
+                    this.pw.println("   */");
+                    this.pw.println("  public void " + this.getMethodName("add" + referenceDef.getBeanGenericName()) + " (");
+                    this.pw.println("    " + this.getType(referenceDef.getQualifiedQualifierTypeName()) + " " + referenceDef.getQualifierName() + ",");
+                    this.pw.println("    " + referenceType + " " + valueHolder);        
+                    this.pw.println("  );");
+//              }
                 this.pw.println();
             }
         }
@@ -216,8 +239,8 @@ public class InstanceMapper
             this.trace("Instance/ReferenceRemoveOptional");
             this.pw.println("  /**");
             this.pw
-                .println("   * Removes the value for the optional reference <code>"
-                    + referenceDef.getName() + "</code>.");
+            .println("   * Removes the value for the optional reference <code>"
+                + referenceDef.getName() + "</code>.");
             this.pw.println("   * <p>");
             this.pw.println(MapperUtils.wrapText(
                 "   * ",
@@ -265,8 +288,8 @@ public class InstanceMapper
                 .wrapText(
                     "   * ",
                     "@param "
-                        + referenceDef.getQualifierName()
-                        + " The qualifier attribute value that qualifies the reference to get the element to be removed."));
+                    + referenceDef.getQualifierName()
+                    + " The qualifier attribute value that qualifies the reference to get the element to be removed."));
             this.pw.println("   */");
             this.pw.println("  public void " + this.getMethodName("remove" + referenceDef.getBeanGenericName()) + " (");
             this.pw.println("    "
@@ -316,7 +339,7 @@ public class InstanceMapper
             this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
         }
         this.pw
-            .println("   * @param " + referenceName + " The non-null new value for this reference.");
+        .println("   * @param " + referenceName + " The non-null new value for this reference.");
         this.pw.println("   */");
         this.pw.println("  public void " + this.getMethodName(beanSetterName) + "(");
         this.pw.println("    " + argumentType + ' ' + referenceName);
@@ -362,55 +385,55 @@ public class InstanceMapper
     ) throws ServiceException {
         String referenceName = referencedEnd ?
             getFeatureName(referenceDef) :
-            getFeatureName(referenceDef.getExposedEndName());
-        String qualifiedTypeName = referencedEnd ?
-            referenceDef.getQualifiedTypeName() :
-            referenceDef.getExposedEndQualifiedTypeName();
-        ClassDef classDef = getClassDef(qualifiedTypeName);
-        ClassType classType = getClassType(classDef);
-        if(getFormat() == Format.JDO2) {
-            mapDeclareReference("  ", qualifiedTypeName, referenceName);
-        }
-        if(referencedEnd) {
-            this.trace("Instance/ReferenceGetx_1NoQualifier");
-            this.pw.println("  /**");
-            this.pw.println("   * Retrieves the value for the reference <code>"
-                + referenceName + "</code>.");
-            if (referenceDef.getAnnotation() != null) {
-                this.pw.println("   * <p>");
-                this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
-            }
-            this.pw.print("   * @return The ");
-            this.pw.print(optional ? "&ndash; possibly <code>null</code> &ndash;" : "non-<code>null</code>");
-            this.pw.println(" value for this reference.");
-            this.pw.println("   */");
-            String accessorType = classType.getType(classDef, this.getFormat(), TypeMode.RESULT); 
-            this.pw.println(
-                "  public " + accessorType + ' '
-                + this.getMethodName(referenceDef.getBeanGetterName()) + '('
-            );
-            if(getFormat() == Format.JDO2) {
-                this.pw.println("  ){");
-                switch (classType) {
-                    case MIXIN:
-                        this.pw.println("    return this." + referenceName + INSTANCE_SUFFIX + " == null ? this." + referenceName + INSTANCE_SUFFIX + " = openmdxjdoGetObject(");
-                        this.pw.println("       " + accessorType + ".class,");
-                        this.pw.println("       this." + referenceName);
-                        this.pw.println("    ) : this." + referenceName + INSTANCE_SUFFIX + ';');
-                        break;
-                    case EXTENSION:
-                        this.pw.println("    return (" + accessorType + ")this." + referenceName + ";");
-                        break;
-                    case OBJECT:
-                        this.pw.println("    return this." + referenceName + ";");
-                        break;
+                getFeatureName(referenceDef.getExposedEndName());
+            String qualifiedTypeName = referencedEnd ?
+                referenceDef.getQualifiedTypeName() :
+                    referenceDef.getExposedEndQualifiedTypeName();
+                ClassDef classDef = getClassDef(qualifiedTypeName);
+                ClassType classType = getClassType(classDef);
+                if(getFormat() == Format.JDO2) {
+                    mapDeclareReference("  ", qualifiedTypeName, referenceName);
                 }
-                this.pw.println("  }");
-            } else {
-                this.pw.println("  );");
-            }
-            this.pw.println();
-        }
+                if(referencedEnd) {
+                    this.trace("Instance/ReferenceGetx_1NoQualifier");
+                    this.pw.println("  /**");
+                    this.pw.println("   * Retrieves the value for the reference <code>"
+                        + referenceName + "</code>.");
+                    if (referenceDef.getAnnotation() != null) {
+                        this.pw.println("   * <p>");
+                        this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
+                    }
+                    this.pw.print("   * @return The ");
+                    this.pw.print(optional ? "&ndash; possibly <code>null</code> &ndash;" : "non-<code>null</code>");
+                    this.pw.println(" value for this reference.");
+                    this.pw.println("   */");
+                    String accessorType = classType.getType(classDef, this.getFormat(), TypeMode.RESULT); 
+                    this.pw.println(
+                        "  public " + accessorType + ' '
+                        + this.getMethodName(referenceDef.getBeanGetterName()) + '('
+                    );
+                    if(getFormat() == Format.JDO2) {
+                        this.pw.println("  ){");
+                        switch (classType) {
+                            case MIXIN:
+                                this.pw.println("    return this." + referenceName + INSTANCE_SUFFIX + " == null ? this." + referenceName + INSTANCE_SUFFIX + " = openmdxjdoGetObject(");
+                                this.pw.println("       " + accessorType + ".class,");
+                                this.pw.println("       this." + referenceName);
+                                this.pw.println("    ) : this." + referenceName + INSTANCE_SUFFIX + ';');
+                                break;
+                            case EXTENSION:
+                                this.pw.println("    return (" + accessorType + ")this." + referenceName + ";");
+                                break;
+                            case OBJECT:
+                                this.pw.println("    return this." + referenceName + ";");
+                                break;
+                        }
+                        this.pw.println("  }");
+                    } else {
+                        this.pw.println("  );");
+                    }
+                    this.pw.println();
+                }
     }
 
     // -----------------------------------------------------------------------
@@ -449,12 +472,12 @@ public class InstanceMapper
         this.pw.println();
 //      this.pw.println("  /**");
 //      MapperUtils
-//          .wrapText(
-//              "   * ",
-//              "Retrieves the value for the reference <code>" + referenceDef.getName() + "</code> for the specified qualifier attribute value and query.");
+//      .wrapText(
+//      "   * ",
+//      "Retrieves the value for the reference <code>" + referenceDef.getName() + "</code> for the specified qualifier attribute value and query.");
 //      if (referenceDef.getAnnotation() != null) {
-//          this.pw.println("   * <p>");
-//          this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
+//      this.pw.println("   * <p>");
+//      this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
 //      }
 //      this.pw.println("   * @param query query which is applied to the set of referenced objects.");
 //      this.pw.println("   * @return The filtered collection of referenced objects.");
@@ -463,11 +486,11 @@ public class InstanceMapper
 //      this.pw.println("    " + this.getType(referenceDef, null, Boolean.FALSE) + " " + referenceDef.getQualifierName() + ",");
 //      this.pw.println("    " + this.cciType(referenceDef.getQualifiedTypeName()) + "Query query");
 //      if(getFormat() == Format.JDO2) {
-//          this.pw.println("  ){");
-//          this.pw.println("    throw new java.lang.UnsupportedOperationException(\"Not yet implemented\");"); 
-//          this.pw.println("  }");
+//      this.pw.println("  ){");
+//      this.pw.println("    throw new java.lang.UnsupportedOperationException(\"Not yet implemented\");"); 
+//      this.pw.println("  }");
 //      } else {
-//          this.pw.println("  );");
+//      this.pw.println("  );");
 //      }
 //      this.pw.println();
     }
@@ -483,120 +506,120 @@ public class InstanceMapper
         ) + '.' + Identifier.CLASS_PROXY_NAME.toIdentifier(
             referenceDef.getName()
         ) : "java.util.Set";
-        Boolean mixIn = null;
-        ClassMetaData classMetaData;
+            Boolean mixIn = null;
+            ClassMetaData classMetaData;
 
-        if(getFormat() == Format.JDO2) {
-            classMetaData = (ClassMetaData) getClassDef(referenceDef.getQualifiedTypeName()).getClassMetaData();
-            if(classMetaData.isRequiresExtent()) {
-                this.trace("Instance/ReferenceDeclaration");
-                this.pw.println();
-                this.pw.println("  /**");
-                this.pw.println("   * Reference <code>" + referenceName + "</code>.");
-                this.pw.println("   */");
-                if(mixIn = isMixIn(referenceDef)) {
-                    this.pw.print("  private java.util.Set<java.lang.String> " + referenceName + ';');
+            if(getFormat() == Format.JDO2) {
+                classMetaData = (ClassMetaData) getClassDef(referenceDef.getQualifiedTypeName()).getClassMetaData();
+                if(classMetaData.isRequiresExtent()) {
+                    this.trace("Instance/ReferenceDeclaration");
                     this.pw.println();
                     this.pw.println("  /**");
-                    this.pw.println("   * Reference <code>" + referenceName + "</code> instances.");
+                    this.pw.println("   * Reference <code>" + referenceName + "</code>.");
                     this.pw.println("   */");
-                    this.pw.print("  private transient ");
-                    this.pw.println(getType(referenceDef, "java.util.Set", null, TypeMode.MEMBER) + ' ' + referenceName + INSTANCE_SUFFIX + ';');
-                    this.pw.println();
-                } else {
-                    if (referenceDef.isComposition()) {
-                        this.pw.println("@SuppressWarnings(\"unused\")");
+                    if(mixIn = isMixIn(referenceDef)) {
+                        this.pw.print("  private java.util.Set<java.lang.String> " + referenceName + ';');
+                        this.pw.println();
+                        this.pw.println("  /**");
+                        this.pw.println("   * Reference <code>" + referenceName + "</code> instances.");
+                        this.pw.println("   */");
                         this.pw.print("  private transient ");
-                        this.pw.println(getType(referenceDef, collectionType, null, TypeMode.MEMBER) + ' ' + referenceName + ';');
+                        this.pw.println(getType(referenceDef, "java.util.Set", null, TypeMode.MEMBER) + ' ' + referenceName + INSTANCE_SUFFIX + ';');
+                        this.pw.println();
                     } else {
-                        this.pw.print("  private ");
-                        this.pw.println(getType(referenceDef, "java.util.Set", null, TypeMode.MEMBER) + ' ' + referenceName + ';');
+                        if (referenceDef.isComposition()) {
+                            this.pw.println("@SuppressWarnings(\"unused\")");
+                            this.pw.print("  private transient ");
+                            this.pw.println(getType(referenceDef, collectionType, null, TypeMode.MEMBER) + ' ' + referenceName + ';');
+                        } else {
+                            this.pw.print("  private ");
+                            this.pw.println(getType(referenceDef, "java.util.Set", null, TypeMode.MEMBER) + ' ' + referenceName + ';');
+                        }
+                        this.pw.println();
                     }
-                    this.pw.println();
                 }
+            } else {
+                classMetaData = null;
             }
-        } else {
-            classMetaData = null;
-        }
-        this.trace("Instance/ReferenceGet0_nWithQuery");
-        if(getFormat() == Format.JMI1) {
-            String qualifiedQueryName = getQueryType(
-                referenceDef.getQualifiedTypeName(), 
-                getNamespace(
-                    MapperUtils.getNameComponents(
-                        MapperUtils.getPackageName(
-                            referenceDef.getQualifiedTypeName()
+            this.trace("Instance/ReferenceGet0_nWithQuery");
+            if(getFormat() == Format.JMI1) {
+                String qualifiedQueryName = getQueryType(
+                    referenceDef.getQualifiedTypeName(), 
+                    getNamespace(
+                        MapperUtils.getNameComponents(
+                            MapperUtils.getPackageName(
+                                referenceDef.getQualifiedTypeName()
+                            )
                         )
                     )
-                )
-            );
-            this.pw.println("  /**");
-            this.pw.println(MapperUtils.wrapText(
-                "   * ",
-                "Retrieves the value for the reference <code>" + referenceDef.getName() + "</code> for the specified query."));
-            this.pw.println(MapperUtils.wrapText(
-                "   * ",
-                "<em>Note: This is an extension to the JMI 1 standard.<br>" +
-                "In order to remain standard compliant you should substitute this method with <code>java.jdo.Query</code></em>"
-            ));
-            if (referenceDef.getAnnotation() != null) {
-                this.pw.println("   * <p>");
-                this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
-            }
-            this.pw.println("   * @param query predicate which is applied to the set of referenced objects.");
-            this.pw.println("   * @return The objects for which the predicate evaluates to <code>true</code>.");
-            this.pw.println("   */");
-            this.pw.println("  public <T extends " + this.getType(referenceDef.getQualifiedTypeName()) + "> java.util.List<T> " + this.getMethodName(referenceDef.getBeanGetterName()) + "(");
-            this.pw.println("    " + qualifiedQueryName + " query");
-            this.pw.println("  );");
-            this.pw.println();
-        } else {
-            this.pw.println("  /**");
-            this.pw.println(MapperUtils.wrapText(
-                "   * ",
-                "Retrieves a set containing all the elements for the reference <code>" + referenceDef.getName() + "</code>."));
-            if (referenceDef.getAnnotation() != null) {
-                this.pw.println("   * <p>");
-                this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
-            }
-            this.pw.println("   * @return A set containing all the elements for this reference.");
-            this.pw.println("   */");
-            String cast = this.printAnnotationAndReturnCast(referenceDef, collectionType);
-            String methodName = this.getMethodName(referenceDef.getBeanGetterName());
-            this.pw.println("  public " + getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER) + ' ' + methodName + "(");
-            if(getFormat() == Format.JDO2) {
-                this.pw.println("  ){");
-                if(referenceDef.isComposition()) {
-                    if(classMetaData.isRequiresExtent()) {
-                        this.pw.println("    return " + cast + " null; // TODO");
-                    } else {
-                        this.pw.println("    throw new javax.jdo.JDOUserException(");
-                        this.pw.println("      \"Extent not managed for '" + referenceDef.getQualifiedTypeName().replace(":","::") + "'\"");
-                        this.pw.println("    );");
-                    }
-                } else if(mixIn) {
-                    this.pw.println("    if(this." + referenceName + INSTANCE_SUFFIX + " == null){");
-                    this.pw.println("      this." + referenceName + INSTANCE_SUFFIX + " = openmdxjdoGetObjectSet(");
-                    this.pw.println("        " + getType(referenceDef, null, null, TypeMode.MEMBER) + ".class,");
-                    this.pw.println("        this." + referenceName);
-                    this.pw.println("      );");
-                    this.pw.println("    }");
-                    this.pw.println("    return (" + collectionType + "<T>)this." + referenceName + INSTANCE_SUFFIX + ';');
-                } else if (referenceDef.isShared()) {
-                    this.pw.println("    Object tmp = this." + referenceName + ';');
-                    this.pw.println("    return " + cast + "tmp;");
-                } else {
-                    this.pw.println(
-                        "    " + collectionType + "<?> " + referenceName + " = this." + referenceName + ';'
-                    );
-                    this.pw.println("    return " + cast + referenceName + ';');
-                }                
-                this.pw.println("  }");
-            } else {
+                );
+                this.pw.println("  /**");
+                this.pw.println(MapperUtils.wrapText(
+                    "   * ",
+                    "Retrieves the value for the reference <code>" + referenceDef.getName() + "</code> for the specified query."));
+                this.pw.println(MapperUtils.wrapText(
+                    "   * ",
+                    "<em>Note: This is an extension to the JMI 1 standard.<br>" +
+                    "In order to remain standard compliant you should substitute this method with <code>java.jdo.Query</code></em>"
+                ));
+                if (referenceDef.getAnnotation() != null) {
+                    this.pw.println("   * <p>");
+                    this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
+                }
+                this.pw.println("   * @param query predicate which is applied to the set of referenced objects.");
+                this.pw.println("   * @return The objects for which the predicate evaluates to <code>true</code>.");
+                this.pw.println("   */");
+                this.pw.println("  public <T extends " + this.getType(referenceDef.getQualifiedTypeName()) + "> java.util.List<T> " + this.getMethodName(referenceDef.getBeanGetterName()) + "(");
+                this.pw.println("    " + qualifiedQueryName + " query");
                 this.pw.println("  );");
+                this.pw.println();
+            } else {
+                this.pw.println("  /**");
+                this.pw.println(MapperUtils.wrapText(
+                    "   * ",
+                    "Retrieves a set containing all the elements for the reference <code>" + referenceDef.getName() + "</code>."));
+                if (referenceDef.getAnnotation() != null) {
+                    this.pw.println("   * <p>");
+                    this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
+                }
+                this.pw.println("   * @return A set containing all the elements for this reference.");
+                this.pw.println("   */");
+                String cast = this.printAnnotationAndReturnCast(referenceDef, collectionType);
+                String methodName = this.getMethodName(referenceDef.getBeanGetterName());
+                this.pw.println("  public " + getType(referenceDef, collectionType, Boolean.TRUE, TypeMode.MEMBER) + ' ' + methodName + "(");
+                if(getFormat() == Format.JDO2) {
+                    this.pw.println("  ){");
+                    if(referenceDef.isComposition()) {
+                        if(classMetaData.isRequiresExtent()) {
+                            this.pw.println("    return " + cast + " null; // TODO");
+                        } else {
+                            this.pw.println("    throw new javax.jdo.JDOUserException(");
+                            this.pw.println("      \"Extent not managed for '" + referenceDef.getQualifiedTypeName().replace(":","::") + "'\"");
+                            this.pw.println("    );");
+                        }
+                    } else if(mixIn) {
+                        this.pw.println("    if(this." + referenceName + INSTANCE_SUFFIX + " == null){");
+                        this.pw.println("      this." + referenceName + INSTANCE_SUFFIX + " = openmdxjdoGetObjectSet(");
+                        this.pw.println("        " + getType(referenceDef, null, null, TypeMode.MEMBER) + ".class,");
+                        this.pw.println("        this." + referenceName);
+                        this.pw.println("      );");
+                        this.pw.println("    }");
+                        this.pw.println("    return (" + collectionType + "<T>)this." + referenceName + INSTANCE_SUFFIX + ';');
+                    } else if (referenceDef.isShared()) {
+                        this.pw.println("    Object tmp = this." + referenceName + ';');
+                        this.pw.println("    return " + cast + "tmp;");
+                    } else {
+                        this.pw.println(
+                            "    " + collectionType + "<?> " + referenceName + " = this." + referenceName + ';'
+                        );
+                        this.pw.println("    return " + cast + referenceName + ';');
+                    }                
+                    this.pw.println("  }");
+                } else {
+                    this.pw.println("  );");
+                }
             }
-        }
-        this.pw.println();
+            this.pw.println();
     }
 
     // -----------------------------------------------------------------------
@@ -611,7 +634,7 @@ public class InstanceMapper
         if(qualifierType == null || qualifierType == PrimitiveTypes.INTEGER) {
             String collectionType = qualifierType == null ? 
                 "java.util.Set" :
-                "java.util.List";
+                    "java.util.List";
             int attributeField = -1;
             String methodName = this.getMethodName(referenceDef.getBeanGetterName());
             if(getFormat() == Format.JDO2 && !delegate) {
@@ -672,12 +695,12 @@ public class InstanceMapper
             this.pw.println("  /**");
             this.pw.println(MapperUtils.wrapText(
                 "   * ",
-                "Retrieves the <code>Collection</code> of objects referenced by <code>" + referenceDef.getName() + "</code>."));
+                "Retrieves the <code>Mao</code> of objects referenced by <code>" + referenceDef.getName() + "</code>."));
             if (referenceDef.getAnnotation() != null) {
                 this.pw.println("   * <p>");
                 this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
             }
-            this.pw.println("   * @return The <code>Collection</code> of referenced objects.");
+            this.pw.println("   * @return The <code>Map</code> of referenced objects.");
             this.pw.println("   */");
             String cast = printAnnotationAndReturnMapCast(referenceDef, java.lang.String.class);
             this.pw.println("  public " + this.getMapType(referenceDef, java.lang.String.class, Boolean.TRUE) + " " + methodName + "(");
@@ -698,7 +721,7 @@ public class InstanceMapper
             this.pw.println();
         }
     }
-    
+
     // -----------------------------------------------------------------------
     public void mapReferenceGet0_1WithQualifier(
         ReferenceDef referenceDef
@@ -711,9 +734,9 @@ public class InstanceMapper
             String methodName = this.getMethodName(referenceDef.getBeanGetterName());
             this.trace("Instance/IntfReferenceGet0_1WithQualifier");
             for(
-                int i = 0;
-                i < 2;
-                i++
+                    int i = 0;
+                    i < 2;
+                    i++
             ){
                 this.pw.println("  /**");
                 this.pw.println(MapperUtils.wrapText(
@@ -816,7 +839,7 @@ public class InstanceMapper
         for(StructuralFeatureDef param: operationDef.getParameters()) {
             if(!"org:openmdx:base:Void".equals(param.getQualifiedTypeName())) {
                 String separator = ii == 0
-                    ? "      "
+                ? "      "
                     : "    , ";
                 this.mapParameter(
                     separator,
@@ -1012,14 +1035,14 @@ public class InstanceMapper
             } break;
         }
     }
-    
+
     // -----------------------------------------------------------------------
     private void mapClass(){
         this.pw.println("  /**");
         for(
-            int i = 0;
-            i < this.qualifiedClassName.size();
-            i++
+                int i = 0;
+                i < this.qualifiedClassName.size();
+                i++
         ){
             this.pw.print(i == 0 ? "   * Define the model class <code>" : "::");
             this.pw.print(this.qualifiedClassName.get(i));
@@ -1028,9 +1051,9 @@ public class InstanceMapper
         this.pw.println("   */");
         this.pw.println("  final static public " + CLASS_TYPE + " " + CLASS_MEMBER + " = openmdxjdoClassName(");
         for(
-            int i = 0;
-            i < this.qualifiedClassName.size();
-            i++
+                int i = 0;
+                i < this.qualifiedClassName.size();
+                i++
         ){
             this.pw.print(i == 0 ? "    \"" : ", \"");
             this.pw.print(this.qualifiedClassName.get(i));
@@ -1059,11 +1082,11 @@ public class InstanceMapper
             this.pw.println();
         }
     }
-    
+
     // -----------------------------------------------------------------------
     private void mapContainment(
     ) throws ServiceException{
-        
+
         this.trace("Instance/Containment");
         //
         // Names
@@ -1121,7 +1144,7 @@ public class InstanceMapper
                 this.pw.println("    " + referenceMemberType + ' ' + referenceValueName + ',');
                 this.pw.println("    boolean " + qualifierPersistencyArgumentName + ',');
                 this.pw.println("    " + qualifierArgumentType + ' ' + qualifierValueName);
-    	        this.pw.println("  ){");
+                this.pw.println("  ){");
                 if(mixin) {
                     this.pw.println("    this." + referenceValueName + INSTANCE_SUFFIX + " = " + referenceValueName + ';');
                     this.pw.println("    this." + referenceValueName + " = openmdxjdoGetObjectId(" + referenceValueName + ");");
@@ -1388,50 +1411,50 @@ public class InstanceMapper
     ){
         return PrimitiveTypes.STRING.equals(qualifiedTypeName) ?
             "identityParser.nextString()" :
-          PrimitiveTypes.LONG.equals(qualifiedTypeName) ?
-            "identityParser.nextNumber().longValue()" :
-          PrimitiveTypes.INTEGER.equals(qualifiedTypeName) ?
-            "identityParser.nextNumber().intValue()" :
-          PrimitiveTypes.SHORT.equals(qualifiedTypeName) ?
-            "identityParser.nextNumber().shortValue()" :
-          PrimitiveTypes.DECIMAL.equals(qualifiedTypeName) ? 
-            "(java.math.BigDecimal)identityParser.nextNumber()" :
-          PrimitiveTypes.UUID.equals(qualifiedTypeName) ?
-            "identityParser.nextUUID()" :
-          PrimitiveTypes.OID.equals(qualifiedTypeName) ?
-            "identityParser.nextOID()" :
-          PrimitiveTypes.ANYURI.equals(qualifiedTypeName) ?
-            "identityParser.nextIRI()" :
-            "identityParser.nextString()";
+                PrimitiveTypes.LONG.equals(qualifiedTypeName) ?
+                    "identityParser.nextNumber().longValue()" :
+                        PrimitiveTypes.INTEGER.equals(qualifiedTypeName) ?
+                            "identityParser.nextNumber().intValue()" :
+                                PrimitiveTypes.SHORT.equals(qualifiedTypeName) ?
+                                    "identityParser.nextNumber().shortValue()" :
+                                        PrimitiveTypes.DECIMAL.equals(qualifiedTypeName) ? 
+                                            "(java.math.BigDecimal)identityParser.nextNumber()" :
+                                                PrimitiveTypes.UUID.equals(qualifiedTypeName) ?
+                                                    "identityParser.nextUUID()" :
+                                                        PrimitiveTypes.OID.equals(qualifiedTypeName) ?
+                                                            "identityParser.nextOID()" :
+                                                                PrimitiveTypes.ANYURI.equals(qualifiedTypeName) ?
+                                                                    "identityParser.nextIRI()" :
+                                                                        "identityParser.nextString()";
     }
 
     // -----------------------------------------------------------------------
     protected String getQualifierMutator(
         String qualifiedTypeName
     ){
-	    return PrimitiveTypes.STRING.equals(qualifiedTypeName) ?
+        return PrimitiveTypes.STRING.equals(qualifiedTypeName) ?
             "appendString" :
-          PrimitiveTypes.LONG.equals(qualifiedTypeName) ?
-            "appendNumber" :
-          PrimitiveTypes.INTEGER.equals(qualifiedTypeName) ?
-            "appendNumber" :
-          PrimitiveTypes.SHORT.equals(qualifiedTypeName) ?
-             "appendNumber" :
-          PrimitiveTypes.DECIMAL.equals(qualifiedTypeName) ? 
-             "appendNumber" :
-          PrimitiveTypes.UUID.equals(qualifiedTypeName) ?
-             "appendUUID" :
-          PrimitiveTypes.OID.equals(qualifiedTypeName) ?
-             "appendOID" :
-          PrimitiveTypes.ANYURI.equals(qualifiedTypeName) ?
-            "appendIRI" :
-            "appendString";
+                PrimitiveTypes.LONG.equals(qualifiedTypeName) ?
+                    "appendNumber" :
+                        PrimitiveTypes.INTEGER.equals(qualifiedTypeName) ?
+                            "appendNumber" :
+                                PrimitiveTypes.SHORT.equals(qualifiedTypeName) ?
+                                    "appendNumber" :
+                                        PrimitiveTypes.DECIMAL.equals(qualifiedTypeName) ? 
+                                            "appendNumber" :
+                                                PrimitiveTypes.UUID.equals(qualifiedTypeName) ?
+                                                    "appendUUID" :
+                                                        PrimitiveTypes.OID.equals(qualifiedTypeName) ?
+                                                            "appendOID" :
+                                                                PrimitiveTypes.ANYURI.equals(qualifiedTypeName) ?
+                                                                    "appendIRI" :
+                                                                        "appendString";
     }
-    
+
     // -----------------------------------------------------------------------
     boolean isAuthority(){
         return 
-            "org:openmdx:base:Authority".equals(this.classDef.getQualifiedName());
+        "org:openmdx:base:Authority".equals(this.classDef.getQualifiedName());
     }
 
     // -----------------------------------------------------------------------
@@ -1442,15 +1465,15 @@ public class InstanceMapper
     // -----------------------------------------------------------------------
     boolean isProvider(){
         return 
-            "org:openmdx:base:Provider".equals(this.classDef.getQualifiedName());
+        "org:openmdx:base:Provider".equals(this.classDef.getQualifiedName());
     }
-    
+
     // -----------------------------------------------------------------------
     boolean hasSlices(){
         return this.extendsClassDef != null || !this.sliced.isEmpty();
-//        return !this.sliced.isEmpty();
+//      return !this.sliced.isEmpty();
     }
-    
+
     // -----------------------------------------------------------------------
     public void mapSingleValuedFields(
     ) throws ServiceException{
@@ -1481,13 +1504,13 @@ public class InstanceMapper
             this.pw.println();
         }
     }
-    
+
     public void mapMultivaluedFields(
     ) throws ServiceException{
         if(isSliceHolder() || hasSlices()) {
             String superClassName = isSliceHolder() ? 
                 QUALIFIED_SLICE_CLASS_NAME :
-                this.getType(this.extendsClassDef.getQualifiedName()) + '.' + SLICE_CLASS_NAME;
+                    this.getType(this.extendsClassDef.getQualifiedName()) + '.' + SLICE_CLASS_NAME;
             this.pw.println();
             this.pw.println("  /**");
             this.pw.println(MapperUtils.wrapText(
@@ -1501,8 +1524,8 @@ public class InstanceMapper
             for(Map.Entry<String,String> e : this.sliced.entrySet()){
                 String qualifiedName = e.getValue();
                 if(
-                    this.model.isPrimitiveType(qualifiedName) ||
-                    this.model.isStructureType(qualifiedName)
+                        this.model.isPrimitiveType(qualifiedName) ||
+                        this.model.isStructureType(qualifiedName)
                 ){
                     String typeName = getValueType(qualifiedName, true);
                     this.mapDeclareValue("    ", typeName, e.getKey());
@@ -1629,9 +1652,9 @@ public class InstanceMapper
                     this.pw.println("        case " + j++ + ":");
                     this.pw.print("          this." + e.getKey() + " = ");
                     if(
-                        this.model.isPrimitiveType(e.getValue()) ||
-                        this.model.isStructureType(e.getValue())                        
-                     ) {
+                            this.model.isPrimitiveType(e.getValue()) ||
+                            this.model.isStructureType(e.getValue())                        
+                    ) {
                         String source = '(' + getObjectType(e.getValue()) + ")value";
                         if(this.mapValueType(e.getValue())) {
                             this.pw.println(getModelType(e.getValue()) + ".toJDO(" + source + ");");
@@ -1698,9 +1721,9 @@ public class InstanceMapper
             this.pw.print("public class " + this.className); 
             this.pw.println(
                 "  extends " + (
-                   isBaseClass() 
-                       ? QUALIFIED_ABSTRACT_OBJECT_CLASS_NAME 
-                       : this.getType(this.extendsClassDef.getQualifiedName())
+                        isBaseClass() 
+                        ? QUALIFIED_ABSTRACT_OBJECT_CLASS_NAME 
+                            : this.getType(this.extendsClassDef.getQualifiedName())
                 )
             );
             this.pw.print(" implements ");
@@ -1708,13 +1731,13 @@ public class InstanceMapper
                 interfaceType(
                     this.classDef, 
                     hasSPI() ? Visibility.SPI : Visibility.CCI,
-                    false
+                        false
                 )
             );
 //          if(isBaseClass()) {
-//              this.pw.print(",\n    javax.jdo.listener.StoreCallback");
-//              this.pw.print(",\n    javax.jdo.listener.LoadCallback");
-//              this.pw.print(",\n    javax.jdo.listener.ClearCallback");
+//          this.pw.print(",\n    javax.jdo.listener.StoreCallback");
+//          this.pw.print(",\n    javax.jdo.listener.LoadCallback");
+//          this.pw.print(",\n    javax.jdo.listener.ClearCallback");
 //          }
             this.pw.println();
         } 
@@ -1738,9 +1761,9 @@ public class InstanceMapper
                 }
             } else {
                 for (
-                    Iterator<ClassDef> i = this.classDef.getSupertypes().iterator(); 
-                    i.hasNext(); 
-                    separator = ",\n    "
+                        Iterator<ClassDef> i = this.classDef.getSupertypes().iterator(); 
+                        i.hasNext(); 
+                        separator = ",\n    "
                 ){
                     this.pw.print(separator + this.getType(i.next().getQualifiedName()));
                 }
@@ -1771,8 +1794,8 @@ public class InstanceMapper
                 this.pw.println("   * Slice holder");
                 this.pw.println("   */");
                 this.pw.println(
-                	"   private java.util.TreeMap<java.lang.Integer," + SLICE_CLASS_NAME + "> " + 
-                	SLICES_MEMBER + " = new java.util.TreeMap<java.lang.Integer," + SLICE_CLASS_NAME + ">();"
+                    "   private java.util.TreeMap<java.lang.Integer," + SLICE_CLASS_NAME + "> " + 
+                    SLICES_MEMBER + " = new java.util.TreeMap<java.lang.Integer," + SLICE_CLASS_NAME + ">();"
                 );
                 this.pw.println();
                 this.pw.println("   @SuppressWarnings(\"unchecked\")");
@@ -1951,7 +1974,7 @@ public class InstanceMapper
         this.trace("Instance/AttributeGetStream.vm");
         this.pw.println();
         String newValue = getFeatureName(attributeDef);
-        
+
         if (PrimitiveTypes.BINARY.equals(attributeDef.getQualifiedTypeName())) {
             if(getFormat() != Format.JMI1) {
                 this.pw.println("  /**");
@@ -1968,7 +1991,7 @@ public class InstanceMapper
                     this.pw.println("  }");
                     mapDeclareValue("  ", "byte[]", newValue);
                 } else {
-                   this.pw.println("  );");
+                    this.pw.println("  );");
                 }
                 this.pw.println();
             }
@@ -1988,7 +2011,7 @@ public class InstanceMapper
                     this.pw.println("  }");
                     mapDeclareValue("  ", "char[]", newValue);
                 } else {
-                   this.pw.println("  );");
+                    this.pw.println("  );");
                 }
             }
         }
@@ -2042,7 +2065,7 @@ public class InstanceMapper
     }
 
     // -----------------------------------------------------------------------
-    
+
     public void mapAttributeGetSet(
         AttributeDef attributeDef
     ) throws ServiceException {
@@ -2068,9 +2091,9 @@ public class InstanceMapper
             } else {
                 String fieldType = getObjectType(attributeDef.getQualifiedTypeName());
                 for(
-                    int i = 0;
-                    i < embedded.intValue();
-                    i++
+                        int i = 0;
+                        i < embedded.intValue();
+                        i++
                 ){
                     this.pw.println("  private " + fieldType + " " + attributeName + SUFFIX_SEPARATOR + i + ";");
                 }
@@ -2117,9 +2140,9 @@ public class InstanceMapper
                 this.pw.println("    protected final " + elementType + " openmdxjdoGet(int index){");
                 this.pw.println("      switch(index){");
                 for(
-                    int i = 0;
-                    i < embedded;
-                    i++
+                        int i = 0;
+                        i < embedded;
+                        i++
                 ){
                     this.pw.println("         case " + i + ": return " + attributeName + SUFFIX_SEPARATOR + i + ";");
                 }
@@ -2130,9 +2153,9 @@ public class InstanceMapper
                 this.pw.println("    protected final void openmdxjdoSet(int index, " + elementType + " element){");
                 this.pw.println("      switch(index){");
                 for(
-                    int i = 0;
-                    i < embedded;
-                    i++
+                        int i = 0;
+                        i < embedded;
+                        i++
                 ){
                     this.pw.println("         case " + i + ": " + attributeName + SUFFIX_SEPARATOR + i + " = element;");
                 }
@@ -2326,7 +2349,7 @@ public class InstanceMapper
             this.pw.println();
         }
     }
-    
+
     //-----------------------------------------------------------------------
 
     public void mapAttributeSetSparseArray(
@@ -2366,12 +2389,12 @@ public class InstanceMapper
             this.pw.println();
         }
     }
-    
+
     //-----------------------------------------------------------------------
 
     public void mapReferenceSetWithQualifier(
         ReferenceDef referenceDef)
-        throws ServiceException {
+    throws ServiceException {
         this.trace("Instance/ReferenceSetWithQualifier");
         this.pw.println("  /**");
         this.pw.println(MapperUtils.wrapText(
@@ -2402,7 +2425,7 @@ public class InstanceMapper
         this.pw.println("  );");
         this.pw.println();
     }
-    
+
     // -----------------------------------------------------------------------
     public void mapAttributeGetList(
         AttributeDef attributeDef
@@ -2428,9 +2451,9 @@ public class InstanceMapper
             } else {
                 String fieldType = getObjectType(attributeDef.getQualifiedTypeName());
                 for(
-                    int i = 0;
-                    i < embedded.intValue();
-                    i++
+                        int i = 0;
+                        i < embedded.intValue();
+                        i++
                 ){
                     this.pw.println("  private " + fieldType + " " + attributeName + SUFFIX_SEPARATOR + i + ";");
                 }
@@ -2478,9 +2501,9 @@ public class InstanceMapper
                 this.pw.println("    protected final " + elementType + " openmdxjdoGet(int index){");
                 this.pw.println("      switch(index){");
                 for(
-                    int i = 0;
-                    i < embedded;
-                    i++
+                        int i = 0;
+                        i < embedded;
+                        i++
                 ){
                     this.pw.println("         case " + i + ": return " + attributeName + SUFFIX_SEPARATOR + i + ";");
                 }
@@ -2491,9 +2514,9 @@ public class InstanceMapper
                 this.pw.println("    protected final void openmdxjdoSet(int index, " + elementType + " element){");
                 this.pw.println("      switch(index){");
                 for(
-                    int i = 0;
-                    i < embedded;
-                    i++
+                        int i = 0;
+                        i < embedded;
+                        i++
                 ){
                     this.pw.println("         case " + i + ": " + attributeName + SUFFIX_SEPARATOR + i + " = element;");
                 }
@@ -2520,7 +2543,7 @@ public class InstanceMapper
         boolean objectIdentity = SystemAttributes.OBJECT_IDENTITY.equals(attributeName);
         String featureType = objectIdentity ?
             QUALIFIED_IDENTITY_FEATURE_CLASS_NAME :
-            this.getFeatureType(attributeDef, Boolean.TRUE);        
+                this.getFeatureType(attributeDef, Boolean.TRUE);        
         String modelType = attributeDef.getQualifiedTypeName();
         if(getFormat() == Format.JDO2) {
             mapDeclareValue("  ", this.getValueType(modelType, false), attributeName);
@@ -2599,10 +2622,10 @@ public class InstanceMapper
         boolean optional
     ) throws ServiceException{
         return
-           PrimitiveTypes.DATE.equals(qualifiedTypeName) ? "java.sql.Date" :
-           PrimitiveTypes.DATETIME.equals(qualifiedTypeName) ? "java.sql.Timestamp" :
-           optional ? getObjectType(qualifiedTypeName) :
-           getType(qualifiedTypeName);
+        PrimitiveTypes.DATE.equals(qualifiedTypeName) ? "java.sql.Date" :
+            PrimitiveTypes.DATETIME.equals(qualifiedTypeName) ? "java.sql.Timestamp" :
+                optional ? getObjectType(qualifiedTypeName) :
+                    getType(qualifiedTypeName);
     }
 
     //-----------------------------------------------------------------------
@@ -2610,10 +2633,10 @@ public class InstanceMapper
         String qualifiedTypeName
     ) {
         return 
-            PrimitiveTypes.DATE.equals(qualifiedTypeName) ||
-            PrimitiveTypes.DATETIME.equals(qualifiedTypeName);
+        PrimitiveTypes.DATE.equals(qualifiedTypeName) ||
+        PrimitiveTypes.DATETIME.equals(qualifiedTypeName);
     }
-    
+
     //-----------------------------------------------------------------------
     protected void mapDeclareValue(
         String indentation,
@@ -2628,7 +2651,7 @@ public class InstanceMapper
         this.pw.println(indentation + "private " + attributeType + ' ' + attributeName + ';');
         this.pw.println();
     }
-            
+
     //-----------------------------------------------------------------------
     protected void mapDeclareReference(
         String indentation,
@@ -2674,7 +2697,7 @@ public class InstanceMapper
         this.pw.println(indentation + "private int " + attributeName + SIZE_SUFFIX + ';');
         this.pw.println();
     }
-            
+
     //-----------------------------------------------------------------------
     /**
      * Retrieve not inherited features
@@ -2690,7 +2713,7 @@ public class InstanceMapper
     private final Map<String,ModelElement_1_0> superFeatures;
     private final Map<String,ModelElement_1_0> localFeatures;
     private final Map<String,String> sliced = new LinkedHashMap<String,String>();   
-    
+
     static final String OPENMDX_JDO_PREFIX = "openmdxjdo";
     static final String SLICE_CLASS_NAME = "Slice";
     static final String SLICE_ID_CLASS_NAME = "ObjectId";

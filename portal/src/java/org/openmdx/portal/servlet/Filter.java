@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Filter.java,v 1.7 2008/04/04 11:56:25 hburger Exp $
+ * Name:        $Id: Filter.java,v 1.10 2008/09/26 12:10:39 hburger Exp $
  * Description: Filter
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:56:25 $
+ * Date:        $Date: 2008/09/26 12:10:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -66,7 +63,6 @@ import java.util.List;
 import javax.resource.ResourceException;
 
 import org.openmdx.application.log.AppLog;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.resource.Records;
@@ -251,15 +247,7 @@ implements Serializable {
             return Records.getRecordFactory().asMappedRecord(
                 getClass().getName(), 
                 this.groupName + '-' + this.labels,
-                new String[]{
-                    "name",
-                    "labels",
-                    "groupName",
-                    "iconKey",
-                    "order",
-                    "condition",
-                    "orderSpecifier"
-                }, 
+                TO_STRING_FIELDS,
                 new Object[]{
                     this.name,
                     this.labels,
@@ -279,7 +267,7 @@ implements Serializable {
                 }
             ).toString();
         } catch (ResourceException exception) {
-            throw new RuntimeServiceException(exception);
+            return super.toString();
         }
     }
 
@@ -309,6 +297,16 @@ implements Serializable {
     private String iconKey = null;
     private Integer[] order = null;
 
+    private static final String[] TO_STRING_FIELDS = {
+        "name",
+        "labels",
+        "groupName",
+        "iconKey",
+        "order",
+        "condition",
+        "orderSpecifier"
+    };
+    
 }
 
 //--- End of File -----------------------------------------------------------

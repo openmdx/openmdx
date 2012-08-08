@@ -18,8 +18,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.url.protocol.XriAuthorities;
-import org.openmdx.kernel.url.protocol.XriProtocols;
 
 /**
  * An delegating URLConnection support class.
@@ -71,13 +71,13 @@ public class ZipURLConnection extends JarURLConnection {
 	    final URL xri
 	) throws MalformedURLException, IOException {
         String path = xri.getFile();
-        int i = path.lastIndexOf(XriProtocols.ZIP_SEPARATOR);
+        int i = path.lastIndexOf(XRI_2Protocols.ZIP_SEPARATOR);
         if(i < 0) throw new MalformedURLException(
-            "No separator ('" + XriProtocols.ZIP_SEPARATOR + "' found in url " + path
+            "No separator ('" + XRI_2Protocols.ZIP_SEPARATOR + "' found in url " + path
         );
         return new URL(
             JAR_PREFIX + path.substring(XriAuthorities.ZIP_AUTHORITY.length() + 2, i) + 
-			JAR_SEPARATOR + path.substring(i + XriProtocols.ZIP_SEPARATOR.length())
+			JAR_SEPARATOR + path.substring(i + XRI_2Protocols.ZIP_SEPARATOR.length())
         );
 	}
 

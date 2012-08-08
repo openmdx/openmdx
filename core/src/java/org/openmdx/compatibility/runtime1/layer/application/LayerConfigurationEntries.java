@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LayerConfigurationEntries.java,v 1.6 2007/12/06 16:30:51 hburger Exp $
+ * Name:        $Id: LayerConfigurationEntries.java,v 1.7 2008/11/14 00:30:16 wfro Exp $
  * Description: Generated constants for LayerConfigurationEntries
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/06 16:30:51 $
+ * Date:        $Date: 2008/11/14 00:30:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,15 +72,6 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
    * The JNDI_CONTEXT configuration field  
    */
   static public final String JNDI_CONTEXT = "jndiContext";
-
-
-
-  /**
-   * The SERVICE_LOCATOR_CONTEXT configuration field  
-   * 
-   * @deprecated the service locator sub-system has been removed in the meanwhile
-   */
-  static public final String SERVICE_LOCATOR_CONTEXT = "serviceLocatorContext";
 
 
 

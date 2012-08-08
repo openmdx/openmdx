@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectEventHandler.java,v 1.24 2008/06/18 22:52:51 wfro Exp $
+ * Name:        $Id: EditObjectEventHandler.java,v 1.29 2008/11/10 10:20:11 wfro Exp $
  * Description: EditObjectEventHandler 
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/18 22:52:51 $
+ * Date:        $Date: 2008/11/10 10:20:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.eventhandler;
 
@@ -132,8 +129,7 @@ public class EditObjectEventHandler {
                         );
                     }
                     EventHandlerHelper.notifyObjectModified(
-                        showViewsCache,
-                        currentView.getRefObject()
+                        showViewsCache
                     );
                     // Object is saved. EditObjectView is not required any more. Remove 
                     // it from the set of open EditObjectViews.
@@ -150,7 +146,7 @@ public class EditObjectEventHandler {
                 // let the user fix the input data
                 catch(Exception e) {
                     ServiceException e0 = new ServiceException(e);
-                    AppLog.warning(e.getMessage(), e.getCause());
+                    AppLog.warning(e0.getMessage(), e0.getCause());
                     try {
                         pm.currentTransaction().rollback();
                     } catch(Exception e1) {}
@@ -178,8 +174,7 @@ public class EditObjectEventHandler {
                             currentView.getRestrictToElements(),
                             currentView.getParentObject(),
                             currentView.getForReference(),
-                            currentView.getMode(),
-                            currentView.getControlFactory()
+                            currentView.getMode()
                         );                
                         // Current view is dirty. Remove it and replace it by newly created. 
                         editViewsCache.removeView(
@@ -190,7 +185,7 @@ public class EditObjectEventHandler {
                     catch(Exception e1) {
                         nextView = currentView.getPreviousView(null);
                     }
-                    currentView.handleCanNotCommitException(e0.getExceptionStack());
+                    currentView.handleCanNotCommitException(e0.getCause());
                 }
                 break;
             }

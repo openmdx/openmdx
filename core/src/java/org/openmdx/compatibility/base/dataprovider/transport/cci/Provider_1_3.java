@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Provider_1_3.java,v 1.2 2007/10/10 16:06:01 hburger Exp $
+ * Name:        $Id: Provider_1_3.java,v 1.4 2008/11/04 10:00:23 hburger Exp $
  * Description: Provider interface 1.3
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:01 $
+ * Date:        $Date: 2008/11/04 10:00:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,13 +50,20 @@
  */
 package org.openmdx.compatibility.base.dataprovider.transport.cci;
 
-import org.openmdx.base.accessor.generic.spi.ViewConnectionFactory_1_0;
+import java.util.List;
 
 /**
  * Provider interface 1.3
  */
 public interface Provider_1_3
-    extends Provider_1_2, ViewConnectionFactory_1_0
+    extends Provider_1_2
 {
-    //
+    
+    /**
+     * Tells under which principals the unit of work is running
+     * 
+     * @return the principal chain
+     */
+    List<String> getPrincipalChain();
+    
 }

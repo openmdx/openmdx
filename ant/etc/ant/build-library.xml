@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build-library.xml,v 1.132 2008/03/21 18:22:25 hburger Exp $
+= Name:        $Id: build-library.xml,v 1.139 2008/11/19 16:10:54 hburger Exp $
 = Description: openMDX Build Library
-= Revision:    $Revision: 1.132 $
-= Date:        $Date: 2008/03/21 18:22:25 $
+= Revision:    $Revision: 1.139 $
+= Date:        $Date: 2008/11/19 16:10:54 $
 = Copyright:   (c) 2003-2008 OMEX AG
 =======================================================================
 =
@@ -81,7 +81,7 @@
 		<antcontrib:else>
 			<taskdef resource="org/openmdx/tools/ant/antlib.xml" uri="xri://(antlib:org.openmdx.tools.ant)">
 				<classpath>
-					<pathelement location="${openmdx.home}/jre-1.3/ant/lib/openmdx-ant.jar"/>
+					<pathelement location="${openmdx.home}/jre-1.5/ant/lib/openmdx-ant.jar"/>
 				</classpath>
 			</taskdef>
 			<property name="org.openmdx.tools.ant.is.available" value="true"/>
@@ -97,7 +97,7 @@
 		<property name="ant.since1_7" value="-Dignore=" />
 		<java classname="org.apache.tools.ant.launch.Launcher">
 			<arg value="${ant.since1_7}-lib"/>
-				<arg value="${ant.since1_7}${openmdx.home}/jre-1.3/ant/lib/openmdx-ant.jar"/>
+				<arg value="${ant.since1_7}${openmdx.home}/jre-1.5/ant/lib/openmdx-ant.jar"/>
 			<arg value="${ant.since1_7}-main"/>
 				<arg value="${ant.since1_7}org.openmdx.tools.ant.Main"/>
 			<arg value="-projecthelp"/>
@@ -238,7 +238,7 @@
 	<target name="-ant-init" unless="org.openmdx.tools.ant.is.available">
 		<taskdef resource="org/openmdx/tools/ant/antlib.xml" uri="xri://(antlib:org.openmdx.tools.ant)">
 			<classpath>
-				<pathelement location="${openmdx.home}/apache/jre-1.2/ant/lib/ant.jar"/>
+				<pathelement location="${openmdx.home}/apache/jre-1.5/ant/lib/ant.jar"/>
 				<pathelement location="${openmdx.home}/apache/jre-1.2/contribution/lib/ant-contrib.jar"/>
 				<pathelement location="${build.dir}/bin"/>
 				<pathelement location="${basedir}/src/resource"/>
@@ -647,8 +647,12 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 			<arg value="--pathMapPath=&amp;"/>
 			<arg value="--pathMapSymbol=$$${project.implementation.prefix}_opt_openmdx"/>
 			<arg value="--pathMapPath=${openmdx.home}"/>
-			<arg value="--mdlDir=${basedir}/src/model/rose"/>
-			<arg value="--mdlFile=models.mdl"/>
+			<arg value="--pathMapSymbol=$$thirdparty_models"/>
+			<arg value="--pathMapPath=${model.transformation.rose.thirdparty}"/>
+			<arg value="--mdlDir=${model.transformation.rose.dir}"/>
+			<arg value="--pathMapSymbol=$$sandbox"/>
+			<arg value="--pathMapPath=${model.transformation.rose.sandbox}"/>
+			<arg value="--mdlFile=${model.transformation.rose.file}"/>
 			<arg value="--out=${build.dir}/model/models.zip"/>
 			<arg value="--openmdxjdoDir=${basedir}/src/resource"/>
 			<arg line="${model.build.formats}"/>
@@ -757,7 +761,7 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 	<target 
 		name="test" 
 		description="Run JUnit tests, e.g. 'ant test' or 'ant -Djunit.test.case=Test*ProtocolHandler test'" 
-		depends="-junit-test-log-properties,-ant-lib-junit,build" 
+		depends="-junit-test-log-properties,build" 
 		if="junit.has.test.case"
 	>
 		<junit 
@@ -771,10 +775,7 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 			tempdir="${tmp.dir}"
 		>
 			<jvmarg value="-Djava.endorsed.dirs=${openmdx.home}/java2/${build.java.platform}/endorsed/lib"/>
-			<classpath>
-				<path refid="project.bin.classpath"/>
-				<path refid="microsoft.sql-server.lib"/>
-			</classpath>
+			<classpath refid="project.bin.classpath"/>
 			<formatter type="xml"/>
 			<sysproperty key="org.openmdx.log.debug" value="${junit.test.log.debug}"/>
 			<sysproperty key="org.openmdx.log.path" value="build/${build.target.platform}/log/junit"/>
@@ -834,24 +835,6 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 		</condition>
 	</target>
 	
-	<target 
-		name="-ant-lib-junit" 
-		depends="-junit-test-init" 
-		unless="ant.lib.has.junit" 
-		if="junit.has.test.case"
-	>
-		<mkdir dir="${user.home}/.ant/lib" />
-		<copy 
-			file="${openmdx.home}/java2/${build.java.platform}/extension/lib/junit.jar"
-			todir="${user.home}/.ant/lib"
-		/>
-		<fail> 
-junit.jar was missing in your Ant library.
-It has been copied to '${user.home}/.ant/lib'.
-Now you may restart Ant. 
-		</fail>
-	</target>
-
 	<target 
 		name="-junit-test-log-properties" 
 		depends="-junit-test-init" 
@@ -1070,67 +1053,7 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 			</path>
 			<param name="deliverable.prefix" value="${src-archive.prefix}"/>
 			<param name="deliverable.suffix" value=""/>
-			<param name="deliverable.pattern" value="standard.edition.pattern"/>
-		</antcontrib:foreach>
-		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
-			<path>
-				<dirset dir="${basedir}/src">
-					<include name="?ar"/>
-				</dirset>
-			</path>
-			<param name="deliverable.prefix" value="${src-archive.prefix}openmdx-1-"/>
-			<param name="deliverable.suffix" value=""/>
-			<param name="deliverable.pattern" value="openmdx-1.edition.pattern"/>
-		</antcontrib:foreach>
-		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
-			<path>
-				<dirset dir="${basedir}/src">
-					<include name="?ar"/>
-				</dirset>
-			</path>
-			<param name="deliverable.prefix" value="${src-archive.prefix}jboss-3-"/>
-			<param name="deliverable.suffix" value=""/>
-			<param name="deliverable.pattern" value="jboss-3.edition.pattern"/>
-		</antcontrib:foreach>
-		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
-			<path>
-				<dirset dir="${basedir}/src">
-					<include name="?ar"/>
-				</dirset>
-			</path>
-			<param name="deliverable.prefix" value="${src-archive.prefix}weblogic-7-"/>
-			<param name="deliverable.suffix" value=""/>
-			<param name="deliverable.pattern" value="weblogic-7.edition.pattern"/>
-		</antcontrib:foreach>
-		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
-			<path>
-				<dirset dir="${basedir}/src">
-					<include name="?ar"/>
-				</dirset>
-			</path>
-			<param name="deliverable.prefix" value="${src-archive.prefix}websphere-5-"/>
-			<param name="deliverable.suffix" value=""/>
-			<param name="deliverable.pattern" value="websphere-5.edition.pattern"/>
-		</antcontrib:foreach>
-		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
-			<path>
-				<dirset dir="${basedir}/src">
-					<include name="?ar"/>
-				</dirset>
-			</path>
-			<param name="deliverable.prefix" value="${src-archive.prefix}orion-9-"/>
-			<param name="deliverable.suffix" value=""/>
-			<param name="deliverable.pattern" value="orion-9.edition.pattern"/>
-		</antcontrib:foreach>
-		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
-			<path>
-				<dirset dir="${basedir}/src">
-					<include name="?ar"/>
-				</dirset>
-			</path>
-			<param name="deliverable.prefix" value="${src-archive.prefix}tomcat-6-"/>
-			<param name="deliverable.suffix" value=""/>
-			<param name="deliverable.pattern" value="tomcat-6.edition.pattern"/>
+			<param name="deliverable.pattern" value="all.pattern"/>
 		</antcontrib:foreach>
 		<antcontrib:if>
 			<available file="${build.dir}/src" type="dir"/>
@@ -1283,10 +1206,10 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 					<include name="${ant.project.name}.*.zip"/>
 					<exclude name="*-connector.*"/>
 					<exclude name="*-data.*"/>
-					<exclude name="*-ear.*"/>
+					<exclude name="*.ear.*"/>
 					<exclude name="*-model.*"/>
 					<exclude name="*-sql.*"/>
-					<exclude name="*-war.*"/>
+					<exclude name="*.war.*"/>
 				</fileset>
 			</path>
 			<param name="install.target" value="${basedir}/src"/>
@@ -1296,7 +1219,7 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 	<target 
 		name="install-bin" 
 		description="Converts a generic distribution to a binary distribution" 
-		depends="install-model,install-sql,install-source-archive,eclipse-bin-project"
+		depends="install-model,install-sql,install-ear,install-war,install-source-archive,eclipse-bin-project"
 	>
 		<antcontrib:if>
 			<isset property="install-bin.callback"/>
@@ -1446,11 +1369,11 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 		<antcontrib:foreach target="-install-" param="install.source">
 			<path>
 				<fileset dir="${src.archive.dir}">
-					<include name="${ant.project.name}.*-war.zip"/>
+					<include name="${ant.project.name}.war.zip"/>
 				</fileset>
 			</path>
 			<param name="install.target" value="${basedir}/src"/>
-			<param name="install.suffix" value="-war"/>
+			<param name="install.suffix" value="war"/>
 			<param name="install.tag" value="war"/>
 		</antcontrib:foreach>
 	</target>
@@ -1458,11 +1381,11 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 		<antcontrib:foreach target="-install-" param="install.source">
 			<path>
 				<fileset dir="${src.archive.dir}">
-					<include name="${ant.project.name}.*-ear.zip"/>
+					<include name="${ant.project.name}.ear.zip"/>
 				</fileset>
 			</path>
 			<param name="install.target" value="${basedir}/src"/>
-			<param name="install.suffix" value="-ear"/>
+			<param name="install.suffix" value="ear"/>
 			<param name="install.tag" value="ear"/>
 		</antcontrib:foreach>
 	</target>

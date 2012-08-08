@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StrictDatatypeComparator.java,v 1.2 2008/03/21 18:30:56 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: StrictDatatypeComparator.java,v 1.5 2008/09/22 23:38:20 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:30:56 $
+ * Date:        $Date: 2008/09/22 23:38:20 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.query;
 
@@ -65,7 +64,6 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Allows comparison of XML Datatype classes
  */
-@SuppressWarnings("unchecked")
 public class StrictDatatypeComparator extends LenientNumberComparator {
 
     /**
@@ -73,7 +71,7 @@ public class StrictDatatypeComparator extends LenientNumberComparator {
      * 
      * @return  a lenient comparator using the default CharSequence comparator
      */
-    public static Comparator getInstance(
+    public static Comparator<Object> getInstance(
     ){
         return StrictDatatypeComparator.instance;
     }
@@ -82,7 +80,7 @@ public class StrictDatatypeComparator extends LenientNumberComparator {
      * Use specific CharSequence comparator
      */
     public StrictDatatypeComparator(
-        Comparator charSequenceComparator
+        Comparator<Object> charSequenceComparator
     ) {
         super(charSequenceComparator);
     }
@@ -90,9 +88,9 @@ public class StrictDatatypeComparator extends LenientNumberComparator {
     /**
      * 
      */
-    private static final Comparator instance = new StrictDatatypeComparator(null);
-            
-    
+    private static final Comparator<Object> instance = new StrictDatatypeComparator(null);
+
+
     //------------------------------------------------------------------------
     // Implements Comparator
     //------------------------------------------------------------------------
@@ -110,55 +108,45 @@ public class StrictDatatypeComparator extends LenientNumberComparator {
             if(!first.getClass().isInstance(second)) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter(
-                        "classes",
-                        new String[]{
-                            first == null ? null : first.getClass().getName(),
-                            second == null ? null : second.getClass().getName()    
-                        }
-                    )
-                },
-                "The two classes are not comparable"
+                "The two classes are not comparable",
+                new BasicException.Parameter(
+                    "classes",
+                    first == null ? null : first.getClass().getName(),
+                        second == null ? null : second.getClass().getName()    
+                )
             );
             int result = duration ?   
-                    ((Duration)first).compare((Duration)second) :
+                ((Duration)first).compare((Duration)second) :
                     ((XMLGregorianCalendar)first).compare((XMLGregorianCalendar)second); 
-            switch (result) {
-                case DatatypeConstants.LESSER: return -1;
-                case DatatypeConstants.EQUAL: return 0;
-                case DatatypeConstants.GREATER: return 1;
-                case DatatypeConstants.INDETERMINATE: throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.BAD_QUERY_CRITERIA,
-                    new BasicException.Parameter[]{
+                switch (result) {
+                    case DatatypeConstants.LESSER: return -1;
+                    case DatatypeConstants.EQUAL: return 0;
+                    case DatatypeConstants.GREATER: return 1;
+                    case DatatypeConstants.INDETERMINATE: throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_QUERY_CRITERIA,
+                        "The relationship between the two given values is indeterminate", 
                         new BasicException.Parameter(
                             "values",
-                            new String[]{
-                                first.toString(),
-                                second.toString()    
-                            }
+                            first.toString(),
+                            second.toString()    
                         )
-                    }, 
-                    "The relationship between the two given values is indeterminate"
-                );
-                default: throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE,
-                    new BasicException.Parameter[]{
+                    );
+                    default: throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "Unexpected compare result", 
                         new BasicException.Parameter(
                             "result",
                             result
                         )
-                    }, 
-                    "Unexpected compare result"
-                );
-            }
+                    );
+                }
         } catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);
         } else {
             return super.compare(first, second); 
         }            
     }
-     
+
 }

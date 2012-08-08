@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     opencrx, http://www.opencrx.org/
- * Name:        $Id: HtmlEncoder.java,v 1.13 2008/03/21 18:32:18 hburger Exp $
+ * Name:        $Id: HtmlEncoder.java,v 1.15 2008/12/12 14:00:19 wfro Exp $
  * Description: HttpEncoder class
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2008/03/21 18:32:18 $
+ * Date:        $Date: 2008/12/12 14:00:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -78,7 +78,6 @@ public class HtmlEncoder {
             return s;
         }
         StringBuilder target = new StringBuilder();
-        boolean containsTag = false;
         int i = 0;
         while(i < len) {
             char c = s.charAt(i);
@@ -98,7 +97,6 @@ public class HtmlEncoder {
                             target.append(s.substring(i, pos+1));
                             i = pos + 1;
                             isKnownTag = true;
-                            containsTag = true;
                             break;
                         }
                     }
@@ -128,7 +126,8 @@ public class HtmlEncoder {
             }
         }
         String t = target.toString();
-        return forEditing || containsTag || (t.indexOf("\n") < 0)
+        boolean startsWithTag = t.startsWith("<");
+        return forEditing || startsWithTag || (t.indexOf("\n") < 0)
             ? t
             : t.replaceAll("\n", "<br />");
     }
@@ -137,7 +136,7 @@ public class HtmlEncoder {
     // Members
     //-----------------------------------------------------------------------
     private static final String XSS_CHARS[] = {
-        "&quot;", null, null, "&#37;", "&amp;", "&#39;", "&#40;", "&#41;", null, "&#43;",
+        "&quot;", null, null, "&#37;", "&amp;", "&#39;", null, null, null, null,
         null, null, null, null, null, null, null, null, null, null,
         null, null, null, null, null, "&#59;", "&lt;", null, "&gt;", null, "&#64;"
     };

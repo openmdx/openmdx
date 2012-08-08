@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectView.java,v 1.35 2008/05/27 00:28:59 wfro Exp $
+ * Name:        $Id: EditObjectView.java,v 1.37 2008/11/10 10:20:11 wfro Exp $
  * Description: EditObjectView
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.37 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/27 00:28:59 $
+ * Date:        $Date: 2008/11/10 10:20:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.view;
 
@@ -74,7 +71,6 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.attribute.Attribute;
-import org.openmdx.portal.servlet.control.ControlFactory;
 import org.openmdx.portal.servlet.control.EditInspectorControl;
 
 public class EditObjectView
@@ -95,9 +91,8 @@ public class EditObjectView
         Map<Path,Action> historyActions,
         String lookupType,
         Map restrictToElements, 
-        ViewMode mode,
-        ControlFactory controlFactory
-    ) {
+        ViewMode mode
+    ) throws ServiceException {
         this(
             id,
             containerElementId,
@@ -110,8 +105,7 @@ public class EditObjectView
             restrictToElements,       
             null,
             null,
-            mode,
-            controlFactory
+            mode
         );
     }
   
@@ -142,9 +136,8 @@ public class EditObjectView
         Map restrictToElements,       
         RefObject_1_0 parent,
         String forReference,
-        ViewMode mode,
-        ControlFactory controlFactory
-    ) {
+        ViewMode mode
+    ) throws ServiceException {
         super(
             id,
             containerElementId,
@@ -152,18 +145,14 @@ public class EditObjectView
             application,
             historyActions,
             lookupType,
-            restrictToElements,
-            controlFactory
+            restrictToElements
         );
         this.editObjectIdentity = editObjectIdentity;    
         this.forReference = forReference;
         this.mode = mode;
         this.parent = parent;
-        EditInspectorControl inspectorControl = controlFactory.createEditInspectorControl(
+        EditInspectorControl inspectorControl = this.application.createEditInspectorControl(
             id,
-            application.getCurrentLocaleAsString(),
-            application.getCurrentLocaleAsIndex(),
-            this.objectReference.getInspector(),
             object.refClass().refMofId()
         );
         this.inspectorControl = inspectorControl;
@@ -250,12 +239,6 @@ public class EditObjectView
               (RefObject_1_0)this.object
           );
       }
-  }
-  
-  //-------------------------------------------------------------------------
-  public String getIconKey(
-  ) {
-    return this.getObjectReference().getInspector().getIconKey();
   }
   
   //-------------------------------------------------------------------------

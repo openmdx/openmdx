@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Object_1.java,v 1.27 2008/03/19 17:18:51 hburger Exp $
- * Description: Embedded Object Provider
- * Revision:    $Revision: 1.27 $
+ * Name:        $Id: Object_1.java,v 1.54 2008/12/15 03:15:36 hburger Exp $
+ * Description: Abstract Object_1
+ * Revision:    $Revision: 1.54 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:18:51 $
+ * Date:        $Date: 2008/12/15 03:15:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,231 +51,440 @@
 package org.openmdx.base.accessor.generic.view;
 
 import java.io.Serializable;
-import java.util.AbstractMap;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import javax.jdo.listener.DeleteCallback;
+import javax.jdo.listener.LoadCallback;
+import javax.jdo.listener.StoreCallback;
+import javax.resource.cci.InteractionSpec;
 
 import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0;
 import org.openmdx.base.accessor.generic.cci.Object_1_0;
-import org.openmdx.base.accessor.generic.cci.Object_1_2;
-import org.openmdx.base.accessor.generic.spi.AbstractObject_1;
+import org.openmdx.base.accessor.generic.spi.Delegating_1;
 import org.openmdx.base.accessor.generic.spi.MarshallingObject_1;
-import org.openmdx.base.collection.FilterableMap;
-import org.openmdx.base.exception.MarshalException;
+import org.openmdx.base.accessor.generic.spi.Object_1_5;
+import org.openmdx.base.accessor.generic.spi.Object_1_6;
+import org.openmdx.base.aop2.core.ContextCapable_1;
+import org.openmdx.base.aop2.core.ExtentCapable_1;
+import org.openmdx.base.exception.ExtendedIOException;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_4;
 import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.model1.accessor.basic.cci.ModelUtils;
+import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.code.Multiplicities;
+import org.openmdx.state2.aop2.core.DateTimeState_1;
+import org.openmdx.state2.cci.DateStateContext;
+import org.openmdx.state2.cci.DateTimeStateContext;
 
 /**
- * Maps embedded objects to members of their corresponding container:<ul>
- * <li>context
- * <li>role
- * <li>view
- * </ul>
+ * Registers the the delegates with their manager
  */
-@SuppressWarnings("unchecked")
 class Object_1 
-    extends MarshallingObject_1 
-    implements Object_1_2
+    extends MarshallingObject_1<Manager_1> 
+    implements Object_1_6, Serializable, LoadCallback, StoreCallback, DeleteCallback
 {
 
     /**
-     * Implements <code>Serializable</code>
-     */
-    private static final long serialVersionUID = 3689345537765552435L;
-
-    /**
+     * Constructor 
      * 
-     */
-    private transient ServiceException inaccessibilityReason;
-
-    /**
-     * Constructor
-     * @throws ServiceException 
+     * @param marshaller
+     * @param dataObject
+     * @param interactionSpec 
+     * 
+     * @throws ServiceException
      */
     Object_1(
-        Object_1_0 object,
-        Manager_1 marshaller
+        Manager_1 marshaller,
+        Object_1_5 dataObject
     ) throws ServiceException{
-        super(object, marshaller);
-        this.objAddEventListener(null, marshaller);
+        super(
+            null, 
+            marshaller
+        );
+        this.dataObject = dataObject;
+        this.hollow = true;
+        dataObject.objAddEventListener(
+            null, // feature 
+            marshaller
+        );
     }
+
+    /**
+     * This flag tells whether the object is hollow or not, i.e. whether its
+     * plug-ins are already set up or not.
+     */
+    private transient boolean hollow;
+
+    /**
+     * The associated data object
+     */
+    private Object_1_5 dataObject;
     
     /**
-     * Assert that the object is accessible.
-     * 
-     * @throws ServiceException if it is unaccessible
+     * Implements <code>Serializable</code>
      */
-    protected void assertAcessibility() throws ServiceException{
-        if(objIsInaccessable()) {
-            throw getInaccessabilityReason();
-        }
-    }
+    private static final long serialVersionUID = -8224702798301616975L;
+
+    /**
+     * Cache the feature queries
+     */
+    private transient ConcurrentMap<String,Iterable<?>> featureQueries = 
+        new ConcurrentHashMap<String,Iterable<?>>();;
     
     /**
-     * Set inaccessabilityReason.
-     * 
-     * @param inaccessabilityReason The inaccessabilityReason to set.
+     * The object's classifier
      */
-    void setInaccessabilityReason(
-        ServiceException inaccessabilityReason
-    ) {        
-        this.inaccessibilityReason = inaccessabilityReason;
-        this.context = null;
-        this.role = null;
-        this.view = null;
-        super.marshaller = null;
-    }    
-
-    /* (non-Javadoc)
-     */
-    Manager_1 getFactory(
-    ){
-        return (Manager_1)super.marshaller;
-    }
-
-
-    //--------------------------------------------------------------------------
-    // Extends DelegatingObject_1
-    //--------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.spi.DelegatingObject_1#getDelegate()
-     */
-    protected Object_1_0 getDelegate() {
-        return this.objIsInaccessable() ? null : super.getDelegate();
-    }
+    private transient ModelElement_1_0 classifier;
     
-
+    
     //--------------------------------------------------------------------------
     // Extends Object
     //--------------------------------------------------------------------------
 
     /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
      */
-    public String toString(
-    ){        
-        try {
-            return AbstractObject_1.toString(this, this.objGetClass(), null);
-        } catch (ServiceException e) {
-            return AbstractObject_1.toString(this, "n/a", null);
-        }
+    @Override
+    public boolean equals(Object that) {
+        return Delegating_1.equal(this, that);    
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return Delegating_1.hashCode(this);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.generic.spi.AbstractObject_1#toString()
+     */
+    @Override
+    public String toString() {
+        return toString(
+            this, 
+            String.valueOf(getInteractionSpec())
+        );
     }
 
 
     //--------------------------------------------------------------------------
-    // Extends MarshallingObject_1
+    // Implements Object_1_6
+    //--------------------------------------------------------------------------
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.generic.spi.Delegating_1_0#objGetDelegate()
+     */
+    public Object_1_5 objGetDelegate() {
+        return this.dataObject;
+    }    
+        
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.generic.spi.Object_1_6#objSetDelegate(org.openmdx.base.accessor.generic.cci.Object_1_0)
+     */
+    public void objSetDelegate(
+        Object_1_5 delegate
+    ) {
+        this.dataObject = delegate;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.generic.spi.Object_1_6#getInteractionSpec()
+     */
+    public final InteractionSpec getInteractionSpec(
+    ){
+        return getMarshaller().getInteractionSpec();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.generic.spi.Object_1_5#clone(org.openmdx.base.accessor.generic.cci.Object_1_0)
+     */
+    public Object_1_0 cloneDelegate(
+        Object_1_0 original, 
+        Path identity
+    ) throws ServiceException {
+        return ((Connection_1_4)this.marshaller.getConnection()).cloneObject(
+            identity, 
+            original, 
+            true // completelyDirty
+        );
+    }
+
+        
+    //--------------------------------------------------------------------------
+    // Implements Object_1_5
+    //--------------------------------------------------------------------------
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.generic.spi.Object_1_5#getAspect(java.lang.String)
+     */
+    public Map<String, Object_1_0> getAspect(
+        String aspectClass
+    ) throws ServiceException {
+        Object_1_0 delegate = getDelegate();
+        if(delegate instanceof Object_1_5) {
+            return ((Object_1_5)delegate).getAspect(aspectClass);
+        } else {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                "Aspect capability not supported",
+                new BasicException.Parameter(
+                    "delegateClass", 
+                    delegate == null ? null : delegate.getClass().getName()
+                ), new BasicException.Parameter(
+                    "aspectClass",
+                    aspectClass
+                )
+            );    
+        }
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.generic.spi.Object_1_5#getFactory()
+     */
+    public ObjectFactory_1_0 getFactory() {
+        return this.marshaller.getConnection();
+    }
+
+    
+    //--------------------------------------------------------------------------
+    // Implements Object_1_1
+    //--------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.model1.accessor.basic.cci.ModelHolder_1_0#getModel()
+     */
+    public Model_1_0 getModel() {
+        return getMarshaller().getModel();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.model1.accessor.basic.cci.ModelHolder_1_0#setModel(org.openmdx.model1.accessor.basic.cci.Model_1_0)
+     */
+    public void setModel(Model_1_0 model) {
+        throw new UnsupportedOperationException(
+            "An object's model repository can't be replaced"
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.generic.spi.DynamicallyDelegatingObject_1#objIsHollow()
+     */
+    @Override
+    public boolean objIsHollow() {
+        return this.hollow || super.objIsHollow();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.generic.spi.AbstractObject_1#setInaccessibilityReason(org.openmdx.base.exception.ServiceException)
+     */
+    @Override
+    protected void setInaccessibilityReason(
+        ServiceException inaccessibilityReason
+    ) {
+        super.setInaccessibilityReason(inaccessibilityReason);
+    }
+
+    
+    //--------------------------------------------------------------------------
+    // Implements Object_1_0
     //--------------------------------------------------------------------------
 
     /**
-     * Get a reference feature.
-     * <p> 
-     * This method never returns <code>null</code> as an instance of the
-     * requested class is created on demand if it hasn't been set yet.
+     * Returns the object's identity.
      *
-     * @param       feature
-     *              The feature's name.
-     *
-     * @return      a collection which may be empty but never null.
-     *
-     * @exception   ServiceException ILLEGAL_STATE
-     *              if the object is deleted
-     * @exception   ClassCastException
-     *              if the feature is not a reference
-     * @exception   ServiceException NOT_SUPPORTED
-     *              if the object has no such feature
+     * @return  the object's identity;
+     *          or null for transient objects
      */
-    public FilterableMap objGetContainer(
-        String _feature
+    public Path objGetPath(
     ) throws ServiceException {
-        String feature = _feature;
-        assertAcessibility();
-        boolean contextContainer = SystemAttributes.CONTEXT_CAPABLE_CONTEXT.equals(feature);
-        boolean roleContainer = SystemAttributes.ROLE_CAPABLE_ROLE.equals(feature);
-        boolean viewContainer = SystemAttributes.VIEW_CAPABLE_VIEW.equals(feature);
-        boolean useObjectIdentity = feature.endsWith(SystemAttributes.USE_OBJECT_IDENTITY_HINT);
-        if(useObjectIdentity) {
-            feature = feature.substring(
-                0, 
-                feature.length() - SystemAttributes.USE_OBJECT_IDENTITY_HINT.length()
+        return this.dataObject == null ? null : this.dataObject.objGetPath();
+    }
+
+    /**
+     * Retrieve the object's classifier
+     * 
+     * @return  the object's classifier
+     * 
+     * @throws ServiceException
+     */
+    protected ModelElement_1_0 getClassifier(
+    ) throws ServiceException{
+        return this.classifier == null ?
+            this.classifier = getModel().getElement(objGetClass()) :
+            this.classifier;
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objGetIterable(java.lang.String)
+     */
+    public Iterable<?> objGetIterable(
+        String featureName
+    ) throws ServiceException {
+        Iterable<?> reply = this.featureQueries.get(featureName);
+        if(reply == null) {
+            String multiplicity = ModelUtils.getMultiplicity(
+                getModel().getFeatureDef(getClassifier(), featureName, false)
             );
-            if(
-                !objIsInaccessable() &&
-                this.marshaller instanceof ObjectFactory_1_0
-            ) {
-                Object path = objGetValue(SystemAttributes.OBJECT_IDENTITY);
-                if(path != null) try {
-                    Path identity = new Path(path.toString());
-                    if(
-                        !objGetPath().equals(identity)
-                    ) return ((ObjectFactory_1_0)this.marshaller).getObject(identity).objGetContainer(feature);
-                } catch (Exception exception) {
-                    // fall back to the object's path
+            Iterable<?> concurrent = this.featureQueries.putIfAbsent(
+                featureName, 
+                reply = 
+                    Multiplicities.LIST.equals(multiplicity) ? objGetList(featureName) :
+                    Multiplicities.SET.equals(multiplicity) ? objGetSet(featureName) :
+                    Multiplicities.SPARSEARRAY.equals(multiplicity) ? objGetSparseArray(featureName).values() :
+                    new ValueCollection(featureName)
+            );
+            if(concurrent != null) {
+                reply = concurrent;
+            }
+        }
+        return reply;
+    }
+
+    
+    //--------------------------------------------------------------------------
+    // Extends DynamicallyDelegatingObject_1
+    //--------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.generic.spi.DynamicallyDelegatingObject_1#objGetResourceIdentifier()
+     */
+    @Override
+    public Object objGetResourceIdentifier() {
+        return this.dataObject.objGetResourceIdentifier();
+    }
+
+    /**
+     * Hollow -> Persistent-Clean Transition
+     */
+    protected synchronized void initialize(
+    ) throws ServiceException{
+        if(this.hollow) {
+            Model_1_0 model = getModel();
+            Object_1_0 delegate = this.dataObject;
+            if (model.isInstanceof(this.dataObject, ContextCapable_1.CLASS)) {
+                //
+                // org::openmdx::base::ContextCapable
+                //
+                delegate = new ContextCapable_1(
+                    this,
+                    delegate
+                );
+            }
+            //
+            // State Views
+            //
+            InteractionSpec interactionSpec = super.getMarshaller().getInteractionSpec();
+            boolean state2 = false;
+            if(interactionSpec instanceof DateStateContext) {
+                if(model.isInstanceof(this.dataObject, org.openmdx.compatibility.state1.aop2.core.DateState_1.CLASS)) {
+                    //
+                    // org::openmdx::compatibility::state1::DateState view
+                    //
+                    delegate = new org.openmdx.state2.aop2.core.DateState_1(this);                    
+                } else if(
+                    model.isInstanceof(this.dataObject, org.openmdx.state2.aop2.core.StateCapable_1.CLASS) &&
+                    !model.isInstanceof(this.dataObject, org.openmdx.compatibility.state1.aop2.core.StateCapable_1.CLASS)
+                ) {
+                    //
+                    // org::openmdx::state2::DateState View
+                    //
+                    delegate = new org.openmdx.state2.aop2.core.DateState_1(this);
+                    state2 = true;
+                }
+            } else if(interactionSpec instanceof DateTimeStateContext) {
+                if(model.isInstanceof(this.dataObject, DateTimeState_1.CLASS)) {
+                    //
+                    // org::openmdx::state2::DateTimeState View
+                    //
+                    delegate = new DateTimeState_1(this);
+                    state2 = true;
                 }
             }
-        } else if(viewContainer|contextContainer|roleContainer)for(
-            Iterator i = super.objDefaultFetchGroup().iterator();
-            i.hasNext();
-        ){
-            String attribute = (String)i.next();
-            if(contextContainer && attribute.startsWith(SystemAttributes.CONTEXT_PREFIX)) return getContext();
-            if(roleContainer && attribute.startsWith(SystemAttributes.ROLE_PREFIX)) return getRole();
-            if(viewContainer && attribute.startsWith(SystemAttributes.VIEW_PREFIX)) return getView();
-        }
-        return super.objGetContainer(feature);
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Object_1_0#objDefaultFetchGroup()
-     */
-    public Set objDefaultFetchGroup() throws ServiceException {
-        assertAcessibility();
-        Set features = super.objDefaultFetchGroup();
-        boolean includeView = false;
-        boolean includeContext = false;
-        boolean includeRole = false;
-        for(
-            Iterator i = features.iterator();
-            i.hasNext();
-        ){
-            String feature = (String)i.next();
-            if(feature.startsWith(SystemAttributes.CONTEXT_PREFIX)){
-                includeContext = true;
-                i.remove();
-            } else if(feature.startsWith(SystemAttributes.ROLE_PREFIX)){
-                includeRole = true;
-                i.remove();
-            } else if(feature.startsWith(SystemAttributes.VIEW_PREFIX)){
-                includeView = true;
-                i.remove();
+            //
+            // Aspect Capabilities
+            //
+            if(model.isInstanceof(this.dataObject, org.openmdx.compatibility.state1.aop2.core.DateState_1.CLASS)) {
+                //
+                // org::openmdx::compatibiliy::state1 Aspect
+                //
+                delegate = new org.openmdx.compatibility.state1.aop2.core.BasicState_1(
+                    this,
+                    delegate
+                );                    
+            } else if(state2) {
+                //
+                // org::openmdx::base Aspect 
+                //
+                delegate = new org.openmdx.state2.aop2.core.BasicState_1(
+                    this,
+                    delegate
+                );                                            
+            } else if(model.isInstanceof(this.dataObject, org.openmdx.base.aop2.core.Aspect_1.CLASS)) {
+                //
+                // org::openmdx::base Aspect 
+                //
+                delegate = new org.openmdx.base.aop2.core.Aspect_1(
+                    this,
+                    delegate
+                );                                            
             }
+            //
+            // State Capabilities
+            //
+            if(model.isInstanceof(this.dataObject, org.openmdx.state2.aop2.core.StateCapable_1.CLASS)) {
+                if(model.isInstanceof(this.dataObject, org.openmdx.compatibility.state1.aop2.core.StateCapable_1.CLASS)) {
+                    //
+                    // org::openmdx::compatibility::state1 State Capability
+                    //
+                    delegate = new org.openmdx.compatibility.state1.aop2.core.StateCapable_1(
+                        this,
+                        delegate
+                    );                    
+                } else {
+                    //
+                    // org::openmdx::state2 State Capability
+                    //
+                    delegate = new org.openmdx.state2.aop2.core.StateCapable_1(
+                        this,
+                        delegate
+                    );                    
+                }
+            }
+            if (model.isInstanceof(this.dataObject, ExtentCapable_1.CLASS)) {
+                //
+                // org::openmdx::base Extent Capability
+                //
+                delegate = new ExtentCapable_1(
+                    this,
+                    delegate
+                );
+            }
+            super.setDelegate(delegate);
+            this.hollow = false;
         }
-        if(includeContext) features.add(SystemAttributes.CONTEXT_CAPABLE_CONTEXT);
-        if(includeRole) features.add(SystemAttributes.ROLE_CAPABLE_ROLE);
-        if(includeView) features.add(SystemAttributes.VIEW_CAPABLE_VIEW);
-        return features;
     }
-
-    //--------------------------------------------------------------------------
-    // Implements Object_1_2
-    //--------------------------------------------------------------------------
-
+    
     /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Object_1_2#getInaccessabilityReason()
+     * @see org.openmdx.base.accessor.generic.spi.DynamicallyDelegatingObject_1#getDelegate()
      */
-    public ServiceException getInaccessabilityReason() {
-        return this.inaccessibilityReason;
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.generic.cci.Object_1_2#objIsInaccessable()
-     */
-    public boolean objIsInaccessable() {
-        return this.inaccessibilityReason != null;
+    @Override
+    protected Object_1_0 getDelegate(
+    ) throws ServiceException {
+        if(this.hollow) {
+            initialize();
+        }
+        return super.getDelegate();
     }
 
 
@@ -303,322 +512,112 @@ class Object_1
         java.io.ObjectInputStream stream
     ) throws java.io.IOException, ClassNotFoundException {
         // stream.defaultReadObject(); has nothing to do
-        getFactory().cache(getDelegate(), this);
+        this.hollow = true;
+        this.featureQueries = new ConcurrentHashMap<String,Iterable<?>>();
+        try {
+            getMarshaller().cache(getDelegate(), this);
+        } catch (ServiceException exception) {
+            throw new ExtendedIOException(exception);
+        }
     }
 
 
     //--------------------------------------------------------------------------
-    // Class Container
+    // Implements StoreCallback
     //--------------------------------------------------------------------------
 
     /* (non-Javadoc)
+     * @see javax.jdo.listener.StoreCallback#jdoPreStore()
      */
-    private abstract class Container 
-        extends AbstractMap 
-        implements FilterableMap, Serializable {
+    public void jdoPreStore() {
+        try {
+            Object_1_0 delegate = getDelegate();
+            if(delegate instanceof StoreCallback) {
+                ((StoreCallback)delegate).jdoPreStore();
+            }
+        } catch (ServiceException exception) {
+            throw new RuntimeServiceException(exception);
+        }
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Implements DeleteCallback
+    //--------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see javax.jdo.listener.DeleteCallback#jdoPreDelete()
+     */
+    public void jdoPreDelete() {
+        try {
+            Object_1_0 delegate = getDelegate();
+            if(delegate instanceof DeleteCallback) {
+                ((DeleteCallback)delegate).jdoPreDelete();
+            }
+        } catch (ServiceException exception) {
+            throw new RuntimeServiceException(exception);
+        }
+    }
+
+
+    //--------------------------------------------------------------------------
+    // Implements LoadCallback
+    //--------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see javax.jdo.listener.LoadCallback#jdoPostLoad()
+     */
+    public void jdoPostLoad() {
+        try {
+            Object_1_0 delegate = getDelegate();
+            if(delegate instanceof LoadCallback) {
+                ((LoadCallback)delegate).jdoPostLoad();
+            }
+        } catch (ServiceException exception) {
+            throw new RuntimeServiceException(exception);
+        }
+    }
+
+    
+    //--------------------------------------------------------------------------
+    // Class ValueView
+    //--------------------------------------------------------------------------
+
+    /**
+     * Value Collection
+     */
+    class ValueCollection implements Iterable<Object> {
 
         /**
-         * Constructor
-         * 
-         * @param   prefix
-         * @param lazy tells, whether the embedded object may be fetched lazily
+         * Constructor 
+         *
+         * @param featureName
          */
-        Container(
-            String prefix, 
-            boolean lazy
-        ) {
-            this.containerPrefix = prefix;
-            this.lazy = lazy;
-            if(!lazy) {
-                this.getDelegate();
-            }
+        ValueCollection(
+            String featureName
+        ){
+            this.featureName = featureName;     
         }
-
         
-        /* (non-Javadoc)
-         * @see java.util.AbstractMap#entrySet()
-         */
-        public Set entrySet() {
-            return getDelegate().entrySet();
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.Collection#size()
-         */
-        public int size() {
-            return getDelegate().size();
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.collection.FilterableMap#subMap(java.lang.Object)
-         */
-        public FilterableMap subMap(Object filter) {
-            throw new UnsupportedOperationException("Filtering of embedded objects not yet implemented");
-        }
-
-       /*
-        * Select an object matching the filter.
-        * <p>
-        * The acceptable filter object classes must be specified by the 
-        * Container implementation.
-        *
-        * @param     filter
-        *            The filter to be applied to objects of this container
-        *
-        * @return    the object matching the filter;
-        *            or <code>null</code> if no object matches the filter.
-        * 
-        * @exception ClassCastException
-        *            if the class of the specified filter prevents it from
-        *            being applied to this container.
-        * @exception IllegalArgumentException
-        *            if some aspect of this filter prevents it from being
-        *            applied to this container. 
-        * @exception InvalidCardinalityException
-        *            if more than one object matches the filter. 
-        * @exception MarshalException
-        *            if object retrieval fails
-        */
-        public synchronized Object get(
-            Object filter
-        ) {
-            return get((String)filter, this.lazy);
-        }
-
         /**
-         * Retrieves or creates an embedded object.
          * 
-         * @param objectQualifier
-         * @param mayCreateEmbeddedObject
-         * 
-         * @return an mbedded object; or <code>null</code>
          */
-        private synchronized Object get(
-            String objectQualifier,
-            boolean mayCreateEmbeddedObject
-        ) {
-            Object embeddedObject = this.map.get(objectQualifier);
-            if(embeddedObject == null && mayCreateEmbeddedObject) try {
-                String objectPrefix = containerPrefix + objectQualifier + ':';
-                String objectClass = (String) Object_1.this.getDelegate().objGetValue(
-                    objectPrefix + SystemAttributes.OBJECT_CLASS
-                );
-                if(objectClass == null) return null;
-                this.map.put(
-                    objectQualifier,
-                    embeddedObject = getEmbeddedObject(objectClass, objectPrefix, objectQualifier)
-                );
-            } catch (ServiceException exception) {
-                throw new MarshalException(exception);
-            }
-            return embeddedObject;
-        }
-        
-        /* (non-Javadoc)
-         */
-        protected abstract Object_1_0 getEmbeddedObject(
-            String objectClass, 
-            String prefix, 
-            String qualifier
-        ) throws ServiceException;
-        
-        /* (non-Javadoc)
-         * @see org.openmdx.base.collection.FilterableMap#values(java.lang.Object)
-         */
-        public List values(Object criteria) {
-            if(criteria != null) throw new UnsupportedOperationException("Re-Ordering not supported");
-            return new ArrayList(getDelegate().values());
-        }
+        private final String featureName;
 
         /* (non-Javadoc)
+         * @see java.lang.Iterable#iterator()
          */
-        protected SortedMap getDelegate(
-        ) throws MarshalException {
+        public Iterator<Object> iterator() {
             try {
-                for(
-                    Iterator i=Object_1.this.getDelegate().objDefaultFetchGroup().iterator();
-                    i.hasNext();
-                ){
-                    String feature = (String) i.next();
-                    if(feature.startsWith(containerPrefix)) get(
-                        feature.substring(containerPrefix.length(), feature.lastIndexOf(':')),
-                        true // Creates embedded object if necessary
-                    ); 
-                }
-                return this.map;
+                Object value = objGetValue(this.featureName);
+                return (
+                    value == null ? Collections.emptySet() : Collections.singleton(value)
+                ).iterator();
             } catch (ServiceException exception) {
-                throw new MarshalException(exception);
+                throw new RuntimeServiceException(exception);
             }
         }
-
-        private final SortedMap map = new TreeMap();
-
-        protected final String containerPrefix;
-
-        protected final boolean lazy;
         
-    }
-
-
-    //--------------------------------------------------------------------------
-    // Class Context
-    //--------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     */
-    private FilterableMap context = null;
-
-    /* (non-Javadoc)
-     */
-    private synchronized FilterableMap getContext(
-    ){
-        if(this.context==null)this.context = new Context();
-        return this.context;
-    }
-
-    /* (non-Javadoc)
-     */
-    class Context extends Container{
-        
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 3760567468472873785L;
-
-        
-        /**
-         * Constructor
-         */
-        Context() {
-            super(SystemAttributes.CONTEXT_PREFIX, false);
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.generic.view.Object_1.Container#createView(java.lang.String)
-         */
-        protected Object_1_0 getEmbeddedObject(String objectClass, String prefix, String qualifier) throws ServiceException {
-            return new ContextObject_1(
-                Object_1.this,
-                objectClass,
-                prefix, 
-                qualifier
-            );
-        }
-
-    }
-
-    
-    //--------------------------------------------------------------------------
-    // Class Role
-    //--------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     */
-    private FilterableMap role = null;
-
-    /* (non-Javadoc)
-     */
-    private synchronized FilterableMap getRole(
-    ){
-        if(this.role==null)this.role = new Role();
-        return this.role;
-    }
-
-    /* (non-Javadoc)
-     */
-    class Role extends Container {
-
-        /**
-         * 
-         */
-        private static final long serialVersionUID = 3833182532186485552L;
-
-        /**
-         * Constructor
-         */
-        Role() {
-            super(SystemAttributes.ROLE_PREFIX, true);
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.generic.view.Object_1.Container#createView(java.lang.String)
-         */
-        protected Object_1_0 getEmbeddedObject(String objectClass, String prefix, String qualifier) throws ServiceException {
-            return new RoleObject_1(
-                Object_1.this,
-                objectClass,
-                prefix, 
-                qualifier
-            );
-        }
-        
-    }
-    
-    /**
-     * Add a role to a core object
-     * 
-     * @param roleId
-     * @param objectClass
-     * @return
-     * @throws ServiceException
-     */
-    public Object_1_0 addRole(
-        String roleId,
-        String objectClass
-    ) throws ServiceException {
-        assertAcessibility();
-        getDelegate().objSetValue(
-            SystemAttributes.ROLE_PREFIX + roleId + ':' + SystemAttributes.OBJECT_CLASS,
-            objectClass
-        );
-        return (Object_1_0) getRole().get(roleId);           
-    }
-    
-
-    //--------------------------------------------------------------------------
-    // Class View
-    //--------------------------------------------------------------------------
-
-    /* (non-Javadoc)
-     */
-    private FilterableMap view = null;
-
-    /* (non-Javadoc)
-     */
-    private synchronized FilterableMap getView(
-    ){
-        if(this.view==null)this.view = new View();
-        return this.view;
-    }
-    
-    /* (non-Javadoc)
-     */
-    private class View extends Container {
-
-       /**
-         * 
-         */
-        private static final long serialVersionUID = 3256438127291020598L;
-
-    /**
-         * Constructor
-         */
-        View() {
-            super(SystemAttributes.VIEW_PREFIX, false);
-        }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.base.accessor.generic.view.Object_1.Container#createView(java.lang.String)
-         */
-        protected Object_1_0 getEmbeddedObject(String objectClass, String prefix, String qualifier) throws ServiceException {
-            return new ViewObject_1(
-                Object_1.this,
-                objectClass,
-                prefix, 
-                qualifier
-            );
-        }
-
     }
 
 }

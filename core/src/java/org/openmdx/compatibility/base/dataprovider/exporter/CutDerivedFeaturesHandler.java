@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CutDerivedFeaturesHandler.java,v 1.4 2008/05/12 10:45:51 wfro Exp $
+ * Name:        $Id: CutDerivedFeaturesHandler.java,v 1.5 2008/11/11 15:38:42 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/12 10:45:51 $
+ * Date:        $Date: 2008/11/11 15:38:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -111,9 +111,9 @@ public class CutDerivedFeaturesHandler extends DelegatingHandler {
       if (object.getValues(SystemAttributes.OBJECT_CLASS) != null) {
          objectClass =
             this.model.getDereferencedType(
-               object.getValues(SystemAttributes.OBJECT_CLASS).get(0));
+               object.getValues(SystemAttributes.OBJECT_CLASS).get(0)
+            );
       }
-      
       if (objectClass != null) {
          // get a map containing model-information for the features of this class
          Map classFeatures = (Map) objectClass.getValues("allFeature").get(0);

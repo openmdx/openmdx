@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ByteOrderMark.java,v 1.2 2007/10/10 16:06:08 hburger Exp $
+ * Name:        $Id: ByteOrderMark.java,v 1.3 2008/09/09 14:19:59 hburger Exp $
  * Description: Byte Order Mark
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:08 $
+ * Date:        $Date: 2008/09/09 14:19:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -107,7 +107,7 @@ public class ByteOrderMark {
 	 * Each <code>ENCODINGS</code> entry corresponds to a
 	 * <code>REPRESENTATIONS</code> entry.
 	 */
-	final public static String[] ENCODINGS = new String[]{
+	final public static String[] ENCODINGS = {
 		Encodings.UTF_8, 
 		Encodings.UTF_32BE,
 		Encodings.UTF_32LE,

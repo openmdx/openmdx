@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ReferencedObjectFactory.java,v 1.2 2004/10/29 15:57:45 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ReferencedObjectFactory.java,v 1.3 2008/11/21 17:03:29 hburger Exp $
  * Description: Referenced Object Factory
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/10/29 15:57:45 $
+ * Date:        $Date: 2008/11/21 17:03:29 $
  * ====================================================================
  *
  * This software is published under the GNU Lesser General Public
  * as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
@@ -52,7 +52,7 @@ public class ReferencedObjectFactory implements ObjectFactory
      *
      * @throws Exception
      */
-    public Object getObjectInstance(Object obj, Name name, Context nameCtx, Hashtable environment) throws Exception
+    public Object getObjectInstance(Object obj, Name name, Context nameCtx, Hashtable<?,?> environment) throws Exception
     {
         return new Date();
     }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeTabControl.java,v 1.10 2008/05/01 21:43:56 wfro Exp $
+ * Name:        $Id: AttributeTabControl.java,v 1.12 2008/10/31 13:27:37 wfro Exp $
  * Description: TabControl
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:56 $
+ * Date:        $Date: 2008/10/31 13:27:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,16 +52,15 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.view.ObjectView;
 
 public class AttributeTabControl
   extends TabControl
@@ -94,13 +93,23 @@ public class AttributeTabControl
         String frame,
         boolean forEditing        
     ) throws ServiceException {
-        for(int j = 0; j < this.getFieldGroupControl().length; j++) {
-            FieldGroupControl fieldGroup = this.getFieldGroupControl()[j];
-            fieldGroup.paint(
-                p,
-                frame,
-                forEditing
-            );
+        RefObject_1_0 refObj = p.getView() instanceof ObjectView ?
+            ((ObjectView)p.getView()).getRefObject() :
+            null;
+        for(
+            int i = 0; 
+            i < this.getFieldGroupControl().length; 
+            i++
+        ) {
+            FieldGroupControl fieldGroup = this.getFieldGroupControl()[i];
+            if(
+                p.getApplicationContext().getPortalExtension().isEnabled(fieldGroup, refObj, p.getApplicationContext())) {
+                fieldGroup.paint(
+                    p,
+                    frame,
+                    forEditing
+                );
+            }
         }
     }
     

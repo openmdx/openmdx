@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Attribute.java,v 1.15 2007/12/13 18:58:09 wfro Exp $
+ * Name:        $Id: Attribute.java,v 1.17 2008/12/08 16:33:52 wfro Exp $
  * Description: Attribute 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/12/13 18:58:09 $
+ * Date:        $Date: 2008/12/08 16:33:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 
@@ -75,13 +72,28 @@ public final class Attribute
         AttributeValue attributeValue
     ) {
         this(
-            locale < field.getLabel().size()
-                ? field.getLabel().get(locale)
-                : field.getLabel().get(0),
-            locale < field.getToolTip().size()
-                ? field.getToolTip().get(locale)
-                : field.getToolTip().size() == 0 ? "" : field.getToolTip().get(0),
+            locale,
+            field,
             field.getSpanRow(),
+            attributeValue
+        );
+    }
+    
+    //-------------------------------------------------------------------------
+    public Attribute(
+        int locale,
+        org.openmdx.ui1.jmi1.ValuedField field,
+        int spanRow,
+        AttributeValue attributeValue
+    ) {
+        this(
+            locale < field.getLabel().size() ? 
+                field.getLabel().get(locale) : 
+                field.getLabel().get(0),
+            locale < field.getToolTip().size() ? 
+                field.getToolTip().get(locale) : 
+                field.getToolTip().size() == 0 ? "" : field.getToolTip().get(0),
+            spanRow,
             field.getEventHandler(),
             attributeValue     
         );

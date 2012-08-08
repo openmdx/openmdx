@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.4 2008/06/24 16:17:21 hburger Exp $
+ * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.9 2008/11/24 10:17:07 wfro Exp $
  * Description: ContainerInvocationHandler 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/24 16:17:21 $
+ * Date:        $Date: 2008/11/24 10:17:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,6 +67,7 @@ import org.w3c.cci2.Container;
 /**
  * ContainerInvocationHandler
  */
+@SuppressWarnings("unchecked")
 public class Jmi1ContainerInvocationHandler
     implements InvocationHandler
 {
@@ -120,13 +121,12 @@ public class Jmi1ContainerInvocationHandler
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
-    @SuppressWarnings("deprecation")
     public Object invoke(
         Object proxy, 
         Method method, 
         Object[] args
     ) throws Throwable {        
-        String methodName = method.getName().intern();
+        String methodName = method.getName();
         Class<?> declaringClass = method.getDeclaringClass();
         try {
             if(this.cciDelegate == null) {
@@ -135,51 +135,58 @@ public class Jmi1ContainerInvocationHandler
                     // This typed association end interface has been prepended 
                     // by the Jmi1ObjectInvocationHandler
                     //
-                    if("add" == methodName) {
+                    if("add".equals(methodName)) {
                         this.refDelegate.refAdd(args);
                         return null;
-                    } else if("get" == methodName) {
+                    } 
+                    else if("get".equals(methodName)) {
                         return this.refDelegate.refGet(args);
-                    } else if("remove" == methodName) {
+                    } 
+                    else if("remove".equals(methodName)) {
                         this.refDelegate.refRemove(args);
                         return null;
                     }
-                } else if (declaringClass == Container.class) {
+                } 
+                else if (declaringClass == Container.class) {
                     // 
                     // This interfaces is extended by the typed association end 
                     // interface which has been prepended 
                     // by the Jmi1ObjectInvocationHandler
                     //
-                    if("getAll" == methodName && args.length == 1) {
+                    if("getAll".equals(methodName) && args.length == 1) {
                         return this.refDelegate.refGetAll(args[0]);
-                    } else if("removeAll" == methodName && args.length == 1) {
-                        this.refDelegate.refRemoveAll(args[0]);
-                        return null;
+                    } 
+                    else if("removeAll".equals(methodName) && args.length == 1) {
+                        return this.refDelegate.refRemoveAll(args[0]);
                     }
                 }
                 return method.invoke(this.refDelegate, args);
-            } else {
+            } 
+            else {
                 if(declaringClass == RefContainer.class) {
-                    if("refAdd" == methodName) {
+                    if("refAdd".equals(methodName)) {
                         ReferenceDef.getInstance(proxy.getClass()).add.invoke(
                             this.cciDelegate, 
                             (Object[]) this.marshaller.unmarshal(args[0])
                         );
                         return null;
-                    } else if("refGet" == methodName) {
+                    } 
+                    else if("refGet".equals(methodName)) {
                         return this.marshaller.marshal(
                             ReferenceDef.getInstance(proxy.getClass()).get.invoke(
                                 this.cciDelegate, 
                                 (Object[]) this.marshaller.unmarshal(args[0])
                             )
                         );
-                    } else if("refRemove" == methodName) {
+                    } 
+                    else if("refRemove".equals(methodName)) {
                         ReferenceDef.getInstance(proxy.getClass()).remove.invoke(
                             this.cciDelegate, 
                             (Object[]) this.marshaller.unmarshal(args[0])
                         );
                         return null;
-                    } else if("refGetAll" == methodName) {
+                    } 
+                    else if("refGetAll".equals(methodName)) {
                         Object predicate = this.marshaller.unmarshal(args[0]);
                         return this.marshaller.marshal(
                             predicate instanceof AnyTypePredicate ? ReferenceDef.getAll.invoke(
@@ -189,7 +196,8 @@ public class Jmi1ContainerInvocationHandler
                                 predicate
                             )
                         );
-                    } else if("refRemoveAll" == methodName) {
+                    } 
+                    else if("refRemoveAll".equals(methodName)) {
                         Object predicate = this.marshaller.unmarshal(args[0]);
                         if(predicate instanceof AnyTypePredicate) {
                             ReferenceDef.removeAll.invoke(
@@ -244,12 +252,12 @@ public class Jmi1ContainerInvocationHandler
             Method get = null;
             Method remove = null;
             for(Method method : nativeInterface.getDeclaredMethods()) {
-                String name = method.getName().intern();
-                if("add" == name) {
+                String methodName = method.getName();
+                if("add".equals(methodName)) {
                     add = method;
-                } else if ("get" == name) {
+                } else if ("get".equals(methodName)) {
                     get = method;
-                } else if ("remove" == name) {
+                } else if ("remove".equals(methodName)) {
                     remove = method;
                 }
             }
@@ -279,10 +287,13 @@ public class Jmi1ContainerInvocationHandler
         ){
             ReferenceDef instance = instances.get(referenceClass);
             if(instance == null) {
-                instances.putIfAbsent(
+                ReferenceDef concurrent = instances.putIfAbsent(
                     referenceClass, 
                     instance = new ReferenceDef(referenceClass.getInterfaces()[0])
                 );
+                if(concurrent != null) {
+                    instance = concurrent;
+                }
             }
             return instance;
         };

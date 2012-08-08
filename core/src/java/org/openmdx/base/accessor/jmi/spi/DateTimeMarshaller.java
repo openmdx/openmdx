@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateTimeMarshaller.java,v 1.4 2008/04/09 12:34:01 hburger Exp $
+ * Name:        $Id: DateTimeMarshaller.java,v 1.6 2008/09/26 15:27:16 hburger Exp $
  * Description: Date-Time Marshaller class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:01 $
+ * Date:        $Date: 2008/09/26 15:27:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,113 +50,78 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
-import java.text.ParseException;
 import java.util.Date;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.format.DateFormat;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
-import org.openmdx.kernel.exception.BasicException;
+import org.w3c.spi.ImmutableDatatype;
 
 
-//---------------------------------------------------------------------------
 /**
- * Marshals Object -> Date and Date -> Object. Object must be instanceof String.
+ * Normalizes Date
  */
-public class DateTimeMarshaller
-  implements Marshaller, ReluctantUnmarshalling 
-{
+public class DateTimeMarshaller extends NormalizingMarshaller {
 
-  //-------------------------------------------------------------------------
-  private DateTimeMarshaller(
-    boolean forward
-  ) {
-    this.forward = forward;
-  }
-  
-  //-------------------------------------------------------------------------
-  public static DateTimeMarshaller getInstance(
-    boolean forward
-  ) {
-    return forward
-      ? DateTimeMarshaller.toMarshaller
-      : DateTimeMarshaller.fromMarshaller;
-  }
+    /**
+     * Constructor 
+     */
+    private DateTimeMarshaller(
+    ) {
+        // Avoid instantiation
+    }
 
-  //-------------------------------------------------------------------------
-  public Object marshalGeneric(
-    Object source,
-    boolean forward
-  ) throws ServiceException {
-    if(source == null) {
-      return null;
-    }
-    if(forward) {
-      try {
-        return DateFormat.getInstance().parse((String)source);
-      }
-      catch(ParseException e) {
-        throw new ServiceException(
-            e,
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.TRANSFORMATION_FAILURE, 
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "exception parsing date"
-        );  
-      }
-    }
-    else {
-      if(source instanceof Date) {
-        return DateFormat.getInstance().format((Date)source);
-      }
-      else {
-        throw new ServiceException (
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.TRANSFORMATION_FAILURE, 
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Can only unmarshal objects of type " + Date.class.getName()
-        );  
-      }
-    }
-  }
-  
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object marshal(
-    Object source
-  ) throws ServiceException {
-    return marshalGeneric(
-      source, 
-      this.forward
-    );
-  }
-  
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object unmarshal (
-    Object source
-  ) throws ServiceException {
-    return marshalGeneric(
-      source, 
-      !this.forward
-    );
-  }
+    /**
+     * A singleton
+     */
+    static private final DateTimeMarshaller instance = new DateTimeMarshaller();
 
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private final boolean forward;
-  
-  static private final DateTimeMarshaller toMarshaller = new DateTimeMarshaller(true);
-  static private final DateTimeMarshaller fromMarshaller = new DateTimeMarshaller(false);
+    /**
+     * Provide a marshaller instance
+     * 
+     * @return an instance
+     */
+    public static DateTimeMarshaller getInstance(
+    ) {
+        return instance;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#normalize(java.lang.Object)
+     */
+    @Override
+    protected Object normalize(
+        Object source
+    ) throws ServiceException{
+        if(source instanceof ImmutableDatatype && source instanceof Date) {
+            return ((Date)source).clone();
+        }
+        if(keep(source)) {
+            return source;
+        }
+        //
+        // Lenient
+        //
+        try {
+            return DateFormat.getInstance().parse((String)source);
+        } catch (Exception exception) {
+            throw newServiceException(exception, source);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#isLenient()
+     */
+    @Override
+    protected boolean isLenient() {
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#targetClass()
+     */
+    @Override
+    protected Class<?> targetClass() {
+        return Date.class;
+    }    
 
 }
-
-//--- End of File -----------------------------------------------------------

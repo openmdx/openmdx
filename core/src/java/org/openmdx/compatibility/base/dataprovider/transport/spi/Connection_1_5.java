@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Connection_1_5.java,v 1.2 2007/11/28 13:28:47 hburger Exp $
- * Description: Connection_1_5 
- * Revision:    $Revision: 1.2 $
+ * Name:        $Id: Connection_1_5.java,v 1.5 2008/09/11 18:01:06 hburger Exp $
+ * Description: Connection interface 1.5
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/28 13:28:47 $
+ * Date:        $Date: 2008/09/11 18:01:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,14 +50,18 @@
  */
 package org.openmdx.compatibility.base.dataprovider.transport.spi;
 
-import org.openmdx.model1.accessor.basic.cci.ModelHolder_1_0;
-
 /**
- * Connection_1_5
- *
+ * Connection interface 1.5
  */
 public interface Connection_1_5
-    extends Connection_1_4, ModelHolder_1_0
+    extends Connection_1_4
 {
-    // 
+
+    /**
+     * Tells whether the persistence manager represented by this connection is multithreaded or not
+     * 
+     * @return <code> true</code> if the the persistence manager is multithreaded 
+     */
+    boolean isMultithreaded();
+
 }

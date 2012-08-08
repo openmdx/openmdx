@@ -2,11 +2,11 @@
 <!--
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ejb-jar.xml,v 1.3 2007/05/31 08:40:09 hburger Exp $
+ * Name:        $Id: ejb-jar.xml,v 1.4 2008/11/16 00:46:12 hburger Exp $
  * Description: Enterprise JavaBeans 2.1 Descriptor
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/05/31 08:40:09 $
+ * Date:        $Date: 2008/11/16 00:46:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -118,22 +118,7 @@
 			<env-entry>
 				<env-entry-name>KERNEL/modelPackage[3]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:datastore1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[4]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>org:openmdx:test:app1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[5]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:view1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[6]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:sequence1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>MODEL/optimisticLocking</env-entry-name>

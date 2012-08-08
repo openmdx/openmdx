@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RoseExporterMain.java,v 1.9 2008/03/21 18:40:08 hburger Exp $
+ * Name:        $Id: RoseExporterMain.java,v 1.10 2008/09/10 08:55:29 hburger Exp $
  * Description: RoseExporterMain command-line tool
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:40:08 $
+ * Date:        $Date: 2008/09/10 08:55:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,164 +69,160 @@ import org.openmdx.model1.importer.rose.RoseImporter_1;
 @SuppressWarnings("unchecked")
 public class RoseExporterMain {
 
-  //-------------------------------------------------------------------------  
-  static class Runner {
-    
-    //-----------------------------------------------------------------------  
-    public void run(
-      String args[]
-    ) throws ServiceException, Exception {
+    //-------------------------------------------------------------------------  
+    static class Runner {
 
-      // get options
-      Getopt g = new Getopt(
-        RoseExporterMain.class.getName(),
-        args,
-        "",
-        new LongOpt[]{
-          new LongOpt("pathMapSymbol", LongOpt.REQUIRED_ARGUMENT, null, 's'),
-          new LongOpt("pathMapPath", LongOpt.REQUIRED_ARGUMENT, null, 'p'),
-          new LongOpt("mdlDir", LongOpt.REQUIRED_ARGUMENT, null, 'd'),
-          new LongOpt("mdlFile", LongOpt.REQUIRED_ARGUMENT, null, 'f'),
-          new LongOpt("out", LongOpt.OPTIONAL_ARGUMENT, null, 'o'),
-          new LongOpt("format", LongOpt.OPTIONAL_ARGUMENT, null, 't'),
-          new LongOpt("openmdxjdoDir", LongOpt.OPTIONAL_ARGUMENT, null, 'j')
+        //-----------------------------------------------------------------------  
+        public void run(
+            String args[]
+        ) throws ServiceException, Exception {
+
+            // get options
+            Getopt g = new Getopt(
+                RoseExporterMain.class.getName(),
+                args,
+                "",
+                new LongOpt[]{
+                    new LongOpt("pathMapSymbol", LongOpt.REQUIRED_ARGUMENT, null, 's'),
+                    new LongOpt("pathMapPath", LongOpt.REQUIRED_ARGUMENT, null, 'p'),
+                    new LongOpt("mdlDir", LongOpt.REQUIRED_ARGUMENT, null, 'd'),
+                    new LongOpt("mdlFile", LongOpt.REQUIRED_ARGUMENT, null, 'f'),
+                    new LongOpt("out", LongOpt.OPTIONAL_ARGUMENT, null, 'o'),
+                    new LongOpt("format", LongOpt.OPTIONAL_ARGUMENT, null, 't'),
+                    new LongOpt("openmdxjdoDir", LongOpt.OPTIONAL_ARGUMENT, null, 'j')
+                }
+            );
+
+            List formats = new ArrayList();
+            List modelNames = new ArrayList();
+            String mdlDir = null;
+            String mdlFile = null;
+            String openmdxjdoDir = null;
+            String outFileName = "./out.jar";
+            List pathMapSymbols = new ArrayList();
+            List pathMapPaths = new ArrayList();
+
+            int c;
+            while ((c = g.getopt()) != -1) {
+                switch(c) {
+                    case 's':
+                        pathMapSymbols.add(
+                            g.getOptarg()
+                        );
+                        break;
+                    case 't':
+                        formats.add(
+                            g.getOptarg()
+                        );
+                        break;
+                    case 'p':
+                        pathMapPaths.add(
+                            g.getOptarg()
+                        );
+                        break;
+                    case 'd':
+                        mdlDir = g.getOptarg();
+                        break;
+                    case 'j':
+                        openmdxjdoDir = g.getOptarg();
+                        break;
+                    case 'f':
+                        mdlFile = g.getOptarg();
+                        break;
+                    case 'o':
+                        outFileName = g.getOptarg();
+                        break;
+                }
+            }
+
+            // modelNames      
+            for(
+                    int i = g.getOptind(); 
+                    i < args.length ; 
+                    i++
+            ) {
+                modelNames.add(args[i]);
+            }
+            if(modelNames.size() != 1) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION,
+                    "number of model names must be 1",
+                    new BasicException.Parameter("model names", modelNames)
+                );
+            }
+
+            // pathMap
+            Map pathMap = new HashMap();
+            if(pathMapSymbols.size() != pathMapPaths.size()) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION,
+                    "number of symbols and paths must be equal",
+                    new BasicException.Parameter("pathMapSymbol", pathMapSymbols),
+                    new BasicException.Parameter("pathMapPath", pathMapPaths)
+                );
+            }
+
+            pathMap = new HashMap();
+            for(
+                    int i = 0; 
+                    i < pathMapSymbols.size();
+                    i++
+            ) {
+                pathMap.put(
+                    pathMapSymbols.get(i),
+                    pathMapPaths.get(i)
+                );
+            }
+
+            Model_1Accessor modelExternalizer = new Model_1Accessor(
+                "Mof", 
+                openmdxjdoDir
+            );
+
+            modelExternalizer.importModel(
+                new RoseImporter_1(
+                    mdlDir,
+                    mdlFile,
+                    pathMap,
+                    System.out
+                )
+            );      
+            FileOutputStream fos = new FileOutputStream(
+                new File(outFileName)
+            );
+            fos.write(
+                modelExternalizer.externalizePackageAsJar(
+                    (String)modelNames.get(0),
+                    formats
+                )
+            );  
+            fos.close();
         }
-      );
+    }
 
-      List formats = new ArrayList();
-      List modelNames = new ArrayList();
-      String mdlDir = null;
-      String mdlFile = null;
-      String openmdxjdoDir = null;
-      String outFileName = "./out.jar";
-      List pathMapSymbols = new ArrayList();
-      List pathMapPaths = new ArrayList();
-
-      int c;
-      while ((c = g.getopt()) != -1) {
-        switch(c) {
-          case 's':
-            pathMapSymbols.add(
-              g.getOptarg()
-            );
-            break;
-          case 't':
-            formats.add(
-              g.getOptarg()
-            );
-            break;
-          case 'p':
-            pathMapPaths.add(
-              g.getOptarg()
-            );
-            break;
-          case 'd':
-            mdlDir = g.getOptarg();
-            break;
-          case 'j':
-            openmdxjdoDir = g.getOptarg();
-            break;
-          case 'f':
-            mdlFile = g.getOptarg();
-            break;
-          case 'o':
-            outFileName = g.getOptarg();
-            break;
+    //---------------------------------------------------------------------------  
+    public static void main(
+        String[] args
+    ) {
+        try {
+            new Runner().run(args);
         }
-      }
+        catch(ServiceException e) {
+            System.err.println(e.toString());
+        }
+        catch(Exception e) {
+            System.err.println(
+                new ServiceException(e).toString()
+            );
+        }
+    }
 
-      // modelNames      
-      for(
-          int i = g.getOptind(); 
-          i < args.length ; 
-          i++
-      ) {
-          modelNames.add(args[i]);
-      }
-      if(modelNames.size() != 1) {
-          throw new ServiceException(
-              BasicException.Code.DEFAULT_DOMAIN,
-              BasicException.Code.INVALID_CONFIGURATION,
-              new BasicException.Parameter[]{
-                new BasicException.Parameter("model names", modelNames)
-              },
-              "number of model names must be 1"
-          );
-      }
-      
-      // pathMap
-      Map pathMap = new HashMap();
-      if(pathMapSymbols.size() != pathMapPaths.size()) {
-        throw new ServiceException(
-          BasicException.Code.DEFAULT_DOMAIN,
-          BasicException.Code.INVALID_CONFIGURATION,
-          new BasicException.Parameter[]{
-            new BasicException.Parameter("pathMapSymbol", pathMapSymbols),
-            new BasicException.Parameter("pathMapPath", pathMapPaths)
-          },
-          "number of symbols and paths must be equal"
-        );
-      }
-  
-      pathMap = new HashMap();
-      for(
-        int i = 0; 
-        i < pathMapSymbols.size();
-        i++
-      ) {
-        pathMap.put(
-          pathMapSymbols.get(i),
-          pathMapPaths.get(i)
-        );
-      }
-      
-      Model_1Accessor modelExternalizer = new Model_1Accessor(
-        "Mof", 
-        openmdxjdoDir
-      );
-  
-      modelExternalizer.importModel(
-        new RoseImporter_1(
-          mdlDir,
-          mdlFile,
-          pathMap,
-          System.out
-        )
-      );      
-      FileOutputStream fos = new FileOutputStream(
-          new File(outFileName)
-      );
-      fos.write(
-          modelExternalizer.externalizePackageAsJar(
-              (String)modelNames.get(0),
-              formats
-          )
-      );  
-      fos.close();
-    }
-  }
-  
-  //---------------------------------------------------------------------------  
-  public static void main(
-    String[] args
-  ) {
-    try {
-      new Runner().run(args);
-    }
-    catch(ServiceException e) {
-      System.err.println(e.toString());
-    }
-    catch(Exception e) {
-      System.err.println(
-        new ServiceException(e).toString()
-      );
-    }
-  }
+    //---------------------------------------------------------------------------
+    // Variables  
+    //---------------------------------------------------------------------------  
 
-  //---------------------------------------------------------------------------
-  // Variables  
-  //---------------------------------------------------------------------------  
-    
 }
 
 //--- End of File -----------------------------------------------------------

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightConnectionManager.java,v 1.9 2008/03/21 18:38:38 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: LightweightConnectionManager.java,v 1.10 2008/10/09 22:28:54 hburger Exp $
  * Description: LightweightConnectionManager
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:38:38 $
+ * Date:        $Date: 2008/10/09 22:28:54 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD licenseas listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.application.container.lightweight;
 
@@ -69,6 +68,7 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
+import org.openmdx.kernel.application.container.spi.resource.Validatable;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
 import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
@@ -81,7 +81,6 @@ import org.openmdx.uses.org.apache.commons.pool.impl.GenericObjectPool;
  * This implementation uses one connection manager per managed connection
  * factory.
  */
-@SuppressWarnings("unchecked")
 public class LightweightConnectionManager
     extends AbstractConnectionManager
 {
@@ -89,16 +88,15 @@ public class LightweightConnectionManager
     /**
      * Constructor
      * 
-     * @param credentials
-     * @param connectionClass
-     * @param transactionManager
-     * @param initialCapacity 
-     * @param maximumCapacity 
-     * @param maximumWait 
+     * @param credentials the credentials to be used to connect
+     * @param connectionClass the connection class 
+     * @param transactionManager the transaction manager to be used
+     * @param maximumCapacity the maximum number of objects that can be borrowed from me at one time 
+     * @param maximumWait the maximum amount of time to wait for an idle object when the pool is exhausted
      */
     public LightweightConnectionManager(
-        Set credentials, 
-        Class connectionClass,
+        Set<?> credentials, 
+        Class<?> connectionClass,
         TransactionManager transactionManager, 
         Integer maximumCapacity, 
         Long maximumWait
@@ -115,21 +113,68 @@ public class LightweightConnectionManager
 
     /**
      * Constructor
-     * @param credentials
-     * @param connectionClass
-     * @param transactionManager
-     * @param initialCapacity 
-     * @param maximumCapacity 
-     * @param maximumWait 
      * 
-     * @throws ResourceException
+     * @param credentials the credentials to be used to connect
+     * @param connectionClass the connection class 
+     * @param transactionManager the transaction manager to be used
+     * @param maximumCapacity the maximum number of objects that can be borrowed from me at one time 
+     * @param maximumWait the maximum amount of time to wait for an idle object when the pool is exhausted
      */
     public LightweightConnectionManager(
-        Set credentials, 
+        Set<?> credentials, 
         String connectionClass,
         TransactionManager transactionManager, 
         Integer maximumCapacity, 
         Long maximumWait
+    ) throws ResourceException {
+        this(
+            credentials,
+            connectionClass,
+            transactionManager,
+            maximumCapacity,
+            maximumWait,
+            null, // maximumIdle
+            null, // minimumIdle
+            null, // testOnBorrow
+            null, // testOnReturn
+            null, // timeBetweeEvictionRuns
+            null, // numberOfTestsPerEvictionRun
+            null, // minimumEvictableIdleTime
+            null // testWhileIdle
+       );
+    }
+
+    /**
+     * Constructor
+     * 
+     * @param credentials the credentials to be used to connect
+     * @param connectionClass the connection class 
+     * @param transactionManager the transaction manager to be used
+     * @param maximumCapacity the maximum number of objects that can be borrowed from me at one time 
+     * @param maximumWait the maximum amount of time to wait for an idle object when the pool is exhausted
+     * @param maximumIdle maxIdle the maximum number of idle objects in my poo
+     * @param minimumIdle minIdle the minimum number of idle objects in my pool
+     * @param testOnBorrow whether or not to validate objects before they are returned by the borrowObject(} method
+     * @param testOnReturn whether or not to validate objects after they are returned to the returnObject(} method
+     * @param timeBetweeEvictionRuns the amount of time (in milliseconds) to sleep between examining idle objects for eviction
+     * @param numberOfTestsPerEvictionRun the number of idle objects to examine per run within the idle object eviction thread (if any)
+     * @param minimumEvictableIdleTime the minimum number of milliseconds an object can sit idle in the pool before it is eligable for eviction
+     * @param testWhileIdle whether or not to validate objects in the idle object eviction thread, if any
+     */
+    public LightweightConnectionManager(
+        Set<?> credentials, 
+        String connectionClass,
+        TransactionManager transactionManager, 
+        Integer maximumCapacity, 
+        Long maximumWait, 
+        Integer maximumIdle, 
+        Integer minimumIdle, 
+        Boolean testOnBorrow, 
+        Boolean testOnReturn, 
+        Long timeBetweeEvictionRuns, 
+        Integer numberOfTestsPerEvictionRun, 
+        Long minimumEvictableIdleTime, 
+        Boolean testWhileIdle
     ) throws ResourceException {
         super(credentials, connectionClass);
         this.transactionManager = transactionManager;
@@ -137,10 +182,18 @@ public class LightweightConnectionManager
 			new LightweightPoolableObjectFactory(),
 			maximumCapacity == null ? GenericObjectPool.DEFAULT_MAX_ACTIVE : maximumCapacity.intValue(),
 			GenericObjectPool.WHEN_EXHAUSTED_BLOCK,
-			maximumWait == null ? GenericObjectPool.DEFAULT_MAX_WAIT : maximumWait.longValue()			
+			maximumWait == null ? GenericObjectPool.DEFAULT_MAX_WAIT : maximumWait.longValue(),
+		    maximumIdle == null ? GenericObjectPool.DEFAULT_MAX_IDLE : maximumIdle.intValue(),    
+	        minimumIdle == null ? GenericObjectPool.DEFAULT_MIN_IDLE : minimumIdle.intValue(), 
+            testOnBorrow == null ? GenericObjectPool.DEFAULT_TEST_ON_BORROW : testOnBorrow.booleanValue(),
+            testOnReturn == null ? GenericObjectPool.DEFAULT_TEST_ON_RETURN : testOnReturn.booleanValue(),   
+            timeBetweeEvictionRuns == null ? GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS : timeBetweeEvictionRuns.longValue(),
+            numberOfTestsPerEvictionRun == null ? GenericObjectPool.DEFAULT_NUM_TESTS_PER_EVICTION_RUN :  numberOfTestsPerEvictionRun.intValue(),
+            minimumEvictableIdleTime == null ? GenericObjectPool.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS : minimumEvictableIdleTime.longValue(),
+            testWhileIdle == null ? GenericObjectPool.DEFAULT_TEST_WHILE_IDLE : testWhileIdle.booleanValue()    
 		);
     }
-
+    
     /**
      * Implements <code>Serializable</code>.
      */
@@ -154,7 +207,8 @@ public class LightweightConnectionManager
     /**
      * Each value is a set of connections enlisted with the given transaction.
      */
-    private static final Map transactionalConnections = new WeakHashMap();
+    private static final Map<Transaction,ManagedConnectionSet> transactionalConnections = 
+        new WeakHashMap<Transaction,ManagedConnectionSet>();
     
 	/**
      * A pool of unused connections
@@ -199,14 +253,14 @@ public class LightweightConnectionManager
     /* (non-Javadoc)
      * @see org.openmdx.kernel.application.container.lightweight.AbstractConnectionManager#getManagedConnections()
      */
-    protected Set getManagedConnections(        
+    protected Set<ManagedConnection> getManagedConnections(        
     ) throws ResourceException {
         Transaction transaction = getTransaction();
         if(transaction == null) throw new LocalTransactionException(
             "No active transaction, managed connection can't be allocated"
         );
         synchronized(transactionalConnections){
-            ManagedConnectionSet managedConnectionSet = (ManagedConnectionSet) transactionalConnections.get(
+            ManagedConnectionSet managedConnectionSet = transactionalConnections.get(
                 transaction
             );
             if(managedConnectionSet == null) try {
@@ -293,17 +347,22 @@ public class LightweightConnectionManager
         }
     }
 
+    
+    //------------------------------------------------------------------------
+    // Class ManagedConnectionSet
+    //------------------------------------------------------------------------
+    
 	/**
-     * Class ManagedConnectionSet
+     * Managed Connection Set
      */
     class ManagedConnectionSet
-        extends AbstractSet
+        extends AbstractSet<ManagedConnection>
         implements Synchronization 
     {
 
         private static final long serialVersionUID = 3257009851963356210L;
 
-        private final Set delegate = new HashSet();
+        private final Set<ManagedConnection> delegate = new HashSet<ManagedConnection>();
         
         /* (non-Javadoc)
          * @see javax.transaction.Synchronization#afterCompletion(int)
@@ -319,7 +378,7 @@ public class LightweightConnectionManager
             //
         }
 
-        public Iterator iterator(
+        public Iterator<ManagedConnection> iterator(
         ) {
             return new Interceptor(this.delegate.iterator());
         }
@@ -328,22 +387,22 @@ public class LightweightConnectionManager
             return delegate.size();
         }
         
-        public boolean add(Object o) {
+        public boolean add(ManagedConnection o) {
             return this.delegate.add(o);
         }        
         
         /**
          * Class Interceptor
          */
-        class Interceptor implements Iterator {
+        class Interceptor implements Iterator<ManagedConnection> {
             
             public Interceptor(
-                Iterator delegate
+                Iterator<ManagedConnection> delegate
             ) {
                 this.delegate = delegate;
             }
             
-            private final Iterator delegate;
+            private final Iterator<ManagedConnection> delegate;
 
             private ManagedConnection current = null;
             
@@ -351,8 +410,8 @@ public class LightweightConnectionManager
                 return this.delegate.hasNext();
             }
 
-            public Object next() {
-                return this.current = (ManagedConnection) this.delegate.next();
+            public ManagedConnection next() {
+                return this.current = this.delegate.next();
             }
 
             public void remove() {
@@ -368,30 +427,33 @@ public class LightweightConnectionManager
         
     }
 
-	
+    
+	//------------------------------------------------------------------------
+    // Class LightweightPoolableObjectFactory
+    //------------------------------------------------------------------------
+    
 	/**
-	 * 
 	 * Lightweight Poolable Object Factory
-	 *
 	 */
-	class LightweightPoolableObjectFactory implements PoolableObjectFactory {
+    class LightweightPoolableObjectFactory implements PoolableObjectFactory {
 
 		/* (non-Javadoc)
 		 * @see org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory#activateObject(java.lang.Object)
 		 */
 		public void activateObject(Object obj) throws Exception {		
+            ManagedConnection managedConnection = (ManagedConnection)obj;
 	        Transaction transaction = getTransaction();
-	        if(transaction == null) throw new LocalTransactionException(
-	            "No active transaction, resource can't be enlisted"
-	        );
-	        transaction.enlistResource(((ManagedConnection)obj).getXAResource());
+	        if(transaction != null) {
+    	        transaction.enlistResource(managedConnection.getXAResource());
+	        }
 		}
 	
 		/* (non-Javadoc)
 		 * @see org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory#destroyObject(java.lang.Object)
 		 */
 		public void destroyObject(Object obj) throws Exception {
-	        ((ManagedConnection)obj).destroy();
+            ManagedConnection managedConnection = (ManagedConnection)obj;
+            managedConnection.destroy();
 		}
 	
 		/* (non-Javadoc)
@@ -408,17 +470,25 @@ public class LightweightConnectionManager
 		 * @see org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory#passivateObject(java.lang.Object)
 		 */
 		public void passivateObject(Object obj) throws Exception {
-	        ((ManagedConnection)obj).cleanup();
+            ManagedConnection managedConnection = (ManagedConnection)obj;
+            managedConnection.cleanup();
 		}
 	
 		/* (non-Javadoc)
 		 * @see org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory#validateObject(java.lang.Object)
 		 */
 		public boolean validateObject(Object obj) {
-			// 
-			// There is no approprate managed connection validation method
-			//
-			return true;
+		    if(obj instanceof Validatable) {
+		        //
+		        // Validate the object
+		        //
+		        return ((Validatable)obj).validate();
+		    } else {
+	            // 
+	            // There is no validation method
+	            //
+	            return true;
+		    }
 		}
 	
 	}

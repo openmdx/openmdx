@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DateValue.java,v 1.43 2008/04/04 17:01:10 hburger Exp $
+ * Name:        $Id: DateValue.java,v 1.46 2008/11/12 10:36:53 wfro Exp $
  * Description: DateValue 
- * Revision:    $Revision: 1.43 $
+ * Revision:    $Revision: 1.46 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:10 $
+ * Date:        $Date: 2008/11/12 10:36:53 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 
@@ -412,10 +409,10 @@ public class DateValue
                 p. write("<td class=\"addon\" ", rowSpanModifier, ">");
                 if(this.isChangeable()) {
                     if(this.isDate()) {
-                        p.write("        ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\"" + p.getOnClick("multiValuedHigh=", this.getUpperBound("10"), "; return editdates_showPopup(this.id, '", EditObjectControl.POPUP_EDIT_DATES, "', $('", id, "'), new Array());")));
+                        p.write("        ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("10"), "; popup_", EditObjectControl.EDIT_DATES, " = ", EditObjectControl.EDIT_DATES, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_DATES, ", 'popup_", EditObjectControl.EDIT_DATES, "', $('", id, "'), new Array());\""));
                     }
                     else {
-                        p.write("        ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\"" + p.getOnClick("multiValuedHigh=", this.getUpperBound("10"), "; return editdatetimes_showPopup(this.id, '", EditObjectControl.POPUP_EDIT_DATETIMES, "', $('", id, "'), new Array());")));
+                        p.write("        ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("10"), "; popup_", EditObjectControl.EDIT_DATETIMES, " = ", EditObjectControl.EDIT_DATETIMES, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_DATETIMES, ", 'popup_", EditObjectControl.EDIT_DATETIMES, "', $('", id, "'), new Array());\""));
                     }
                 }
                 p.write("</td>");

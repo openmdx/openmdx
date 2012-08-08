@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ObjectHandler.java,v 1.4 2008/06/28 00:21:49 hburger Exp $
+ * Name:        $Id: ObjectHandler.java,v 1.7 2008/09/10 08:55:20 hburger Exp $
  * Description: Local Object Invocation Handler
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:49 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,20 +50,11 @@
  */
 package org.openmdx.kernel.application.container.spi.ejb;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.rmi.RemoteException;
 
 import javax.ejb.EJBObject;
 
-import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -83,8 +74,6 @@ extends AbstractObjectHandler<HomeHandler>
     ){
         super(homeHandler);
     }
-
-    static boolean VALIDATE_SERIALIZED_OBJECT = false;
 
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
@@ -166,24 +155,20 @@ extends AbstractObjectHandler<HomeHandler>
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("object", this),
-                    new BasicException.Parameter("methodName", methodName),
-                    new BasicException.Parameter("argumentClasses", argumentClassNames)
-                },
-                "The requested method is not supported by the given EJB instance"
+                "The requested method is not supported by the given EJB instance",
+                new BasicException.Parameter("object", this),
+                new BasicException.Parameter("methodName", methodName),
+                new BasicException.Parameter("argumentClasses", (Object[])argumentClassNames)
             );
         } catch (ClassNotFoundException exception) {
             throw new BasicException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("object", this),
-                    new BasicException.Parameter("methodName", methodName),
-                    new BasicException.Parameter("argumentClasses", argumentClassNames)
-                },
-                "The requested method is not supported by the given EJB instance"
+                "The requested method is not supported by the given EJB instance",
+                new BasicException.Parameter("object", this),
+                new BasicException.Parameter("methodName", methodName),
+                new BasicException.Parameter("argumentClasses", (Object[])argumentClassNames)
             );
         } finally {
             this.homeHandler.setCallerContext(callerContext);
@@ -224,8 +209,8 @@ extends AbstractObjectHandler<HomeHandler>
         public Object invoke(
             Object[] arguments
         ) throws Exception {
-            SeDes seDes = new SeDes();
-            seDes.put(arguments);
+            InternalMethodInvocationArguments valueHolder = InternalMethodInvocationArguments.getInstance();
+            valueHolder.put(arguments);
             Object callerContext = this.homeHandler.setBeanContext();
             try {
                 RemoteTransactionContext transactionContext = new RemoteTransactionContext(
@@ -233,198 +218,18 @@ extends AbstractObjectHandler<HomeHandler>
                     this.transactionAttribute
                 );
                 try {
-                    seDes.put(delegateInvocation((Object[])seDes.get()));
+                    valueHolder.put(delegateInvocation((Object[])valueHolder.get()));
                     transactionContext.end();
                 } catch (BasicException exception) {
-                    seDes.raise(transactionContext.end(exception));
+                    valueHolder.raise(transactionContext.end(exception));
                 } catch (InvocationTargetException exception) {
                     transactionContext.end();
-                    seDes.raise(exception.getCause());
+                    valueHolder.raise(exception.getCause());
                 }                
             } finally {
                 this.homeHandler.setCallerContext(callerContext);
             }
-            return seDes.get();
-        }
-
-    }
-
-
-    //------------------------------------------------------------------------
-    // Class SeDes
-    //------------------------------------------------------------------------
-
-    /**
-     * Serializer/Deserializer
-     */
-    static class SeDes {
-
-        /**
-         * Constructor 
-         */
-        SeDes() {
-        }
-
-        /**
-         * 
-         */
-        private byte[] data = null;
-
-        /**
-         * <code>true</code> if the serialized object should be thrown instead 
-         * of returned.
-         */
-        private boolean throwable = false;
-
-        /**
-         * Serialize the exception
-         * 
-         * @param exception to be serialized
-         * 
-         * @throws RemoteException 
-         */
-        void raise(
-            Throwable throwable
-        ) throws RemoteException {
-            this.throwable = true;
-            serialize(
-                throwable instanceof Exception ? throwable : BasicException.toStackedException(throwable)
-            );
-        }
-
-        /**
-         * Serialize the object
-         * 
-         * @param object to be serialized
-         * 
-         * @throws RemoteException 
-         */
-        void put(
-            Object object
-        ) throws RemoteException {
-            this.throwable = false;
-            serialize(object);
-        }
-
-        /**
-         * De-serialize the object
-         * 
-         * @return the de-serialized object
-         * 
-         * @throws Exception 
-         */
-        Object get(
-        ) throws Exception {
-            if(this.throwable) {
-                throw (Exception) deserialize();
-            } else {
-                return deserialize();
-            }
-        }
-
-        /**
-         * Serialize the object
-         * 
-         * @param object to be serialized
-         * 
-         * @throws RemoteException 
-         */
-        private void serialize(
-            Object object
-        ) throws RemoteException {
-            try {
-                if(object == null) {
-                    this.data = null;
-                } else {
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    ObjectOutputStream sink = new ObjectOutputStream(stream);
-                    sink.writeObject(object);
-                    sink.close();
-                    this.data = stream.toByteArray();
-                }
-                if (VALIDATE_SERIALIZED_OBJECT) try { 
-                    deserialize();
-                } catch (Exception exception) {
-                    throw new RemoteException(
-                        "Check failure",
-                        BasicException.toStackedException(exception)
-                    );
-                }
-            } catch (IOException exception) {
-                throw new RemoteException(
-                    "Serialization failure",
-                    BasicException.toStackedException(exception)
-                );
-            }
-
-        }
-
-
-        /**
-         * De-serialize the object
-         * 
-         * @return the de-serialized object
-         * 
-         * @throws RemoteException 
-         */
-        private Object deserialize(
-        ) throws RemoteException {
-            if(this.data == null) {
-                return null;
-            } else try {
-                ByteArrayInputStream stream = new ByteArrayInputStream(this.data);
-                ObjectInputStream source = new ThreadInputStream(stream);
-                return source.readObject();
-            } catch (Exception exception) {
-                throw new RemoteException(
-                    "Deserialization failure",
-                    BasicException.toStackedException(exception)
-                );
-            }
-        }
-
-    }
-
-    //------------------------------------------------------------------------
-    // Class ThreadInputStream
-    //------------------------------------------------------------------------
-
-    /**
-     * Thread Input Stream
-     */
-    static class ThreadInputStream extends ObjectInputStream {
-
-        /**
-         * Constructor 
-         *
-         * @param in
-         * @throws IOException
-         */
-        public ThreadInputStream(InputStream in)
-        throws IOException {
-            super(in);
-        }
-
-        /**
-         * Load the local class equivalent of the specified stream class
-         * description. 
-         * 
-         * @param   desc an instance of class <code>ObjectStreamClass</code>
-         * 
-         * @return  a <code>Class</code> object corresponding to <code>desc</code>
-         * 
-         * @throws  IOException any of the usual input/output exceptions
-         * @throws  ClassNotFoundException if class of a serialized object cannot
-         *      be found
-         */
-        protected Class<?> resolveClass(
-            ObjectStreamClass desc
-        ) throws IOException, ClassNotFoundException {
-            try {
-                return Classes.getApplicationClass(desc.getName());
-            } catch (ClassNotFoundException ex) {
-                return super.resolveClass(desc);
-            }
+            return valueHolder.get();
         }
 
     }

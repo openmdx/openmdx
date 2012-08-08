@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DBOSlicedWithParentAndIdAsKey.java,v 1.1 2008/05/15 23:33:23 wfro Exp $
+ * Name:        $Id: DBOSlicedWithParentAndIdAsKey.java,v 1.2 2008/11/14 10:03:52 hburger Exp $
  * Description: DBOSlicedWithParentAndIdAsKey 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/15 23:33:23 $
+ * Date:        $Date: 2008/11/14 10:03:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -97,32 +97,23 @@ public class DBOSlicedWithParentAndIdAsKey extends DBOSlicedWithIdAsKey
         );
         this.objectIdValues.clear();
         this.objectIdValues.add(
-            this.getObjectId()
+            this.database.getObjectId(
+                this.getObjectId()
+            )
         );
         this.objectIdClause = "(v." + database.OBJECT_ID + " = ?)";
         this.objectIdColumn.clear();
         this.objectIdColumn.add(database.OBJECT_ID);
         this.referenceValues.clear();
+        this.referenceValues.add(
+            this.database.getObjectId(
+                conn,
+                this.getReference().getParent()
+            )
+        );
         if(this.getJoinCriteria() == null) {
-            String parentRid = (String)this.database.getReferenceId(
-                conn, 
-                this.reference.getParent().getParent(),
-                false
-            );        
-            this.referenceValues.add(
-                parentRid + "/" + this.reference.getParent().getBase()
-            );
             this.referenceClause = "(v." + database.privateAttributesPrefix + "parent" + " = ?)";            
-        }
-        else {
-            String parentRid = (String)this.database.getReferenceId(
-                conn, 
-                this.reference.getParent().getParent(),
-                false
-            );        
-            this.referenceValues.add(
-                parentRid + "/" + this.reference.getParent().getBase()
-            );
+        } else {
             this.referenceClause = "(vj." + this.getJoinCriteria()[1] + " = ?)";            
         }
         this.referenceColumn.clear();

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PackageMapper.java,v 1.17 2008/06/28 00:21:26 hburger Exp $
+ * Name:        $Id: PackageMapper.java,v 1.18 2008/11/18 18:17:31 hburger Exp $
  * Description: JMI Package Template 
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:26 $
+ * Date:        $Date: 2008/11/18 18:17:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -99,7 +99,9 @@ public class PackageMapper
             false
         ); 
         this.pw.println("  public " + candidateType + "Query " + getMethodName(
-            "create" + MapperUtils.getElementName(classifierDef.getQualifiedName()) + "Query"
+            "create",
+            MapperUtils.getElementName(classifierDef.getQualifiedName()),
+            "Query"
         ) + "();");
         this.pw.println();
     }

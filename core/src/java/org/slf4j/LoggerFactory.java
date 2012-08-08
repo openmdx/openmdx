@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LoggerFactory.java,v 1.9 2008/03/13 17:16:15 hburger Exp $
+ * Name:        $Id: LoggerFactory.java,v 1.10 2008/11/18 01:30:52 hburger Exp $
  * Description: Dynamic Logger Binder
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/13 17:16:15 $
+ * Date:        $Date: 2008/11/18 01:30:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -76,8 +76,11 @@
  */
 package org.slf4j;
 
+import java.util.Arrays;
+
 import org.slf4j.helpers.FallbackLoggerFactory;
 import org.slf4j.helpers.LenientBinder;
+import org.slf4j.helpers.Util;
 import org.slf4j.spi.LoggerFactoryBinder;
 
 /**
@@ -105,10 +108,14 @@ public final class LoggerFactory {
         // private constructor prevents instantiation
     }
 
+    static final String SUBSTITUTE_LOGGER_URL = "http://www.slf4j.org/codes.html#substituteLogger";
+    static final String VERSION_MISMATCH = "http://www.slf4j.org/codes.html#version_mismatch";
+
     /**
-     * The logger factory singleton
+     * It is our responsibility to track version changes and manage the
+     * compatibility list.
      */
-    private static final ILoggerFactory loggerFactory = new LenientFactory().narrow();
+    static private final String[] API_COMPATIBILITY_LIST = new String[] { "1.5.5" };
 
     /**
      * Return a logger named according to the name parameter using the statically
@@ -119,7 +126,7 @@ public final class LoggerFactory {
      * @return logger
      */
     public static Logger getLogger(String name) {
-        return LoggerFactory.loggerFactory.getLogger(name);
+        return getILoggerFactory().getLogger(name);
     }
 
     /**
@@ -131,7 +138,7 @@ public final class LoggerFactory {
      * @return logger
      */
     public static Logger getLogger(Class<?> clazz) {
-        return LoggerFactory.loggerFactory.getLogger(clazz.getName());
+        return getILoggerFactory().getLogger(clazz.getName());
     }
 
     /**
@@ -142,15 +149,33 @@ public final class LoggerFactory {
      * 
      * @return the ILoggerFactory instance in use
      */
-    public static ILoggerFactory getILoggerFactory() {
-        return LoggerFactory.loggerFactory;
+    public static final ILoggerFactory getILoggerFactory() {
+        return LenientFactory.SINGLETON;
     }
 
+    protected final static void versionSanityCheck(
+        String requestedVersion
+    ) {
+        if(requestedVersion != null) {
+            for(String version : API_COMPATIBILITY_LIST) {
+                if(version.equals(requestedVersion)) {
+                    return;
+                }
+            }
+            Util.reportFailure(
+                "The version " + requestedVersion + 
+                " requested by your slf4j binding is not compatible with "
+                + Arrays.toString(API_COMPATIBILITY_LIST)
+            );
+            Util.reportFailure("See " + VERSION_MISMATCH + " for further details.");
+        }
+    }
 
+    
     //------------------------------------------------------------------------
     // Class LenientFactory
     //------------------------------------------------------------------------
-    
+
     /**
      * Lenient Logger Factory
      * <p>
@@ -159,18 +184,24 @@ public final class LoggerFactory {
      * <li>a JDK 1.4 Logger Factory otherwise
      * </ul>
      */
-    static class LenientFactory
+    final static class LenientFactory
         extends LenientBinder<ILoggerFactory,LoggerFactoryBinder>
         implements ILoggerFactory
     {
-        
+
         /**
          * Constructor 
          */
-        LenientFactory() {
+        private LenientFactory() {
             super("org.slf4j.impl.StaticLoggerBinder");
+            versionSanityCheck(this.getRequesteVersion());
         }
 
+        /**
+         * The logger factory singleton
+         */
+        static final ILoggerFactory SINGLETON = new LenientFactory().narrow();
+        
         /* (non-Javadoc)
          * @see org.slf4j.helpers.LenientBinder#getFallbackDelegate()
          */
@@ -195,5 +226,5 @@ public final class LoggerFactory {
         }
 
     }
-    
+
 }

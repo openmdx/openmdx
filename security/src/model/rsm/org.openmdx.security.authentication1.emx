@@ -691,7 +691,7 @@
     </ownedMember>
     <ownedMember xmi:type="uml:Class" xmi:id="_3C7B8A60016D3FC68A7D01CF" name="Password">
       <generalization xmi:id="_3C7B8A60016D417D3886011C" general="_3C7B8A60016D417D211400A3"/>
-      <ownedAttribute xmi:id="_3C7B8A60016D417D2E9B0392" name="password" visibility="private">
+      <ownedAttribute xmi:id="_3C7B8A60016D417D2E9B0392" name="password">
         <type xmi:type="uml:PrimitiveType" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.w3c.emx#_3C7B8A60016D3C8B62E40010?w3c/w3c/string"/>
         <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVCuNt6-EdmkJO73lqONhA" value="1"/>
         <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hVCuNd6-EdmkJO73lqONhA"/>

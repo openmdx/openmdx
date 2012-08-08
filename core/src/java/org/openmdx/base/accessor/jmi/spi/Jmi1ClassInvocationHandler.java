@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ClassInvocationHandler.java,v 1.10 2008/05/06 14:53:48 wfro Exp $
+ * Name:        $Id: Jmi1ClassInvocationHandler.java,v 1.13 2008/11/24 10:17:07 wfro Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/06 14:53:48 $
+ * Date:        $Date: 2008/11/24 10:17:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,6 +54,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.jmi.reflect.JmiException;
@@ -139,16 +140,18 @@ public class Jmi1ClassInvocationHandler implements InvocationHandler {
         Object[] args
     ) throws Throwable {
         Class<?> declaringClass = method.getDeclaringClass();
-        String methodName = method.getName().intern();
+        String methodName = method.getName();
         if(Object.class == declaringClass) {
             //
             // Object methods
             //
-            if("toString" == methodName) {
+            if("toString".equals(methodName)) {
                 return proxy.getClass().getName() + " delegating to " + this.delegation;
-            } else if ("hashCode" == methodName) {
+            } 
+            else if ("hashCode".equals(methodName)) {
                 return this.delegation.hashCode();
-            } else if ("equals" == methodName) {
+            } 
+            else if ("equals".equals(methodName)) {
                 if(Proxy.isProxyClass(args[0].getClass())) {
                     InvocationHandler invocationHandler = Proxy.getInvocationHandler(args[0]);
                     if(invocationHandler instanceof Jmi1ClassInvocationHandler) {
@@ -159,7 +162,7 @@ public class Jmi1ClassInvocationHandler implements InvocationHandler {
                 }
                 return false;
             }
-        } else if("refCreateInstance" == methodName && args.length == 1) {
+        } else if("refCreateInstance".equals(methodName) && args.length == 1) {
             return this.delegation.refCreateInstance(
                 (List<?>)args[0], // arguments
                 (RefClass_1_0)proxy
@@ -192,6 +195,18 @@ public class Jmi1ClassInvocationHandler implements InvocationHandler {
             //
             return this.delegation.refCreateInstance(
                 null, // arguments
+                (RefClass_1_0)proxy
+            );            
+        } else if(
+            args == null || 
+            args.length == 1 ||
+            methodName.startsWith("get")
+        ) {
+            //
+            // Creators
+            //
+            return this.delegation.refCreateInstance(
+                Arrays.asList(args), 
                 (RefClass_1_0)proxy
             );            
         }        

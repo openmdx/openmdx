@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RMIMapper.java,v 1.22 2008/03/28 18:06:12 hburger Exp $
+ * Name:        $Id: RMIMapper.java,v 1.23 2008/12/15 11:35:46 hburger Exp $
  * Description: RMIMapper class
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/28 18:06:12 $
+ * Date:        $Date: 2008/12/15 11:35:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,6 +52,7 @@
 package org.openmdx.compatibility.base.dataprovider.transport.rmi;
 
 import java.io.File;
+import java.rmi.Remote;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.stream.rmi.spi.StreamSynchronization_1_1;
@@ -63,6 +64,8 @@ import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
 import org.openmdx.compatibility.base.dataprovider.transport.rmi.spi.DataproviderObjectInterceptor;
 import org.openmdx.kernel.application.container.lightweight.LightweightContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Marshalls remote streams and service exceptions
@@ -107,8 +110,20 @@ public class RMIMapper {
       LightweightContainer.getMode() == LightweightContainer.Mode.ENTERPRISE_APPLICATION_CONTAINER ? // TODO replace by local call detection
         (DataproviderObjectInterceptor) new org.openmdx.compatibility.base.dataprovider.transport.rmi.inprocess.StreamMarshaller() :
         (DataproviderObjectInterceptor) new org.openmdx.compatibility.base.dataprovider.transport.rmi.standard.StreamMarshaller();
-
+    
+    /**
+     * Logger instance
+     */
+    private static Logger logger = LoggerFactory.getLogger(RMIMapper.class);    
         
+    static {
+        logger.info(
+            "Stream interceptor = {}", 
+            interceptor == null ? "null" : interceptor.getClass().getName()
+        );
+    }
+    
+    
     //------------------------------------------------------------------------
     // Streaming
     //------------------------------------------------------------------------
@@ -256,7 +271,7 @@ public class RMIMapper {
      * @param unitsOfWork a collection of requests
      * @param steamBufferDirectory to buffer the stream in case of a transaction
      * boundary, defaults to the 
-     * @param chunkSize TODO
+     * @param chunkSize 
      * @param transactionBoundary 
      * @return  the modifed collection of requests
      * @throws ServiceException in case of failure
@@ -352,5 +367,18 @@ public class RMIMapper {
         }
         return unitsOfWork;
     }       
+
+    /**
+     * Unmarshals remote values
+     * 
+     * @param value
+     * 
+     * @return an appropriate proxy object for the given value
+     */
+    public static Object unmarshal(
+        Remote value
+    ){
+        return RMIMapper.interceptor.unmarshal(value);
+    }
 
 }

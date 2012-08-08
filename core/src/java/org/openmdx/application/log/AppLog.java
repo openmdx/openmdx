@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AppLog.java,v 1.19 2008/05/05 17:50:33 hburger Exp $
+ * Name:        $Id: AppLog.java,v 1.20 2008/10/09 09:34:08 hburger Exp $
  * Description: Logging
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/05 17:50:33 $
+ * Date:        $Date: 2008/10/09 09:34:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -629,11 +629,13 @@ public class AppLog {
      * meaning for the logging framework.
      *
      * @param group  a statistics group.
-     * @param info   a statistics record string
+     * @param record   a statistics record string
      * @see #statistics(String, String, int)
      */
-    public static void statistics(String    group, String   record)
-    {
+    public static void statistics(
+        String    group, 
+        String   record
+    ) {
         if (logger.isInfoEnabled()) {
             String message = MessageFormatter.arrayFormat(
                 "{} Statistics|Group {}|{}", 

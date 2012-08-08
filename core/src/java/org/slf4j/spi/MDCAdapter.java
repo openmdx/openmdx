@@ -20,9 +20,16 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * ______________________________________________________________________
+ *
+ * Copyright (c) 2008, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * JAVA 5 support added
  */
-
 package org.slf4j.spi;
+
+import java.util.Map;
 
 /**
  * This interface abstracts the service offered by various MDC
@@ -67,4 +74,24 @@ public interface MDCAdapter {
    */
   public void clear();
 
+  /**
+   * Return a copy of the current thread's context map, with keys and 
+   * values of type String. Returned value may be null.
+   * 
+   * @return A copy of the current thread's context map. May be null.
+   * @since 1.5.1
+   */
+  public Map<String,String> getCopyOfContextMap();
+  
+  /**
+   * Set the current thread's context map by first clearing any existing 
+   * map and then copying the map passed as parameter. The context map 
+   * parameter must only contain keys and values of type String.
+   * 
+   * @param contextMap must contain only keys and values of type String
+   * 
+   * @since 1.5.1
+   */
+  public void setContextMap(Map<String,String> contextMap);
+  
 }

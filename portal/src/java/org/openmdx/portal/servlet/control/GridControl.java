@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: GridControl.java,v 1.37 2008/05/01 21:43:56 wfro Exp $
+ * Name:        $Id: GridControl.java,v 1.39 2008/11/10 10:20:11 wfro Exp $
  * Description: GridControlDef
- * Revision:    $Revision: 1.37 $
+ * Revision:    $Revision: 1.39 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:56 $
+ * Date:        $Date: 2008/11/10 10:20:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -98,8 +95,7 @@ public class GridControl
         super(
             id,
             locale,
-            localeAsIndex,
-            controlFactory
+            localeAsIndex
         );
         this.containerClass = containerClass;
         this.paneIndex = paneIndex;        
@@ -175,7 +171,7 @@ public class GridControl
                       new Action.Parameter(Action.PARAMETER_NAME, columnTitle.getFeatureName())          
                   },
                   columnLabel,
-                  this.getTexts().getSearchIncrementallyText(),
+                  controlFactory.getTextsFactory().getTexts(locale).getSearchIncrementallyText(),
                   WebKeys.ICON_SEARCH_INC,
                   true
               )

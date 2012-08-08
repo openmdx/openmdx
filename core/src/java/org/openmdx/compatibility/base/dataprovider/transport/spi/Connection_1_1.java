@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Connection_1_1.java,v 1.3 2008/02/29 18:04:59 hburger Exp $
+ * Name:        $Id: Connection_1_1.java,v 1.5 2008/09/11 18:01:06 hburger Exp $
  * Description: Interaction interface 1.1
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 18:04:59 $
+ * Date:        $Date: 2008/09/11 18:01:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -55,12 +55,13 @@ import java.util.List;
 import org.openmdx.base.accessor.generic.cci.Structure_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.resource.cci.Connection_1_0;
+import org.openmdx.model1.accessor.basic.cci.ModelHolder_1_0;
 
 /**
  * Interaction 1.1
  */
 public interface Connection_1_1
-    extends Connection_1_0, Manager_1_0
+    extends Connection_1_0, Manager_1_0, ModelHolder_1_0
 {
 
     /**

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Texts.java,v 1.11 2007/05/22 12:04:15 wfro Exp $
+ * Name:        $Id: Texts.java,v 1.15 2008/11/14 17:26:24 wfro Exp $
  * Description: Texts
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/05/22 12:04:15 $
+ * Date:        $Date: 2008/11/14 17:26:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.texts;
 
@@ -276,6 +273,11 @@ public Texts(
     return this.properties.getProperty("ErrorTextCannotSetLocale");
   }
   
+  public String getErrorTextCannotSetPerspective(
+  ) {
+    return this.properties.getProperty("ErrorTextCannotSetPerspective");
+  }
+  
   public String getErrorTextCannotDeleteObject(
   ) {
     return this.properties.getProperty("ErrorTextCannotDeleteObject");
@@ -386,6 +388,21 @@ public Texts(
         return this.properties.getProperty("ShowRowsText");      
     }
 
+    public String getExploreText(
+    ) {
+        return this.properties.getProperty("ExploreText");      
+    }
+  
+    public String getShowHeaderTitle(
+    ) {
+        return this.properties.getProperty("ShowHeaderTitle");              
+    }
+    
+    public String getHideHeaderTitle(
+    ) {
+        return this.properties.getProperty("HideHeaderTitle");              
+    }
+    
     public String getUserDefinedText(
         String key
     ) {

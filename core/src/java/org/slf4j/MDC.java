@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MDC.java,v 1.6 2008/03/13 18:46:14 hburger Exp $
+ * Name:        $Id: MDC.java,v 1.7 2008/11/18 01:30:52 hburger Exp $
  * Description: Lenient Mapped Diagnostic Context
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/13 18:46:14 $
+ * Date:        $Date: 2008/11/18 01:30:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -76,6 +76,8 @@
  */
 package org.slf4j;
 
+import java.util.Map;
+
 import org.slf4j.helpers.BasicMDCAdapter;
 import org.slf4j.helpers.LenientBinder;
 import org.slf4j.spi.MDCAdapter;
@@ -117,11 +119,6 @@ public class MDC {
     }
 
     /**
-     * The MDC adapter singleton
-     */
-    private static final MDCAdapter mdcAdapter = new LenientAdapter().narrow();
-
-    /**
      * Put a context value (the <code>val</code> parameter) as identified with
      * the <code>key</code> parameter into the current thread's context map.
      * The <code>key</code> parameter cannot be null. The code>val</code> parameter 
@@ -136,7 +133,7 @@ public class MDC {
         if (key == null) {
             throw new IllegalArgumentException("key parameter cannot be null");
         }
-        MDC.mdcAdapter.put(key, val);
+        getMDCAdapter().put(key, val);
     }
 
     /**
@@ -152,7 +149,7 @@ public class MDC {
         if (key == null) {
             throw new IllegalArgumentException("key parameter cannot be null");
         }
-        return MDC.mdcAdapter.get(key);
+        return getMDCAdapter().get(key);
     }
 
     /**
@@ -167,24 +164,47 @@ public class MDC {
         if (key == null) {
             throw new IllegalArgumentException("key parameter cannot be null");
         }
-        MDC.mdcAdapter.remove(key);
+        getMDCAdapter().remove(key);
     }
 
     /**
      * Clear all entries in the MDC of the underlying implementation.
      */
     public static void clear() {
-        MDC.mdcAdapter.clear();
+        getMDCAdapter().clear();
     }
 
+    /**
+     * Return a copy of the current thread's context map, with keys and 
+     * values of type String. Returned value may be null.
+     * 
+     * @return A copy of the current thread's context map. May be null.
+     * @since 1.5.1
+     */
+    public static Map<String,String> getCopyOfContextMap() {
+      return getMDCAdapter().getCopyOfContextMap();
+    }
+
+    /**
+     * Set the current thread's context map by first clearing any existing 
+     * map and then copying the map passed as parameter. The context map passed
+     * as parameter must only contain keys and values of type String.
+     * 
+     * @param contextMap must contain only keys and values of type String
+     * @since 1.5.1
+     */
+    public static void setContextMap(Map<String,String> contextMap) {
+        getMDCAdapter().setContextMap(contextMap);
+    }
+    
     /**
      * Returns the MDCAdapter instance currently in use.
      * 
      * @return the MDcAdapter instance currently in use.
      * @since 1.4.2
      */
-    public static MDCAdapter getMDCAdapter() {
-        return MDC.mdcAdapter;
+    public static final MDCAdapter getMDCAdapter() {
+        return LenientAdapter.SINGLETON;
     }
 
     
@@ -200,17 +220,22 @@ public class MDC {
      * <li>a BasicMDCAdapter otherwise
      * </ul>
      */
-    static class LenientAdapter
+    final static class LenientAdapter
         extends LenientBinder<MDCAdapter,Object>
         implements MDCAdapter
     {
-    
+            
         /**
          * Constructor 
          */
-        LenientAdapter() {
+        private LenientAdapter() {
             super("org.slf4j.impl.StaticMDCBinder");
         }
+        
+        /**
+         * The MDC adapter singlet
+         */
+        final static MDCAdapter SINGLETON = new LenientAdapter().narrow();
     
         /* (non-Javadoc)
          * @see org.slf4j.helpers.LenientBinder#getFallbackDelegate()
@@ -259,7 +284,21 @@ public class MDC {
         public void remove(String key) {
             getDelegate().remove(key);
         }
-    
+
+        /* (non-Javadoc)
+         * @see org.slf4j.spi.MDCAdapter#getCopyOfContextMap()
+         */
+        public Map<String, String> getCopyOfContextMap() {
+            return getDelegate().getCopyOfContextMap();
+        }
+
+        /* (non-Javadoc)
+         * @see org.slf4j.spi.MDCAdapter#setContextMap(java.util.Map)
+         */
+        public void setContextMap(Map<String, String> contextMap) {
+            getDelegate().setContextMap(contextMap);            
+        }
+        
     }
     
 }

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LenientPathComparator.java,v 1.5 2008/03/21 20:14:51 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: LenientPathComparator.java,v 1.6 2008/09/22 23:38:20 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 20:14:51 $
+ * Date:        $Date: 2008/09/22 23:38:20 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.query;
 
@@ -59,7 +58,6 @@ import org.openmdx.compatibility.base.naming.Path;
 /**
  * Allows comparison of not directly comparable classes
  */
-@SuppressWarnings("unchecked")
 public class LenientPathComparator extends StrictDatatypeComparator {
 
     /**
@@ -67,7 +65,7 @@ public class LenientPathComparator extends StrictDatatypeComparator {
      * 
      * @return  a leinient comparator using the default CharSequence comparator
      */
-    public static Comparator getInstance(
+    public static Comparator<Object> getInstance(
     ){
         return LenientPathComparator.instance;
     }
@@ -76,7 +74,7 @@ public class LenientPathComparator extends StrictDatatypeComparator {
      * Use specific CharSequence camparator
      */
     public LenientPathComparator(
-        Comparator charSequenceComparator
+        Comparator<Object> charSequenceComparator
     ) {
         super(charSequenceComparator);
     }
@@ -84,7 +82,7 @@ public class LenientPathComparator extends StrictDatatypeComparator {
     /**
      * 
      */
-    private static final Comparator instance = new LenientPathComparator(null);
+    private static final Comparator<Object> instance = new LenientPathComparator(null);
             
     
     //------------------------------------------------------------------------

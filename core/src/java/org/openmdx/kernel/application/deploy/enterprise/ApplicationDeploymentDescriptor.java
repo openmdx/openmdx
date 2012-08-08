@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ApplicationDeploymentDescriptor.java,v 1.11 2008/03/21 18:38:41 hburger Exp $
+ * Name:        $Id: ApplicationDeploymentDescriptor.java,v 1.13 2008/12/16 18:26:37 hburger Exp $
  * Description: Application Deployment Descriptor
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:38:41 $
+ * Date:        $Date: 2008/12/16 18:26:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,10 @@
  */
 package org.openmdx.kernel.application.deploy.enterprise;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +63,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.openmdx.kernel.application.configuration.Report;
 import org.openmdx.kernel.application.deploy.spi.Deployment.Application;
@@ -75,16 +81,19 @@ public class ApplicationDeploymentDescriptor
     extends AbstractDeploymentDescriptor
     implements Application
 {
+
     public ApplicationDeploymentDescriptor(
-        URL url
+        URL earURL, 
+        URL applicationURL
     ) {
-        super(url);
+        super(applicationURL);
+        this.earURL = earURL;
+        this.expanded = "file".equalsIgnoreCase(applicationURL.getProtocol());
         this.report = new Report(
             REPORT_APPLICATION_NAME, 
             REPORT_APPLICATION_VERSION, 
-            url.toString()
+            applicationURL.toString()
         );
-        this.expanded = "file".equalsIgnoreCase(url.getProtocol());
     }
 
     public void parseXml(
@@ -137,6 +146,60 @@ public class ApplicationDeploymentDescriptor
             Element securityRole = (Element)it.next();
             report.addInfo("security roles are not supported; security role declaration '" + securityRole + "' is ignored");
         }    
+        this.libraryDirectory = getElementContent(getOptionalChild(element, "library-directory", report));
+        if(this.libraryDirectory == null) {
+            this.libraryDirectory = "lib";
+        }
+        if("".equals(libraryDirectory)) {
+            setApplicationClassPath(new URL[]{});
+            report.addInfo("library-directory search disabled");
+        } else try {
+            URL libraryURL = VerifyingDeploymentManager.getNestedArchiveUrl(earURL, this.libraryDirectory);
+            report.addInfo("library-directory " + libraryDirectory + ": " + libraryURL);
+            if(isExpanded()) {
+                File libraryDirectory = new File(libraryURL.toURI());
+                File[] files = libraryDirectory.listFiles(jarFilter);
+                if(files != null) {
+                    URL[] urls = new URL[files.length];
+                    for(
+                        int i = 0;
+                        i < files.length;
+                        i++
+                    ){
+                        urls[i] = files[i].toURL();
+                    }
+                    setApplicationClassPath(urls);
+                } else {
+                    setApplicationClassPath(new URL[]{});
+                }
+            } else {
+                File libraryDirectory = new File(this.libraryDirectory);
+                ZipInputStream stream = new ZipInputStream(earURL.openStream());
+                List<URL> jars = new ArrayList();
+                for(
+                   ZipEntry entry = stream.getNextEntry();
+                   entry != null;
+                   entry = stream.getNextEntry()
+                ){
+                    File candidate = new File(entry.getName());
+                    if(
+                        libraryDirectory.equals(candidate.getParentFile()) &&
+                        candidate.getName().endsWith(".jar")
+                    ){
+                        jars.add(
+                            VerifyingDeploymentManager.getNestedArchiveUrl(earURL, entry.getName())
+                        );
+                    }
+                }
+                setApplicationClassPath(
+                    jars.toArray(new URL[jars.size()])
+                );
+            }
+        } catch (IOException exception) {
+            report.addError("library-directory evaluation failure", exception);
+        } catch (URISyntaxException exception) {
+            report.addError("library-directory evaluation failure", exception);
+        }
     }
 
     public void parseXml(
@@ -282,6 +345,24 @@ public class ApplicationDeploymentDescriptor
     public String getDisplayName(
     ) {
         return this.displayName;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Application#getLibraryDirectory()
+     */
+    public String getLibraryDirectory() {
+        return this.libraryDirectory;
+    }
+
+    public URL[] getApplicationClassPath(
+    ) {
+      return this.applicationClassPath;
+    }
+
+    public void setApplicationClassPath(
+      URL[] applicationClassPath
+    ) {
+      this.applicationClassPath = applicationClassPath;
     }
 
     public List<String> getEjbModuleURIs(
@@ -485,6 +566,16 @@ public class ApplicationDeploymentDescriptor
     private List<String> applicationClientURIs = new ArrayList<String>();
     private List modules = new ArrayList();
     private String displayName = null;
+    private String libraryDirectory;
+    private URL[] applicationClassPath;
     private final boolean expanded;
+    private final URL earURL;
     private Map owningModulesForEjb = new HashMap();
+
+    private final static FilenameFilter jarFilter = new FilenameFilter() {
+        public boolean accept(File dir, String name) {
+            return name.endsWith(".jar");
+        }
+    };
+    
 }

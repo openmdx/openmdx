@@ -4,6 +4,214 @@
                     =====================================
 
 ==============================================================================
+Version 2.2.1+                                                      2008-11-27
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR10006304
+      Support for base and AdditionalElementDefinition in different grid panes.
+      The order definition of an additional element definition allows to
+      position a reference tab in grid panes. In addition additional element
+      definitions can be marked as inactive.
+      
+      CR0003607
+      Cannot disable additionalElementDefinition. Additional element
+      definitions can be marked as inactive.
+      
+      CR0003539
+      Ui perspectives. Perspectives allow to modify the Root UI customizing. 
+      A perspective overrides the Root customizing, i.e. a perspective inherits 
+      all UI element definitions from the Root customizing. The WEB-INF/config/ui 
+      directory structure looks as follows:
+      
+      WEB-INF/config/ui
+          Root
+              locale 0
+              locale 1
+              ...
+          {1-Perspective A}
+              locale 0
+              locale 1
+              ...
+          {2-Perspective B}
+              locale 0
+              locale 1
+              ...
+              
+      The name of a Perspective must be of the form {order}-{name}, e.g.
+      1-Guest, 2-BackOffice, 3-FrontOffice, 4-Mgmt. The order defines in
+      which order the perspectives are rendered in the perspective selector
+      in the GUI. Root has the predefined order 0.
+      
+      CR10008232
+      DataBinding for composite objects. The data binding allows to map
+      attributes of an inspector's composite objects. E.g. if Contact
+      has Addresses as composite objects, the data binding allows to map
+      attributes of composite address objects to the Contact's inspector.
+      The composite object is specified by a query which must uniquely
+      identify the composite. The query is specified by a semi-colon 
+      separated list of name-value pairs. The names must match a query
+      property name. The required property 'type' specifies the 
+      composite's object class. The optional property 'id' allows to 
+      select a composite with a predefined qualifier. Newly created
+      composites are initialized with the query property values.
+            
+      Example:
+      
+      <!-- Add feature emailAddress to inspector org:opencrx:kernel:account1:Contact -->
+			<featureDefinition>             
+			  <org.openmdx.ui1.StructuralFeatureDefinition qualifiedName="org:opencrx:kernel:account1:Contact:address!emailAddress">
+			  <_object>
+			    <type>org:w3c:string</type>
+			    <multiplicity>0..1</multiplicity>
+			    <changeable>true</changeable>
+			  </_object>
+			  <_content/>
+			  </org.openmdx.ui1.StructuralFeatureDefinition>
+        ...
+     
+      <!-- Customize feature emailAddress -->
+			<elementDefinition>
+			  <org.openmdx.ui1.ElementDefinition name="org:opencrx:kernel:account1:Contact:address!emailAddress">
+			  <_object>
+			    <active>true</active>
+			    <toolTip>
+			    <_item>E-Mail (usage=400)</_item>
+			    </toolTip>
+			    <label>
+			    <_item>E-Mail (usage=400)</_item>
+			    </label>
+			    <dataBindingName>org.openmdx.portal.servlet.databinding.CompositeObjectDataBinding?type=org:opencrx:kernel:account1:EMailAddress;usage=(short)400</dataBindingName>
+			  </_object>
+			  <_content/>
+			  </org.openmdx.ui1.ElementDefinition>                
+        ...
+      
+      CR10008230
+      PortalExtension: callback for disabling controls. The callback 
+      isEnabled(control, refObj, app) allows to disable controls, 
+      e.g. attribute tabs or field groups.
+                        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+            
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
+Version 2.2.1                                                      2008-10-14
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20017002
+      Ui: showMemberRange. ElementDefinition.showMemberRange is a list order 
+      ranges which allows to list the elements (columns) shown for a specific 
+      object container (grid). Here is an example:
+      
+			<additionalElementDefinition>
+			  <org.openmdx.ui1.AdditionalElementDefinition id="9998" _operation="create">
+			    <_object>
+			      <toolTip>
+			        <_item>Accounts</_item>
+			      </toolTip>
+			      <label>
+			        <_item>Accounts</_item>
+			      </label>
+			      <order>
+			        <_item>0</_item>
+			        <_item>0</_item>
+			        <_item>10</_item>
+			      </order>
+			      <maxMember>23</maxMember>
+			      <showMaxMember>6</showMaxMember>
+			      <!-- Grid Accounts contains all fields with orderObjectContainer in range defined below -->
+			      <showMemberRange>
+			        <_item>0:0:3-0:0:3</_item>
+			        <_item>0:0:5-0:0:5</_item>
+			      </showMemberRange>
+			    </_object>
+			    <_content/>
+			  </org.openmdx.ui1.AdditionalElementDefinition>
+			
+			  <org.openmdx.ui1.AdditionalElementDefinition id="9999" _operation="create">
+			    <_object>
+			      <toolTip>
+			        <_item>Accounts (disabled)</_item>
+			      </toolTip>
+			      <label>
+			        <_item>»Accounts (disabled)</_item>
+			      </label>
+			      <order>
+			        <_item>0</_item>
+			        <_item>0</_item>
+			        <_item>510</_item>
+			      </order>
+			      <maxMember>23</maxMember>
+			      <showMaxMember>6</showMaxMember>
+			      <!-- Grid Accounts (disabled) contains all fields with orderObjectContainer in range defined below -->
+			      <showMemberRange>
+			        <_item>0:0:3-0:0:3</_item>
+			        <_item>0:0:4-0:0:4</_item>
+			        <_item>0:0:5-0:0:5</_item>
+			        <_item>0:0:6-0:0:6</_item>
+			      </showMemberRange>
+			    </_object>
+			    <_content/>
+			  </org.openmdx.ui1.AdditionalElementDefinition>
+      
+            
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+            
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
+Version 2.2.0                                                       2008-09-10
+==============================================================================
+
+1.    NEW FEATURES
+      none
+            
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR10007941
+      GUI: horizontal root menu control. Replace vertical root menu by 
+      horizontal menu. At the same time remove yuiext layout manager. 
+      
+            
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
 Version 2.1.0                                                       2008-07-10
 ==============================================================================
 

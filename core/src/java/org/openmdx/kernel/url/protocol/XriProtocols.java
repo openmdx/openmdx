@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XriProtocols.java,v 1.9 2008/03/13 17:16:15 hburger Exp $
+ * Name:        $Id: XriProtocols.java,v 1.10 2008/08/20 23:37:22 hburger Exp $
  * Description: XRI Protocol Constants
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/13 17:16:15 $
+ * Date:        $Date: 2008/08/20 23:37:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,32 +55,35 @@
 package org.openmdx.kernel.url.protocol;
 
 /**
- * XRI Protocol Constants
+ * @deprecated use XRI1Protocols or XRI2Protocols
  */
 public class XriProtocols extends XriAuthorities {
-    
+
+    /**
+     * Constructor 
+     */
     protected XriProtocols() {
         // Avoid instantiation
     }
 
     /**
-     * A derived value the resource prefix
+     * @deprecated use XRI2Protocols.RESOURCE_PREFIX
      */
-    public final static String RESOURCE_PREFIX = "xri://" + RESOURCE_AUTHORITY + '/';
+    public final static String RESOURCE_PREFIX = XRI_2Protocols.RESOURCE_PREFIX;
 
     /**
-     * A derived value the model prefix
+     * @deprecated use XRI1Protocols.OPENMDX_PREFIX
      */
-    public final static String OPENMDX_PREFIX = "xri:" + OPENMDX_AUTHORITY;
+    public final static String OPENMDX_PREFIX = XRI_1Protocols.OPENMDX_PREFIX;
     
     /**
-     * A derived value the ZIP prefix
+     * @deprecated use XRI2Protocols.ZIP_PREFIX
      */
-    public final static String ZIP_PREFIX = "xri://" + ZIP_AUTHORITY + "*(";
+    public final static String ZIP_PREFIX = XRI_2Protocols.ZIP_PREFIX;
 
     /**
-     * The ZIP suffix
+     * @deprecated use XRI2Protocols.ZIP_SUFFIX
      */
-    public final static String ZIP_SEPARATOR = ")/";
+    public final static String ZIP_SEPARATOR = XRI_2Protocols.ZIP_SEPARATOR;
 
 }

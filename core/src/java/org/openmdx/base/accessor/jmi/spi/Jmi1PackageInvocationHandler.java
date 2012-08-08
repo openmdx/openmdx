@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1PackageInvocationHandler.java,v 1.13 2008/04/09 23:52:18 hburger Exp $
+ * Name:        $Id: Jmi1PackageInvocationHandler.java,v 1.19 2008/12/17 13:54:47 wfro Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 23:52:18 $
+ * Date:        $Date: 2008/12/17 13:54:47 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -165,6 +165,7 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                 String elementName = Identifier.CLASS_PROXY_NAME.toIdentifier((String)e.values("name").get(0));
                 String qualifiedElementName = (String)e.values("qualifiedName").get(0);
                 if(
+                    (model.isClassType(e) || model.isStructureType(e)) &&
                     elementName.equals(cciName) &&
                     qualifiedElementName.substring(0, qualifiedElementName.lastIndexOf(":")).equals(qualifiedPackageName)
                 ) {
@@ -180,11 +181,11 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
             throw new ServiceException (
                 BasicException.Code.DEFAULT_DOMAIN, 
                 BasicException.Code.NOT_FOUND, 
+                "model element not found with qualified cci name.",
                 new BasicException.Parameter [] {
                   new BasicException.Parameter("package.name", qualifiedPackageName),
                   new BasicException.Parameter("cci.name", cciName)
-                },
-                "model element not found with qualified cci name."
+                }
             );
         }
         return qualifiedMofName;
@@ -200,16 +201,18 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
         Object[] args
     ) throws Throwable {
         Class<?> declaringClass = method.getDeclaringClass();
-        String methodName = method.getName().intern();
+        String methodName = method.getName();
         if(Object.class == declaringClass) {
             //
             // Object methods
             //
-            if("toString" == methodName) {
+            if("toString".equals(methodName)) {
                 return proxy.getClass().getName() + " delegating to " + this.delegation;
-            } else if ("hashCode" == methodName) {
+            } 
+            else if("hashCode".equals(methodName)) {
                 return this.delegation.hashCode();
-            } else if ("equals" == methodName) {
+            } 
+            else if("equals".equals(methodName)) {
                 if(Proxy.isProxyClass(args[0].getClass())) {
                     InvocationHandler invocationHandler = Proxy.getInvocationHandler(args[0]);
                     if(invocationHandler instanceof Jmi1PackageInvocationHandler) {
@@ -220,7 +223,8 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                 }
                 return false;
             }
-        } else if("refClass" == methodName && args.length == 1) {
+        } 
+        else if("refClass".equals(methodName) && args.length == 1) {
             //
             // RefClass
             //
@@ -228,16 +232,18 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                 (String)args[0], // qualifiedClassName
                 (RefPackage_1_0)proxy
             );
-        } else if(
+        } 
+        else if(
             declaringClass == RefPackage_1_4.class ||    
             methodName.startsWith("ref") && 
             (method.getName().length() > 3) &&
-            Character.isUpperCase(method.getName().charAt(3))
+            Character.isUpperCase(methodName.charAt(3))
         ) {
-            return "refOutermostPackage" == methodName
-                ? this.delegation.refOutermostPackage()
-                : method.invoke(this.delegation, args);
-        } else if(method.getName().startsWith("get")) {
+            return "refOutermostPackage".equals(methodName) ? 
+                this.delegation.refOutermostPackage() : 
+                method.invoke(this.delegation, args);
+        } 
+        else if(methodName.startsWith("get")) {
             //
             // Getters
             //
@@ -250,7 +256,8 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                 ),
                 (RefPackage_1_0)proxy
             );            
-        } else if(method.getName().startsWith("create")) {
+        } 
+        else if(methodName.startsWith("create")) {
             // 
             // Creators
             //
@@ -274,7 +281,8 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                     ), 
                     iargs
                 );
-            } else if(
+            } 
+            else if(
                 //
                 // Queries
                 //
@@ -290,7 +298,7 @@ public class Jmi1PackageInvocationHandler implements InvocationHandler {
                     this.getQualifiedMofName(
                         qualifiedPackageName.substring(0, qualifiedPackageName.lastIndexOf(":")),
                         cciName.endsWith("Query") 
-                            ? cciName.substring(0, cciName.indexOf("Query")) 
+                            ? cciName.substring(0, cciName.length() - "Query".length()) 
                             : cciName
                         ), 
                     null, 

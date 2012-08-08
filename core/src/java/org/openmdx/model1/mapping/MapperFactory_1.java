@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MapperFactory_1.java,v 1.18 2008/03/21 18:40:16 hburger Exp $
+ * Name:        $Id: MapperFactory_1.java,v 1.20 2008/11/11 15:40:46 wfro Exp $
  * Description: PackageExternalizerFactory_1
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:40:16 $
+ * Date:        $Date: 2008/11/11 15:40:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -83,19 +83,7 @@ public class MapperFactory_1 {
             //
             // dynamic loading decouples factory and managed classes. 
             //
-            if(MappingTypes.JMI_OPENMDX_1.equals(format)) {
-                return (Mapper_1_0) Classes.getApplicationClass(
-                    "org.openmdx.compatibility.model1.mapping.java.JMIMapper_1"
-                ).getConstructor(
-                    MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION
-                ).newInstance(
-                    new Object[]{
-                        MappingTypes.JMI_OPENMDX_1,
-                        "cci",
-                        "java"            
-                    }
-                );
-            } else if(
+            if(
                 MappingTypes.CCI2.equals(format) ||
                 MappingTypes.JMI1.equals(format) ||
                 MappingTypes.JDO2.equals(format)
@@ -105,11 +93,9 @@ public class MapperFactory_1 {
                 ).getConstructor(
                     MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION
                 ).newInstance(
-                    new Object[]{
-                        format,
-                        format,
-                        "java"            
-                    }
+                    format,
+                    format,
+                    "java"            
                 );
             } else if(
                 format.startsWith(MappingTypes.JDO2 + ':')
@@ -119,11 +105,9 @@ public class MapperFactory_1 {
                 ).getConstructor(
                     MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION
                 ).newInstance(
-                    new Object[]{
-                        format,
-                        MappingTypes.JDO2,
-                        "java"            
-                    }
+                    format,
+                    MappingTypes.JDO2,
+                    "java"            
                 );
             } else {
                 return (Mapper_1_0) Classes.getApplicationClass(

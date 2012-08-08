@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CachingMarshaller.java,v 1.7 2008/06/13 09:34:19 hburger Exp $
+ * Name:        $Id: CachingMarshaller.java,v 1.11 2008/12/15 03:15:37 hburger Exp $
  * Description: Caching Marshaller 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/13 09:34:19 $
+ * Date:        $Date: 2008/12/15 03:15:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -18,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -51,9 +51,8 @@
 package org.openmdx.compatibility.base.marshalling;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.openmdx.base.exception.ServiceException;
 
@@ -61,14 +60,11 @@ import org.openmdx.base.exception.ServiceException;
 * This marshaller caches marshalled objects.
 * <p>
 * The embedded marshaller is called only if there is no marshalled object
-* registered under the source's object identity. The marshalled objects are
-* registered with weak references.
+* registered for the given source object.. 
 * <p>
-* <strong>Note that this implementation is not synchronized.</strong>
-* If multiple threads access a <code>CachingMarshaller</code> instance 
-* concurrently, it must be synchronized externally. This is typically
-* accomplished by synchronizing on some object that naturally encapsulates the 
-* caching marshaller. 
+* <em>Note:</em><br>
+* This implementation is thread safe. If different threads marshal the same
+* source object concurrently than all marshaled objects but one are discarded.  
 */
 public abstract class CachingMarshaller 
     implements Serializable, CachingMarshaller_1_0
@@ -80,31 +76,13 @@ public abstract class CachingMarshaller
      */
     protected CachingMarshaller(
     ){
-        this(
-            false // multithreaded
-        );
-    }
-
-    /**
-     * Constructs a new, empty caching marshaller with the default initial
-     * cache size. 
-     */
-    protected CachingMarshaller(
-        boolean multithreaded
-    ){
-        this.multithreaded = multithreaded;
         initialize();
     }
     
     /**
-     * 
-     */
-    private final boolean multithreaded;
-    
-    /**
      * The unmarshalled objects
      */ 
-    protected transient Map<Object,Object> mapping;
+    protected transient ConcurrentMap<Object,Object> mapping;
 
     /**
      * Clears the cache 
@@ -114,14 +92,6 @@ public abstract class CachingMarshaller
         this.mapping.clear();
     }
 
-    private void initialize(
-    ){
-        this.mapping = this.multithreaded ? 
-            new ConcurrentHashMap<Object,Object>() : 
-            new HashMap<Object,Object>();
-    }
-    
-    
     //--------------------------------------------------------------------------
     // Implements Marshaller
     //--------------------------------------------------------------------------
@@ -142,10 +112,9 @@ public abstract class CachingMarshaller
         Object unmarshalled,
         Object marshalled
     ){
-        Object oldValue = this.mapping.put(unmarshalled, marshalled);
-        boolean modify = oldValue == null;
-        if(!modify)this.mapping.put(unmarshalled, oldValue); // undo
-        return modify;
+        return 
+            marshalled != null && 
+            this.mapping.putIfAbsent(unmarshalled, marshalled) == null;
     }
 
     /**
@@ -182,12 +151,24 @@ public abstract class CachingMarshaller
     public Object marshal (
         Object source
     ) throws ServiceException {
-        if(source == null) return null;
-        Object target = this.mapping.get(source);
-        if(target == null) cache(
-            source,
-            target = createMarshalledObject(source)
-        );
+        Object target;
+        if(source == null) {
+            target = null;
+        } else {
+            target = this.mapping.get(source);
+            if(target == null) {
+                target = createMarshalledObject(source);
+                if(target != null) {
+                    Object concurrent = this.mapping.putIfAbsent(
+                        source, 
+                        target
+                    );
+                    if(concurrent != null) {
+                        target = concurrent;
+                    }
+                }
+            }
+        }
         return target;
     }
 
@@ -199,7 +180,7 @@ public abstract class CachingMarshaller
      * @return          The unmarshalled object;
      *          or null if source is null
      * 
-     * @exception       ServiceException MARSHAL_FAILURE
+     * @exception       ServiceException TRANSFORMATION_FAILURE
      *                  Object can't be unmarshalled
      */
     public abstract Object unmarshal (
@@ -227,6 +208,14 @@ public abstract class CachingMarshaller
     // Implements Serializable
     //--------------------------------------------------------------------------
 
+    /**
+     * Initialize the transient collections
+     */
+    private void initialize(
+    ){
+        this.mapping = new ConcurrentHashMap<Object,Object>();
+    }
+        
     /**
      * Save the components of the <tt>CachingMarshaller</tt> instance to a 
      * stream (that is, serialize it).

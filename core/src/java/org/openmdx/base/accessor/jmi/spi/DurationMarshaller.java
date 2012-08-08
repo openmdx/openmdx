@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DurationMarshaller.java,v 1.14 2008/04/09 12:34:01 hburger Exp $
+ * Name:        $Id: DurationMarshaller.java,v 1.17 2008/09/26 15:27:16 hburger Exp $
  * Description: DurationMarshaller class
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:01 $
+ * Date:        $Date: 2008/09/26 15:27:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,107 +54,75 @@ package org.openmdx.base.accessor.jmi.spi;
 import javax.xml.datatype.Duration;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
-import org.openmdx.kernel.exception.BasicException;
-import org.w3c.cci2.Datatypes;
+import org.w3c.spi.DatatypeFactories;
 
 /**
- * DurationMarshaller
+ * Normalizes Date
  */
-public class DurationMarshaller
-   extends Datatypes
-  implements Marshaller, ReluctantUnmarshalling 
-{
+public class DurationMarshaller extends NormalizingMarshaller {
 
-  //-------------------------------------------------------------------------
-  private DurationMarshaller(
-    boolean forward
-  ) {
-    this.forward = forward;
-  }
-
-  //-------------------------------------------------------------------------
-  public static DurationMarshaller getInstance(
-    boolean forward
-  ) {
-    return forward
-      ? DurationMarshaller.toMarshaller
-      : DurationMarshaller.fromMarshaller;
-  }
-
-  //-------------------------------------------------------------------------
-  public Object marshalGeneric(
-    Object source,
-    boolean forward
-  ) throws ServiceException {
-    if(source == null) {
-      return null;
+    /**
+     * Constructor 
+     */
+    private DurationMarshaller(
+    ) {
+        // Avoid instantiation
     }
-    if(forward) {
-      try {
-        return getFactory().newDuration((String)source);
-      } catch(IllegalArgumentException e) {
-        throw new ServiceException(
-            e,
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.TRANSFORMATION_FAILURE,
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "exception parsing duration"
-        );
-      }
+
+    /**
+     * A singleton
+     */
+    static private final DurationMarshaller instance = new DurationMarshaller();
+
+    /**
+     * Provide a marshaller instance
+     * 
+     * @return an instance
+     */
+    public static DurationMarshaller getInstance(
+    ) {
+        return instance;
     }
-    else {
-      if(source instanceof Duration) {
-        return ((Duration)source).toString();
-      }
-      else {
-        throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.TRANSFORMATION_FAILURE,
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Can only unmarshal objects of type " + Duration.class.getName()
-        );
-      }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#normalize(java.lang.Object)
+     */
+    @Override
+    protected Object normalize(
+        Object source
+    ) throws ServiceException{
+        if(source instanceof Duration) {
+            return DatatypeFactories.immutableDatatypeFactory().toNormalizedDuration(
+                (Duration)source
+            );
+        }
+        if(keep(source)) {
+            return source;
+        }
+        //
+        // Lenient
+        //
+        try {
+            return DatatypeFactories.immutableDatatypeFactory().newDuration((String)source);
+        } catch (Exception exception) {
+            throw newServiceException(exception, source);
+        }
     }
-  }
 
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object marshal(
-    Object source
-  ) throws ServiceException {
-    return marshalGeneric(
-      source,
-      this.forward
-    );
-  }
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#isLenient()
+     */
+    @Override
+    protected boolean isLenient() {
+        return true;
+    }
 
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object unmarshal (
-    Object source
-  ) throws ServiceException {
-    return marshalGeneric(
-      source,
-      !this.forward
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private final boolean forward;
-
-  static private final DurationMarshaller toMarshaller = new DurationMarshaller(true);
-  static private final DurationMarshaller fromMarshaller = new DurationMarshaller(false);
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#targetClass()
+     */
+    @Override
+    protected Class<?> targetClass() {
+        return Duration.class;
+    }    
 
 }
-
-//--- End of File -----------------------------------------------------------

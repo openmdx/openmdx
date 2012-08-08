@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractHomeHandler.java,v 1.1 2008/01/25 00:58:53 hburger Exp $
+ * Name:        $Id: AbstractHomeHandler.java,v 1.2 2008/09/10 08:55:20 hburger Exp $
  * Description: Abstract Enterprise Java Bean Home Invocation Handler
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 00:58:53 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -70,8 +70,8 @@ import org.slf4j.LoggerFactory;
  * Abstract Enterprise Java Bean Home Invocation Handler
  */
 abstract class AbstractHomeHandler 
-    extends AbstractInvocationHandler 
-    implements HomeConfiguration
+extends AbstractInvocationHandler 
+implements HomeConfiguration
 {
 
     /**
@@ -90,12 +90,12 @@ abstract class AbstractHomeHandler
      * The EJB's container transaction evaluator
      */
     private ContainerTransaction containerTransaction = null;
-    
+
     /**
      * Instance logger
      */
     private Logger logger = LoggerFactory.getLogger(AbstractHomeHandler.class);
-    
+
     /**
      * Obtain a Bean instance from the pool.
      *
@@ -113,15 +113,13 @@ abstract class AbstractHomeHandler
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.SYSTEM_EXCEPTION,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("name", this.beanName),
-                    new BasicException.Parameter("url", this.jndiURL)
-                },
-                "Enterprise Java Bean instance acquisition failed"
+                "Enterprise Java Bean instance acquisition failed",
+                new BasicException.Parameter("name", this.beanName),
+                new BasicException.Parameter("url", this.jndiURL)
             );
         }        
     }
-    
+
     /**
      * Return a Bean instance to the pool.
      *
@@ -145,9 +143,9 @@ abstract class AbstractHomeHandler
      *
      * @param ejbInstance an {@link #acquireBeanInstance acquired} Bean instance to be invalidated.
      */
-     void invalidateBeanInstance(
+    void invalidateBeanInstance(
         Object ejbInstance
-     ){
+    ){
         try {
             this.instancePool.invalidateObject(ejbInstance);
         } catch (Exception exception) {
@@ -165,7 +163,7 @@ abstract class AbstractHomeHandler
         String methodInterface, 
         String methodName, 
         String[] methodParameters
-     ) {
+    ) {
         return this.containerTransaction.getTransactionAttribute(
             methodInterface,
             methodName, 
@@ -189,12 +187,12 @@ abstract class AbstractHomeHandler
     ) throws NoSuchMethodException{
         return this.instanceClass.getMethod(name, parameterTypes);
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements InvocationHandler
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
@@ -205,8 +203,8 @@ abstract class AbstractHomeHandler
     ) throws Throwable {
         Class<?> methodSource = method.getDeclaringClass();
         if(
-            "remove".equals(method.getName()) && 
-            (methodSource == EJBHome.class || methodSource == EJBLocalHome.class)
+                "remove".equals(method.getName()) && 
+                (methodSource == EJBHome.class || methodSource == EJBLocalHome.class)
         ) {
             throw new RemoveException(
                 this + " is a session, bot an entity bean"
@@ -215,26 +213,26 @@ abstract class AbstractHomeHandler
             return super.invoke(proxy, method, args);
         }
     }
-    
+
     //------------------------------------------------------------------------
     // Implements HomeConfiguration
     //------------------------------------------------------------------------
-    
+
     /**
      * The home's JNDI url
      */
     private String jndiURL = null;
-    
+
     /**
      * The EJB's name
      */
     private String beanName = null;
-    
+
     /**
      * The container's transaction manager
      */
     private TransactionManager transactionManager = null;
-    
+
     /**
      * The EJB instance class
      */
@@ -267,7 +265,7 @@ abstract class AbstractHomeHandler
         this.containerTransaction = containerTransaction;
         this.transactionManager = transactionManager;
     }
-    
+
     /**
      * Create a local home instance
      * 
@@ -277,7 +275,7 @@ abstract class AbstractHomeHandler
     ){
         return null;
     }
-    
+
     /**
      * Create a home instance
      * @return a new home instance
@@ -300,11 +298,11 @@ abstract class AbstractHomeHandler
     ) throws RemoteException {
         return null;
     }
-    
+
     TransactionManager getTransactionManager() {
         return this.transactionManager;
     }
-    
+
 
     //------------------------------------------------------------------------
     // Extends Object
@@ -331,7 +329,7 @@ abstract class AbstractHomeHandler
     //------------------------------------------------------------------------
     // Implements ContextSwitcher
     //------------------------------------------------------------------------
-    
+
     /**
      * The EJB instance pool
      */

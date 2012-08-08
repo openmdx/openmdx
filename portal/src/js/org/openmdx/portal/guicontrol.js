@@ -1,10 +1,10 @@
 // ====================================================================
 // Project:     openmdx, http://www.openmdx.org/
-// Name:        $Id: guicontrol.js,v 1.4 2008/06/10 14:26:28 cmu Exp $
+// Name:        $Id: guicontrol.js,v 1.7 2008/12/09 14:40:54 wfro Exp $
 // Description: java script helpers
-// Revision:    $Revision: 1.4 $
+// Revision:    $Revision: 1.7 $
 // Owner:       OMEX AG, Switzerland, http://www.omex.ch
-// Date:        $Date: 2008/06/10 14:26:28 $
+// Date:        $Date: 2008/12/09 14:40:54 $
 // ====================================================================
 //
 // This software is published under the BSD license
@@ -117,6 +117,48 @@ function getEncodedHRef(components) {
     href += components[i] + "=" + encodeURIComponent(components[i+1]);
   }
   return href;
+}
+
+//---------------------------------------------------------------------------
+Array.prototype.hasMember=function(testItem){
+  var i=this.length;
+  while(i-->0)if(testItem==this[i])return 1;
+  return 0
+};
+
+function uniqueInt(){
+  var num,maxNum=100000;
+  if(!uniqueInt.a||maxNum<=uniqueInt.a.length)uniqueInt.a=[];
+  do num=Math.ceil(Math.random()*maxNum);
+  while(uniqueInt.a.hasMember(num))
+  uniqueInt.a[uniqueInt.a.length]=num;
+  return num
+}
+
+function checkTextareaLimits(el,maxLines,maxChar){
+  if(!el.x){
+    el.x=uniqueInt();
+    el.onblur=function(){clearInterval(window['int'+el.x])}
+  }
+  window['int'+el.x]=setInterval(function(){
+    var lines=el.value.replace(/\r/g,'').split('\n'), i=lines.length, lines_removed, char_removed;
+    if(maxLines&&i>maxLines){
+      //alert('You can not enter\nmore than '+maxLines+' lines');
+      //el.style.backgroundColor = bgColorError;
+      lines=lines.slice(0,maxLines);
+      lines_removed=1;
+    }
+    if(maxChar){
+      i=lines.length;
+      while(i-->0)if(lines[i].length>maxChar){
+        lines[i]=lines[i].slice(0,maxChar);
+        char_removed=1
+      }
+      //if(char_removed)alert('You can not enter more\nthan '+maxChar+' characters per line')
+      //if(char_removed) {el.style.backgroundColor = bgColorError;}
+    }
+    if(char_removed||lines_removed)el.value=lines.join('\n')
+  },50);
 }
 
 //---------------------------------------------------------------------------
@@ -575,151 +617,69 @@ function dragAndDropStop(event) {
 }
 
 //---------------------------------------------------------------------------
-function prepareShowPopup(caller, popId, field, options) {
+function prepareShowPopup(caller, popVar, popId, field, options) {
   POPUP_FIELD = field;
   POPUP_OPTIONS = options;
-  var IfrRef = getElement('DivShim');
   var pos = 0;
   if(shownPopup) {
-    shownPopup.style.display = 'none';
-    IfrRef.style.display = 'none';
+    shownPopup.hide();
   }
-  shownPopup = getElement(popId);
-  shownPopup.style.zIndex = 600;
-  shownPopup.style.display = 'block';
-
-  if (document.all) {
-    /* NOT a Mozilla browser */
-    /* note that Opera positions iframes ALWAYS above all other elements --> do not show iframe when Opera detected */
-    if(browser.is_opera) {
-    }
-    else {
-      /* IE places Windows controls above popup unless iframe is placed right 'under' popup*/
-      /* position and size of iframe */
-      /*
-      var nudgeLeft = parseInt(shownPopup.clientLeft);
-      var nudgeUp = parseInt(shownPopup.clientTop);
-      try {
-        IfrRef.style.top = parseInt(shownPopup.style.top) - nudgeUp/2 + 'px';
-        IfrRef.style.left = parseInt(shownPopup.style.left) - nudgeLeft/2 + 'px';
-      } catch (e) {
-        debugger;
-        posOffset = shownPopup.positionedOffset();
-        IfrRef.style.top = posOffset.top + 'px';
-        IfrRef.style.left = posOffset.left + 'px';
-      }
-      IfrRef.style.width = shownPopup.offsetWidth + nudgeLeft;
-      IfrRef.style.height = shownPopup.offsetHeight + nudgeUp;
-      */
-      IfrRef.style.zIndex = 600;
-      IfrRef.style.display = 'block';
-    }
+  shownPopup = popVar;
+  $(popId).style.display='block';
+  if(!popVar){
+    popVar = new YAHOO.widget.Panel(popId, {zindex:20000, close:true, visible:false, constraintoviewport:true, modal:true});
+    popVar.cfg.queueProperty('keylisteners', new YAHOO.util.KeyListener(document, {keys:27}, {fn:popVar.hide, scope:popVar, correctScope:true}));
+    popVar.render();
   }
-  /* ensure correct display in all browsers */
-  shownPopup.style.display = 'none';
-  shownPopup.style.display = 'block';
-}
-
-//---------------------------------------------------------------------------
-function positionPopup(caller, popId) {
-  var el = getElement(popId);
-  var fixer_posOff = Element.positionedOffset($(caller));
-  var el_dim = Element.getDimensions(el);
-  el.style.left = (fixer_posOff.left - el_dim.width)  + 'px';
-  el.style.top  = (fixer_posOff.top  - el_dim.height) + 'px';
-
-  /* ensure popUp stays within Browser Window */
-  if (window.innerWidth) {
-    pos = window.pageXOffset
-  }
-  else if (document.documentElement && document.documentElement.scrollLeft) {
-    pos = document.documentElement.scrollLeft
-  }
-  else if (document.body) {
-    pos = document.body.scrollLeft
-  }
-  // pos contains the position of the left pixel displayed in the browser window
-  if (pos > parseInt(shownPopup.style.left)) shownPopup.style.left = pos + 'px';
-  if (window.innerHeight) {
-    pos = window.pageYOffset
-  }
-  else if (document.documentElement && document.documentElement.scrollTop) {
-    pos = document.documentElement.scrollTop
-  }
-  else if (document.body) {
-    pos = document.body.scrollTop
-  }
-  // pos contains the position of the top line displayed in the browser window
-  if (pos > parseInt(shownPopup.style.top)) shownPopup.style.top = pos + 'px';
-
-  if (document.all) {
-    /* NOT a Mozilla browser */
-    /* note that Opera positions iframes ALWAYS above all other elements --> do not show iframe when Opera detected */
-    if(browser.is_opera) {
-    }
-    else {
-      /* IE places Windows controls above popup unless iframe is placed right 'under' popup*/
-      /* position and size of iframe */
-      var el_cumOff = Element.cumulativeOffset(el);
-      var IfrRef = getElement('DivShim');
-      var nudgeLeft = parseInt(el.clientLeft);
-      var nudgeUp = parseInt(el.clientTop);
-      IfrRef.style.top = el_cumOff.top - nudgeUp/2 + 'px';
-      IfrRef.style.left = el_cumOff.left - nudgeLeft/2 + 'px';
-      IfrRef.style.width = el.offsetWidth + nudgeLeft;
-      IfrRef.style.height = el.offsetHeight + nudgeUp;
-      IfrRef.style.zIndex = 600;
-      IfrRef.style.display = 'none';
-    }
-  }
-
+  popVar.show();
+  return popVar;
 }
 //---------------------------------------------------------------------------
-function editstrings_showPopup(caller, popId, field) {
-  prepareShowPopup(caller, popId, field, new Array());
+function editstrings_showPopup(event, caller, popVar, popId, field, options) {
+  popVar = prepareShowPopup(caller, popVar, popId, field, options);
   editstrings_on_load();
-  positionPopup(caller, popId);
-  return false;
+  popVar.moveTo(event.clientX+1, event.clientY);
+  return popVar;
 }
 
 //---------------------------------------------------------------------------
-function editbooleans_showPopup(caller, popId, field) {
-  prepareShowPopup(caller, popId, field, new Array());
+function editbooleans_showPopup(event, caller, popVar, popId, field, options) {
+  popVar = prepareShowPopup(caller, popVar, popId, field, options);
   editbooleans_on_load();
-  positionPopup(caller, popId);
-  return false;
+  popVar.moveTo(event.clientX+1, event.clientY);
+  return popVar;
 }
 
 //---------------------------------------------------------------------------
-function editdates_showPopup(caller, popId, field) {
-  prepareShowPopup(caller, popId, field, new Array());
+function editdates_showPopup(event, caller, popVar, popId, field, options) {
+  popVar = prepareShowPopup(caller, popVar, popId, field, options);
   editdates_on_load();
-  positionPopup(caller, popId);
-  return false;
+  popVar.moveTo(event.clientX+1, event.clientY);
+  return popVar;
 }
 
 //---------------------------------------------------------------------------
-function editdatetimes_showPopup(caller, popId, field) {
-  prepareShowPopup(caller, popId, field, new Array());
+function editdatetimes_showPopup(event, caller, popVar, popId, field, options) {
+  popVar = prepareShowPopup(caller, popVar, popId, field, options);
   editdatetimes_on_load();
-  positionPopup(caller, popId);
-  return false;
+  popVar.moveTo(event.clientX+1, event.clientY);
+  return popVar;
 }
 
 //---------------------------------------------------------------------------
-function editcodes_showPopup(caller, popId, field, options) {
-  prepareShowPopup(caller, popId, field, options);
+function editcodes_showPopup(event, caller, popVar, popId, field, options) {
+  popVar = prepareShowPopup(caller, popVar, popId, field, options);
   editcodes_on_load();
-  positionPopup(caller, popId);
-  return false;
+  popVar.moveTo(event.clientX+1, event.clientY);
+  return popVar;
 }
 
 //---------------------------------------------------------------------------
-function editnumbers_showPopup(caller, popId, field) {
-  prepareShowPopup(caller, popId, field, new Array());
+function editnumbers_showPopup(event, caller, popVar, popId, field, options) {
+  popVar = prepareShowPopup(caller, popVar, popId, field, options);
   editnumbers_on_load();
-  positionPopup(caller, popId);
-  return false;
+  popVar.moveTo(event.clientX+1, event.clientY);
+  return popVar;
 }
 
 //---------------------------------------------------------------------------

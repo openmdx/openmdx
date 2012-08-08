@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
  * =======================================================================
- * = Name:        $Id: jre-1.5-properties.xml,v 1.1 2007/12/13 23:32:45 wfro Exp $
+ * = Name:        $Id: jre-1.5-properties.xml,v 1.2 2008/09/26 17:10:24 wfro Exp $
  * = Description: openCRX/Core JRE 1.5 platform properties
- * = Revision:    $Revision: 1.1 $
- * = Date:        $Date: 2007/12/13 23:32:45 $
+ * = Revision:    $Revision: 1.2 $
+ * = Date:        $Date: 2008/09/26 17:10:24 $
  * = Copyright:   (c) 2003-2007 CRIXP AG
  * =======================================================================
  * This software is published under the BSD license
@@ -51,5 +51,4 @@
  * openMDX (http://www.openmdx.org/)
 -->
 <project name="openmdx-portal-jre-1.5-properties">
-	<property name="model.build.formats" value="--format=xmi1 --format=uml.openmdx-1 --format=uml2.openmdx-1 --format=together.openmdx-1 --format=cci2 --format=jmi1 --format=jdo2 "/>
 </project>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1_0RemoteImpl.java,v 1.8 2008/01/25 00:58:53 hburger Exp $
+ * Name:        $Id: Dataprovider_1_0RemoteImpl.java,v 1.9 2008/09/09 01:06:14 wfro Exp $
  * Description: Dataprovider_1_0RemoteImpl
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 00:58:53 $
+ * Date:        $Date: 2008/09/09 01:06:14 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -125,7 +125,8 @@ class Dataprovider_1_0RemoteImpl
     ) throws RemoteException {
         try {
             return (UnitOfWorkReply[]) this.action.invoke(
-                new Object[]{header, workingUnits}
+                header, 
+                workingUnits
             );
         } catch (InvocationTargetException exception) {
             throw new UndeclaredThrowableException(exception);

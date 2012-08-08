@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: CompositeGrid.java,v 1.16 2008/04/25 23:39:22 wfro Exp $
+ * Name:        $Id: CompositeGrid.java,v 1.19 2008/09/19 20:54:23 wfro Exp $
  * Description: CompositeGrid
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2008/04/25 23:39:22 $
+ * Date:        $Date: 2008/09/19 20:54:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.view;
 
@@ -72,8 +69,8 @@ import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.control.GridControl;
 
 public class CompositeGrid 
-    extends Grid
-    implements Serializable {
+extends Grid
+implements Serializable {
 
     //-------------------------------------------------------------------------
     public CompositeGrid(
@@ -96,10 +93,10 @@ public class CompositeGrid
             this.getGridControl().getObjectContainer().getReferenceName()
         );
         return allObjects == null
-            ? Collections.EMPTY_LIST
+        ? Collections.EMPTY_LIST
             : allObjects;
     }
-    
+
     //-------------------------------------------------------------------------
     public void refresh(
         boolean refreshData
@@ -108,7 +105,7 @@ public class CompositeGrid
             refreshData
         );
     }
-    
+
     //-------------------------------------------------------------------------
     protected List<?> getFilteredObjects(
         Filter filter
@@ -116,7 +113,7 @@ public class CompositeGrid
         Collection allObjects = this.getAllObjects();
         List filteredObjects = null;
         if(filter == null) {
-             filteredObjects = ((RefContainer)allObjects).refGetAll(null);
+            filteredObjects = ((RefContainer)allObjects).refGetAll(null);
         }
         else {
             try {
@@ -126,7 +123,7 @@ public class CompositeGrid
                 catch(UnsupportedOperationException e) {}
                 if(filteredObjects == null) {
                     filteredObjects = new ArrayList<Object>(
-                        ((RefContainer)allObjects).refGetAll(filter)
+                            ((RefContainer)allObjects).refGetAll(filter)
                     );
                 }
             }
@@ -140,7 +137,7 @@ public class CompositeGrid
                         new BasicException.Parameter("object", this.view.getObject()),
                         new BasicException.Parameter("reference", this.getGridControl().getQualifiedReferenceName()),
                         new BasicException.Parameter("filter", filter),
-                        new BasicException.Parameter("principal", this.view.getApplicationContext().getLoginPrincipalId()),                        
+                        new BasicException.Parameter("principal", this.view.getApplicationContext().getLoginPrincipalId())
                     },
                     "error getting filtered objects"
                 );
@@ -149,12 +146,12 @@ public class CompositeGrid
         }
         return filteredObjects;
     }
-    
+
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3258408426441815605L;
-    
+
 }
 
 //--- End of File -----------------------------------------------------------

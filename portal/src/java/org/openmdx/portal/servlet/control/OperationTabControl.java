@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationTabControl.java,v 1.26 2008/05/27 15:56:47 wfro Exp $
+ * Name:        $Id: OperationTabControl.java,v 1.36 2008/12/07 23:58:49 wfro Exp $
  * Description: OperationTabControl
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.36 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/27 15:56:47 $
+ * Date:        $Date: 2008/12/07 23:58:49 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -87,52 +84,52 @@ import org.openmdx.portal.servlet.view.ViewMode;
 import org.openmdx.ui1.layer.application.Ui_1;
 
 public class OperationTabControl
-  extends TabControl
-  implements Serializable {
+    extends TabControl
+    implements Serializable {
   
-  //-------------------------------------------------------------------------
-  public OperationTabControl(
-      String id,
-      String locale,
-      int localeAsIndex,
-      ControlFactory controlFactory,
-      org.openmdx.ui1.jmi1.OperationTab tab,
-      int paneIndex,
-      int tabIndex
-  ) {
-      super(
-          id,
-          locale,
-          localeAsIndex,
-          controlFactory,
-          tab,
-          paneIndex,        
-          tabIndex
-      );
-    
-  }
+    //-------------------------------------------------------------------------
+    public OperationTabControl(
+        String id,
+        String locale,
+        int localeAsIndex,
+        ControlFactory controlFactory,
+        org.openmdx.ui1.jmi1.OperationTab tab,
+        int paneIndex,
+        int tabIndex
+    ) {
+        super(
+            id,
+            locale,
+            localeAsIndex,
+            controlFactory,
+            tab,
+            paneIndex,        
+            tabIndex
+        );
+        this.operationName = tab == null ? null :((org.openmdx.ui1.jmi1.OperationTab)tab).getOperationName();
+    }
   
-  //-------------------------------------------------------------------------
-  public String getOperationName(
-  ) {
-    return ((org.openmdx.ui1.jmi1.OperationTab)this.tab).getOperationName();
-  }
-  
-  //-------------------------------------------------------------------------
-  public String getIconKey(
-  ) {
-    return this.tab.getIconKey().substring(
-      this.tab.getIconKey().lastIndexOf(":") + 1
-    ) + WebKeys.ICON_TYPE;
-  }
+    //-------------------------------------------------------------------------
+    public String getOperationName(
+    ) {
+        return this.operationName;
+    }
 
-  //-------------------------------------------------------------------------
-  public String getToolTip(
-  ) {
-    return this.localeAsIndex < this.tab.getToolTip().size()
-      ? this.tab.getToolTip().get(this.localeAsIndex)
-      : this.tab.getToolTip().get(0);
-  }
+    //-------------------------------------------------------------------------
+    public String getIconKey(
+    ) {
+        return this.iconKey.substring(
+            this.iconKey.lastIndexOf(":") + 1
+        ) + WebKeys.ICON_TYPE;
+    }
+
+    //-------------------------------------------------------------------------
+    public String getToolTip(
+    ) {
+        return this.localeAsIndex < this.toolTips.size() ? 
+            this.toolTips.get(this.localeAsIndex) : 
+            this.toolTips.get(0);
+    }
   
     //-------------------------------------------------------------------------
     public boolean confirmExecution(
@@ -147,7 +144,7 @@ public class OperationTabControl
     public Action getInvokeOperationAction(
         ShowObjectView view,
         ApplicationContext application
-    ) {
+    ) throws ServiceException {
         // build-in operations
         if(Ui_1.EDIT_OBJECT_OPERATION_NAME.equals(this.getOperationName())) {
             return view.getObjectReference().getEditObjectAction(ViewMode.EMBEDDED);
@@ -180,53 +177,6 @@ public class OperationTabControl
     }
       
     //-------------------------------------------------------------------------
-    private void writeOperationParameterDialog(
-        HtmlPage p,
-        int operationIndex,
-        String okTitle,
-        String cancelTitle
-    ) throws ServiceException {
-        
-        p.write("  <script type=\"text/javascript\">");
-        p.write("      var Operation", Integer.toString(operationIndex), " = function(){");
-        p.write("      var dialog;");
-        p.write("");
-        p.write("      return {");
-        p.write("");
-        p.write("        submitHandler : function(btn, evtObject) {");
-        p.write("             document.op", Integer.toString(operationIndex), "Form.submit();");
-        p.write("             this.hide();");
-        p.write("        },");
-        p.write("");
-        p.write("        showDialog : function(){");
-        p.write("            if(!dialog){");
-        p.write("                dialog = new YAHOO.ext.BasicDialog(\"op", Integer.toString(operationIndex), "Dialog\", {");
-        p.write("                        modal:true,");
-        p.write("                        autoTabs:false,");
-        p.write("                        autoScroll:false,");
-        p.write("                        resizeable:false,");
-        p.write("                        width:\"60%\",");
-        p.write("                        shim:true,");
-        p.write("                        shadow:true,");
-        p.write("                        minWidth:250,");
-        p.write("                        minHeight:50,");
-        p.write("                        proxyDrag: false");
-        p.write("                });");
-        p.write("                dialog.addKeyListener(27, dialog.hide, dialog);");
-        p.write("                dialog.addButton('", okTitle, "', this.submitHandler, dialog);");
-        p.write("                dialog.addButton('", cancelTitle, "', dialog.hide, dialog);");
-        p.write("            }");
-        p.write("            var elt = getEl('op", Integer.toString(operationIndex), "Form');");
-        p.write("            dialog.resizeTo(elt.getWidth(), elt.getHeight()+100);");        
-        p.write("            dialog.show();");
-        p.write("        }");
-        p.write("      };");
-        p.write("    }();");
-        p.write("");
-        p.write("  </script>");
-    }
-    
-    //-------------------------------------------------------------------------
     @Override
     public void paint(
         HtmlPage p,
@@ -248,21 +198,21 @@ public class OperationTabControl
                 application
             );
             if(invokeOperationAction.isEnabled()) {
-                // no input parameters so don't generate dialog
+                // No input parameters so don't generate dialog
                 if((this.getFieldGroupControl().length == 0) && !this.confirmExecution(application)) {
                     if(Ui_1.EDIT_OBJECT_OPERATION_NAME.equals(this.getOperationName())) {
-                        p.write("    <li><a href=\"#\"", p.getOnClick("javascript:new Ajax.Updater('aPanel', ", p.getEvalHRef(invokeOperationAction),", {asynchronous:true, evalScripts: true, onComplete: function(){}});return false;"), " id=\"opTab", operationId, "\" >", this.getName(), "</a></li>");                        
+                        p.write("    <li><a href=\"#\" onclick=\"javascript:new Ajax.Updater('aPanel', ", p.getEvalHRef(invokeOperationAction),", {asynchronous:true, evalScripts: true, onComplete: function(){}});return false;\" id=\"opTab", operationId, "\" >", this.getName(), "</a></li>");                        
                     }
                     else {
-                        p.write("    <li><a href=\"#\"", p.getOnClick("javascript:this.href=", p.getEvalHRef(invokeOperationAction), ";"), " id=\"opTab", operationId, "\" >", this.getName(), "</a></li>");
+                        p.write("    <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(invokeOperationAction), ";onmouseover=function(){};\" id=\"opTab", operationId, "\" >", this.getName(), "</a></li>");
                     }
                 }
-                // standard operation with input parameters
-                else {
-                    p.write("    <li><a href=\"#\"", " id=\"op", operationId, "Trigger\"", p.getOnClick("javascript:Operation", operationId, ".showDialog();try{document.forms.op", operationId, "Form.elements[0].focus();}catch(e){};"), " >", this.getName(), "...</a></li>");
+                // Standard operation with input parameters
+                else {                                         
+                    p.write("    <li><a href=\"#\"", " id=\"op", operationId, "Trigger\" onclick=\"javascript:$('op", operationId, "Dialog').style.display='block';if(!op", operationId, "Dialog){op", operationId, "Dialog = new YAHOO.widget.Panel('op", operationId, "Dialog', {zindex:20000, fixedcenter:true, close:true, visible:false, constraintoviewport:true, modal:true}); op", operationId, "Dialog.cfg.queueProperty('keylisteners', new YAHOO.util.KeyListener(document, {keys:27}, {fn:op", operationId, "Dialog.hide, scope:op", operationId, "Dialog, correctScope:true})); op", operationId, "Dialog.render();} op", operationId, "Dialog.show();\">", this.getName(), "...</a></li>");
                 }
             }
-            // operation is disabled. Do not generate onlick or href actions
+            // operation is disabled. Do not generate onclick or href actions
             else {
                 // no input parameters
                 if(this.getFieldGroupControl().length == 0) {
@@ -276,34 +226,35 @@ public class OperationTabControl
         }
         // Operation parameters
         else if(FRAME_PARAMETERS.equals(frame)) {
-
             Action invokeOperationAction = this.getInvokeOperationAction(
                 view, 
                 application
             );
             int operationIndex = 100*(this.getPaneIndex() + 1) + this.getTabIndex();
-
+            String operationId = Integer.toString(operationIndex);
             if(invokeOperationAction.isEnabled()) {
-
-                String formId = "op" + operationIndex + "Form";
-
+                String formId = "op" + operationId + "Form";
                 // Operations with no arguments
                 if(this.getFieldGroupControl().length == 0) {            
                     // Confirmation prompt
                     if(this.confirmExecution(application)) {
-                        p.write("<div id=\"op", Integer.toString(operationIndex), "Dialog\" style=\"visibility:hidden;position:absolute;top:0px;\">");
-                        this.writeOperationParameterDialog(
-                            p, 
-                            operationIndex,
-                            texts.getYesText(),
-                            texts.getNoText()
-                        );
-                        p.write("  <div class=\"ydlg-hd\">", texts.getAssertExecutionText(), "</div>");
-                        p.write("  <div class=\"ydlg-bd\">");     
+                        p.write("<script language=\"javascript\" type=\"text/javascript\">");
+                        p.write("  var op", operationId, "Dialog = null;");
+                        p.write("</script>");     
+                        p.write("<div id=\"op", operationId, "Dialog\" class=\"opDialog\">");
+                        p.write("  <div class=\"hd\">", texts.getAssertExecutionText(), "</div> <!-- name of operation -->");
+                        p.write("  <div class=\"bd\">");                        
                         p.write("    <form id=\"", formId, "\" name=\"", formId, "\" action=\"\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"post\" >");
                         p.write("      <input type=\"hidden\" name=\"requestId.submit\" value=\"", view.getRequestId(), "\" />");  
                         p.write("      <input type=\"hidden\" name=\"event.submit\" value=\"", Integer.toString(invokeOperationAction.getEvent()), "\" />");
                         p.write("      <input type=\"hidden\" name=\"parameter\" value=\"", invokeOperationAction.getParameter(), "\" />");
+                        p.write("      <div id=\"op", operationId, "FormButtons\" style=\"text-align:right;padding-top:8px;\">");
+                        p.write("        <input type=\"submit\" value=\"", texts.getOkTitle(), "\" onmouseup=\"javascript:$('op", operationId, "FormWait').style.display='block';$('op", operationId, "FormButtons').style.visibility='hidden';\" />");
+                        p.write("        <input type=\"button\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:op", operationId, "Dialog.hide();\" />");
+                        p.write("      </div>");
+                        p.write("      <div id=\"op", operationId, "FormWait\" style=\"text-align:right;display:none;\">");
+                        p.write("        <img src=\"images/wait.gif\" alt=\"\" />");
+                        p.write("      </div>");                    
                         p.write("    </form>");
                         p.write("  </div>");
                         p.write("</div>");
@@ -311,23 +262,19 @@ public class OperationTabControl
                 }            
                 // Standard operations
                 else {
-                    p.write("<div id=\"op", Integer.toString(operationIndex), "Dialog\" style=\"visibility:hidden;position:absolute;top:0px;\">");
-                    this.writeOperationParameterDialog(
-                        p, 
-                        operationIndex,
-                        texts.getOkTitle(),
-                        texts.getCancelTitle()
-                    );
-                    p.write("  <div class=\"ydlg-hd\">", this.getToolTip(), "</div>");
-                    p.write("  <div class=\"ydlg-bd\">");     
-                    p.write("<form id=\"", formId, "\" name=\"", formId, "\" action=\"\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"post\" >");
+                    p.write("<script language=\"javascript\" type=\"text/javascript\">");
+                    p.write("  var op", operationId, "Dialog = null;");
+                    p.write("</script>");     
+                    p.write("<div id=\"op", operationId, "Dialog\" class=\"opDialog\">");
+                    p.write("  <div class=\"hd\">", this.getToolTip(), "</div> <!-- name of operation -->");
+                    p.write("  <div class=\"bd\">");                        
+                    p.write("    <form id=\"", formId, "\" name=\"", formId, "\" action=\"\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"post\" >");
                     // only show field group for input fields
                     for(int k = 0; k < 1; k++) {
                         FieldGroup fieldGroup = operationTab.getFieldGroup()[k];
                         Attribute[][] attributes = fieldGroup.getAttribute();
                         if((attributes != null) && (attributes.length > 0) && (attributes[0].length > 0)) {
                             p.write("<div class=\"opFieldGroupName\">", fieldGroup.getFieldGroupControl().getName(), "</div>");
-                            // Firefox Caret Bug Workaround: <div style=...
                             p.write("<div style=\"overflow:auto;\">");
                             p.write("<table class=\"opFieldGroup\">");
                             int nCols = attributes.length;
@@ -464,7 +411,7 @@ public class OperationTabControl
                                                         (autocompleter == null) || 
                                                         !autocompleter.hasFixedSelectableValues()
                                                     ) {
-                                                        p.write("  ", p.getImg("class=\"popUpButton\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\"", p.getOnClick("javascript:OF.findObject(" + p.getEvalHRef(findObjectAction), ", document.forms['", formId, "'].elements['", field, "[" + tabIndex, "]", ".Title'], document.forms['", formId, "'].elements['", field, "[", Integer.toString(tabIndex), "]", "'], '", lookupId, "');")));
+                                                        p.write("  ", p.getImg("class=\"popUpButton\" border=\"0\" alt=\"Click to open ObjectFinder\" src=\"", p.getResourcePath("images/"), findObjectAction.getIconKey(), "\" onclick=\"javascript:OF.findObject(", p.getEvalHRef(findObjectAction), ", document.forms['", formId, "'].elements['", field, "[" + tabIndex, "]", ".Title'], document.forms['", formId, "'].elements['", field, "[", Integer.toString(tabIndex), "]", "'], '", lookupId, "');\""));
                                                     }
                                                     p.write("</td>");
                                                 }
@@ -479,7 +426,7 @@ public class OperationTabControl
                                                     if(attribute.getSpanRow() > 1) {
                                                         int htmlId = operationIndex*100 + tabIndex;
                                                         if(attribute.getSpanRow() > 4) {
-                                                            p.write("<div", p.getOnClick("javascript:loadHTMLedit('T", Integer.toString(htmlId), "');"), p.getOnMouseOver("javascript:this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/"), "html", p.getImgType(), "\" border=\"0\" alt=\"o\" title=\"\""), "</div>");
+                                                            p.write("<div onclick=\"javascript:loadHTMLedit('T", Integer.toString(htmlId), "');\"", p.getOnMouseOver("javascript:this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/"), "html", p.getImgType(), "\" border=\"0\" alt=\"o\" title=\"\""), "</div>");
                                                         }
                                                         p.write("<textarea id=\"T", Integer.toString(htmlId), "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" class=\"string\" name=\"", field, "[", Integer.toString(tabIndex), "]", "\" tabindex=\"", Integer.toString(tabIndex), "\" style=\"width:100%;\" >", stringifiedValue, "</textarea>");
                                                     }
@@ -539,11 +486,18 @@ public class OperationTabControl
                             p.write("</div>");
                         }
                     }
-                    p.write("    <input type=\"hidden\" name=\"requestId.submit\" value=\"", view.getRequestId(), "\" />");  
-                    p.write("    <input type=\"hidden\" name=\"event.submit\" value=\"", Integer.toString(invokeOperationAction.getEvent()), "\" />");
-                    p.write("    <input type=\"hidden\" name=\"parameter\" value=\"", invokeOperationAction.getParameter(), "\" />");
-                    p.write("  </form>");
-                    p.write("</div>");
+                    p.write("      <input type=\"hidden\" name=\"requestId.submit\" value=\"", view.getRequestId(), "\" />");  
+                    p.write("      <input type=\"hidden\" name=\"event.submit\" value=\"", Integer.toString(invokeOperationAction.getEvent()), "\" />");
+                    p.write("      <input type=\"hidden\" name=\"parameter\" value=\"", invokeOperationAction.getParameter(), "\" />");
+                    p.write("      <div id=\"op", operationId, "FormButtons\" style=\"text-align:right;padding-top:8px;\">");
+                    p.write("        <input type=\"submit\" value=\"", texts.getOkTitle(), "\" onmouseup=\"javascript:$('op", operationId, "FormWait').style.display='block';$('op", operationId, "FormButtons').style.visibility='hidden';\" />");
+                    p.write("        <input type=\"button\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:op", operationId, "Dialog.hide();\" />");
+                    p.write("      </div>");
+                    p.write("      <div id=\"op", operationId, "FormWait\" style=\"text-align:right;display:none;\">");
+                    p.write("        <img src=\"images/wait.gif\" alt=\"\" />");
+                    p.write("      </div>");                    
+                    p.write("    </form>");
+                    p.write("  </div>");
                     p.write("</div>");
                 }
             }
@@ -558,6 +512,7 @@ public class OperationTabControl
     public static final String FRAME_PARAMETERS = "Parameters";
     public static final String FRAME_RESULTS = "Results";
 
+    protected final String operationName;
 }
 
 //--- End of File -----------------------------------------------------------

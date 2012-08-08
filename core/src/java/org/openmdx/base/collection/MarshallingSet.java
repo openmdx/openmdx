@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSet.java,v 1.12 2008/04/09 12:33:43 hburger Exp $
+ * Name:        $Id: MarshallingSet.java,v 1.14 2008/12/15 03:15:37 hburger Exp $
  * Description: Marshalling Set
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:33:43 $
+ * Date:        $Date: 2008/12/15 03:15:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,10 +56,10 @@ import java.util.Set;
 
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 
-
 /**
  * A Marshalling Set
  */
+@SuppressWarnings("unchecked")
 public class MarshallingSet<E>
     extends MarshallingCollection<E>
     implements Set<E>, Serializable
@@ -73,7 +73,7 @@ public class MarshallingSet<E>
      */   
     public MarshallingSet(
         org.openmdx.base.persistence.spi.Marshaller marshaller,
-        Set<?> set
+        Set set
     ) {
         super(marshaller, set);
         this.delegateIsInstanceOfSet = true;
@@ -103,7 +103,7 @@ public class MarshallingSet<E>
      */   
     public MarshallingSet(
         Marshaller marshaller,
-        Set<?> set
+        Set set
     ) {
         super(marshaller, set);
         this.delegateIsInstanceOfSet = true;
@@ -118,7 +118,7 @@ public class MarshallingSet<E>
      */
     public MarshallingSet(
         org.openmdx.base.persistence.spi.Marshaller marshaller,
-        Collection<?> set
+        Collection set
     ) {
         super(marshaller, set);
         this.delegateIsInstanceOfSet = set instanceof Set;
@@ -134,7 +134,7 @@ public class MarshallingSet<E>
      */
     public MarshallingSet(
         org.openmdx.base.persistence.spi.Marshaller marshaller,
-        Collection<?> set, 
+        Collection set, 
         Unmarshalling unmarshalling
     ) {
         super(marshaller, set, unmarshalling);
@@ -150,7 +150,7 @@ public class MarshallingSet<E>
      */
     public MarshallingSet(
         Marshaller marshaller,
-        Collection<?> set
+        Collection set
     ) {
         super(marshaller, set);
         this.delegateIsInstanceOfSet = set instanceof Set;
@@ -175,17 +175,21 @@ public class MarshallingSet<E>
      * @see java.util.Collection#add(java.lang.Object)
      */
     public boolean add(E element) {
-        return 
-        	(this.delegateIsInstanceOfSet || ! this.contains(element)) &&
-        	super.add(element);
+        return (
+            this.delegateIsInstanceOfSet || ! this.contains(element)
+        ) && super.add(element);
     }
 
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
     public boolean equals(Object object) {
-    	if (object == this) return true;
-    	if (!(object instanceof Set)) return false;
+    	if (object == this) {
+    	    return true;
+    	}
+    	if (!(object instanceof Set)) {
+    	    return false;
+    	}
     	Collection<?> that = (Collection<?>) object;
     	return that.size() == this.size() && this.containsAll(that);  
     }

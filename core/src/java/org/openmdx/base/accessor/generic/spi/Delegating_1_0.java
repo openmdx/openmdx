@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Delegating_1_0.java,v 1.1 2007/10/10 16:05:50 hburger Exp $
- * Description: Delegating_1_0 
- * Revision:    $Revision: 1.1 $
+ * Name:        $Id: Delegating_1_0.java,v 1.2 2008/10/28 17:32:28 hburger Exp $
+ * Description: Delegating 1.0
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:50 $
+ * Date:        $Date: 2008/10/28 17:32:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -48,14 +48,18 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.accessor.generic.spi;
 
 /**
- * Delegating_1_0
+ * Delegating 1.0
  */
 public interface Delegating_1_0 {
     
+    /**
+     * Retrieve the delegate
+     * 
+     * @return the delegate
+     */
     Object objGetDelegate();
 
 }

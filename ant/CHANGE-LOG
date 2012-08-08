@@ -3,6 +3,31 @@
                              CHANGE LOG openMDX
                     =====================================
 
+==============================================================================
+Version 2.2.0+                                                      2008-09-26
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES
+     
+2.0.  CHANGED FEATURES
+
+      CR20016210
+      jmi1 replaces cci 
+      
+      Discontinue legacy API generation
+      
+2.1.  FIXED BUGS
+      none
+                  
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3   REMOVED FEATURES
+      none
+
 
 ==============================================================================
 Version 1.18.0                                                      2007-05-31

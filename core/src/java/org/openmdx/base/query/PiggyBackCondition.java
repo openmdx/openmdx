@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PiggyBackCondition.java,v 1.1 2007/07/26 08:38:38 wfro Exp $
+ * Name:        $Id: PiggyBackCondition.java,v 1.2 2008/09/09 01:05:33 wfro Exp $
  * Description: PiggyBackCondition
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/07/26 08:38:38 $
+ * Date:        $Date: 2008/09/09 01:05:33 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,13 +62,13 @@ public class PiggyBackCondition
     public PiggyBackCondition(
     ) {
         super(
-            new Object[]{}
+            EMPTY_OBJECT_ARRAY
         );
     }
   
     public PiggyBackCondition(
         String feature,
-        Object[] values
+        Object... values
     ) {
         super(
             Quantors.PIGGY_BACK,

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Throwables.java,v 1.4 2008/03/21 18:35:32 hburger Exp $
+ * Name:        $Id: Throwables.java,v 1.6 2008/10/06 17:34:52 hburger Exp $
  * Description: Throwables
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:35:32 $
+ * Date:        $Date: 2008/10/06 17:34:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,6 +51,7 @@
  */
 package org.openmdx.kernel.exception;
 
+import org.openmdx.kernel.exception.BasicException.Parameter;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -91,6 +92,7 @@ public class Throwables {
      * @param parameters  Any exception parameters, maybe <code>null</code>
      * @param description The description, maybe <code>null</code> in which
      * case the throwable's message is used
+     * @deprecated Use {@link #initCause(Throwable,Throwable,String,int,String,BasicException.Parameter[])} instead
      */
     public static Throwable initCause (
         Throwable throwable,
@@ -99,6 +101,38 @@ public class Throwables {
         int exceptionCode,
         BasicException.Parameter[] parameters,
         String description
+    ) {
+        return initCause(
+            throwable,
+            cause,
+            exceptionDomain,
+            exceptionCode,
+            description,
+            parameters);
+    }
+
+    /**
+     * Set a <code>Throwable</code>'s exception stack.
+     *
+     * @param throwable A throwable from which the backtrace and other exception
+     * information is used. 
+     * @param cause An embedded exception
+     * @param exceptionDomain An exception domain. A null objects references
+     * the default exception domain with negative exception codes only.
+     * @param exceptionCode  An exception code. Negative codes describe common
+     * exceptions codes. Positive exception codes are specific for a given
+     * exception domain.
+     * @param description The description, maybe <code>null</code> in which
+     * case the throwable's message is used
+     * @param parameters  Any exception parameters, maybe <code>null</code>
+     */
+    public static Throwable initCause (
+        Throwable throwable,
+        Throwable cause,
+        String exceptionDomain,
+        int exceptionCode,
+        String description,
+        Parameter... parameters
     ) {
         return throwable.initCause(
             new BasicException(
@@ -137,7 +171,7 @@ public class Throwables {
             if(cursor instanceof BasicException) {
                 exceptionStack = (BasicException) cursor;
             } else if(cursor instanceof BasicException.Wrapper) {
-                exceptionStack = ((BasicException.Wrapper)cursor).getExceptionStack();
+                exceptionStack = ((BasicException.Wrapper)cursor).getCause();
             } else {
                 continue Cause; 
             }

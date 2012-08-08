@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EjbConfiguration.java,v 1.10 2008/04/14 18:37:14 hburger Exp $
+ * Name:        $Id: EjbConfiguration.java,v 1.11 2008/09/10 08:55:25 hburger Exp $
  * Description: EjbConfiguration class 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/14 18:37:14 $
+ * Date:        $Date: 2008/09/10 08:55:25 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,68 +69,66 @@ import org.openmdx.kernel.exception.BasicException;
  */
 @SuppressWarnings("unchecked")
 public class EjbConfiguration 
-	extends Configuration
+extends Configuration
 { 
 
-	/**
-	 * Constructor
-	 *
-	 * @param		source
-	 *				the ejb context
-	 * @param		section
-	 *				the section to be parsed, my be null
-	 * @param		specification
-	 *				the configurations specification, may be null
-	 */
-	public EjbConfiguration(
-		Context context,
-		String[] section,
-		Map specification
-	) throws ServiceException {
-		super();
-		try {
-	        Context base = context;
-	        if(section != null) for(
-	           int i = 0, iLimit = section.length - 1;
-	           i < iLimit;
-	           i++
-	        ){
-	            base = (Context) base.lookup(section[i]);
-	        }
-			String sectionName =
-				section == null ? "" : section[section.length - 1];
-			for(
-				NamingEnumeration bindings = base.listBindings(sectionName);
-				bindings.hasMore();
-			) try {
-				Binding binding = (Binding)bindings.next();
-				Object value = binding.getObject();
+    /**
+     * Constructor
+     *
+     * @param		source
+     *				the ejb context
+     * @param		section
+     *				the section to be parsed, my be null
+     * @param		specification
+     *				the configurations specification, may be null
+     */
+    public EjbConfiguration(
+        Context context,
+        String[] section,
+        Map specification
+    ) throws ServiceException {
+        super();
+        try {
+            Context base = context;
+            if(section != null) for(
+                    int i = 0, iLimit = section.length - 1;
+                    i < iLimit;
+                    i++
+            ){
+                base = (Context) base.lookup(section[i]);
+            }
+            String sectionName =
+                section == null ? "" : section[section.length - 1];
+            for(
+                    NamingEnumeration bindings = base.listBindings(sectionName);
+                    bindings.hasMore();
+            ) try {
+                Binding binding = (Binding)bindings.next();
+                Object value = binding.getObject();
                 String name = binding.getName();
                 if(
-                    SharedConfigurationEntries.WORK_AROUND_SUN_APPLICATION_SERVER_BINDINGS || 
-                    !binding.isRelative()
+                        SharedConfigurationEntries.WORK_AROUND_SUN_APPLICATION_SERVER_BINDINGS || 
+                        !binding.isRelative()
                 ) name = name.substring(name.lastIndexOf('/') + 1);
-				if (
-					value instanceof String ||
-					value instanceof Boolean ||
-					value instanceof Integer ||
-					value instanceof Long ||
-					value instanceof Short
-				) setValue(name,value);
-			} catch (NamingException exception) {
-				throw new ServiceException (
-					exception,
-					BasicException.Code.DEFAULT_DOMAIN, 
-					BasicException.Code.ACTIVATION_FAILURE, 
-					new BasicException.Parameter[] {
-						new BasicException.Parameter("section", Arrays.toString(section))
-					},
-					"Naming exception in section"
-				);
-			}
-		} catch (NamingException exception) {
-			// The section has no entries
-		}
-	}
-    
+                if (
+                        value instanceof String ||
+                        value instanceof Boolean ||
+                        value instanceof Integer ||
+                        value instanceof Long ||
+                        value instanceof Short
+                ) setValue(name,value);
+            } catch (NamingException exception) {
+                throw new ServiceException (
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN, 
+                    BasicException.Code.ACTIVATION_FAILURE, 
+                    "Naming exception in section",
+                    new BasicException.Parameter("section", Arrays.toString(section))
+                );
+            }
+        } catch (NamingException exception) {
+            // The section has no entries
+        }
+    }
+
 }

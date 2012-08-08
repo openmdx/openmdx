@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr" lang="ro"><head>
+  
+  <title>openCRX - Advanced Search</title><meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css"></head>
+
+<body style="direction: ltr;" onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
+<table class="objectTitle">
+  <tbody><tr>
+    <td>Căutare avansată</td>
+	<td>
+		<script>
+		  <!--
+		  document.write('<td align="right"><a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+		  -->
+		</script>
+	</td>
+  </tr>
+</tbody></table>
+
+ <div class="hh2">Căutare avansată uşurată</div>
+ <div class="normal">Puteţi
+mări acurateţea căutărilor adăugând operatori care vă rafinează
+cuvintele cheie şi numerele. Toate opţiunile listate pe această pagină
+pot fi introduse direct in caseta de căutare.</div><div class="hh2">Introducere</div> 
+ <div class="normal">Puteţi introduce cuvinte/numere sau expresii ca de exemplu <strong>'Miller'</strong>, <strong>'&gt; 500'</strong> ori <strong>'&gt;=
+   Smith'</strong>, şi după aceea</div>
+ <table cellpadding="0" cellspacing="10">
+   <tbody><tr valign="top">
+     <td>• daţi clic pe un&nbsp;<strong>antet de coloană</strong>&nbsp;pentru a căuta obiecte
+       cu valori potrivite în acel atribut în particular (<strong>toate obiectele</strong>&nbsp;sunt căutate
+       indiferent de filtrele deja stabilite iar rezultatele căutărilor existente vor fi pierdute)</td>
+	 <td bgcolor="#cccccc"><strong>Căutare nouă</strong><br>
+	 <img src="images/helpSearchTut0.gif" height="51" width="129"></td>
+   </tr>
+   <tr valign="top">
+     <td>• dând clic pe&nbsp;<strong>butonul</strong><strong> [+]</strong>&nbsp;pentru a căuta obiecte
+       cu valori potrivite în acel atribut în particular (<strong>doar obiectele conţinute în căutările&nbsp;</strong><strong>sau filtrele</strong><strong> anterioare</strong> sunt căutate mai în detaliu, cu alte cuvinte, 'adăugând' această căutare se va obţine un rezultat&nbsp;filtrat)</td>
+	 <td bgcolor="#cccccc"><strong>Adaugă Condiţie</strong><br>
+	 <img src="images/helpSearchTut1.gif" height="51" width="129"></td>
+   </tr>
+</tbody></table>
+ <div class="hh2">Operatori</div>
+ <div class="normal">Următorii&nbsp;operatori sunt permişi (aveţi în vedere că nu toate sistemele de baze de date acceptă toţi operatorii):</div>
+ <ul>
+ <li>similar (<strong>*</strong>)</li>
+ <li>ca şi (<strong>%</strong>), operator predefinit pentru căutări de şiruri</li>
+ <li>egal (<strong>=</strong>), operator predefinit pentru căutări&nbsp;booleene, numere şi coduri</li>
+ <li>diferit (<strong>&lt;&gt;</strong>, <strong>!</strong>=)</li>
+ <li>mai puţin (<strong>&lt;</strong>)</li>
+ <li>mai puţin sau egal (<strong>&lt;=</strong>)</li>
+ <li>mai mare (<strong>&gt;</strong>)</li>
+ <li>mai mare sau egal <strong>(&gt;=</strong>)</li>
+ </ul>
+ <div class="hh2">Căutări&nbsp;"ŞI" </div>
+ <div class="normal">Pentru a obţine rezultate&nbsp;care satisfac simultan mai multe condiţii utilizaţi caracterul&nbsp;"<strong>&amp;</strong>"
+între condiţii. De exemplu pentru a căuta&nbsp;valorile intre 500 şi
+1000 (mai mari decât 500 şi mai mici decât 1000), tastaţi: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
+ <div class="hh2">Căutări "SAU"</div>
+<div class="normal">Pentru a obţine rezultate&nbsp;care includ cuvântul A sau B, utilizaţi&nbsp;"<strong>;</strong>" între termeni. De exemplu pentru a căuta persoane cu numele 'Smith' SAU 'Miller', tastaţi: <strong>'= Smith; Miller'</strong></div>
+ <div class="hh2">Căutări Combinate</div>
+ <div class="normal">Puteţi
+combina nelimitat căutările. De exemplu pentru a căuta valorile mai
+mici de&nbsp;'1000', dar diferite de '500' şi diferite de '600',
+tastaţi: <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
+ <div class="normal">Regulile de analiză pentru căutarea&nbsp;combinată vor fi:</div>
+ <ul>
+   <li>searchExpr ::= filterValue { &amp; filterValue }<br>
+   (--&gt; semn de căutare pentru şir cu <strong>&amp;</strong> drept separator)</li>
+   <li>filterValue ::= [operator] value { ; value }<br>
+   (--&gt; semn de căutare pentru şi&nbsp;<strong>;</strong> drept separator)</li>
+ </ul>
+ <div class="hh2">Căutări cu Caracter Multiplu (Wildcard)</div>
+ <div class="normal">
+   <p>Unele
+baze de date permit căutări cu caracter multiplu (wildcard) allow you
+to initiate wildcard searches. Dacă sunt permise, puteţi căuta de
+exemplu toate persoanele cu numele conţinând 'ller' (exemplu: Miller,
+Mueller, etc.) tastând: <strong>'%%ller'<br>
+   AVERTIZARE:</strong>
+căutările cu wildcard pot fi foarte consumatoare de timp dacă baya de
+date nu e optimizată&nbsp;(caută absolut&nbsp;toate tabelele)! </p>
+ </div>
+</body></html>

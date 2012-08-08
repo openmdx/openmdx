@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightClassLoader.java,v 1.7 2008/01/15 17:28:31 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: LightweightClassLoader.java,v 1.10 2008/09/08 11:45:37 hburger Exp $
  * Description: Lightweight Class Loader
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/15 17:28:31 $
+ * Date:        $Date: 2008/09/08 11:45:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -46,14 +46,15 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.application.deploy.spi;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -62,17 +63,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 import org.openmdx.kernel.application.configuration.Report;
+import org.openmdx.kernel.application.configuration.ReportLogger;
 import org.openmdx.kernel.environment.SystemProperties;
-import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
-import org.openmdx.kernel.url.protocol.XriProtocols;
+import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.url.protocol.xri.ZipURLConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Lightweight Class Loader
@@ -115,6 +120,68 @@ public class LightweightClassLoader extends URLClassLoader
     private final String shortDescription;
 
     /**
+     * Keep track of missing classes
+     */
+    private final ConcurrentMap<String,ClassNotFoundException> missingClasses = new ConcurrentHashMap<String,ClassNotFoundException>();
+
+    /**
+     * The 
+     */
+    private static final URL NO_RESOURCE = noResource();
+    
+    /**
+     * Keep track of missing resources
+     */
+    private final ConcurrentMap<String,URL> resources = NO_RESOURCE == null ? 
+        null : // no tracking will take place
+        new ConcurrentHashMap<String,URL>();
+    
+    /* (non-Javadoc)
+     * @see java.net.URLClassLoader#findResource(java.lang.String)
+     */
+    @Override
+    public URL findResource(
+        String name
+    ) {
+        if(this.resources == null) {
+            return super.findResource(name);
+        } else {
+            URL resource = this.resources.get(name);
+            if(resource == null) {
+                resource = super.findResource(name);
+                this.resources.putIfAbsent(
+                    name, 
+                    resource == null ? NO_RESOURCE : resource
+                );
+                return resource;
+            } else {
+                return resource == NO_RESOURCE ? null : resource;
+            }
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see java.net.URLClassLoader#findClass(java.lang.String)
+     */
+    @Override
+    protected Class<?> findClass(
+        String name
+    ) throws ClassNotFoundException {
+        ClassNotFoundException notFound = this.missingClasses.get(name);
+        if(notFound == null) {
+            try {
+                return super.findClass(name);
+            } catch (ClassNotFoundException exception) {
+                this.missingClasses.putIfAbsent(
+                    name,
+                    notFound = exception
+                );
+            }
+        }
+        throw notFound;
+    }
+
+    /**
      * Add a list of URLs to the lightweight class loader's search path,
      * including libraries referred to by manifest class-path entries.
      * 
@@ -129,13 +196,16 @@ public class LightweightClassLoader extends URLClassLoader
     ){
     	Set<URL> currentUrls = new HashSet<URL>(Arrays.asList(getURLs()));
     	List<URL> newUrls = new ArrayList<URL>(Arrays.asList(urls));
+    	boolean added = false;
+    	Logger logger = new ReportLogger(report);
     	while(!newUrls.isEmpty()) {
     	    URL newURL = newUrls.remove(0);
     	    try {
         		URL url = toCanonicalForm(newURL);
         		if(currentUrls.add(url)){
-        			newUrls.addAll(Arrays.asList(getManifestClassPath(url)));
-        			URL implementationURL = getImplementationURL(url); 
+        		    added = true;
+        			newUrls.addAll(Arrays.asList(getManifestClassPath(url, logger)));
+        			URL implementationURL = getImplementationURL(url, logger); 
                     try {
                         //
                         // Validate URL
@@ -156,10 +226,33 @@ public class LightweightClassLoader extends URLClassLoader
                 );
         	}
     	}
+    	if(added){
+    	    this.missingClasses.clear();
+            this.resources.clear();
+    	}
     }
 
+    /**
+     * Provide the NO_RESOURCE place holder object
+     * @return
+     */
+    private static URL noResource(
+    ){
+        try {
+            return new URL("file","","");
+        } catch (MalformedURLException exception) {
+            LoggerFactory.getLogger(
+                LightweightClassLoader.class
+            ).error(
+                "NO_RESOURCE place holder URL \"file:\" can't created, no resource tracking will take place",
+                exception
+            );
+            return null;
+        }
+    }
+    
 	/**
-     * Converts file URL to their canaonical form
+     * Converts file URL to their canonical form
      * 
      * @param url
      * @return
@@ -233,7 +326,7 @@ public class LightweightClassLoader extends URLClassLoader
       	try {
     	    return ((ZipURLConnection)
     	    	new URL(
-    	    		XriProtocols.ZIP_PREFIX + module + XriProtocols.ZIP_SEPARATOR
+    	    		XRI_2Protocols.ZIP_PREFIX + module + XRI_2Protocols.ZIP_SEPARATOR
     	    	).openConnection()
     		).getManifest();
       	} catch (IOException exception){
@@ -264,46 +357,54 @@ public class LightweightClassLoader extends URLClassLoader
      * Return an empty array if either is missing.
      * 
      * @param url
-     * @return the manifest class path; never null.
+     * @param logger
+     *  
+     * @return the manifest class path; never <code>null</code>.
+     * 
      * @throws IOException
      */
     static public URL[] getManifestClassPath(
-        URL url
+        URL url, 
+        Logger logger
     ) throws IOException {
-      	Manifest manifest = getManifest(url);
-      	String archiveString = url.toExternalForm();
-    	List<URL> classPath = new ArrayList<URL>();
-      	if(manifest != null){  		
-      		String attributeValue = manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
-      		if(attributeValue != null) {
-          		URL context = archiveString.endsWith("/") ? new URL(url, "..") : url; 
-      			for(
-	      		    StringTokenizer tokens = new StringTokenizer(attributeValue);
-	      		    tokens.hasMoreTokens();
-	      		) classPath.add(
-	      		    new URL(context, tokens.nextToken())
-	      		); 
-      		}
-      	}
-    	SysLog.detail(
-    		archiveString + " has " + (
-    			manifest == null ? "no" : "a"
-    		) + " Manifest leading to the following Class-Path", 
-    		classPath
-    	);
-      	return classPath.toArray(new URL[classPath.size()]);
+        Manifest manifest = getManifest(url);
+        String archiveString = url.toExternalForm();
+        List<URL> classPath = new ArrayList<URL>();
+        if(manifest != null){       
+            String attributeValue = manifest.getMainAttributes().getValue(Attributes.Name.CLASS_PATH);
+            if(attributeValue != null) {
+                URL context = archiveString.endsWith("/") ? new URL(url, "..") : url; 
+                for(
+                    StringTokenizer tokens = new StringTokenizer(attributeValue);
+                    tokens.hasMoreTokens();
+                ) classPath.add(
+                    new URL(context, tokens.nextToken())
+                ); 
+            }
+        }
+        logger.info(
+            "{} has {} Manifest leading to the following Class-Path: {}",
+            archiveString,
+            manifest == null ? "no" : "a",
+            classPath
+        );
+        return classPath.toArray(new URL[classPath.size()]);
     }
-
+    
     /**
      * The Manifest is optional as well as its Implementation-URL attribute.
      * Return the original URL of either is missing
      * 
      * @param url
-     * @return the manifest class path; never null.
+     * @param logger 
+     * 
+     * @return the manifest class path; never <code>null</code>.
+     * 
      * @throws IOException
      */
     static protected URL getImplementationURL(
-        URL url
+        URL url, 
+        Logger logger
     ) throws IOException {
       	Manifest manifest = getManifest(url);
       	String archiveString = url.toExternalForm();
@@ -320,14 +421,16 @@ public class LightweightClassLoader extends URLClassLoader
       		}
       	}
       	if(implementationURL == null) {
-        	SysLog.detail(
-        		archiveString + " has no Implementation-URL Manifest entry", 
+      	    logger.info(
+      	        "{} has no Implementation-URL Manifest entry: {}",
+      	        archiveString, 
         		url
         	);
         	return url;
       	} else {
-        	SysLog.detail(
-        		archiveString + " has an Implementation-URL Manifest entry leading to the following location", 
+            logger.info(
+                "{} has an Implementation-URL Manifest entry leading to the following location: ",
+                archiveString, 
         		implementationURL
         	);
         	return implementationURL;

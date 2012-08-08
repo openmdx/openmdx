@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MarshallingObject_1.java,v 1.11 2008/04/21 17:04:25 hburger Exp $
+ * Project:     openMEX, http://www.openmdx.org/
+ * Name:        $Id: MarshallingObject_1.java,v 1.21 2008/12/15 03:15:36 hburger Exp $
  * Description: MarshallingObject_1 class
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/21 17:04:25 $
+ * Date:        $Date: 2008/12/15 03:15:36 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,16 +45,20 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.accessor.generic.spi;
 
-import java.io.Serializable;
+import java.util.Collection;
 import java.util.EventListener;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
+
+import javax.jmi.reflect.RefBaseObject;
+import javax.jmi.reflect.RefObject;
+import javax.jmi.reflect.RefPackage;
 
 import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.accessor.generic.cci.Structure_1_0;
@@ -65,100 +68,29 @@ import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.compatibility.base.marshalling.CachingMarshaller_1_0;
 import org.openmdx.compatibility.base.marshalling.CollectionMarshallerAdapter;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
 
-
-
 /**
- * An abstract delegating object
+ * A marshalling object
  */
-@SuppressWarnings("unchecked")
-public class MarshallingObject_1
-    extends DelegatingObject_1 
-    implements Serializable
+public abstract class MarshallingObject_1<M extends CachingMarshaller_1_0>
+    extends DynamicallyDelegatingObject_1
 {
-
-    /**
-     * Marshalling Container
-     */
-    static class MarshallingContainer<K,V,M extends FilterableMap<K,?>> 
-        extends MarshallingFilterableMap<K,V,M>
-    {
-    
-        /**
-         * Constructor
-         * 
-         * @param marshaller
-         * @param container
-         */
-        public MarshallingContainer(
-            Marshaller marshaller,
-            M container
-        ) throws ServiceException {
-            super(marshaller, container);
-        }
-    
-        /**
-         * Implements <code>Serializable</code>
-         */
-        private static final long serialVersionUID = 3257009873437996080L;
-    
-        /**
-         * Get the delegate and verifies the marshaller
-         * 
-         * @param marshaller
-         * 
-         * @return the delegate map
-         * 
-         * @exception ServiceException BAD_PARAMETER
-         *            If the request specifies a different marshaller
-         *            
-         */
-        M getDelegate(
-            Marshaller marshaller
-        ) throws ServiceException{
-            if(!(super.marshaller instanceof CollectionMarshallerAdapter)) throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("expected",CollectionMarshallerAdapter.class.getName()),
-                    new BasicException.Parameter("actual",super.marshaller.getClass().getName())
-                },
-                "Unexpected marshaller"
-            );
-    		Marshaller delegate = ((CollectionMarshallerAdapter)super.marshaller).getDelegate();
-            if(delegate != marshaller) throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("expected",marshaller.getClass().getName()),
-                    new BasicException.Parameter("actual",delegate.getClass().getName())
-                },
-                "Delegate marshaller mismatch"
-            );
-            return super.getDelegate();
-        }
-        
-    }
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3257565092349491254L;
 
     /**
      * Constructor
      */
-    public MarshallingObject_1(
+    protected MarshallingObject_1(
         Object_1_0 object,
-        Marshaller marshaller
+        M marshaller
     ){
         super(object);
         this.marshaller = marshaller;
     }
-    
+
     /**
      * Deserializer
      */
@@ -167,7 +99,32 @@ public class MarshallingObject_1
         super();
     }
 
+    /**
+     * @serial
+     */
+    protected M marshaller;
 
+    /**
+     * Retrieve the marshaller
+     * 
+     * @return the marshaller
+     */
+    protected M getMarshaller(){
+        return this.marshaller;
+    }
+
+    /**
+     * In order to replace the given marshaller
+     * 
+     * @param marshaller
+     */
+    protected void setMarshaller(
+        M marshaller
+    ){
+        this.marshaller = marshaller;
+    }
+    
+    
     //------------------------------------------------------------------------
     // Implements Object_1_0
     //------------------------------------------------------------------------
@@ -197,7 +154,7 @@ public class MarshallingObject_1
         String feature,
         Object to
     ) throws ServiceException {
-        getDelegate().objSetValue(feature, this.marshaller.unmarshal(to));
+        getDelegate().objSetValue(feature, getMarshaller().unmarshal(to));
     }
 
     /**
@@ -217,9 +174,9 @@ public class MarshallingObject_1
     public Object objGetValue(
         String feature
     ) throws ServiceException {
-        return this.marshaller.marshal(getDelegate().objGetValue(feature));
+        return getMarshaller().marshal(getDelegate().objGetValue(feature));
     }
-    
+
     /**
      * Get a List attribute.
      * <p> 
@@ -238,15 +195,15 @@ public class MarshallingObject_1
      * @exception   ClassCastException
      *              if the feature's value is not a list
      */
-    public List objGetList(
+    public List<Object> objGetList(
         String feature
     ) throws ServiceException {
-        return new MarshallingList(
-            this.marshaller,
+        return new MarshallingList<Object>(
+            getMarshaller(),
             getDelegate().objGetList(feature)
         );
     }
-        
+
     /**
      * Get a Set attribute.
      * <p> 
@@ -265,15 +222,15 @@ public class MarshallingObject_1
      * @exception   ClassCastException
      *              if the feature's value is not a set
      */
-    public Set objGetSet(
+    public Set<Object> objGetSet(
         String feature
     ) throws ServiceException {
-        return new MarshallingSet(
-            this.marshaller,
+        return new MarshallingSet<Object>(
+            getMarshaller(),
             getDelegate().objGetSet(feature)
         );
     }
-    
+
     /**
      * Get a SparseArray attribute.
      * <p> 
@@ -292,15 +249,15 @@ public class MarshallingObject_1
      * @exception   ServiceException NOT_SUPPORTED
      *              if the object has no such feature
      */
-    public SortedMap objGetSparseArray(
+    public SortedMap<Integer,Object> objGetSparseArray(
         String feature
     ) throws ServiceException {
         return new MarshallingSortedMap(
-            this.marshaller,
+            getMarshaller(),
             getDelegate().objGetSparseArray(feature)
         );
     }
-        
+
     /**
      * Get a reference feature.
      * <p> 
@@ -319,14 +276,14 @@ public class MarshallingObject_1
      * @exception   ServiceException NOT_SUPPORTED
      *              if the object has no such feature
      */
-    public FilterableMap objGetContainer(
+    public FilterableMap<String, Object_1_0> objGetContainer(
         String feature
     ) throws ServiceException {
         if(getDelegate() == null) {
             return null;
         }
         return new MarshallingContainer(
-            this.marshaller,
+            getMarshaller(),
             getDelegate().objGetContainer(feature)
         );
     }
@@ -356,22 +313,20 @@ public class MarshallingObject_1
      *            if the copy operation fails.
      */
     public Object_1_0 objCopy(
-        FilterableMap there,
+        FilterableMap<String, Object_1_0> there,
         String criteria
     ) throws ServiceException {
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter(
-                    "class",
-                   getClass().getName()
-                )
-            },
-            "This Object_1_0 implementation does not support objCopy()"
+            "This Object_1_0 implementation does not support objCopy()",
+            new BasicException.Parameter(
+                "class",
+                getClass().getName()
+            )
         );
     } 
-    
+
     /**
      * The move operation moves the object to the scope of the container passed
      * as the first parameter. The object remains valid after move has
@@ -392,16 +347,19 @@ public class MarshallingObject_1
      *            if the move operation fails.
      */
     public void objMove(
-        FilterableMap there,
+        FilterableMap<String, Object_1_0> there,
         String criteria
-    ) throws ServiceException {        
+    ) throws ServiceException {
+        FilterableMap<String,Object_1_0> to = there == null ? 
+            null : 
+            ((MarshallingContainer)there).getDelegate(getMarshaller()); 
         getDelegate().objMove(
-            there == null ? null : ((MarshallingContainer)there).getDelegate(this.marshaller),
+            to,
             criteria
         );
     } 
 
-     
+
     //--------------------------------------------------------------------------
     // Operations
     //--------------------------------------------------------------------------
@@ -432,10 +390,11 @@ public class MarshallingObject_1
         String operation,
         Structure_1_0 arguments
     ) throws ServiceException {
-        return (Structure_1_0)this.marshaller.marshal(
+        M marshaller = getMarshaller();
+        return (Structure_1_0)marshaller.marshal(
             getDelegate().objInvokeOperationInUnitOfWork(
                 operation,
-                (Structure_1_0)this.marshaller.unmarshal(arguments)
+                (Structure_1_0)marshaller.unmarshal(arguments)
             )
         );
     }
@@ -468,10 +427,11 @@ public class MarshallingObject_1
         String operation,
         Structure_1_0 arguments
     ) throws ServiceException {
-        return (Structure_1_0)this.marshaller.marshal(
+        Marshaller marshaller = getMarshaller();
+        return (Structure_1_0)marshaller.marshal(
             getDelegate().objInvokeOperation(
                 operation,
-                (Structure_1_0)this.marshaller.unmarshal(arguments)
+                (Structure_1_0)marshaller.unmarshal(arguments)
             )
         );
     }
@@ -496,7 +456,7 @@ public class MarshallingObject_1
     ) throws ServiceException{
         super.objAddEventListener(feature, listener); //... Event marshalling to be added
     }
-    
+
     /**
      * Remove an event listener.
      * 
@@ -510,7 +470,7 @@ public class MarshallingObject_1
         String feature,
         EventListener listener
     ) throws ServiceException{
-        super.objRemoveEventListener(feature, listener); //... Event marshalling to be added
+        super.objRemoveEventListener(feature, listener); // TODO add event marshalling
     }
 
     /**
@@ -525,20 +485,130 @@ public class MarshallingObject_1
      * @return an array of listenerType containing the matching event
      *         listeners
      */
-    public EventListener[] objGetEventListeners(
+    public <T extends EventListener> T[] objGetEventListeners(
         String feature,
-        Class listenerType
+        Class<T> listenerType
     ) throws ServiceException{
-        return super.objGetEventListeners(feature, listenerType); //... Event marshalling to be added
+        return super.objGetEventListeners(feature, listenerType); // TODO add event marshalling
     }
+
     
     //------------------------------------------------------------------------
-    // Instance members
+    // Class MarshallingContainer
     //------------------------------------------------------------------------
 
     /**
-     * @serial
+     * Marshalling Container
      */
-    protected Marshaller marshaller;
-            
+    protected static class MarshallingContainer 
+        extends MarshallingFilterableMap
+        implements RefBaseObject
+    {
+
+        /**
+         * Constructor
+         * 
+         * @param marshaller
+         * @param container
+         */
+        protected MarshallingContainer(
+            Marshaller marshaller,
+            FilterableMap<String,Object_1_0> container
+        ) throws ServiceException {
+            super(marshaller, container);
+        }
+
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = 3257009873437996080L;
+
+        /**
+         * Get the delegate and verifies the marshaller
+         * 
+         * @param marshaller
+         * 
+         * @return the delegate map
+         * 
+         * @exception ServiceException BAD_PARAMETER
+         *            If the request specifies a different marshaller
+         *            
+         */
+        FilterableMap<String,Object_1_0> getDelegate(
+            Marshaller marshaller
+        ) throws ServiceException{
+            if(!(super.marshaller instanceof CollectionMarshallerAdapter)) throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "Unexpected marshaller",
+                new BasicException.Parameter("expected",CollectionMarshallerAdapter.class.getName()),
+                new BasicException.Parameter("actual",super.marshaller.getClass().getName())
+            );
+            Marshaller delegate = ((CollectionMarshallerAdapter)super.marshaller).getDelegate();
+            if(delegate != marshaller) throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.BAD_PARAMETER,
+                "Delegate marshaller mismatch",
+                new BasicException.Parameter("expected",marshaller.getClass().getName()),
+                new BasicException.Parameter("actual",delegate.getClass().getName())
+            );
+            return getDelegate();
+        }
+
+        /**
+         * Retrieve the delegate in case of a RefContainer instance
+         * 
+         * @return the delegate in case of a RefContainer instance
+         * 
+         * @throws UnsupportedOperationException unless the delegate is an instance of RefContainer
+         */
+        private RefBaseObject refBaseObject(){
+            FilterableMap<String,Object_1_0> delegate = getDelegate();
+            if(delegate instanceof RefBaseObject) {
+                return (RefBaseObject)delegate;
+            }
+            throw new UnsupportedOperationException(
+                "The delegate is not an instance of " + RefBaseObject.class.getName() + ": " + (
+                    delegate == null ? "null" : delegate.getClass().getName()
+                )
+            );
+        }
+        
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refImmediatePackage()
+         */
+        public RefPackage refImmediatePackage() {
+            return refBaseObject().refImmediatePackage();
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refMetaObject()
+         */
+        public RefObject refMetaObject() {
+            return refBaseObject().refMetaObject();
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refMofId()
+         */
+        public String refMofId() {
+            return refBaseObject().refMofId();
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refOutermostPackage()
+         */
+        public RefPackage refOutermostPackage() {
+            return refBaseObject().refOutermostPackage();
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refVerifyConstraints(boolean)
+         */
+        public Collection<?> refVerifyConstraints(boolean deepVerify) {
+            return refBaseObject().refVerifyConstraints(deepVerify);
+        }
+
+    }
+
 }

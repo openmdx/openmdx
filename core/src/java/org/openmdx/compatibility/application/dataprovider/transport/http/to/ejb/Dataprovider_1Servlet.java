@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Servlet.java,v 1.12 2008/03/21 18:43:56 hburger Exp $
+ * Name:        $Id: Dataprovider_1Servlet.java,v 1.13 2008/09/10 08:55:24 hburger Exp $
  * Description: Dataprovider Servlet
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:43:56 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -104,7 +104,7 @@ public class Dataprovider_1Servlet extends HttpServlet {
         try {
             context = new InitialContext();
             this.dataprovider = Dataprovider_1ConnectionFactoryImpl.createGenericConnection(
-                    context.lookup("java:comp/env/ejb/dataprovider")
+                context.lookup("java:comp/env/ejb/dataprovider")
             );
         } catch (Exception exception) {
             throw (UnavailableException) Throwables.initCause(
@@ -114,12 +114,10 @@ public class Dataprovider_1Servlet extends HttpServlet {
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("info", "$Id: Dataprovider_1Servlet.java,v 1.12 2008/03/21 18:43:56 hburger Exp $"),
-                    new BasicException.Parameter("dataprovider", "java:comp/env/ejb/dataprovider")
-                },
-                null
-           );
+                null,
+                new BasicException.Parameter("info", "$Id: Dataprovider_1Servlet.java,v 1.13 2008/09/10 08:55:24 hburger Exp $"),
+                new BasicException.Parameter("dataprovider", "java:comp/env/ejb/dataprovider")
+            );
         } finally {
             if(context != null) try {
                 context.close();
@@ -181,17 +179,15 @@ public class Dataprovider_1Servlet extends HttpServlet {
         } catch (ServiceException exception) {
             throw (UnavailableException) Throwables.initCause(
                 new UnavailableException(
-                        "Execution context modifier acquistion failed"
+                    "Execution context modifier acquistion failed"
                 ),
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
-                new BasicException.Parameter[]{
-                     new BasicException.Parameter("id", "$Id: Dataprovider_1Servlet.java,v 1.12 2008/03/21 18:43:56 hburger Exp $"),
-                     new BasicException.Parameter("security", security)
-                },
-                null
-           );
+                null,
+                new BasicException.Parameter("id", "$Id: Dataprovider_1Servlet.java,v 1.13 2008/09/10 08:55:24 hburger Exp $"),
+                new BasicException.Parameter("security", security)
+            );
         }
     }
 

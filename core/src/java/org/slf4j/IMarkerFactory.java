@@ -21,9 +21,7 @@
  * OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 package org.slf4j;
-
 
 /**
  * Implementaitons of this interface are used to manufacture {@link Marker}
@@ -69,4 +67,13 @@ public interface IMarkerFactory {
    * @return whether the marker  could be detached or not
    */
   boolean detachMarker(String name);
+    
+  /**
+   * Create a marker which is detached (even at birth) from this IMarkerFactory.
+   *
+   * @return a dangling marker
+   * @since 1.5.1
+   */
+  Marker getDetachedMarker(String name);
+
 }

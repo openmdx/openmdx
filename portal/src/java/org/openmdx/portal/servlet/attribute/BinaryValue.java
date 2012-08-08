@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BinaryValue.java,v 1.29 2008/06/18 22:42:30 wfro Exp $
+ * Name:        $Id: BinaryValue.java,v 1.38 2008/11/12 10:36:53 wfro Exp $
  * Description: BinaryValue
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.38 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/18 22:42:30 $
+ * Date:        $Date: 2008/11/12 10:36:53 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 
@@ -86,6 +83,7 @@ import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.HtmlPage;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
+import org.w3c.cci2.BinaryLargeObject;
 
 public class BinaryValue 
     extends AttributeValue
@@ -141,276 +139,302 @@ public class BinaryValue
             fieldDef.qualifiedFeatureName,
             fieldDef.mimeType
         );
-      
         // find matching user-defined mime type class according to the customized mime type
         String mimeTypeWithoutParams = mimeType;
         int pos = 0;
         if((pos = mimeType.indexOf(";")) >= 0) {
             mimeTypeWithoutParams = mimeType.substring(0, pos);
         }
-
         // Return user defined attribute value class or BinaryValue as default
         String valueClassName = (String)application.getMimeTypeImpls().get(mimeTypeWithoutParams);
-        AttributeValue attributeValue = valueClassName == null
-            ? null
-            : AttributeValue.createAttributeValue(
+        AttributeValue attributeValue = valueClassName == null ? 
+            null : 
+            AttributeValue.createAttributeValue(
                 valueClassName,
                 object,
                 fieldDef,
                 application
-              );
-        return attributeValue != null
-            ? attributeValue
-            : new BinaryValue(
+            );
+        return attributeValue != null ? 
+            attributeValue : 
+            new BinaryValue(
                 object,
                 fieldDef,
                 application
-              );
+            );
     }
   
-  //-------------------------------------------------------------------------
-  protected BinaryValue(
-    Object object, 
-    FieldDef fieldDef,
-    ApplicationContext application
-  ) {
-    super(
-        object, 
-        fieldDef,
-        application
-    );
-    
-    // mimeType
-    AppLog.trace("getting type for " + this.fieldDef.qualifiedFeatureName + " for", this.object);
-    this.mimeType = BinaryValue.getMimeType(
-        object,
-        fieldDef.qualifiedFeatureName,
-        fieldDef.mimeType
-    );
-
-    // name
-    AppLog.trace("getting name for " + this.fieldDef.qualifiedFeatureName + " for", this.object);
-    this.name = this.getString(this.fieldDef.qualifiedFeatureName + "Name", false);
-    if(this.name == null) {
-        this.name = DEFAULT_NAME;
-    }
-
-    ModelElement_1_0 featureDef = null;
-    try {
-        featureDef = application.getModel().getElement(this.fieldDef.qualifiedFeatureName);
-    }
-    catch(ServiceException e) {
-        AppLog.warning("can not get feature definition");
-        AppLog.warning(e.getMessage(), e.getCause());
-    }
-    // For features for type <<stream> binary the binary value 
-    // is retrieved on-demand on EVENT_DOWNLOAD
-    if(
-       (this.object instanceof RefObject_1_0) &&
-       (featureDef != null)
+    //-------------------------------------------------------------------------
+    protected BinaryValue(
+        Object object, 
+        FieldDef fieldDef,
+        ApplicationContext application
     ) {
-        // <<stream>> org:w3c:binary can not be optional
-        if(Multiplicities.STREAM.equals(featureDef.values("multiplicity").get(0))) {
-            this.isNull = false;
+        super(
+            object, 
+            fieldDef,
+            application
+        );
+        // mimeType
+        AppLog.trace("getting type for " + this.fieldDef.qualifiedFeatureName + " for", this.object);
+        this.mimeType = BinaryValue.getMimeType(
+            object,
+            fieldDef.qualifiedFeatureName,
+            fieldDef.mimeType
+        );
+        // name
+        AppLog.trace("getting name for " + this.fieldDef.qualifiedFeatureName + " for", this.object);
+        this.name = this.getString(this.fieldDef.qualifiedFeatureName + "Name", false);
+        if(this.name == null) {
+            this.name = DEFAULT_NAME;
         }
-        // Check whether binary value is empty
-        else {
-            Object bytes = super.getValue(false);
-            if(bytes instanceof Collection) {
-                bytes = ((Collection)bytes).iterator().next();
+        ModelElement_1_0 featureDef = null;
+        try {
+            featureDef = application.getModel().getElement(this.fieldDef.qualifiedFeatureName);
+        }
+        catch(ServiceException e) {
+            AppLog.warning("can not get feature definition");
+            AppLog.warning(e.getMessage(), e.getCause());
+        }
+        // For features for type <<stream> binary the binary value 
+        // is retrieved on-demand on EVENT_DOWNLOAD
+        if(
+            (this.object instanceof RefObject_1_0) &&
+            (featureDef != null)
+        ) {
+            // <<stream>> org:w3c:binary can not be optional
+            if(Multiplicities.STREAM.equals(featureDef.values("multiplicity").get(0))) {
+                this.isNull = false;
             }
+            // Check whether binary value is empty
+            else {
+                Object bytes = super.getValue(false);
+                if(bytes instanceof Collection) {
+                    bytes = ((Collection)bytes).iterator().next();
+                }
+                this.isNull = bytes == null;
+            }
+            if(!this.isNull) {
+                String encodedName = this.name;
+                try {
+                    encodedName = URLEncoder.encode(this.name, "UTF-8");
+                } catch(Exception e) {}
+                this.downloadAction = 
+                    new Action(
+                        Action.EVENT_DOWNLOAD_FROM_FEATURE,
+                        new Action.Parameter[]{
+                            new Action.Parameter(Action.PARAMETER_OBJECTXRI, ((RefObject_1_0)this.object).refMofId()),
+                            new Action.Parameter(Action.PARAMETER_FEATURE, this.fieldDef.qualifiedFeatureName),
+                            new Action.Parameter(Action.PARAMETER_NAME, encodedName),
+                            new Action.Parameter(Action.PARAMETER_MIME_TYPE, this.mimeType)
+                        },
+                        this.application.getTexts().getClickToDownloadText() + " " + this.name,
+                        true
+                    );
+            }        
+        }
+        // For transient objects the binary value is stored in temporary
+        // file which is returned on EVENT_DOWNLOAD
+        else {
+            String location = null;        
+            byte[] bytes = null;
+            Object value = super.getValue(false);
+            if(value instanceof Collection) {
+                bytes = (byte[])((Collection)value).iterator().next();
+            }
+            else {
+                bytes = (byte[])value;
+            }
+            AppLog.trace("bytes", "" + (bytes == null ? -1 : bytes.length));
             this.isNull = bytes == null;
+            this.downloadAction = null;        
+            // Only create temporary file if the content is not null
+            // and if it muste be prepared for download. inPlace content
+            // is never downloaded
+            if(!this.isNull && !this.fieldDef.isInPlace) {
+                try {
+                    location = UUIDs.getGenerator().next().toString();
+                    File f = new File(
+                        application.getTempFileName(location, "")
+                    );
+                    OutputStream os = new FileOutputStream(f);
+                    os.write(bytes);
+                    os.flush();
+                    os.close();
+                }
+                catch(Exception e) {
+                    ServiceException e0 = new ServiceException(e);
+                    AppLog.warning(e0.getMessage(), e0.getCause());
+                }
+            }
+            if(!this.isNull) {
+                this.downloadAction = 
+                    new Action(
+                        Action.EVENT_DOWNLOAD_FROM_LOCATION,
+                        new Action.Parameter[]{
+                            new Action.Parameter(Action.PARAMETER_LOCATION, location),
+                            new Action.Parameter(Action.PARAMETER_NAME, this.name),
+                            new Action.Parameter(Action.PARAMETER_MIME_TYPE, this.mimeType)
+                        },
+                        this.application.getTexts().getClickToDownloadText() + " " + this.name,
+                        true
+                    );
+            }        
         }
-        if(!this.isNull) {
-            String encodedName = this.name;
-            try {
-                encodedName = URLEncoder.encode(this.name, "UTF-8");
-            } catch(Exception e) {}
-            this.downloadAction = 
-                new Action(
-                    Action.EVENT_DOWNLOAD_FROM_FEATURE,
-                    new Action.Parameter[]{
-                        new Action.Parameter(Action.PARAMETER_OBJECTXRI, ((RefObject_1_0)this.object).refMofId()),
-                        new Action.Parameter(Action.PARAMETER_FEATURE, this.fieldDef.qualifiedFeatureName),
-                        new Action.Parameter(Action.PARAMETER_NAME, encodedName),
-                        new Action.Parameter(Action.PARAMETER_MIME_TYPE, this.mimeType)
-                    },
-                    this.application.getTexts().getClickToDownloadText() + " " + this.name,
-                    true
-                );
-        }        
     }
-    // For transient objects the binary value is stored in temporary
-    // file which is returned on EVENT_DOWNLOAD
-    else {
-        String location = null;        
-        byte[] bytes = null;
-        Object value = super.getValue(false);
-        if(value instanceof Collection) {
-            bytes = (byte[])((Collection)value).iterator().next();
+
+    //-------------------------------------------------------------------------
+    public boolean isInPlace(
+    ) {
+        return this.fieldDef.isInPlace;  
+    }
+
+    //-------------------------------------------------------------------------
+    public String getMimeType(
+    ) {
+        return this.mimeType;  
+    }
+
+    //-------------------------------------------------------------------------
+    public Object getValue(
+        boolean shortFormat
+    ) {
+        return this.downloadAction;
+    }
+  
+    //-------------------------------------------------------------------------
+    public Object getDefaultValue(
+    ) {
+        return null;
+    }
+
+    //-------------------------------------------------------------------------
+    public void getBinaryValue(
+        OutputStream os
+    ) throws ServiceException {
+        try {
+            Object value = super.getValue(false);
+            if(value instanceof Collection) {
+                value = ((Collection)value).iterator().next();
+            }
+            if(value instanceof byte[]) {
+                byte[] bytes = (byte[])value;
+                for(int i = 0; i < bytes.length; i++) {
+                    os.write(bytes[i]);
+                }
+            }
+            else if(value instanceof InputStream) {
+                InputStream is = (InputStream)value;          
+                int b = 0;
+                while((b = is.read()) != -1) {
+                    os.write(b);              
+                }          
+            }
+            else if(value instanceof BinaryLargeObject) {
+                BinaryLargeObject blob = (BinaryLargeObject)value;
+                blob.getContent(os, 0L);
+            }
+        }
+        catch(Exception e) {
+            throw new ServiceException(e);
+        }
+    }
+  
+    //-------------------------------------------------------------------------
+    /**
+     * Prepares a single stringified Value to append.
+     */
+    protected String getStringifiedValueInternal(
+        HtmlPage p, 
+        Object v,
+        boolean multiLine,
+        boolean forEditing,
+        boolean shortFormat
+    ) {
+        ApplicationContext app = p.getApplicationContext();
+        HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
+        if(forEditing) {
+            return super.getStringifiedValueInternal(
+                p, 
+                v, 
+                multiLine, 
+                forEditing,
+                shortFormat
+            );
         }
         else {
-            bytes = (byte[])value;
+            Action action = (Action)v;
+            return "<a href=\"\" onmouseover=\"javascript:this.href=" + p.getEvalHRef(action) + ";onmouseover=function(){};\">" + htmlEncoder.encode(action.getTitle(), false) + "</a>";
         }
-        AppLog.trace("bytes", "" + (bytes == null ? -1 : bytes.length));
-        this.isNull = bytes == null;
-        this.downloadAction = null;        
-        // Only create temporary file if the content is not null
-        // and if it muste be prepared for download. inPlace content
-        // is never downloaded
-        if(!this.isNull && !this.fieldDef.isInPlace) {
-            try {
-                location = UUIDs.getGenerator().next().toString();
-                File f = new File(
-                    application.getTempFileName(location, "")
-                );
-                OutputStream os = new FileOutputStream(f);
-                os.write(bytes);
-                os.flush();
-                os.close();
-            }
-            catch(Exception e) {
-                ServiceException e0 = new ServiceException(e);
-                AppLog.warning(e0.getMessage(), e0.getCause());
+    }
+  
+    //-------------------------------------------------------------------------
+    protected Map getMimeTypeParams(
+    ) {
+        Map<String,String> params = new HashMap<String,String>();
+        int pos = 0;
+        if((pos = this.mimeType.indexOf(";")) >= 0) {
+            StringTokenizer tokenizer = new StringTokenizer(this.mimeType.substring(pos+1), ";");
+            while(tokenizer.hasMoreTokens()) {
+                String token = tokenizer.nextToken();
+                if((pos = token.indexOf("=")) >= 0) {
+                    params.put(
+                        token.substring(0, pos),
+                        token.substring(pos+1)
+                    );
+                }
             }
         }
-        if(!this.isNull) {
-            this.downloadAction = 
-                new Action(
-                    Action.EVENT_DOWNLOAD_FROM_LOCATION,
-                    new Action.Parameter[]{
-                        new Action.Parameter(Action.PARAMETER_LOCATION, location),
-                        new Action.Parameter(Action.PARAMETER_NAME, this.name),
-                        new Action.Parameter(Action.PARAMETER_MIME_TYPE, this.mimeType)
-                    },
-                    this.application.getTexts().getClickToDownloadText() + " " + this.name,
-                    true
-                );
-        }        
-     }
-  }
+        return params;
+    }
   
-  //-------------------------------------------------------------------------
-  public boolean isInPlace(
-  ) {
-    return this.fieldDef.isInPlace;  
-  }
-  
-  //-------------------------------------------------------------------------
-  public String getMimeType(
-  ) {
-    return this.mimeType;  
-  }
-  
-  //-------------------------------------------------------------------------
-  public Object getValue(
-      boolean shortFormat
-  ) {
-      return this.downloadAction;
-  }
-  
-  //-------------------------------------------------------------------------
-  public Object getDefaultValue(
-  ) {
-      return null;
-  }
-  
-  //-------------------------------------------------------------------------
-  public void getBinaryValue(
-      OutputStream os
-  ) throws ServiceException {
-      try {
-          Object value = super.getValue(false);
-          if(value instanceof Collection) {
-              value = ((Collection)value).iterator().next();
-          }
-          if(value instanceof byte[]) {
-              byte[] bytes = (byte[])value;
-              for(int i = 0; i < bytes.length; i++) {
-                  os.write(bytes[i]);
-              }
-          }
-          else if(value instanceof InputStream) {
-              InputStream is = (InputStream)value;          
-              int b = 0;
-              while((b = is.read()) != -1) {
-                  os.write(b);              
-              }          
-          }
-      }
-      catch(Exception e) {
-          throw new ServiceException(e);
-      }
-  }
-  
-  //-------------------------------------------------------------------------
-  /**
-   * Prepares a single stringified Value to append.
-   */
-  protected String getStringifiedValueInternal(
-      HtmlPage p, 
-      Object v,
-      boolean multiLine,
-      boolean forEditing,
-      boolean shortFormat
-  ) {
-      ApplicationContext app = p.getApplicationContext();
-      HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
-      if(forEditing) {
-          return super.getStringifiedValueInternal(
-              p, 
-              v, 
-              multiLine, 
-              forEditing,
-              shortFormat
-          );
-      }
-      else {
-          Action action = (Action)v;
-          return "<a href=\"\" onclick=\"javascript:this.href=" + p.getEvalHRef(action) + ";\">" + htmlEncoder.encode(action.getTitle(), false) + "</a>";
-      }
-  }
-  
-  //-------------------------------------------------------------------------
-  protected Map getMimeTypeParams(
-  ) {
-      Map<String,String> params = new HashMap<String,String>();
-      int pos = 0;
-      if((pos = this.mimeType.indexOf(";")) >= 0) {
-          StringTokenizer tokenizer = new StringTokenizer(this.mimeType.substring(pos+1), ";");
-          while(tokenizer.hasMoreTokens()) {
-              String token = tokenizer.nextToken();
-              if((pos = token.indexOf("=")) >= 0) {
-                  params.put(
-                      token.substring(0, pos),
-                      token.substring(pos+1)
-                  );
-              }
-          }
-      }
-      return params;
-  }
-  
-  //-------------------------------------------------------------------------
-  protected Set getAcceptedMimeTypes(
-      HttpServletRequest request
-  ) {
-      // get accepted mime types. Required for rendering binaries  
-      Set<String> acceptedMimeTypes = new HashSet<String>();
-      StringTokenizer mimeTypeTokenizer = new StringTokenizer(request.getHeader("accept"), ", ");
-      while(mimeTypeTokenizer.hasMoreTokens()) {
-        String mimeType = mimeTypeTokenizer.nextToken();
-        // this allows a startsWith comparison later on
-        if(mimeType.indexOf("*") >= 0) {
-          acceptedMimeTypes.add(mimeType.substring(0, mimeType.indexOf("*")));
+    //-------------------------------------------------------------------------
+    protected Set getAcceptedMimeTypes(
+        HttpServletRequest request
+    ) {
+        // get accepted mime types. Required for rendering binaries  
+        Set<String> acceptedMimeTypes = new HashSet<String>();
+        StringTokenizer mimeTypeTokenizer = new StringTokenizer(request.getHeader("accept"), ", ");
+        while(mimeTypeTokenizer.hasMoreTokens()) {
+            String mimeType = mimeTypeTokenizer.nextToken();
+            // this allows a startsWith comparison later on
+            if(mimeType.indexOf("*") >= 0) {
+                acceptedMimeTypes.add(mimeType.substring(0, mimeType.indexOf("*")));
+            }
+            else {
+                acceptedMimeTypes.add(mimeType);
+            }
         }
-        else {
-          acceptedMimeTypes.add(mimeType);
-        }
-      }
-      return acceptedMimeTypes;
-  }
+        return acceptedMimeTypes;
+    }
   
+    //-----------------------------------------------------------------------
+    protected void paintInPlace(
+        HtmlPage p,
+        Action binaryValueAction,
+        String label,
+        String gapModifier,
+        String rowSpanModifier,
+        String widthModifier,
+        String styleModifier
+    ) throws ServiceException {
+        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();                
+        Map popupImages = (Map)p.getProperty(HtmlPage.PROPERTY_POPUP_IMAGES);        
+        String imageId = org.openmdx.kernel.id.UUIDs.getGenerator().next().toString();
+        CharSequence imageSrc = p.getEncodedHRef(binaryValueAction);
+        if(popupImages != null) {
+            popupImages.put(imageId, imageSrc);
+        }
+        // Single-valued BinaryValue in place
+        p.write(gapModifier); 
+        p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
+        p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, " id=\"tdImage", imageId, "\">");
+        p.write("<div class=\"valuePicture\" ", styleModifier, ">");
+        p.write(p.getImg("class=\"picture\" src=\"", imageSrc, "\" id=\"image", imageId, "\" ondblclick=\"return showImage('divImgPopUp", imageId, "', 'popUpImg", imageId, "', 'tdImage", imageId, "', this.id);\" alt=\"\""));
+        p.write("</div>");
+        p.write("</td>");                                                            
+    }
+    
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     public void paint(
@@ -438,9 +462,9 @@ public class BinaryValue
             label += label.length() == 0 ? "" : ":";        
         }
         if(forEditing) {
-            String idTag = id == null
-                ? ""
-                : "id=\"" + id + "\"";                                                                        
+            String idTag = id == null ? 
+                "" : 
+                "id=\"" + id + "\"";                                                                        
             p.write("<td class=\"label\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             String feature = this.getName();
             p.write("<td ", rowSpanModifier, ">");
@@ -472,10 +496,8 @@ public class BinaryValue
             else {                                            
                 Map popupImages = (Map)p.getProperty(HtmlPage.PROPERTY_POPUP_IMAGES);
                 HttpServletRequest request = p.getHttpServletRequest();          
-                String result = "";
                 styleModifier = "style=\"height: " + (1.2+(attribute.getSpanRow()-1)*1.5) + "em\"";
                 Action binaryValueAction = (Action)this.getValue(false);
-              
                 Set acceptedMimeTypes = this.getAcceptedMimeTypes(request);
                 // mimeType                                     
                 boolean isAcceptedMimeType = false;
@@ -485,50 +507,44 @@ public class BinaryValue
                         break;
                     }
                 }          
-                // in place
+                // In place
                 if(
                     this.isInPlace() && 
                     (binaryValueAction != null) && 
                     isAcceptedMimeType
                 ) {
-                    String imageId = org.openmdx.kernel.id.UUIDs.getGenerator().next().toString();
-                    CharSequence imageSrc = p.getEncodedHRef(binaryValueAction);
-                    if(popupImages != null) {
-                        popupImages.put(imageId, imageSrc);
-                    }
-        
-                    // single-valued BinaryValue in place
-                    result += gapModifier; 
-                    result += "<td class=\"label\"><span class=\"nw\">" + htmlEncoder.encode(label, false) + "</span></td>";
-                    result += "<td " + rowSpanModifier + " class=\"valueL\" " + widthModifier + " id=\"tdImage" + imageId + "\">";
-                    result += "<div class=\"valuePicture\" " + styleModifier + ">";
-                    result += p.getImg("class=\"picture\" src=\"" + imageSrc + "\" id=\"image" + imageId + "\" ondblclick=\"return showImage('divImgPopUp" + imageId + "', 'popUpImg" + imageId + "', 'tdImage" + imageId + "', this.id);\" alt=\"\"");
-                    result += "</div>";
-                    result += "</td>";                                                    
+                    this.paintInPlace(
+                        p, 
+                        binaryValueAction, 
+                        label, 
+                        gapModifier, 
+                        rowSpanModifier, 
+                        widthModifier, 
+                        styleModifier
+                    );
                 }
-                // single-valued BinaryValue as link -->
+                // Single-valued BinaryValue as link -->
                 else {
-                    result += gapModifier;
-                    result += "<td class=\"label\"><span class=\"nw\">" + label + "</span></td>";
-                    result += "<td " + rowSpanModifier + " class=\"valueL\" " + widthModifier + ">";
-                    result += "<div class=\"field\">" + attribute.getStringifiedValue(p, false, false) + "</div>";
-                    result += "</td>";
+                    p.write(gapModifier);
+                    p.write("<td class=\"label\"><span class=\"nw\">", label, "</span></td>");
+                    p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, ">");
+                    p.write("<div class=\"field\">", attribute.getStringifiedValue(p, false, false), "</div>");
+                    p.write("</td>");
                 }
-                p.write(result);
             }
         }
-  }
+    }
 
-  //-------------------------------------------------------------------------
-  private static final long serialVersionUID = 3761967151120333111L;
-  
-  protected static final String DEFAULT_MIME_TYPE = "application/octet-stream";
-  protected static final String DEFAULT_NAME = "unknown.bin";
+    //-------------------------------------------------------------------------
+    private static final long serialVersionUID = 3761967151120333111L;
 
-  protected String name;
-  protected boolean isNull;
-  protected String mimeType = null;
-  protected Action downloadAction = null;
+    protected static final String DEFAULT_MIME_TYPE = "application/octet-stream";
+    protected static final String DEFAULT_NAME = "unknown.bin";
+
+    protected String name;
+    protected boolean isNull;
+    protected String mimeType = null;
+    protected Action downloadAction = null;
   
 }
 

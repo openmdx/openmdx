@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: OrderedRecordFactory.java,v 1.7 2008/02/28 13:59:08 hburger Exp $
+ * Name:        $Id: OrderedRecordFactory.java,v 1.8 2008/09/04 06:49:13 hburger Exp $
  * Description: Java Connector Architecture: Extended Record Factory
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/28 13:59:08 $
+ * Date:        $Date: 2008/09/04 06:49:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -315,8 +315,6 @@ public class OrderedRecordFactory
    *            record type. 
    * @param     recordShortDescription
    *            The short description of the Record; or null.
-   * @param     values
-   *            The values of the indexed record.
    *
    * @exception ResourceException
    *            Failed to create an initialized IndexedRecord.

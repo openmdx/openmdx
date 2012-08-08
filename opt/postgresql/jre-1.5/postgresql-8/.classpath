@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/postgresql-8.1.jdbc3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/postgresql-8.3.jdbc3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestJdbc_1.java,v 1.15 2006/08/09 14:46:55 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: TestJdbc_1.java,v 1.17 2008/11/04 10:19:09 hburger Exp $
  * Description: junit for jdbc persistence
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/09 14:46:55 $
+ * Date:        $Date: 2008/11/04 10:19:09 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -103,10 +102,10 @@ public class TestJdbc_1
   ) {
     TestSuite suite = new TestSuite();
     for(
-      Iterator i = TestJdbc_1.providerNames.iterator();
+      Iterator<String> i = TestJdbc_1.providerNames.iterator();
       i.hasNext();
     ) {
-      suite.addTest(new TestJdbc_1((String)i.next()));
+      suite.addTest(new TestJdbc_1(i.next()));
     }
     return suite;
   }
@@ -350,7 +349,7 @@ public class TestJdbc_1
         );
         
         // get all SingleLegBooking from extent
-        List slbFindReply = requests.addFindRequest(
+        List<?> slbFindReply = requests.addFindRequest(
           providerPath.getDescendant(
             new String[]{
               "segment",
@@ -363,9 +362,7 @@ public class TestJdbc_1
               Quantors.THERE_EXISTS,
               "identity",
               FilterOperators.IS_LIKE,
-              new Object[]{
                 providerPath.toUri() + "/segment/" + segmentName + "/cb/:*/slb/:*"
-              }  
             )
           },
           AttributeSelectors.ALL_ATTRIBUTES,
@@ -374,7 +371,7 @@ public class TestJdbc_1
           Integer.MAX_VALUE,
           Directions.ASCENDING  
         );
-        for(Iterator slbs = slbFindReply.iterator(); slbs.hasNext(); ) {
+        for(Iterator<?> slbs = slbFindReply.iterator(); slbs.hasNext(); ) {
           slbs.next();
         }
         assertEquals("slbFindReply.size()", _nRuns * 10, slbFindReply.size());
@@ -483,10 +480,10 @@ public class TestJdbc_1
         //
         Path referenceFilterCB = new Path(providerPath.toXri() + "/segment/" + segmentName + "/cb");
   
-        p0 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_IN, new Object[]{"13"});
+        p0 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_IN, "13");
         FilterProperty[] attributeFilterCB = new FilterProperty[]{p0};
   
-        List cbFindReply = requests.addFindRequest(
+        List<?> cbFindReply = requests.addFindRequest(
           referenceFilterCB,
           attributeFilterCB,
           AttributeSelectors.ALL_ATTRIBUTES,
@@ -498,19 +495,19 @@ public class TestJdbc_1
           Directions.ASCENDING  
         );
   
-        for(Iterator cbs = cbFindReply.iterator(); cbs.hasNext(); ) {
+        for(Iterator<?> cbs = cbFindReply.iterator(); cbs.hasNext(); ) {
           DataproviderObject o0 = (DataproviderObject)cbs.next();
   
           // find SLBs by cbType
           Path referenceFilterSLB = new Path(o0.path().toString() + "/slb");
   
-          p0 = new FilterProperty(Quantors.THERE_EXISTS, "pos", FilterOperators.IS_LIKE,new Object[]{
+          p0 = new FilterProperty(Quantors.THERE_EXISTS, "pos", FilterOperators.IS_LIKE,
               new Path(providerPath.toXri() + "/segment/" + segmentName + "/account/123456789012345678901234567890/bookedPosition/FI:%")
-          });
-          p1 = new FilterProperty(Quantors.THERE_EXISTS, "bookingDate", FilterOperators.IS_IN,new Object[]{"20010101T120000X000Z"});
+          );
+          p1 = new FilterProperty(Quantors.THERE_EXISTS, "bookingDate", FilterOperators.IS_IN,"20010101T120000X000Z");
           FilterProperty[] attributeFilterSLB = new FilterProperty[]{p0, p1};
   
-          List slbFindReply = requests.addFindRequest(
+          List<?> slbFindReply = requests.addFindRequest(
             referenceFilterSLB,
             attributeFilterSLB,
               AttributeSelectors.ALL_ATTRIBUTES,
@@ -524,17 +521,17 @@ public class TestJdbc_1
           );
   
           assertEquals("slbFindReply.size()", 10, slbFindReply.size());
-          for(Iterator slbs = slbFindReply.iterator(); slbs.hasNext(); ) {
+          for(Iterator<?> slbs = slbFindReply.iterator(); slbs.hasNext(); ) {
             /*DataproviderObject o1 = (DataproviderObject)*/slbs.next();
           }
           
           // find SLBs by description
-          p0 = new FilterProperty(Quantors.THERE_EXISTS, "description", FilterOperators.IS_IN, new Object[]{
+          p0 = new FilterProperty(Quantors.THERE_EXISTS, "description", FilterOperators.IS_IN, 
             "additional description 4"
-          });
-          p1 = new FilterProperty(Quantors.THERE_EXISTS, "bookingDate", FilterOperators.IS_IN, new Object[]{
+          );
+          p1 = new FilterProperty(Quantors.THERE_EXISTS, "bookingDate", FilterOperators.IS_IN, 
             "20010101T120000X000Z"
-          });
+          );
           attributeFilterSLB = new FilterProperty[]{p0,p1};
   
           slbFindReply = requests.addFindRequest(
@@ -548,7 +545,7 @@ public class TestJdbc_1
           );
   
           assertEquals("slbFindReply.size()", 10, slbFindReply.size());
-          for(Iterator slbs = slbFindReply.iterator(); slbs.hasNext(); ) {
+          for(Iterator<?> slbs = slbFindReply.iterator(); slbs.hasNext(); ) {
             /*DataproviderObject o1 = (DataproviderObject)*/slbs.next();
           }
         }
@@ -562,7 +559,7 @@ public class TestJdbc_1
         FilterProperty[] attributeFilter = new FilterProperty[]{p0};
         Path referenceFilter = new Path(providerPath.toXri() + "/segment/" + segmentName + "/cb");
         try {
-          List findReply = requests.addFindRequest( 
+          List<?> findReply = requests.addFindRequest( 
             referenceFilter,
             attributeFilter
           );
@@ -580,7 +577,7 @@ public class TestJdbc_1
         p0 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_IN);
         attributeFilter = new FilterProperty[]{p0};
         referenceFilter = new Path(providerPath.toXri() + "/segment/" + segmentName + "/cb");
-        List findReply = requests.addFindRequest( 
+        List<?> findReply = requests.addFindRequest( 
           referenceFilter,
           attributeFilter
         );
@@ -591,42 +588,42 @@ public class TestJdbc_1
          */
     
         // THERE_EXISTS   
-        p0 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_LESS,new Object[]{"AAA"});
+        p0 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_LESS,"AAA");
       
-        p1 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_LESS_OR_EQUAL,new Object[]{"AAA"});
+        p1 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_LESS_OR_EQUAL,"AAA");
       
-        FilterProperty p2 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_IN, new Object[]{"AAA"});
+        FilterProperty p2 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_IN, "AAA");
       
-        FilterProperty p3 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_GREATER_OR_EQUAL, new Object[]{"AAA"});
+        FilterProperty p3 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_GREATER_OR_EQUAL, "AAA");
       
-        FilterProperty p4 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_GREATER, new Object[]{"AAA"});
+        FilterProperty p4 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_GREATER, "AAA");
       
-        FilterProperty p5 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_BETWEEN, new Object[]{"AAA","BBB"});
+        FilterProperty p5 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_BETWEEN, "AAA","BBB");
       
-        FilterProperty p6 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_OUTSIDE, new Object[]{"AAA","BBB"});
+        FilterProperty p6 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_OUTSIDE, "AAA","BBB");
       
-        FilterProperty p7 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_LIKE, new Object[]{"AAA%"});
+        FilterProperty p7 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_LIKE, "AAA%");
       
-        FilterProperty p8 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_UNLIKE, new Object[]{"AAA%"});
+        FilterProperty p8 = new FilterProperty(Quantors.THERE_EXISTS, "cbType", FilterOperators.IS_UNLIKE, "AAA%");
       
         // FOR_ALL
-        FilterProperty p9 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_LESS, new Object[]{"AAA"});
+        FilterProperty p9 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_LESS, "AAA");
       
-        FilterProperty p10 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_LESS_OR_EQUAL, new Object[]{"AAA"});
+        FilterProperty p10 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_LESS_OR_EQUAL, "AAA");
       
-        FilterProperty p11 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_IN, new Object[]{"AAA"});
+        FilterProperty p11 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_IN, "AAA");
       
-        FilterProperty p12 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_GREATER_OR_EQUAL, new Object[]{"AAA"});
+        FilterProperty p12 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_GREATER_OR_EQUAL, "AAA");
       
-        FilterProperty p13 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_GREATER, new Object[]{"AAA"});
+        FilterProperty p13 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_GREATER, "AAA");
       
-        FilterProperty p14 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_BETWEEN, new Object[]{"AAA","BBB"});
+        FilterProperty p14 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_BETWEEN, "AAA","BBB");
       
-        FilterProperty p15 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_OUTSIDE, new Object[]{"AAA","BBB"});
+        FilterProperty p15 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_OUTSIDE, "AAA","BBB");
       
-        FilterProperty p16 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_LIKE, new Object[]{"AAA%"});
+        FilterProperty p16 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_LIKE, "AAA%");
       
-        FilterProperty p17 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_UNLIKE, new Object[]{"AAA%"});
+        FilterProperty p17 = new FilterProperty(Quantors.FOR_ALL, "cbType", FilterOperators.IS_UNLIKE, "AAA%");
       
         // find_1
         attributeFilter = new FilterProperty[]{
@@ -933,10 +930,8 @@ public class TestJdbc_1
   static private Dataprovider_1_0 provider = null;
   static private int _nRuns = 10;
   static private String segmentName = "s0";
-  static private List providerNames = Arrays.asList(
-    new String[]{
+  static private List<String> providerNames = Arrays.asList(
       "Sliced"
-    }
   ); 
   static final boolean _testMultiValuedModify = true;
   static final boolean _testExtent = false;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork_1_2.java,v 1.2 2008/06/03 16:30:46 hburger Exp $
+ * Name:        $Id: UnitOfWork_1_2.java,v 1.4 2008/09/10 08:55:31 hburger Exp $
  * Description: UnitOfWork interface 1.2
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/03 16:30:46 $
+ * Date:        $Date: 2008/09/10 08:55:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,11 +50,13 @@
  */
 package org.openmdx.base.transaction;
 
+import org.openmdx.base.exception.ServiceException;
+
 /**
  * UnitOfWork interface 1.2
  */
 public interface UnitOfWork_1_2
-    extends UnitOfWork_1_0
+extends UnitOfWork_1_0
 {
 
     /**
@@ -65,13 +67,14 @@ public interface UnitOfWork_1_2
      * marked for rollback.
      */
     boolean getRollbackOnly();
-    
+
     /**
      * Sets the rollback-only status of the unit of work to <code>true</code>.
      * After this flag is set to <code>true</code>, the unit of work 
      * can no longer be committed, and any attempt to commit the 
      * transaction will throw a ServiceException.
      */
-    void setRollbackOnly();
-        
+    void setRollbackOnly(
+    ) throws ServiceException;
+
 }

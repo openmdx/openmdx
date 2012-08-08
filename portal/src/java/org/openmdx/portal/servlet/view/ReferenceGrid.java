@@ -1,18 +1,18 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: ReferenceGrid.java,v 1.7 2008/04/04 11:53:28 hburger Exp $
+ * Name:        $Id: ReferenceGrid.java,v 1.9 2008/11/12 16:10:58 wfro Exp $
  * Description: ReferenceGridControl
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:53:28 $
+ * Date:        $Date: 2008/11/12 16:10:58 $
  * ====================================================================
  *
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,19 +53,18 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.view;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.control.GridControl;
 
@@ -103,30 +102,38 @@ public class ReferenceGrid
         Filter filter
     ) {
         Collection<?> allObjects = this.getAllObjects();
-        List<?> filteredObjects = null;
-        if(allObjects == null) {
+        List<Object> filteredObjects = new ArrayList<Object>();
+        if(allObjects != null) {
             filteredObjects = new ArrayList<Object>();
-        }
-        else {
-            filteredObjects = new ArrayList<Object>(allObjects);
-        }
-        for(Iterator i = filteredObjects.iterator(); i.hasNext(); ) {
-            Object obj = i.next();
-            if(obj instanceof RefObject_1_0) {
+            Iterator<?> i = allObjects.iterator();
+            while(i.hasNext()) {
                 try {
-                    ((RefObject_1_0)obj).refRefresh();
-                } catch(Exception e) {}
+                    Object object = i.next();
+                    filteredObjects.add(object);
+                }
+                catch(Exception e) {
+                    ServiceException e0 = new ServiceException(e);
+                    SysLog.warning(
+                        "Unable to retrieve object (more info at detail level)", 
+                        Arrays.asList(
+                            this.view.getObjectReference().refMofId(), 
+                            this.getGridControl().getObjectContainer().getReferenceName(), 
+                            this.view.getApplicationContext().getLoginPrincipalId(), 
+                            e0.getMessage()
+                        )
+                    );
+                    SysLog.detail(e0.getMessage(), e0.getCause());
+                }
             }
         }
         return filteredObjects;
     }
     
-    
     //-------------------------------------------------------------------------
     /**
      * Always show all rows in case of non-composite grids
      */
-//  @Override
+    @Override
     public int getPageSize(
     ) {
         return Integer.MAX_VALUE;

@@ -1,0 +1,234 @@
+
+(object Petal
+    version    	45
+    _written   	"Rose 7.6.0109.2314"
+    charSet    	0)
+
+(object Class_Category "datastore1"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3FF0C394039D"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "QueryFilter"
+	    quid       	"491C351B00EA"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"491C3523003E"
+		    supplier   	"Logical View::org::openmdx::base::Context"
+		    quidu      	"403F322B0061"))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "clause"
+		    quid       	"491C352903B9"
+		    type       	"org::w3c::string"
+		    exportControl 	"Public")
+		(object ClassAttribute "booleanParam"
+		    quid       	"491C35320232"
+		    stereotype 	"list"
+		    type       	"org::w3c::boolean"
+		    exportControl 	"Public")
+		(object ClassAttribute "stringParam"
+		    quid       	"491C353E0148"
+		    stereotype 	"list"
+		    type       	"org::w3c::string"
+		    exportControl 	"Public")
+		(object ClassAttribute "integerParam"
+		    quid       	"491C354002BF"
+		    stereotype 	"list"
+		    type       	"org::w3c::integer"
+		    exportControl 	"Public")
+		(object ClassAttribute "decimalParam"
+		    quid       	"491C3546005D"
+		    stereotype 	"list"
+		    type       	"org::w3c::decimal"
+		    exportControl 	"Public")
+		(object ClassAttribute "dateParam"
+		    quid       	"491C354B005D"
+		    stereotype 	"list"
+		    type       	"org::w3c::date"
+		    exportControl 	"Public")
+		(object ClassAttribute "dateTimeParam"
+		    quid       	"491C35500232"
+		    stereotype 	"list"
+		    type       	"org::w3c::dateTime"
+		    exportControl 	"Public"))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Main"
+	    quid       	"3D0C663E028A"
+	    title      	"Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	1010
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::org::openmdx::base::Context" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(441, 163)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(175, 117)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	532
+			justify    	0
+			label      	"Context")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@1
+			location   	(175, 76)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	532
+			justify    	0
+			label      	"<<root>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	10337791
+		    quidu      	"403F322B0061"
+		    width      	550
+		    height     	194
+		    annotation 	8)
+		(object ClassView "Class" "Logical View::org::openmdx::compatibility::datastore1::QueryFilter" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(472, 575)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(91, 376)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	763
+			justify    	0
+			label      	"QueryFilter")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"491C351B00EA"
+		    compartment 	(object Compartment
+			Parent_View 	@2
+			location   	(91, 428)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	8
+			max_width  	737)
+		    width      	781
+		    height     	419
+		    annotation 	8)
+		(object InheritView "" @3
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"491C3523003E"
+		    client     	@2
+		    supplier   	@1
+		    line_style 	3
+		    origin_attachment 	(426, 365)
+		    terminal_attachment 	(426, 260))))
+	(object ClassDiagram "_LICENSE"
+	    quid       	"410407160158"
+	    title      	"_LICENSE"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object NoteView @4
+		    location   	(742, 1022)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(61, 68)
+			fill_color 	13434879
+			nlines     	46
+			max_width  	1327
+			label      	
+|This software is published under the BSD license
+|as listed below.
+|
+|Copyright (c) 2004, OMEX AG, Switzerland
+|All rights reserved.
+|
+|Redistribution and use in source and binary forms, with or without 
+|modification, are permitted provided that the following conditions 
+|are met:
+|
+|Redistribution and use in source and binary forms, with or
+|without modification, are permitted provided that the following
+|conditions are met:
+|
+|* Redistributions of source code must retain the above copyright
+|notice, this list of conditions and the following disclaimer.
+|
+|* Redistributions in binary form must reproduce the above copyright
+|notice, this list of conditions and the following disclaimer in
+|the documentation and/or other materials provided with the
+|distribution.
+|
+|* Neither the name of OMEX AG nor the names of the contributors
+|to openMDX may be used to endorse or promote products derived
+|from this software without specific prior written permission
+|
+|
+|THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+|CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+|INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+|MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+|DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+|BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+|EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+|TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+|DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+|ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+|OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+|OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+|POSSIBILITY OF SUCH DAMAGE.
+|
+|------------------
+|
+|This product includes software developed by the Apache Software
+|Foundation (http://www.apache.org/).
+			)
+		    line_color 	3342489
+		    fill_color 	16775658
+		    width      	1387
+		    height     	1920)))))

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSortedMap.java,v 1.11 2008/04/09 12:33:43 hburger Exp $
+ * Name:        $Id: MarshallingSortedMap.java,v 1.12 2008/10/02 17:32:13 hburger Exp $
  * Description: Marshalling Sorted Map
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:33:43 $
+ * Date:        $Date: 2008/10/02 17:32:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,9 +59,9 @@ import org.openmdx.compatibility.base.marshalling.Marshaller;
 /**
  * A Marshalling Sorted Map
  */
-public class MarshallingSortedMap<K,V>
-  extends MarshallingMap<K,V,SortedMap<K,?>> 
-  implements SortedMap<K,V>, Serializable 
+public class MarshallingSortedMap
+  extends MarshallingMap<Integer,Object> 
+  implements SortedMap<Integer,Object>, Serializable 
 {
 
     /**
@@ -73,7 +73,7 @@ public class MarshallingSortedMap<K,V>
      */    
     public MarshallingSortedMap(
         org.openmdx.base.persistence.spi.Marshaller marshaller,
-        SortedMap<K,?> sortedMap, 
+        SortedMap<Integer,Object> sortedMap, 
         Unmarshalling unmarshalling 
     ) {
         super(
@@ -91,7 +91,7 @@ public class MarshallingSortedMap<K,V>
      */    
     public MarshallingSortedMap(
         org.openmdx.base.persistence.spi.Marshaller marshaller,
-        SortedMap<K,?> sortedMap 
+        SortedMap<Integer,Object> sortedMap 
     ) {
         super(marshaller, sortedMap);
     }
@@ -104,19 +104,27 @@ public class MarshallingSortedMap<K,V>
      */    
     public MarshallingSortedMap(
         Marshaller marshaller,
-        SortedMap<K,?> sortedMap 
+        SortedMap<Integer,Object> sortedMap 
     ) {
         super(marshaller, sortedMap);
     }
     
+    /* (non-Javadoc)
+     * @see org.openmdx.base.collection.MarshallingMap#getDelegate()
+     */
+    @Override
+    protected SortedMap<Integer, Object> getDelegate() {
+        return (SortedMap<Integer, Object>) super.getDelegate();
+    }
+
     /**
      * 
      */  
-    public SortedMap<K,V> subMap(
-        K fromKey, 
-        K toKey
+    public SortedMap<Integer,Object> subMap(
+        Integer fromKey, 
+        Integer toKey
     ) {
-        return new MarshallingSortedMap<K,V>(
+        return new MarshallingSortedMap(
             super.marshaller,
             getDelegate().subMap(fromKey, toKey), Unmarshalling.EAGER
         );  
@@ -135,7 +143,7 @@ public class MarshallingSortedMap<K,V>
     /**
      * 
      */  
-    public K firstKey(
+    public Integer firstKey(
     ) {
         return getDelegate().firstKey();
     }
@@ -143,7 +151,7 @@ public class MarshallingSortedMap<K,V>
     /**
      * 
      */  
-    public K lastKey(
+    public Integer lastKey(
     ) {
         return getDelegate().lastKey();
     }
@@ -151,10 +159,10 @@ public class MarshallingSortedMap<K,V>
     /**
      * 
      */  
-    public SortedMap<K,V> headMap(
-        K toKey
+    public SortedMap<Integer,Object> headMap(
+        Integer toKey
     ) {
-        return new MarshallingSortedMap<K,V>(
+        return new MarshallingSortedMap(
             super.marshaller,
             getDelegate().headMap(toKey), Unmarshalling.EAGER
         );  
@@ -163,10 +171,10 @@ public class MarshallingSortedMap<K,V>
     /**
      * 
      */  
-    public SortedMap<K,V> tailMap(
-        K fromKey
+    public SortedMap<Integer,Object> tailMap(
+        Integer fromKey
     ) {
-        return new MarshallingSortedMap<K,V>(
+        return new MarshallingSortedMap(
             super.marshaller,
             getDelegate().tailMap(fromKey), Unmarshalling.EAGER
         );  

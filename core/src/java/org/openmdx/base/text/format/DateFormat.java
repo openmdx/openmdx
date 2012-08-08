@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateFormat.java,v 1.8 2008/03/06 19:03:24 hburger Exp $
+ * Name:        $Id: DateFormat.java,v 1.11 2008/11/05 12:53:42 hburger Exp $
  * Description: infrastructure: date format
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/06 19:03:24 $
+ * Date:        $Date: 2008/11/05 12:53:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,9 +53,9 @@ package org.openmdx.base.text.format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * This class provides thread-safe DateFormatters
@@ -64,10 +64,8 @@ public class DateFormat extends ThreadLocal<SimpleDateFormat> {
 
     /**
      * Creates a DateFormat object for the specified pattern.
-     * 
-     * @deprecated use DateFormat.getInstance(String)
      */
-    public DateFormat(
+    DateFormat(
     	String pattern
     ){
     	this.pattern = pattern;
@@ -108,11 +106,15 @@ public class DateFormat extends ThreadLocal<SimpleDateFormat> {
         String pattern
     ){
         DateFormat instance = patternMap.get(pattern);
-        if(instance == null) patternMap.put(
-            pattern,
-            instance = new DateFormat(pattern)
-        );
-        return instance;
+        if(instance == null) {
+            DateFormat concurrent = patternMap.putIfAbsent(
+                pattern,
+                instance = new DateFormat(pattern)
+            );
+            return concurrent == null ? instance : concurrent;
+        } else {
+            return instance;
+        }
     }
     
     /* (non-Javadoc)
@@ -184,7 +186,8 @@ public class DateFormat extends ThreadLocal<SimpleDateFormat> {
     /**
      * Associates patterns with thread maps
      */
-    final static private Map<String, DateFormat> patternMap = new HashMap<String, DateFormat>();
+    final static private ConcurrentMap<String, DateFormat> patternMap = 
+        new ConcurrentHashMap<String, DateFormat>();
     
     /**
      * An instance with the default format "yyyyMMdd'T'HHmmss.SSS'Z'"

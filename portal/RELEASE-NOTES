@@ -1,5 +1,5 @@
-Release Name: openMDX/Portal 2.1.0
-Release Date: 2008-07-10
+Release Name: openMDX/Portal 2.2.1
+Release Date: 2008-10-14
 
 ---------------------------------------------------------------------
 Notes:
@@ -49,41 +49,77 @@ Notes:
 Changes:
 
 0.    SUMMARY
-      * Script-based customizing
-      * Ajax-based, in-place editing
-      * Migrate to openMDX 2 PersistenceManager
-      * Bugs fixed
+      * UI enhancements
+      * Bug fixes
                         
 1.    NEW FEATURES
-
-      CR10007738
-      Portal: all controls are script enabled. All controls are script enabled, 
-      i.e. if a control does not implement the method 
-      paint(HtmlPage p, String frame, boolean forEditing) the default 
-      implementation executes a Groovy-script located in 
-      ./config/control/{control-id}
       
+      CR20017002
+      Ui: showMemberRange. ElementDefinition.showMemberRange is a list order 
+      ranges which allows to list the elements (columns) shown for a specific 
+      object container (grid). Here is an example:
+      
+			<additionalElementDefinition>
+			  <org.openmdx.ui1.AdditionalElementDefinition id="9998" _operation="create">
+			    <_object>
+			      <toolTip>
+			        <_item>Accounts</_item>
+			      </toolTip>
+			      <label>
+			        <_item>Accounts</_item>
+			      </label>
+			      <order>
+			        <_item>0</_item>
+			        <_item>0</_item>
+			        <_item>10</_item>
+			      </order>
+			      <maxMember>23</maxMember>
+			      <showMaxMember>6</showMaxMember>
+			      <!-- Grid Accounts contains all fields with orderObjectContainer in range defined below -->
+			      <showMemberRange>
+			        <_item>0:0:3-0:0:3</_item>
+			        <_item>0:0:5-0:0:5</_item>
+			      </showMemberRange>
+			    </_object>
+			    <_content/>
+			  </org.openmdx.ui1.AdditionalElementDefinition>
+			
+			  <org.openmdx.ui1.AdditionalElementDefinition id="9999" _operation="create">
+			    <_object>
+			      <toolTip>
+			        <_item>Accounts (disabled)</_item>
+			      </toolTip>
+			      <label>
+			        <_item>»Accounts (disabled)</_item>
+			      </label>
+			      <order>
+			        <_item>0</_item>
+			        <_item>0</_item>
+			        <_item>510</_item>
+			      </order>
+			      <maxMember>23</maxMember>
+			      <showMaxMember>6</showMaxMember>
+			      <!-- Grid Accounts (disabled) contains all fields with orderObjectContainer in range defined below -->
+			      <showMemberRange>
+			        <_item>0:0:3-0:0:3</_item>
+			        <_item>0:0:4-0:0:4</_item>
+			        <_item>0:0:5-0:0:5</_item>
+			        <_item>0:0:6-0:0:6</_item>
+			      </showMemberRange>
+			    </_object>
+			    <_content/>
+			  </org.openmdx.ui1.AdditionalElementDefinition>
+      
+            
 2.    CHANGES  
      
 2.0.  CHANGED FEATURES
-
-      CR10007629
-      Redesign edit mode. The edit mode is Ajax-based now. Ajax.Updaters switch
-      the attribute pane between show and edit mode. Painting the full view in
-      show and edit mode is not required anymore.
-       
-      CR20010100
-      Portal: migrate to PersistenceManager. Migrate from openMDX 1 cci RefPackage
-      and openMDX 1 compatibility RequestCollection to openMDX 2 PersistenceManager.
+      none
       
+            
 2.1.  FIXED BUGS
+      none
 
-      CR10007763
-      Multi-valued code tables with '. In edit mode, multi-valued code tables with 
-      code values containing single quotes (') do not work (pop-up does not appear) 
-      because the single quotes are not escaped.
-
-      
 2.2.  DEPRECATED FEATURES
       none
             

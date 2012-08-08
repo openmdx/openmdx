@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractObject.java,v 1.39 2008/06/28 00:21:26 hburger Exp $
+ * Name:        $Id: AbstractObject.java,v 1.41 2008/11/04 09:59:24 hburger Exp $
  * Description: Object Relational Mapping 
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:26 $
+ * Date:        $Date: 2008/11/04 09:59:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -1000,7 +1000,7 @@ public abstract class AbstractObject
         /**
          * Validate the index 
          * 
-         * @param size
+         * @param index
          * @param sizeIsAcceptable
          * 
          * @throws IndexOutOfBoundsException if the index is less than 0
@@ -1280,7 +1280,8 @@ public abstract class AbstractObject
         /**
          * Constructor 
          *
-         * @param collection
+         * @param query
+         * @param parent
          */
         ResultSet(
             Query query,

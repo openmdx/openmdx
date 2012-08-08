@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1_3.java,v 1.4 2008/02/08 16:51:25 hburger Exp $
+ * Name:        $Id: RefPackage_1_3.java,v 1.6 2008/11/07 17:45:04 hburger Exp $
  * Description: RefPackage interface 1.3
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:51:25 $
+ * Date:        $Date: 2008/11/07 17:45:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,6 +64,11 @@ public interface RefPackage_1_3
     void clear();
 
     /**
+     * Close
+     */
+    void close();
+        
+    /**
      * Lookup the implementation specified by <code>qualifiedClassName</code> and create
      * an instance with refDelegate as delegate object. The Java package name is derived 
      * from the package name of the specified class and this RefPackage packageImpl 
@@ -75,11 +80,6 @@ public interface RefPackage_1_3
         String qualifiedClassName,
         RefObject_1_0 refDelegate
     );
-
-    /**
-     * @return config option useOpenMdx1ImplLookup
-     */
-    boolean refUseOpenMdx1ImplLookup();
 
     /**
      * @return config option bindingPackageSuffix

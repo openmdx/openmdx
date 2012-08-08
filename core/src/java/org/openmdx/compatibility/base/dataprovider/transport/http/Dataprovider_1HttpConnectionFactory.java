@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1HttpConnectionFactory.java,v 1.7 2008/03/19 17:07:35 hburger Exp $
+ * Name:        $Id: Dataprovider_1HttpConnectionFactory.java,v 1.8 2008/09/10 08:55:24 hburger Exp $
  * Description: Lightweight Container's Dataprovider Connection Factory 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:07:35 $
+ * Date:        $Date: 2008/09/10 08:55:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,16 +75,16 @@ import org.openmdx.kernel.exception.BasicException;
  */
 @SuppressWarnings("unchecked")
 public class Dataprovider_1HttpConnectionFactory
-        implements DataproviderConnectionFactory, Dataprovider_1ConnectionFactory
+implements DataproviderConnectionFactory, Dataprovider_1ConnectionFactory
 {
 
-        /**
-	 * Constructor
-	 */
-        public Dataprovider_1HttpConnectionFactory(
-        ){
-            super();
-        }
+    /**
+     * Constructor
+     */
+    public Dataprovider_1HttpConnectionFactory(
+    ){
+        super();
+    }
 
     /**
      * 
@@ -111,8 +111,8 @@ public class Dataprovider_1HttpConnectionFactory
         this.url = new URL(url, "process");
         Map cookies = new HashMap();
         for(
-            Iterator i = subject.getPrivateCredentials(PasswordCredential.class).iterator();
-            i.hasNext();
+                Iterator i = subject.getPrivateCredentials(PasswordCredential.class).iterator();
+                i.hasNext();
         ) {
             PasswordCredential credential = (PasswordCredential) i.next();
             String name = credential.getUserName();
@@ -124,12 +124,12 @@ public class Dataprovider_1HttpConnectionFactory
                 int j = name.indexOf(':');
                 if(j < 0) try {
                     if(
-                         this.requestProperties.put(
-                             "Authorization",
-                             "Basic " + Base64.encode(
-                                 (name + ':' + getValue(credential)).getBytes(ENCODING)
-                             )
-                         ) != null
+                            this.requestProperties.put(
+                                "Authorization",
+                                "Basic " + Base64.encode(
+                                    (name + ':' + getValue(credential)).getBytes(ENCODING)
+                                )
+                            ) != null
                     ) throw new IllegalArgumentException(
                         "Subject contains duplicate Basic authentication PasswordCredentials"
                     );
@@ -138,17 +138,15 @@ public class Dataprovider_1HttpConnectionFactory
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("encoding", ENCODING)
-                        },
-                        "Encoding missing"
+                        "Encoding missing",
+                        new BasicException.Parameter("encoding", ENCODING)
                     );
                 } else if (name.startsWith("Cookie:")) {
                     if(
-                        cookies.put(
-                            name.substring(j + 1),
-                            getValue(credential)
-                        ) != null
+                            cookies.put(
+                                name.substring(j + 1),
+                                getValue(credential)
+                            ) != null
                     ) throw new IllegalArgumentException(
                         "Subject contains duplicate cookie credential '" + name.substring(j + 1) + "'"
                     );
@@ -162,8 +160,8 @@ public class Dataprovider_1HttpConnectionFactory
         if(!cookies.isEmpty()) {
             StringBuilder cookieValue = new StringBuilder("$Version=1");
             for(
-                Iterator i = cookies.entrySet().iterator();
-                i.hasNext();
+                    Iterator i = cookies.entrySet().iterator();
+                    i.hasNext();
             ){
                 Map.Entry e = (Entry) i.next();
                 cookieValue.append(
@@ -196,12 +194,12 @@ public class Dataprovider_1HttpConnectionFactory
     }
 
     /* (non-Javadoc)
-	 * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1ConnectionFactory#createConnection()
-	 */
-        public Dataprovider_1_1Connection createConnection(
-        ) throws ServiceException {
-                return new Dataprovider_1HttpConnection(this.url, this.requestProperties);
-        }
+     * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1ConnectionFactory#createConnection()
+     */
+    public Dataprovider_1_1Connection createConnection(
+    ) throws ServiceException {
+        return new Dataprovider_1HttpConnection(this.url, this.requestProperties);
+    }
 
     /**
      * The authorization value encoding to be used.

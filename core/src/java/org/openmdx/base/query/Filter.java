@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Filter.java,v 1.8 2008/04/25 23:34:29 wfro Exp $
+ * Name:        $Id: Filter.java,v 1.9 2008/09/09 10:52:22 hburger Exp $
  * Description: Filter
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 23:34:29 $
+ * Date:        $Date: 2008/09/09 10:52:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,7 +59,6 @@ import java.util.List;
 
 import javax.resource.ResourceException;
 
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.resource.Records;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.compatibility.base.query.FilterProperty;
@@ -250,26 +249,23 @@ public class Filter
         try {
             return Records.getRecordFactory().asMappedRecord(
                 getClass().getName(),
-                "",
-                new String[]{
-                    "condition",
-                    "orderSpecifier"
-                }, 
+                null,
+                TO_STRING_FIELDS, 
                 new Object[]{
                     Records.getRecordFactory().asIndexedRecord(
                         Condition.class.getName(),
-                        "",
+                        null,
                         this.conditions
                     ),
                     Records.getRecordFactory().asIndexedRecord(
                         OrderSpecifier.class.getName(),
-                        "",
+                        null,
                         this.orderSpecifiers
                     )
                 }
             ).toString();
         } catch (ResourceException exception) {
-            throw new RuntimeServiceException(exception);
+            return super.toString();
         }
     }
 
@@ -330,6 +326,10 @@ public class Filter
     private static final long serialVersionUID = 3257285842266371888L;
     private final List conditions;
     private final List orderSpecifiers;
+    private static final String[] TO_STRING_FIELDS = {
+        "condition",
+        "orderSpecifier"
+    };
   
 }
 

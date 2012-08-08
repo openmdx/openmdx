@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ReferenceDef.java,v 1.13 2008/03/21 18:40:17 hburger Exp $
+ * Name:        $Id: ReferenceDef.java,v 1.14 2008/11/11 15:40:46 wfro Exp $
  * Description: VelocityReferenceDef class
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:40:17 $
+ * Date:        $Date: 2008/11/11 15:40:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -106,18 +106,18 @@ public class ReferenceDef
           (String)referenceDef.values("annotation").get(0),
           new HashSet(referenceDef.values("stereotype")),
           (String)referenceDef.values("visibility").get(0),
-          (String)model.getDereferencedType(referenceDef.values("type").get(0)).values("qualifiedName").get(0),
+          (String)model.getElementType(referenceDef).values("qualifiedName").get(0),
           (String)referenceDef.values("multiplicity").get(0),
           getQualifierName(referenceDef, model, "referencedEnd"),
-          getQualifierTypeName(referenceDef, (Model_1_3) model, "referencedEnd", openmdx1),
+          getQualifierTypeName(referenceDef, (Model_1_3) model, "referencedEnd"),
           (Boolean)referenceDef.values("isChangeable").get(0),
           (Boolean)referenceDef.values("isDerived").get(0), 
           true,
           getExposedEndName(referenceDef, model),
-          getExposedEndQualifiedTypeName(referenceDef, (Model_1_3) model, openmdx1),
+          getExposedEndQualifiedTypeName(referenceDef, (Model_1_3) model),
           getQualifierName(referenceDef, model, "exposedEnd"),
-          getQualifierTypeName(referenceDef, (Model_1_3) model, "exposedEnd", openmdx1),
-          getReferencedEndQualifiedTypeName(referenceDef, (Model_1_3)model, openmdx1),
+          getQualifierTypeName(referenceDef, (Model_1_3) model, "exposedEnd"),
+          getReferencedEndQualifiedTypeName(referenceDef, (Model_1_3)model),
           (String) associationDef.values("name").get(0),
           (String) associationDef.values("qualifiedName").get(0),
           isComposition(referenceDef, model),
@@ -272,8 +272,7 @@ public class ReferenceDef
       qualifiedTypeName, 
       multiplicity,
       isChangeable,
-      isDerived, 
-      openmdx1
+      isDerived 
     );
     this.qualifierName = qualifierName;
     this.qualifiedQualifierTypeName = qualifiedQualifierTypeName;
@@ -320,7 +319,7 @@ public class ReferenceDef
   private static String getQualifierTypeName(
     ModelElement_1_0 referenceDef,
     Model_1_3 model, 
-    String end, boolean openmdx1
+    String end
   ) throws ServiceException {
     ModelElement_1_0 referencedEnd = model.getElement(
       referenceDef.values(end).get(0)
@@ -328,8 +327,7 @@ public class ReferenceDef
     boolean hasQualifiers = referencedEnd.values("qualifierName").size() > 0;
     return hasQualifiers 
       ? (String)model.getDereferencedType(
-          referencedEnd.values("qualifierType").get(0),
-          openmdx1
+          referencedEnd.values("qualifierType").get(0)
       ).values("qualifiedName").get(0) 
       : null;
   }
@@ -337,30 +335,26 @@ public class ReferenceDef
   //-------------------------------------------------------------------------
   private static String getExposedEndQualifiedTypeName(
     ModelElement_1_0 referenceDef,
-    Model_1_3 model, 
-    boolean openmdx1
+    Model_1_3 model 
   ) throws ServiceException {
     ModelElement_1_0 exposedEnd = model.getElement(
       referenceDef.values("exposedEnd").get(0)
     );
-    return (String)model.getDereferencedType(
-        exposedEnd.values("type").get(0),
-        openmdx1
+    return (String)model.getElementType(
+        exposedEnd
     ).values("qualifiedName").get(0);
   }
   
   //-------------------------------------------------------------------------
   private static String getReferencedEndQualifiedTypeName(
     ModelElement_1_0 referenceDef,
-    Model_1_3 model, 
-    boolean openmdx1
+    Model_1_3 model 
   ) throws ServiceException {
     ModelElement_1_0 referencedEnd = model.getElement(
       referenceDef.values("referencedEnd").get(0)
     );
-    return (String)model.getDereferencedType(
-        referencedEnd.values("type").get(0),
-        openmdx1
+    return (String)model.getElementType(
+        referencedEnd
     ).values("qualifiedName").get(0);
   }
   

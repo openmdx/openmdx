@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingMap.java,v 1.17 2008/04/09 12:33:43 hburger Exp $
+ * Name:        $Id: MarshallingMap.java,v 1.20 2008/12/15 03:15:37 hburger Exp $
  * Description: Marshalling Map
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:33:43 $
+ * Date:        $Date: 2008/12/15 03:15:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,16 +56,18 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.CollectionMarshallerAdapter;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * A Marshalling Map
  * <p>
  * The marshaller is applied to the delegate's values, but not to its keys.
  */
-public class MarshallingMap<K,V,M extends Map<K,?>>
+public class MarshallingMap<K,V>
   extends AbstractMap<K,V>
   implements Serializable 
 {
@@ -80,11 +82,11 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
     @SuppressWarnings("unchecked")
     public MarshallingMap(
         org.openmdx.base.persistence.spi.Marshaller marshaller,
-        M map, 
+        Map<K,V> map, 
         Unmarshalling unmarshalling 
     ) {
         this.marshaller = marshaller;
-        this.map = (Map<K, Object>) map;
+        this.map = map;
         this.unmarshalling = unmarshalling;
     }
   
@@ -97,7 +99,7 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
     @SuppressWarnings("unchecked")
     public MarshallingMap(
         org.openmdx.base.persistence.spi.Marshaller marshaller,
-        M map 
+        Map<K,V> map 
     ) {
         this(marshaller, map, Unmarshalling.EAGER);
     }
@@ -110,7 +112,7 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
      */
     public MarshallingMap(
         Marshaller marshaller,
-        M map 
+        Map<K,V> map 
     ) {
         this(
             new CollectionMarshallerAdapter(marshaller), 
@@ -133,17 +135,20 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
     /**
      * 
      */    
-    private final Map<K,Object> map;
+    private final Map<K,V> map;
 
     /**
      * 
      */
     protected final org.openmdx.base.persistence.spi.Marshaller marshaller;
     
-    
-    @SuppressWarnings("unchecked")
-    protected final M getDelegate(){
-        return (M) this.map;
+    /**
+     * This method may be overridden by a sub-class for danymic delegation
+     * 
+     * @return the delegate
+     */
+    protected Map<K,V> getDelegate(){
+        return this.map;
     }
     
     
@@ -155,14 +160,14 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
      * @see java.util.Map#clear()
      */
     public void clear() {
-        this.map.clear();
+        getDelegate().clear();
     }
       
     /* (non-Javadoc)
      * @see java.util.Map#containsKey(java.lang.Object)
      */
     public boolean containsKey(Object key) {
-        return this.map.containsKey(key);
+        return getDelegate().containsKey(key);
     }
 
     /* (non-Javadoc)
@@ -173,7 +178,7 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
             case RELUCTANT:
                 return super.containsValue(value);
             case EAGER: default: 
-                return this.map.containsValue(
+                return getDelegate().containsValue(
                     this.marshaller.unmarshal(value)
                 );
         }
@@ -184,11 +189,15 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
      */
     public Set<Map.Entry<K, V>> entrySet(
     ) {
+        try {
         return new MarshallingSet<Map.Entry<K, V>>(
             new MapEntryMarshaller<K,V>(this.marshaller),
-            this.map.entrySet(),
+            getDelegate().entrySet(),
             this.unmarshalling
         );
+        } catch (NullPointerException exception) {
+            return null; 
+        }
     }
 
     /* (non-Javadoc)
@@ -196,16 +205,24 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
      */
     @SuppressWarnings("unchecked")
     public V get(Object key) {
-        return (V) this.marshaller.marshal(
-            this.map.get(key)
-        );
+        Object value = getDelegate().get(key); 
+        if(this.marshaller instanceof CollectionMarshallerAdapter) {
+            try {
+                return (V) ((CollectionMarshallerAdapter)this.marshaller).getDelegate().marshal(value);
+            } catch (ServiceException exception) {
+                if(exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
+                    return null;
+                }
+            }
+        }
+        return (V) this.marshaller.marshal(value);
     }
 
     /* (non-Javadoc)
      * @see java.util.Map#isEmpty()
      */
     public boolean isEmpty() {
-        return this.map.isEmpty();
+        return getDelegate().isEmpty();
     }
 
     /* (non-Javadoc)
@@ -224,7 +241,7 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
         V value
     ) {
         return (V) this.marshaller.marshal(
-            this.map.put(key, this.marshaller.unmarshal(value))
+            getDelegate().put(key, (V)this.marshaller.unmarshal(value))
         );
     }
 
@@ -236,7 +253,7 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
         Object key
     ) {
         return (V) this.marshaller.marshal(
-            this.map.remove(key)
+            getDelegate().remove(key)
         );
     }
 
@@ -244,7 +261,7 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
      * @see java.util.Map#size()
      */
     public int size() {
-        return this.map.size();
+        return getDelegate().size();
     }
 
     /* (non-Javadoc)
@@ -253,7 +270,7 @@ public class MarshallingMap<K,V,M extends Map<K,?>>
     public Collection<V> values() {
         return new MarshallingCollection<V>(
             this.marshaller,
-            this.map.values(), 
+            getDelegate().values(), 
             this.unmarshalling
         );
     }

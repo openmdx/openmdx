@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.45 2008/06/04 22:06:24 wfro Exp $
+= Name:        $Id: build.xml,v 1.46 2008/08/05 14:12:04 wfro Exp $
 = Description: ant build for openMDX/Portal
-= Revision:    $Revision: 1.45 $
-= Date:        $Date: 2008/06/04 22:06:24 $
+= Revision:    $Revision: 1.46 $
+= Date:        $Date: 2008/08/05 14:12:04 $
 = Copyright:   (c) 2004-2006 OMEX AG
 =======================================================================
  *
@@ -149,12 +149,8 @@
 			<param name="file.name" value="utilities.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/com/yui-ext"/>
-			<param name="file.name" value="yui-ext.js"/>
-		</antcall>
-		<antcall target="-compress-and-append-">
-			<param name="in.dir.name" value="src/js/org/openmdx/portal"/>
-			<param name="file.name" value="Element-FASTgetStyle.js"/>
+			<param name="in.dir.name" value="src/js/com/yahoo/yui"/>
+			<param name="file.name" value="container.js"/>
 		</antcall>
 		<antcall target="-compress-and-append-">
 			<param name="in.dir.name" value="src/js/com/dynarch/calendar"/>
@@ -199,8 +195,8 @@
 			<zipfileset dir="src/js/org/wymeditor" prefix="javascript/wymeditor" />
 			<zipfileset dir="src/js/org/jit" prefix="javascript/jit" />
 			<zipfileset dir="src/js/com/dynarch/calendar/lang" prefix="javascript/calendar/lang" />
-			<zipfileset dir="src/js/com/yui-ext/resources" prefix="javascript/yui-ext/resources" />
 			<zipfileset dir="src/js/org/prototypejs" prefix="javascript" />
+			<zipfileset dir="src/js/com/yahoo/yui/assets" prefix="javascript/yui/build/assets" />
 			<zipfileset dir="src/js/org/openmdx/portal" prefix="javascript">
 				<include name="iehover-fix.js"/>
 				<include name="ssf.js"/>

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PathComponent.java,v 1.17 2008/03/21 18:48:01 hburger Exp $
+ * Name:        $Id: PathComponent.java,v 1.18 2008/09/10 08:55:28 hburger Exp $
  * Description: A Path COmponent 
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:48:01 $
+ * Date:        $Date: 2008/09/10 08:55:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -80,7 +80,7 @@ import org.openmdx.kernel.id.UUIDs;
  */
 @SuppressWarnings("unchecked")
 public final class PathComponent
-    implements Comparable, Cloneable, Serializable
+implements Comparable, Cloneable, Serializable
 {
 
     /**
@@ -146,31 +146,27 @@ public final class PathComponent
     ){
         try {
             for (
-                int index = 0;
-                index < this.fields.length;
-                index++
+                    int index = 0;
+                    index < this.fields.length;
+                    index++
             ) {
                 String field = this.fields[index];
                 if(
-                    field == null ||
-                    (field.length() == 0 && index != 0 && index != this.fields.length-1)
+                        field == null ||
+                        (field.length() == 0 && index != 0 && index != this.fields.length-1)
                 ) throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.BAD_PARAMETER,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("index",index),
-                        new BasicException.Parameter("field",field)
-                    },
-                    "A path component's field can neither be null nor empty"
+                    "A path component's field can neither be null nor empty",
+                    new BasicException.Parameter("index",index),
+                    new BasicException.Parameter("field",field)
                 );
                 if (parse(field).length > 1) throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN, 
                     BasicException.Code.BAD_PARAMETER,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("index",index),
-                        new BasicException.Parameter("field",field)
-                    },
-                    "A path component's field can't contain un-escaped field delimiters"
+                    "A path component's field can't contain un-escaped field delimiters",
+                    new BasicException.Parameter("index",index),
+                    new BasicException.Parameter("field",field)
                 );
             }
             return this;
@@ -308,9 +304,9 @@ public final class PathComponent
         PathComponent that = (PathComponent) obj;
         int limit = this.size() < that.size() ? this.size() : that.size();
         for (
-            int cursor = 0;
-            cursor < limit;
-            cursor++
+                int cursor = 0;
+                cursor < limit;
+                cursor++
         ) {
             int result = this.get(cursor).compareTo(that.get(cursor));
             if (result != 0) return result;
@@ -376,8 +372,8 @@ public final class PathComponent
         int position
     ){
         if (
-            position < 0 ||
-            position > size()
+                position < 0 ||
+                position > size()
         ) throw new ArrayIndexOutOfBoundsException(BAD_FIELD_NUMBER);
         String[] fields = new String[position];
         System.arraycopy(
@@ -408,8 +404,8 @@ public final class PathComponent
         int position
     ){
         if (
-            position < 0 ||
-            position > size()
+                position < 0 ||
+                position > size()
         ) throw new ArrayIndexOutOfBoundsException(BAD_FIELD_NUMBER);
         String[] fields = new String[size()-position];
         System.arraycopy(
@@ -435,9 +431,9 @@ public final class PathComponent
     ) {
         if(prefix.length > size()) return false;
         for(
-            int index = 0;
-            index < prefix.length;
-            index++
+                int index = 0;
+                index < prefix.length;
+                index++
         ) if(! prefix[index].equals(this.get(index))) return false;
         return true;
     }
@@ -475,9 +471,9 @@ public final class PathComponent
         int offset = size() - suffix.length;
         if (offset < 0) return false;
         for(
-            int index = 0;
-            index < suffix.length;
-            index++
+                int index = 0;
+                index < suffix.length;
+                index++
         ) if(! suffix[index].equals(this.get(offset+index))) return false;
         return true;
     }
@@ -656,7 +652,7 @@ public final class PathComponent
      *              syntax rules of the path
      */
     public void setTo(
-      PathComponent source
+        PathComponent source
     ){
         this.fields = source.fields;
     }
@@ -673,13 +669,13 @@ public final class PathComponent
     ){
         ArrayList target = new ArrayList();
         for (
-            int begin = 0, end = -1;
-            begin <= source.length();
-            begin = end + 1
+                int begin = 0, end = -1;
+                begin <= source.length();
+                begin = end + 1
         ){
             end = subSegmentEnd(source, begin);
             target.add(source.substring(begin, end));
-            
+
         }
         return (String[]) target.toArray(new String[target.size()]);
     }
@@ -703,12 +699,12 @@ public final class PathComponent
                 if(cursor < 0) cursor = position;
             }
             for(
-                int end = segment.indexOf(FIELD_DELIMITER, cursor);
-                end >= 0;
-                end = segment.indexOf(FIELD_DELIMITER, end + 1)
+                    int end = segment.indexOf(FIELD_DELIMITER, cursor);
+                    end >= 0;
+                    end = segment.indexOf(FIELD_DELIMITER, end + 1)
             ) if(
-                ++end >= segment.length() ||
-                segment.charAt(end) != FIELD_DELIMITER
+                    ++end >= segment.length() ||
+                    segment.charAt(end) != FIELD_DELIMITER
             ) {
                 return end - 1;
             }
@@ -749,13 +745,13 @@ public final class PathComponent
     ){
         StringBuilder target = new StringBuilder();
         for (
-            int index = 0;
-            index < this.fields.length;
-            index++
+                int index = 0;
+                index < this.fields.length;
+                index++
         ){
             (index > 0 ?
                 target.append(FIELD_DELIMITER) :
-                target
+                    target
             ).append(
                 this.fields[index]
             );
@@ -775,9 +771,9 @@ public final class PathComponent
         Object that
     ){
         return
-            this == that ||
-            that != null &&
-            Arrays.equals(this.fields,((PathComponent)that).fields);
+        this == that ||
+        that != null &&
+        Arrays.equals(this.fields,((PathComponent)that).fields);
     }
 
     /**
@@ -794,9 +790,9 @@ public final class PathComponent
     ){
         int hashCode = 1;
         for(
-            int index = 0;
-            index < size();
-            index++
+                int index = 0;
+                index < size();
+                index++
         ) hashCode = 31 * hashCode + this.fields[index].hashCode();
         return hashCode;
     }

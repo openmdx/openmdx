@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ContextUtil.java,v 1.2 2005/04/08 15:29:16 hburger Exp $
+ * Name:        $Id: ContextUtil.java,v 1.3 2008/11/21 16:58:45 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/08 15:29:16 $
+ * Date:        $Date: 2008/11/21 16:58:45 $
  * ====================================================================
  *
  * This software is published under the GNU Lesser General Public
@@ -33,6 +33,7 @@ package org.openmdx.test.kernel.naming;
 import java.io.PrintStream;
 import javax.naming.Binding;
 import javax.naming.Context;
+import javax.naming.NameClassPair;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
@@ -55,7 +56,7 @@ public class ContextUtil
 	}
 	private static void print(Context ctx, PrintStream out, int depth) throws NamingException
 	{
-		NamingEnumeration enumeration = ctx.list("");
+		NamingEnumeration<NameClassPair> enumeration = ctx.list("");
 		
 		println("[" + ctx.getNameInNamespace() + "]", out, depth);
 		

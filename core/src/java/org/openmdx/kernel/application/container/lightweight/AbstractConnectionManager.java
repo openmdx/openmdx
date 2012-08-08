@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractConnectionManager.java,v 1.10 2008/06/05 17:39:59 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: AbstractConnectionManager.java,v 1.11 2008/10/09 22:27:23 hburger Exp $
  * Description: Abstract Connection Manager
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/05 17:39:59 $
+ * Date:        $Date: 2008/10/09 22:27:23 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.application.container.lightweight;
 
@@ -66,7 +65,6 @@ import org.openmdx.compatibility.kernel.application.cci.Classes;
 /**
  * Abstract Connection Manager
  */
-@SuppressWarnings("unchecked")
 public abstract class AbstractConnectionManager
     implements ConnectionManager 
 {
@@ -79,7 +77,7 @@ public abstract class AbstractConnectionManager
      * @throws ResourceException
      */
     protected AbstractConnectionManager(
-        Set credentials
+        Set<?> credentials
     ){
         this.credentials = credentials;
         this.connectionClass = null;
@@ -95,8 +93,8 @@ public abstract class AbstractConnectionManager
      * @throws ResourceException
      */
     protected AbstractConnectionManager(
-        Set credentials,
-        Class connectionClass
+        Set<?> credentials,
+        Class<?> connectionClass
     ){
         this.credentials = credentials;
         this.connectionClass = connectionClass;
@@ -111,7 +109,7 @@ public abstract class AbstractConnectionManager
      * @throws ResourceException
      */
     protected AbstractConnectionManager(
-        Set credentials,
+        Set<?> credentials,
         String connectionClass
     ) throws ResourceException{
         this(
@@ -123,12 +121,12 @@ public abstract class AbstractConnectionManager
     /**
      * @serial the Subject's private credentials
      */
-    private final Set credentials;
+    private final Set<?> credentials;
     
     /**
      * @serial the connection instance's class
      */
-    private final Class connectionClass;
+    private final Class<?> connectionClass;
 
     /**
      * A subjects credentials go lost during a serialization/deserialization 
@@ -145,7 +143,7 @@ public abstract class AbstractConnectionManager
      * 
      * @throws ResourceException 
      */
-    private static Class getConnectionClass(
+    private static Class<?> getConnectionClass(
         String name
     ) throws ResourceException{
         try {
@@ -212,7 +210,7 @@ public abstract class AbstractConnectionManager
      *  
      * @return the set of managed connections.
      */
-    protected Set getManagedConnections(
+    protected Set<ManagedConnection> getManagedConnections(
     ) throws ResourceException {
         throw new NotSupportedException(
            "The getManagedConnections method must be overriden by a sub-class"
@@ -254,7 +252,7 @@ public abstract class AbstractConnectionManager
      * @throws ResourceException 
      */
     protected ManagedConnection allocateMangedConnection(
-        Set managedConnections,
+        Set<ManagedConnection> managedConnections,
         Subject subject,
         ManagedConnectionFactory managedConnectionFactory, 
         ConnectionRequestInfo connectionRequestInfo

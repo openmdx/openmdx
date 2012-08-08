@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Deployment.java,v 1.6 2008/06/30 15:41:09 hburger Exp $
+ * Name:        $Id: Dataprovider_1Deployment.java,v 1.10 2008/11/27 16:46:56 hburger Exp $
  * Description: In-Process Dataprovider Connection Factory
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/30 15:41:09 $
+ * Date:        $Date: 2008/11/27 16:46:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -105,17 +105,17 @@ public class Dataprovider_1Deployment
      * 
      */
     private final Deployment modelDeployment;
-    
+
     /**
      * 
      */
     private final String jndiName;
-    
+
     /**
      * 
      */
     private int referenceCount = 0;
-    
+
 
     //------------------------------------------------------------------------
     // Implements Dataprovider_1ConnectionFactory
@@ -144,7 +144,6 @@ public class Dataprovider_1Deployment
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ACTIVATION_FAILURE,
-                null,
                 null
             );
         }
@@ -161,8 +160,8 @@ public class Dataprovider_1Deployment
         connection.close();
         if(--referenceCount == 0) this.dataproviderDeployment.destroy();
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Class Dataprovider_1Connection
     //------------------------------------------------------------------------
@@ -171,7 +170,7 @@ public class Dataprovider_1Deployment
      * Dataprovider_1Connection allows destruction of unreferenced deployments.
      */
     class Dataprovider_1Connection implements Dataprovider_1_3Connection {
-        
+
         /**
          * Constructor
          * 
@@ -211,7 +210,7 @@ public class Dataprovider_1Deployment
          */
         public UnitOfWorkReply[] process(
             ServiceHeader header, 
-            UnitOfWorkRequest[] unitsOfWork
+            UnitOfWorkRequest... unitsOfWork
         ) {
             return this.delegate.process(header, unitsOfWork);
         }
@@ -228,17 +227,15 @@ public class Dataprovider_1Deployment
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("required", ManagerFactory_2_0.class.getName()),
-                        new BasicException.Parameter("actual", this.delegate.getClass().getName())
-                    },
-                    "The managed connection does not implement the required interface"
+                    "The managed connection does not implement the required interface",
+                    new BasicException.Parameter("required", ManagerFactory_2_0.class.getName()),
+                    new BasicException.Parameter("actual", this.delegate.getClass().getName())
                 )
             );
         }
 
         /* (non-Javadoc)
-         * @see org.openmdx.kernel.persistence.spi.EntityManagerFactory_2_0#createEntityManager()
+         * @see org.openmdx.kernel.persistence.spi.ManagerFactory_2_0#createManager()
          */
         public PersistenceManager createManager(
         ) throws ResourceException {
@@ -248,16 +245,14 @@ public class Dataprovider_1Deployment
                 new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.NOT_SUPPORTED,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("required", ManagerFactory_2_0.class.getName()),
-                        new BasicException.Parameter("actual", this.delegate.getClass().getName())
-                    },
-                    "The managed connection does not implement the required interface"
+                    "The managed connection does not implement the required interface",
+                    new BasicException.Parameter("required", ManagerFactory_2_0.class.getName()),
+                    new BasicException.Parameter("actual", this.delegate.getClass().getName())
                 )
             );
         }
 
-        
+
         /* (non-Javadoc)
          * @see org.openmdx.base.persistence.spi.OptimisticTransaction_2_0#commit(javax.transaction.Synchronization)
          */
@@ -269,11 +264,9 @@ public class Dataprovider_1Deployment
             } else throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("required", OptimisticTransaction_2_0.class.getName()),
-                    new BasicException.Parameter("actual", this.delegate.getClass().getName())
-                },
-                "The managed connection does not implement the reqired interface"
+                "The managed connection does not implement the reqired interface",
+                new BasicException.Parameter("required", OptimisticTransaction_2_0.class.getName()),
+                new BasicException.Parameter("actual", this.delegate.getClass().getName())
             );
         }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FieldGroupControl.java,v 1.36 2008/06/18 22:42:30 wfro Exp $
+ * Name:        $Id: FieldGroupControl.java,v 1.43 2008/12/09 13:45:36 wfro Exp $
  * Description: FieldGroupControl
- * Revision:    $Revision: 1.36 $
+ * Revision:    $Revision: 1.43 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/18 22:42:30 $
+ * Date:        $Date: 2008/12/09 13:45:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,29 +52,30 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
-import org.openmdx.application.log.AppLog;
+import javax.jdo.JDOHelper;
+
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.HtmlPage;
+import org.openmdx.portal.servlet.UiContext;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.BinaryValue;
 import org.openmdx.portal.servlet.attribute.TextValue;
 import org.openmdx.portal.servlet.view.EditObjectView;
+import org.openmdx.portal.servlet.view.TransientObjectView;
 import org.openmdx.portal.servlet.view.ObjectView;
+import org.openmdx.portal.servlet.view.View;
 import org.openmdx.portal.servlet.view.ViewMode;
-import org.openmdx.ui1.jmi1.FieldGroup;
 
 public class FieldGroupControl
     extends Control
@@ -85,100 +86,222 @@ public class FieldGroupControl
         String id,
         String locale,
         int localeAsIndex,
-        ControlFactory controlFactory,
-        org.openmdx.ui1.jmi1.FieldGroup fieldGroup,
-        TabControl tabControl,
-        int fieldGroupIndex
+        org.openmdx.ui1.jmi1.FieldGroup fieldGroup
     ) {
         super(
             id,
             locale,
-            localeAsIndex,
-            controlFactory
+            localeAsIndex
         );
-        this.tabControl = tabControl;
-        this.fieldGroup = fieldGroup;    
-        this.fieldGroupIndex = fieldGroupIndex;
+        this.labels = fieldGroup.getLabel();
+        this.fields = getFields(fieldGroup);
+        this.columnBreakAtElements = fieldGroup.getColumnBreakAtElement();
     }
   
     //-------------------------------------------------------------------------
-    public FieldGroup getFieldGroup(
+    public FieldGroupControl(
+        String id,
+        String locale,
+        int localeAsIndex,
+        UiContext uiContext,        
+        org.openmdx.ui1.jmi1.FormFieldGroupDefinition formFieldGroup
     ) {
-        return this.fieldGroup;
+        super(
+            id,
+            locale,
+            localeAsIndex
+        );
+        this.labels = formFieldGroup.getLabel();
+        this.columnBreakAtElements = formFieldGroup.getColumnBreakAtElement();
+        this.fields = getFields(
+            uiContext, 
+            formFieldGroup
+        );
+    }
+  
+    //-------------------------------------------------------------------------
+    public static class Field {
+    
+        public Field(
+            org.openmdx.ui1.jmi1.ValuedField field,
+            Integer spanRow,
+            Integer skipRow
+        ) {
+            this.field = field;
+            this.spanRow = spanRow;
+            this.skipRow = skipRow;
+        }
+    
+        public int getSpanRow(
+        ) {
+            return this.spanRow == null ?
+                this.field.getSpanRow() :
+                this.spanRow;
+        }
+        
+        public int getSkipRow(
+        ) {
+            return this.skipRow == null ?
+                this.field.getSkipRow() :
+                this.skipRow;
+        }
+        
+        public org.openmdx.ui1.jmi1.ValuedField getField(
+        ) {
+            return this.field;
+        }
+        
+        private final org.openmdx.ui1.jmi1.ValuedField field;
+        private final Integer spanRow;
+        private final Integer skipRow;
+    }
+    
+    //-------------------------------------------------------------------------
+    protected static org.openmdx.ui1.jmi1.ValuedField findField(
+        UiContext uiContext,        
+        String forClass,
+        String featureName
+    ) {
+        org.openmdx.ui1.jmi1.Inspector inspector = uiContext.getInspector(
+            forClass, 
+            UiContext.MAIN_PERSPECTIVE
+        );
+        for(Iterator i = inspector.getMember().iterator(); i.hasNext(); ) {
+            Object pane = i.next();
+            if (pane instanceof org.openmdx.ui1.jmi1.AttributePane) {
+                org.openmdx.ui1.jmi1.AttributePane paneAttr = (org.openmdx.ui1.jmi1.AttributePane)pane;
+                for(Iterator j = paneAttr.getMember().iterator(); j.hasNext(); ) {
+                    org.openmdx.ui1.jmi1.Tab tab = (org.openmdx.ui1.jmi1.Tab)j.next();
+                    for(Iterator k = tab.getMember().iterator(); k.hasNext(); ) {
+                        org.openmdx.ui1.jmi1.FieldGroup fieldGroup = (org.openmdx.ui1.jmi1.FieldGroup)k.next();
+                        for(Iterator l = fieldGroup.getMember().iterator(); l.hasNext(); ) {
+                            org.openmdx.ui1.jmi1.ValuedField field = (org.openmdx.ui1.jmi1.ValuedField)l.next();
+                            if(field.getFeatureName().equals(featureName)) {
+                                return field;
+                            }
+                        }
+                    }
+                }
+            }          
+        }   
+        return null;
+    }    
+    
+    //-------------------------------------------------------------------------
+    protected static List<Field> getFields(
+        UiContext uiContext,        
+        org.openmdx.ui1.jmi1.FormFieldGroupDefinition formFieldGroup
+    ) {        
+        List<Field> fields = new ArrayList<Field>();
+        org.openmdx.ui1.cci2.FormFieldDefinitionQuery query = 
+            (org.openmdx.ui1.cci2.FormFieldDefinitionQuery)JDOHelper.getPersistenceManager(formFieldGroup).newQuery(org.openmdx.ui1.jmi1.FormFieldDefinition.class);
+        query.orderByOrder().ascending();
+        List<org.openmdx.ui1.jmi1.FormFieldDefinition> fieldDefinitions = formFieldGroup.getFormFieldDefinition(query);
+        for(org.openmdx.ui1.jmi1.FormFieldDefinition fieldDefinition: fieldDefinitions) {
+            org.openmdx.ui1.jmi1.ValuedField field = findField(
+                uiContext,
+                fieldDefinition.getForClass(), 
+                fieldDefinition.getFeatureName()
+            );
+            if(field != null) {
+                fields.add(
+                    new Field(
+                        field,
+                        fieldDefinition.getSpanRow(),
+                        fieldDefinition.getSkipRow()
+                    )
+                );
+            }
+        }
+        return fields;
+    }
+    
+    //-------------------------------------------------------------------------
+    protected static List<Field> getFields(
+        org.openmdx.ui1.jmi1.FieldGroup fieldGroup
+    ) {        
+        List<Field> fields = new ArrayList<Field>();
+        List<org.openmdx.ui1.jmi1.ValuedField> members = fieldGroup.getMember();
+        for(org.openmdx.ui1.jmi1.ValuedField member: members) {
+            fields.add(
+                new Field(
+                    member,
+                    null,
+                    null
+                )
+            );
+        }
+        return fields;
     }
     
     //-------------------------------------------------------------------------
     public String getName(
     ) {
-        return this.localeAsIndex < this.fieldGroup.getLabel().size()
-          ? this.fieldGroup.getLabel().get(this.localeAsIndex)
-          : this.fieldGroup.getLabel().get(0);
+        return this.localeAsIndex < this.labels.size() ? 
+            this.labels.get(this.localeAsIndex) : 
+            this.labels.get(0);
     }
   
-  //-------------------------------------------------------------------------
-  public Attribute[][] getAttribute(
-      Object object,
-      ApplicationContext application
-  ) {    
-    
-    List<List<Attribute>> columns = new ArrayList<List<Attribute>>();
-    List<Attribute> attributes = null;
-    columns.add(
-      attributes = new ArrayList<Attribute>()
-    );
-        
-    int col = 0;
-    int maxRow = 0;
-    int count = 0;
-    AppLog.trace("refreshing field group", fieldGroup);
-    Attribute[][] a = null;
-    try {
-        while(count < this.fieldGroup.getMember().size()) {
-          if(count == this.fieldGroup.getColumnBreakAtElement().get(col)) {
-            columns.add(
-              attributes = new ArrayList<Attribute>()
-            );
-            col++;
-          }
-          org.openmdx.ui1.jmi1.ValuedField field = (org.openmdx.ui1.jmi1.ValuedField)this.fieldGroup.getMember().get(count);
-          int locale = application.getCurrentLocaleAsIndex();
-          AttributeValue attributeValue =
-            this.controlFactory.getAttributeValueFactory().getAttributeValue(
-              field, 
-              object,
-              application
-          );
-          // skip rows before
-          for(int i = 0; i < field.getSkipRow(); i++) {
-            attributes.add(null); // add an empty cell              
-          }
-          attributes.add(
-              new Attribute(
-                  locale, 
-                  field, 
-                  attributeValue
-              )
-          );
-          // skip rows after
-          for(int i = 1; i < field.getSpanRow(); i++) {
-            attributes.add(new Attribute()); // add an empty placeholder
-          }
-          maxRow = java.lang.Math.max(maxRow, attributes.size());
-          count++;
+    //-------------------------------------------------------------------------
+    public Attribute[][] getAttribute(
+        Object object,
+        ApplicationContext application
+    ) {    
+        List<List<Attribute>> columns = new ArrayList<List<Attribute>>();
+        List<Attribute> attributes = null;
+        columns.add(
+            attributes = new ArrayList<Attribute>()
+        );
+        int col = 0;
+        int maxRow = 0;
+        int count = 0;
+        Attribute[][] a = null;
+        try {
+            while(count < this.fields.size()) {
+                if(count == this.columnBreakAtElements.get(col)) {
+                    columns.add(
+                        attributes = new ArrayList<Attribute>()
+                    );
+                    col++;
+                }
+                Field field = this.fields.get(count);
+                int locale = application.getCurrentLocaleAsIndex();
+                AttributeValue attributeValue = application.createAttributeValue(
+                    field.getField(), 
+                    object
+                );
+                // skip rows before
+                for(int i = 0; i < field.getSkipRow(); i++) {
+                    attributes.add(null); // add an empty cell              
+                }
+                attributes.add(
+                    new Attribute(
+                        locale, 
+                        field.getField(), 
+                        field.getSpanRow(),
+                        attributeValue
+                    )
+                );
+                // skip rows after
+                for(int i = 1; i < field.getSpanRow(); i++) {
+                    attributes.add(new Attribute()); // add an empty placeholder
+                }
+                maxRow = java.lang.Math.max(maxRow, attributes.size());
+                count++;
+            }
+            a = new Attribute[columns.size()][maxRow];
+            for(int u = 0; u < columns.size(); u++) {
+                List row = (List)columns.get(u);
+                for(int v = 0; v < row.size(); v++) {
+                    a[u][v] = (Attribute)row.get(v);
+                }
+            }
         }
-        a = new Attribute[columns.size()][maxRow];
-        for(int u = 0; u < columns.size(); u++) {
-          List row = (List)columns.get(u);
-          for(int v = 0; v < row.size(); v++) {
-            a[u][v] = (Attribute)row.get(v);
-          }
+        catch(Exception e) {
+            new ServiceException(e).log();
         }
+        return a;
     }
-    catch(Exception e) {
-      new ServiceException(e).log();
-    }
-    return a;
-  }
     
     //-------------------------------------------------------------------------
     @Override
@@ -187,16 +310,22 @@ public class FieldGroupControl
         String frame,
         boolean forEditing        
     ) throws ServiceException {
-        HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();
-        ObjectView view = (ObjectView)p.getView();
-        ViewMode viewMode = view instanceof EditObjectView ? ((EditObjectView)view).getMode() : ViewMode.STANDARD;
-        Attribute[][] attributes = view.getAttributePane().getAttributeTab()[this.tabControl.getTabIndex()].getFieldGroup()[this.fieldGroupIndex].getAttribute();
+        ApplicationContext application = p.getApplicationContext();
+        HtmlEncoder_1_0 htmlEncoder = application.getHtmlEncoder();
+        View view = p.getView();
+        ViewMode viewMode = view instanceof EditObjectView ? 
+            ((EditObjectView)view).getMode() : 
+            ViewMode.STANDARD;
+        Attribute[][] attributes = this.getAttribute(
+            view.getObject(), 
+            application
+        );
         int nCols = attributes.length;
         int nRows = nCols > 0 ? attributes[0].length : 0;
         if((nCols > 0) && (nRows > 0)) {
-            int fieldGroupId = p.getProperty(HtmlPage.PROPERTY_FIELD_GROUP_ID) != null
-                ? ((Integer)p.getProperty(HtmlPage.PROPERTY_FIELD_GROUP_ID)).intValue()
-                : 1000;
+            int fieldGroupId = p.getProperty(HtmlPage.PROPERTY_FIELD_GROUP_ID) != null ? 
+                ((Integer)p.getProperty(HtmlPage.PROPERTY_FIELD_GROUP_ID)).intValue() : 
+                1000;
             p.write("<div class=\"fieldGroupName\">", htmlEncoder.encode(this.getName(), false), "</div>");
             p.write("<table class=\"fieldGroup\">");
             for(int v = 0; v < nRows; v++) {
@@ -239,9 +368,12 @@ public class FieldGroupControl
                         p.write(gapModifier.toString());
                     }
                     p.write("<td class=\"label\"></td>");
-                    p.write("<td class=\"valueEmpty\" ",  widthModifier.toString(), ">&nbsp;</td>");
                     if(forEditing) {
+                        p.write("<td class=\"valueEmpty\">&nbsp;</td>");
                         p.write("<td class=\"addon\"></td>");
+                    }
+                    else {
+                        p.write("<td class=\"valueEmpty\" ", widthModifier.toString(), ">&nbsp;</td>");                        
                     }
                   }
                   else if(attribute.isEmpty()) {
@@ -254,9 +386,9 @@ public class FieldGroupControl
                        forEditing, 
                        false
                     );
-                    stringifiedValue = valueHolder instanceof TextValue
-                        ? ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue
-                        : stringifiedValue;
+                    stringifiedValue = valueHolder instanceof TextValue ? 
+                        ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue : 
+                        stringifiedValue;
 
                     // styles
                     String color = valueHolder.getColor();
@@ -294,7 +426,11 @@ public class FieldGroupControl
                         p,
                         null, // default id
                         null, // default label
-                        view.getLookupObject(),
+                        view instanceof TransientObjectView ? 
+                            ((TransientObjectView)view).getLookupObject() :
+                            view instanceof ObjectView ? 
+                                ((ObjectView)view).getLookupObject() :
+                                null,
                         nCols,
                         tabIndex,
                         gapModifier.toString(),
@@ -320,13 +456,19 @@ public class FieldGroupControl
     }
   
     //-------------------------------------------------------------------------
+    public List<Field> getFields(
+    ) {
+        return this.fields;
+    }
+    
+    //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3257845493685302835L;
   
-    private final TabControl tabControl;
-    private final org.openmdx.ui1.jmi1.FieldGroup fieldGroup;
-    private final int fieldGroupIndex;
+    protected final List<String> labels;
+    protected final List<Field> fields;    
+    protected final List<Integer> columnBreakAtElements;
     
 }
 

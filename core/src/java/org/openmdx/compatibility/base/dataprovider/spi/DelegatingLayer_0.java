@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingLayer_0.java,v 1.9 2008/03/04 14:21:12 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: DelegatingLayer_0.java,v 1.12 2008/11/27 16:46:55 hburger Exp $
  * Description: DelegatingLayer_0 class
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/04 14:21:12 $
+ * Date:        $Date: 2008/11/27 16:46:55 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,33 +45,34 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.spi;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.application.cci.ConfigurationSpecifier;
 import org.openmdx.compatibility.base.application.configuration.Configuration;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderLayers;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderOperations;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
-import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
-import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
-public class DelegatingLayer_0
-    implements Layer_1_0
-{
+/**
+ * DelegatingLayer_0
+ */
+public class DelegatingLayer_0 extends AbstractLayer_0 {
+
+    final static private UnitOfWorkRequest NULL_WORKING_UNIT = 
+        new UnitOfWorkRequest(false,new DataproviderRequest[]{});
+
+    /**
+     *
+     */
+    private Configuration configuration;
 
     /**
      * To be supplied by the dataprovider
@@ -91,7 +91,7 @@ public class DelegatingLayer_0
     //------------------------------------------------------------------------
     // The methods to be reviewed>>>
     //------------------------------------------------------------------------
-    
+
     /**
      * This method allows the dataprovider layers to set up the working units'
      * contexts.
@@ -107,7 +107,7 @@ public class DelegatingLayer_0
     ){
         //
     }
-        
+
     /**
      * This method allows the dataprovider layers to verify the integrity of a 
      * collection of requests as a whole before the actual processing of the 
@@ -127,9 +127,9 @@ public class DelegatingLayer_0
     ) throws ServiceException {
         DataproviderRequest[] requests = unitOfWork.getRequests();
         for (
-            int index = 0;
-            index < requests.length;
-            index++
+                int index = 0;
+                index < requests.length;
+                index++
         ) prolog(
             header, 
             context,
@@ -153,22 +153,8 @@ public class DelegatingLayer_0
         ServiceHeader header, Object context,
         DataproviderRequest request
     ) throws ServiceException {
-        if (this.id == DataproviderLayers.PERSISTENCE) new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ASSERTION_FAILURE,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("class", getClass().getName()),
-                new BasicException.Parameter(
-                    "namespace",
-                    getConfiguration().getValues(
-                        SharedConfigurationEntries.NAMESPACE_ID
-                    )
-                )
-            },
-            "DelegatingLayer_0 used as PERSISTENCE layer!"
-        ).log();
         SysLog.trace(
-            DataproviderLayers.toString(this.id), 
+            getId(), 
             request
         );
         switch (request.operation()) {
@@ -177,48 +163,48 @@ public class DelegatingLayer_0
                     header, context,
                     request
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_CREATION:
                 createProlog(
                     header, context,
                     request
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_SETTING:
                 setProlog(
                     header, context,
                     request
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_MODIFICATION:
             case DataproviderOperations.OBJECT_REPLACEMENT:
                 updateProlog(
                     header, context,
                     request
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_REMOVAL:
                 removeProlog(
                     header, context,
                     request
                 );
-            break;
+                break;
             case DataproviderOperations.ITERATION_START:
             case DataproviderOperations.ITERATION_CONTINUATION:
                 findProlog(
                     header, context,
                     request
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_RETRIEVAL:
                 getProlog(
                     header, context,
                     request
                 );
-            break;
+                break;
         }
     }
-    
+
     /**
      * This method allows the dataprovider layer to verify the integrity of a 
      * single request before its actual processing.
@@ -256,7 +242,7 @@ public class DelegatingLayer_0
     ) throws ServiceException {
         //
     }
-        
+
     /**
      * This method allows the dataprovider layer to verify the integrity of a 
      * single request before its actual processing.
@@ -378,9 +364,9 @@ public class DelegatingLayer_0
         DataproviderRequest[] requests = unitOfWork.getRequests();
         DataproviderReply[] replies = reply.getReplies();
         for (
-            int index = 0;
-            index < requests.length;
-            index++
+                int index = 0;
+                index < requests.length;
+                index++
         ) epilog(
             header, 
             context,
@@ -416,21 +402,21 @@ public class DelegatingLayer_0
                     request,
                     reply
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_CREATION:
                 createEpilog(
                     header, context,
                     request,
                     reply
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_SETTING:
                 setEpilog(
                     header, context,
                     request,
                     reply
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_MODIFICATION:
             case DataproviderOperations.OBJECT_REPLACEMENT:
                 updateEpilog(
@@ -438,14 +424,14 @@ public class DelegatingLayer_0
                     request,
                     reply
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_REMOVAL:
                 removeEpilog(
                     header, context,
                     request,
                     reply
                 );
-            break;
+                break;
             case DataproviderOperations.ITERATION_START:
             case DataproviderOperations.ITERATION_CONTINUATION:
                 findEpilog(
@@ -453,14 +439,14 @@ public class DelegatingLayer_0
                     request,
                     reply
                 );
-            break;
+                break;
             case DataproviderOperations.OBJECT_RETRIEVAL:
                 getEpilog(
                     header, context,
                     request,
                     reply
                 );
-            break;
+                break;
         }
     }
 
@@ -507,7 +493,7 @@ public class DelegatingLayer_0
     ) throws ServiceException {
         //
     }
-        
+
     /**
      * This method allows the dataprovider layer to verify the integrity of a 
      * single reply after the actual processing of the request.
@@ -618,379 +604,82 @@ public class DelegatingLayer_0
         //
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Layer_1_0
     //------------------------------------------------------------------------
-    
+
     public void activate(
         short id,
         Configuration configuration,
         Layer_1_0 delegation
     ) throws Exception {
-//      this.statistics = (LayerStatistics_1_0)configuration.values(
-//          SharedConfigurationEntries.LAYER_STATISTICS
-//      ).get(
-//          id
-//      );
         this.configuration = configuration;
-        this.delegation = delegation;
-        this.id = id;
-        SysLog.detail(
-            "Activating " + DataproviderLayers.toString(id) + " layer ",
-             configuration
-        );
+        super.activate(id, configuration, delegation);
     }
 
-    public void deactivate(
-    ) throws Exception {
-        //
-    }
-
-    public Map<String,ConfigurationSpecifier> configurationSpecification() {
-        return new HashMap<String,ConfigurationSpecifier>();
-    }
+    
+    //--------------------------------------------------------------------------
+    // Implements Dataprovider_1_0
+    //--------------------------------------------------------------------------
 
     /**
-     * Get the object specified by the requests's path 
+     * Process a set of working units
      *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
+     * @param header          the service header
+     * @param workingUnits    a collection of working units
      *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
+     * @return    a collection of working unit replies
      */
-    public DataproviderReply get(
+    public UnitOfWorkReply[] process(
         ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
-    }
-
-    /**
-     * Get the objects specified by the references and filter properties.
-     *
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply find(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
-    }
-
-    /**
-     * Request to start publishing the data stream specified by the requests's path 
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply startPublishing(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
-    }
-
-    /**
-     * Create a new object
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply create(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
-    }
-
-    /**
-     * Modifies some of an object's attributes leaving the others unchanged.
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply modify(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
-    }
-
-    /**
-     * Modifies all changeable attributes of an object.
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply replace(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
-    }
-
-    /**
-     * Creates an object or modifies all its changeable attributes if it
-     * already exists.
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply set(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
-    }
-
-    /**
-     * Removes an object including its descendents
-     *
-     * @param       header
-     *              request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public DataproviderReply remove(
-        ServiceHeader header,
-        DataproviderRequest request
-    ) throws ServiceException {
-        throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
-    }
-
-    /**
-     * This method allows the dataprovider layers to verify the integrity of a 
-     * collection of requests as a whole before the actual processing of the 
-     * individual requests starts.
-     *
-     * @param       header
-     *              the requests' service header
-     * @param       requests
-     *              the request list
-     *
-     * @exception   ServiceException
-     *              on failure
-     */
-    public void prolog(
-        ServiceHeader header,
-        DataproviderRequest[] requests
-    ) throws ServiceException {
-        throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
-    }
-        
-    /**
-     * This method allows the dataprovider layers postprocessing of a 
-     * collection of requests as a whole after the actual processing of the 
-     * individual requests has been done.
-     *
-     * @param       header
-     *              the requests' service header
-     * @param       requests
-     *              the request collection
-     * @param       replies
-     *              the reply collection
-     *
-     * @exception   ServiceException
-     *              must not be thrown unless the request collection is to be 
-     *              treated as an atomic processing unit
-     */
-    public void epilog(
-        ServiceHeader header, 
-        DataproviderRequest[] requests,
-        DataproviderReply[] replies
-    ) throws ServiceException {
-        throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
-    }
-
-          
-  //--------------------------------------------------------------------------
-  // Implements Operation_1_0
-  //--------------------------------------------------------------------------
-
-    /**
-     * Execute an operation
-     *
-     * @param       header
-     *              the request header
-     * @param       request
-     *              the request
-     *
-     * @return      the reply
-     *
-     * @exception   ServiceException
-     *              in case of failure
-     */
-    public DataproviderReply operation(
-        ServiceHeader header, 
-        DataproviderRequest request
-    ) throws ServiceException {
-        throw new UnsupportedOperationException(DATAPROVIDER_ONLY);
-    }
-
-
-  //--------------------------------------------------------------------------
-  // Implements Dataprovider_1_0
-  //--------------------------------------------------------------------------
-
-  /**
-   * Process a set of working units
-   *
-   * @param header          the service header
-   * @param workingUnits    a collection of working units
-   *
-   * @return    a collection of working unit replies
-   */
-  public UnitOfWorkReply[] process(
-    ServiceHeader header,
-    UnitOfWorkRequest[] workingUnits
-  ){
-    try {
-        ServiceException[] stati = new ServiceException[workingUnits.length];
-        Object[] contexts = new Object[workingUnits.length];
-        contextInitialization(
-            header,
-            contexts
-        );
-        for (
-            int index = 0;
-            index < workingUnits.length;
-            index++
-        ) try {
-            prolog(
-                header, 
-                contexts[index],
-                workingUnits[index]
+        UnitOfWorkRequest... workingUnits
+    ){
+        try {
+            ServiceException[] stati = new ServiceException[workingUnits.length];
+            Object[] contexts = new Object[workingUnits.length];
+            contextInitialization(
+                header,
+                contexts
             );
-        } catch (ServiceException exception) {
-            stati[index] = exception;
-            workingUnits[index] = NULL_WORKING_UNIT;
-        }
-        UnitOfWorkReply[] result = delegation.process(
-          header, 
-          workingUnits
-        );
-        for (
-            int index = 0;
-            index < workingUnits.length;
-            index++
-        ) if (stati[index] == null) try {
-            epilog(
+            for (
+                    int index = 0;
+                    index < workingUnits.length;
+                    index++
+            ) try {
+                prolog(
+                    header, 
+                    contexts[index],
+                    workingUnits[index]
+                );
+            } catch (ServiceException exception) {
+                stati[index] = exception;
+                workingUnits[index] = NULL_WORKING_UNIT;
+            }
+            UnitOfWorkReply[] result = super.process(
                 header, 
-                contexts[index],
-                workingUnits[index],
-                result[index]
+                workingUnits
             );
-//          if (this.statistics != null) this.statistics.update(
-//            workingUnits[index].getRequests(),
-//            result[index].getReplies()
-//          );
-        } catch (ServiceException exception) {
-            result[index] = new UnitOfWorkReply(exception);
-    //      if (this.statistics != null) this.statistics.update(
-    //          requests,
-    //          null
-    //      );
-        } else {
-            result[index] = new UnitOfWorkReply(stati[index]);
-    //      if (this.statistics != null) this.statistics.update(
-    //          requests,
-    //          null
-    //      );
+            for (
+                    int index = 0;
+                    index < workingUnits.length;
+                    index++
+            ) if (stati[index] == null) try {
+                epilog(
+                    header, 
+                    contexts[index],
+                    workingUnits[index],
+                    result[index]
+                );
+            } catch (ServiceException exception) {
+                result[index] = new UnitOfWorkReply(exception);
+            } else {
+                result[index] = new UnitOfWorkReply(stati[index]);
+            }
+            return result;
+        } catch (RuntimeException exception) {
+            throw new RuntimeServiceException(exception).log();
         }
-        return result;
-    } catch (RuntimeException exception) {
-        throw new RuntimeServiceException(exception).log();
     }
-  }
-
-
-  //------------------------------------------------------------------------
-  // Constants
-  //------------------------------------------------------------------------
-
-  final static private String DATAPROVIDER_ONLY = 
-    DelegatingLayer_0.class.getName()
-    + " supports Datatprovider_1_0 processing methods only";
-    
-    
-  final static private UnitOfWorkRequest NULL_WORKING_UNIT = 
-    new UnitOfWorkRequest(false,new DataproviderRequest[]{});
-  
-  
-  //------------------------------------------------------------------------
-  // Variables
-  //------------------------------------------------------------------------
-  
-    /**
-     * The layer's id
-     */
-    private short id;
-    
-    /**
-     *
-     */
-    private Dataprovider_1_0 delegation;
-    
-    /**
-     *
-     */
-    private Configuration configuration;
-
-//  /**
-//   * statistics object
-//   */
-//  private LayerStatistics_1_0 statistics;
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Codes.java,v 1.9 2008/04/04 11:57:31 hburger Exp $
+ * Name:        $Id: Codes.java,v 1.12 2008/09/19 20:54:22 wfro Exp $
  * Description: Codes
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:57:31 $
+ * Date:        $Date: 2008/09/19 20:54:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,9 +51,6 @@
  *
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
- *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
  * 
  */
 package org.openmdx.portal.servlet;
@@ -79,8 +76,8 @@ import org.openmdx.kernel.exception.BasicException;
 
 @SuppressWarnings("unchecked")
 public final class Codes
-  implements Serializable {
-  
+implements Serializable {
+
     //-------------------------------------------------------------------------
     public Codes(
         RefObject_1_0 codeSegment
@@ -94,7 +91,7 @@ public final class Codes
         this.backColorMap = new HashMap();      
         this.refresh();
     }
-  
+
     //-------------------------------------------------------------------------
     public void refresh(
     ) {
@@ -102,8 +99,8 @@ public final class Codes
         this.codeSegment.refRefresh();        
         Collection valueContainers = (Collection)codeSegment.refGetValue("valueContainer");
         for(
-            Iterator i = valueContainers.iterator();
-            i.hasNext();
+                Iterator i = valueContainers.iterator();
+                i.hasNext();
         ) {
             RefObject valueContainer = (RefObject)i.next();
             AppLog.detail("preparing code value container", valueContainer.refMofId());
@@ -121,269 +118,269 @@ public final class Codes
         this.colorMap.clear();
         this.backColorMap.clear();      
     }
-  
-  //-------------------------------------------------------------------------
-  private boolean entryIsValid(
-      RefObject entry
-  ) {
-      Date validFrom = (Date)entry.refGetValue("validFrom");
-      Date validTo = (Date)entry.refGetValue("validTo");
-      Date current = new Date();
-      return 
+
+    //-------------------------------------------------------------------------
+    private boolean entryIsValid(
+        RefObject entry
+    ) {
+        Date validFrom = (Date)entry.refGetValue("validFrom");
+        Date validTo = (Date)entry.refGetValue("validTo");
+        Date current = new Date();
+        return 
         ((validFrom == null) || validFrom.before(current)) &&
         ((validTo == null) || validTo.after(current));
-  }
-  
-  //-------------------------------------------------------------------------
-  private SortedMap cacheShortText(
-      String valueContainerName,
-      short locale,
-      boolean codeAsKey,
-      String shortTextId,
-      boolean includeAll
-  ) {
-      RefObject valueContainer = (RefObject)this.valueContainerMap.get(valueContainerName);
-      if(valueContainer == null) {
-          return null;
-      }
-      SortedMap shortTexts = new TreeMap();
-      Collection entries = (Collection)valueContainer.refGetValue("entry");
-      for(Iterator i = entries.iterator(); i.hasNext(); ) {
-        RefObject entry = (RefObject)i.next();
-        if(includeAll || this.entryIsValid(entry)) {
-            Short code = new Short((short)0);
-            try {
-              code = new Short(new Path(entry.refMofId()).getBase());
-            } catch(Exception e) {}
-            List texts = (List)entry.refGetValue("shortText");
-            Object text = texts.size() > locale
-              ? texts.get(locale)
-              : texts.isEmpty() ? "" : texts.get(0);          
-            if(codeAsKey) {
-              shortTexts.put(code, text);
-            }
-            else {
-              shortTexts.put(text, code);
+    }
+
+    //-------------------------------------------------------------------------
+    private SortedMap cacheShortText(
+        String valueContainerName,
+        short locale,
+        boolean codeAsKey,
+        String shortTextId,
+        boolean includeAll
+    ) {
+        RefObject valueContainer = (RefObject)this.valueContainerMap.get(valueContainerName);
+        if(valueContainer == null) {
+            return null;
+        }
+        SortedMap shortTexts = new TreeMap();
+        Collection entries = (Collection)valueContainer.refGetValue("entry");
+        for(Iterator i = entries.iterator(); i.hasNext(); ) {
+            RefObject entry = (RefObject)i.next();
+            if(includeAll || this.entryIsValid(entry)) {
+                Short code = new Short((short)0);
+                try {
+                    code = new Short(new Path(entry.refMofId()).getBase());
+                } catch(Exception e) {}
+                List texts = (List)entry.refGetValue("shortText");
+                Object text = texts.size() > locale
+                ? texts.get(locale)
+                    : texts.isEmpty() ? "" : texts.get(0);          
+                if(codeAsKey) {
+                    shortTexts.put(code, text);
+                }
+                else {
+                    shortTexts.put(text, code);
+                }
             }
         }
-      }
-      this.shortTextMap.put(
-          shortTextId,
-          shortTexts
-      );      
-      return shortTexts;   
-  }
-  
-  //-------------------------------------------------------------------------
-  private SortedMap cacheLongText(
-      String valueContainerName,
-      short locale,
-      boolean codeAsKey,
-      String longTextId,
-      boolean includeAll
-  ) {
-      RefObject valueContainer = (RefObject)this.valueContainerMap.get(valueContainerName);
-      if(valueContainer == null) {
-          return null;
-      }
-      SortedMap longTexts = new TreeMap();
-      Collection entries = (Collection)valueContainer.refGetValue("entry");
-      for(Iterator i = entries.iterator(); i.hasNext(); ) {
-        RefObject entry = (RefObject)i.next();
-        if(includeAll || this.entryIsValid(entry)) {
-            Short code = new Short((short)0);
-            try {
-              code = new Short(new Path(entry.refMofId()).getBase());
-            } catch(Exception e) {}
-            List texts = (List)entry.refGetValue("longText");
-            Object text = texts.size() > locale
+        this.shortTextMap.put(
+            shortTextId,
+            shortTexts
+        );      
+        return shortTexts;   
+    }
+
+    //-------------------------------------------------------------------------
+    private SortedMap cacheLongText(
+        String valueContainerName,
+        short locale,
+        boolean codeAsKey,
+        String longTextId,
+        boolean includeAll
+    ) {
+        RefObject valueContainer = (RefObject)this.valueContainerMap.get(valueContainerName);
+        if(valueContainer == null) {
+            return null;
+        }
+        SortedMap longTexts = new TreeMap();
+        Collection entries = (Collection)valueContainer.refGetValue("entry");
+        for(Iterator i = entries.iterator(); i.hasNext(); ) {
+            RefObject entry = (RefObject)i.next();
+            if(includeAll || this.entryIsValid(entry)) {
+                Short code = new Short((short)0);
+                try {
+                    code = new Short(new Path(entry.refMofId()).getBase());
+                } catch(Exception e) {}
+                List texts = (List)entry.refGetValue("longText");
+                Object text = texts.size() > locale
                 ? texts.get(locale)
-                : texts.isEmpty() ? "" : texts.get(0);
-            if(codeAsKey) {
-              longTexts.put(code, text);
+                    : texts.isEmpty() ? "" : texts.get(0);
+                if(codeAsKey) {
+                    longTexts.put(code, text);
+                }
+                else {
+                    if(text == null) {
+                        throw new RuntimeServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.INVALID_CONFIGURATION, 
+                            new BasicException.Parameter[]{
+                                new BasicException.Parameter("container name", valueContainerName),
+                                new BasicException.Parameter("locale", locale),
+                                new BasicException.Parameter("lookup id", longTextId),
+                                new BasicException.Parameter("entry", entry.refMofId()),                            
+                                new BasicException.Parameter("texts", texts)
+                            },
+                            "text of code value entry can not be null"
+                        );
+                    }
+                    longTexts.put(text, code);
+                }
             }
-            else {
-                if(text == null) {
-                    throw new RuntimeServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.INVALID_CONFIGURATION, 
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("container name", valueContainerName),
-                            new BasicException.Parameter("locale", locale),
-                            new BasicException.Parameter("lookup id", longTextId),
-                            new BasicException.Parameter("entry", entry.refMofId()),                            
-                            new BasicException.Parameter("texts", texts)                            
-                        },
-                        "text of code value entry can not be null"
+        }
+        this.longTextMap.put(
+            longTextId,
+            longTexts
+        );      
+        return longTexts;
+    }
+
+    //-------------------------------------------------------------------------
+    public SortedMap getLongText(
+        String name,
+        short locale,
+        boolean codeAsKey,
+        boolean includeAll
+    ) {
+        SortedMap longTexts = null;
+        String longTextId = name + ":" + locale + ":" + codeAsKey + ":" + includeAll;
+        if((longTexts = (SortedMap)this.longTextMap.get(longTextId)) == null) {
+            longTexts = this.cacheLongText(
+                name,
+                locale,
+                codeAsKey,
+                longTextId,
+                includeAll
+            );
+        }
+        return longTexts;
+    }
+
+    //-------------------------------------------------------------------------
+    public SortedMap getShortText(
+        String name,
+        short locale,
+        boolean codeAsKey,
+        boolean includeAll
+    ) {
+        SortedMap shortTexts = null;
+        String shortTextId = name + ":" + locale + ":" + codeAsKey + ":" + includeAll;
+        if((shortTexts = (SortedMap)this.shortTextMap.get(shortTextId)) == null) {
+            shortTexts = this.cacheShortText(
+                name,
+                locale,
+                codeAsKey,
+                shortTextId,
+                includeAll
+            );
+        }
+        return shortTexts;      
+    }
+
+    //-------------------------------------------------------------------------
+    public SortedMap getIconKeys(
+        String name,
+        boolean includeAll
+    ) {
+        SortedMap iconKeys = null;
+        if((iconKeys = (SortedMap)this.iconKeyMap.get(name + ":" + includeAll)) == null) {
+            RefObject valueContainer = (RefObject)this.valueContainerMap.get(name);
+            if(valueContainer == null) {
+                return null;
+            }
+            iconKeys = new TreeMap();
+            Collection entries = (Collection)valueContainer.refGetValue("entry");
+            for(Iterator i = entries.iterator(); i.hasNext(); ) {
+                RefObject entry = (RefObject)i.next();
+                if(includeAll || this.entryIsValid(entry)) {
+                    Short code = new Short((short)0);
+                    try {
+                        code = new Short(new Path(entry.refMofId()).getBase());
+                    } catch(Exception e) {}
+                    iconKeys.put(
+                        code, 
+                        entry.refGetValue("iconKey")
                     );
                 }
-                longTexts.put(text, code);
             }
-        }
-      }
-      this.longTextMap.put(
-        longTextId,
-        longTexts
-      );      
-      return longTexts;
-  }
-  
-  //-------------------------------------------------------------------------
-  public SortedMap getLongText(
-    String name,
-    short locale,
-    boolean codeAsKey,
-    boolean includeAll
-  ) {
-    SortedMap longTexts = null;
-    String longTextId = name + ":" + locale + ":" + codeAsKey + ":" + includeAll;
-    if((longTexts = (SortedMap)this.longTextMap.get(longTextId)) == null) {
-        longTexts = this.cacheLongText(
-            name,
-            locale,
-            codeAsKey,
-            longTextId,
-            includeAll
-        );
-    }
-    return longTexts;
-  }
-  
-  //-------------------------------------------------------------------------
-  public SortedMap getShortText(
-    String name,
-    short locale,
-    boolean codeAsKey,
-    boolean includeAll
-  ) {
-    SortedMap shortTexts = null;
-    String shortTextId = name + ":" + locale + ":" + codeAsKey + ":" + includeAll;
-    if((shortTexts = (SortedMap)this.shortTextMap.get(shortTextId)) == null) {
-        shortTexts = this.cacheShortText(
-            name,
-            locale,
-            codeAsKey,
-            shortTextId,
-            includeAll
-        );
-    }
-    return shortTexts;      
-  }
-  
-  //-------------------------------------------------------------------------
-  public SortedMap getIconKeys(
-    String name,
-    boolean includeAll
-  ) {
-    SortedMap iconKeys = null;
-    if((iconKeys = (SortedMap)this.iconKeyMap.get(name + ":" + includeAll)) == null) {
-      RefObject valueContainer = (RefObject)this.valueContainerMap.get(name);
-      if(valueContainer == null) {
-          return null;
-      }
-      iconKeys = new TreeMap();
-      Collection entries = (Collection)valueContainer.refGetValue("entry");
-      for(Iterator i = entries.iterator(); i.hasNext(); ) {
-        RefObject entry = (RefObject)i.next();
-        if(includeAll || this.entryIsValid(entry)) {
-            Short code = new Short((short)0);
-            try {
-              code = new Short(new Path(entry.refMofId()).getBase());
-            } catch(Exception e) {}
-            iconKeys.put(
-                code, 
-                entry.refGetValue("iconKey")
+            this.iconKeyMap.put(
+                name + ":" + includeAll,
+                iconKeys
             );
         }
-      }
-      this.iconKeyMap.put(
-        name + ":" + includeAll,
-        iconKeys
-      );
+        return iconKeys;
     }
-    return iconKeys;
-  }
-  
-  //-------------------------------------------------------------------------
-  public SortedMap getColors(
-    String name,
-    boolean includeAll
-  ) {
-    SortedMap colors = null;
-    if((colors = (SortedMap)this.colorMap.get(name + ":" + includeAll)) == null) {
-      RefObject valueContainer = (RefObject)this.valueContainerMap.get(name);
-      if(valueContainer == null) {
-          return null;
-      }
-      colors = new TreeMap();
-      Collection entries = (Collection)valueContainer.refGetValue("entry");
-      for(Iterator i = entries.iterator(); i.hasNext(); ) {
-        RefObject entry = (RefObject)i.next();
-        if(includeAll || this.entryIsValid(entry)) {
-            Short code = new Short((short)0);
-            try {
-              code = new Short(new Path(entry.refMofId()).getBase());
-            } catch(Exception e) {}
-            colors.put(
-                code, 
-                entry.refGetValue("color")
-            );
-        }
-      }
-      this.colorMap.put(
-        name + ":" + includeAll,
-        colors
-      );
-    }
-    return colors;
-  }
-  
-  //-------------------------------------------------------------------------
-  public SortedMap getBackColors(
-    String name,
-    boolean includeAll
-  ) {
-    SortedMap backColors = null;
-    if((backColors = (SortedMap)this.backColorMap.get(name + ":" + includeAll)) == null) {
-      RefObject valueContainer = (RefObject)this.valueContainerMap.get(name);
-      if(valueContainer == null) {
-          return null;
-      }
-      backColors = new TreeMap();
-      Collection entries = (Collection)valueContainer.refGetValue("entry");
-      for(Iterator i = entries.iterator(); i.hasNext(); ) {
-        RefObject entry = (RefObject)i.next();
-        if(includeAll || this.entryIsValid(entry)) {
-            Short code = new Short((short)0);
-            try {
-              code = new Short(new Path(entry.refMofId()).getBase());
-            } catch(Exception e) {}
-            backColors.put(
-                code, 
-                entry.refGetValue("backColor")
-            );
-        }
-      }
-      this.backColorMap.put(
-        name + ":" + includeAll,
-        backColors
-      );
-    }
-    return backColors;
-  }
-  
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private static final long serialVersionUID = 8069002786499927870L;
 
-  private final RefObject_1_0 codeSegment;
-  private final Map valueContainerMap;
-  private final Map shortTextMap;
-  private final Map longTextMap;
-  private final Map iconKeyMap;
-  private final Map colorMap;
-  private final Map backColorMap;
+    //-------------------------------------------------------------------------
+    public SortedMap getColors(
+        String name,
+        boolean includeAll
+    ) {
+        SortedMap colors = null;
+        if((colors = (SortedMap)this.colorMap.get(name + ":" + includeAll)) == null) {
+            RefObject valueContainer = (RefObject)this.valueContainerMap.get(name);
+            if(valueContainer == null) {
+                return null;
+            }
+            colors = new TreeMap();
+            Collection entries = (Collection)valueContainer.refGetValue("entry");
+            for(Iterator i = entries.iterator(); i.hasNext(); ) {
+                RefObject entry = (RefObject)i.next();
+                if(includeAll || this.entryIsValid(entry)) {
+                    Short code = new Short((short)0);
+                    try {
+                        code = new Short(new Path(entry.refMofId()).getBase());
+                    } catch(Exception e) {}
+                    colors.put(
+                        code, 
+                        entry.refGetValue("color")
+                    );
+                }
+            }
+            this.colorMap.put(
+                name + ":" + includeAll,
+                colors
+            );
+        }
+        return colors;
+    }
+
+    //-------------------------------------------------------------------------
+    public SortedMap getBackColors(
+        String name,
+        boolean includeAll
+    ) {
+        SortedMap backColors = null;
+        if((backColors = (SortedMap)this.backColorMap.get(name + ":" + includeAll)) == null) {
+            RefObject valueContainer = (RefObject)this.valueContainerMap.get(name);
+            if(valueContainer == null) {
+                return null;
+            }
+            backColors = new TreeMap();
+            Collection entries = (Collection)valueContainer.refGetValue("entry");
+            for(Iterator i = entries.iterator(); i.hasNext(); ) {
+                RefObject entry = (RefObject)i.next();
+                if(includeAll || this.entryIsValid(entry)) {
+                    Short code = new Short((short)0);
+                    try {
+                        code = new Short(new Path(entry.refMofId()).getBase());
+                    } catch(Exception e) {}
+                    backColors.put(
+                        code, 
+                        entry.refGetValue("backColor")
+                    );
+                }
+            }
+            this.backColorMap.put(
+                name + ":" + includeAll,
+                backColors
+            );
+        }
+        return backColors;
+    }
+
+    //-------------------------------------------------------------------------
+    // Variables
+    //-------------------------------------------------------------------------
+    private static final long serialVersionUID = 8069002786499927870L;
+
+    private final RefObject_1_0 codeSegment;
+    private final Map valueContainerMap;
+    private final Map shortTextMap;
+    private final Map longTextMap;
+    private final Map iconKeyMap;
+    private final Map colorMap;
+    private final Map backColorMap;
 }
 
 //--- End of File -----------------------------------------------------------

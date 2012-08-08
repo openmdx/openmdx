@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefStruct_1.java,v 1.4 2008/04/25 00:53:11 hburger Exp $
+ * Name:        $Id: RefStruct_1.java,v 1.10 2008/11/11 15:37:52 wfro Exp $
  * Description: RefStruct_1 class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 00:53:11 $
+ * Date:        $Date: 2008/11/11 15:37:52 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -77,7 +77,6 @@ import org.openmdx.base.collection.MarshallingList;
 import org.openmdx.base.collection.MarshallingSet;
 import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.exception.StackedException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
@@ -92,998 +91,1042 @@ import org.openmdx.model1.code.PrimitiveTypes;
  * RefStruct_1 class
  */
 public abstract class RefStruct_1
-  implements RefStruct_1_0, Serializable {
+implements RefStruct_1_0, Serializable {
 
-  //-------------------------------------------------------------------------
-  public RefStruct_1(
-    RefPackage_1_0 refPackage,
-    Structure_1_0 struct
-  ) {
-    this.refPackage = refPackage;
-    this.structure = struct;
-  }
-
-  //-------------------------------------------------------------------------
-  public RefStruct_1(
-    RefPackage_1_0 refPackage,
-    RefStruct_1_0 refStruct
-  ) {
-    this(
-      refPackage,
-      refStruct.refDelegate()
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  public RefStruct_1(
-    String typeName,
-    RefPackage_1_0 refPackage,
-    List<?> values
-  ) {
-    this.refPackage = refPackage;
-    this.structure = newStructure(
-      this.refQualifiedTypeName(),
-      refPackage,
-      values
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  public RefStruct_1(
-    RefPackage_1_0 refPackage,
-    Object value
-  ) {
-      this.refPackage = refPackage;
-      if(value instanceof Structure_1_0) {
-          this.structure = (Structure_1_0)value;
-      }
-      else {
-          this.structure = newStructure(
-              this.refQualifiedTypeName(),
-              refPackage,
-              (List<?>)value
-          );
-      }
-  }
-
-  //-------------------------------------------------------------------------
-  public RefStruct_1(
-    String typeName,
-    RefPackage_1_0 refPackage,
-    Object value
-  ) {
-    this.refPackage = refPackage;
-    if(value instanceof Structure_1_0) {
-        this.structure = (Structure_1_0)value;
+    //-------------------------------------------------------------------------
+    public RefStruct_1(
+        RefPackage_1_0 refPackage,
+        Structure_1_0 struct
+    ) {
+        this.refPackage = refPackage;
+        this.structure = struct;
     }
-    else {
-        this.structure = newStructure(
-            typeName,
+
+    //-------------------------------------------------------------------------
+    public RefStruct_1(
+        RefPackage_1_0 refPackage,
+        RefStruct_1_0 refStruct
+    ) {
+        this(
             refPackage,
-            (List<?>)value
+            refStruct.refDelegate()
         );
     }
-  }
 
-  //-------------------------------------------------------------------------
-  final private ModelElement_1_0 getFeature(
-    String featureName
-  ) throws ServiceException {
-
-    // full-qualified feature name. Lookup in model
-    if(featureName.indexOf(':') >= 0) {
-      return this.getModel().getElement(featureName);
-    }
-
-    // get all features of class and find feature with featureName
-    else {
-      ModelElement_1_0 feature = this.getModel().getFeatureDef(
-        this.getModel().getElement(this.refQualifiedTypeName()),
-        featureName,
-        false
-      );
-      if(feature == null) {
-        throw new ServiceException (
-          BasicException.Code.DEFAULT_DOMAIN,
-          StackedException.NOT_FOUND,
-          new BasicException.Parameter [] {
-            new BasicException.Parameter("struct name", this.refQualifiedTypeName()),
-            new BasicException.Parameter("field", featureName)
-          },
-          "field not found"
+    //-------------------------------------------------------------------------
+    public RefStruct_1(
+        String typeName,
+        RefPackage_1_0 refPackage,
+        List<?> values
+    ) {
+        this.refPackage = refPackage;
+        this.structure = newStructure(
+            this.refQualifiedTypeName(),
+            refPackage,
+            values
         );
-      }
-      return feature;
     }
-  }
 
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
+    //-------------------------------------------------------------------------
+    public RefStruct_1(
+        RefPackage_1_0 refPackage,
+        Object value
+    ) {
+        this.refPackage = refPackage;
+        if(value instanceof Structure_1_0) {
+            this.structure = (Structure_1_0)value;
+        }
+        else {
+            this.structure = newStructure(
+                this.refQualifiedTypeName(),
+                refPackage,
+                (List<?>)value
+            );
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    public RefStruct_1(
+        String typeName,
+        RefPackage_1_0 refPackage,
+        Object value
+    ) {
+        this.refPackage = refPackage;
+        if(value instanceof Structure_1_0) {
+            this.structure = (Structure_1_0)value;
+        }
+        else {
+            this.structure = newStructure(
+                typeName,
+                refPackage,
+                (List<?>)value
+            );
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    final private ModelElement_1_0 getFeature(
+        String featureName
+    ) throws ServiceException {
+
+        // full-qualified feature name. Lookup in model
+        if(featureName.indexOf(':') >= 0) {
+            return this.getModel().getElement(featureName);
+        }
+
+        // get all features of class and find feature with featureName
+        else {
+            ModelElement_1_0 feature = this.getModel().getFeatureDef(
+                this.getModel().getElement(this.refQualifiedTypeName()),
+                featureName,
+                false
+            );
+            if(feature == null) {
+                throw new ServiceException (
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND,
+                    "field not found",
+                    new BasicException.Parameter [] {
+                        new BasicException.Parameter("struct name", this.refQualifiedTypeName()),
+                        new BasicException.Parameter("field", featureName)
+                    }
+                );
+            }
+            return feature;
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     private Structure_1_0 newStructure(
         String typeName,
         RefPackage_1_0 refPackage,
         List<?> structValues
-      ) {
-    try {
-      Model_1_0 model = refPackage.refModel();
-      ModelElement_1_0 structDef = model.getElement(typeName);
+    ) {
+        try {
+            Model_1_0 model = refPackage.refModel();
+            ModelElement_1_0 structDef = model.getElement(typeName);
 
-      List<Object> marshalledValues = new ArrayList<Object>();
-      List<String> fieldNames = new ArrayList<String>();
+            List<Object> marshalledValues = new ArrayList<Object>();
+            List<String> fieldNames = new ArrayList<String>();
 
-      // unmarshal values (JMI types -> object layer types)
-      int ee = 0;
-      for(
-        Iterator<?> e = structDef.values("content").iterator();
-        e.hasNext();
-        ee++
-      ) {
-        ModelElement_1_0 fieldDef = model.getElement(e.next());
-        ModelElement_1_0 fieldType = model.getDereferencedType(
-          fieldDef.values("type").get(0)
+            // unmarshal values (JMI types -> object layer types)
+            int ee = 0;
+            for(
+                    Iterator<?> e = structDef.values("content").iterator();
+                    e.hasNext();
+                    ee++
+            ) {
+                ModelElement_1_0 fieldDef = model.getElement(e.next());
+                ModelElement_1_0 fieldType = model.getElementType(
+                    fieldDef
+                );
+                fieldNames.add(
+                    (String)fieldDef.values("name").get(0)
+                );
+                String qualifiedTypeName = (String)fieldType.values("qualifiedName").get(0);
+                String multiplicity = (String)fieldDef.values("multiplicity").get(0);
+                Object v = structValues.get(ee);
+
+                if(
+                        Multiplicities.LIST.equals(multiplicity) ||
+                        Multiplicities.MULTI_VALUE.equals(multiplicity)
+                ) {
+                    List<?> values = (List<?>)v;
+                    if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingList<Object>(
+                                    DateTimeMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingList<Object>(
+                                    DateMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingList<Object>(
+                                    URIMarshaller.getInstance(false),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingList<Object>(
+                                    DurationMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingList<Object>(
+                                    ShortMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingList<Object>(
+                                    IntegerMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingList<Object>(
+                                    LongMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(model.isStructureType(fieldType)) {
+                        marshalledValues.add(
+                            new MarshallingList<Object>(
+                                    new StructMarshaller(
+                                        qualifiedTypeName,
+                                        refPackage,
+                                        false
+                                    ),
+                                    values
+                            )
+                        );
+                    }
+                    else if(
+                            model.isClassType(fieldType) ||
+                            PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+                    ) {
+                        List<Object> l = new ArrayList<Object>();
+                        marshalledValues.add(l);
+                        for(
+                                Iterator<?> j = values.iterator();
+                                j.hasNext();
+                        ) {
+                            l.add(
+                                toPath(j.next())
+                            );
+                        }
+                    }
+                    else {
+                        marshalledValues.add(values);
+                    }
+                }
+                else if(
+                        Multiplicities.SET.equals(multiplicity)
+                ) {
+                    Set<?> values = v instanceof Set ? (Set<?>)v : Collections.EMPTY_SET;
+                    if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSet<Object>(
+                                    DateTimeMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSet<Object>(
+                                    DateMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSet<Object>(
+                                    URIMarshaller.getInstance(false),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSet<Object>(
+                                    DurationMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSet<Object>(
+                                    ShortMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSet<Object>(
+                                    IntegerMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSet<Object>(
+                                    LongMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(model.isStructureType(fieldType)) {
+                        marshalledValues.add(
+                            new MarshallingSet<Object>(
+                                    new StructMarshaller(
+                                        qualifiedTypeName,
+                                        refPackage,
+                                        false
+                                    ),
+                                    values
+                            )
+                        );
+                    }
+                    else if(
+                            model.isClassType(fieldType) ||
+                            PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+                    ) {
+                        Set<Object> l = new HashSet<Object>();
+                        marshalledValues.add(l);
+                        for(
+                                Iterator<?> i = (values).iterator();
+                                i.hasNext();
+                        ) {
+                            l.add(
+                                toPath(i.next())
+                            );
+                        }
+                    }
+                    else {
+                        marshalledValues.add(values);
+                    }
+                }
+                else if(
+                        Multiplicities.SPARSEARRAY.equals(multiplicity)
+                ) {
+                    SortedMap<Integer,Object> values;
+                    if(v instanceof SortedMap) {
+                        values = (SortedMap<Integer,Object>)v;
+                    } else {
+                        SortedMap<Integer,Object> l = new TreeMap<Integer,Object>();
+                        int i = 0;
+                        for(Object u : (Collection<?>)v) {
+                            l.put(Integer.valueOf(i++), u);
+                        }
+                        values = l;
+                    }
+                    if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSortedMap(
+                                    DateTimeMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSortedMap(
+                                    DateMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSortedMap(
+                                    URIMarshaller.getInstance(false),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSortedMap(
+                                    DurationMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSortedMap(
+                                    ShortMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSortedMap(
+                                    IntegerMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
+                        marshalledValues.add(
+                            new MarshallingSortedMap(
+                                    LongMarshaller.getInstance(),
+                                    values
+                            )
+                        );
+                    }
+                    else if(model.isStructureType(fieldType)) {
+                        marshalledValues.add(
+                            new MarshallingSortedMap(
+                                    new StructMarshaller(
+                                        qualifiedTypeName,
+                                        refPackage,
+                                        false
+                                    ),
+                                    values
+                            )
+                        );
+                    }
+                    else if(
+                            model.isClassType(fieldType) ||
+                            PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+                    ) {
+                        SortedMap<Object,Object> l = new TreeMap<Object,Object>();
+                        marshalledValues.add(l);
+                        for(Map.Entry<Integer,?> j : values.entrySet()) {
+                            l.put(j.getKey(), toPath(j.getValue()));
+                        }
+                    }
+                    else {
+                        marshalledValues.add(values);
+                    }
+                }
+                else if(
+                        Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
+                        Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
+                ) {
+                    Object value = v == null
+                    ? null
+                        : v instanceof Collection
+                        ? ((Collection<?>)v).size() > 0
+                            ? ((Collection<?>)v).iterator().next()
+                                : null
+                                : v;
+                        if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
+                            marshalledValues.add(
+                                DateTimeMarshaller.getInstance().marshal(value)
+                            );
+                        }
+                        else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
+                            marshalledValues.add(
+                                DateMarshaller.getInstance().marshal(value)
+                            );
+                        }
+                        else if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                            marshalledValues.add(
+                                URIMarshaller.getInstance(false).marshal(value)
+                            );
+                        }
+                        else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
+                            marshalledValues.add(
+                                DurationMarshaller.getInstance().marshal(value)
+                            );
+                        }
+                        else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
+                            marshalledValues.add(
+                                ShortMarshaller.getInstance().marshal(value)
+                            );
+                        }
+                        else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
+                            marshalledValues.add(
+                                IntegerMarshaller.getInstance().marshal(value)
+                            );
+                        }
+                        else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
+                            marshalledValues.add(
+                                LongMarshaller.getInstance().marshal(value)
+                            );
+                        }
+                        else if(model.isStructureType(fieldType)) {
+                            marshalledValues.add(
+                                new StructMarshaller(
+                                    qualifiedTypeName,
+                                    refPackage,
+                                    false
+                                ).marshal(value)
+                            );
+                        }
+                        else if(
+                                model.isClassType(fieldType) ||
+                                PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+                        ) {
+                            if(value instanceof Collection) {
+                                marshalledValues.add(
+                                    ((Collection<?>)value).size() > 0
+                                    ? toPath(((Collection<?>)value).iterator().next())
+                                        : null
+                                );
+                            }
+                            else {
+                                marshalledValues.add(
+                                    toPath(value)
+                                );
+                            }
+                        }
+                        else {
+                            marshalledValues.add(value);
+                        }
+                }
+                else {
+                    throw new ServiceException (
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "unsupported multiplicity. Supported are [set|list|sparsearray|0..n|0..1|1..1]",
+                        new BasicException.Parameter [] {
+                            new BasicException.Parameter("field", fieldDef),
+                            new BasicException.Parameter("type", fieldType)
+                        }
+                    );
+                }
+            }
+            StructureFactory_1_0 structureFactory = hasLegacyDelegate() ?
+                this.refPackage.refObjectFactory() :
+                    (StructureFactory_1_0) ((RefPackage_1_4)this.refPackage).getDelegate();
+                return structureFactory.createStructure(
+                    typeName,
+                    fieldNames,
+                    marshalledValues
+                );
+        } catch (ServiceException exception) {
+            throw new JmiServiceException(exception);
+        }
+    }
+
+    protected boolean hasLegacyDelegate(
+    ){
+        return 
+        !(this.refPackage instanceof RefPackage_1_4) ||
+        ((RefPackage_1_4)this.refPackage).hasLegacyDelegate();
+    }
+
+    //-------------------------------------------------------------------------
+    protected String refQualifiedTypeName(
+    ) {
+        throw new UnsupportedOperationException();
+    }
+
+    //-------------------------------------------------------------------------
+    public Model_1_0 getModel(
+    ) {
+        return this.refPackage.refModel();
+    }
+
+    //-------------------------------------------------------------------------
+    private void assertStructureField(
+        ModelElement_1_0 elementDef
+    ) throws ServiceException {
+        if(!this.getModel().isStructureFieldType(elementDef)) {
+            throw new ServiceException (
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "model element not of type " + ModelAttributes.STRUCTURE_FIELD,
+                new BasicException.Parameter [] {
+                    new BasicException.Parameter("model element", elementDef)
+                }
+            );
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    private ModelElement_1_0 getType(
+        ModelElement_1_0 elementDef
+    ) throws ServiceException {
+        return this.getModel().getElementType(
+            elementDef
         );
-        fieldNames.add(
-          (String)fieldDef.values("name").get(0)
+    }
+
+    //-------------------------------------------------------------------------
+    private Marshaller toRefStructMarshaller(
+        String typeName
+    ) {
+        return new StructMarshaller(
+            typeName,
+            this.refPackage,
+            true
         );
-        String qualifiedTypeName = (String)fieldType.values("qualifiedName").get(0);
+    }
+
+    //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    private Object getValue(
+        ModelElement_1_0 fieldDef
+    ) throws ServiceException {
+
+        SysLog.trace("field", fieldDef);
+
+        this.assertStructureField(fieldDef);
+
+        ModelElement_1_0 type = this.getType(fieldDef);
+        String qualifiedTypeName = (String)type.values("qualifiedName").get(0);
         String multiplicity = (String)fieldDef.values("multiplicity").get(0);
-        Object v = structValues.get(ee);
-
+        Object v = this.structure.objGetValue(
+            (String)fieldDef.values("name").get(0)
+        );
         if(
-          Multiplicities.LIST.equals(multiplicity) ||
-          Multiplicities.MULTI_VALUE.equals(multiplicity)
+                Multiplicities.LIST.equals(multiplicity) ||
+                Multiplicities.MULTI_VALUE.equals(multiplicity)
         ) {
-          List<?> values = (List<?>)v;
-          if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingList<Object>(
-                DateTimeMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingList<Object>(
-                DateMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingList<Object>(
-                DurationMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingList<Object>(
-                ShortMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingList<Object>(
-                IntegerMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingList<Object>(
-                LongMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(model.isStructureType(fieldType)) {
-            marshalledValues.add(
-              new MarshallingList<Object>(
-                new StructMarshaller(
-                  qualifiedTypeName,
-                  refPackage,
-                  false
-                ),
-                values
-              )
-            );
-          }
-          else if(
-            model.isClassType(fieldType) ||
-            PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-          ) {
-            List<Object> l = new ArrayList<Object>();
-            marshalledValues.add(l);
-            for(
-              Iterator<?> j = values.iterator();
-              j.hasNext();
+            List<?> values = (List<?>)v;
+            if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
+                return new MarshallingList<Object>(
+                        DateTimeMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
+                return new MarshallingList<Object>(
+                        DateMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                return new MarshallingList<Object>(
+                        URIMarshaller.getInstance(true),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
+                return new MarshallingList<Object>(
+                        DurationMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
+                return new MarshallingList<Object>(
+                        ShortMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
+                return new MarshallingList<Object>(
+                        IntegerMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
+                return new MarshallingList<Object>(
+                        LongMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(this.getModel().isStructureType(type)) {
+                return new MarshallingList<Object>(
+                        this.toRefStructMarshaller(qualifiedTypeName),
+                        values
+                );
+            }
+            else if(
+                    this.getModel().isClassType(type) ||
+                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
             ) {
-              l.add(
-                toPath(j.next())
-              );
-            }
-          }
-          else {
-            marshalledValues.add(values);
-          }
-        }
-        else if(
-          Multiplicities.SET.equals(multiplicity)
-        ) {
-          Set<?> values = v instanceof Set ? (Set<?>)v : Collections.EMPTY_SET;
-          if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingSet<Object>(
-                DateTimeMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingSet<Object>(
-                DateMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingSet<Object>(
-                DurationMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingSet<Object>(
-                ShortMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingSet<Object>(
-                IntegerMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingSet<Object>(
-                LongMarshaller.getInstance(false),
-                values
-              )
-             );
-          }
-          else if(model.isStructureType(fieldType)) {
-            marshalledValues.add(
-              new MarshallingSet<Object>(
-                new StructMarshaller(
-                  qualifiedTypeName,
-                  refPackage,
-                  false
-                ),
-                values
-              )
-            );
-          }
-          else if(
-            model.isClassType(fieldType) ||
-            PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-          ) {
-            Set<Object> l = new HashSet<Object>();
-            marshalledValues.add(l);
-            for(
-               Iterator<?> i = (values).iterator();
-               i.hasNext();
-            ) {
-              l.add(
-                toPath(i.next())
-              );
-            }
-          }
-          else {
-            marshalledValues.add(values);
-          }
-        }
-        else if(
-          Multiplicities.SPARSEARRAY.equals(multiplicity)
-        ) {
-          SortedMap<Integer,?> values;
-          if(v instanceof SortedMap) {
-              values = (SortedMap<Integer,?>)v;
-          } else {
-              SortedMap<Integer,Object> l = new TreeMap<Integer,Object>();
-              int i = 0;
-              for(Object u : (Collection<?>)v) {
-                  l.put(Integer.valueOf(i++), u);
-              }
-              values = l;
-          }
-          if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingSortedMap<Integer,Object>(
-                DateTimeMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingSortedMap<Integer,Object>(
-                DateMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingSortedMap<Integer,Object>(
-                DurationMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingSortedMap<Integer,Object>(
-                ShortMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingSortedMap<Integer,Object>(
-                IntegerMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              new MarshallingSortedMap<Integer,Object>(
-                LongMarshaller.getInstance(false),
-                values
-              )
-            );
-          }
-          else if(model.isStructureType(fieldType)) {
-            marshalledValues.add(
-              new MarshallingSortedMap<Integer,Object>(
-                new StructMarshaller(
-                  qualifiedTypeName,
-                  refPackage,
-                  false
-                ),
-                values
-              )
-            );
-          }
-          else if(
-            model.isClassType(fieldType) ||
-            PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-          ) {
-            SortedMap<Object,Object> l = new TreeMap<Object,Object>();
-            marshalledValues.add(l);
-            for(Map.Entry<Integer,?> j : values.entrySet()) {
-                l.put(j.getKey(), toPath(j.getValue()));
-            }
-          }
-          else {
-            marshalledValues.add(values);
-          }
-        }
-        else if(
-          Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
-          Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
-        ) {
-          Object value = v == null
-            ? null
-            : v instanceof Collection
-              ? ((Collection<?>)v).size() > 0
-                ? ((Collection<?>)v).iterator().next()
-                : null
-              : v;
-          if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              DateTimeMarshaller.getInstance(false).marshal(value)
-            );
-          }
-          else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              DateMarshaller.getInstance(false).marshal(value)
-            );
-          }
-          else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              DurationMarshaller.getInstance(false).marshal(value)
-            );
-          }
-          else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              ShortMarshaller.getInstance(false).marshal(value)
-            );
-          }
-          else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              IntegerMarshaller.getInstance(false).marshal(value)
-            );
-          }
-          else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-            marshalledValues.add(
-              LongMarshaller.getInstance(false).marshal(value)
-            );
-          }
-          else if(model.isStructureType(fieldType)) {
-            marshalledValues.add(
-              new StructMarshaller(
-                qualifiedTypeName,
-                refPackage,
-                false
-              ).marshal(value)
-            );
-          }
-          else if(
-            model.isClassType(fieldType) ||
-            PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-          ) {
-            if(value instanceof Collection) {
-              marshalledValues.add(
-                ((Collection<?>)value).size() > 0
-                  ? toPath(((Collection<?>)value).iterator().next())
-                  : null
-              );
+                return new MarshallingList<Object>(
+                        (Marshaller)this.refPackage.refOutermostPackage(),
+                        values
+                );
             }
             else {
-              marshalledValues.add(
-                toPath(value)
-              );
+                return values;
             }
-          }
-          else {
-            marshalledValues.add(value);
-          }
+        }
+        else if(
+                Multiplicities.SET.equals(multiplicity)
+        ) {
+            Set<?> values = v instanceof Set ? (Set<?>)v : new HashSet<Object>((List<?>)v);
+            if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
+                return new MarshallingSet<Object>(
+                        DateTimeMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
+                return new MarshallingSet<Object>(
+                        DateMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                return new MarshallingSet<Object>(
+                        URIMarshaller.getInstance(true),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
+                return new MarshallingSet<Object>(
+                        DurationMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
+                return new MarshallingSet<Object>(
+                        ShortMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
+                return new MarshallingSet<Object>(
+                        IntegerMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
+                return new MarshallingSet<Object>(
+                        LongMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(this.getModel().isStructureType(type)) {
+                return new MarshallingSet<Object>(
+                        this.toRefStructMarshaller(qualifiedTypeName),
+                        values
+                );
+            }
+            else if(
+                    this.getModel().isClassType(type) ||
+                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+            ) {
+                return new MarshallingSet<Object>(
+                        (Marshaller)this.refPackage.refOutermostPackage(),
+                        values
+                );
+            }
+            else {
+                return values;
+            }
+        }
+        else if(
+                Multiplicities.SPARSEARRAY.equals(multiplicity)
+        ) {
+            SortedMap<Integer,Object> values;
+            if(v instanceof SortedMap) {
+                values = (SortedMap<Integer,Object>)v;
+            } else {
+                TreeMap<Integer,Object> j = new TreeMap<Integer,Object>();
+                int i=0;
+                for(Object k : (Collection<?>)v){
+                    j.put(Integer.valueOf(i++), k);
+                }
+                values = j;
+            }
+            if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
+                return new MarshallingSortedMap(
+                        DateTimeMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
+                return new MarshallingSortedMap(
+                        DateMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                return new MarshallingSortedMap(
+                        URIMarshaller.getInstance(true),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
+                return new MarshallingSortedMap(
+                        DurationMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
+                return new MarshallingSortedMap(
+                        ShortMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
+                return new MarshallingSortedMap(
+                        IntegerMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
+                return new MarshallingSortedMap(
+                        LongMarshaller.getInstance(),
+                        values
+                );
+            }
+            else if(this.getModel().isStructureType(type)) {
+                return new MarshallingSortedMap(
+                        this.toRefStructMarshaller(qualifiedTypeName),
+                        values
+                );
+            }
+            else if(
+                    this.getModel().isClassType(type) ||
+                    PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+            ) {
+                return new MarshallingSortedMap(
+                        (Marshaller)this.refPackage.refOutermostPackage(),
+                        values
+                );
+            }
+            else {
+                return values;
+            }
+        }
+        else if(
+                Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
+                Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
+        ) {
+            Object value = v == null
+            ? null
+                : v instanceof Collection
+                ? ((Collection<?>)v).size() > 0
+                    ? ((Collection<?>)v).iterator().next()
+                        : null
+                        : v;
+                if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
+                    return DateTimeMarshaller.getInstance().marshal(value);
+                }
+                else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
+                    return DateMarshaller.getInstance().marshal(value);
+                }
+                else if(PrimitiveTypes.ANYURI.equals(qualifiedTypeName)) {
+                    return URIMarshaller.getInstance(true).marshal(value);
+                }
+                else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
+                    return DurationMarshaller.getInstance().marshal(value);
+                }
+                else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
+                    return ShortMarshaller.getInstance().marshal(value);
+                }
+                else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
+                    return IntegerMarshaller.getInstance().marshal(value);
+                }
+                else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
+                    return LongMarshaller.getInstance().marshal(value);
+                }
+                else if(this.getModel().isStructureType(type)) {
+                    return this.toRefStructMarshaller(qualifiedTypeName).marshal(value);
+                }
+                else if(
+                        this.getModel().isClassType(type) ||
+                        PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
+                ) {
+                    if(value instanceof Collection) {
+                        return ((Collection<?>)value).size() > 0
+                        ? ((Marshaller)this.refPackage.refOutermostPackage()).marshal(((Collection<?>)value).iterator().next())
+                            : null;
+                    }
+                    else {
+                        return ((Marshaller)this.refPackage.refOutermostPackage()).marshal(value);
+                    }
+                }
+                else {
+                    return value;
+                }
         }
         else {
-          throw new ServiceException (
-            StackedException.DEFAULT_DOMAIN,
-            StackedException.ASSERTION_FAILURE,
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("field", fieldDef),
-              new BasicException.Parameter("type", fieldType)
-            },
-            "unsupported multiplicity. Supported are [set|list|sparsearray|0..n|0..1|1..1]"
-          );
+            throw new ServiceException (
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "unsupported multiplicity. Supported are [set|list|sparsearray|0..n|0..1|1..1]",
+                new BasicException.Parameter [] {
+                    new BasicException.Parameter("field", fieldDef),
+                    new BasicException.Parameter("type", type)
+                }
+            );
         }
-      }
-      StructureFactory_1_0 structureFactory = hasLegacyDelegate() ?
-          this.refPackage.refObjectFactory() :
-          (StructureFactory_1_0) ((RefPackage_1_4)this.refPackage).getDelegate();
-      return structureFactory.createStructure(
-        typeName,
-        fieldNames,
-        marshalledValues
-      );
-    } catch (ServiceException exception) {
-      throw new JmiServiceException(exception);
     }
-  }
 
-  protected boolean hasLegacyDelegate(
-  ){
-      return 
-          !(this.refPackage instanceof RefPackage_1_4) ||
-          ((RefPackage_1_4)this.refPackage).hasLegacyDelegate();
-  }
-  
-  //-------------------------------------------------------------------------
-  protected String refQualifiedTypeName(
-  ) {
-    throw new UnsupportedOperationException();
-  }
+    //-------------------------------------------------------------------------
+    // RefStructure_1_0
+    //-------------------------------------------------------------------------
 
-  //-------------------------------------------------------------------------
-  public Model_1_0 getModel(
-  ) {
-    return this.refPackage.refModel();
-  }
-
-  //-------------------------------------------------------------------------
-  private void assertStructureField(
-    ModelElement_1_0 elementDef
-  ) throws ServiceException {
-    if(!this.getModel().isStructureFieldType(elementDef)) {
-      throw new ServiceException (
-        StackedException.DEFAULT_DOMAIN,
-        StackedException.ASSERTION_FAILURE,
-        new BasicException.Parameter [] {
-          new BasicException.Parameter("model element", elementDef)
-        },
-        "model element not of type " + ModelAttributes.STRUCTURE_FIELD
-      );
-    }
-  }
-
-  //-------------------------------------------------------------------------
-  private ModelElement_1_0 getType(
-    ModelElement_1_0 elementDef
-  ) throws ServiceException {
-    return this.getModel().getDereferencedType(
-      elementDef.values("type").get(0)
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  private Marshaller toRefStructMarshaller(
-    String typeName
-  ) {
-    return new StructMarshaller(
-      typeName,
-      this.refPackage,
-      true
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-private Object getValue(
-    ModelElement_1_0 fieldDef
-  ) throws ServiceException {
-
-    SysLog.trace("field", fieldDef);
-
-    this.assertStructureField(fieldDef);
-
-    ModelElement_1_0 type = this.getType(fieldDef);
-    String qualifiedTypeName = (String)type.values("qualifiedName").get(0);
-    String multiplicity = (String)fieldDef.values("multiplicity").get(0);
-    Object v = this.structure.objGetValue(
-      (String)fieldDef.values("name").get(0)
-    );
-    if(
-      Multiplicities.LIST.equals(multiplicity) ||
-      Multiplicities.MULTI_VALUE.equals(multiplicity)
+    //-------------------------------------------------------------------------
+    public Structure_1_0 refDelegate(
     ) {
-      List<?> values = (List<?>)v;
-      if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-        return new MarshallingList<Object>(
-          DateTimeMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-        return new MarshallingList<Object>(
-          DateMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-        return new MarshallingList<Object>(
-          DurationMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-        return new MarshallingList<Object>(
-          ShortMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-        return new MarshallingList<Object>(
-          IntegerMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-        return new MarshallingList<Object>(
-          LongMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(this.getModel().isStructureType(type)) {
-        return new MarshallingList<Object>(
-          this.toRefStructMarshaller(qualifiedTypeName),
-          values
-        );
-      }
-      else if(
-        this.getModel().isClassType(type) ||
-        PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-      ) {
-        return new MarshallingList<Object>(
-          (Marshaller)this.refPackage.refOutermostPackage(),
-          values
-        );
-      }
-      else {
-        return values;
-      }
+        return this.structure;
     }
-    else if(
-      Multiplicities.SET.equals(multiplicity)
+
+    //-------------------------------------------------------------------------
+    public boolean refContainsValue(
+        String fieldName,
+        Object value
     ) {
-      Set<?> values = v instanceof Set ? (Set<?>)v : new HashSet<Object>((List<?>)v);
-      if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-        return new MarshallingSet<Object>(
-          DateTimeMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-        return new MarshallingSet<Object>(
-          DateMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-        return new MarshallingSet<Object>(
-          DurationMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-        return new MarshallingSet<Object>(
-          ShortMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-        return new MarshallingSet<Object>(
-          IntegerMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-        return new MarshallingSet<Object>(
-          LongMarshaller.getInstance(true),
-          values
-         );
-      }
-      else if(this.getModel().isStructureType(type)) {
-        return new MarshallingSet<Object>(
-          this.toRefStructMarshaller(qualifiedTypeName),
-          values
-        );
-      }
-      else if(
-        this.getModel().isClassType(type) ||
-        PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-      ) {
-        return new MarshallingSet<Object>(
-          (Marshaller)this.refPackage.refOutermostPackage(),
-          values
-        );
-      }
-      else {
-        return values;
-      }
-    }
-    else if(
-      Multiplicities.SPARSEARRAY.equals(multiplicity)
-    ) {
-      SortedMap<Integer,?> values;
-      if(v instanceof SortedMap) {
-        values = (SortedMap<Integer,?>)v;
-      } else {
-        TreeMap<Integer,Object> j = new TreeMap<Integer,Object>();
-        int i=0;
-        for(Object k : (Collection<?>)v){
-            j.put(Integer.valueOf(i++), k);
+        Object values = null;
+        try {
+            values = this.getValue(
+                this.getFeature(fieldName)
+            );
         }
-        values = j;
-      }
-      if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-        return new MarshallingSortedMap<Integer,Object>(
-          DateTimeMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-        return new MarshallingSortedMap<Integer,Object>(
-          DateMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-        return new MarshallingSortedMap<Integer,Object>(
-          DurationMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-        return new MarshallingSortedMap<Integer,Object>(
-          ShortMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-        return new MarshallingSortedMap<Integer,Object>(
-          IntegerMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-        return new MarshallingSortedMap<Integer,Object>(
-          LongMarshaller.getInstance(true),
-          values
-        );
-      }
-      else if(this.getModel().isStructureType(type)) {
-        return new MarshallingSortedMap<Integer,Object>(
-          this.toRefStructMarshaller(qualifiedTypeName),
-          values
-        );
-      }
-      else if(
-        this.getModel().isClassType(type) ||
-        PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-      ) {
-        return new MarshallingSortedMap<Integer,Object>(
-          (Marshaller)this.refPackage.refOutermostPackage(),
-          values
-        );
-      }
-      else {
-        return values;
-      }
-    }
-    else if(
-      Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
-      Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
-    ) {
-      Object value = v == null
-        ? null
-        : v instanceof Collection
-          ? ((Collection<?>)v).size() > 0
-            ? ((Collection<?>)v).iterator().next()
-            : null
-          : v;
-      if(PrimitiveTypes.DATETIME.equals(qualifiedTypeName)) {
-        return DateTimeMarshaller.getInstance(true).marshal(value);
-      }
-      else if(PrimitiveTypes.DATE.equals(qualifiedTypeName)) {
-        return DateMarshaller.getInstance(true).marshal(value);
-      }
-      else if(PrimitiveTypes.DURATION.equals(qualifiedTypeName)) {
-        return DurationMarshaller.getInstance(true).marshal(value);
-      }
-      else if(PrimitiveTypes.SHORT.equals(qualifiedTypeName)) {
-        return ShortMarshaller.getInstance(true).marshal(value);
-      }
-      else if(PrimitiveTypes.INTEGER.equals(qualifiedTypeName)) {
-        return IntegerMarshaller.getInstance(true).marshal(value);
-      }
-      else if(PrimitiveTypes.LONG.equals(qualifiedTypeName)) {
-        return LongMarshaller.getInstance(true).marshal(value);
-      }
-      else if(this.getModel().isStructureType(type)) {
-        return this.toRefStructMarshaller(qualifiedTypeName).marshal(value);
-      }
-      else if(
-        this.getModel().isClassType(type) ||
-        PrimitiveTypes.OBJECT_ID.equals(qualifiedTypeName)
-      ) {
-        if(value instanceof Collection) {
-          return ((Collection<?>)value).size() > 0
-            ? ((Marshaller)this.refPackage.refOutermostPackage()).marshal(((Collection<?>)value).iterator().next())
-            : null;
+        catch(ServiceException e) {
+            throw new JmiServiceException(e, null);
+        }
+        if(values instanceof Collection) {
+            return ((Collection<?>)values).contains(value);
         }
         else {
-          return ((Marshaller)this.refPackage.refOutermostPackage()).marshal(value);
+            return values.equals(value);
         }
-      }
-      else {
-        return value;
-      }
     }
-    else {
-      throw new ServiceException (
-        StackedException.DEFAULT_DOMAIN,
-        StackedException.ASSERTION_FAILURE,
-        new BasicException.Parameter [] {
-          new BasicException.Parameter("field", fieldDef),
-          new BasicException.Parameter("type", type)
-        },
-        "unsupported multiplicity. Supported are [set|list|sparsearray|0..n|0..1|1..1]"
-      );
-    }
-  }
 
-  //-------------------------------------------------------------------------
-  // RefStructure_1_0
-  //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------
+    // RefStruct
+    //-------------------------------------------------------------------------
 
-  //-------------------------------------------------------------------------
-  public Structure_1_0 refDelegate(
-  ) {
-    return this.structure;
-  }
-
-  //-------------------------------------------------------------------------
-  public boolean refContainsValue(
-    String fieldName,
-    Object value
-  ) {
-    Object values = null;
-    try {
-      values = this.getValue(
-        this.getFeature(fieldName)
-      );
-    }
-    catch(ServiceException e) {
-      throw new JmiServiceException(e, null);
-    }
-    if(values instanceof Collection) {
-      return ((Collection<?>)values).contains(value);
-    }
-    else {
-      return values.equals(value);
-    }
-  }
-
-  //-------------------------------------------------------------------------
-  // RefStruct
-  //-------------------------------------------------------------------------
-
-  //-------------------------------------------------------------------------
-  /**
-   * The returned value is retrieved and returned from the delegate without
-   * checking the type against the model assuming that the delegate is
-   * in a consistent state.
-   */
-  public Object refGetValue(
-    String fieldName
-  ) {
-    Object values = null;
-    try {
-      values = this.getValue(
-        this.getFeature(fieldName)
-      );
-    }
-    catch(ServiceException e) {
-      throw new JmiServiceException(e, null);
-    }
-    return values;
-  }
-
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-public Object refGetValue(
-    String fieldName,
-    int index
-  ) {
-    try {
-      Object values = this.getValue(
-        this.getFeature(fieldName)
-      );
-      if(!(values instanceof Collection)) {
-        if(index > 0) {
-          throw new ServiceException (
-            StackedException.DEFAULT_DOMAIN,
-            StackedException.ASSERTION_FAILURE,
-            new BasicException.Parameter[] {
-              new BasicException.Parameter("fieldName", fieldName),
-              new BasicException.Parameter("value", values),
-              new BasicException.Parameter("index", index)
-            },
-            "can not get element of non-collection value with index > 0"
-          );
+    //-------------------------------------------------------------------------
+    /**
+     * The returned value is retrieved and returned from the delegate without
+     * checking the type against the model assuming that the delegate is
+     * in a consistent state.
+     */
+    public Object refGetValue(
+        String fieldName
+    ) {
+        Object values = null;
+        try {
+            values = this.getValue(
+                this.getFeature(fieldName)
+            );
+        }
+        catch(ServiceException e) {
+            throw new JmiServiceException(e, null);
         }
         return values;
-      }
-      else if(values instanceof Set) {
-        throw new ServiceException (
-          StackedException.DEFAULT_DOMAIN,
-          StackedException.ASSERTION_FAILURE,
-          new BasicException.Parameter[] {
-            new BasicException.Parameter("fieldName", fieldName),
-            new BasicException.Parameter("value", values),
-            new BasicException.Parameter("index", index)
-          },
-          "indexed access to value of type set not supported"
-        );
-      }
-      else if(values instanceof List) {
-        return ((List<?>)values).get(index);
-      }
-      else if(values instanceof SortedMap) {
-        return ((SortedMap<Integer,?>)values).get(Integer.valueOf(index));
-      }
-      else {
-        throw new ServiceException (
-          StackedException.DEFAULT_DOMAIN,
-          StackedException.ASSERTION_FAILURE,
-          new BasicException.Parameter[] {
-            new BasicException.Parameter("fieldName", fieldName),
-            new BasicException.Parameter("value", values),
-            new BasicException.Parameter("value class", values.getClass().getName()),
-            new BasicException.Parameter("index", index)
-          },
-          "unsupported collection class"
-        );
-      }
     }
-    catch(ServiceException e) {
-      throw new JmiServiceException(e, null);
+
+    //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
+    public Object refGetValue(
+        String fieldName,
+        int index
+    ) {
+        try {
+            Object values = this.getValue(
+                this.getFeature(fieldName)
+            );
+            if(!(values instanceof Collection)) {
+                if(index > 0) {
+                    throw new ServiceException (
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "can not get element of non-collection value with index > 0",
+                        new BasicException.Parameter("fieldName", fieldName),
+                        new BasicException.Parameter("value", values),
+                        new BasicException.Parameter("index", index)
+                    );
+                }
+                return values;
+            }
+            else if(values instanceof Set) {
+                throw new ServiceException (
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "indexed access to value of type set not supported",
+                    new BasicException.Parameter("fieldName", fieldName),
+                    new BasicException.Parameter("value", values),
+                    new BasicException.Parameter("index", index)
+                );
+            }
+            else if(values instanceof List) {
+                return ((List<?>)values).get(index);
+            }
+            else if(values instanceof SortedMap) {
+                return ((SortedMap<Integer,?>)values).get(Integer.valueOf(index));
+            }
+            else {
+                throw new ServiceException (
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "unsupported collection class",
+                    new BasicException.Parameter("fieldName", fieldName),
+                    new BasicException.Parameter("value", values),
+                    new BasicException.Parameter("value class", values.getClass().getName()),
+                    new BasicException.Parameter("index", index)
+                );
+            }
+        }
+        catch(ServiceException e) {
+            throw new JmiServiceException(e, null);
+        }
     }
-  }
 
-  //-------------------------------------------------------------------------
-  public Object refGetValue(
-    RefObject field
-  ) {
-    Object values = null;
-    try {
-      values = this.getValue(
-        (ModelElement_1_0)field
-      );
+    //-------------------------------------------------------------------------
+    public Object refGetValue(
+        RefObject field
+    ) {
+        Object values = null;
+        try {
+            values = this.getValue(
+                (ModelElement_1_0)field
+            );
+        }
+        catch(ServiceException e) {
+            throw new JmiServiceException(e, null);
+        }
+        return values;
     }
-    catch(ServiceException e) {
-      throw new JmiServiceException(e, null);
+
+    //-------------------------------------------------------------------------
+    /**
+     * For openMDX 2 JMI mapping
+     */
+    public List<String> refTypeName(
+    ) {
+        List<String> typeName = new ArrayList<String>();
+        for(
+                Enumeration<Object> e = new StringTokenizer(this.refQualifiedTypeName(), ":");
+                e.hasMoreElements();
+        ) typeName.add((String)e.nextElement());
+        return Collections.unmodifiableList(typeName);
     }
-    return values;
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * For openMDX 2 JMI mapping
-   */
-  public List<String> refTypeName(
-  ) {
-      List<String> typeName = new ArrayList<String>();
-      for(
-          Enumeration<Object> e = new StringTokenizer(this.refQualifiedTypeName(), ":");
-          e.hasMoreElements();
-      ) typeName.add((String)e.nextElement());
-      return Collections.unmodifiableList(typeName);
-  }
 
 
-  //-------------------------------------------------------------------------
-  public boolean equals(
-    Object that
-  ) {
-    return that instanceof RefStruct_1 && super.equals(that);
-  }
+    //-------------------------------------------------------------------------
+    public boolean equals(
+        Object that
+    ) {
+        return that instanceof RefStruct_1 && super.equals(that);
+    }
 
-  //-------------------------------------------------------------------------
-  public List<String> refFieldNames(
-  ) {
-    return this.structure.objFieldNames();
-  }
+    //-------------------------------------------------------------------------
+    public List<String> refFieldNames(
+    ) {
+        return this.structure.objFieldNames();
+    }
 
-  //-------------------------------------------------------------------------
-  protected Object toPath(
-    Object source
-  ){
-    return source instanceof RefObject_1_0 ?
-        ((RefObject_1_0)source).refGetPath() :
-        source;
-  }
+    //-------------------------------------------------------------------------
+    protected Object toPath(
+        Object source
+    ){
+        return source instanceof RefObject_1_0 ?
+            ((RefObject_1_0)source).refGetPath() :
+                source;
+    }
 
-  protected RefObject toRefObject(
-      String refMofId
-  ){
-      return this.refPackage.refObject(refMofId);
-  }
-  
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private RefPackage_1_0 refPackage;
-  private Structure_1_0 structure;
+    protected RefObject toRefObject(
+        String refMofId
+    ){
+        return this.refPackage.refObject(refMofId);
+    }
+
+    //-------------------------------------------------------------------------
+    // Variables
+    //-------------------------------------------------------------------------
+    private RefPackage_1_0 refPackage;
+    private Structure_1_0 structure;
 
 }
 

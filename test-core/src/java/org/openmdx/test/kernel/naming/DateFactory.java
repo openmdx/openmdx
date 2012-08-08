@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DateFactory.java,v 1.1 2004/07/06 09:38:08 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: DateFactory.java,v 1.2 2008/11/21 17:03:29 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/07/06 09:38:08 $
+ * Date:        $Date: 2008/11/21 17:03:29 $
  * ====================================================================
  *
  * This software is published under the GNU Lesser General Public
  * as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * This library is free software; you can redistribute it and/or
@@ -59,7 +59,7 @@ public class DateFactory implements ObjectFactory
         Object obj, 
         Name name, 
         Context nameCtx, 
-        Hashtable environment
+        Hashtable<?,?> environment
     ) throws Exception {
         SysLog.trace("getObjectInstance");
         return new Date();

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderObjectInterceptor.java,v 1.3 2005/10/09 19:00:01 hburger Exp $
+ * Name:        $Id: DataproviderObjectInterceptor.java,v 1.4 2008/12/15 11:35:46 hburger Exp $
  * Description: RMI Mapping: DataproviderObject Interceptor Interface
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/10/09 19:00:01 $
+ * Date:        $Date: 2008/12/15 11:35:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,6 +51,8 @@
  */
 package org.openmdx.compatibility.base.dataprovider.transport.rmi.spi;
 
+import java.rmi.Remote;
+
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.stream.rmi.spi.StreamSynchronization_1_1;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
@@ -73,6 +75,13 @@ public interface DataproviderObjectInterceptor {
         DataproviderObject object
     ) throws ServiceException;
         
+    /**
+     * Unmarshal a stream
+     */
+    Object unmarshal (
+        Remote stream
+    );
+
     /**
      * Unmarshal an object
      *

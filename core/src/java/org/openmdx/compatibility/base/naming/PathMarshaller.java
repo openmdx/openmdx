@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PathMarshaller.java,v 1.9 2008/03/21 18:48:02 hburger Exp $
+ * Name:        $Id: PathMarshaller.java,v 1.10 2008/09/10 08:55:28 hburger Exp $
  * Description: Property 
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:48:02 $
+ * Date:        $Date: 2008/09/10 08:55:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,9 +63,9 @@ import org.openmdx.kernel.exception.BasicException;
  */
 @SuppressWarnings("unchecked")
 public final class PathMarshaller
-    implements Marshaller
+implements Marshaller
 {
-    
+
     private PathMarshaller (
     ){
         // Avoid external instantiation
@@ -86,20 +86,20 @@ public final class PathMarshaller
     ){
         return PathMarshaller.instance;
     }
-    
-            
+
+
     //------------------------------------------------------------------------
     // Implements Marshaller
     //------------------------------------------------------------------------
 
     /**
      * Marshal a CharSequence[] into a CharSequence.
-   * 
+     * 
      * @param     charSequences
      *            The array of CharSequences to be marshalled.
      * 
      * @return      A CharSequence containing the marshalled objects.
-   */
+     */
     public Object marshal (
         Object charSequences
     ) throws ServiceException {
@@ -108,25 +108,25 @@ public final class PathMarshaller
         if (source.length==0) return "";
         StringBuilder target = new StringBuilder();
         appendMarshalled(target,source[0]);
-    for(
-      int i=1;
-      i<source.length;
-      i++
-    )appendMarshalled(
-                target.append(COMPONENT_SEPARATOR),
-                source[i]
+        for(
+                int i=1;
+                i<source.length;
+                i++
+        )appendMarshalled(
+            target.append(COMPONENT_SEPARATOR),
+            source[i]
         );
         return target;
     }
 
     /**
-   * Append a marshalled component to a <code>StringBuilder</code>.
-   * 
+     * Append a marshalled component to a <code>StringBuilder</code>.
+     * 
      * @param     buffer
      *            The StringBuffer to be modified.
      * @param     charSequence
      *            The component to be appended.
-   */
+     */
     private void appendMarshalled (
         StringBuilder buffer,
         Object charSequence
@@ -136,34 +136,33 @@ public final class PathMarshaller
         if(cursor == buffer.length())throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.BAD_PARAMETER,
-            null,
             "One of the paths' components is empty"
         );
         for (
-            int index = buffer.length ();
-            index > cursor;
+                int index = buffer.length ();
+                index > cursor;
         ) {
             final char character = buffer.charAt (--index);
             if (
-                character == COMPONENT_SEPARATOR || 
-                character == FIELD_SEPARATOR
+                    character == COMPONENT_SEPARATOR || 
+                    character == FIELD_SEPARATOR
             ) buffer.insert(
                 index,
                 character
             );
         }           
     }
-    
+
 
     /**
      * Unmarshal a CharSequence into a CharSequence[].
-   * 
+     * 
      * @param         marshalledObjects
      *            A string containing a marshalled sequence of objects
      * 
      * @return    A String array containing the unmarshaled sequence
      *                  of objects.
-   */
+     */
     public Object unmarshal (
         Object charSequence
     ) throws ServiceException {
@@ -175,14 +174,12 @@ public final class PathMarshaller
             if(end==0) throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.BAD_PARAMETER,
-                null,
                 "Path starts with '" + COMPONENT_SEPARATOR + "'"
             );  
             while(end != -1) {
                 if(end+1==source.length()) throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.BAD_PARAMETER,
-                    null,
                     "Path ends with '" + COMPONENT_SEPARATOR + "'"
                 );
                 if(source.charAt(end+1) == COMPONENT_SEPARATOR) {
@@ -204,10 +201,10 @@ public final class PathMarshaller
     /**
      * Append unmarshalled
      * 
-   * Append an unmarshalled component to a ArrayList.
-   * 
+     * Append an unmarshalled component to a ArrayList.
+     * 
      * @param  object   The component to be appended.
-   */
+     */
     private void appendUnmarshalled (
         ArrayList target,
         String source
@@ -215,19 +212,19 @@ public final class PathMarshaller
         StringBuilder buffer = new StringBuilder();
         int end;
         for (
-            int start = 0;
-            start < source.length();
-      start = end + 1
+                int start = 0;
+                start < source.length();
+                start = end + 1
         ){
-      end = start;
-      while(
-        end+1 < source.length() &&
-        ! (source.charAt(end) == COMPONENT_SEPARATOR) &&
-        ! (source.charAt(end) == FIELD_SEPARATOR)
-      ) end++;
-      buffer.append(source.substring(start,++end));
-    }
+            end = start;
+            while(
+                    end+1 < source.length() &&
+                    ! (source.charAt(end) == COMPONENT_SEPARATOR) &&
+                    ! (source.charAt(end) == FIELD_SEPARATOR)
+            ) end++;
+            buffer.append(source.substring(start,++end));
+        }
         target.add(buffer.toString());
     }
-        
+
 }

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="src" path="lib"/>
+	<classpathentry kind="lib" path="lib/slf4j-api.jar" sourcepath="src/slf4j-api.java.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/jdo2-api.jar" sourcepath="src/jdo2-api.java.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/junit.jar" sourcepath="src/junit.java.zip"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 6"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/openMDX Thirdparty ~ Java2 Extension (jre-1.5)"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

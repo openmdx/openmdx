@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1LocalConnection.java,v 1.10 2008/07/01 19:22:34 hburger Exp $
+ * Name:        $Id: Dataprovider_1LocalConnection.java,v 1.12 2008/11/27 16:46:56 hburger Exp $
  * Description: Local Dataprovider  Connection
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/01 19:22:34 $
+ * Date:        $Date: 2008/11/27 16:46:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,7 +71,7 @@ import org.openmdx.kernel.exception.BasicException;
  * Local Dataprovider Connection
  */
 public class Dataprovider_1LocalConnection
-    implements Dataprovider_1_3Connection
+implements Dataprovider_1_3Connection
 {
 
     /**
@@ -83,7 +83,7 @@ public class Dataprovider_1LocalConnection
         this.ejbLocalObject = local;
     }
 
-    
+
     /**
      * The delegation object.
      */
@@ -102,11 +102,10 @@ public class Dataprovider_1LocalConnection
         } else throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            null,
             "Attempt to use removed dataprovider connection"
         );
     }
-    
+
     /**
      * Cast the delegate
      * 
@@ -125,15 +124,13 @@ public class Dataprovider_1LocalConnection
         } else throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("required", extension.getName()),
-                new BasicException.Parameter("actual", delegate.getClass().getName())
-            },
-            "The EJBLocalObject does not implement the required interface"
+            "The EJBLocalObject does not implement the required interface",
+            new BasicException.Parameter("required", extension.getName()),
+            new BasicException.Parameter("actual", delegate.getClass().getName())
         );
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0
     //------------------------------------------------------------------------
@@ -148,7 +145,7 @@ public class Dataprovider_1LocalConnection
      */
     public UnitOfWorkReply[] process(
         ServiceHeader header,
-        UnitOfWorkRequest[] workingUnits
+        UnitOfWorkRequest... workingUnits
     ){
         try {
             return getDelegate().process(
@@ -160,7 +157,7 @@ public class Dataprovider_1LocalConnection
         }
     }
 
-        
+
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0Connection
     //------------------------------------------------------------------------
@@ -175,13 +172,12 @@ public class Dataprovider_1LocalConnection
     ) throws ServiceException {
         if (this.ejbLocalObject != null) {
             try {
-                 this.ejbLocalObject.remove();
+                this.ejbLocalObject.remove();
             } catch (Exception exception) {
                 throw new ServiceException(
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.DEACTIVATION_FAILURE,
-                    null,
                     "Failure during deactivation of dataprovider connection"
                 );
             } finally {
@@ -190,7 +186,7 @@ public class Dataprovider_1LocalConnection
         }
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_1Connection
     //------------------------------------------------------------------------
@@ -227,7 +223,6 @@ public class Dataprovider_1LocalConnection
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ROLLBACK,
-                null,
                 "Unit of work has been rolled back"
             );
         } catch (EJBException exception) {
@@ -235,7 +230,7 @@ public class Dataprovider_1LocalConnection
         }
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements EntityManagerFactory_2_0
     //------------------------------------------------------------------------
@@ -271,5 +266,5 @@ public class Dataprovider_1LocalConnection
             throw new ResourceException(exception);
         }
     }
-    
+
 }

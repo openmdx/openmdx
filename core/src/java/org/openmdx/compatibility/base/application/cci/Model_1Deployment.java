@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Model_1Deployment.java,v 1.3 2008/04/10 18:16:59 hburger Exp $
+ * Name:        $Id: Model_1Deployment.java,v 1.6 2008/12/04 16:40:39 wfro Exp $
  * Description: Model_1Deployment
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/10 18:16:59 $
+ * Date:        $Date: 2008/12/04 16:40:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,13 +51,16 @@
 package org.openmdx.compatibility.base.application.cci;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 
 import javax.naming.Context;
 
 import org.openmdx.base.application.deploy.Deployment;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.accessor.basic.spi.Model_1;
-
 
 /**
  * Model_1Deployment
@@ -65,20 +68,50 @@ import org.openmdx.model1.accessor.basic.spi.Model_1;
 public class Model_1Deployment implements Deployment {
 
     /**
-     * Constructor
-     * 
+     * Constructor 
+     *
+     * @param models
+     */
+    public Model_1Deployment(
+        Collection<String> models
+    ) {
+        if(models != null) {
+            this.pending = models;
+        }
+    }
+
+    /**
+     * Constructor 
+     *
+     * @param models
      */
     public Model_1Deployment(
         String... models
     ) {
-        this.pending = models;
+        if(models != null) {
+            this.pending = Arrays.asList(models);
+        }
     }
-
+    
     /**
-     * Not yet deployed model elements
+     * Models to be deployed at instance level
      */
-    private String[] pending;
-
+    private Collection<String> pending = Collections.emptySet();
+    
+    /**
+     * Models to be deployed at class level
+     */
+    private static Collection<String> standard = Arrays.asList(
+        "org:w3c",
+        "org:oasis-open",
+        "org:openmdx:base",
+        "org:openmdx:compatibility:datastore1",
+        "org:openmdx:compatibility:document1",
+        "org:openmdx:compatibility:state1",
+        "org:openmdx:state2",
+        "org:omg:model1"
+    );
+    
     /**
      * The exception in case of failure
      */
@@ -101,8 +134,15 @@ public class Model_1Deployment implements Deployment {
      */
     public Context context() throws ServiceException {
         if(this.pending != null) try {
-            Model_1 model = new Model_1();
-            model.addModels(Arrays.asList(this.pending));
+            Model_1_0 model = new Model_1();
+            if(standard != null) {
+                Collection<String> models = new HashSet<String>(standard);
+                models.addAll(this.pending);
+                model.addModels(models);
+                standard = null;
+            } else {
+                model.addModels(this.pending);
+            }
         } catch (ServiceException exception) {
             this.exception = exception;            
         } finally {

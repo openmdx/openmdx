@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ExporterTestSetup.java,v 1.5 2007/02/02 15:33:33 hburger Exp $
+ * Name:        $Id: ExporterTestSetup.java,v 1.6 2008/11/16 00:46:12 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/02/02 15:33:33 $
+ * Date:        $Date: 2008/11/16 00:46:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -1311,7 +1311,6 @@ public class ExporterTestSetup {
                 new String[] { 
                     "org:w3c", 
                     "org:openmdx:base", 
-                    "org:openmdx:datastore1", 
                     "org:openmdx:test:compatibility:state1"
                 }
             )

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EmailAddressImpl.java,v 1.1 2008/04/25 12:11:22 hburger Exp $
+ * Name:        $Id: EmailAddressImpl.java,v 1.3 2008/11/14 10:25:10 hburger Exp $
  * Description: E-Mail Address  
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 12:11:22 $
+ * Date:        $Date: 2008/11/14 10:25:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,11 +53,11 @@ package org.openmdx.test.app1.aop2.standard;
 import org.openmdx.base.jmi1.Void;
 import org.openmdx.test.app1.jmi1.AddressFormatAsParams;
 import org.openmdx.test.app1.jmi1.AddressFormatAsResult;
+import org.openmdx.test.app1.jmi1.App1Package;
+import org.openmdx.test.app1.jmi1.EmailAddress;
 import org.openmdx.test.app1.jmi1.EmailAddressSendMessageParams;
 import org.openmdx.test.app1.jmi1.EmailAddressSendMessageTemplateParams;
 import org.openmdx.test.app1.jmi1.EmailAddressSendMessageTemplateResult;
-import org.openmdx.test.app1.jmi1.App1Package;
-import org.openmdx.test.app1.jmi1.EmailAddress;
 import org.openmdx.test.app1.jmi1.MessageTemplate;
 
 /**
@@ -111,7 +111,8 @@ public class EmailAddressImpl extends AddressImpl {
     public Void sendMessage(
         EmailAddressSendMessageParams in
     ) {
-        System.out.println("sending message " + in.getText() + " to " + sameObject().refMofId());
+        EmailAddress same = sameObject();
+        System.out.println("sending message " + in.getText() + " to " + same.refMofId());
         return null;
     }
 
@@ -127,7 +128,8 @@ public class EmailAddressImpl extends AddressImpl {
     public EmailAddressSendMessageTemplateResult sendMessageTemplate(
         EmailAddressSendMessageTemplateParams in
      ) {
-        System.out.println("sending message " + in.getBody().getText() + " with template to " + sameObject().refMofId());
+        EmailAddress same = sameObject();
+        System.out.println("sending message " + in.getBody().getText() + " with template to " + same.refMofId());
         App1Package app1Package = samePackage();
         return app1Package.createEmailAddressSendMessageTemplateResult(
             (MessageTemplate) in.getBody()

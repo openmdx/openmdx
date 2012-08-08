@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiLoader.java,v 1.19 2008/04/18 11:10:39 wfro Exp $
+ * Name:        $Id: UiLoader.java,v 1.25 2008/12/08 15:30:39 wfro Exp $
  * Description: UiLoader
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/18 11:10:39 $
+ * Date:        $Date: 2008/12/08 15:30:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,19 +52,18 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.loader;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
@@ -110,6 +109,7 @@ public class UiLoader
             context,
             roleMapper
         );
+        this.model = model;
         this.providerPath = providerPath;
         this.uiRepository = createUiRepository(model);      
     }
@@ -172,7 +172,7 @@ public class UiLoader
             ).newInstance();
             persistencePlugin.activate((short)0, configuration, null);
             Layer_1_0 modelPlugin = (Layer_1_0)Classes.getApplicationClass(
-                "org.openmdx.model1.layer.model.Model_1"
+                "org.openmdx.compatibility.base.dataprovider.layer.model.Standard_1"
             ).newInstance();
             modelPlugin.activate((short)1, configuration, persistencePlugin);
             Layer_1_0 applicationPlugin = (Layer_1_0)Classes.getApplicationClass(
@@ -180,7 +180,7 @@ public class UiLoader
             ).newInstance();
             applicationPlugin.activate((short)2, configuration, modelPlugin);
             Layer_1_0 typePlugin = (Layer_1_0)Classes.getApplicationClass(
-                "org.openmdx.model1.layer.type.Model_1"
+                "org.openmdx.compatibility.base.dataprovider.layer.type.Strict_1"
             ).newInstance();
             typePlugin.activate((short)3, configuration, applicationPlugin);
             Layer_1_0 interceptionPlugin = (Layer_1_0)Classes.getApplicationClass(
@@ -221,16 +221,17 @@ public class UiLoader
                 ),
                 false
             );
-            Manager_1 manager = new Manager_1(
-                new Connection_1(
-                    dataprovider,
-                    false
-                )
+            Connection_1 connection = new Connection_1(
+                dataprovider,
+                false
             );
+            connection.setModel(this.model);
+            Manager_1 manager = new Manager_1(connection);
             RefRootPackage_1 rootPkg = new RefRootPackage_1(
                 manager,
-                Names.JMI1_PACKAGE_SUFFIX,
-                true
+                null,
+                null,
+                Names.JMI1_PACKAGE_SUFFIX
             );
             this.pm = rootPkg.refPersistenceManager();
         }
@@ -242,10 +243,10 @@ public class UiLoader
      * load ui config in case the ui config resources have changed
      */
     @SuppressWarnings("unchecked")
-    public boolean load(
+    public List<Path> load(
         String[] locale
     ) throws ServiceException {
-        boolean resetSession = false;
+        Map<String,Path> loadedUiSegments = new TreeMap<String,Path>();
         List dirs = this.getDirectories("/WEB-INF/config/ui/");
         for(
             Iterator i = dirs.iterator(); 
@@ -271,7 +272,7 @@ public class UiLoader
               int fallbackLocaleIndex = 0;
               for(int j = 0; j < locale.length; j++) {
                 fallbackLocaleIndex = 0;
-                Set uiResources = new TreeSet();
+                Set uiResources = null;
                 if(locale[j] != null) {
                     String uiResourcesPath = dir + locale[j];
                     uiResources = context.getResourcePaths(uiResourcesPath);
@@ -279,19 +280,32 @@ public class UiLoader
                     // if not found fall back to locale[0]
                     if(uiResources == null) {
                         for(int k = j-1; k >= 0; k--) {
-                            if(locale[j].substring(0,2).equals(locale[k].substring(0,2))) {
+                            if(
+                                (locale[k] != null) && 
+                                (locale[j].substring(0,2).equals(locale[k].substring(0,2)))
+                            ) {
                                 fallbackLocaleIndex = k;
                                 break;
                             }
                         }
                         System.out.println(locale[j] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
-                    } else {
+                    } 
+                    else {
                     	uiResources = new TreeSet(uiResources);
                     }
                 }
                 try {
-                  System.out.println("Loading " + uiResources.size() + " ui files for locale " + locale[j]);
-                  for(Iterator k = uiResources.iterator(); k.hasNext(); ) {        
+                  if(uiResources == null) {
+                      uiResources = new TreeSet();
+                      uiResources.add("./"); // empty dir
+                  }
+                  else {
+                      System.out.println("Loading " + uiResources.size() + " ui files for locale " + locale[j]);
+                  }                  
+                  for(
+                      Iterator k = uiResources.iterator(); 
+                      k.hasNext(); 
+                  ) {        
                       Map uiElements = MapUtils.orderedMap(new HashMap());
                       String path = (String)k.next();
                       if(!path.endsWith("/")) {
@@ -309,9 +323,8 @@ public class UiLoader
                               e.log();
                               System.out.println("STATUS: " + e.getMessage());
                           }
-                      }
-        
-                      // merge entries
+                      }        
+                      // Merge entries
                       Set entrySet = j == 0 ? uiElements.entrySet() : mergedUiElements.entrySet();
                       for(Iterator l = entrySet.iterator(); l.hasNext(); ) {
                           Entry e = (Entry)l.next();
@@ -404,14 +417,14 @@ public class UiLoader
                   PersistenceManager pm = this.getRepository();
                   org.openmdx.ui1.jmi1.Ui1Package uiPkg = getUiPackage(pm);
                   
-                  String segmentName = this.getSegmentName(dir);
+                  String[] segmentName = this.getSegmentName(dir);
                   // Remove existing ui config
                   try {
                       pm.currentTransaction().begin();
                       org.openmdx.base.jmi1.Provider provider = (org.openmdx.base.jmi1.Provider)pm.getObjectById(
                           this.providerPath
                       );
-                      provider.getSegment(segmentName).refDelete();
+                      provider.getSegment(segmentName[segmentName.length-1]).refDelete();
                       pm.currentTransaction().commit();
                   }
                   catch(Exception e) {
@@ -427,9 +440,9 @@ public class UiLoader
                     );
                     provider.addSegment(
                         false,
-                        segmentName,
+                        segmentName[segmentName.length-1],
                         uiPkg.getSegment().createSegment()
-                    );
+                    );                    
                     pm.currentTransaction().commit();
                   }
                   catch(Exception e) {
@@ -451,6 +464,10 @@ public class UiLoader
                       );
                   }
                   store.endBatch();            
+                  loadedUiSegments.put(
+                      segmentName[0],
+                      this.providerPath.getDescendant("segment", segmentName[segmentName.length-1])
+                  );
               }
               catch(ServiceException e) {
                   AppLog.error("can not create ui config", e.getMessage());
@@ -461,12 +478,13 @@ public class UiLoader
               );
           }
         }    
-        return resetSession;
+        return new ArrayList<Path>(loadedUiSegments.values());
     }
-      
+
     //-------------------------------------------------------------------------
     private Map uiCRC = new HashMap();
     private final Layer_1 uiRepository;
+    private final Model_1_3 model;
     private transient PersistenceManager pm = null;
     private final Path providerPath;
   

@@ -55,7 +55,7 @@
 			<env-entry>
 				<env-entry-name>KERNEL/modelPackage[1]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:oasis_open</env-entry-value>
+				<env-entry-value>org:oasis-open</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/modelPackage[2]</env-entry-name>
@@ -65,22 +65,7 @@
 			<env-entry>
 				<env-entry-name>KERNEL/modelPackage[3]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:datastore1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[4]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>org:openmdx:test:app1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[5]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:view1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[6]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:sequence1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>MODEL/optimisticLocking</env-entry-name>

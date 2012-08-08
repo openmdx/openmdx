@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LongMarshaller.java,v 1.9 2008/04/09 12:34:01 hburger Exp $
+ * Name:        $Id: LongMarshaller.java,v 1.11 2008/09/26 15:27:16 hburger Exp $
  * Description: LongMarshaller class
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:01 $
+ * Date:        $Date: 2008/09/26 15:27:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,84 +51,80 @@
 package org.openmdx.base.accessor.jmi.spi;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
-import org.openmdx.kernel.exception.BasicException;
 
-
-//---------------------------------------------------------------------------
 /**
  * Number <-> Long marshaller. Marshals objects which are instance of
  * Number to the specific type Long (which is also a Number).
  */
-public class LongMarshaller
-  implements Marshaller, ReluctantUnmarshalling 
-{
+public class LongMarshaller extends NormalizingMarshaller {
 
-  //-------------------------------------------------------------------------
-  private LongMarshaller(
-  ) {
-      super();
-  }
-  
-  //-------------------------------------------------------------------------
-  public static LongMarshaller getInstance(
-    boolean forward
-  ) {
-    return instance;
-  }
-
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object marshal(
-    Object source
-  ) throws ServiceException {
-    try {
-        return source == null
-          ? null
-          : new Long(((Number)source).longValue());
-    } catch (RuntimeException e) {
-        throw new ServiceException(
-            e,
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.TRANSFORMATION_FAILURE, 
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Could not marshal source to Long"
-        );
+    /**
+     * Constructor 
+     */
+    private LongMarshaller(
+    ) {
+        // Avoid external instantiation
     }
-  }
-  
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object unmarshal (
-    Object source
-  ) throws ServiceException {
-    try {
-        return source == null
-          ? null
-          : new Long(((Number)source).longValue());
-    } catch (RuntimeException e) {
-        throw new ServiceException(
-            e,
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.TRANSFORMATION_FAILURE, 
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Could not unmarshal Long"
-        );
+
+    /**
+     * A singleton
+     */
+    static private final LongMarshaller instance = new LongMarshaller();
+
+    /**
+     * @deprecated Use {@link #getInstance()} instead
+     */
+    public static LongMarshaller getInstance(
+        boolean forward
+    ) {
+        return getInstance();
     }
-  }
 
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  static private final LongMarshaller instance = new LongMarshaller();
+    /**
+     * Provide a marshaller instance
+     * 
+     * @return an instance
+     */
+    public static LongMarshaller getInstance(
+    ) {
+        return instance;
+    }
 
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#normalize(java.lang.Object)
+     */
+    @Override
+    protected Object normalize(
+        Object source
+    ) throws ServiceException{
+        if(keep(source)) {
+            return source;
+        }
+        //
+        // Lenient
+        //
+        try {
+            return new Long(((Number)source).longValue());
+        } catch (Exception exception) {
+            throw newServiceException(exception, source);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#isLenient()
+     */
+    @Override
+    protected boolean isLenient() {
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#targetClass()
+     */
+    @Override
+    protected Class<?> targetClass() {
+        return Long.class;
+    }
+    
 }
-  
-//--- End of File -----------------------------------------------------------

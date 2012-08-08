@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1HttpConnection.java,v 1.5 2008/03/19 17:07:15 hburger Exp $
+ * Name:        $Id: Dataprovider_1HttpConnection.java,v 1.7 2008/11/27 16:46:56 hburger Exp $
  * Description: Lightweight Container's Dataprovider Connection  
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:07:15 $
+ * Date:        $Date: 2008/11/27 16:46:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,70 +75,70 @@ import org.openmdx.kernel.exception.BasicException;
  */
 @SuppressWarnings("unchecked")
 public class Dataprovider_1HttpConnection 
-	implements Dataprovider_1_1Connection
+implements Dataprovider_1_1Connection
 {
 
-	/**
-	 * Constructor
-	 * 
-	 * @param url
-	 * @param requestProperties additional request properties
-	 */
-	Dataprovider_1HttpConnection(
-		URL url,
+    /**
+     * Constructor
+     * 
+     * @param url
+     * @param requestProperties additional request properties
+     */
+    Dataprovider_1HttpConnection(
+        URL url,
         Map requestProperties
     ){
-		this.url = url;
-		this.requestProperties = new HashMap(
+        this.url = url;
+        this.requestProperties = new HashMap(
             requestProperties
         );
         this.requestProperties.put(
             "Content-Type", 
             "application/octet-stream"
         );
-	}
+    }
 
     //-----------------------------------------------------------------------
     /**
-	 * @deprecated
-	 */
-	public void remove(
-	) throws ServiceException {
-		close();		
-	}
+     * @deprecated
+     */
+    public void remove(
+    ) throws ServiceException {
+        close();		
+    }
 
     //-----------------------------------------------------------------------
-	/* (non-Javadoc)
-	 * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection#close()
-	 */
-	public void close(
-	) {
-		this.url = null;
-		this.requestProperties = null;
-	}
+    /* (non-Javadoc)
+     * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection#close()
+     */
+    public void close(
+    ) {
+        this.url = null;
+        this.requestProperties = null;
+    }
 
     //-----------------------------------------------------------------------
-	/* (non-Javadoc)
-	 * @see org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0#process(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest[])
-	 */
-	public UnitOfWorkReply[] process(
-		ServiceHeader header, 
-		UnitOfWorkRequest[] workingUnits
-	) {
-		try {
-			HttpURLConnection connection = getConnection(
-				this.url,
-				this.requestProperties
-			);
-			ObjectInputStream replyStream = null;
-			try {
-		        ObjectOutputStream requestStream = new ObjectOutputStream(connection.getOutputStream());
-				requestStream.writeObject(header);
-				requestStream.writeObject(workingUnits);
+    /* (non-Javadoc)
+     * @see org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0#process(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest[])
+     */
+    public UnitOfWorkReply[] process(
+        ServiceHeader header, 
+        UnitOfWorkRequest... workingUnits
+    ) {
+        try {
+            HttpURLConnection connection = getConnection(
+                this.url,
+                this.requestProperties
+            );
+            ObjectInputStream replyStream = null;
+            try {
+                ObjectOutputStream requestStream = new ObjectOutputStream(connection.getOutputStream());
+                requestStream.writeObject(header);
+                requestStream.writeObject(workingUnits);
                 int responseCode = connection.getResponseCode(); 
-	            if(
-                    responseCode != HttpURLConnection.HTTP_OK &&
-                    StatusCodes.isRetriable(responseCode)
+                if(
+                        responseCode != HttpURLConnection.HTTP_OK &&
+                        StatusCodes.isRetriable(responseCode)
                 ) {
                     close(connection.getInputStream());
                     close(connection.getErrorStream());
@@ -154,80 +154,72 @@ public class Dataprovider_1HttpConnection
                 if(responseCode != HttpURLConnection.HTTP_OK) throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.COMMUNICATION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("response.code", responseCode),
-                        new BasicException.Parameter("response.message", connection.getResponseMessage())
-                    },
-                    "Unexpected response" 
+                    "Unexpected response",
+                    new BasicException.Parameter("response.code", responseCode),
+                    new BasicException.Parameter("response.message", connection.getResponseMessage())
                 );              
-		        replyStream = new ObjectInputStream(connection.getInputStream());	
-		        return  (UnitOfWorkReply[]) replyStream.readObject();
-			} catch (ClassCastException exception) {
-				throw new ServiceException(
-					exception,
-					BasicException.Code.DEFAULT_DOMAIN,
-					BasicException.Code.ASSERTION_FAILURE,
-					new BasicException.Parameter[]{
-						new BasicException.Parameter("url", url)
-					},
-					"Probably unexpected reply class"
-				);
-			} catch (IOException exception) {
-				throw new ServiceException(
-					exception,
-					BasicException.Code.DEFAULT_DOMAIN,
-					BasicException.Code.COMMUNICATION_FAILURE,
-					new BasicException.Parameter[]{
-						new BasicException.Parameter("url", url)
-					},
-					"Communication failure"
-				);
-			} catch (ClassNotFoundException exception) {
-				throw new ServiceException(
-					exception,
-					BasicException.Code.DEFAULT_DOMAIN,
-					BasicException.Code.ASSERTION_FAILURE,
-					new BasicException.Parameter[]{
-						new BasicException.Parameter("url", url)
-					},
-					"Unmarshalling failure"
-				);
-			} finally {
-				close(connection.getErrorStream());
-				close(replyStream);
-			}
-		} catch (ServiceException exception) {
-			UnitOfWorkReply[] reply = new UnitOfWorkReply[workingUnits.length];
-			Arrays.fill(
-				reply,
-				new UnitOfWorkReply(exception)
-			);
-			return reply;
-		}
-	}
+                replyStream = new ObjectInputStream(connection.getInputStream());	
+                return  (UnitOfWorkReply[]) replyStream.readObject();
+            } catch (ClassCastException exception) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "Probably unexpected reply class",
+                    new BasicException.Parameter("url", url)
+                );
+            } catch (IOException exception) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.COMMUNICATION_FAILURE,
+                    "Communication failure",
+                    new BasicException.Parameter("url", url)
+                );
+            } catch (ClassNotFoundException exception) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "Unmarshalling failure",
+                    new BasicException.Parameter("url", url)
+                );
+            } finally {
+                close(connection.getErrorStream());
+                close(replyStream);
+            }
+        } catch (ServiceException exception) {
+            UnitOfWorkReply[] reply = new UnitOfWorkReply[workingUnits.length];
+            Arrays.fill(
+                reply,
+                new UnitOfWorkReply(exception)
+            );
+            return reply;
+        }
+    }
 
-	/**
-	 * Get a connection
-	 * 
-	 * @param url
+    /**
+     * Get a connection
+     * 
+     * @param url
      * @param thereuqest properties
-	 * 
-	 * @return the connection set up for a conversational request.
-	 * 
-	 * @throws ServiceException
-	 */
-	protected static HttpURLConnection getConnection(
-		URL url,
-		Map requestProperties
-	) throws ServiceException{
-		try {
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setDoOutput(true);
-			connection.setDoInput(true);
-	        connection.setRequestMethod("POST");
+     * 
+     * @return the connection set up for a conversational request.
+     * 
+     * @throws ServiceException
+     */
+    protected static HttpURLConnection getConnection(
+        URL url,
+        Map requestProperties
+    ) throws ServiceException{
+        try {
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+            connection.setRequestMethod("POST");
             for(
-                 Iterator i = requestProperties.entrySet().iterator();
-                 i.hasNext();
+                    Iterator i = requestProperties.entrySet().iterator();
+                    i.hasNext();
             ){
                 Map.Entry e = (Entry) i.next();
                 connection.setRequestProperty(
@@ -235,44 +227,42 @@ public class Dataprovider_1HttpConnection
                     (String)e.getValue()
                 );
             }
-	        connection.connect();
-	        return connection;
-		} catch (IOException exception) {				
-			throw new ServiceException(
-				exception,
-				BasicException.Code.DEFAULT_DOMAIN,
-				BasicException.Code.COMMUNICATION_FAILURE,
-				new BasicException.Parameter[]{
-					new BasicException.Parameter("url", url),
-					new BasicException.Parameter("requestProperties", requestProperties.keySet())
-				},
-				"URL connection could not be established"
-			);
-		}
-	}
+            connection.connect();
+            return connection;
+        } catch (IOException exception) {				
+            throw new ServiceException(
+                exception,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.COMMUNICATION_FAILURE,
+                "URL connection could not be established",
+                new BasicException.Parameter("url", url),
+                new BasicException.Parameter("requestProperties", requestProperties.keySet())
+            );
+        }
+    }
 
-	/**
-	 * Close a stream unless its reference is null.
-	 * 
-	 * @param stream
-	 */
-	protected static void close(
-		InputStream stream
-	){
-		if (stream != null) try {
-			stream.close();
-		} catch (IOException exception) {
-			// Ignore I/O Exceptions
-		}
-	}
+    /**
+     * Close a stream unless its reference is null.
+     * 
+     * @param stream
+     */
+    protected static void close(
+        InputStream stream
+    ){
+        if (stream != null) try {
+            stream.close();
+        } catch (IOException exception) {
+            // Ignore I/O Exceptions
+        }
+    }
 
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    
+
     // the connection's URL
     protected URL url;
-    
+
     // the request properties
     private Map requestProperties;
 

@@ -1,6 +1,4 @@
-﻿if(!WYM_STRINGS) var WYM_STRINGS = new Array();
-
-var WYM_STRINGS_NL = {
+WYMeditor.STRINGS['nl'] = {
     Strong:           'Sterk benadrukken',
     Emphasis:         'Benadrukken',
     Superscript:      'Bovenschrift',
@@ -44,4 +42,3 @@ var WYM_STRINGS_NL = {
     Source_Code:      'Broncode'
 };
 
-WYM_STRINGS['nl'] = WYM_STRINGS_NL;

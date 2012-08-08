@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeValue.java,v 1.34 2008/05/08 16:38:11 wfro Exp $
+ * Name:        $Id: CodeValue.java,v 1.38 2008/11/12 10:36:53 wfro Exp $
  * Description: CodeValue
- * Revision:    $Revision: 1.34 $
+ * Revision:    $Revision: 1.38 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/08 16:38:11 $
+ * Date:        $Date: 2008/11/12 10:36:53 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.attribute;
 
@@ -284,11 +281,7 @@ public class CodeValue
     //-------------------------------------------------------------------------
     public Object getDefaultValue(
     ) {
-        if(this.defaultValue == null) {
-            return null;
-        }
-        String text = (String)this.getLongText(true, true).get(this.defaultValue);
-        return text == null ? this.defaultValue.toString() : text;
+        return this.defaultValue;
     }
   
     //-------------------------------------------------------------------------
@@ -363,7 +356,7 @@ public class CodeValue
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, ">");
                 if(this.isChangeable()) {
-                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\"", p.getOnClick("multiValuedHigh=", this.getUpperBound("10"), "; return editcodes_showPopup(this.id, '", EditObjectControl.POPUP_EDIT_CODES, "', $('", id, "'), new Array(", longTextsAsJsArray.toString(), "));")));
+                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("10"), "; popup_", EditObjectControl.EDIT_CODES, " = ",  EditObjectControl.EDIT_CODES, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_CODES, ", 'popup_", EditObjectControl.EDIT_CODES, "', $('", id, "'), new Array(", longTextsAsJsArray.toString(), "));\""));
                 }
                 p.write("</td>");
             }

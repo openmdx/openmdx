@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Object_1_0.java,v 1.7 2008/05/27 16:52:29 hburger Exp $
+ * Name:        $Id: Object_1_0.java,v 1.10 2008/11/05 12:53:42 hburger Exp $
  * Description: SPICE Basic Accessor Object interface
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/27 16:52:29 $
+ * Date:        $Date: 2008/11/05 12:53:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -79,6 +79,20 @@ public interface Object_1_0 extends PersistenceCapable_1_0 {
     String objGetClass(
     ) throws ServiceException;
 
+    /**
+     * Works for single- and multi-valued attributes
+     * 
+     * @param featureName
+     * 
+     * @return an iterable feature view
+     *
+     * @exception   ServiceException  
+     *              if the view is unavailable
+     */
+    Iterable<?> objGetIterable(
+        String featureName
+    ) throws ServiceException;
+    
 
     //------------------------------------------------------------------------
     // State Management
@@ -97,7 +111,7 @@ public interface Object_1_0 extends PersistenceCapable_1_0 {
      */
     void objAddToUnitOfWork(
     ) throws ServiceException;
-     
+
     /**
      * After this call the object ignores unit of work boundaries.
      * <p>
@@ -220,9 +234,9 @@ public interface Object_1_0 extends PersistenceCapable_1_0 {
      * @exception   ServiceException NOT_SUPPORTED
      *              if the listener type is not supported
      */
-    EventListener[] objGetEventListeners(
+    <T extends EventListener> T[] objGetEventListeners(
         String feature,
-        Class<? extends EventListener> listenerType
+        Class<T> listenerType
     ) throws ServiceException;
 
 }

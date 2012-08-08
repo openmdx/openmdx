@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ManagerFactoryConfigurationEntries.java,v 1.1 2008/07/01 00:26:18 hburger Exp $
+ * Name:        $Id: ManagerFactoryConfigurationEntries.java,v 1.2 2008/11/04 10:01:08 hburger Exp $
  * Description: Common Configuration Entries 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/01 00:26:18 $
+ * Date:        $Date: 2008/11/04 10:01:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -83,7 +83,12 @@ public class ManagerFactoryConfigurationEntries extends SharedConfigurationEntri
      */
     static public final String PLUG_IN = "plugIn";
 
+    /**
+     * Lenient flag
+     */
+    static public final String LENIENT = "lenient";
 
+    
     //------------------------------------------------------------------------
     // Manager types
     //------------------------------------------------------------------------

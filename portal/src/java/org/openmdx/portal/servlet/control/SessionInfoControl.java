@@ -1,10 +1,10 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: SessionInfoControl.java,v 1.36 2008/05/01 21:43:55 wfro Exp $
+ * Name:        $Id: SessionInfoControl.java,v 1.42 2008/11/12 10:36:53 wfro Exp $
  * Description: SessionInfoControl
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:55 $
+ * Date:        $Date: 2008/11/12 10:36:53 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -51,9 +51,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -78,14 +75,12 @@ public class SessionInfoControl
     public SessionInfoControl(
         String id,
         String locale,
-        int localeAsIndex,
-        ControlFactory controlFactory
+        int localeAsIndex
     ) {
         super(
             id,
             locale,
-            localeAsIndex,
-            controlFactory
+            localeAsIndex
         );
     }
     
@@ -120,7 +115,7 @@ public class SessionInfoControl
                 Action[] selectLocaleAction = ((ShowObjectView)view).getSelectLocaleAction();
                 for(int i = 0; i < selectLocaleAction.length; i++) {
                     Action action = selectLocaleAction[i];
-                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", action.getParameter(Action.PARAMETER_LOCALE), " - ", action.getTitle(), "</a></li>");
+                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\"><span style=\"font-family:courier;\">", action.getParameter(Action.PARAMETER_LOCALE), " - </span>", action.getTitle(), "</a></li>");
                 }
                 p.write("    </ul>");
                 p.write("  </li>");
@@ -139,10 +134,11 @@ public class SessionInfoControl
         String buttonClass
     ) {
         try {
-            View view = p.getView();        
+            View view = p.getView();
+            ApplicationContext app = p.getApplicationContext();            
             Action logoffAction = view.getLogoffAction();        
             if(!forEditing) {
-                p.write("<a class=\"", buttonClass, "\" href=\"#\"", p.getOnClick("javascript:", p.getButtonEffectPulsate(), "window.location.href=", p.getEvalHRef(logoffAction), ";"), ">", logoffAction.getTitle(), "</a>");            
+                p.write("<a class=\"", buttonClass, "\" href=\"#\" onclick=\"javascript:", p.getButtonEffectPulsate(), "window.location.href=", p.getEvalHRef(logoffAction), ";\">", logoffAction.getTitle(), "&nbsp;", app.getLoginPrincipalId(), "</a>");            
             }
         }
         catch(Exception e) {
@@ -182,43 +178,6 @@ public class SessionInfoControl
     }
     
     //---------------------------------------------------------------------------------
-    public static void paintGuiModesMenu(
-        HtmlPage p,
-        boolean forEditing
-    ) {
-        try {
-            ApplicationContext app = p.getApplicationContext();
-            View view = p.getView();        
-            Action[] setGuiModeAction = view.getSetGuiModeActions();
-            String currentGuiMode = "0";
-            for(int i = 0; i < setGuiModeAction.length; i++) {
-                if(setGuiModeAction[i].getParameter(Action.PARAMETER_NAME).equals(app.getCurrentGuiMode())) {
-                    currentGuiMode = setGuiModeAction[i].getTitle();
-                    break;
-                }
-            }
-            if(forEditing) {
-                p.write("<span>", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_UI_MODE, currentGuiMode, p.getImgType(), "\" alt=\"\""), "&nbsp;</span>");            
-            }
-            else {
-                p.write("<ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
-                p.write("  <li><a href=\"#\" onclick=\"javascript:return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_UI_MODE, currentGuiMode, p.getImgType(), "\" alt=\"\""), "&nbsp;", p.getImg("src=\"images/", WebKeys.ICON_PANEL_DOWN, "\" alt=\"\""), "</a>");
-                p.write("    <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
-                for(int i = 0; i < setGuiModeAction.length; i++) {
-                    Action action = setGuiModeAction[i];
-                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_UI_MODE, action.getTitle(), p.getImgType(), "\" alt=\"\""), "</a></li>");
-                }
-                p.write("    </ul>");
-                p.write("  </li>");        
-                p.write("</ul>");
-            }
-        }
-        catch(Exception e) {
-            new ServiceException(e).log();
-        }
-    }
-    
-    //---------------------------------------------------------------------------------
     public static void paintCurrentDateTime(
         HtmlPage p,
         String separator
@@ -252,7 +211,7 @@ public class SessionInfoControl
             View view = p.getView();        
             Action saveSettingsAction = view.getSaveSettingsAction();
             if(!forEditing) {
-                p.write("<a class=\"", buttonClass, "\" href=\"#\"", p.getOnClick("javascript:", p.getButtonEffectPulsate(), ";new Ajax.Request(", p.getEvalHRef(saveSettingsAction), ", {asynchronous:true});"), ">", saveSettingsAction.getTitle(), "</a>");            
+                p.write("<a class=\"", buttonClass, "\" href=\"#\" onclick=\"javascript:", p.getButtonEffectPulsate(), ";new Ajax.Request(", p.getEvalHRef(saveSettingsAction), ", {asynchronous:true});\">", saveSettingsAction.getTitle(), "</a>");            
             }
         }
         catch(Exception e) {

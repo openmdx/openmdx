@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: MarshallingList.java,v 1.13 2008/04/12 14:14:00 wfro Exp $
+ * Name:        $Id: MarshallingList.java,v 1.14 2008/10/02 17:32:13 hburger Exp $
  * Description: MarshallingList
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/12 14:14:00 $
+ * Date:        $Date: 2008/10/02 17:32:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,15 +56,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.openmdx.base.persistence.spi.Marshaller;
 import org.openmdx.compatibility.base.marshalling.CollectionMarshallerAdapter;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
 
 /**
  * A Marshalling List
  */
-public class MarshallingList<E> extends AbstractList<E> implements Serializable
-{
+@SuppressWarnings("unchecked")
+public class MarshallingList<E> extends AbstractList<E> implements Serializable {
 
     /**
      * Constructor
@@ -73,14 +73,13 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable
      * @param list
      * @param unmarshalling
      */    
-    @SuppressWarnings("unchecked")
     public MarshallingList(
-        org.openmdx.base.persistence.spi.Marshaller marshaller,
-        List<?> list, 
+        Marshaller marshaller,
+        List list, 
         Unmarshalling unmarshalling 
     ) {
         this.marshaller = marshaller;
-        this.list = (List<Object>) list;
+        this.delegate = list;
         this.unmarshalling = unmarshalling;
     }
 
@@ -90,10 +89,9 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable
      * @param marshaller
      * @param list
      */    
-    @SuppressWarnings("unchecked")
     public MarshallingList(
-        org.openmdx.base.persistence.spi.Marshaller marshaller,
-        List<?> list 
+        Marshaller marshaller,
+        List list 
     ) {
         this(marshaller, list, Unmarshalling.EAGER);
     }
@@ -105,8 +103,8 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable
      * @param list
      */    
     public MarshallingList(
-        Marshaller marshaller,
-        List<?> list 
+        org.openmdx.compatibility.base.marshalling.Marshaller marshaller,
+        List list 
     ) {
         this(
             new CollectionMarshallerAdapter(marshaller), 
@@ -115,6 +113,49 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable
         );
     }
 
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3761694498107044406L;
+    
+    /**
+     * 
+     */
+    private List delegate;
+    
+    /**
+     * 
+     */
+    protected final Marshaller marshaller;
+    
+    /**
+     * 
+     */
+    protected final Unmarshalling unmarshalling;
+    
+    /**
+     * Retrieve the delegate
+     * <p>
+     * This method may be overridden by a sub-class for dynamic delegation.
+     * 
+     * @return the delegate
+     */
+    protected List getDelegate(){
+        return this.delegate;
+    }
+
+    /**
+     * Replace the delegate for static delegation
+     * 
+     * @param the new delegate
+     */
+    protected void setDelegate(
+        List delegate
+    ){
+        this.delegate = delegate;
+    }
+    
+    
     //------------------------------------------------------------------------
     // Implements List
     //------------------------------------------------------------------------
@@ -123,9 +164,9 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable
         int index, 
         E element
     ) {
-        this.list.add(
+        getDelegate().add(
             index,
-            this.marshaller.unmarshal(element)
+            marshaller.unmarshal(element)
         ); 
     }
   
@@ -133,8 +174,8 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable
      * @see java.util.Collection#add(java.lang.Object)
      */
     public boolean add(E element) {
-        return this.list.add(
-            this.marshaller.unmarshal(element)
+        return getDelegate().add(
+            marshaller.unmarshal(element)
         );
     }
 
@@ -142,24 +183,23 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable
      * @see java.util.Collection#clear()
      */
     public void clear() {
-        this.list.clear();
+        getDelegate().clear();
     }
 
     /* (non-Javadoc)
      * @see java.util.Collection#contains(java.lang.Object)
      */
     public boolean contains(Object candidate) {
-        return this.list.contains(
-            this.marshaller.unmarshal(candidate)
+        return getDelegate().contains(
+            marshaller.unmarshal(candidate)
         );
     }
 
-    @SuppressWarnings("unchecked")
     public E get(
         int index
     ) {
-        return (E) this.marshaller.marshal(
-            this.list.get(index)
+        return (E) marshaller.marshal(
+            getDelegate().get(index)
         );
     }
 
@@ -172,8 +212,8 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable
                 return super.indexOf(candidate);
             case EAGER:
             default:    
-                return this.list.indexOf(
-                    this.marshaller.unmarshal(candidate)
+                return getDelegate().indexOf(
+                    marshaller.unmarshal(candidate)
                 );
         }
     }
@@ -182,7 +222,7 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable
      * @see java.util.Collection#isEmpty()
      */
     public boolean isEmpty() {
-        return this.list.isEmpty();
+        return getDelegate().isEmpty();
     }
 
     /* (non-Javadoc)
@@ -194,18 +234,17 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable
                 return super.lastIndexOf(candidate);
             case EAGER:
             default:    
-                return this.list.lastIndexOf(
-                    this.marshaller.unmarshal(candidate)
+                return getDelegate().lastIndexOf(
+                    marshaller.unmarshal(candidate)
                 );
         }
     }
 
-    @SuppressWarnings("unchecked")
     public E remove(
         int index
     ) {
-        return (E) this.marshaller.marshal(
-            this.list.remove(index)
+        return (E) marshaller.marshal(
+            getDelegate().remove(index)
         );
     } 
 
@@ -220,122 +259,126 @@ public class MarshallingList<E> extends AbstractList<E> implements Serializable
                 return super.remove(candidate);
             case EAGER:
             default:    
-                return this.list.remove(
-                    this.marshaller.unmarshal(candidate)
+                return getDelegate().remove(
+                    marshaller.unmarshal(candidate)
                 );
         }
     }
 
-    @SuppressWarnings("unchecked")
     public E set(
         int index, 
         E element
     ) {
-        return (E) this.marshaller.marshal(
-            this.list.set(
+        return (E) marshaller.marshal(
+            getDelegate().set(
                 index, 
-                this.marshaller.unmarshal(element)
+                marshaller.unmarshal(element)
             )
         );
     }
 
     public int size(
     ) {
-        return this.list.size();
+        return getDelegate().size();
     }
 
     public Iterator<E> iterator(
     ) {
-        return new MarshallingListIterator<E>();
+        return new MarshallingListIterator(getDelegate().listIterator());
     }
 
     public ListIterator<E> listIterator(
     ) {
-        return new MarshallingListIterator<E>();
+        return new MarshallingListIterator(getDelegate().listIterator());
     }
 
     public ListIterator<E> listIterator(
         int index
     ) {
-        return new MarshallingListIterator<E>(index);
+        return new MarshallingListIterator(getDelegate().listIterator(index));
     }
  
-    //-----------------------------------------------------------------------    
-    public class MarshallingListIterator<T> implements ListIterator<T> {
+    
+    //------------------------------------------------------------------------
+    // Class MarshallingListIterator
+    //-----------------------------------------------------------------------
+    
+    /**
+     * 
+     */
+    class MarshallingListIterator implements ListIterator<E> {
         
-        public MarshallingListIterator(
+        /**
+         * Constructor 
+         *
+         * @param delegate
+         */
+        MarshallingListIterator(
+            ListIterator<?> delegate
         ) {
-            this.iterator = MarshallingList.this.list.listIterator();
+            this.delegate = delegate;
         }
 
-        public MarshallingListIterator(
-            int index
-        ) {
-            this.iterator = MarshallingList.this.list.listIterator(index);
-        }
+        /**
+         * 
+         */
+        private final ListIterator delegate;
 
         public void add(
-            T element
+            E element
         ) {
-            this.iterator.add(
-                MarshallingList.this.marshaller.unmarshal(element)
+            this.delegate.add(
+                marshaller.unmarshal(element)
             );
         }
 
         public boolean hasNext(
         ) {
-            return this.iterator.hasNext();
+            return this.delegate.hasNext();
         }
 
         public boolean hasPrevious(
         ) {
-            return this.iterator.hasPrevious();
+            return this.delegate.hasPrevious();
         }
 
-        @SuppressWarnings("unchecked")        
-        public T next(
+        public E next(
         ) {
-            return (T)MarshallingList.this.marshaller.marshal(this.iterator.next());
+            return (E)marshaller.marshal(
+                this.delegate.next()
+            );
         }
 
         public int nextIndex(
         ) {
-            return this.iterator.nextIndex();
+            return this.delegate.nextIndex();
         }
 
-        @SuppressWarnings("unchecked")        
-        public T previous(
+        public E previous(
         ) {
-            return (T)MarshallingList.this.marshaller.marshal(this.iterator.previous());
+            return (E)marshaller.marshal(
+                this.delegate.previous()
+            );
         }
 
         public int previousIndex(
         ) {
-            return this.iterator.previousIndex();
+            return this.delegate.previousIndex();
         }
 
         public void remove(
         ) {
-            this.iterator.remove();            
+            this.delegate.remove();            
         }
 
         public void set(
-            T element
+            E element
         ) {
-            this.iterator.set(
-                MarshallingList.this.marshaller.unmarshal(element)
+            this.delegate.set(
+                marshaller.unmarshal(element)
             );
         }
        
-        private final ListIterator<Object> iterator;
     }
-
-    //-----------------------------------------------------------------------
-    // Members
-    //-----------------------------------------------------------------------    
-    private static final long serialVersionUID = 3761694498107044406L;
-    protected List<Object> list;
-    protected org.openmdx.base.persistence.spi.Marshaller marshaller;
-    protected final Unmarshalling unmarshalling;
         
 }

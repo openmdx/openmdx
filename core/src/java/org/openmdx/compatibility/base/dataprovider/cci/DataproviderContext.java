@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderContext.java,v 1.9 2008/02/29 17:58:29 hburger Exp $
+ * Name:        $Id: DataproviderContext.java,v 1.10 2008/10/13 14:08:51 hburger Exp $
  * Description: Dataprovider Context
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 17:58:29 $
+ * Date:        $Date: 2008/10/13 14:08:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -132,7 +132,7 @@ public abstract class DataproviderContext
     /**
      * A map representation of the contexts.
      */
-    public final Map contexts(
+    public final Map<Object,Object> contexts(
     ){
         return this.contexts;
     }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ApplicationDecorator.java,v 1.5 2008/01/13 21:37:34 hburger Exp $
+ * Name:        $Id: ApplicationDecorator.java,v 1.6 2008/12/16 15:35:13 hburger Exp $
  * Description: Application Decorator
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/13 21:37:34 $
+ * Date:        $Date: 2008/12/16 15:35:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,7 @@
  */
 package org.openmdx.kernel.application.deploy.lightweight;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -121,6 +122,21 @@ public class ApplicationDecorator implements Application {
      */
     public boolean isExpanded() {
         return this.delegate.isExpanded();
+    }
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Application#getLibraryDirectory()
+     */
+    public String getLibraryDirectory() {
+        return this.delegate.getLibraryDirectory();
+    }
+
+    /**
+     * @return
+     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Application#getApplicationClassPath()
+     */
+    public URL[] getApplicationClassPath() {
+        return this.delegate.getApplicationClassPath();
     }
 
     private final Application delegate;

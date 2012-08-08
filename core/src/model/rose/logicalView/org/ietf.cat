@@ -1,0 +1,109 @@
+
+(object Petal
+    version    	50
+    _written   	"Rose 8.3.0407.2800"
+    charSet    	0)
+
+(object Class_Category "ietf"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"45CB2F7003D8"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "OID"
+	    quid       	"45CB2FE8032C"
+	    documentation 	
+|Universal Object Identifiers
+|
+|The structure and encoding of Oids is defined in ISOIEC-8824 and ISOIEC-8825.
+	    
+	    stereotype 	"primitive")
+	(object Class "UUID"
+	    quid       	"45CB3034002E"
+	    stereotype 	"primitive"))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Primitives"
+	    quid       	"45CB2FE10128"
+	    title      	"Primitives"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::org::ietf::OID" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(581, 141)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(437, 117)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	288
+			justify    	0
+			label      	"OID")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@1
+			location   	(437, 76)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	288
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"45CB2FE8032C"
+		    width      	306
+		    height     	150
+		    annotation 	8)
+		(object ClassView "Class" "Logical View::org::ietf::UUID" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(222, 141)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(75, 117)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	294
+			justify    	0
+			label      	"UUID")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@2
+			location   	(75, 76)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	294
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"45CB3034002E"
+		    width      	312
+		    height     	150
+		    annotation 	8)))))

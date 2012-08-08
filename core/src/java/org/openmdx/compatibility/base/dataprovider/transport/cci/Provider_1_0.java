@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Provider_1_0.java,v 1.6 2008/03/07 22:00:36 hburger Exp $
+ * Name:        $Id: Provider_1_0.java,v 1.7 2008/10/14 16:05:33 hburger Exp $
  * Description: SPICE Provider Layer: Provider interface
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/07 22:00:36 $
+ * Date:        $Date: 2008/10/14 16:05:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,9 +66,8 @@ import org.openmdx.compatibility.base.query.FilterProperty;
 
 
 /**
- * SPICE Provider Layer: Provider interface.
+ * Provider interface.
  */
-@SuppressWarnings("unchecked")
 public interface Provider_1_0 
     extends Synchronization_1_0
 {
@@ -137,7 +136,7 @@ public interface Provider_1_0
      * @exception   ServiceException  NOT_SUPPORTED
      *              if no provider for the given reference filter is reachable.
      */
-    List find(
+    List<Object> find(
         Path referenceFilter,
         FilterProperty[] attributeFilter,
         AttributeSpecifier[] attributeSpecifier,
@@ -161,7 +160,7 @@ public interface Provider_1_0
      * @exception   ServiceException  NOT_SUPPORTED
      *              if no provider for the given reference filter is reachable.
      */
-     List reconstruct(
+     List<Object> reconstruct(
         Path referenceFilter,
         Manager_1_0 manager,
         InputStream criteria
@@ -187,8 +186,8 @@ public interface Provider_1_0
      */
     MappedRecord getDefaultFetchGroup(
       Path identity,
-    Set requestedSet,
-    Manager_1_0 manager
+      Set<String> requestedSet,
+      Manager_1_0 manager
     ) throws ServiceException;
 
     /**
@@ -208,6 +207,7 @@ public interface Provider_1_0
      * @exception ServiceException  NOT_SUPPORTED
      *            if no provider for the given path is reachable.
      */
+    @SuppressWarnings("unchecked")
     void getAttribute(
         Path accessPath,
         String name,

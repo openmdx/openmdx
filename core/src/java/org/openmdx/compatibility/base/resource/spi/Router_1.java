@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Router_1.java,v 1.8 2005/04/08 14:21:04 hburger Exp $
+ * Name:        $Id: Router_1.java,v 1.9 2008/09/10 08:55:29 hburger Exp $
  * Description: Router 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/08 14:21:04 $
+ * Date:        $Date: 2008/09/10 08:55:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,12 +75,10 @@ public class Router_1 implements ConnectionFactory_1_0 {
         if(factories == null || factories.length != 1) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_IMPLEMENTED,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("factories",factories.length),
-                new BasicException.Parameter("minimum",1),
-                new BasicException.Parameter("maximum",1)
-            },
-            "Number of factories must be one at the moment"
+            "Number of factories must be one at the moment",
+            new BasicException.Parameter("factories",factories.length),
+            new BasicException.Parameter("minimum",1),
+            new BasicException.Parameter("maximum",1)
         );
         this.factories = factories;
     }

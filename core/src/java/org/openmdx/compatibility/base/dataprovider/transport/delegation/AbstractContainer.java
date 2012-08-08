@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractContainer.java,v 1.4 2008/01/08 16:16:31 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: AbstractContainer.java,v 1.7 2008/12/15 03:15:29 hburger Exp $
  * Description: Abstract Container
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:31 $
+ * Date:        $Date: 2008/12/15 03:15:29 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,31 +52,82 @@ package org.openmdx.compatibility.base.dataprovider.transport.delegation;
 
 import java.io.Serializable;
 import java.util.AbstractCollection;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
+import javax.jmi.reflect.RefBaseObject;
+import javax.jmi.reflect.RefObject;
+import javax.jmi.reflect.RefPackage;
+
+import org.openmdx.base.accessor.generic.spi.ObjectFilter_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.collection.Container;
-
+import org.openmdx.compatibility.base.query.AbstractFilter;
+import org.openmdx.compatibility.base.query.FilterProperty;
+import org.openmdx.compatibility.base.query.Selector;
+import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 
 /**
  * Abstract Container
  */
-
+@SuppressWarnings("deprecation")
 abstract class AbstractContainer<E>
     extends AbstractCollection<E>
-    implements Container<E>, Serializable
-
-
-
-
-
-
+    implements org.openmdx.compatibility.base.collection.Container<E>, Serializable, RefBaseObject
 {
+
+    /**
+     * Constructor
+     *  
+     * @param attributeFilter
+     *
+     */
+    protected AbstractContainer(
+        Selector attributeFilter
+    ) {
+        this.attributeFilter = attributeFilter;
+    }
+
+    /**
+     * The container's attribute filter
+     */
+    private Selector attributeFilter;
+    
+    /**
+     * The current sequence state has to be requested from the subclass.
+     */
+    private static final long SEQUENCE_INITIALIZATION_PENDING = -2L;
+
+    /**
+     * The subclass has requested to use UUIDs instead of sequence values.
+     */
+    protected static final long SEQUENCE_NOT_SUPPORTED = -1L;
+
+    /**
+     * If sequences are supported by either the application or persistence 
+     * layer.
+     */
+    protected static final long SEQUENCE_MIN_VALUE = 0L;
 
     /**
      * The next qualifier.
      */
     private long nextQualifier = SEQUENCE_INITIALIZATION_PENDING;
 
+    /**
+     * 
+     */
+    private static final String NO_JMI = "JMI objects have to be provided by a higher layer";
+    
+    /**
+     * Retrieve the attribute filter
+     * 
+     * @return the attribute filter
+     */
+    protected final Selector getSelector(){
+        return this.attributeFilter;
+    }
+    
     /**
      * Initial qualifier value callback method.
      * 
@@ -115,21 +165,83 @@ abstract class AbstractContainer<E>
     ){
         this.nextQualifier = SEQUENCE_INITIALIZATION_PENDING;
     }
-
+    
     /**
-     * The current sequence state has to be requested from the subclass.
+     * Retrieve the model
+     * 
+     * @return the model, or <code>null</code> if no model provider is available
      */
-    private static final long SEQUENCE_INITIALIZATION_PENDING = -2L;
-
+    protected abstract Model_1_0 getModel();
+    
     /**
-     * The subclass has requested to use UUIDs instead of sequence values.
+     * Combine the current attribute filter with the requested one.
+     * 
+     * @param filter
+     * 
+     * @return the combined filter; or <code>null</code> if the
+     * actual filter includes the requested one.
      */
-    protected static final long SEQUENCE_NOT_SUPPORTED = -1L;
+    protected Selector combineWith(
+        Object filter
+    ){
+        if(filter == null) {
+            return null;
+        } else {
+            if(this.attributeFilter == null) {
+                return new ObjectFilter_1(
+                    getModel(),
+                    (FilterProperty[])filter
+                );
+            } else {
+                Set<FilterProperty> target = new LinkedHashSet<FilterProperty>();
+                for(FilterProperty e : ((AbstractFilter)this.attributeFilter).getDelegate()) {
+                    target.add(e);
+                }
+                boolean changed = false;
+                for(FilterProperty e : (FilterProperty[])filter) {
+                    changed |= target.add(e);
+                }
+                if(changed) {
+                    return new ObjectFilter_1(
+                        getModel(),
+                        target.toArray(
+                            new FilterProperty[target.size()]
+                        )
+                    );
+                } else {
+                    return null;
+                }
+            }
+        }
+        
+    }
 
-    /**
-     * If sequences are supported by either the application or persistence 
-     * layer.
+    /* (non-Javadoc)
+     * @see javax.jmi.reflect.RefBaseObject#refImmediatePackage()
      */
-    protected static final long SEQUENCE_MIN_VALUE = 0L;
+    public RefPackage refImmediatePackage() {
+        throw new UnsupportedOperationException(NO_JMI);
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jmi.reflect.RefBaseObject#refMetaObject()
+     */
+    public RefObject refMetaObject() {
+        throw new UnsupportedOperationException(NO_JMI);
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jmi.reflect.RefBaseObject#refOutermostPackage()
+     */
+    public RefPackage refOutermostPackage() {
+        throw new UnsupportedOperationException(NO_JMI);
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jmi.reflect.RefBaseObject#refVerifyConstraints(boolean)
+     */
+    public Collection<?> refVerifyConstraints(boolean deepVerify) {
+        return null; // TODO Nothing to be done yet
+    }
 
 }

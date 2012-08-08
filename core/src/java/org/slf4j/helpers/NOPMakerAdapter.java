@@ -1,4 +1,14 @@
+/**
+ * ______________________________________________________________________
+ *
+ * Copyright (c) 2008, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * JAVA 5 support added
+ */
 package org.slf4j.helpers;
+
+import java.util.Map;
 
 import org.slf4j.spi.MDCAdapter;
 
@@ -13,20 +23,28 @@ import org.slf4j.spi.MDCAdapter;
  */
 public class NOPMakerAdapter implements MDCAdapter {
 
-  public void clear() {
-      //
-  }
+    public void clear() {
+        // NOP
+    }
 
-  public String get(String key) {
-    return null;
-  }
+    public String get(String key) {
+        return null;
+    }
 
-  public void put(String key, String val) {
-      //
-  }
+    public void put(String key, String val) {
+        // NOP
+    }
 
-  public void remove(String key) {
-      //
-  }
+    public void remove(String key) {
+        // NOP
+    }
+
+    public Map<String,String> getCopyOfContextMap() {
+        return null;
+    }
+
+    public void setContextMap(Map<String,String> contextMap) {
+        // NOP
+    }
 
 }

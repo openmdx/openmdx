@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: ControlFactory.java,v 1.26 2008/04/04 17:01:06 hburger Exp $
+ * Name:        $Id: ControlFactory.java,v 1.31 2008/12/08 15:30:09 wfro Exp $
  * Description: ControlFactory
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:06 $
+ * Date:        $Date: 2008/12/08 15:30:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -108,6 +105,7 @@ public class ControlFactory
     //-------------------------------------------------------------------------
     public synchronized GridControl createGridControl(
         String id,
+        int perspective,
         String locale,
         int localeAsIndex,
         org.openmdx.ui1.jmi1.Tab tab,
@@ -117,7 +115,7 @@ public class ControlFactory
         org.openmdx.ui1.jmi1.ObjectContainer objectContainer = (org.openmdx.ui1.jmi1.ObjectContainer)tab.getMember().get(0);
         String key = null;
         synchronized(objectContainer) {
-            key = containerClass + "!" + objectContainer.refMofId() + "!" + paneIndex + "!" + locale;
+            key = perspective + "*" + containerClass + "*" + objectContainer.refMofId() + "*" + paneIndex + "*" + locale;
         }
         GridControl gridControl = (GridControl)this.gridControls.get(key);
         if(gridControl == null) {
@@ -143,18 +141,13 @@ public class ControlFactory
         String id,
         String locale,
         int localeAsIndex,
-        TabControl tabControl,
-        org.openmdx.ui1.jmi1.FieldGroup fieldGroup,
-        int fieldGroupIndex
+        org.openmdx.ui1.jmi1.FieldGroup fieldGroup
     ) {
         return new FieldGroupControl(
             id == null ? this.uuidAsString() : id,
             locale,
             localeAsIndex,
-            this,
-            fieldGroup,
-            tabControl,
-            fieldGroupIndex
+            fieldGroup
         );
     }
 
@@ -240,6 +233,7 @@ public class ControlFactory
     //-------------------------------------------------------------------------
     public synchronized ReferencePaneControl createReferencePaneControl(
         String id,
+        int perspective,
         String locale,
         int localeAsIndex,
         org.openmdx.ui1.jmi1.ReferencePane pane,
@@ -248,6 +242,7 @@ public class ControlFactory
     ) {
         return new ReferencePaneControl(
             id == null ? this.uuidAsString() : id,
+            perspective,
             locale,
             localeAsIndex,
             this,
@@ -260,16 +255,18 @@ public class ControlFactory
     //-------------------------------------------------------------------------
     public synchronized ShowInspectorControl createShowInspectorControl(
         String id,
+        int perspective,
         String locale,
         int localeAsIndex,
         org.openmdx.ui1.jmi1.Inspector inspector,
         String forClass
     ) {
-        String key = forClass + ":Show:" + locale;
+        String key = perspective + "*" + forClass + "*Show*" + locale;
         ShowInspectorControl inspectorControl = (ShowInspectorControl)this.inspectorControls.get(key);
         if(inspectorControl == null) {
             inspectorControl = new ShowInspectorControl(
                 id == null ? this.uuidAsString() : id,
+                perspective,
                 locale,
                 localeAsIndex,
                 this,
@@ -289,12 +286,13 @@ public class ControlFactory
     //-------------------------------------------------------------------------
     public synchronized EditInspectorControl createEditInspectorControl(
         String id,
+        int perspective,
         String locale,
         int localeAsIndex,
         org.openmdx.ui1.jmi1.Inspector inspector,
         String forClass
     ) {
-        String key = forClass + ":Edit" + locale;
+        String key = perspective + "*" + forClass + "*Edit*" + locale;
         EditInspectorControl inspectorControl = (EditInspectorControl)this.inspectorControls.get(key);
         if(inspectorControl == null) {
             inspectorControl = new EditInspectorControl(
@@ -398,16 +396,14 @@ public class ControlFactory
                 new Class[]{
                     String.class,
                     String.class,
-                    int.class,
-                    ControlFactory.class
+                    int.class
                 }
             );
             return (Control)cons.newInstance(
                 new Object[]{
                     id == null ? this.uuidAsString() : id,
                     locale,
-                    new Integer(localeAsIndex),
-                    this
+                    new Integer(localeAsIndex)
                 }
             );
         }
@@ -430,7 +426,6 @@ public class ControlFactory
                     String.class,
                     String.class,
                     int.class,
-                    ControlFactory.class,
                     Object[].class
                 }
             );
@@ -439,7 +434,6 @@ public class ControlFactory
                     id == null ? this.uuidAsString() : id,
                     locale,
                     new Integer(localeAsIndex),
-                    this,
                     parameter
                 }
             );

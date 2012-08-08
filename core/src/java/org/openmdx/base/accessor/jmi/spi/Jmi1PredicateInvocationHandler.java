@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1PredicateInvocationHandler.java,v 1.7 2008/05/06 14:53:47 wfro Exp $
+ * Name:        $Id: Jmi1PredicateInvocationHandler.java,v 1.10 2008/11/24 10:17:07 wfro Exp $
  * Description: Jmi1PackageInvocationHandler 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/06 14:53:47 $
+ * Date:        $Date: 2008/11/24 10:17:07 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -58,46 +58,33 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
 
+import javax.jdo.Query;
+
 import org.openmdx.base.accessor.jmi.cci.RefFilter_1_0;
+import org.openmdx.base.accessor.jmi.cci.RefFilter_1_1;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.compatibility.base.query.Quantors;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.w3c.cci2.AnyTypePredicate;
 
 /**
  * Jmi1ObjectInvocationHandler
- *
  */
 public class Jmi1PredicateInvocationHandler implements InvocationHandler {
-    
-    //-----------------------------------------------------------------------
-    public static class RefPredicate_1Proxy extends RefPredicate_1 {
-        
-        public RefPredicate_1Proxy(
-            RefPackage_1_0 refPackage,
-            String filterType,
-            FilterProperty[] filterProperties,
-            AttributeSpecifier[] attributeSpecifiers,
-            RefFilter_1_0 delegateFilter,
-            Short delegateQuantor,
-            String delegateName
-        ) {
-            super(
-                refPackage,
-                filterType,
-                filterProperties,
-                attributeSpecifiers,
-                delegateFilter,
-                delegateQuantor,
-                delegateName
-            );
-        }
-        
-        private static final long serialVersionUID = -6399595381625181656L;
-    }
-    
-    //-----------------------------------------------------------------------
+
+    /**
+     * Constructor 
+     *
+     * @param refPackage
+     * @param filterType
+     * @param filterProperties
+     * @param attributeSpecifiers
+     * @param delegateFilter
+     * @param delegateQuantor
+     * @param delegateName
+     */
     public Jmi1PredicateInvocationHandler(
         RefPackage_1_0 refPackage,
         String filterType,
@@ -118,7 +105,11 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
         );
     }
 
-    //-----------------------------------------------------------------------
+    /**
+     * 
+     */
+    protected final RefPredicate_1 delegate;
+
     /* (non-Javadoc)
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
@@ -127,131 +118,156 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
         Method method, 
         Object[] args
     ) throws Throwable {
-        // RefObject
-        if(
-            method.getName().startsWith("ref") && 
-            (method.getName().length() > 3) &&
-            Character.isUpperCase(method.getName().charAt(3))
+        Class<?> declaringClass = method.getDeclaringClass();
+        String methodName = method.getName();
+        if(declaringClass == Object.class) {
+            if("toString".equals(methodName)) {
+                return this.delegate.toString();
+            } 
+            else if("hashCode".equals(methodName)) {
+                return this.delegate.hashCode();
+            } 
+            else if ("equals".equals(methodName)) {
+                return args[0] == proxy; // Identity
+            }
+        } 
+        else if (
+            declaringClass == Query.class ||
+            declaringClass == RefFilter_1_0.class ||
+            declaringClass == RefFilter_1_1.class 
         ) {
             try {
                 return method.invoke(
                     this.delegate, 
                     args
                 );
-            }
-            catch(InvocationTargetException e) {
+            } catch(InvocationTargetException e) {
                 throw e.getTargetException();
             }
+        } 
+        else if (declaringClass == AnyTypePredicate.class) {
+            if("equalTo".equals(methodName)) {
+                this.delegate.equalTo(
+                    args[0]
+                );
+                return null;
+            } 
+            else if("notEqualTo".equals(methodName)) {
+                this.delegate.notEqualTo(
+                    args[0]
+                );
+                return null;
+            } 
+            else if("elementOf".equals(methodName)) {
+                if(args[0] == null) {
+                    this.delegate.elementOf(
+                        Collections.EMPTY_SET
+                    );
+                    return null;
+                } 
+                else if (args[0] instanceof Collection){
+                    this.delegate.elementOf(
+                        (Collection<?>)args[0]
+                    );
+                    return null;
+                } 
+                else if (args[0].getClass().isArray()) {
+                    this.delegate.elementOf(
+                        (Object[])args[0]
+                    );
+                    return null;
+                } 
+                else throw new IllegalArgumentException(
+                    "Invalid argument for 'elementOf': " + args[0].getClass().getName()
+                );
+            } 
+            else if("notAnElementOf".equals(methodName)) {
+                if(args[0] == null) {
+                    this.delegate.notAnElementOf(
+                        Collections.EMPTY_SET
+                    );
+                    return null;
+                } 
+                else if (args[0] instanceof Collection){
+                    this.delegate.notAnElementOf(
+                        (Collection<?>)args[0]
+                    );
+                    return null;
+                } 
+                else if (args[0].getClass().isArray()) {
+                    this.delegate.notAnElementOf(
+                        (Object[])args[0]
+                    );
+                    return null;
+                } 
+                else throw new IllegalArgumentException(
+                    "Invalid argument for 'notAnElementOf': " + args[0].getClass().getName()
+                );
+            }        
         }
-        // orderBy
-        else if(method.getName().startsWith("orderBy")) {
+        else if(methodName.startsWith("orderBy")) {
+            //
+            // orderBy
+            //
             ModelElement_1_0 feature = this.delegate.getFeatureMapper().getFeature(
-                method.getName().substring(7),
+                methodName.substring(7),
                 FeatureMapper.MethodSignature.PREDICATE                                
             );
             String featureName = (String)feature.values("name").get(0);
             return this.delegate.refGetOrder(
                 featureName
             );
-        }
-        // thereExists
-        else if(method.getName().startsWith("thereExists")) {
-            ModelElement_1_0 feature = this.delegate.getFeatureMapper().getFeature(
-                method.getName().substring(11),
-                FeatureMapper.MethodSignature.PREDICATE                                
-            );
-            String featureName = (String)feature.values("name").get(0);
-            return "thereExistsContext".equals(method.getName())
-                ? this.delegate.refGetPredicate(
+        } 
+        else if(methodName.startsWith("thereExists")) {
+            //
+            // thereExists
+            //
+            if("thereExistsContext".equals(methodName)) {
+                return this.delegate.refGetPredicate(
                     Quantors.THERE_EXISTS,
                     "org:openmdx:base:ContextCapable:context"
-                  )
-                : this.delegate.refGetPredicate(
+                );
+            } 
+            else {
+                ModelElement_1_0 feature = this.delegate.getFeatureMapper().getFeature(
+                    methodName.substring(11),
+                    FeatureMapper.MethodSignature.PREDICATE                                
+                );
+                String featureName = (String)feature.values("name").get(0);
+                return this.delegate.refGetPredicate(
                     Quantors.THERE_EXISTS,
                     featureName
-                  );
-        }
-        // forAll
-        else if(method.getName().startsWith("forAll")) {
-            ModelElement_1_0 feature = this.delegate.getFeatureMapper().getFeature(
-                method.getName().substring(6),
-                FeatureMapper.MethodSignature.PREDICATE                
-            );
-            String featureName = (String)feature.values("name").get(0);
-            return "thereExistsContext".equals(method.getName())
-                ? this.delegate.refGetPredicate(
+                );
+            }
+        } 
+        else if(methodName.startsWith("forAll")) {
+            //
+            // forAll
+            //
+            if("forAllContext".equals(methodName)){
+                return this.delegate.refGetPredicate(
                     Quantors.FOR_ALL,
                     "org:openmdx:base:ContextCapable:context"
-                  )
-                : this.delegate.refGetPredicate(
+                );
+            } 
+            else {
+                ModelElement_1_0 feature = this.delegate.getFeatureMapper().getFeature(
+                    methodName.substring(6),
+                    FeatureMapper.MethodSignature.PREDICATE                
+                );
+                String featureName = (String)feature.values("name").get(0);
+                return this.delegate.refGetPredicate(
                     Quantors.FOR_ALL,
                     featureName
-                  );
-        }
-        // equalTo
-        else if("equalTo".equals(method.getName())) {
-            this.delegate.equalTo(
-                args[0]
-            );
-            return null;
-        }        
-        // notEqualTo
-        else if("notEqualTo".equals(method.getName())) {
-            this.delegate.notEqualTo(
-                args[0]
-            );
-            return null;
-        }        
-        // elementOf
-        else if("elementOf".equals(method.getName())) {
-            if(args[0] == null) {
-                this.delegate.elementOf(
-                    Collections.EMPTY_SET
                 );
-                return null;
-            } else if (args[0] instanceof Collection){
-                this.delegate.elementOf(
-                    (Collection<?>)args[0]
-                );
-                return null;
-            } else if (args[0].getClass().isArray()) {
-                this.delegate.elementOf(
-                    (Object[])args[0]
-                );
-                return null;
-            } else throw new IllegalArgumentException(
-                "Invalid argument for 'elementOf': " + args[0].getClass().getName()
-            );
-        }        
-        // notAnElementOf
-        else if("notAnElementOf".equals(method.getName())) {
-            if(args[0] == null) {
-                this.delegate.elementOf(
-                    Collections.EMPTY_SET
-                );
-                return null;
-            } else if (args[0] instanceof Collection){
-                this.delegate.notAnElementOf(
-                    (Collection<?>)args[0]
-                );
-                return null;
-            } else if (args[0].getClass().isArray()) {
-                this.delegate.notAnElementOf(
-                    (Object[])args[0]
-                );
-                return null;
-            } else throw new IllegalArgumentException(
-                "Invalid argument for 'notAnElementOf': " + args[0].getClass().getName()
-            );
-        }        
-        // Object
-        else if("toString".equals(method.getName())) {
-            return this.delegate.toString();
-        }
-        // Predicate
-        else if((args == null) || (args.length == 0)) {
+            }
+        } 
+        else if(args == null || args.length == 0) {
+            //
+            // Predicate
+            //
             ModelElement_1_0 feature = this.delegate.getFeatureMapper().getFeature(
-                method.getName(),
+                methodName,
                 FeatureMapper.MethodSignature.PREDICATE                
             );
             String featureName = (String)feature.values("name").get(0);            
@@ -259,12 +275,54 @@ public class Jmi1PredicateInvocationHandler implements InvocationHandler {
                 featureName
             );
         }
-        throw new UnsupportedOperationException(method.getName());
+        throw new UnsupportedOperationException(methodName);
     }
+
+    //------------------------------------------------------------------------
+    // Class RefPredicate_1Proxy
+    //------------------------------------------------------------------------
     
-    //-----------------------------------------------------------------------
-    // Members
-    //-----------------------------------------------------------------------
-    protected final RefPredicate_1 delegate;
-    
+    /**
+     * RefPredicate_1Proxy
+     */
+    public static class RefPredicate_1Proxy extends RefPredicate_1 {
+
+        /**
+         * Constructor 
+         *
+         * @param refPackage
+         * @param filterType
+         * @param filterProperties
+         * @param attributeSpecifiers
+         * @param delegateFilter
+         * @param delegateQuantor
+         * @param delegateName
+         */
+        public RefPredicate_1Proxy(
+            RefPackage_1_0 refPackage,
+            String filterType,
+            FilterProperty[] filterProperties,
+            AttributeSpecifier[] attributeSpecifiers,
+            RefFilter_1_0 delegateFilter,
+            Short delegateQuantor,
+            String delegateName
+        ) {
+            super(
+                refPackage,
+                filterType,
+                filterProperties,
+                attributeSpecifiers,
+                delegateFilter,
+                delegateQuantor,
+                delegateName
+            );
+        }
+
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = -6399595381625181656L;
+
+    }
+
 }

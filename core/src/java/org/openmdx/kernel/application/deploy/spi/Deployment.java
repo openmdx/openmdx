@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Deployment.java,v 1.18 2008/01/13 21:37:34 hburger Exp $
+ * Name:        $Id: Deployment.java,v 1.21 2008/12/16 15:35:06 hburger Exp $
  * Description: Deployment 
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/13 21:37:34 $
+ * Date:        $Date: 2008/12/16 15:35:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,6 @@ import javax.naming.NamingException;
 import javax.naming.Reference;
 
 import org.openmdx.kernel.application.configuration.Configuration;
-
 
 /**
  * Deployment
@@ -132,6 +131,29 @@ public interface Deployment {
          * @return all modules of this application
          */
         List<Module> getModules();
+
+        /**
+         * The library-directory element specifies the pathname
+         * of a directory within the application package, relative
+         * to the top level of the application package. All files 
+         * named "*.jar" in this directory must be made available
+         * in the class path of all components included in this
+         * application package.  If this element isn't specified,
+         * the directory named "lib" is searched.  An empty element
+         * may be used to disable searching.
+         * 
+         * @return the library directory, or <code>""</code> to disable
+         * searching
+         */
+        String getLibraryDirectory(
+        );
+        
+        /**
+         * Retrieve the class path for the JARs in the library-directory 
+         * 
+         * @return the application's class path
+         */
+        URL[] getApplicationClassPath();
 
     }
     
@@ -280,7 +302,7 @@ public interface Deployment {
 
     }
 
-        /**
+    /**
      * An openMDX Pool 
      */
     interface Pool {
@@ -328,6 +350,65 @@ public interface Deployment {
          */
         Long getMaximumWait(
         ); 
+
+        /**
+         * Returns the cap on the number of "idle" instances in the pool.
+         * @return the cap on the number of "idle" instances in the pool.
+         */
+        Integer getMaximumIdle();
+        
+        /**
+         * Returns the minimum number of objects allowed in the pool
+         * before the evictor thread (if active) spawns new objects.
+         * (Note no objects are created when: numActive + numIdle >= maxActive)
+         *
+         * @return The minimum number of objects.
+         */
+        Integer getMinimumIdle();
+        
+        /**
+         * When <tt>true</tt>, objects will be validated
+         * before being returned by the borrowObject()
+         * method.  If the object fails to validate,
+         * it will be dropped from the pool, and we will attempt
+         * to borrow another.
+         */
+        Boolean getTestOnBorrow();
+        
+        /**
+         * When <tt>true</tt>, objects will be validated
+         * before being returned to the pool within the
+         * returnObject().
+         */
+        Boolean getTestOnReturn();
+        
+        /**
+         * Returns the number of milliseconds to sleep between runs of the
+         * idle object evictor thread.
+         * When non-positive, no idle object evictor thread will be
+         * run.
+         */
+        Long getTimeBetweenEvictionRuns();
+
+        /**
+         * Returns the number of objects to examine during each run of the
+         * idle object evictor thread (if any).
+         */
+        Integer getNumberOfTestsPerEvictionRun();
+        
+        /**
+         * Returns the minimum amount of time an object may sit idle in the pool
+         * before it is eligable for eviction by the idle object evictor
+         * (if any).
+         */
+        Long getMinimumEvictableIdleTime();
+        
+        /**
+         * When <tt>true</tt>, objects will be validated
+         * by the idle object evictor (if any).  If an object
+         * fails to validate, it will be dropped from the pool.
+         */
+        Boolean getTestWhileIdle();
         
     }
 
@@ -911,7 +992,7 @@ public interface Deployment {
          * 
          * @return the list of methods
          */
-        List<String> getMethod();
+        List<Method> getMethod();
         
         /**
          * The trans-attributeType specifies how the container must manage the 

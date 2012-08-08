@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectEventHandler.java,v 1.29 2008/05/31 23:40:08 wfro Exp $
+ * Name:        $Id: ShowObjectEventHandler.java,v 1.40 2008/11/27 01:51:26 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.40 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/31 23:40:08 $
+ * Date:        $Date: 2008/11/27 01:51:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.eventhandler;
 
@@ -160,8 +157,7 @@ public class ShowObjectEventHandler {
                             historyActions,
                             currentView.getLookupType(),
                             currentView.getRestrictToElements(),
-                            ViewMode.STANDARD,
-                            currentView.getControlFactory()
+                            ViewMode.STANDARD
                         );
                     }
                     // EVENT_SELECT_AND_NEW_OBJECT
@@ -180,8 +176,7 @@ public class ShowObjectEventHandler {
                             currentView.getRestrictToElements(),
                             parent,
                             forReference,
-                            ViewMode.STANDARD,
-                            currentView.getControlFactory()
+                            ViewMode.STANDARD
                         );
                     }
                     else {
@@ -192,14 +187,15 @@ public class ShowObjectEventHandler {
                             application,
                             historyActions,
                             currentView.getLookupType(),
-                            currentView.getRestrictToElements(),
-                            currentView.getControlFactory()
+                            currentView.getRestrictToElements()
                         );
-                        // show same grid in refreshed object
+                        // Show same grid in refreshed object
                         if (event == Action.EVENT_RELOAD) {
                             ShowObjectView view = (ShowObjectView) nextView;
-                            for (int i = 0; i < currentView.getReferencePane().length; i++) {
-                                view.getReferencePane()[i].selectReference(currentView.getReferencePane()[i].getSelectedReference());
+                            if(view.getReferencePane().length == currentView.getReferencePane().length) {
+                                for (int i = 0; i < currentView.getReferencePane().length; i++) {
+                                    view.getReferencePane()[i].selectReference(currentView.getReferencePane()[i].getSelectedReference());
+                                }
                             }
                         }
                         // SELECT_OBJECT and reference pane (specified with
@@ -260,8 +256,7 @@ public class ShowObjectEventHandler {
                         application,
                         currentView.createHistoryAppendCurrent(),
                         currentView.getLookupType(),
-                        currentView.getRestrictToElements(),
-                        currentView.getControlFactory()
+                        currentView.getRestrictToElements()
                     );
                     nextView.setMacro(
                         new Object[]{
@@ -296,8 +291,7 @@ public class ShowObjectEventHandler {
                         currentView.getRestrictToElements(),
                         ViewMode.valueOf(
                             Action.getParameter(parameter, Action.PARAMETER_MODE)
-                        ),
-                        currentView.getControlFactory()
+                        )
                     );
                 }
                 catch (Exception e) {
@@ -328,8 +322,7 @@ public class ShowObjectEventHandler {
                         currentView.getRestrictToElements(),
                         parent,
                         forReference,
-                        ViewMode.STANDARD,
-                        currentView.getControlFactory()
+                        ViewMode.STANDARD
                     );
                 }
                 catch (Exception e) {
@@ -353,8 +346,7 @@ public class ShowObjectEventHandler {
                         application,
                         currentView.getHistoryActions(),
                         currentView.getLookupType(),
-                        currentView.getRestrictToElements(),
-                        currentView.getControlFactory()
+                        currentView.getRestrictToElements()
                     );
                     ShowObjectView view = (ShowObjectView) nextView;
                     for (int i = 0; i < currentView.getReferencePane().length; i++) {
@@ -370,11 +362,11 @@ public class ShowObjectEventHandler {
                 }
                 break;
     
-            case Action.EVENT_SELECT_GUI_MODE: {
+            case Action.EVENT_SELECT_PERSPECTIVE:
                 try {
-                    String guiLookName = Action.getParameter(parameter, Action.PARAMETER_NAME);
-                    AppLog.trace("setting gui look", guiLookName);
-                    application.setCurrentGuiMode(guiLookName);
+                    String perspective = Action.getParameter(parameter, Action.PARAMETER_ID);
+                    AppLog.trace("Setting perspective", perspective);
+                    application.setCurrentPerspective(Integer.valueOf(perspective));
                     nextView = new ShowObjectView(
                         currentView.getId(),
                         currentView.getContainerElementId(),
@@ -382,23 +374,17 @@ public class ShowObjectEventHandler {
                         application,
                         currentView.getHistoryActions(),
                         currentView.getLookupType(),
-                        currentView.getRestrictToElements(),
-                        currentView.getControlFactory()
+                        currentView.getRestrictToElements()
                     );
-                    ShowObjectView view = (ShowObjectView) nextView;
-                    for (int i = 0; i < currentView.getReferencePane().length; i++) {
-                        view.getReferencePane()[i].selectReference(currentView.getReferencePane()[i].getSelectedReference());
-                    }
                 }
                 catch (Exception e) {
                     ServiceException e0 = new ServiceException(e);
                     AppLog.warning(e0.getMessage(), e0.getCause());
                     application.addErrorMessage(
-                        application.getTexts().getErrorTextCannotSetLocale(),
+                        application.getTexts().getErrorTextCannotSetPerspective(),
                         new String[] { parameter, e.getMessage() });
                 }
                 break;
-            }
     
             case Action.EVENT_DELETE: {
                 try {
@@ -413,7 +399,7 @@ public class ShowObjectEventHandler {
                     try {
                         pm.currentTransaction().rollback();
                     } catch (Exception e1) {}
-                    currentView.handleCanNotCommitException(e0.getExceptionStack());
+                    currentView.handleCanNotCommitException(e0.getCause());
                 }
                 break;
             }
@@ -436,7 +422,7 @@ public class ShowObjectEventHandler {
                     try {
                         pm.currentTransaction().rollback();
                     } catch (Exception e1) {}
-                    currentView.handleCanNotCommitException(e0.getExceptionStack());
+                    currentView.handleCanNotCommitException(e0.getCause());
                 }
                 break;
             }
@@ -571,13 +557,12 @@ public class ShowObjectEventHandler {
                                     Arrays.asList(new Object[]{param})
                                 );
                                 pm.currentTransaction().commit();
-                                // Test whether object is still accessable. If not
+                                // Test whether object is still accessible. If not
                                 // go back to previous view. Notify other views about object update
                                 try {
                                     currentView.getRefObject().refRefresh();
                                     EventHandlerHelper.notifyObjectModified(
-                                        showViewsCache,
-                                        currentView.getRefObject()
+                                        showViewsCache
                                     );     
                                     RefObject_1_0 newTarget = application.getPortalExtension().handleOperationResult(
                                         currentView.getRefObject(), 
@@ -629,8 +614,7 @@ public class ShowObjectEventHandler {
                                             application,
                                             historyActions,
                                             currentView.getLookupType(),
-                                            currentView.getRestrictToElements(),
-                                            currentView.getControlFactory()
+                                            currentView.getRestrictToElements()
                                         );
                                     }
                                 }
@@ -640,14 +624,14 @@ public class ShowObjectEventHandler {
                             }
                             catch(Exception e) {
                                 ServiceException e0 = new ServiceException(e);
-                                AppLog.info(e0.getMessage(), e0.getCause());
+                                AppLog.warning(e0.getMessage(), e0.getCause());
                                 try {
                                     pm.currentTransaction().rollback();
                                 }
                                 catch (Exception e1) {
                                 }
                                 currentView.handleCanNotInvokeOperationException(
-                                    e0.getExceptionStack(), tab.getOperationTabControl().getOperationName()
+                                    e0.getCause(), tab.getOperationTabControl().getOperationName()
                                 );
                             }
                         }
@@ -710,20 +694,24 @@ public class ShowObjectEventHandler {
                                     // Edit existing object
                                     if (objectXri.startsWith(XriProtocols.OPENMDX_PREFIX)) {
                                         Path objectIdentity = new Path(objectXri);
-                                        RefObject_1_0 editObject = (RefObject_1_0)pm.getObjectById(objectIdentity);                                    
-                                        editView = new EditObjectView(
-                                            currentView.getId(),
-                                            currentView.getContainerElementId(),
-                                            editObject, 
-                                            null, 
-                                            application, 
-                                            currentView.getPersistenceManager(),
-                                            MapUtils.orderedMap(new HashMap()), 
-                                            currentView.getLookupType(),
-                                            currentView.getRestrictToElements(),
-                                            ViewMode.STANDARD,
-                                            currentView.getControlFactory()
-                                        );
+                                        RefObject_1_0 editObject = (RefObject_1_0)pm.getObjectById(objectIdentity);
+                                        try {
+                                            editView = new EditObjectView(
+                                                currentView.getId(),
+                                                currentView.getContainerElementId(),
+                                                editObject, 
+                                                null, 
+                                                application, 
+                                                currentView.getPersistenceManager(),
+                                                MapUtils.orderedMap(new HashMap()), 
+                                                currentView.getLookupType(),
+                                                currentView.getRestrictToElements(),
+                                                ViewMode.STANDARD
+                                            );
+                                        }
+                                        catch(ServiceException e) {
+                                            AppLog.warning(e.getMessage(), e.getCause());
+                                        }
                                     }
                                     // Create new object from existing
                                     else if (objectXri.startsWith("clonedFrom:")) {
@@ -731,40 +719,48 @@ public class ShowObjectEventHandler {
                                         RefObject_1_0 existingObject = (RefObject_1_0)pm.getObjectById(objectIdentity);
                                         RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(existingObject.refClass().refMofId()).refCreateInstance(null);
                                         newObject.refInitialize(existingObject);
-                                        editView = new EditObjectView(
-                                            currentView.getId(), 
-                                            currentView.getContainerElementId(),
-                                            newObject, 
-                                            null, 
-                                            application, 
-                                            currentView.getPersistenceManager(),
-                                            MapUtils.orderedMap(new HashMap()), 
-                                            currentView.getLookupType(),
-                                            currentView.getRestrictToElements(),
-                                            parent, 
-                                            grid.getGridControl().getObjectContainer().getReferenceName(), 
-                                            ViewMode.STANDARD,
-                                            currentView.getControlFactory()
-                                        );
+                                        try {
+                                            editView = new EditObjectView(
+                                                currentView.getId(), 
+                                                currentView.getContainerElementId(),
+                                                newObject, 
+                                                null, 
+                                                application, 
+                                                currentView.getPersistenceManager(),
+                                                MapUtils.orderedMap(new HashMap()), 
+                                                currentView.getLookupType(),
+                                                currentView.getRestrictToElements(),
+                                                parent, 
+                                                grid.getGridControl().getObjectContainer().getReferenceName(), 
+                                                ViewMode.STANDARD
+                                            );
+                                        }
+                                        catch(ServiceException e) {
+                                            AppLog.warning(e.getMessage(), e.getCause());
+                                        }
                                     }
                                     // Create new object
                                     else {
                                         RefObject_1_0 newObject = (RefObject_1_0)parent.refOutermostPackage().refClass(objectXri).refCreateInstance(null);
-                                        editView = new EditObjectView(
-                                            currentView.getId(), 
-                                            currentView.getContainerElementId(),
-                                            newObject, 
-                                            null, 
-                                            application, 
-                                            currentView.getPersistenceManager(),
-                                            MapUtils.orderedMap(new HashMap()), 
-                                            currentView.getLookupType(),
-                                            currentView.getRestrictToElements(),
-                                            parent, 
-                                            grid.getGridControl().getObjectContainer().getReferenceName(), 
-                                            ViewMode.STANDARD,
-                                            currentView.getControlFactory()                                        
-                                        );
+                                        try {
+                                            editView = new EditObjectView(
+                                                currentView.getId(), 
+                                                currentView.getContainerElementId(),
+                                                newObject, 
+                                                null, 
+                                                application, 
+                                                currentView.getPersistenceManager(),
+                                                MapUtils.orderedMap(new HashMap()), 
+                                                currentView.getLookupType(),
+                                                currentView.getRestrictToElements(),
+                                                parent, 
+                                                grid.getGridControl().getObjectContainer().getReferenceName(), 
+                                                ViewMode.STANDARD
+                                            );
+                                        }
+                                        catch(ServiceException e) {
+                                            AppLog.warning(e.getMessage(), e.getCause());
+                                        }
                                     }
                                     // Process edit request
                                     if(editView != null) {
@@ -779,7 +775,7 @@ public class ShowObjectEventHandler {
                                                 pm.currentTransaction().rollback();
                                             }
                                             catch (Exception e1) {}
-                                            currentView.handleCanNotCommitException(e0.getExceptionStack());
+                                            currentView.handleCanNotCommitException(e0.getCause());
                                         }
                                     }
                                 }
@@ -822,10 +818,10 @@ public class ShowObjectEventHandler {
             (event == Action.EVENT_DELETE) ||
             (event == Action.EVENT_MULTI_DELETE) ||
             (event == Action.EVENT_INVOKE_OPERATION) ||
-            (event == Action.EVENT_SELECT_GUI_MODE) ||
             (event == Action.EVENT_MACRO) ||
             (event == Action.EVENT_OBJECT_GET_ATTRIBUTES) ||
-            (event == Action.EVENT_SAVE_GRID);
+            (event == Action.EVENT_SAVE_GRID) ||
+            (event == Action.EVENT_SELECT_PERSPECTIVE);
     }
     
 }

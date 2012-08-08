@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SysLogLoggerAdapter.java,v 1.2 2008/05/05 17:50:04 hburger Exp $
+ * Name:        $Id: SysLogLoggerAdapter.java,v 1.3 2008/11/18 01:26:55 hburger Exp $
  * Description: Object Relational Mapping 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/05 17:50:04 $
+ * Date:        $Date: 2008/11/18 01:26:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,7 +68,7 @@ public final class SysLogLoggerAdapter
     implements LocationAwareLogger 
 {
 
-    // WARN: SysLogLoggerAdapter constructor should have only package access so
+	// WARN: SysLogLoggerAdapter constructor should have only package access so
     // that only SysLogLoggerFactory be able to create one.
     SysLogLoggerAdapter(
         String logName
@@ -76,6 +76,11 @@ public final class SysLogLoggerAdapter
         this.logName = logName;
         this.singleton = SysLog.getLogger();
     }
+
+    /**
+	 * Implements <code>Serializable</code>
+	 */
+	private static final long serialVersionUID = -8869832637551915409L;
 
     /**
      * 

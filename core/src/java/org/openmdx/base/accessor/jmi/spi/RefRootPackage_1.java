@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RefRootPackage_1.java,v 1.66 2008/07/06 21:01:45 wfro Exp $
+ * Name:        $Id: RefRootPackage_1.java,v 1.88 2008/12/17 14:27:27 wfro Exp $
  * Description: RefRootPackage_1 class
- * Revision:    $Revision: 1.66 $
+ * Revision:    $Revision: 1.88 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/06 21:01:45 $
+ * Date:        $Date: 2008/12/17 14:27:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,70 +50,76 @@
  */
 package org.openmdx.base.accessor.jmi.spi;
 
+import java.beans.ExceptionListener;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalInternalException;
+import javax.jdo.JDOFatalUserException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.datastore.JDOConnection;
 import javax.jdo.spi.PersistenceCapable;
+import javax.jmi.reflect.InvalidObjectException;
 import javax.jmi.reflect.RefClass;
+import javax.jmi.reflect.RefException;
+import javax.jmi.reflect.RefFeatured;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
 import javax.resource.cci.InteractionSpec;
+import javax.security.auth.Subject;
 
+import org.openmdx.base.accessor.generic.cci.ObjectFactoryBuilder_1_0;
 import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0;
-import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_2;
 import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_3;
-import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_4;
 import org.openmdx.base.accessor.generic.cci.Object_1_0;
-import org.openmdx.base.accessor.generic.spi.MultithreadedObjectFactory_1;
-import org.openmdx.base.accessor.generic.spi.ViewObject_1_0;
+import org.openmdx.base.accessor.generic.spi.Delegating_1_0;
+import org.openmdx.base.accessor.generic.spi.InteractionSpecs;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
-import org.openmdx.base.accessor.jmi.cci.RefClass_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.accessor.jmi.cci.RefPackageFactory_1_2;
+import org.openmdx.base.accessor.jmi.cci.RefPackageFactory_1_1;
+import org.openmdx.base.accessor.jmi.cci.RefPackageFactory_1_3;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_1;
-import org.openmdx.base.accessor.jmi.cci.RefPackage_1_2;
+import org.openmdx.base.accessor.jmi.cci.RefPackage_1_3;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_4;
 import org.openmdx.base.exception.NotSupportedException;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.object.spi.InstanceLifecycleNotifier;
+import org.openmdx.base.persistence.cci.UserObjects;
+import org.openmdx.base.persistence.spi.AbstractManagerFactory;
 import org.openmdx.base.persistence.spi.Entity_2_0;
-import org.openmdx.base.persistence.spi.OptimisticTransaction_2_0;
+import org.openmdx.base.persistence.spi.PersistenceManagerFactory_2_0;
 import org.openmdx.base.transaction.UnitOfWork_1_0;
-import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1Factory;
-import org.openmdx.compatibility.base.dataprovider.transport.spi.Connection_1_3;
-import org.openmdx.compatibility.base.exception.StackedException;
 import org.openmdx.compatibility.base.marshalling.CachingMarshaller;
 import org.openmdx.compatibility.base.marshalling.CachingMarshaller_1_0;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.accessor.basic.cci.ModelHolder_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_6;
 import org.openmdx.model1.accessor.basic.spi.Model_1;
 import org.openmdx.model1.mapping.Names;
 import org.openmdx.model1.mapping.java.Identifier;
@@ -125,198 +131,171 @@ import org.openmdx.model1.mapping.java.Identifier;
  */
 public class RefRootPackage_1
     extends RefPackage_1
-    implements RefPackageFactory_1_2, CachingMarshaller_1_0, Serializable 
+    implements RefPackage_1_6, RefPackageFactory_1_3, ExceptionListener 
 {
 
     /**
      * Constructor 
      *
+     * @param viewManager
+     * @param legacyDelegate
      * @param objectFactory
+     * @param standardDelegate
+     * @param packageImpls
+     * @param userObjects
+     * @param userContext
      * @param persistenceManagerFactory
-     * @param bindingPackageSuffix
-     * @param optimisticTransaction TODO
+     * @param principals 
+     * @param accessor 
+     * @param viewContext
      */
     RefRootPackage_1(
-        ObjectFactory_1_4 objectFactory,
+        ConcurrentMap<InteractionSpec,RefPackage_1_6> viewManager,
+        InteractionSpec interactionSpec,
+        boolean legacyDelegate,
+        ObjectFactory_1_0 objectFactory,
+        PersistenceManager standardDelegate,
+        Map<String,String>  packageImpls,
+        Map<String, Object> userObjects,
+        Object userContext,
         PersistenceManagerFactory persistenceManagerFactory,
-        String bindingPackageSuffix, 
-        OptimisticTransaction_2_0 optimisticTransaction
+        Set<? extends Principal> principals, 
+        boolean accessor
+    ) {
+        super(
+            null, // outermostPackage
+            null // immediatePackage 
+        );
+        this.viewManager = viewManager;
+        this.interactionSpec = interactionSpec;
+        this.legacyDelegate = legacyDelegate;
+        this.objectFactory = objectFactory;
+        this.standardDelegate = standardDelegate;
+        this.packageImpls = packageImpls;
+        this.userObjects = userObjects;
+        this.userContext = userContext;
+        String bindingPackageSuffix = persistenceManagerFactory instanceof PersistenceManagerFactory_2_0 ?
+            ((PersistenceManagerFactory_2_0)persistenceManagerFactory).getBindingPackageSuffix() :
+            null;
+        this.bindingPackageSuffix = bindingPackageSuffix == null ? Names.JMI1_PACKAGE_SUFFIX : bindingPackageSuffix;
+        this.loadedPackages = new ConcurrentHashMap<String,RefPackage>();
+        this.marshaller = new RefObject_1Marshaller(
+        );
+        this.persistenceManager = null; // Lazy initialization
+        this.persistenceManagerFactory = persistenceManagerFactory;
+        this.principals = principals == null ? NO_PRINCIPALS : principals;
+        this.accessor = accessor;
+        SysLog.detail("configured package implementations", this.packageImpls);
+    }
+
+    /**
+     * Constructor
+     * <p><em>
+     * Note:<br>
+     * This constructor is invoked reflectively by PersistenceManagerFactory_2.
+     * </em><p>
+     * @param persistenceManagerFactory the PersistenceManagerFactory
+     *        representing this RefPackage.
+     * @param objectFactory delegation object factory. This JMI implementation
+     *        implements the facade pattern. The 'real' objects are managed by
+     *        the specified object factory. The JMI classes put a typed JMI
+     *        facade on top of the objects managed by the factory. All object
+     *        handling is performed by the object factory.
+     * @param packageImpls Specifies the location of the JMI implementation 
+     *        classes in the format [key=<qualified package name>,value=<java
+     *        package name>]. The marshaller looks up the implementation classes
+     *        at the specified location.
+     * @param userObjects the user objects to be propagated to each persistence
+     *        manager
+     * @param principals the principals 
+     *        
+     * @throws ServiceException 
+     * 
+     * @see org.openmdx.compatibility.base.dataprovider.kernel.ManagerFactory_2
+     */
+    public RefRootPackage_1(
+        PersistenceManagerFactory persistenceManagerFactory,
+        ObjectFactory_1_0 objectFactory,
+        Map<String,String> packageImpls,
+        Map<String,Object> userObjects,
+        Set<? extends Principal> principals
     ) {
         this(
             null, // lazy instantiation of viewManager
             null, // viewContext
             true, // legacyDelegate
-            persistenceManagerFactory.getMultithreaded() ? new MultithreadedObjectFactory_1 (
-                objectFactory,
-                optimisticTransaction
-            ) : objectFactory,
+            objectFactory,
             null, // standardDelegate
-            null, // packageImpls
-            null, // context
-            bindingPackageSuffix,
-            false, // throwNotFoundIfNull
-            true, // useOpenMdx1ImplLookup
-            false, // re-fetch
-            persistenceManagerFactory,
-            optimisticTransaction
-        );
-    }
-
-    /**
-     * Constructor 
-     * <p>
-     * Same as this(objectFactory, null, null)
-     *
-     * @param objectFactory
-     * 
-     * @deprecated
-     */
-    public RefRootPackage_1(
-        ObjectFactory_1_0 objectFactory
-    ) {
-        this(
-            objectFactory,
-            true
-        );
-    }
-
-    /**
-     * Constructor 
-     * <p>
-     * Same as this(objectFactory, null, null)
-     *
-     * @param objectFactory
-     * @param throwNotFoundIfNull
-     * 
-     * @deprecated
-     */
-    public RefRootPackage_1(
-        ObjectFactory_1_0 objectFactory,
-        boolean throwNotFoundIfNull
-    ) {
-        this(
-            objectFactory,
-            null, // packageImpls
-            null, // context
-            throwNotFoundIfNull
-        );
-    }
-
-    /**
-     * Constructor 
-     * <p>
-     * Same as this(objectFactory, null, null)
-     *
-     * @param objectFactory
-     * @param bindingPackageSuffix
-     * @param throwNotFoundIfNull
-     */
-    public RefRootPackage_1(
-        ObjectFactory_1_0 objectFactory,
-        String bindingPackageSuffix,
-        boolean throwNotFoundIfNull
-    ) {
-        this(
-            objectFactory,
-            null, // packageImpls
-            null, // context
-            bindingPackageSuffix,
-            throwNotFoundIfNull
-        );
-    }
-
-    /**
-     * Constructor 
-     * <p>
-     * Same as this(objectFactory, null, null)
-     *
-     * @param objectFactory
-     * @param bindingPackageSuffix
-     * @param throwNotFoundIfNull
-     * @param useOpenMdx1UseImplLookup
-     */
-    public RefRootPackage_1(
-        ObjectFactory_1_0 objectFactory,
-        String bindingPackageSuffix,
-        boolean throwNotFoundIfNull,
-        boolean useOpenMdx1UseImplLookup
-    ) {
-        this(
-            objectFactory,
-            null,
-            null,
-            bindingPackageSuffix,
-            throwNotFoundIfNull,
-            useOpenMdx1UseImplLookup
-        );
-    }
-
-    /**
-     * Constructor 
-     * <p>
-     * Same as this(objectFactory, null, null, defaultLocationSuffix, true).
-     *
-     * @param objectFactory
-     * @param bindingPackageSuffix
-     */
-    public RefRootPackage_1(
-        ObjectFactory_1_0 objectFactory,
-        String bindingPackageSuffix
-    ) {
-        this(
-            objectFactory,
-            null,
-            null,
-            bindingPackageSuffix,
-            true
-        );
-    }
-
-    /**
-     * Constructor 
-     * <p>
-     * Same as this(objectFactory, packageImpls, context, "cci").
-     *
-     * @param objectFactory
-     * @param packageImpls
-     * @param context
-     */
-    public RefRootPackage_1(
-        ObjectFactory_1_0 objectFactory,
-        Map<String,String>  packageImpls,
-        Object context
-    ) {
-        this(
-            objectFactory,
             packageImpls,
-            context,
-            Names.CCI1_PACKAGE_SUFFIX,
-            false // throwNotFoundIfNull
+            userObjects,
+            null, // context
+            persistenceManagerFactory, 
+            principals, 
+            false // accessor
+        );
+    }
+
+    /**
+     * Constructor 
+     * <p><em>
+     * Note:<br>
+     * This constructor is invoked reflectively by PlugInManagerFactory_2.
+     * </em><p>
+     * @param persistenceManagerFactory
+     * @param standardDelegate
+     * @param packageImpls
+     * @param userObjects the user objects to be propagated to each persistence
+     *        manager
+     * @param principals the principals 
+     * 
+     * @see org.openmdx.compatibility.base.dataprovider.kernel.PlugInManagerFactory_2
+     */
+    public RefRootPackage_1(
+        PersistenceManagerFactory persistenceManagerFactory,
+        PersistenceManager standardDelegate,
+        Map<String,String> packageImpls,
+        Map<String,Object> userObjects,
+        Set<? extends Principal> principals
+    ){
+        this(
+            null, // viewManager
+            null, // viewContext
+            false, // legacyDelegate
+            null, // objectFactory
+            standardDelegate, // standardDelegate
+            packageImpls,
+            userObjects, 
+            null, // context
+            persistenceManagerFactory,  
+            principals, 
+            false // accessor
         );
     }
 
     /**
      * Constructor 
      * <p>
-     * Same as this(objectFactory, packageImpls, context, "accessor.jmi", throwNotFoundIfNull)
-     *
-     * @param objectFactory
-     * @param packageImpls
-     * @param context
-     * @param throwNotFoundIfNull
+     * The standard delegate constructor
+     * 
+     * @param persistenceManagerFactory the persistence manager factory. 
+     * @param persistenceManager the delegate persistence manager. 
      */
     public RefRootPackage_1(
-        ObjectFactory_1_0 objectFactory,
-        Map<String,String>  packageImpls,
-        Object context,
-        boolean throwNotFoundIfNull
-    ) {
+        PersistenceManagerFactory persistenceManagerFactory,
+        PersistenceManager entityManager
+    ){
         this(
-            objectFactory,
-            packageImpls,
-            context,
-            null,
-            throwNotFoundIfNull
+            null, // viewManager
+            null, // viewContext
+            false, // legacyDelegate
+            null, // objectFactory
+            entityManager, // standardDelegate
+            null, // packageImpls
+            null, // userObjects
+            null, // context
+            persistenceManagerFactory,  
+            null, 
+            true // accessor
         );
     }
 
@@ -345,56 +324,14 @@ public class RefRootPackage_1
      *        e.g. 'org.omg.model1.cci.StructuralFeature' or
      *        'org.omg.model1.cci.StructuralFeatureImpl'. In case of .NET
      *        deployment the defaultLocationSuffix should be set to 'cci.dotnet'.
-     *
-     * @param throwNotFoundIfNull if true RefObject.get<feature>(qualifier) always throws
-     *        a NOT_FOUND exception independent of the multiplicity (0..1|1..1)
-     *        of the modeled reference. This flag is for backwards compatibility.
-     *        If false get<feature>(qualifier) throws a NOT_FOUND if the object
-     *        was not found and multiplicity is 1..1. It returns null if the
-     *        object was not found and multiplicity is 0..1.
+     *        
      * @throws ServiceException 
      */
     public RefRootPackage_1(
         ObjectFactory_1_0 objectFactory,
         Map<String,String>  packageImpls,
         Object context,
-        String bindingPackageSuffix,
-        boolean throwNotFoundIfNull
-    ) {
-        this(
-            objectFactory,
-            packageImpls,
-            context,
-            bindingPackageSuffix,
-            throwNotFoundIfNull,
-            true // useOpenMdx1ImplLookup
-        );
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param persistenceManagerFactory the PersistenceManagerFactory
-     *        representing this RefPackage.
-     *        
-     * @param objectFactory delegation object factory. This JMI implementation
-     *        implements the facade pattern. The 'real' objects are managed by
-     *        the specified object factory. The JMI classes put a typed JMI
-     *        facade on top of the objects managed by the factory. All object
-     *        handling is performed by the object factory.
-     *        
-     * @param packageImpls Specifies the location of the JMI implementation 
-     *        classes in the format [key=<qualified package name>,value=<java
-     *        package name>]. The marshaller looks up the implementation classes
-     *        at the specified location.
-     *        
-     * @throws ServiceException 
-     */
-    @SuppressWarnings("unchecked")
-    public RefRootPackage_1(
-        PersistenceManagerFactory persistenceManagerFactory,
-        ObjectFactory_1_0 objectFactory,
-        Map<String,String> packageImpls
+        String bindingPackageSuffix
     ) {
         this(
             null, // lazy instantiation of viewManager
@@ -403,198 +340,27 @@ public class RefRootPackage_1
             objectFactory,
             null, // standardDelegate
             packageImpls,
-            null, // context
-            Names.JMI1_PACKAGE_SUFFIX,
-            false, // throwNotFoundIfNull
-            false, // useOpenMdx1ImplLookup
-            false, // re-fetch
-            persistenceManagerFactory,
-            null // optimisticTransaction
+            null, // userObjects
+            context, // context
+            new CompatibilityPersistenceManagerFactory(
+                objectFactory,
+                packageImpls,
+                context,
+                bindingPackageSuffix
+            ),
+            null, // principals
+            false // accessor
         );
     }
     
-    /**
-     * Constructor 
-     * <p>
-     * The standard delegate constructor
-     * 
-     * @param persistenceManagerFactory the persistence manager factory. 
-     * @param persistenceManager the delegate persistence manager. 
-     */
-    public RefRootPackage_1(
-        PersistenceManagerFactory persistenceManagerFactory,
-        PersistenceManager entityManager
-    ){
-        this(
-            null, // viewManager
-            null, // viewContext
-            false, // legacyDelegate
-            null, // objectFactory
-            entityManager, // standardDelegate
-            null, // packageImpls
-            null, // context
-            Names.JMI1_PACKAGE_SUFFIX,
-            false, // throwNotFoundIfNull,
-            false, // useOpenMdx1ImplLookup
-            true, // re-fetch 
-            persistenceManagerFactory, 
-            null // optimisticTransaction
-        );
-    }
-    
-    /**
-     * Constructor 
-     *
-     * @param standardDelegate the delegate
-     * @param packageImpls
-     */
-    public RefRootPackage_1(
-        PersistenceManagerFactory persistenceManagerFactory,
-        PersistenceManager standardDelegate,
-        Map<String,String> packageImpls
-    ){
-        this(
-            null, // viewManager
-            null, // viewContext
-            false, // legacyDelegate
-            null, // objectFactory
-            standardDelegate, // standardDelegate
-            packageImpls,
-            null, // context
-            Names.JMI1_PACKAGE_SUFFIX,
-            false, // throwNotFoundIfNull,
-            false, // useOpenMdx1ImplLookup
-            false, // re-fetch
-            persistenceManagerFactory,
-            null // optimisticTransaction
-        );
-    }
-
-    /**
-     * Constructor 
-     *
-     * @param objectFactory
-     * @param packageImpls
-     * @param context
-     * @param bindingPackageSuffix
-     * @param throwNotFoundIfNull
-     * @param useOpenMdx1ImplLookup
-     */
-    public RefRootPackage_1(
-        ObjectFactory_1_0 objectFactory,
-        Map<String,String> packageImpls,
-        Object context,
-        String bindingPackageSuffix,
-        boolean throwNotFoundIfNull,
-        boolean useOpenMdx1ImplLookup
-    ) {
-        this(
-            null, // lazy instantiation of viewManager
-            null, // viewContext
-            true, // legacyDelegate
-            objectFactory,
-            null, // standardDelegate
-            packageImpls,
-            context,
-            bindingPackageSuffix,
-            throwNotFoundIfNull,
-            useOpenMdx1ImplLookup, 
-            false, // re-fetch
-            null, // persistenceManagerFactory
-            null // optimisticTransaction
-        );
-    }
-
-    /**
-     * Constructor
-     * @param packageImpls Specifies the location of the JMI implementation 
-     *        classes in the format [key=<qualified package name>,value=<java
-     *        package name>]. The marshaller looks up the implementation classes
-     *        at the specified location.
-     * @param context user-specific context object. The context object is available
-     *        from all instance-level JMI objects. The framework does 
-     *        not read or update the context object.
-     * @param bindingPackageSuffix The default value is 'cci'. This suffix is
-     *        required to construct a default location for looking up the JMI
-     *        interface and implementation classes which is: <qualified model name
-     *        as java package name>.<bindingPackageSuffix>.<JMI interface or class name>,
-     *        e.g. 'org.omg.model1.cci.StructuralFeature' or
-     *        'org.omg.model1.cci.StructuralFeatureImpl'.
-     * @param throwNotFoundIfNull if true RefObject.get<feature>(qualifier) always throws
-     *        a NOT_FOUND exception independent of the multiplicity (0..1|1..1)
-     *        of the modeled reference. This flag is for backwards compatibility.
-     *        If false get<feature>(qualifier) throws a NOT_FOUND if the object
-     *        was not found and multiplicity is 1..1. It returns null if the
-     *        object was not found and multiplicity is 0..1.
-     * @param useOpenMdx1ImplLookup if true user impls are looked up in openMDX 1
-     *        compatibility mode. If false user impls are dispatched by RefObject
-     *        proxies to user-defined impls.
-     * @param consolidating tells whether delegates have to be re-fetched.
-     * @param persistenceManagerFactory 
-     *        The persistence manager factory, <code>null</code> for lazy initialization.
-     * @param optimisticTransaction 
-     * @param delegate the delegate, either a PersistenceManager instance or an
-     *        ObjectFactory_1_0 instance. This JMI implementation
-     *        implements the facade pattern. The 'real' objects are managed by
-     *        the specified object factory. The JMI classes put a typed JMI
-     *        facade on top of the objects managed by the factory. All object
-     *        handling is performed by the object factory.
-     * @param viewPackages the view package cache
-     */
-    private RefRootPackage_1(
-        ViewManager_1 viewManager,
-        Object viewContext,
-        boolean legacyDelegate,
-        ObjectFactory_1_0 objectFactory,
-        PersistenceManager standardDelegate,
-        Map<String,String>  packageImpls,
-        Object context,
-        String bindingPackageSuffix,
-        boolean throwNotFoundIfNull,
-        boolean useOpenMdx1ImplLookup, 
-        boolean consolidating, 
-        PersistenceManagerFactory persistenceManagerFactory, 
-        OptimisticTransaction_2_0 optimisticTransaction
-    ) {
-        super(null, null);
-        this.consolidating = consolidating;
-        this.viewManager = viewManager;
-        this.viewContext = viewContext;
-        this.legacyDelegate = legacyDelegate;
-        this.objectFactory = objectFactory;
-        this.standardDelegate = standardDelegate;
-        this.packageImpls = packageImpls;
-        this.userContext = context;
-        this.bindingPackageSuffix = bindingPackageSuffix == null ? 
-            Names.CCI1_PACKAGE_SUFFIX : 
-            bindingPackageSuffix;
-        this.throwNotFoundIfNull = throwNotFoundIfNull;
-        this.useOpenMdx1ImplLookup = useOpenMdx1ImplLookup;
-        this.loadedPackages = new HashMap<String,RefPackage>();
-        this.marshaller = new RefObject_1Marshaller(
-            FORCE_CONCURRENT_MAP || (
-                persistenceManagerFactory != null && persistenceManagerFactory.getMultithreaded()
-            )
-        );
-        this.persistenceManager = null; // Lazy initialization
-        this.persistenceManagerFactory = persistenceManagerFactory;
-        this.optimisticTransaction = optimisticTransaction;
-        SysLog.detail("configured package implementations", this.packageImpls);
-    }
     
     //-------------------------------------------------------------------------
     public String refImplPackageName(
         String packageName
     ) {
         return this.packageImpls == null
-            ? null
+        ? null
             : (String)this.packageImpls.get(packageName);
-    }
-
-    //-------------------------------------------------------------------------
-    public boolean refUseOpenMdx1ImplLookup(
-    ) {
-        return this.useOpenMdx1ImplLookup;
     }
 
     //-------------------------------------------------------------------------
@@ -610,50 +376,13 @@ public class RefRootPackage_1
     }
 
     //-------------------------------------------------------------------------
-    boolean getThrowNotFoundIfNull(
-    ) {
-        return this.throwNotFoundIfNull;
-    }
-    
-    //-------------------------------------------------------------------------
-    /**
-     * Re-fetch the delegate if necessary
-     * 
-     * @param persistenceCapable the delegate
-     * 
-     * @return the correct delegate
-     */
-    final Object getPersistenceCapable(
-        Object persistenceCapable
+    private Constructor<?> getUserImplConstructor(
+        String qualifiedClassName
     ){
-        if(this.consolidating) {
-            Object objectId = JDOHelper.getObjectId(persistenceCapable);
-            return objectId == null ? persistenceCapable : this.standardDelegate.getObjectById(objectId);
-        } else {
-            return persistenceCapable;
-        }
-    }
-
-    /**
-     * Create an implementation instance
-     * 
-     * @param qualifiedClassName
-     * @param refDelegate
-     * @param self
-     * @param next
-     * 
-     * @return the  implementation instance
-     */
-    private Object refCreateImpl(
-        String qualifiedClassName,
-        RefObject_1_0 refDelegate,
-        Object self,
-        Object next
-    ) {
-        if(this.classesNotHavingUserImpl.contains(qualifiedClassName)) {
+        Constructor<?> userImplConstructor = this.userImplConstructors.get(qualifiedClassName);
+        if(userImplConstructor == NULL_CONSTRUCTOR) {
             return null;
         }
-        Constructor<?> userImplConstructor = this.userImplConstructors.get(qualifiedClassName);
         if(userImplConstructor == null) {
             String qualifiedPackageName = qualifiedClassName.substring(
                 0, 
@@ -669,27 +398,13 @@ public class RefRootPackage_1
             if(implPackageName != null) {
                 try { 
                     userClass = Classes.getApplicationClass(implPackageName + "." + className + "Impl");
-                }
-                catch(ClassNotFoundException e) {
-                    this.classesNotHavingUserImpl.add(qualifiedClassName);
+                } catch(ClassNotFoundException e) {
                     SysLog.info("No user impl found", Arrays.asList(implPackageName, className));
                 }                                    
             }
-            // Fallback. Try to find impl in declaring package
             if(userClass == null) {
-                implPackageName = this.refImplPackageName(
-                    qualifiedPackageName
-                );
-                if(implPackageName != null) {
-                    try { 
-                        userClass = Classes.getApplicationClass(implPackageName + "." + className + "Impl");
-                    }
-                    catch(ClassNotFoundException e) {
-                        SysLog.info("No user impl found", Arrays.asList(implPackageName, className));                    
-                    }
-                }
-            }
-            if(userClass != null) {
+                this.userImplConstructors.put(qualifiedClassName, NULL_CONSTRUCTOR);
+            } else {
                 String bindingPackageSuffix = this.refBindingPackageSuffix();
                 String cci2QualifiedInterfaceName =
                     qualifiedPackageName.replace(':', '.') + "." +
@@ -728,47 +443,93 @@ public class RefRootPackage_1
                     catch(ClassNotFoundException e0) {
                         SysLog.warning("Required interface not found on class path", cci2QualifiedInterfaceName);
                     }
-                }                    
+                }       
                 this.userImplConstructors.put(
                     qualifiedClassName, 
-                    userImplConstructor
+                    userImplConstructor == null ? NULL_CONSTRUCTOR : userImplConstructor
                 );
             }
         }
+        return userImplConstructor;
+    }
+    
+    //-------------------------------------------------------------------------
+    /**
+     * Create an implementation instance
+     * 
+     * @param qualifiedClassName
+     * @param refDelegate
+     * @param self
+     * @param next
+     * 
+     * @return the  implementation instance
+     */
+    private Object refCreateImpl(
+        String qualifiedClassName,
+        RefObject_1_0 refDelegate,
+        Object self,
+        Object next
+    ) {
+        Constructor<?> userImplConstructor = getUserImplConstructor(qualifiedClassName);
         if(userImplConstructor == null) {
-            this.classesNotHavingUserImpl.add(qualifiedClassName);
-        } else {
-            try {
-                return this.legacyDelegate ? userImplConstructor.newInstance(
-                    refDelegate,
-                    Proxy.newProxyInstance(
-                        refDelegate.getClass().getClassLoader(),
-                        refDelegate.getClass().getInterfaces(),
-                        new Jmi1ObjectInvocationHandler(
-                            refDelegate.refDelegate(),
-                            (Jmi1Class)refDelegate.refClass(),
-                            true
-                        )
-                    )
-                ) : userImplConstructor.newInstance(
-                    self,
-                    next
-                );
-            } catch(Exception e) {
-                new ServiceException(e).log();
-                // Do NOT mark qualifiedClassName as having no implementation
-            }
+            return null;
         }
-        return null;
+        try {
+            return this.legacyDelegate ? userImplConstructor.newInstance(
+                refDelegate,
+                Proxy.newProxyInstance(
+                    refDelegate.getClass().getClassLoader(),
+                    refDelegate.getClass().getInterfaces(),
+                    new Jmi1ObjectInvocationHandler(
+                        refDelegate.refDelegate(),
+                        (Jmi1Class)refDelegate.refClass(),
+                        true
+                    )
+                )
+            ) : userImplConstructor.newInstance(
+                self,
+                next
+            );
+        } catch(Exception e) {
+            new ServiceException(e).log();
+            // Do NOT mark qualifiedClassName as having no implementation
+            return null;
+        }
     }
 
 
+
     //-------------------------------------------------------------------------
-    // Marshaller
+    // Implements ExceptionListener
+    //-------------------------------------------------------------------------
+
+    /**
+     * Build an InvalidObjectException from a given cause
+     * 
+     * @param source
+     * 
+     * @return
+     */
+    protected InvalidObjectException toInvalidObjectException (
+        Exception source
+    ){
+        return source instanceof InvalidObjectException ?
+            (InvalidObjectException) source :
+                new InaccessibleObject(source).getException();
+    }
+
+    /* (non-Javadoc)
+     * @see java.beans.ExceptionListener#exceptionThrown(java.lang.Exception)
+     */
+    public void exceptionThrown(Exception cause) {
+        throw toInvalidObjectException(cause);
+    }
+
+    //-------------------------------------------------------------------------
+    // Implements Marshaller
     //-------------------------------------------------------------------------
 
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public Object unmarshal(
         Object source
     ) throws ServiceException {
@@ -776,22 +537,24 @@ public class RefRootPackage_1
     }
 
     //-------------------------------------------------------------------------  
-    @SuppressWarnings("unchecked")
     public Object marshal(
         Object source
     ) throws ServiceException {
-        return
-            this.persistenceManager != null &&
-            source instanceof PersistenceCapable &&
-            ((PersistenceCapable)source).jdoGetPersistenceManager() == this.persistenceManager ? 
-            source :
-            this.marshaller.marshal(source);
+        if(
+            this.persistenceManager != null && 
+            JDOHelper.getPersistenceManager(source) == this.persistenceManager
+        ) {
+            return source;
+        }
+        InteractionSpec interactionSpec = InteractionSpecs.getInteractionsSpec(source);
+        RefPackage_1_6 refPackage = getRefPackage(interactionSpec);
+        return (refPackage == this ? this.marshaller : refPackage).marshal(source);
     }
 
     //-------------------------------------------------------------------------  
     /**
      * Registers an object unless an object matching the unmarshalled object is
-     * already registerd.
+     * already registered.
      *
      * @param   unmarshalled
      *          the unmarshalled object
@@ -822,34 +585,30 @@ public class RefRootPackage_1
     ){
         return this.marshaller.evict(marshalled);
     }
-  
     
     //-------------------------------------------------------------------------
-    // RefPackageFactory_1_2
+    // RefPackageFactory_1_3
     //-------------------------------------------------------------------------
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.jmi.cci.RefPackageFactory_1_2#getOptimisticTransaction()
+     * @see org.openmdx.base.accessor.jmi.cci.RefPackageFactory_1_3#getUserObjects()
      */
-    public OptimisticTransaction_2_0 getOptimisticTransaction() {
-        return this.optimisticTransaction;
+    public Map<String, Object> getUserObjects() {
+        return this.userObjects;
     }
 
+
     //-------------------------------------------------------------------------
-    // RefPackage_1_0
+    // RefPackage_1_6
     //-------------------------------------------------------------------------
 
     public RefObject refObject(
-        String refMofId
+        Path objectId
     ) {
         try {
-            Path objectId = new Path(refMofId);
-            Object object = this.legacyDelegate ? refObjectFactory().getObject(
-                objectId
-            ) : getDelegate().getObjectById(
-                objectId
+            return (RefObject) marshal(
+                this.legacyDelegate ? refObjectFactory().getObject(objectId) : getDelegate().getObjectById(objectId)
             );
-            return (RefObject)marshal(object);
         } catch(ServiceException e) {
             throw new JmiServiceException(e);
         } catch(RuntimeServiceException e) {
@@ -859,6 +618,17 @@ public class RefRootPackage_1
         }
     }
     
+    
+    //-------------------------------------------------------------------------
+    // RefPackage_1_0
+    //-------------------------------------------------------------------------
+
+    public RefObject refObject(
+        String refMofId
+    ) {
+        return refMofId == null ? null : refObject(new Path(refMofId));
+    }
+
     //-------------------------------------------------------------------------
     public RefStruct refCreateStruct(
         String structName,
@@ -874,7 +644,7 @@ public class RefRootPackage_1
     }
 
     //-------------------------------------------------------------------------
-    public Model_1_0 refModel(
+    public Model_1_6 refModel(
     ) {
         if(RefRootPackage_1.model == null) {
             try {
@@ -883,9 +653,9 @@ public class RefRootPackage_1
             catch(ServiceException e) {
                 throw new JmiServiceException(e);
             }
-            if(this.objectFactory instanceof ModelHolder_1_0) {
-                ((ModelHolder_1_0)this.objectFactory).setModel(RefRootPackage_1.model);
-            }
+        }
+        if(this.objectFactory instanceof ModelHolder_1_0) {
+            ((ModelHolder_1_0)this.objectFactory).setModel(RefRootPackage_1.model);
         }
         return RefRootPackage_1.model;
     }
@@ -906,17 +676,11 @@ public class RefRootPackage_1
     public UnitOfWork_1_0 refUnitOfWork(
     ) {
         if(this.unitOfWork == null) {
-            if(this.legacyDelegate) {
-                try {
-                    this.unitOfWork = this.objectFactory.getUnitOfWork();
-                } catch (ServiceException exception) {
-                    throw new JmiServiceException(exception);
-                }
-            } else {
-                this.unitOfWork = new UnitOfWork_1(
-                    this.standardDelegate.currentTransaction()
-                );
-            }
+            this.unitOfWork = this.legacyDelegate ? new org.openmdx.base.accessor.generic.spi.UnitOfWork_1(
+                this.objectFactory
+            ) : new UnitOfWork_1(
+                this.standardDelegate
+            );
         }
         return this.unitOfWork;
     }
@@ -968,12 +732,10 @@ public class RefRootPackage_1
                 if(!Names.JMI1_PACKAGE_SUFFIX.equals(this.bindingPackageSuffix)) {
                     throw new JmiServiceException(
                         new ServiceException(
-                            StackedException.DEFAULT_DOMAIN,
-                            StackedException.NOT_SUPPORTED,
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("binding.name", bindingPackageSuffix)
-                            },
-                            "Unsupported binding. Supported are " + Arrays.asList(Names.JMI1_PACKAGE_SUFFIX)
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED,
+                            "Unsupported binding. Supported are " + Arrays.asList(Names.JMI1_PACKAGE_SUFFIX),
+                            new BasicException.Parameter("binding.name", bindingPackageSuffix)
                         )
                     );
                 }
@@ -1003,12 +765,10 @@ public class RefRootPackage_1
             }
             throw new JmiServiceException(
                 new ServiceException(
-                    StackedException.DEFAULT_DOMAIN,
-                    StackedException.NOT_FOUND,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("class", loadedClassName)
-                    },
-                    "package class not found"
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_FOUND,
+                    "package class not found",
+                    new BasicException.Parameter("class", loadedClassName)
                 )
             );
         }
@@ -1043,7 +803,6 @@ public class RefRootPackage_1
         List args
     ) {
         String packagePrefix = structName.substring(0, structName.lastIndexOf(':'));
-//      String packageName = packagePrefix.substring(packagePrefix.lastIndexOf(':') + 1);
         return this.refPackage(
             packagePrefix
         ).refCreateStruct(
@@ -1057,7 +816,7 @@ public class RefRootPackage_1
     ) {
         return null;
     }
-  
+
     //-------------------------------------------------------------------------
     // Implements RefPackageFactory_1_0
     //-------------------------------------------------------------------------
@@ -1068,38 +827,74 @@ public class RefRootPackage_1
      * @return a new RefPackage instance
      */
     public RefPackage_1_1 createRefPackage() {
-        try {
-            if(this.legacyDelegate) {
-                ObjectFactory_1_2 objectFactory = (ObjectFactory_1_2)this.objectFactory;
-                Connection_1Factory connectionFactory = objectFactory.getConnectionFactory();
-                boolean containerManagedUnitOfWork = Boolean.TRUE.equals(
-                    objectFactory.hasContainerManagedUnitOfWork()
-                ); 
-                Connection_1_3 connection = connectionFactory.getConnection(
-                    containerManagedUnitOfWork
-                ); 
-                return new RefRootPackage_1(
-                    connection,
-                    this.packageImpls,
-                    this.userContext,
-                    this.bindingPackageSuffix,
-                    this.throwNotFoundIfNull
-                );
-            } else {
-                PersistenceManager entityManager = this.standardDelegate.getPersistenceManagerFactory().getPersistenceManager(); 
-                return new RefRootPackage_1(
-                    refPersistenceManagerFactory(),
-                    entityManager
-                );  
-            }
-        } catch (Exception exception) {
-            throw new JmiServiceException(exception);
-        }
+        return new RefRootPackage_1(
+            this.viewManager,
+            this.interactionSpec,
+            this.legacyDelegate,
+            this.objectFactory,
+            this.standardDelegate,
+            this.packageImpls,
+            this.userObjects,
+            this.userContext,
+            this.persistenceManagerFactory,
+            this.principals, this.accessor
+        );
     }
-    
+
     //-------------------------------------------------------------------------
     // Implements RefPackageFactory_1_1
     //-------------------------------------------------------------------------
+
+    /**
+     * Retrieve a context specific RefPackage
+     * 
+     * @param viewContext
+     * 
+     * @return a context specific RefPackage
+     */
+    public RefPackage_1_6 getRefPackage(
+        InteractionSpec interactionSpec
+    ){
+        if(
+            interactionSpec == InteractionSpecs.NULL ||
+            this.interactionSpec == null ? interactionSpec == null : this.interactionSpec.equals(interactionSpec)
+        ) {
+            return this;
+        }
+        try {
+            RefPackage_1_6 refPackage;
+            if(this.viewManager == null) {
+                this.viewManager = new ConcurrentHashMap<InteractionSpec,RefPackage_1_6>();
+                this.viewManager.put(InteractionSpecs.NULL, this);
+                refPackage = null;
+            } else {
+                refPackage = this.viewManager.get(
+                    interactionSpec == null ? InteractionSpecs.NULL : interactionSpec
+                );
+            }
+            if(refPackage == null) {
+                RefPackage_1_6 oldPackage = this.viewManager.put(
+                    interactionSpec,
+                    refPackage = newRefPackage(interactionSpec) 
+                );
+                if(oldPackage != null) {
+                    return oldPackage;
+                }
+            }
+            return refPackage; 
+        } catch (Exception exception) {
+            throw new JmiServiceException(
+                new NotSupportedException(
+                    exception,
+                    "The given RefPackage is unable to create a view",
+                    new BasicException.Parameter(
+                        "objectFactory.class", 
+                        this.objectFactory == null ? "n/a" : this.objectFactory.getClass().getName()
+                    )
+                )
+            );
+        }
+    }
 
     /**
      * Create a context specific RefPackage
@@ -1108,57 +903,47 @@ public class RefRootPackage_1
      * 
      * @return a context specific RefPackage
      */
-    public RefPackage_1_2 getRefPackage(
+    protected RefPackage_1_6 newRefPackage(
         InteractionSpec viewContext
     ){
-        if(this.viewContext == viewContext) {
-            return this;
-        } else try {
-            if(this.viewManager == null) {
-                this.viewManager = new ViewManager_1(
-                    (ObjectFactory_1_4)this.objectFactory, 
-                    refModel()
-                );
-            }
-            RefPackage_1_2 refPackage = this.viewManager.getView(viewContext);
-            if(refPackage == null) {
-                this.viewManager.addView(
-                    viewContext,
-                    refPackage = new RefRootPackage_1(
-                        this.viewManager,
-                        viewContext,
-                        true, // legacyDelegate
-                        this.viewManager.getViewConnection(viewContext),
-                        null, // standardDelegate
-                        this.packageImpls,
-                        this.userContext,
-                        this.bindingPackageSuffix,
-                        this.throwNotFoundIfNull,
-                        this.useOpenMdx1ImplLookup, false, null, optimisticTransaction
-                    ) 
-                );
-            }
-            return refPackage;
-        } catch (Exception exception) {
-            throw new JmiServiceException(
-                new NotSupportedException(
-                    exception,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter(
-                            "objectFactory.class", 
-                            this.objectFactory == null ? "n/a" : this.objectFactory.getClass().getName()
-                        ),
-                    },
-                    "The given RefPackage is unable to create a view"
-                )
+        if(this.legacyDelegate) {
+            ObjectFactoryBuilder_1_0 delegateFactory = (ObjectFactoryBuilder_1_0) this.objectFactory;
+            ObjectFactory_1_0 legacyDelegate = delegateFactory.getObjectFactory(viewContext);
+            return new RefRootPackage_1(
+                this.viewManager,
+                viewContext,
+                this.legacyDelegate, 
+                legacyDelegate,
+                null, // standardDelegate
+                this.packageImpls,
+                this.userObjects, 
+                this.userContext,
+                this.persistenceManagerFactory,
+                this.principals, 
+                this.accessor
+            );
+        } else {
+            RefPackageFactory_1_1 delegateFactory = (RefPackageFactory_1_1) ((Delegating_1_0)this.standardDelegate).objGetDelegate();
+            PersistenceManager_1 standardDelegate = (PersistenceManager_1) delegateFactory.getRefPackage(viewContext).refPersistenceManager();
+            return new RefRootPackage_1(
+                this.viewManager,
+                viewContext,
+                this.legacyDelegate, 
+                null, // objectFactory,
+                standardDelegate, 
+                this.packageImpls,
+                this.userObjects, 
+                this.userContext,
+                this.persistenceManagerFactory,
+                this.principals, this.accessor
             );
         }
     }
-  
+    
     //-------------------------------------------------------------------------
     // Implements RefPackage_1_4
     //-------------------------------------------------------------------------
-        
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.RefPackage_1#refLegacyDelegate()
      */
@@ -1196,7 +981,7 @@ public class RefRootPackage_1
             next
         );
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.spi.RefPackage_1#getDataStoreConnection()
      */
@@ -1206,11 +991,52 @@ public class RefRootPackage_1
             hasLegacyDelegate() ? this.objectFactory : this.standardDelegate
         );
     }
-    
-    
+
+
+    //-------------------------------------------------------------------------
+    // Implements RefPackage_1_5
+    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.RefPackage_1#evictAll()
+     */
+    @Override
+    public void evictAll(
+    ) {
+        if(this.legacyDelegate) {
+            if(this.objectFactory instanceof ObjectFactory_1_3) {
+                ((ObjectFactory_1_3)this.objectFactory).evict();
+            }
+        } else {
+            standardDelegate.evictAll();
+        }
+    }
+
+
     //-------------------------------------------------------------------------
     // Implements RefPackage_1_3
     //-------------------------------------------------------------------------
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.RefPackage_1#close()
+     */
+    @Override
+    public void close() {
+        clear();
+        if(hasLegacyDelegate()) {
+            if(this.objectFactory != null) try {
+                this.objectFactory.close();
+            } catch (ServiceException exception) {
+                SysLog.error("Close failure", exception);
+            } finally {
+                this.objectFactory = null;
+            }
+        } else {
+            if(this.standardDelegate != null) {
+                this.standardDelegate.close();
+                this.standardDelegate = null;
+            }            
+        }
+    }
 
     /**
      * Retrieves the JDO Persistence Manager Factory.
@@ -1219,11 +1045,9 @@ public class RefRootPackage_1
      */
     public PersistenceManagerFactory refPersistenceManagerFactory (
     ) {
-        return this.persistenceManagerFactory == null ? this.persistenceManagerFactory = new PersistenceManagerFactory_1(
-            this
-        ) : this.persistenceManagerFactory; 
+        return this.persistenceManagerFactory; 
     }
-    
+
     /**
      * Empty the cache
      */
@@ -1234,11 +1058,16 @@ public class RefRootPackage_1
                 ((ObjectFactory_1_3)this.objectFactory).clear();
             }
         } else {
-            this.standardDelegate.evictAll();
+            if(this.standardDelegate instanceof Delegating_1_0) {
+                Object delegate = ((Delegating_1_0)standardDelegate).objGetDelegate();
+                if(delegate instanceof RefPackage_1_3) {
+                    ((RefPackage_1_3)delegate).clear();
+                }
+            }
         }
     }
-    
-    
+
+
     //-------------------------------------------------------------------------
     // Implements RefPackage_1_2
     //-------------------------------------------------------------------------
@@ -1249,43 +1078,12 @@ public class RefRootPackage_1
      * @return the RefPackage's view context in case of a view,
      * <code>null</code> otherwise
      */
-    public Object refViewContext(
+    public InteractionSpec refInteractionSpec(
     ){
-        return this.viewContext;
+        return this.interactionSpec;
     }
 
-    /**
-     * Returns an new RefObject with initial values
-     * @param allValuesDirty
-     * @param object
-     * 
-     * @return
-     */
-    public RefObject refCloneObject (
-        String mofId,
-        RefObject object, 
-        boolean allValuesDirty
-    ){
-        RefObject_1_0 refObject = (RefObject_1_0) object;
-        RefClass_1_0 refClass = (RefClass_1_0) refClass(
-            refObject.refClass().refMofId()
-        );
-        ViewObject_1_0 viewObject = (ViewObject_1_0) refObject.refDelegate();
-        try {
-            return refClass.refCreateInstance(
-                Collections.singletonList(
-                    new CloneableObject_1(
-                        mofId == null ? null : new Path(mofId), 
-                            viewObject.getSourceDelegate(), 
-                            allValuesDirty
-                    )
-                )
-            );
-        } catch (ServiceException exception) {
-            throw new JmiServiceException(exception);
-        }
-    }
-  
+    
     //-------------------------------------------------------------------------
     // Implements RefPackage_1_1
     //-------------------------------------------------------------------------
@@ -1298,13 +1096,41 @@ public class RefRootPackage_1
      */
     public PersistenceManager refPersistenceManager(
     ) {
-        return this.persistenceManager == null ? this.persistenceManager = new PersistenceManager_1(
-            refPersistenceManagerFactory(),
-            new InstanceLifecycleNotifier(),
-            this
-        ) : this.persistenceManager;
+        if(this.persistenceManager == null) {
+            this.persistenceManager = new PersistenceManager_1(
+                refPersistenceManagerFactory(),
+                new InstanceLifecycleNotifier(),
+                this
+            );
+            if(this.userObjects != null) {
+                for(Map.Entry<String,Object> userObject : this.userObjects.entrySet()) {
+                    this.persistenceManager.putUserObject(
+                        userObject.getKey(), 
+                        userObject.getValue()
+                    );
+                }
+                this.persistenceManager.putUserObject(
+                    UserObjects.PRINCIPALS,
+                    this.principals
+                );
+            }
+        }
+        return this.persistenceManager;
     }
 
+    //-------------------------------------------------------------------------
+    private static Constructor<?> newNullConstructor(){
+        try {
+            return Object.class.getConstructor();
+        } catch (Exception exception) {
+            SysLog.error(
+                "Failed to acquire 'new Object()' aa null constructor, which will lead to RuntimeExceptions!",
+                exception
+            );
+            return null;
+        }
+    }
+    
     //-------------------------------------------------------------------------
     /**
      * Merge interfaces
@@ -1336,16 +1162,16 @@ public class RefRootPackage_1
         Class<?> startClass
     ){
         for(
-            Class<?> currentClass = startClass;
-            currentClass != null;
-            currentClass = currentClass.getSuperclass()
+                Class<?> currentClass = startClass;
+                currentClass != null;
+                currentClass = currentClass.getSuperclass()
         ){
             for(Class<?> candidate : currentClass.getInterfaces()) {
                 interfaces.add(candidate);
             }
         }
     }
-  
+
     //-------------------------------------------------------------------------
     /**
      * Returns a proxy implementing the interfaces of both
@@ -1371,6 +1197,344 @@ public class RefRootPackage_1
             )
         );
     }
+
+    /**
+     * Retrieve the object's MOF class name
+     * 
+     * @param javaClass
+     * 
+     * @return the object's MOF class name
+     */
+    public static String getMofClassName(
+        String javaClassName,
+        Model_1_0 model
+    ) throws JmiServiceException {
+        String qualifiedClassName = classNames.get(javaClassName);
+        if(qualifiedClassName == null) {
+            try {
+                String[] components = javaClassName.split("\\.");
+                StringBuilder sb = new StringBuilder();
+                for(int i = 0; i < components.length-2; i++) {
+                    if(i > 0) sb.append(":");
+                    sb.append(components[i]);
+                }
+                String objectPackageName = sb.toString();
+                String objectClassName = components[components.length-1];
+                for(ModelElement_1_0 element: model.getContent()) {
+                    String qualifiedElementName = (String)element.values("qualifiedName").get(0);
+                    String qualifiedPackageName = qualifiedElementName.substring(0, qualifiedElementName.lastIndexOf(":"));
+                    String elementName = (String)element.values("name").get(0);
+                    if(
+                        model.isClassType(element) && 
+                        objectPackageName.equals(qualifiedPackageName) &&
+                        Identifier.CLASS_PROXY_NAME.toIdentifier(elementName).equals(objectClassName)
+                    ) {
+                        classNames.put(
+                            javaClassName, 
+                            qualifiedElementName
+                        );
+                        qualifiedClassName = qualifiedElementName;
+                        break;
+                    }                    
+                }
+                if(qualifiedClassName == null) {
+                    throw new JmiServiceException(
+                        new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_FOUND,
+                            "model element for requested class not found",
+                            new BasicException.Parameter("java-class", javaClassName),
+                            new BasicException.Parameter("mof-package", objectPackageName),
+                            new BasicException.Parameter("mof-class", objectClassName)
+                        )
+                    );
+                }
+            } catch(ServiceException e) {
+                throw new JmiServiceException(e);
+            }
+        }
+        return qualifiedClassName;
+    }
+
+
+    //-------------------------------------------------------------------------
+    // Implements RefPackage_1_6
+    //-------------------------------------------------------------------------
+
+    /**
+     * Retrieve a class' mix-in interfaces
+     * 
+     * @param qualifiedClassName
+     * 
+     * @return the class' mix-in interfaces
+     */
+    public Set<Class<?>> getMixedInInterfaces(
+        String qualifiedClassName 
+    ) throws ServiceException {
+        Set<Class<?>> mixedInInterfaces = this.mixedInInterfaces.get(qualifiedClassName);
+        if(mixedInInterfaces == null) {
+            mixedInInterfaces = new LinkedHashSet<Class<?>>();
+            Constructor<?> mostDerivedConstructor = this.getUserImplConstructor(qualifiedClassName);
+            if(mostDerivedConstructor != null) {
+                mixedInInterfaces.addAll(
+                    Classes.getInterfaces(mostDerivedConstructor.getDeclaringClass())
+                );
+            }
+            Constructor<?> leastDerivedConstructor = this.getUserImplConstructor(
+                this.refModel().getLeastDerived(qualifiedClassName)
+            );
+            if(leastDerivedConstructor != null) {
+                mixedInInterfaces.addAll(
+                    Classes.getInterfaces(leastDerivedConstructor.getDeclaringClass())
+                );
+            }
+            if(this.standardDelegate instanceof PersistenceManager_1) {
+                RefPackage_1_6 delegate = ((PersistenceManager_1)this.standardDelegate).objGetDelegate();
+                mixedInInterfaces.addAll(
+                    delegate.getMixedInInterfaces(qualifiedClassName)
+                );
+            }
+            this.mixedInInterfaces.put(qualifiedClassName, mixedInInterfaces);
+                
+        }
+        return mixedInInterfaces;
+    }    
+    
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.RefPackage_1_6#getClassImplementingInterface(java.lang.String, java.lang.reflect.Method)
+     */
+    public String getClassImplementingInterface(
+        String mostDerivedClassName,
+        Class<?> declaringClass
+    ) throws ServiceException {
+        Constructor<?> mostDerivedConstructor = this.getUserImplConstructor(mostDerivedClassName);
+        if(mostDerivedConstructor != null) {
+            for(Class<?> candidate : mostDerivedConstructor.getDeclaringClass().getInterfaces()) {
+                if(declaringClass.isAssignableFrom(candidate)) {
+                    return mostDerivedClassName;
+                }
+            }
+        }
+        String leastDerivedClassName = this.refModel().getLeastDerived(mostDerivedClassName);
+        Constructor<?> leastDerivedConstructor = this.getUserImplConstructor(leastDerivedClassName);
+        if(leastDerivedConstructor != null && leastDerivedConstructor != mostDerivedConstructor) {
+            for(Class<?> candidate : leastDerivedConstructor.getDeclaringClass().getInterfaces()) {
+                if(declaringClass.isAssignableFrom(candidate)) {
+                    return leastDerivedClassName;
+                }
+            }
+        }
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.RefPackage_1_6#isAccessor()
+     */
+    public boolean isAccessor() {
+        return this.accessor;
+    }
+
+    
+    //-------------------------------------------------------------------------
+    // Implements RefPackage_1_1
+    //-------------------------------------------------------------------------
+
+    //-----------------------------------------------------------------------
+    public Object refCreateImpl(
+        String qualifiedClassName,
+        RefObject_1_0 refDelegate
+    ) {
+        return refCreateImpl(
+            qualifiedClassName,
+            refDelegate,
+            null, // self,
+            null // next
+        );
+    }
+
+
+    //-------------------------------------------------------------------------
+    // Class InaccessibleObject
+    //-------------------------------------------------------------------------
+
+    /**
+     * InaccessibleObject
+     */
+    class InaccessibleObject implements RefObject {
+
+        /**
+         * Constructor 
+         */
+        InaccessibleObject(
+            Exception e
+        ) {
+            this.cause = new InvalidObjectException(
+                this,
+                e.getMessage()
+            );
+            BasicException basic = BasicException.toStackedException(e, this.cause);
+            this.cause.initCause(basic);
+            String path = basic.getParameter("path");
+            Path objectId;
+            if(path == null) {
+                objectId = null;
+            } else try {
+                objectId = new Path(path);
+            } catch (RuntimeException exception) {
+                objectId = null;
+            }
+            this.objectId = objectId;
+        }
+
+        private Path objectId;
+
+        private final InvalidObjectException cause;
+
+        InvalidObjectException getException(
+        ){
+            return this.cause;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefObject#refClass()
+         */
+        public RefClass refClass(
+        ) {
+            throw this.cause;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefObject#refDelete()
+         */
+        public void refDelete() {
+            throw this.cause;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefObject#refImmediateComposite()
+         */
+        public RefFeatured refImmediateComposite() {
+            if(this.objectId == null) {
+                throw this.cause;
+            } else {
+                int s = this.objectId.size() - 2;
+                return s > 0 ? 
+                    (RefFeatured)refPersistenceManager().getObjectById(this.objectId.getPrefix(s)) : 
+                        null;
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefObject#refIsInstanceOf(javax.jmi.reflect.RefObject, boolean)
+         */
+        public boolean refIsInstanceOf(
+            RefObject objType, 
+            boolean considerSubtypes
+        ) {
+            throw this.cause;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefObject#refOutermostComposite()
+         */
+        public RefFeatured refOutermostComposite() {
+            if(this.objectId == null) {
+                throw this.cause;
+            } else {
+                return this.objectId.size() > 2 ?
+                    (RefFeatured)refPersistenceManager().getObjectById(this.objectId.getPrefix(1)) : 
+                        null;
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefFeatured#refGetValue(javax.jmi.reflect.RefObject)
+         */
+        public Object refGetValue(RefObject feature) {
+            throw this.cause;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefFeatured#refGetValue(java.lang.String)
+         */
+        public Object refGetValue(String featureName) {
+            throw this.cause;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefFeatured#refInvokeOperation(javax.jmi.reflect.RefObject, java.util.List)
+         */
+        @SuppressWarnings("unchecked")
+        public Object refInvokeOperation(
+            RefObject requestedOperation, 
+            List args
+        ) throws RefException {
+            throw this.cause;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefFeatured#refInvokeOperation(java.lang.String, java.util.List)
+         */
+        @SuppressWarnings("unchecked")
+        public Object refInvokeOperation(
+            String requestedOperation, 
+            List args
+        ) throws RefException {
+            throw this.cause;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefFeatured#refSetValue(javax.jmi.reflect.RefObject, java.lang.Object)
+         */
+        public void refSetValue(RefObject feature, Object value) {
+            throw this.cause;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefFeatured#refSetValue(java.lang.String, java.lang.Object)
+         */
+        public void refSetValue(String featureName, Object value) {
+            throw this.cause;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refImmediatePackage()
+         */
+        public RefPackage refImmediatePackage() {
+            throw this.cause;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refMetaObject()
+         */
+        public RefObject refMetaObject() {
+            throw this.cause;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refMofId()
+         */
+        public String refMofId() {
+            return this.objectId.toXri();
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refOutermostPackage()
+         */
+        public RefPackage refOutermostPackage() {
+            return RefRootPackage_1.this;
+        }
+
+        /* (non-Javadoc)
+         * @see javax.jmi.reflect.RefBaseObject#refVerifyConstraints(boolean)
+         */
+        @SuppressWarnings("unchecked")
+        public Collection refVerifyConstraints(boolean deepVerify) {
+            throw this.cause;
+        }
+
+    }
+
 
     //-------------------------------------------------------------------------
     // Class RefObjectHandler
@@ -1424,7 +1588,7 @@ public class RefRootPackage_1
             Method primaryMethod;
             boolean tested;
             if(this.mapping == null) {
-                this.mapping = new IdentityHashMap<Method,Method>();
+                this.mapping = new ConcurrentHashMap<Method,Method>();
                 primaryMethod = null;
                 tested = false;
             } else {
@@ -1447,23 +1611,21 @@ public class RefRootPackage_1
 
     }
 
+
     //-------------------------------------------------------------------------
     // Class RefObject_1Marshaller
     //-------------------------------------------------------------------------
-    
+
     class RefObject_1Marshaller
-        extends CachingMarshaller 
-   {
-        
+    extends CachingMarshaller 
+    {
+
         /**
          * Constructor 
-         *
-         * @param multithreaded
          */
         RefObject_1Marshaller(
-            boolean multithreaded
         ) {
-            super(multithreaded);
+            super();
         }
 
         private static final long serialVersionUID = -6856573596590312011L;
@@ -1476,18 +1638,18 @@ public class RefRootPackage_1
             if(marshalled instanceof RefObject_1_0) {
                 RefPackage refPackage = ((RefObject)marshalled).refOutermostPackage();
                 if(
-                    RefRootPackage_1.this != refPackage &&
-                    refPackage instanceof CachingMarshaller_1_0
+                        RefRootPackage_1.this != refPackage &&
+                        refPackage instanceof CachingMarshaller_1_0
                 ){
                     return ((CachingMarshaller_1_0)refPackage).cache(unmarshalled, marshalled);
                 }
             }
             return super.cache(unmarshalled, marshalled);
         }
-        
+
         //-----------------------------------------------------------------------
         public Object unmarshal(
-          Object source
+            Object source
         ) throws ServiceException {
             if(RefRootPackage_1.this.legacyDelegate){
                 if(source instanceof Entity_2_0) {
@@ -1506,10 +1668,10 @@ public class RefRootPackage_1
             }
             return source;
         }
-    
+
         //-----------------------------------------------------------------------  
         public Object createMarshalledObject(
-          Object source
+            Object source
         ) throws ServiceException {
             if(RefRootPackage_1.this.legacyDelegate){
                 if(source instanceof Object_1_0) {
@@ -1518,36 +1680,41 @@ public class RefRootPackage_1
                         return RefRootPackage_1.this.refClass(className).refCreateInstance(
                             Collections.singletonList(source)
                         );
+                    } else if (refInteractionSpec() != null) {
+                        return null;
                     } else  throw new ServiceException(
-                        StackedException.DEFAULT_DOMAIN,
+                        BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("path", ((Object_1_0)source).objGetPath()),
-                        },
-                        "object class can not be determined"
+                        "Object class can not be determined",
+                        new BasicException.Parameter(
+                            "resourceIdentifier", 
+                            ((Object_1_0)source).objGetResourceIdentifier()
+                        ),
+                        new BasicException.Parameter(
+                            "interactionSpec"
+                        )
                     );
                 }
             } else {
                 if(source instanceof PersistenceCapable) {
-                    Object persistenceCapable = getPersistenceCapable(source);
                     return RefRootPackage_1.this.refClass(
                         getMofClassName(
-                            persistenceCapable.getClass().getInterfaces()[0].getName().intern(),
+                            source.getClass().getInterfaces()[0].getName(),
                             RefRootPackage_1.this.refModel()
                         )
                     ).refCreateInstance(
-                        Collections.singletonList(persistenceCapable)
+                        Collections.singletonList(source)
                     );
                 }
             }
             return source;
         }
-    
+
         //-----------------------------------------------------------------------  
         protected void clear() {
             super.clear();
         }
-    
+
         //-----------------------------------------------------------------------  
         Object remove(
             Object unmarshalled
@@ -1557,82 +1724,92 @@ public class RefRootPackage_1
 
     }
 
-    /**
-     * Retrieve the object's MOF class name
-     * 
-     * @param javaClass
-     * 
-     * @return the object's MOF class name
-     */
-    public static String getMofClassName(
-        String javaClassName,
-        Model_1_0 model
-    ) throws JmiServiceException {
-        String qualifiedClassName = classNames.get(javaClassName);
-        if(qualifiedClassName == null) {
-            try {
-                String[] components = javaClassName.split("\\.");
-                StringBuilder sb = new StringBuilder();
-                for(int i = 0; i < components.length-2; i++) {
-                    if(i > 0) sb.append(":");
-                    sb.append(components[i]);
-                }
-                String objectPackageName = sb.toString();
-                String objectClassName = components[components.length-1];
-                for(ModelElement_1_0 element: model.getContent()) {
-                    String qualifiedElementName = (String)element.values("qualifiedName").get(0);
-                    String qualifiedPackageName = qualifiedElementName.substring(0, qualifiedElementName.lastIndexOf(":"));
-                    String elementName = (String)element.values("name").get(0);
-                    if(
-                        objectPackageName.equals(qualifiedPackageName) &&
-                        Identifier.CLASS_PROXY_NAME.toIdentifier(elementName).equals(objectClassName)
-                    ) {
-                        classNames.put(
-                            javaClassName, 
-                            qualifiedElementName
-                        );
-                        qualifiedClassName = qualifiedElementName;
-                        break;
-                    }                    
-                }
-                if(qualifiedClassName == null) {
-                    throw new JmiServiceException(
-                        new ServiceException(
-                            StackedException.DEFAULT_DOMAIN,
-                            StackedException.NOT_FOUND,
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("java-class", javaClassName),
-                                new BasicException.Parameter("mof-package", objectPackageName),
-                                new BasicException.Parameter("mof-class", objectClassName)
-                            },
-                            "model element for requested class not found"
-                        )
-                    );
-                }
-            } catch(ServiceException e) {
-                throw new JmiServiceException(e);
-            }
-        }
-        return qualifiedClassName;
-    }
+    //------------------------------------------------------------------------
+    // Class PersistenceManagerFactory_1
+    //------------------------------------------------------------------------
     
-    //-------------------------------------------------------------------------
-    // Implements RefPackage_1_1
-    //-------------------------------------------------------------------------
+    /**
+     * PersistenceManagerFactory_1
+     */
+    static class CompatibilityPersistenceManagerFactory
+        extends AbstractManagerFactory
+    {
 
-    //-----------------------------------------------------------------------
-    public Object refCreateImpl(
-        String qualifiedClassName,
-        RefObject_1_0 refDelegate
-    ) {
-        return refCreateImpl(
-            qualifiedClassName,
-            refDelegate,
-            null, // self,
-            null // next
-        );
+        /**
+         * Constructor 
+         *
+         * @param configuration
+         */
+        CompatibilityPersistenceManagerFactory(
+            ObjectFactory_1_0 objectFactory,
+            Map<String,String> packageImpls,
+            Object context,
+            String bindingPackageSuffix
+        ) {
+            super(
+                bindingPackageSuffix == null ? Collections.EMPTY_MAP : Collections.singletonMap(
+                    ConfigurableProperty.BindingPackageSuffix, 
+                    bindingPackageSuffix
+                )
+            );
+            this.objectFactory = objectFactory;
+            this.packageImpls = packageImpls;
+            this.context = context;
+        }
+        
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = 1935043108080407782L;
+
+        /**
+         * 
+         */
+        private final ObjectFactory_1_0 objectFactory;
+        
+        /**
+         * 
+         */
+        private final Map<String,String> packageImpls;
+        
+        /**
+         * 
+         */
+        private final Object context;
+       
+        
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.AbstractManagerFactory#newManager(javax.security.auth.Subject)
+         */
+        @Override
+        protected PersistenceManager newManager(
+            Subject subject
+        ) { 
+            throw new JDOFatalUserException("Re-authentication is not supported");
+        }
+
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.AbstractManagerFactory#newManager()
+         */
+        @Override
+        protected PersistenceManager newManager(
+        ) {
+            return new RefRootPackage_1(
+                null, // lazy instantiation of viewManager
+                null, // viewContext
+                true, // legacyDelegate
+                this.objectFactory,
+                null, // standardDelegate
+                this.packageImpls,
+                null, // userObjects
+                this.context, // context
+                this, // persistenceManagerFactory
+                null, // principals
+                false // accessor
+            ).refPersistenceManager();
+        }
+
     }
-          
     
     //------------------------------------------------------------------------
     // Class DataStoreConnection
@@ -1656,7 +1833,7 @@ public class RefRootPackage_1
          * 
          */
         private Object nativeConnection;
-        
+
         /* (non-Javadoc)
          * @see javax.jdo.datastore.JDOConnection#close()
          */
@@ -1674,50 +1851,44 @@ public class RefRootPackage_1
 
     }
 
-    
-    //-------------------------------------------------------------------------
-    // Variables
-    //-------------------------------------------------------------------------
-    
-    /**
-     * 
-     */
-    private static final boolean FORCE_CONCURRENT_MAP = true;
-    
     /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = 1272557331049377936L;
+    private static final long serialVersionUID = 6682037424274032056L;
 
     /**
-     * Defines, whether the delegates have to be re-fetched.
+     * An empty proncipal set
      */
-    private final boolean consolidating;
+    private static final Set<Principal> NO_PRINCIPALS = Collections.emptySet();
     
     /**
      * Defines, whether objectFactory or standardDelegate is valid.
      */
     final boolean legacyDelegate;
+
+    /**
+     * Defines, whether instance callbacks should be registered
+     */
+    final boolean accessor;
     
     /**
      * Contains the legacy delegate
      */
-    private final ObjectFactory_1_0 objectFactory;
-    
+    private ObjectFactory_1_0 objectFactory;
+
     /**
      * Contains the standard delegate
      */
-    private final PersistenceManager standardDelegate;
-    
-    private final Object viewContext;
+    private PersistenceManager standardDelegate;
+
+    private final InteractionSpec interactionSpec;
     private final Object userContext;
-    protected ViewManager_1 viewManager;
+    protected ConcurrentMap<InteractionSpec,RefPackage_1_6> viewManager;
     private final RefObject_1Marshaller marshaller;
-    private final boolean throwNotFoundIfNull;
-    private PersistenceManagerFactory persistenceManagerFactory;
+    private final PersistenceManagerFactory persistenceManagerFactory;
     private transient PersistenceManager persistenceManager;
-    private final OptimisticTransaction_2_0 optimisticTransaction;
-    
+    private final Set<? extends Principal> principals;
+
     /**
      * All root packages share the loaded packages.
      */
@@ -1736,6 +1907,11 @@ public class RefRootPackage_1
     private final Map<String,String> packageImpls;
 
     /**
+     * The user objects have to be propagated to a <code>PersistenceManager</code>
+     */
+    private final Map<String,Object> userObjects;
+
+    /**
      * defaultLocationSuffix. The default location for implementation lookup is constructed
      * as <qualified model name as java package name>.<suffix>.<interface or
      * class name>.
@@ -1745,27 +1921,20 @@ public class RefRootPackage_1
     /**
      * Holds the union of models of the loaded sub-packages.
      */
-    private static Model_1_0 model = null;
+    private static Model_1_6 model = null;
 
     private UnitOfWork_1_0 unitOfWork = null;
-    
-    /**
-     * If true, object impl classes are located by the openMDX 1 impl lookup algorithm, i.e.
-     * an implementation is located by the hard-coded name <code>class name</code>Impl or
-     * <code>superclass name</code>Impl. 
-     * If false, objects are always marshaled to proxy objects which dispatch itself to
-     * user-defined implementations.
-     */
-    private final boolean useOpenMdx1ImplLookup;
-  
-    protected final Map<String,Constructor<?>> userImplConstructors = new HashMap<String,Constructor<?>>();
-    protected final Set<String> classesNotHavingUserImpl = new HashSet<String>();
+
+    protected final Map<String,Constructor<?>> userImplConstructors = new ConcurrentHashMap<String,Constructor<?>>();
+    protected final Map<String,Set<Class<?>>> mixedInInterfaces = new ConcurrentHashMap<String,Set<Class<?>>>();
     
     /**
      * Holds the mapping of java proxy names to MOF qualified class names.
      */
-    protected static final Map<String,String> classNames = new IdentityHashMap<String,String>();
+    protected static final Map<String,String> classNames = new ConcurrentHashMap<String,String>();
 
+    private static final Constructor<?> NULL_CONSTRUCTOR = newNullConstructor();
+    
 }
 
 //--- End of File -----------------------------------------------------------

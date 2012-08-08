@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefContainer.java,v 1.2 2008/04/21 17:05:30 hburger Exp $
+ * Name:        $Id: RefContainer.java,v 1.4 2008/12/15 03:15:30 hburger Exp $
  * Description: RefContainer 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/21 17:05:30 $
+ * Date:        $Date: 2008/12/15 03:15:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,12 +52,14 @@ package org.oasisopen.jmi1;
 
 import java.util.List;
 
+import javax.jmi.reflect.RefBaseObject;
+
 import org.oasisopen.cci2.QualifierType;
 
 /**
  * RefContainer
  */
-public interface RefContainer {
+public interface RefContainer extends RefBaseObject {
 
     /**
      * Adds an object to the container
@@ -124,7 +126,7 @@ public interface RefContainer {
      * 
      * @return the result
      */
-    void refRemoveAll(
+    long refRemoveAll(
         Object query
     );
 

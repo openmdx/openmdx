@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObjectParentRidOnly.java,v 1.8 2008/03/21 18:47:38 hburger Exp $
+ * Name:        $Id: SlicedDbObjectParentRidOnly.java,v 1.9 2008/11/14 10:03:52 hburger Exp $
  * Description: SlicedDbObjectParentRidOnly class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:47:38 $
+ * Date:        $Date: 2008/11/14 10:03:52 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -113,16 +113,19 @@ public class SlicedDbObjectParentRidOnly
             // get rid|oid of parent object and construct reference clause
             this.referenceValues = new ArrayList();
             // parent object rid
+            Path parentResourceIdentifier = this.getReference().getParent();
             this.referenceValues.add(
                 this.database.getReferenceId(
                     conn, 
-                    this.reference.getParent().getParent(), 
+                    parentResourceIdentifier.getParent(), 
                     false
                 )
             );
             // parent object oid
             this.referenceValues.add(
-                this.reference.getParent().getBase()
+                this.database.getObjectId(
+                    parentResourceIdentifier.getBase()
+                )
             );
             this.referenceClause = 
                 "(v." + columnNameParentRid + " IN (?)) AND " +

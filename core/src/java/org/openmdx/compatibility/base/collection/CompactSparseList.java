@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CompactSparseList.java,v 1.10 2008/02/08 16:52:21 hburger Exp $
+ * Name:        $Id: CompactSparseList.java,v 1.11 2008/09/05 23:18:48 hburger Exp $
  * Description: Property
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:52:21 $
+ * Date:        $Date: 2008/09/05 23:18:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -639,8 +639,6 @@ public class CompactSparseList<E>
 
         /**
          * Constructor
-         *  
-         * @param index
          */
         NonDelegateIterator(
         ){

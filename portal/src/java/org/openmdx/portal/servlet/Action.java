@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Action.java,v 1.35 2008/06/26 00:39:15 wfro Exp $
+ * Name:        $Id: Action.java,v 1.38 2008/11/12 01:05:06 wfro Exp $
  * Description: Action
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.38 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/26 00:39:15 $
+ * Date:        $Date: 2008/11/12 01:05:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -530,11 +527,11 @@ public final class Action
     public final static int EVENT_SET_PANEL_STATE = 39;
     public final static int EVENT_FIND_OBJECTS = 40;
     public final static int EVENT_INVOKE_WIZARD = 41;
-    public final static int EVENT_SELECT_GUI_MODE = 42;
     public final static int EVENT_MACRO = 43;
     public final static int EVENT_GRID_GET_ROW_MENU = 44;
     public final static int EVENT_OBJECT_GET_ATTRIBUTES = 45;
     public final static int EVENT_SET_ROLE = 47;
+    public final static int EVENT_SELECT_PERSPECTIVE = 48;
     
     //-----------------------------------------------------------------------
     // Macro types

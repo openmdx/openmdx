@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: JmiServiceException.java,v 1.16 2008/03/24 20:11:28 hburger Exp $
+ * Name:        $Id: JmiServiceException.java,v 1.20 2008/10/07 08:40:31 hburger Exp $
  * Description: JmiServiceException class
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/24 20:11:28 $
+ * Date:        $Date: 2008/10/07 08:40:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,7 +57,6 @@ import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefClass;
 import javax.jmi.reflect.RefObject;
 
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -66,9 +65,8 @@ import org.openmdx.kernel.log.SysLog;
  * The JmiServiceException is a specialization of the JmiException. It 
  * embeds a ServiceExeption and is thrown by the openMDX implementation.
  */
-public class JmiServiceException 
-	extends JmiException 
-	implements BasicException.Wrapper
+public class JmiServiceException extends JmiException 
+    implements BasicException.Wrapper
 {
 
     /**
@@ -85,29 +83,33 @@ public class JmiServiceException
         Throwable cause 
     ){
         super(null, null, cause.getMessage());
-        this.exceptionStack = BasicException.toStackedException(
-            cause,
-            this
+        super.initCause(
+            BasicException.toStackedException(
+                cause,
+                this
+            )
         );
     }
 
     /**
-	 * Constructor
-	 * 
-	 * @param cause a <code>BasicException</code> wrapper
-	 * @param elementInError
-	 */
-	public JmiServiceException(
-		Throwable cause,
-		RefObject elementInError
-	) {
-		super(null, elementInError, cause.getMessage());
-		this.exceptionStack = BasicException.toStackedException(
-			cause,
-			this,
-            getParameters(elementInError)
-		);
-	}
+     * Constructor
+     * 
+     * @param cause a <code>BasicException</code> wrapper
+     * @param elementInError
+     */
+    public JmiServiceException(
+        Throwable cause,
+        RefObject elementInError
+    ) {
+        super(null, elementInError, cause.getMessage());
+        super.initCause(
+            BasicException.toStackedException(
+                cause,
+                this,
+                getParameters(elementInError)
+            )
+        );
+    }
 
     /**
      * Retrieve attributes of the element in error
@@ -133,7 +135,7 @@ public class JmiServiceException
                 ),
                 new BasicException.Parameter(
                     "object.mof.class", 
-                     refClass == null ? null : refClass.refMofId()
+                    refClass == null ? null : refClass.refMofId()
                 )
             };
         } catch (RuntimeException exception) {
@@ -145,7 +147,7 @@ public class JmiServiceException
             };
         }
     }
-    
+
     /**
      * Log the exception at warning level.
      *
@@ -162,9 +164,7 @@ public class JmiServiceException
     public JmiServiceException appendCause(
         Throwable cause
     ){
-        (
-            (BasicException)this.exceptionStack.getExceptionStack().get(0)
-        ).initCause(cause);
+        getCause().appendCause(cause);
         return this;
     }
 
@@ -174,23 +174,15 @@ public class JmiServiceException
     //------------------------------------------------------------------------
 
     /**
-     * @deprecated use getExceptionStack()
-     * 
-     * @return the BasicException wrapped by this object.
-     */
-    public final BasicException getStackedException (
-    ) {
-        return getExceptionStack();
-    }
-
-    /**
      * Return a StackedException, this exception object's cause.
      * 
      * @return the BasicException wrapped by this object.
+     * 
+     * @deprecated use getCause()
      */
     public BasicException getExceptionStack (
     ) {
-        return this.exceptionStack;
+        return getCause();
     }
 
     /**
@@ -200,9 +192,10 @@ public class JmiServiceException
      */
     public String getExceptionDomain()
     {
-        return this.exceptionStack == null ? 
+        BasicException exceptionStack = getCause();
+        return exceptionStack == null ? 
             BasicException.Code.DEFAULT_DOMAIN : 
-            this.exceptionStack.getExceptionDomain();
+                exceptionStack.getExceptionDomain();
     }
 
     /**
@@ -212,35 +205,32 @@ public class JmiServiceException
      */
     public int getExceptionCode()
     {
-        return this.exceptionStack == null ? 
+        BasicException exceptionStack = getCause();
+        return exceptionStack == null ? 
             BasicException.Code.GENERIC : 
-            this.exceptionStack.getExceptionCode();
+                exceptionStack.getExceptionCode();
     }
-    
-	/**
-	 * Returns the cause belonging to a specific exception domain.
-	 * 
-	 * @param 	exceptionDomain
-	 * 			the desired exception domain,
-	 *          or <code>null</code> to retrieve the initial cause.
-	 *
-	 * @return  Either the cause belonging to a specific exception domain
-	 *          or the initial cause if <code>exceptionDomain</code> is
-	 * 			<code>null</code>.  
-	 */
-	public BasicException getCause(
-	    String exceptionDomain
-	){
-        return this.exceptionStack == null ? 
-            null : 
-            this.exceptionStack.getCause(exceptionDomain);
-	}
 
     /**
-     * The exception stack
+     * Returns the cause belonging to a specific exception domain.
+     * 
+     * @param 	exceptionDomain
+     * 			the desired exception domain,
+     *          or <code>null</code> to retrieve the initial cause.
+     *
+     * @return  Either the cause belonging to a specific exception domain
+     *          or the initial cause if <code>exceptionDomain</code> is
+     * 			<code>null</code>.  
      */
-    private BasicException exceptionStack;
-         
+    public BasicException getCause(
+        String exceptionDomain
+    ){
+        BasicException exceptionStack = getCause();
+        return exceptionStack == null ? 
+            null : 
+                exceptionStack.getCause(exceptionDomain);
+    }
+
 
     //------------------------------------------------------------------------
     // Extends Throwable
@@ -251,12 +241,13 @@ public class JmiServiceException
      */
     public String getMessage(
     ){
-        return this.exceptionStack == null ?
+        BasicException exceptionStack = getCause();
+        return exceptionStack == null ?
             super.getMessage() : 
-            this.exceptionStack.getMessage() + ": " +
-            this.exceptionStack.getDescription();
+                exceptionStack.getMessage() + ": " +
+                exceptionStack.getDescription();
     }
-    
+
     /**
      * A String consisting of the class of this exception, the exception 
      * domain, the exception code, the exception description and the exception
@@ -265,35 +256,11 @@ public class JmiServiceException
      * @return a multiline representation of this exception.
      */     
     public String toString(){
+        BasicException exceptionStack = getCause();
         return 
-            this.exceptionStack == null ?
+        exceptionStack == null ?
             super.toString() : 
-            super.toString() + '\n' + this.exceptionStack;
-    }
-
-    /**
-     * Initializes the cause of this throwable to the specified value. 
-     * (The cause is the throwable that caused this throwable to get thrown.) 
-     * 
-     * @param   cause
-     *          the cause (which is saved for later retrieval by the
-     *          getCause() method). (A null value is permitted, and indicates 
-     *          that the cause is nonexistent or unknown.) 
-     *
-     * @return      a reference to this RuntimeServiceException instance. 
-     *
-     * @exception   IllegalArgumentException
-     *              if cause is this throwable.
-     *              (A throwable cannot be its own cause.) 
-     * @exception   IllegalStateException
-     *              if the cause is already set.
-     */     
-    public Throwable initCause(
-        Throwable cause
-    ){
-        throw new IllegalStateException(
-            "A RuntimeServiceException's cause can't be changed"
-        );
+                super.toString() + '\n' + exceptionStack;
     }
 
     /**
@@ -302,19 +269,20 @@ public class JmiServiceException
      *
      * @return Throwable  The exception cause.
      */
-    public Throwable getCause(
+    public final BasicException getCause(
     ){
-        return this.exceptionStack;
+        return (BasicException) super.getCause();
     }
 
     /* (non-Javadoc)
      * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
      */
     public void printStackTrace(PrintStream s) {
-        if(this.exceptionStack == null){
+        BasicException exceptionStack = getCause();
+        if(exceptionStack == null){
             super.printStackTrace(s);
         } else {
-            this.exceptionStack.printStack(this, s, true);
+            exceptionStack.printStack(this, s, true);
         }
     }
 
@@ -322,28 +290,14 @@ public class JmiServiceException
      * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
      */
     public void printStackTrace(PrintWriter s) {
-        if(this.exceptionStack == null){
+        BasicException exceptionStack = getCause();
+        if(exceptionStack == null){
             super.printStackTrace(s);
         } else {
-            this.exceptionStack.printStack(this, s, true);
+            exceptionStack.printStack(this, s, true);
         }
     }
 
-
-    //------------------------------------------------------------------------
-    // Deprecated
-    //------------------------------------------------------------------------
-
-    /**
-     * Convert this JmiServiceException to a ServiceException 
-     *
-     * @deprecated  use new 
-     * @{link ServiceException(Exception jmiServiceException)}
-     */
-    public ServiceException getServiceException (
-    ) {
-        return new ServiceException(this);
-    }
 
 }
 

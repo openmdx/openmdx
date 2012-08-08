@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: jdbcURLContextFactory.java,v 1.3 2008/01/10 15:26:57 hburger Exp $
+ * Name:        $Id: jdbcURLContextFactory.java,v 1.5 2008/10/13 09:53:34 hburger Exp $
  * Description: java URL Context Factory
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/10 15:26:57 $
+ * Date:        $Date: 2008/10/13 09:53:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -121,7 +121,9 @@ public class jdbcURLContextFactory implements ObjectFactory {
             if(url.startsWith(URL_PREFIX)) return new ManagedDatabaseConnectionFactory(
                 new LightweightXADataSource(url, environment),
                 new DatabaseConnectionRequestInfo(
-                    null
+                    null, // transactionIsolation
+                    null, // validationStatement
+                    null // loginTimeout
                 )
             ); 
             throw new NoInitialContextException(

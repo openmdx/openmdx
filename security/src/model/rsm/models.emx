@@ -63,9 +63,6 @@
     <importedPackage xmi:type="uml:Profile" href="platform:/resource/openMDX%202%20~%20Core_profiles%20(RSM)/openMDX.epx#_O4XmQN64EdmrtKJSXC0_FQ?openMDX"/>
     <importedProfile href="platform:/resource/openMDX%202%20~%20Core_profiles%20(RSM)/openMDX.epx#_O4XmQN64EdmrtKJSXC0_FQ?openMDX"/>
   </packageImport>
-  <packageImport xmi:id="_hROlMN6-EdmkJO73lqONhA">
-    <importedPackage xmi:type="uml:Model" href="pathmap://ROSE_LIBRARIES/RoseAnalysisDatatypes.library.uml2#_utXHQAfzEdmmcbnrymMrWg"/>
-  </packageImport>
   <ownedMember xmi:type="uml:Package" xmi:id="_3C7B8A60016D3C6168960294" name="org">
     <eAnnotations xmi:id="_hX0VeN6-EdmkJO73lqONhA" source="uml2.diagrams"/>
     <eAnnotations xmi:id="_pcmOsN6_EdmkJO73lqONhA" source="uml2.ownedShortcuts">
@@ -110,9 +107,6 @@
         <contents xmi:type="ecore:EAnnotation" xmi:id="_FXsAkN7AEdmkJO73lqONhA" source="eObjectShortcut">
           <references xmi:type="uml:Model" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.base.emx#_phn1cN67EdmkJO73lqONhA?base"/>
         </contents>
-        <contents xmi:type="ecore:EAnnotation" xmi:id="_G-u24N7AEdmkJO73lqONhA" source="eObjectShortcut">
-          <references xmi:type="uml:Model" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.filter1.emx#_r0nLwN67EdmkJO73lqONhA?filter1"/>
-        </contents>
       </eAnnotations>
       <ownedMember xmi:type="uml:Package" xmi:id="_3C7B8A60016D40A89A3E007A" name="compatibility">
         <eAnnotations xmi:id="_hU8nlt6-EdmkJO73lqONhA" source="uml2.diagrams" references="_3C7B8A60016D40A8A08C0201">
@@ -135,11 +129,7 @@
             <styles xmi:type="umlnotation:UMLDiagramStyle" xmi:id="_hU8nmN6-EdmkJO73lqONhA"/>
           </contents>
         </eAnnotations>
-        <eAnnotations xmi:id="_w44aE96_EdmkJO73lqONhA" source="uml2.ownedShortcuts">
-          <contents xmi:type="ecore:EAnnotation" xmi:id="_DQit4N7AEdmkJO73lqONhA" source="eObjectShortcut">
-            <references xmi:type="uml:Model" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.compatibility.view1.emx#_4trI4N67EdmkJO73lqONhA?view1"/>
-          </contents>
-        </eAnnotations>
+        <eAnnotations xmi:id="_w44aE96_EdmkJO73lqONhA" source="uml2.ownedShortcuts"/>
       </ownedMember>
       <ownedMember xmi:type="uml:Package" xmi:id="_3C7B8A60016D40A8BA7401F4" name="security">
         <eAnnotations xmi:id="_yzUGdt6_EdmkJO73lqONhA" source="uml2.ownedShortcuts">

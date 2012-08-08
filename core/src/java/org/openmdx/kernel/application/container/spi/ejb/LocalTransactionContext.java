@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LocalTransactionContext.java,v 1.3 2008/03/27 19:16:28 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: LocalTransactionContext.java,v 1.4 2008/10/08 14:21:32 hburger Exp $
  * Description: LocalTransactionContext
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/27 19:16:28 $
+ * Date:        $Date: 2008/10/08 14:21:32 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.application.container.spi.ejb;
 
@@ -65,8 +64,8 @@ import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionRequiredException;
 
-import org.openmdx.kernel.log.SysLog;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * LocalTransactionContext
@@ -111,12 +110,13 @@ class LocalTransactionContext
     EJBException end(
          Throwable cause
     ){
+        Logger logger = LoggerFactory.getLogger(LocalTransactionContext.class);
         try {
             super.endFail();
         } catch (Exception exception) {
-            SysLog.error("Transaction Management Failure", exception);
+            logger.error("Transaction Management Failure", exception);
         }
-        SysLog.warning("Caught non-application exception", cause);
+        logger.error("Caught non-application exception", cause);
         return new TransactionRolledbackLocalException(
              "Caught non-application exception",
              cause instanceof Exception ? (Exception)cause : new UndeclaredThrowableException(cause)

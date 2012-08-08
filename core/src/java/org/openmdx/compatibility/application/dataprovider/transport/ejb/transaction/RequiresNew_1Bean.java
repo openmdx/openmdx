@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RequiresNew_1Bean.java,v 1.5 2008/06/11 17:08:46 hburger Exp $
+ * Name:        $Id: RequiresNew_1Bean.java,v 1.7 2008/09/10 08:55:26 hburger Exp $
  * Description: RequiresNew_1Bean
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/11 17:08:46 $
+ * Date:        $Date: 2008/09/10 08:55:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,7 @@ import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.base.transaction.Synchronization_1_0;
 import org.openmdx.base.transaction.TransactionManager_1;
 import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.DataproviderWrapper_1_0;
-import org.openmdx.compatibility.base.application.j2ee.AbstractDataprovider_1Bean;
+import org.openmdx.compatibility.application.dataprovider.transport.ejb.spi.AbstractDataprovider_1Bean;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequestContexts;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
@@ -76,21 +76,21 @@ import org.openmdx.kernel.exception.BasicException;
  * This EJB should have the transaction attribute NotSupported!
  */
 public class RequiresNew_1Bean
-    extends AbstractDataprovider_1Bean
-    implements DataproviderWrapper_1_0 
+extends AbstractDataprovider_1Bean
+implements DataproviderWrapper_1_0 
 {
 
     /**
      * Serial Version UID to avoid warning.
      */
     private static final long serialVersionUID = 3257846588834788148L;
-    
+
     /**
      * The transaction timeout in milliseconds.
      */
     protected long timeout;
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements Manageable_1_0
     //------------------------------------------------------------------------
@@ -112,10 +112,8 @@ public class RequiresNew_1Bean
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.INVALID_CONFIGURATION,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("timeout", timeout)
-                    },
-                    "Transaction timeout must be specified in milliseconds"             
+                    "Transaction timeout must be specified in milliseconds",
+                    new BasicException.Parameter("timeout", timeout)
                 );
             }
             if(this.timeout < -1L) this.timeout = -1L;
@@ -124,7 +122,7 @@ public class RequiresNew_1Bean
         }
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements DataproviderWrapper_1_0
     //------------------------------------------------------------------------
@@ -160,9 +158,9 @@ public class RequiresNew_1Bean
             header.getRequestedFor()
         );
         for (
-            int i = 0;
-            i < unitsOfWork.length;
-            i++
+                int i = 0;
+                i < unitsOfWork.length;
+                i++
         ){
             final int index = i;
             try {
@@ -176,9 +174,9 @@ public class RequiresNew_1Bean
                             request[0] = unitsOfWork[index];
                             DataproviderRequest[] dataproviderRequests = request[0].getRequests();
                             for(
-                                int i=0;
-                                i<dataproviderRequests.length;
-                                i++
+                                    int i=0;
+                                    i<dataproviderRequests.length;
+                                    i++
                             ) dataproviderRequests[i].context(
                                 DataproviderRequestContexts.UNIT_OF_WORK_ID
                             ).set(
@@ -199,7 +197,7 @@ public class RequiresNew_1Bean
                         public void afterCompletion(boolean committed) throws ServiceException {
                             request[0] = null;
                         }
-                         
+
                     },
                     this.timeout
                 );

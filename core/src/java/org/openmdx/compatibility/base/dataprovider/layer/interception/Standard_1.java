@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.6 2008/04/25 00:53:38 hburger Exp $
+ * Name:        $Id: Standard_1.java,v 1.7 2008/11/13 18:01:27 wfro Exp $
  * Description: Standard Transport Layer Plug-In
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 00:53:38 $
+ * Date:        $Date: 2008/11/13 18:01:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,10 +61,10 @@ import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 
 /**
- * The standard implementation of the Transport layer's plug-in.
+ * The standard implementation of the interception layer's plug-in.
  */
 public class Standard_1
-    extends Runtime_1 
+    extends SystemAttributes_1 
 {
 
     //--------------------------------------------------------------------------

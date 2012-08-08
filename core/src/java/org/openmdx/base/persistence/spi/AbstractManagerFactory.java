@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractManagerFactory.java,v 1.1 2008/06/27 13:56:09 hburger Exp $
+ * Name:        $Id: AbstractManagerFactory.java,v 1.10 2008/11/07 17:45:59 hburger Exp $
  * Description: Abstract Manager Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/27 13:56:09 $
+ * Date:        $Date: 2008/11/07 17:45:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,16 +61,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import javax.jdo.JDOFatalUserException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.datastore.DataStoreCache;
 import javax.jdo.listener.InstanceLifecycleListener;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
+import org.openmdx.base.security.spi.SimplePrincipal;
 import org.openmdx.compatibility.base.dataprovider.cci.QualityOfService;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.kernel.Version;
@@ -78,6 +79,7 @@ import org.openmdx.kernel.callback.CloseCallback;
 import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 import org.openmdx.kernel.persistence.cci.NonConfigurableProperty;
 import org.openmdx.kernel.persistence.resource.Connection_2;
+import org.openmdx.uses.org.apache.commons.collections.set.MapBackedSet;
 
 /**
  * Abstract Manager Factory
@@ -85,7 +87,7 @@ import org.openmdx.kernel.persistence.resource.Connection_2;
  * @since openMDX 2.0
  */
 public abstract class AbstractManagerFactory
-    implements PersistenceManagerFactory, CloseCallback
+    implements PersistenceManagerFactory_2_0, CloseCallback
 {
 
     /**
@@ -94,7 +96,7 @@ public abstract class AbstractManagerFactory
      * @param configuration
      */
     protected AbstractManagerFactory(
-        Map<String,Object> configuration
+        Map<?,?> configuration
     ) {
         setOptimistic(getFlag(configuration, ConfigurableProperty.Optimistic));
         setRetainValues(getFlag(configuration,ConfigurableProperty.RetainValues));
@@ -127,6 +129,9 @@ public abstract class AbstractManagerFactory
         if(configuration.containsKey(ConfigurableProperty.ContainerManaged.qualifiedName())) setContainerManaged(
             Boolean.valueOf((String)configuration.get(ConfigurableProperty.ContainerManaged.qualifiedName()))
         );
+        if(configuration.containsKey(ConfigurableProperty.ConnectionFactory.qualifiedName())) setConnectionFactory(
+            configuration.get(ConfigurableProperty.ConnectionFactory.qualifiedName())
+        );
     }
     
     /**
@@ -139,7 +144,10 @@ public abstract class AbstractManagerFactory
     /**
      * <code>PersistentManager</code> book keeping.
      */
-    private Set<PersistenceManager> persistenceManagers = new HashSet<PersistenceManager>();
+    @SuppressWarnings("unchecked")
+    private Set<PersistenceManager> persistenceManagers = MapBackedSet.decorate( 
+        new WeakHashMap<PersistenceManager,Object>()
+    );
     
     /**
      * The <code>PersistenceManagerFactory</code>'s properties.
@@ -193,6 +201,8 @@ public abstract class AbstractManagerFactory
     private static final String FROZEN = 
         "The persistence manager factory is no longer configurable";
     
+    private static final String VENDOR_NAME = "OMEX AG";
+    
     /**
      * The <code>PersistenceManagerFactory/code>'s <code>DataStoreCache</code>.
      */
@@ -206,7 +216,12 @@ public abstract class AbstractManagerFactory
     /**
      * 
      */
-    private static final Set<? extends Principal> NO_PRINCIPALS = Collections.emptySet();
+    protected static final Set<? extends Principal> NO_PRINCIPALS = Collections.emptySet();
+
+    /**
+     * 
+     */
+    protected static final Set<Object> NO_CREDENTIALS = Collections.emptySet();
     
     /**
      * 
@@ -222,7 +237,7 @@ public abstract class AbstractManagerFactory
      * @return <code>true</code> if the flag is on
      */
     private static boolean getFlag (
-        Map<String,Object> properties,
+        Map<?,?> properties,
         ConfigurableProperty option
     ){
         return Boolean.valueOf(
@@ -272,8 +287,10 @@ public abstract class AbstractManagerFactory
     /* (non-Javadoc)
      * @see org.openmdx.kernel.callback.CloseCallback#postClose(java.lang.Object)
      */
-    public void postClose(Object closed) {
-        this.persistenceManagers.remove(closed);
+    public synchronized void postClose(Object closed) {
+        if(!isClosed()) {
+            this.persistenceManagers.remove(closed);
+        }
     }
 
     
@@ -285,22 +302,25 @@ public abstract class AbstractManagerFactory
      * @see javax.jdo.PersistenceManagerFactory#close()
      */
     public synchronized void close() {
-        List<JDOUserException> exceptions = new ArrayList<JDOUserException>();
-        for(PersistenceManager p : this.persistenceManagers){
-            if(p.currentTransaction().isActive()) exceptions.add(
-                new JDOUserException("PersistenceManager has active transaction", p)
+        if(!isClosed()) {
+            List<JDOUserException> exceptions = new ArrayList<JDOUserException>();
+            for(PersistenceManager p : this.persistenceManagers){
+                if(p.currentTransaction().isActive()) exceptions.add(
+                    new JDOUserException("PersistenceManager has active transaction", p)
+                );
+            }
+            if(!exceptions.isEmpty()) throw new JDOUserException(
+                "PersistenceManager with active transaction prevents close",
+                exceptions.toArray(
+                    new JDOUserException[exceptions.size()]
+                )
             );
+            Set<PersistenceManager> persistenceManagers = this.persistenceManagers;
+            this.persistenceManagers = null;
+            for(PersistenceManager p : persistenceManagers){
+                p.close();
+            }
         }
-        if(!exceptions.isEmpty()) throw new JDOUserException(
-            "PersistenceManager with active transaction prevents close",
-            exceptions.toArray(
-                new JDOUserException[exceptions.size()]
-            )
-        );
-        for(PersistenceManager p : this.persistenceManagers){
-            p.close();
-        }
-        this.persistenceManagers = null;
     }
 
     /* (non-Javadoc)
@@ -370,7 +390,9 @@ public abstract class AbstractManagerFactory
         String password
     ) {
         freeze();
-        PersistenceManager persistenceManager = newManager (toSubject(userid,password));
+        PersistenceManager persistenceManager = newManager (
+            toSubject(userid,password)
+        );
         initialize(persistenceManager);
         return persistenceManager;
     }
@@ -825,26 +847,31 @@ public abstract class AbstractManagerFactory
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManagerFactory#setTransactionType(java.lang.String)
      */
-    public void setTransactionType(String name) {
+    public void setTransactionType(
+        String name
+    ) {
         this.configurableProperties.put(
             ConfigurableProperty.TransactionType, 
             name
         );
-    }    /**
-     * Convert the stringified principal chain into an array
+    }    
+    
+    /**
+     * Convert the stringified principal chain into a collection of principal
+     * names.
      * 
      * @param connectionUsername a principal or the stringified principal list 
      * 
-     * @return a principal array
+     * @return a principal name collection
      */
-    public static String[] getPrincipalChain(
+    private static Collection<String> toPrincipalNames(
         String connectionUsername
     ){
         if(
             connectionUsername == null || 
             "".equals(connectionUsername)
         ) {
-            return new String[]{};
+            return Collections.emptySet();
         } else if (
             (connectionUsername.startsWith("[") && connectionUsername.endsWith("]")) ||
             (connectionUsername.startsWith("{") && connectionUsername.endsWith("}"))
@@ -859,12 +886,47 @@ public abstract class AbstractManagerFactory
                 if(j < 0) j = iLimit;
                 principalChain.add(connectionUsername.substring(i, j));
             }
-            return principalChain.toArray(
-                new String[principalChain.size()]
-            );
+            return principalChain;
         } else {
-            return new String[]{connectionUsername};
+            return Collections.singleton(connectionUsername);
         }
+    }
+
+    /**
+     * Convert the stringified principal chain into an array
+     * 
+     * @param connectionUsername a principal or the stringified principal list 
+     * 
+     * @return a principal array
+     */
+    public static String[] toPrincipalChain(
+        String connectionUsername
+    ){
+        Collection<String> principalNames = toPrincipalNames(
+            connectionUsername
+        );
+        return principalNames.toArray(
+            new String[principalNames.size()]
+        );
+    }
+    
+    /**
+     * Convert the stringified principal chain into an array
+     * 
+     * @param connectionUsername a principal or the stringified principal list 
+     * 
+     * @return a principal array
+     */
+    public static Set<Principal> toPrincipalSet(
+        String connectionUsername
+    ){
+        Set<Principal> principals = new HashSet<Principal>();
+        for(String name : toPrincipalNames(connectionUsername)) {
+            principals.add(
+                new SimplePrincipal(name)
+            );
+        }
+        return principals;
     }
 
     /**
@@ -875,20 +937,41 @@ public abstract class AbstractManagerFactory
      * 
      * @return a new subject
      */
-    protected static Subject toSubject(
+    protected Subject toSubject(
         String username,
         String password
+    ){
+        return toSubject(
+            username, 
+            password, 
+            NO_CREDENTIALS
+        );
+    }
+
+    /**
+     * Create a read only subject based on the given credentials
+     * 
+     * @param username
+     * @param password
+     * @param publicCredentials 
+     * 
+     * @return a new subject
+     */
+   public static Subject toSubject(
+        String username,
+        String password, 
+        Set<?> publicCredentials
     ){
         return new Subject(
             true, // readOnly, 
             NO_PRINCIPALS,
-            Collections.emptySet(), // pubCredentials, 
+            publicCredentials == null ? NO_CREDENTIALS : publicCredentials,
             Collections.singleton(
                 new PasswordCredential(
                     username,
                     password == null ? NO_PASSWORD : password.toCharArray()
                 )
-            ) //  privCredentials                
+            ) // private credentials           
         );
     }
 
@@ -947,7 +1030,7 @@ public abstract class AbstractManagerFactory
         String connectionPassword
     ){
         return  new ServiceHeader(
-            getPrincipalChain(connectionUsername),
+            toPrincipalChain(connectionUsername),
             "".equals(connectionPassword) ? null : connectionPassword, // correlationId,
             false, // traceRequest
             new QualityOfService(),
@@ -959,7 +1042,7 @@ public abstract class AbstractManagerFactory
     static {
         NON_CONFIGURABLE_PROPERTIES.setProperty(
             NonConfigurableProperty.VendorName.qualifiedName(), 
-            "OMEX AG"
+            VENDOR_NAME
         );
         NON_CONFIGURABLE_PROPERTIES.setProperty(
             NonConfigurableProperty.VersionNumber.qualifiedName(), 

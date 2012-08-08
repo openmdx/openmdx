@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StatusCodes.java,v 1.2 2008/03/19 17:07:45 hburger Exp $
+ * Name:        $Id: StatusCodes.java,v 1.3 2008/09/09 12:06:39 hburger Exp $
  * Description: Remote Exception Categorization
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:07:45 $
+ * Date:        $Date: 2008/09/09 12:06:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,7 +58,7 @@ import java.util.Properties;
 
 import javax.resource.ResourceException;
 
-import org.openmdx.base.resource.spi.OrderedRecordFactory;
+import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.log.SysLog;
 
 /**
@@ -151,7 +151,7 @@ public class StatusCodes {
         try {
             SysLog.info(
                 PROPERTIES,
-                OrderedRecordFactory.getInstance().asIndexedRecord(
+                Records.getRecordFactory().asIndexedRecord(
                     "retriableStatusCodes",
                     null,
                     retriableStatusCodes

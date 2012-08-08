@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FallbackLoggerAdapter.java,v 1.1 2008/03/13 17:16:04 hburger Exp $
+ * Name:        $Id: FallbackLoggerAdapter.java,v 1.2 2008/11/18 01:30:42 hburger Exp $
  * Description: JDK 1.4 Logger Adapter 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/13 17:16:04 $
+ * Date:        $Date: 2008/11/18 01:30:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -102,6 +102,11 @@ public final class FallbackLoggerAdapter
     extends MarkerIgnoringBase 
     implements LocationAwareLogger 
 {
+    
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = -5607368057871832920L;
     
     final java.util.logging.Logger logger;
 

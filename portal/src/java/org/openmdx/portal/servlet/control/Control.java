@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Control.java,v 1.18 2008/05/01 21:43:56 wfro Exp $
+ * Name:        $Id: Control.java,v 1.23 2008/11/10 13:57:48 wfro Exp $
  * Description: Control
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:56 $
+ * Date:        $Date: 2008/11/10 13:57:48 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -69,10 +66,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.jmi.reflect.RefObject;
 import javax.servlet.http.HttpServletRequest;
@@ -82,7 +80,6 @@ import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.HtmlPage;
-import org.openmdx.portal.servlet.texts.Texts_1_0;
 
 public abstract class Control
     implements Serializable {
@@ -91,13 +88,11 @@ public abstract class Control
     public Control(
         String id,
         String locale,
-        int localeAsIndex,
-        ControlFactory controlFactory
+        int localeAsIndex
     ) {
         this.id = id;
         this.locale = locale;
         this.localeAsIndex = localeAsIndex;
-        this.controlFactory = controlFactory;
     }
 
     //-------------------------------------------------------------------------
@@ -130,14 +125,6 @@ public abstract class Control
         return featureName.replace(':', '.') + "." + type;
     }
   
-  //-------------------------------------------------------------------------
-    public Texts_1_0 getTexts(
-    ) {
-        return this.controlFactory.getTextsFactory().getTexts(
-            this.locale
-        );
-    }
-    
     //-------------------------------------------------------------------------
     protected URL getGroovyURL(
         HttpServletRequest request
@@ -156,9 +143,10 @@ public abstract class Control
         try {
             URL groovyURL = this.getGroovyURL(p.getHttpServletRequest());
             if(groovyURL != null) {
-                ScriptEngine scriptEngine = scriptEngines.get(this.id);
+                Map<String,ScriptEngine> engines = scriptEngines.get();
+                ScriptEngine scriptEngine = engines.get(this.id);
                 if(scriptEngine == null) {
-                    scriptEngines.put(
+                    engines.put(
                         this.id,
                         scriptEngine = new ScriptEngine(
                             new URL[]{groovyURL}
@@ -185,11 +173,17 @@ public abstract class Control
                         if(!new File(realPath + "/" + name).exists()) {
                             name = scriptName;   
                         }
-                        scriptNames.put(qualifiedScriptName, name);
+                        scriptNames.putIfAbsent(
+                            qualifiedScriptName, 
+                            name
+                        );
                     }
                     scriptName = name;
                 }
-                scriptEngine.run(scriptName, binding);
+                scriptEngine.run(
+                   scriptName, 
+                   binding
+                );
             }
         }
         catch(Exception e) {
@@ -211,21 +205,21 @@ public abstract class Control
     }
   
     //-------------------------------------------------------------------------
-    public ControlFactory getControlFactory(
-    ) {
-        return this.controlFactory;
-    }
-  
-    //-------------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    protected static Map<String,ScriptEngine> scriptEngines = new HashMap<String,ScriptEngine>();
-    protected static Map<String,String> scriptNames = new HashMap<String,String>();
+    // A map of script engines for each thread
+    protected static ThreadLocal<Map<String,ScriptEngine>> scriptEngines = 
+        new ThreadLocal<Map<String,ScriptEngine>>() {
+            protected synchronized Map<String,ScriptEngine> initialValue() {
+                return new HashMap<String,ScriptEngine>();
+            }
+        };
+    protected static ConcurrentMap<String,String> scriptNames = 
+        new ConcurrentHashMap<String,String>();
   
     protected String id;
     protected String locale;
     protected int localeAsIndex;
-    protected final ControlFactory controlFactory;
   
     //-------------------------------------------------------------------------
     public static class ScriptEngine {
@@ -245,53 +239,37 @@ public abstract class Control
             ClassLoader parentClassLoader
         ) {
             this(roots);
-            this.parentClassLoader = parentClassLoader;
         }
 
-        public ClassLoader getParentClassLoader(
-        ) {
-            return parentClassLoader;
-        }
-
-        public void setParentClassLoader(
-            ClassLoader parentClassLoader
-        ) {
-            if (parentClassLoader == null) {
-                throw new IllegalArgumentException("The parent class loader must not be null.");
-            }
-            this.parentClassLoader = parentClassLoader;
-        }
-
-        private ScriptCacheEntry updateCacheEntry(
-            String scriptName, 
-            final ClassLoader parentClassLoader
+        private ScriptCacheEntry getScript(
+            String scriptName 
         ) throws ResourceException, ScriptException {
             ScriptCacheEntry entry;
             scriptName = scriptName.intern();
-            synchronized (scriptName) {
-                entry = (ScriptCacheEntry)this.scriptCache.get(scriptName);            
-                if(entry == null) {
-                    entry = new ScriptCacheEntry();
-                    GroovyClassLoader groovyLoader = new GroovyClassLoader();
-                    try {
-                        entry.scriptClass = null;
-                        for(int i = 0; i < roots.length; i++) {
-                            URL scriptURL = new URL(roots[i] + "/" + scriptName);
-                            try {
-                                entry.scriptClass = groovyLoader.parseClass(scriptURL.openStream(), scriptName);
-                                break;
-                            }
-                            catch(IOException e) {}
+            entry = (ScriptCacheEntry)this.scriptCache.get(scriptName);            
+            if(entry == null) {
+                entry = new ScriptCacheEntry();
+                try {
+                    entry.scriptClass = null;
+                    for(int i = 0; i < this.roots.length; i++) {
+                        URL scriptURL = new URL(this.roots[i] + "/" + scriptName);
+                        try {
+                            entry.scriptClass = this.groovyClassLoader.parseClass(scriptURL.openStream(), scriptName);
+                            break;
                         }
-                        if(entry.scriptClass == null) {
-                            throw new ScriptException("Could not locate scriptName: " + scriptName);                    
-                        }
-                    } 
-                    catch(Exception e) {
-                        throw new ScriptException("Could not parse scriptName: " + scriptName, e);
+                        catch(IOException e) {}
                     }
-                    this.scriptCache.put(scriptName, entry);
+                    if(entry.scriptClass == null) {
+                        throw new ScriptException("Could not locate script: " + scriptName);                    
+                    }
+                } 
+                catch(Exception e) {
+                    throw new ScriptException("Could not parse script: " + scriptName, e);
                 }
+                this.scriptCache.putIfAbsent(
+                    scriptName, 
+                    entry
+                );
             }
             return entry;
         }
@@ -300,7 +278,7 @@ public abstract class Control
             String scriptName, 
             Binding binding
         ) throws ResourceException, ScriptException {
-            ScriptCacheEntry entry = updateCacheEntry(scriptName, getParentClassLoader());
+            ScriptCacheEntry entry = this.getScript(scriptName);
             Script scriptObject = InvokerHelper.createScript(entry.scriptClass, binding);
             return scriptObject.run();
         }
@@ -309,9 +287,10 @@ public abstract class Control
         // Members
         //-----------------------------------------------------------------------
         private URL[] roots;
-        private Map<String,ScriptCacheEntry> scriptCache = Collections.synchronizedMap(new HashMap<String,ScriptCacheEntry>());
-        private ClassLoader parentClassLoader = getClass().getClassLoader();
-
+        private final GroovyClassLoader groovyClassLoader = new GroovyClassLoader();
+        private ConcurrentHashMap<String,ScriptCacheEntry> scriptCache = 
+            new ConcurrentHashMap<String,ScriptCacheEntry>();
+        
     }
     
 }

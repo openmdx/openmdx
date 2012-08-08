@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SysLog.java,v 1.14 2008/05/05 17:51:52 hburger Exp $
+ * Name:        $Id: SysLog.java,v 1.15 2008/10/09 09:34:26 hburger Exp $
  * Description: Former Log API
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/05 17:51:52 $
+ * Date:        $Date: 2008/10/09 09:34:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -653,11 +653,13 @@ public class SysLog {
      * meaning for the logging framework.
      *
      * @param group  a statistics group.
-     * @param info   a statistics record string
+     * @param record a statistics record string
      * @see #statistics(String, String, int)
      */
-    public static void statistics(String 	group, String 	record)
-    {
+    public static void statistics(
+        String 	group, 
+        String 	record
+    ) {
         if (logger.isInfoEnabled()) {
             String message = MessageFormatter.arrayFormat(
                 "{} Statistics|Group {}|{}", 

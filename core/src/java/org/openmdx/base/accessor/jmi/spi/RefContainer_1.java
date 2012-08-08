@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefContainer_1.java,v 1.14 2008/04/21 17:06:27 hburger Exp $
+ * Name:        $Id: RefContainer_1.java,v 1.20 2008/12/15 03:15:33 hburger Exp $
  * Description: RefContainer_1 class
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/21 17:06:27 $
+ * Date:        $Date: 2008/12/15 03:15:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,6 +56,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.jmi.reflect.RefBaseObject;
+import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
 import org.oasisopen.jmi1.RefContainer;
@@ -74,104 +76,154 @@ import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.compatibility.base.collection.Container;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.compatibility.base.exception.StackedException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.compatibility.base.query.FilterOperators;
 import org.openmdx.compatibility.base.query.FilterProperty;
+import org.openmdx.kernel.exception.BasicException;
 
 //---------------------------------------------------------------------------
-// RefContainer_1
+//RefContainer_1
 //---------------------------------------------------------------------------
 @SuppressWarnings("deprecation")
 public class RefContainer_1
-  extends AbstractCollection<RefObject_1_0>
-  implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.RefContainer_1_0, RefContainer
+extends AbstractCollection<RefObject_1_0>
+implements Serializable, org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1.LegacyContainer, RefContainer
 {
 
-  /**
-   * Implements <code>Serializable</code>
-   */
-  private static final long serialVersionUID = 1211709415207799992L;
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 1211709415207799992L;
 
-  private Marshaller marshaller;
+    private Marshaller marshaller;
 
-  private FilterableMap<String,Object_1_0> container;
+    private FilterableMap<String,Object_1_0> container;
 
-  //-------------------------------------------------------------------------
-  /**
-   * Constructor
-   *
-   * @param   the marshaller to be applied to the elements, filter and order
-   *           objects.
-   * @param   The delegate contains unmarshalled elements
-   */
-  @SuppressWarnings("unchecked")
-  public RefContainer_1(
-    Marshaller marshaller,
-    FilterableMap<String,Object_1_0> container
-  ) {
-    this.marshaller = marshaller;
-    this.container = container;
-  }
-
-  //-------------------------------------------------------------------------
-  public FilterableMap<String,Object_1_0> refDelegate(
-  ) {
-    return this.container;
-  }
-
-  //-------------------------------------------------------------------------
-  public RefPackage refOutermostPackage(
-  ) {
-    return (RefPackage) this.marshaller;
-  }
-  
-  //-------------------------------------------------------------------------
-  public void refAddValue(
-    String qualifier,
-    RefObject_1_0 value
-  ) {
-    try {
-      value.refDelegate().objMove(
-        this.container,
-        qualifier
-      );
+    //-------------------------------------------------------------------------
+    /**
+     * Constructor
+     *
+     * @param   the marshaller to be applied to the elements, filter and order
+     *           objects.
+     * @param   The delegate contains unmarshalled elements
+     */
+    @SuppressWarnings("unchecked")
+    public RefContainer_1(
+        Marshaller marshaller,
+        FilterableMap<String,Object_1_0> container
+    ) {
+        this.marshaller = marshaller;
+        this.container = container;
     }
-    catch(ServiceException e) {
-      throw new JmiServiceException(e);
-    }
-  }
 
-  //-------------------------------------------------------------------------
-  public Container<RefObject_1_0> subSet(
-    Object filter
-  ) {
-    FilterableMap<String, Object_1_0> delegate;
-    if(filter instanceof RefFilter_1_0) {
-      Collection<FilterProperty> filterProperties = ((RefFilter_1_0)filter).refGetFilterProperties();
-      delegate = this.container.subMap(
-        filterProperties.toArray(new FilterProperty[filterProperties.size()])
-      );
-    } else if(filter instanceof Filter) {
-      FilterProperty[] mapped = new FilterProperty[((Filter)filter).getCondition().length];
-      for(int i = 0; i < mapped.length; i++) {
-        Condition condition = ((Filter)filter).getCondition()[i];
-        mapped[i] = new FilterProperty(
-          condition.getQuantor(),
-          condition.getFeature(),
-          (short)FilterOperators.fromString(condition.getName()),
-          condition.getValue()
+    //-------------------------------------------------------------------------
+    public FilterableMap<String,Object_1_0> refDelegate(
+    ) {
+        return this.container;
+    }
+    
+    //  -------------------------------------------------------------------------
+
+    /**
+     * Retrieve the delegate in case of a RefContainer instance
+     * 
+     * @return the delegate in case of a RefContainer instance
+     * 
+     * @throws UnsupportedOperationException unless the delegate is an instance of RefContainer
+     */
+    private RefBaseObject refBaseObject(){
+        if(this.container instanceof RefBaseObject) {
+            return (RefBaseObject)this.container;
+        }
+        throw new UnsupportedOperationException(
+            "The delegate is not an instance of " + RefBaseObject.class.getName() + ": " + (
+                 this.container == null ? "null" : this.container.getClass().getName()
+            )
         );
-      }
-      delegate = this.container.subMap(mapped);
-    } else {
-      delegate = this.container.subMap(filter);
     }
-    return new RefContainer_1(
-      this.marshaller,
-      delegate
-    );
-  }
+    
+    /* (non-Javadoc)
+     * @see javax.jmi.reflect.RefBaseObject#refImmediatePackage()
+     */
+    public RefPackage refImmediatePackage() {
+        throw new UnsupportedOperationException(
+            "refImmediatePackage() is not supported, while refOutermostPackage() is"
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jmi.reflect.RefBaseObject#refMetaObject()
+     */
+    public RefObject refMetaObject() {
+        return refBaseObject().refMetaObject();
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jmi.reflect.RefBaseObject#refMofId()
+     */
+    public String refMofId() {
+        return refBaseObject().refMofId();
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jmi.reflect.RefBaseObject#refVerifyConstraints(boolean)
+     */
+    public Collection<?> refVerifyConstraints(boolean deepVerify) {
+        return refBaseObject().refVerifyConstraints(deepVerify);
+    }
+
+//  -------------------------------------------------------------------------
+    public RefPackage refOutermostPackage(
+    ) {
+        return (RefPackage) this.marshaller;
+    }
+
+    //-------------------------------------------------------------------------
+    public void refAddValue(
+        String qualifier,
+        RefObject_1_0 value
+    ) {
+        try {
+            value.refDelegate().objMove(
+                this.container,
+                qualifier
+            );
+        }
+        catch(ServiceException e) {
+            throw new JmiServiceException(e);
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    public Container<RefObject_1_0> subSet(
+        Object filter
+    ) {
+        FilterableMap<String, Object_1_0> delegate;
+        if(filter instanceof RefFilter_1_0) {
+            Collection<FilterProperty> filterProperties = ((RefFilter_1_0)filter).refGetFilterProperties();
+            delegate = this.container.subMap(
+                filterProperties.toArray(new FilterProperty[filterProperties.size()])
+            );
+        } else if(filter instanceof Filter) {
+            FilterProperty[] mapped = new FilterProperty[((Filter)filter).getCondition().length];
+            for(int i = 0; i < mapped.length; i++) {
+                Condition condition = ((Filter)filter).getCondition()[i];
+                mapped[i] = new FilterProperty(
+                    condition.getQuantor(),
+                    condition.getFeature(),
+                    (short)FilterOperators.fromString(condition.getName()),
+                    condition.getValue()
+                );
+            }
+            delegate = this.container.subMap(mapped);
+        } else {
+            delegate = this.container.subMap(filter);
+        }
+        return new RefContainer_1(
+            this.marshaller,
+            delegate
+        );
+    }
 
     //-------------------------------------------------------------------------
     public List<RefObject_1_0> toList(
@@ -193,10 +245,10 @@ public class RefContainer_1
             source = this.container.subMap(null);
         }
         else if(
-            (criteria instanceof Object[]) && 
-            (((Object[])criteria).length == 2) &&
-            (((Object[])criteria)[0] instanceof FilterProperty[]) && 
-            (((Object[])criteria)[1] instanceof AttributeSpecifier[]) 
+                (criteria instanceof Object[]) && 
+                (((Object[])criteria).length == 2) &&
+                (((Object[])criteria)[0] instanceof FilterProperty[]) && 
+                (((Object[])criteria)[1] instanceof AttributeSpecifier[]) 
         ) {
             source = this.container.subMap(((Object[])criteria)[0]);
             criteria = ((Object[])criteria)[1];
@@ -236,43 +288,44 @@ public class RefContainer_1
         return new MarshallingSequentialList<RefObject_1_0>(this.marshaller, source.values(criteria));
     }
 
-  /* (non-Javadoc)
-   * @see java.util.AbstractCollection#iterator()
-   */
-  public Iterator<RefObject_1_0> iterator() {
-    return new MarshallingSet<RefObject_1_0>(
-      this.marshaller,
-      this.container.values()
-    ).iterator();
-  }
-
-  /* (non-Javadoc)
-   * @see java.util.AbstractCollection#size()
-   */
-  public int size() {
-    return this.container.size();
-  }
-
-  /* (non-Javadoc)
-   * @see org.openmdx.compatibility.base.collection.Container#get(java.lang.Object)
-   */
-  public RefObject_1_0 get(Object filter) {
-   if(filter instanceof String) {
-     try {
-        return (RefObject_1_0) this.marshaller.marshal(this.container.get(filter));
-     } catch (ServiceException exception){
-        if(exception.getExceptionCode() == StackedException.NOT_FOUND) return null;
-        throw new MarshalException(exception);
-     }
-   } else {
-      List<RefObject_1_0> selection = toList(filter);
-      switch(selection.size()){
-        case 0: return null;
-        case 1: return selection.get(0);
-        default: throw new InvalidCardinalityException("Matching objects: " + selection.size());
-      }
+    /* (non-Javadoc)
+     * @see java.util.AbstractCollection#iterator()
+     */
+    public Iterator<RefObject_1_0> iterator() {
+        return new MarshallingSet<RefObject_1_0>(
+                this.marshaller,
+                this.container.values()
+        ).iterator();
     }
-  }
+
+    /* (non-Javadoc)
+     * @see java.util.AbstractCollection#size()
+     */
+    public int size() {
+        return this.container.size();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.compatibility.base.collection.Container#get(java.lang.Object)
+     */
+    public RefObject_1_0 get(Object filter) {
+        if(filter instanceof String) {
+            try {
+                Object_1_0 object = this.container.get(filter);
+                return (RefObject_1_0) this.marshaller.marshal(object);
+            } catch (ServiceException exception){
+                if(exception.getExceptionCode() == BasicException.Code.NOT_FOUND) return null;
+                throw new MarshalException(exception);
+            }
+        } else {
+            List<RefObject_1_0> selection = toList(filter);
+            switch(selection.size()){
+                case 0: return null;
+                case 1: return selection.get(0);
+                default: throw new InvalidCardinalityException("Matching objects: " + selection.size());
+            }
+        }
+    }
 
     /* (non-Javadoc)
      * @see java.util.Collection#add(java.lang.Object)
@@ -282,11 +335,11 @@ public class RefContainer_1
         return true;
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements RefContainer
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refAdd(java.lang.Object[])
      */
@@ -318,16 +371,22 @@ public class RefContainer_1
      * @see org.oasisopen.jmi1.RefContainer#refRemove(java.lang.Object[])
      */
     public void refRemove(Object... arguments) {
-        get(RefContainer_1.toQualifier(arguments.length, arguments)).refDelete();
+        RefObject_1_0 object = get(RefContainer_1.toQualifier(arguments.length, arguments));
+        if(object != null) {
+            object.refDelete();
+        }
     }
 
     /* (non-Javadoc)
      * @see org.oasisopen.jmi1.RefContainer#refRemoveAll(java.lang.Object)
      */
-    public void refRemoveAll(Object query) {
+    public long refRemoveAll(Object query) {
+        long removed = 0;
         for(RefObject_1_0 refObject : toList(query)) {
             refObject.refDelete();
+            removed++;
         }
+        return removed;
     }
 
     /**
@@ -345,29 +404,32 @@ public class RefContainer_1
         switch(size) {
             case 0: return null;
             case 1: return String.valueOf(arguments[0]);
+            case 2: if(arguments[0] == REASSIGNABLE) {
+                return String.valueOf(arguments[1]);
+            } // else fall through
             default:
                 if(size % 2 == 1) throw new IllegalArgumentException(
                     "The ref-method was invoked with an odd number of arguments greater than one: " + arguments.length
                 );
-                StringBuilder qualifier = new StringBuilder(
-                    arguments[0] == PERSISTENT ? "!" : ""
-                ).append(
-                    arguments[1]
-                );
-                for(
+            StringBuilder qualifier = new StringBuilder(
+                arguments[0] == PERSISTENT ? "!" : ""
+            ).append(
+                arguments[1]
+            );
+            for(
                     int i = 2;
                     i < size;
                     i++
-                ){
-                    qualifier.append(
-                        arguments[i] == PERSISTENT ? '!' : '*'
-                    ).append(
-                        arguments[++i]
-                    );
-                }
-                return qualifier.toString();
+            ){
+                qualifier.append(
+                    arguments[i] == PERSISTENT ? '!' : '*'
+                ).append(
+                    arguments[++i]
+                );
+            }
+            return qualifier.toString();
         }        
-     }
+    }
 
-        
+
 }

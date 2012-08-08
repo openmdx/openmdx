@@ -34,9 +34,9 @@
 																		<_item>org:omg:model1</_item>
 																		<_item>org:openmdx:ui1</_item>
 																		<_item>org:openmdx:test:app1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																	</value>
 																</_object>
 																<_content/>
@@ -115,10 +115,10 @@
 																		<_item>org:w3c</_item>
 																		<_item>org:oasis-open</_item>
 																		<_item>org:openmdx:base</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:openmdx:compatibility:state1</_item>
-																		<_item>org:openmdx:test:compatibility:role1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:test:compatibility:role1</_item -->
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -203,10 +203,10 @@
 																		<_item>org:w3c</_item>
 																		<_item>org:oasis-open</_item>
 																		<_item>org:openmdx:base</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:openmdx:compatibility:state1</_item>
-																		<_item>org:openmdx:test:compatibility:role1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:test:compatibility:role1</_item -->
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -484,9 +484,9 @@
 																		<_item>org:oasis-open</_item>
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:openmdx:test:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -587,9 +587,9 @@
 																		<_item>org:oasis-open</_item>
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:openmdx:test:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -676,9 +676,9 @@
 																		<_item>org:oasis-open</_item>
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:openmdx:test:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -779,9 +779,9 @@
 																		<_item>org:oasis-open</_item>
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:openmdx:test:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -876,9 +876,9 @@
 																		<_item>org:oasis-open</_item>
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:openmdx:test:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -1133,9 +1133,9 @@
 																		<_item>org:oasis-open</_item>
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:openmdx:test:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -1446,9 +1446,9 @@
 																		<_item>org:oasis-open</_item>
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:openmdx:test:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -1759,9 +1759,9 @@
 																		<_item>org:oasis-open</_item>
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:openmdx:test:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -2071,9 +2071,9 @@
 																		<_item>org:oasis-open</_item>
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:openmdx:test:compatibility:state1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -2378,9 +2378,9 @@
 																		<_item>org:openmdx:datastore1</_item>
 																		<_item>org:openmdx:lock1</_item>
 																		<_item>org:openmdx:test:app1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:omg:model1</_item>
 																	</value>
 																</_object>
@@ -2477,9 +2477,9 @@
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:datastore1</_item>
 																		<_item>org:openmdx:test:app1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:omg:model1</_item>
 																	</value>
 																</_object>
@@ -2583,9 +2583,9 @@
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:datastore1</_item>
 																		<_item>org:openmdx:test:app1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:omg:model1</_item>
 																	</value>
 																</_object>
@@ -2775,9 +2775,9 @@
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:compatibility:audit1</_item>
 																		<_item>org:openmdx:test:app1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																		<_item>org:openmdx:compatibility:state1</_item>
 																	</value>
 																</_object>
@@ -2956,9 +2956,9 @@
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:compatibility:audit1</_item>
 																		<_item>org:openmdx:test:app1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
-																		<_item>org:openmdx:compatibility:role1</_item>
+																		<!-- _item>org:openmdx:compatibility:role1</_item -->
 																	</value>
 																</_object>
 																<_content/>
@@ -3266,7 +3266,7 @@
 																		<_item>org:oasis-open</_item>
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:openmdx:deployment1</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -3308,7 +3308,7 @@
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:w3c</_item>
 																		<_item>org:oasis-open</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>
@@ -3518,7 +3518,7 @@
 																		<_item>org:openmdx:base</_item>
 																		<_item>org:w3c</_item>
 																		<_item>org:oasis-open</_item>
-																		<_item>org:openmdx:compatibility:view1</_item>
+																		<!-- _item>org:openmdx:compatibility:view1</_item -->
 																		<_item>org:openmdx:compatibility:sequence1</_item>
 																	</value>
 																</_object>

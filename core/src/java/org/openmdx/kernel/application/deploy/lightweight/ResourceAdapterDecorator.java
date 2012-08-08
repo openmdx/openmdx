@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ResourceAdapterDecorator.java,v 1.9 2008/01/13 21:37:34 hburger Exp $
+ * Name:        $Id: ResourceAdapterDecorator.java,v 1.10 2008/10/09 22:33:54 hburger Exp $
  * Description: Resource Adapter Decorator
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/13 21:37:34 $
+ * Date:        $Date: 2008/10/09 22:33:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -151,6 +151,70 @@ public class ResourceAdapterDecorator
     ) {
         this.owner.validate();
         return this.maximumWait;
+    }
+
+    /**
+     * @return
+     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getMaximumIdle()
+     */
+    public Integer getMaximumIdle() {
+        return this.delegate.getMaximumIdle();
+    }
+
+    /**
+     * @return
+     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getMinimumEvictableIdleTime()
+     */
+    public Long getMinimumEvictableIdleTime() {
+        return this.delegate.getMinimumEvictableIdleTime();
+    }
+
+    /**
+     * @return
+     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getMinimumIdle()
+     */
+    public Integer getMinimumIdle() {
+        return this.delegate.getMinimumIdle();
+    }
+
+    /**
+     * @return
+     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getNumberOfTestsPerEvictionRun()
+     */
+    public Integer getNumberOfTestsPerEvictionRun() {
+        return this.delegate.getNumberOfTestsPerEvictionRun();
+    }
+
+    /**
+     * @return
+     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getTestOnBorrow()
+     */
+    public Boolean getTestOnBorrow() {
+        return this.delegate.getTestOnBorrow();
+    }
+
+    /**
+     * @return
+     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getTestOnReturn()
+     */
+    public Boolean getTestOnReturn() {
+        return this.delegate.getTestOnReturn();
+    }
+
+    /**
+     * @return
+     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getTestWhileIdle()
+     */
+    public Boolean getTestWhileIdle() {
+        return this.delegate.getTestWhileIdle();
+    }
+
+    /**
+     * @return
+     * @see org.openmdx.kernel.application.deploy.spi.Deployment.Pool#getTimeBetweenEvictionRuns()
+     */
+    public Long getTimeBetweenEvictionRuns() {
+        return this.delegate.getTimeBetweenEvictionRuns();
     }
 
     public void validate(

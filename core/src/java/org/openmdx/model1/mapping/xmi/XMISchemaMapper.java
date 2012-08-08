@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMISchemaMapper.java,v 1.6 2008/03/21 18:40:22 hburger Exp $
+ * Name:        $Id: XMISchemaMapper.java,v 1.7 2008/11/11 15:41:25 wfro Exp $
  * Description: write XML schema (XSD)
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:40:22 $
+ * Date:        $Date: 2008/11/11 15:41:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -186,7 +186,7 @@ public class XMISchemaMapper {
   ) throws ServiceException {
 
     String attributeName = (String)attributeDef.values("name").get(0);
-    String qualifiedTypeName = (String)this.model.getDereferencedType(attributeDef.values("type").get(0)).values("qualifiedName").get(0);
+    String qualifiedTypeName = (String)this.model.getElementType(attributeDef).values("qualifiedName").get(0);
     String multiplicity = (String) attributeDef.values("multiplicity").get(0);
     String typeName = isClass
       ? "org.openmdx.base.ObjectId"
@@ -208,7 +208,7 @@ public class XMISchemaMapper {
   ) throws ServiceException {
 
     String fieldName = (String)structureFieldDef.values("name").get(0);
-    String qualifiedTypeName = (String)this.model.getDereferencedType(structureFieldDef.values("type").get(0)).values("qualifiedName").get(0);
+    String qualifiedTypeName = (String)this.model.getElementType(structureFieldDef).values("qualifiedName").get(0);
     String multiplicity = (String) structureFieldDef.values("multiplicity").get(0);
     String typeName = isClass
       ? "org.openmdx.base.ObjectId"
@@ -314,7 +314,7 @@ public class XMISchemaMapper {
   ) throws ServiceException {
     
     String referenceName = (String)referenceDef.values("name").get(0);
-    ModelElement_1_0 referencedType = this.model.getDereferencedType(referenceDef.values("type").get(0));
+    ModelElement_1_0 referencedType = this.model.getElementType(referenceDef);
     
     // in case of a recursive reference, only the subclasses of exposingClass
     // with stereotype <<role>> are added to the list of allowed types

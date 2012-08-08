@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestFilter.java,v 1.6 2006/08/11 09:25:23 hburger Exp $
+ * Name:        $Id: TestFilter.java,v 1.7 2008/09/27 12:00:12 hburger Exp $
  * Description: Test Filter
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/08/11 09:25:23 $
+ * Date:        $Date: 2008/09/27 12:00:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -129,61 +129,71 @@ public class TestFilter
                     Quantors.FOR_ALL,
                     "fGreater",
                     true,
-                    new Integer[]{new Integer(-1000), new Integer(1000)}
+                    Integer.valueOf(-1000), 
+                    Integer.valueOf(1000)
                 ),
                 new IsGreaterCondition(
                     Quantors.FOR_ALL,
                     "fGreater",
                     false,
-                    new Integer[]{new Integer(-1000), new Integer(1000)}
+                    Integer.valueOf(-1000), 
+                    Integer.valueOf(1000)
                 ),
                 new IsGreaterOrEqualCondition(
                     Quantors.FOR_ALL,
                     "fGreaterOrEqual",
                     true,
-                    new Double[]{new Double("-9999999999999.123"), new Double("99999999999.123")}
+                    Double.parseDouble("-9999999999999.123"), 
+                    Double.parseDouble("99999999999.123")
                 ),
                 new IsGreaterOrEqualCondition(
                     Quantors.FOR_ALL,
                     "fGreaterOrEqual",
                     false,
-                    new Double[]{new Double("-9999999999999.123"), new Double("99999999999.123")}
+                    Double.parseDouble("-9999999999999.123"), 
+                    Double.parseDouble("99999999999.123")
                 ),
                 new IsInCondition(
                     Quantors.FOR_ALL,
                     "fIsIn",
                     true,
-                    new Boolean[]{Boolean.FALSE, Boolean.TRUE}
+                    Boolean.FALSE, 
+                    Boolean.TRUE
                 ),
                 new IsInCondition(
                     Quantors.FOR_ALL,
                     "fIsIn",
                     false,
-                    new Boolean[]{Boolean.FALSE, Boolean.TRUE}
+                    Boolean.FALSE, 
+                    Boolean.TRUE
                 ),
                 new IsLikeCondition(
                     Quantors.FOR_ALL,
                     "fIsLike",
                     true,
-                    new String[]{"IsLikeCondition", "IsLikeCondition"}
+                    "IsLikeCondition", 
+                    "IsLikeCondition"
                 ),
                 new IsLikeCondition(
                     Quantors.FOR_ALL,
                     "fIsLike",
                     false,
-                    new String[]{"IsLikeCondition", "IsLikeCondition"}
+                    "IsLikeCondition", 
+                    "IsLikeCondition"
                 ),
                 new SoundsLikeCondition(
                     Quantors.FOR_ALL,
                     "fSoundsLike",
                     true,
-                    new String[]{"uri:@openmdx:a.b.c/:*/This/%", "uri:@openmdx:a.b.c/:*/That/%"}
+                    "uri:@openmdx:a.b.c/:*/This/%", 
+                    "uri:@openmdx:a.b.c/:*/That/%"
                 ),
                 new SoundsLikeCondition(
                     Quantors.FOR_ALL,
                     "fSoundsLike",
                     false,
-                    new String[]{"uri:@openmdx:a.b.c/:*/This/%", "uri:@openmdx:a.b.c/:*/That/%"}
+                    "uri:@openmdx:a.b.c/:*/This/%", 
+                    "uri:@openmdx:a.b.c/:*/That/%"
                 )
             },
             new OrderSpecifier[]{

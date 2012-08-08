@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Connection.java,v 1.1 2006/05/19 11:33:31 hburger Exp $
+ * Name:        $Id: Dataprovider_1Connection.java,v 1.2 2008/11/27 16:46:56 hburger Exp $
  * Description: Dataprovider_1 Connection 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/05/19 11:33:31 $
+ * Date:        $Date: 2008/11/27 16:46:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -95,7 +95,7 @@ class Dataprovider_1Connection implements Dataprovider_1_1Connection {
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0#process(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest[])
      */
-    public UnitOfWorkReply[] process(ServiceHeader header, UnitOfWorkRequest[] workingUnits) {
+    public UnitOfWorkReply[] process(ServiceHeader header, UnitOfWorkRequest... workingUnits) {
         return this.delegate.process(header, workingUnits);
     }
     

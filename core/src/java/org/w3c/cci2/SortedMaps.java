@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SortedMaps.java,v 1.4 2008/06/28 00:21:51 hburger Exp $
+ * Name:        $Id: SortedMaps.java,v 1.5 2008/10/02 17:16:48 hburger Exp $
  * Description: Sorted Maps 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:51 $
+ * Date:        $Date: 2008/10/02 17:16:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,6 +50,8 @@
  */
 package org.w3c.cci2;
 
+import java.io.Flushable;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.AbstractSet;
@@ -118,7 +120,7 @@ public class SortedMaps {
      * <code>TreeMap</code> based SparseArray implementation.
      */
     public static class AsSparseArray<E>
-        implements Serializable, SparseArray<E>
+        implements Serializable, SparseArray<E>, Flushable
     {
 
         /**
@@ -180,6 +182,14 @@ public class SortedMaps {
             );
         }
         
+        /* (non-Javadoc)
+         * @see org.openmdx.compatibility.base.dataprovider.transport.spi.Manageable#flush()
+         */
+        public void flush(
+        ) throws IOException {
+            ((Flushable)this.delegate).flush();
+        }
+
         /* (non-Javadoc)
          * @see java.util.AbstractMap#entrySet()
          */

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TogetherMapper_1.java,v 1.11 2008/04/04 01:12:22 hburger Exp $
+ * Name:        $Id: TogetherMapper_1.java,v 1.13 2008/11/11 17:53:17 wfro Exp $
  * Description: TogetherCppExternalizer_1
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 01:12:22 $
+ * Date:        $Date: 2008/11/11 17:53:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,6 +55,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -117,8 +118,7 @@ public class TogetherMapper_1
   ) throws ServiceException {
       AttributeDef mAttributeDef = new AttributeDef(
           attributeDef, 
-          this.model, 
-          true
+          this.model 
       );
       umlMapper.mapClassAttribute(
           mAttributeDef,
@@ -133,8 +133,7 @@ public class TogetherMapper_1
   ) throws ServiceException {
     OperationDef mOperationDef = new OperationDef(
         operationDef,
-        this.model, 
-        true // openmdx1
+        this.model 
     );
     umlMapper.mapClassOperation(mOperationDef);
   }
@@ -176,7 +175,7 @@ public class TogetherMapper_1
         exposedEnd
       )
     ) {
-      SysLog.trace("      => this class = " + classDef.values("qualifiedName").get(0));
+      SysLog.trace("This class", classDef.values("qualifiedName").get(0));
     
       String label = (String)association.values("name").get(0);
       String annotation = (String)association.values("annotation").get(0);
@@ -194,7 +193,7 @@ public class TogetherMapper_1
       }
       String supplierRole = (String)referencedEnd.values("name").get(0);
       String supplierCardinality = ((String)referencedEnd.values("multiplicity").get(0)).replace('n', '*');
-      String supplierQualifiedTypeName = (String)this.model.getDereferencedType(referenceDef.values("type").get(0)).values("qualifiedName").get(0);
+      String supplierQualifiedTypeName = (String)this.model.getElementType(referenceDef).values("qualifiedName").get(0);
       String supplierQualifierName = (String)exposedEnd.values("qualifierName").get(0);
       
       String supplierQualifierType = null;
@@ -309,8 +308,7 @@ public class TogetherMapper_1
   ) throws ServiceException {
       StructuralFeatureDef mFieldDef = new AttributeDef(
           fieldDef,
-          this.model, 
-          true
+          this.model 
       );
       umlMapper.mapStructField(
           mFieldDef,
@@ -341,9 +339,11 @@ public class TogetherMapper_1
         // no composite or shared aggregation in both directions
         // Have to do some guess work!!!!
         SysLog.warning(
-          "Have no indication to which class the association must be assigned; both ends are possible. " + 
-          "end1=" + modelRefAssociationEnd + "; " + 
-          "end2=" + modelExpAssociationEnd
+          "Have no indication to which class the association must be assigned; both ends are possible",
+          Arrays.asList(
+              "end1=" + modelRefAssociationEnd.values("qualifiedName").get(0) + "; " + 
+              "end2=" + modelExpAssociationEnd.values("qualifiedName").get(0)
+          )
         );
         if(this.model.isLocal(modelAssociation, forPackage)) {
           return (
@@ -353,7 +353,7 @@ public class TogetherMapper_1
           );
         } 
         else {
-          SysLog.warning("The association does NOT belong to the current package and is therefore ignored (assume that association will be handled at owner package). Association=" + modelAssociation);
+          SysLog.warning("The association does NOT belong to the current package and is therefore ignored (assume that association will be handled at owner package). Association", modelAssociation.values("qualifiedName").get(0));
           return false;
         }
       } 
@@ -398,12 +398,12 @@ public class TogetherMapper_1
         ) {
     
           ModelElement_1_0 modelElement = (ModelElement_1_0)i.next();
-          SysLog.trace("processing package element " + modelElement.path());
+          SysLog.trace("processing package element", modelElement.values("qualifiedName").get(0));
     
           // org:omg:model1:Class
           if(modelElement.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.CLASS)) {
     
-            SysLog.trace("processing class " + modelElement.path());
+            SysLog.trace("processing class", modelElement.values("qualifiedName").get(0));
   
             // only generate for classes which are content of the modelPackage. 
             // Do not generate for imported model elements
@@ -496,7 +496,7 @@ public class TogetherMapper_1
   
           // org:omg:model1:PrimitiveType
           else if(modelElement.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.PRIMITIVE_TYPE)) {
-            SysLog.trace("processing primitive type " + modelElement.path());
+            SysLog.trace("processing primitive type", modelElement.values("qualifiedName").get(0));
             // only generate for types which are content of the modelPackage. 
             if(this.model.isLocal(modelElement, currentPackageName)) {
               umlFile.reset();  
@@ -511,7 +511,7 @@ public class TogetherMapper_1
     
           // org:omg:model1:AliasType
           else if(modelElement.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.ALIAS_TYPE)) {  
-            SysLog.trace("processing alias type " + modelElement.path());
+            SysLog.trace("processing alias type", modelElement.values("qualifiedName").get(0));
             // only generate for types which are content of the modelPackage.
             // IMPORTANT: model.isLocal() does not work to test whether an ALIAS is
             // local because isLocal() dereferences alias types.
@@ -533,7 +533,7 @@ public class TogetherMapper_1
           // org:omg:model1:StructureType
           else if(modelElement.values(SystemAttributes.OBJECT_CLASS).contains(ModelAttributes.STRUCTURE_TYPE)) {
     
-            SysLog.trace("processing structure type " + modelElement.path());
+            SysLog.trace("processing structure type", modelElement.values("qualifiedName").get(0));
   
             // only generate for structs which are content of the modelPackage. 
             if(this.model.isLocal(modelElement, currentPackageName)) {

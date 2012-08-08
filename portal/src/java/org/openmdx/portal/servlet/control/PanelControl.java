@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PanelControl.java,v 1.21 2008/05/01 21:43:55 wfro Exp $
+ * Name:        $Id: PanelControl.java,v 1.23 2008/11/10 10:20:11 wfro Exp $
  * Description: ContainerControl
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:55 $
+ * Date:        $Date: 2008/11/10 10:20:11 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -72,14 +69,12 @@ public class PanelControl
   public PanelControl(
         String id,
         String locale,
-        int localeAsIndex,
-        ControlFactory controlFactory
+        int localeAsIndex
     ) {
         super(
             id,
             locale,
-            localeAsIndex,
-            controlFactory
+            localeAsIndex
         );
         this.layout = LAYOUT_NONE;
   }

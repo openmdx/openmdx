@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ExtendableUnitOfWork_1.java,v 1.3 2005/04/07 13:21:14 hburger Exp $
+ * Name:        $Id: ExtendableUnitOfWork_1.java,v 1.4 2008/12/15 03:15:29 hburger Exp $
  * Description: Extendable Unit Of Work Implementation
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/07 13:21:14 $
+ * Date:        $Date: 2008/12/15 03:15:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -84,7 +84,7 @@ public abstract class ExtendableUnitOfWork_1 extends UnitOfWork_1{
         boolean optimistic, 
         UserTransaction transaction
     ) throws ServiceException {
-        super(synchronization, transactional, containerManaged, optimistic, transaction);
+        super(synchronization, transactional, containerManaged, optimistic, transaction, null);
     }
 
 }

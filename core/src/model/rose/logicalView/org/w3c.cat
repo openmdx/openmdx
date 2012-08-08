@@ -1,0 +1,590 @@
+
+(object Petal
+    version    	50
+    _written   	"Rose 8.3.0407.2800"
+    charSet    	0)
+
+(object Class_Category "w3c"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3C8B62D700DA"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "string"
+	    quid       	"3C8B62E40010"
+	    stereotype 	"primitive")
+	(object Class "anyURI"
+	    quid       	"3C8B62F20331"
+	    stereotype 	"primitive")
+	(object Class "duration"
+	    quid       	"3C8B6303000B"
+	    stereotype 	"primitive")
+	(object Class "dateTime"
+	    quid       	"3C8B630802BB"
+	    stereotype 	"primitive")
+	(object Class "short"
+	    quid       	"3C8B63110001"
+	    stereotype 	"primitive")
+	(object Class "long"
+	    quid       	"3C8B631401F0"
+	    stereotype 	"primitive")
+	(object Class "boolean"
+	    quid       	"3C8B63180083"
+	    stereotype 	"primitive")
+	(object Class "decimal"
+	    quid       	"3C8B631E003C"
+	    stereotype 	"primitive")
+	(object Class "date"
+	    quid       	"3C8B63230061"
+	    stereotype 	"primitive")
+	(object Class "integer"
+	    quid       	"3CC6A34B0011"
+	    stereotype 	"primitive")
+	(object Class "binary"
+	    quid       	"3E0F6F8900AB"
+	    stereotype 	"primitive")
+	(object Class "byte"
+	    quid       	"42FB68A201DC"
+	    stereotype 	"primitive")
+	(object Class "character"
+	    quid       	"42FB68DD01EB"
+	    stereotype 	"primitive"))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Primitives"
+	    quid       	"3C8B62DE0238"
+	    title      	"Primitives"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	1069
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::org::w3c::string" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(202, 483)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(94, 461)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	216
+			justify    	0
+			label      	"string")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@1
+			location   	(94, 420)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	214
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B62E40010"
+		    width      	234
+		    height     	146
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::w3c::anyURI" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(202, 127)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(94, 105)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	216
+			justify    	0
+			label      	"anyURI")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@2
+			location   	(94, 64)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	214
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B62F20331"
+		    width      	234
+		    height     	146
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::w3c::dateTime" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(201, 308)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(93, 286)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	216
+			justify    	0
+			label      	"dateTime")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@3
+			location   	(93, 245)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	214
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B630802BB"
+		    width      	234
+		    height     	146
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::w3c::short" @4
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(201, 664)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(87, 642)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	228
+			justify    	0
+			label      	"short")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@4
+			location   	(87, 601)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	226
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B63110001"
+		    width      	246
+		    height     	146
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::w3c::long" @5
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(201, 836)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@5
+			location   	(87, 814)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	228
+			justify    	0
+			label      	"long")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@5
+			location   	(87, 773)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	226
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B631401F0"
+		    width      	246
+		    height     	146
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::w3c::boolean" @6
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(201, 1023)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(93, 1001)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	216
+			justify    	0
+			label      	"boolean")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@6
+			location   	(93, 960)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	214
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B63180083"
+		    width      	234
+		    height     	146
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::w3c::decimal" @7
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(201, 1201)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@7
+			location   	(93, 1179)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	216
+			justify    	0
+			label      	"decimal")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@7
+			location   	(93, 1138)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	214
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B631E003C"
+		    width      	234
+		    height     	146
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::w3c::date" @8
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(201, 1373)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@8
+			location   	(87, 1351)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	228
+			justify    	0
+			label      	"date")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@8
+			location   	(87, 1310)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	226
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B63230061"
+		    width      	246
+		    height     	146
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::w3c::integer" @9
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(201, 1548)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@9
+			location   	(93, 1526)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	216
+			justify    	0
+			label      	"integer")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@9
+			location   	(93, 1485)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	214
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3CC6A34B0011"
+		    width      	234
+		    height     	146
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::w3c::binary" @10
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(202, 1723)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@10
+			location   	(99, 1699)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	206
+			justify    	0
+			label      	"binary")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@10
+			location   	(99, 1658)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	203
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3E0F6F8900AB"
+		    width      	224
+		    height     	150
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::w3c::duration" @11
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(203, 1910)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@11
+			location   	(100, 1883)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	207
+			justify    	0
+			label      	"duration")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@11
+			location   	(100, 1842)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	207
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B6303000B"
+		    width      	225
+		    height     	157
+		    annotation 	8)
+		(object NoteView @12
+		    location   	(1406, 122)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@12
+			location   	(1018, 62)
+			fill_color 	13434879
+			nlines     	3
+			max_width  	740
+			label      	
+|This software is published under the BSD license
+|as listed in the _LICENSE class diagram.
+			)
+		    line_color 	3342489
+		    fill_color 	16775658
+		    width      	800
+		    height     	132)
+		(object ClassView "Class" "Logical View::org::w3c::byte" @13
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(534, 125)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@13
+			location   	(421, 104)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	226
+			justify    	0
+			label      	"byte")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@13
+			location   	(421, 63)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	226
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"42FB68A201DC"
+		    width      	244
+		    height     	144
+		    annotation 	8)
+		(object ClassView "Class" "Logical View::org::w3c::character" @14
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(534, 306)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@14
+			location   	(418, 285)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	232
+			justify    	0
+			label      	"character")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@14
+			location   	(418, 244)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	232
+			justify    	0
+			label      	"<<primitive>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"42FB68DD01EB"
+		    width      	250
+		    height     	144
+		    annotation 	8)))))

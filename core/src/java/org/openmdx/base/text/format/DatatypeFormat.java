@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatatypeFormat.java,v 1.6 2008/03/21 18:32:18 hburger Exp $
+ * Name:        $Id: DatatypeFormat.java,v 1.8 2008/09/25 16:55:17 hburger Exp $
  * Description: DatatypeFormat 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:32:18 $
+ * Date:        $Date: 2008/09/25 16:55:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,13 +52,13 @@
 package org.openmdx.base.text.format;
 
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.spi.DatatypeFactories;
 
 /**
  * DatatypeFormat<ul>
@@ -92,7 +92,6 @@ public class DatatypeFormat implements Marshaller {
         boolean basicFormat
     ) throws DatatypeConfigurationException {
         this.basicFormat = basicFormat;
-        this.datatypeFactory = DatatypeFactory.newInstance();
     }
 
     /**
@@ -116,22 +115,16 @@ public class DatatypeFormat implements Marshaller {
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                null,
                 "DatatypeFactory acquisition failed"
             );
         }
     }
-    
+
     /**
      * Use ISO 8601 basic format if <code>true</code>;
      * ISO 8601 extended format otherwise.
      */
     private final boolean basicFormat;
-    
-    /**
-     * The formatter's datatype factory
-     */
-    private final DatatypeFactory datatypeFactory;
 
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.marshalling.Marshaller#unmarshal(java.lang.Object)
@@ -177,14 +170,14 @@ public class DatatypeFormat implements Marshaller {
         if(source instanceof String) {
             String value = (String)source;
             return 
-                value.startsWith("P") || value.startsWith("-P") ? parseDuration(value) :
+            value.startsWith("P") || value.startsWith("-P") ? parseDuration(value) :
                 value.indexOf('T') < 0 ? parseDate(value) :
-                (Object) parseDateTime(value);
+                    (Object) parseDateTime(value);
         } else {
             return source;
         }
     }
-    
+
     /**
      * Parse a duration <code>String</code>
      * 
@@ -195,9 +188,9 @@ public class DatatypeFormat implements Marshaller {
     public Duration parseDuration(
         String duration
     ){
-        return this.datatypeFactory.newDuration(duration);
+        return DatatypeFactories.xmlDatatypeFactory().newDuration(duration);
     }
-    
+
     /**
      * Parse a date <code>String</code>
      * 
@@ -209,7 +202,7 @@ public class DatatypeFormat implements Marshaller {
         String date
     ){
         int t = date.length();
-        return this.datatypeFactory.newXMLGregorianCalendar(
+        return DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(
             this.basicFormat ? new StringBuilder(
                 date
             ).insert(
@@ -236,7 +229,7 @@ public class DatatypeFormat implements Marshaller {
         int t = dateTime.indexOf('T');
         return t < 0 ? parseDate(
             dateTime
-        ) : this.datatypeFactory.newXMLGregorianCalendar(
+        ) : DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(
             this.basicFormat ? new StringBuilder(
                 dateTime
             ).insert(

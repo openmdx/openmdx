@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Switch_1.java,v 1.11 2008/02/29 15:21:29 hburger Exp $
+ * Name:        $Id: Switch_1.java,v 1.13 2008/11/27 16:46:56 hburger Exp $
  * Description: Dataprovider Adapter: Switch
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/29 15:21:29 $
+ * Date:        $Date: 2008/11/27 16:46:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,24 +51,15 @@
 package org.openmdx.compatibility.base.dataprovider.transport.adapter;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
-import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject_1_0;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderReply;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest;
 import org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0;
-import org.openmdx.compatibility.base.dataprovider.cci.Directions;
-import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
-import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
 import org.openmdx.compatibility.base.naming.Path;
-import org.openmdx.kernel.log.SysLog;
 
 /**
  * Dataprovider Adapter: Switch
@@ -99,61 +90,6 @@ public class Switch_1 implements Serializable, Dataprovider_1_0 {
         this.fallback = fallback;
     }
     
-    /**
-     * Reflective Constructor
-     * 
-     * @deprecated in favour of {@linkplain
-     * org.openmdx.compatibility.base.dataprovider.transport.adapter.Switch_1#Switch_1(
-     * org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0[],
-     * org.openmdx.compatibility.base.naming.Path[],
-     * org.openmdx.compatibility.base.dataprovider.cci.Dataprovider_1_0) 
-     * Standard Constructor} due to the fact that EJB calls should be avoided
-     * during ejbCreate().
-     * 
-     * @param forward
-     * @param fallback
-     * @throws ServiceException
-     */
-    public Switch_1(
-        Dataprovider_1_0[] forward,
-        Dataprovider_1_0 fallback
-    ) throws ServiceException {
-        this.fallback = fallback; 
-        List<Dataprovider_1_0> mappings = new ArrayList<Dataprovider_1_0>();
-        List<Path> scopes = new ArrayList<Path>();
-        ServiceHeader header = new ServiceHeader();
-        for(
-            int i=0;
-            i<forward.length;
-            i++
-        ) for (
-            Iterator<?> j = ((DataproviderObject_1_0)
-                new RequestCollection(
-                    header,
-                    forward[i]
-                ).addFindRequest(
-                    A_NAMESPACE_REFERENCE,
-                    null,
-                    AttributeSelectors.ALL_ATTRIBUTES, null,
-                    0, Integer.MAX_VALUE,
-                    Directions.ASCENDING
-                ).get(0)
-            ).values(
-                SharedConfigurationEntries.EXPOSED_PATH
-            ).population().iterator();
-            j.hasNext();
-        ){
-            scopes.add(new Path((String)j.next()));
-            mappings.add(forward[i]);
-        }
-        this.scopes = Path.toPathArray(scopes);
-        this.mappings = mappings.toArray(
-            new Dataprovider_1_0[mappings.size()]
-        );
-        SysLog.detail("scopes",scopes);
-    }
-    
-    
     //------------------------------------------------------------------------
     // Implements Dataprovider_1_0
     //------------------------------------------------------------------------
@@ -168,7 +104,7 @@ public class Switch_1 implements Serializable, Dataprovider_1_0 {
      */
     public UnitOfWorkReply[] process(
         ServiceHeader header,
-        UnitOfWorkRequest[] unitsOfWork
+        UnitOfWorkRequest... unitsOfWork
     ){
         UnitOfWorkReply[] replies = new UnitOfWorkReply[unitsOfWork.length];
         for(
@@ -255,7 +191,7 @@ public class Switch_1 implements Serializable, Dataprovider_1_0 {
         );
         UnitOfWorkReply subunitOfWorkReply = dataprovider.process(
             header,
-            new UnitOfWorkRequest[]{subunitOfWorkRequest}
+            subunitOfWorkRequest
         )[0];
         if (subunitOfWorkReply.failure()) return subunitOfWorkReply;
         System.arraycopy(
@@ -308,11 +244,4 @@ public class Switch_1 implements Serializable, Dataprovider_1_0 {
     // Class Members
     //------------------------------------------------------------------------
     
-    /**
-     * 
-     */
-    private static final Path A_NAMESPACE_REFERENCE = new Path(
-        "xri:@openmdx:org.openmdx.compatibility.runtime1/provider/-/segment/-/domain/-/namespace"
-    );
-
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatabaseConnection.java,v 1.6 2008/03/21 18:38:39 hburger Exp $
+ * Name:        $Id: DatabaseConnection.java,v 1.7 2008/10/09 22:30:36 hburger Exp $
  * Description: DatabaseConnection
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:38:39 $
+ * Date:        $Date: 2008/10/09 22:30:36 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -80,6 +80,11 @@ public class DatabaseConnection implements Connection {
     private CloseCallback managedConnection;
 
     /**
+     * Auto-commits on <code>close()</code> when <code>true</code>
+     */
+    private boolean autoCommit = false;
+    
+    /**
      * Set the delegate
      * 
      * @param managedConnnection the JCA managed connection 
@@ -114,6 +119,9 @@ public class DatabaseConnection implements Connection {
      * @throws java.sql.SQLException if a database access error occurs
      */
     public void close() throws SQLException {
+        if(this.autoCommit) {
+            this.connection.commit();
+        }
         this.managedConnection.postClose(this);
     }
 
@@ -428,11 +436,10 @@ public class DatabaseConnection implements Connection {
      * 
      * @throws java.sql.SQLException if a database access error occurs
      */
-    public void setAutoCommit(boolean autoCommit) throws SQLException {
-        throw new SQLException(
-            getClass().getName() +
-            " does not support explicit connection control"
-        );
+    public void setAutoCommit(
+        boolean autoCommit
+    ) throws SQLException {
+        this.autoCommit = autoCommit;
     }
 
     /**

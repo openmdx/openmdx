@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMEX, http://www.openmdx.org/
- * Name:        $Id: XriAuthorities.java,v 1.3 2008/03/13 17:16:15 hburger Exp $
- * Description: XIR authorities
- * Revision:    $Revision: 1.3 $
+ * Name:        $Id: XriAuthorities.java,v 1.4 2008/08/20 23:41:21 hburger Exp $
+ * Description: XRI authorities
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/13 17:16:15 $
+ * Date:        $Date: 2008/08/20 23:41:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -45,11 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
- * ___________________________________________________________________________ 
- *
- * This class should log as it has to be loaded by the system class loader. 
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.url.protocol;
 
@@ -58,6 +55,9 @@ package org.openmdx.kernel.url.protocol;
  */
 public class XriAuthorities {
 
+    /**
+     * Constructor 
+     */
     protected XriAuthorities() {
         // Avoid instantiation
     }
@@ -73,7 +73,7 @@ public class XriAuthorities {
     public final static String RESOURCE_AUTHORITY = "+resource";
 
     /**
-     * I.e. the openmdx object identifiers start with "xri:@openmdx".
+     * XRI authority of the openMDX object identifiers start with "@openmdx".
      */
     public final static String OPENMDX_AUTHORITY = "@openmdx";
 

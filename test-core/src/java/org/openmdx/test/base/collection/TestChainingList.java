@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestChainingList.java,v 1.5 2008/02/18 14:15:20 hburger Exp $
+ * Name:        $Id: TestChainingList.java,v 1.6 2008/11/04 10:19:09 hburger Exp $
  * Description: class TestChainingList 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 14:15:20 $
+ * Date:        $Date: 2008/11/04 10:19:09 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,7 +61,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.openmdx.compatibility.base.collection.ChainingList;
+import org.openmdx.compatibility.base.dataprovider.transport.delegation.ChainingList;
 
 public class TestChainingList extends TestCase {
 

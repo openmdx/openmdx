@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestAudit_1Plugin.java,v 1.5 2004/04/02 16:59:05 wfro Exp $
+ * Name:        $Id: TestAudit_1Plugin.java,v 1.6 2008/11/14 10:25:19 hburger Exp $
  * Description: TestApp_1Plugin class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2004/04/02 16:59:05 $
+ * Date:        $Date: 2008/11/14 10:25:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -87,7 +87,8 @@ public class TestAudit_1Plugin
       new RefRootPackage_1(
         this.getManager(),
         this.getPackageImpls(),
-        null
+        null, // context
+        null // binding
       ),
       this.getDirectAccessPaths()
     );

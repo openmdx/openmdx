@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractDataprovider_1Bean.java,v 1.1 2008/06/11 17:13:47 hburger Exp $
+ * Name:        $Id: AbstractDataprovider_1Bean.java,v 1.2 2008/11/07 17:46:26 hburger Exp $
  * Description: SessionBean_1 class 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/11 17:13:47 $
+ * Date:        $Date: 2008/11/07 17:46:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,10 +51,13 @@
  */
 package org.openmdx.compatibility.application.dataprovider.transport.ejb.spi;
 
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Set;
 
 import javax.naming.NameClassPair;
 import javax.naming.NamingException;
+import javax.security.auth.Subject;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1RemoteConnection;
@@ -96,6 +99,11 @@ abstract public class AbstractDataprovider_1Bean extends SessionBean_1 {
      */
     private static final String DATABASE_NAME_CONTEXT = "jdbc";
     
+    /**
+     * 
+     */
+    private static final Set<Object> NO_CREDENTIALS = Collections.emptySet();
+
     /**
      * 
      */
@@ -146,7 +154,7 @@ abstract public class AbstractDataprovider_1Bean extends SessionBean_1 {
     /**
      * Get the EJB's self reference
      * 
-     * @return
+     * @return the EJB's self reference
      */
     protected Dataprovider_1_0 getSelf(
     ){
@@ -163,6 +171,22 @@ abstract public class AbstractDataprovider_1Bean extends SessionBean_1 {
         }
     }
 
+    /**
+     * Get a subject containing the EJB's caller principal
+     * 
+     * @return a subject containing the EJB's caller principal
+     */
+    protected Subject newSubject(){
+        return new Subject(
+            true, // read-only
+            Collections.singleton(
+                getSessionContext().getCallerPrincipal()
+            ),
+            NO_CREDENTIALS, // public
+            NO_CREDENTIALS // private
+        );
+    }
+    
     /**
      * Get dataprovider connections
      * 

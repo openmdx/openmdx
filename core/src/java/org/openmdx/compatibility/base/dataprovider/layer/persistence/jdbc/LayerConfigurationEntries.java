@@ -2,8 +2,8 @@
  * ==================================================================== Project:
  * openmdx, http://www.openmdx.org/ Name: $Id: LayerConfigurationEntries.java,v
  * 1.37 2006/11/17 16:55:57 hburger Exp $ Description: Generated constants for
- * LayerConfigurationEntries Revision: $Revision: 1.47 $ Owner: OMEX AG,
- * Switzerland, http://www.omex.ch Date: $Date: 2008/05/15 23:33:23 $
+ * LayerConfigurationEntries Revision: $Revision: 1.48 $ Owner: OMEX AG,
+ * Switzerland, http://www.omex.ch Date: $Date: 2008/11/14 10:03:52 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -337,6 +337,11 @@ public class LayerConfigurationEntries extends org.openmdx.compatibility.base.da
    * constraints on the object_id / idx columns.
    */
   static public final String IGNORE_CHECK_FOR_DUPLICATES = "ignoreCheckForDuplicates";
+  
+  /**
+   * Tells whether object ids are able to handle paths
+   */
+  static public final String USE_NORMALIZED_OBJECT_IDS = "normalizeObjectIds";
   
   /**
      * Returns the smallest defined integer constant or Integer.MAX_VALUE if no

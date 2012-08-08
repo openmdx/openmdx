@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UserDefinedView.java,v 1.10 2008/04/04 11:48:24 hburger Exp $
+ * Name:        $Id: UserDefinedView.java,v 1.13 2008/11/10 15:16:30 wfro Exp $
  * Description: UserDefinedView 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:48:24 $
+ * Date:        $Date: 2008/11/10 15:16:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.view;
 
@@ -83,8 +80,7 @@ public class UserDefinedView
             UUIDs.getGenerator().next().toString(),
             null,
             object,
-            application,
-            parentView.getControlFactory()
+            application
         );
         this.attributes = new HashMap<String,Attribute>();
         this.requestId = parentView.getRequestId();
@@ -102,10 +98,9 @@ public class UserDefinedView
         org.openmdx.ui1.jmi1.ValuedField customizedField,
         Object object
     ) throws ServiceException {
-        AttributeValue attributeValue = this.controlFactory.getAttributeValueFactory().getAttributeValue(
+        AttributeValue attributeValue = this.application.createAttributeValue(
             customizedField,
-            object,
-            this.application
+            object
         );
         Attribute attribute = new Attribute(
             this.application.getCurrentLocaleAsIndex(), 
@@ -124,7 +119,7 @@ public class UserDefinedView
         String forClass,
         String featureName
     ) throws ServiceException {
-        org.openmdx.ui1.jmi1.Inspector inspector = this.application.getUiContext().getInspector(forClass);
+        org.openmdx.ui1.jmi1.Inspector inspector = this.application.getInspector(forClass);
         for(Iterator i = inspector.getMember().iterator(); i.hasNext(); ) {
             Object pane = i.next();
             if (pane instanceof org.openmdx.ui1.jmi1.AttributePane) {
@@ -170,7 +165,7 @@ public class UserDefinedView
         Object object
     ) throws ServiceException {
         org.openmdx.ui1.jmi1.ValuedField customizedField = 
-            (org.openmdx.ui1.jmi1.ValuedField)this.application.getUiContext().getUiSegment().getElement(
+            (org.openmdx.ui1.jmi1.ValuedField)this.application.getUiElement(
                 uiElementId
             );
         return this.addAttribute(

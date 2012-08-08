@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     OMEX/Security, http://www.omex.ch/
- * Name:        $Id: TokenFactory.java,v 1.2 2005/07/22 15:57:34 hburger Exp $
+ * Name:        $Id: TokenFactory.java,v 1.3 2008/09/10 08:55:30 hburger Exp $
  * Description: Token Factory
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/07/22 15:57:34 $
+ * Date:        $Date: 2008/09/10 08:55:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,76 +67,74 @@ import org.openmdx.kernel.exception.BasicException;
  */
 public class TokenFactory {
 
-	/**
-	 * Constructor
-	 * 
-	 * @param privateKey
-	 * @param algorithm
-	 */
-	public TokenFactory(
-		String algorithm,
-		PrivateKey privateKey
-	){
-		this.privateKey = privateKey;
-		this.algorithm = algorithm;
-	}
-	
-	/**
-	 * The tokens are signed with this private key
-	 */
-	private final PrivateKey privateKey;
-	
-	/**
-	 * The algoritme to be used to sign the token
-	 */
-	private final String algorithm;
-	
-	/**
-	 * Create a token for 
-	 * 
-	 * @param timeout the timeout in milliseconds; or -1 if the token should 
-	 * never expire
-	 * @param value the token's value
-	 * @return the signed token
-	 * @throws TokenException 
-	 */
-	public byte[] create (
-		long timeout,
-		Serializable value
-	) throws TokenException {
-		try {
-			ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-			ZipOutputStream compressedStream = new ZipOutputStream(byteStream);
-			compressedStream.putNextEntry(new ZipEntry(Token.VERSION_TAG));
-			ObjectOutputStream objectStream = new ObjectOutputStream(compressedStream);		
-			objectStream.writeObject(
-				new SignedObject(
-					new Token(timeout, value), 
-					this.privateKey, 
-					Signature.getInstance(this.algorithm)
-				)
-			);
-			objectStream.close();
-			return byteStream.toByteArray();
-		} catch (Exception exception) {
-			throw new TokenException(
-				exception,
-				new BasicException.Parameter[]{
-					new BasicException.Parameter(
-						"class", 
-						this.privateKey == null ? null : this.privateKey.getClass().getName()
-					),
-					new BasicException.Parameter(
-						"algorithm", 
-						this.privateKey == null ? null : this.privateKey.getAlgorithm()
-					),
-					new BasicException.Parameter(
-						"format", 
-						this.privateKey == null ? null : this.privateKey.getFormat()
-					)
-				}
-			);
-		}
-	}
-	
+    /**
+     * Constructor
+     * 
+     * @param privateKey
+     * @param algorithm
+     */
+    public TokenFactory(
+        String algorithm,
+        PrivateKey privateKey
+    ){
+        this.privateKey = privateKey;
+        this.algorithm = algorithm;
+    }
+
+    /**
+     * The tokens are signed with this private key
+     */
+    private final PrivateKey privateKey;
+
+    /**
+     * The algoritme to be used to sign the token
+     */
+    private final String algorithm;
+
+    /**
+     * Create a token for 
+     * 
+     * @param timeout the timeout in milliseconds; or -1 if the token should 
+     * never expire
+     * @param value the token's value
+     * @return the signed token
+     * @throws TokenException 
+     */
+    public byte[] create (
+        long timeout,
+        Serializable value
+    ) throws TokenException {
+        try {
+            ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+            ZipOutputStream compressedStream = new ZipOutputStream(byteStream);
+            compressedStream.putNextEntry(new ZipEntry(Token.VERSION_TAG));
+            ObjectOutputStream objectStream = new ObjectOutputStream(compressedStream);		
+            objectStream.writeObject(
+                new SignedObject(
+                    new Token(timeout, value), 
+                    this.privateKey, 
+                    Signature.getInstance(this.algorithm)
+                )
+            );
+            objectStream.close();
+            return byteStream.toByteArray();
+        } catch (Exception exception) {
+            throw new TokenException(
+                exception,
+                new BasicException.Parameter(
+                    "class", 
+                    this.privateKey == null ? null : this.privateKey.getClass().getName()
+                ),
+                new BasicException.Parameter(
+                    "algorithm", 
+                    this.privateKey == null ? null : this.privateKey.getAlgorithm()
+                ),
+                new BasicException.Parameter(
+                    "format", 
+                    this.privateKey == null ? null : this.privateKey.getFormat()
+                )
+            );
+        }
+    }
+
 }

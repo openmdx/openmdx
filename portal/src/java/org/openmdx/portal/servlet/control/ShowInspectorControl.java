@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowInspectorControl.java,v 1.11 2008/05/01 21:43:55 wfro Exp $
+ * Name:        $Id: ShowInspectorControl.java,v 1.13 2008/11/14 14:56:47 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:55 $
+ * Date:        $Date: 2008/11/14 14:56:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -79,6 +76,7 @@ public class ShowInspectorControl
     // -------------------------------------------------------------------------
     public ShowInspectorControl(
         String id, 
+        int perspective,
         String locale,
         int localeAsIndex,
         ControlFactory controlFactory,
@@ -138,6 +136,7 @@ public class ShowInspectorControl
         for(int i = 0; i < this.referencePaneControl.length; i++) {
             this.referencePaneControl[i] = controlFactory.createReferencePaneControl(
                 null, 
+                perspective,
                 locale, 
                 localeAsIndex,
                 this.paneRef[i], 

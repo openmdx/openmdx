@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestOracle_1.java,v 1.1 2007/01/16 15:51:18 hburger Exp $
- * Description: TestOracle_1 
- * Revision:    $Revision: 1.1 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: TestOracle_1.java,v 1.2 2008/11/07 17:54:14 hburger Exp $
+ * Description: Test Oracle
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/16 15:51:18 $
+ * Date:        $Date: 2008/11/07 17:54:14 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,76 +50,43 @@
  */
 package org.openmdx.test.datatypes1;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import junit.textui.TestRunner;
+import java.io.Closeable;
+import java.io.IOException;
 
-import org.openmdx.base.application.deploy.InProcessDeployment;
-import org.openmdx.compatibility.base.application.cci.Dataprovider_1Deployment;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.openmdx.compatibility.base.application.cci.Deployment_1;
 
 /**
- * TestOracle_1
+ * Test Oracle
  */
-public class TestOracle_1
-    extends AbstractExtensionTest_1
-{
-
-    /**
-     * Constructor 
-     *
-     * @param name
-     */
-    public TestOracle_1(String name) {
-        super(name);
-    }
-
-    /**
-     * Launch the test suite from command line
-     * 
-     * @param args
-     */
-    public static void main(
-        String[] args
-    ){
-        TestRunner.run(suite());
-    }
-
-    /**
-     * Retrieve the test suite
-     * 
-     * @return this class' test suite
-     */
-    public static Test suite(
-    ){
-        return new TestSuite(TestOracle_1.class);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.test.datatypes1.TestExtension_1#getConnectionFactory()
-     */
-    protected Dataprovider_1ConnectionFactory getConnectionFactory() {
-        return TestOracle_1.deployment;
-    }
+public class TestOracle_1 extends AbstractExtensionTest_1 {
 
     /**
      * The ORACLE connector URI
      */
-    private final static String CONNECTOR_URI = 
-        "file:src/connector/openmdx-2/oracle-10g.rar";
-        
-    /**
-     * Oracle in-Process deployment with lazy initialization
-     */
-    protected final static Dataprovider_1ConnectionFactory deployment = new Dataprovider_1Deployment(
-        new InProcessDeployment(
+    private final static String CONNECTOR_URI = "file:../test-core/src/connector/openmdx-2/oracle-10g.rar";
+
+    @BeforeClass
+    public static void createPersistenceManagerFactory(
+    ){
+        managerFactory = new Deployment_1(
+            IN_PROCESS,
             CONNECTOR_URI,
             APPLICATION_URI,
-            LOG_DEPLOYMENT_DETAIL ? System.out : null,
-            System.err
-        ),
-        models,
-        JNDI_NAME
-    );    
+            LOG_DEPLOYMENT_DETAIL,
+            ENTITY_MANAGER_FACTORY_JNDI_NAME,
+            GATEWAY_JNDI_NAME,
+            MODEL
+        );
+    }
+
+    @AfterClass
+    public static void closePersistenceManagerFactory(
+    ) throws IOException{
+        if(managerFactory instanceof Closeable) {
+            ((Closeable)managerFactory).close();
+        }
+    }
 
 }

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestPropertyPreferences.java,v 1.5 2006/10/09 21:43:11 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: TestPropertyPreferences.java,v 1.7 2008/11/04 10:19:09 hburger Exp $
  * Description: Test Property Preferences 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/10/09 21:43:11 $
+ * Date:        $Date: 2008/11/04 10:19:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006, OMEX AG, Switzerland
+ * Copyright (c) 2006-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,11 +54,12 @@ package org.openmdx.test.base.configuration.spi;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
-import org.openmdx.base.configuration.cci.ContextSensitivePreferences;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.openmdx.base.configuration.cci.ContextSensitivePreferences;
+import org.openmdx.base.configuration.spi.PropertyPreferencesFactory;
 
 /**
  * Test Property Preferences
@@ -103,7 +104,7 @@ public class TestPropertyPreferences
      */
     protected void setUp(
     ) throws Exception {
-        this.preferences = ContextSensitivePreferences.containerNodeForPackage(getClass());
+        this.preferences = PropertyPreferencesFactory.systemProperties().node("org/openmdx/test/base/configuration/spi");
     }
 
     /**
@@ -139,12 +140,12 @@ public class TestPropertyPreferences
         assertEquals(
             "java.vendor",
             "http://java.sun.com/",
-            ContextSensitivePreferences.containerRoot().node("java/vendor").get("url","?")
+            PropertyPreferencesFactory.systemProperties().node("java/vendor").get("url","?")
         );            
         assertEquals(
             "Property file preference org.openmdx.test.base.configuration.spi.seven",
             "up",
-            preferences.get("seven","down")
+            ContextSensitivePreferences.containerNodeForPackage(getClass()).get("seven","down")
         );            
     }
     
@@ -184,7 +185,7 @@ public class TestPropertyPreferences
         //
         // Persistent
         // 
-        ContextSensitivePreferences.containerRoot().node("org/openmdx/test").sync();
+        preferences.node("org/openmdx/test").sync();
         assertEquals(
             "Persistent preference org.openmdx.test.base.configuration.spi.five",
             5,
@@ -207,8 +208,14 @@ public class TestPropertyPreferences
     }
 
     /**
-     * Tells whether the whole tree should be shwon
+     * Tells whether the whole tree should be shown
      */
     private static final boolean VERBOSE = true;
     
+    /**
+     * 
+     */
+    protected final static String SYSTEM_PROPERTY_SEGMENT = 
+        "xri://@openmdx*org.openmdx.preferences1/provider/Java*Properties/segment/System";
+
 }

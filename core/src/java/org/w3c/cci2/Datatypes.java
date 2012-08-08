@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Datatypes.java,v 1.2 2008/03/06 17:31:55 hburger Exp $
+ * Name:        $Id: Datatypes.java,v 1.3 2008/09/25 16:45:05 hburger Exp $
  * Description: Date 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/06 17:31:55 $
+ * Date:        $Date: 2008/09/25 16:45:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,8 +60,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.Duration;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -69,7 +67,7 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.base.text.format.DateFormat;
-import org.slf4j.LoggerFactory;
+import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Structures;
 
 /**
@@ -83,11 +81,6 @@ public class Datatypes {
     protected Datatypes() {
     }
 
-    /**
-     * 
-     */
-    static DatatypeFactory factory;
-    
     /**
      * Create a value from its string representation 
      * 
@@ -136,9 +129,9 @@ public class Datatypes {
         } else if (valueClass == UUID.class){
             return (V) UUIDConversion.fromString(string);
         } else if (valueClass == Duration.class){
-            return (V) Datatypes.getFactory().newDuration(string);
+            return (V) DatatypeFactories.xmlDatatypeFactory().newDuration(string);
         } else if (valueClass == XMLGregorianCalendar.class){
-            return (V) Datatypes.getFactory().newXMLGregorianCalendar(
+            return (V) DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar(
                 toExtendedFormat(string)
             );
         } else if (valueClass == Oid.class){
@@ -243,31 +236,6 @@ public class Datatypes {
         );
     }
     
-    /**
-     * Retrieve a DatatypeFactory instance
-     * 
-     * @return the DatatypeFactory singleton
-     * 
-     * @throws RuntimeException if the datatype factory could not be acquired.
-     */
-    protected static DatatypeFactory getFactory(){
-        if (Datatypes.factory == null) try {
-            Datatypes.factory = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException exception) {
-            LoggerFactory.getLogger(
-                Datatypes.class
-            ).error(
-                "Datatype factory acquisition failed", 
-                exception
-            );
-            throw new RuntimeException(
-                "Datatype factory acquisition failed",
-                exception
-            );
-        }
-        return Datatypes.factory;
-    }
-
     /**
      * Create a qualified type name
      * 

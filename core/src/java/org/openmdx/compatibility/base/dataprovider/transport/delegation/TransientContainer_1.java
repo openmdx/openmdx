@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TransientContainer_1.java,v 1.10 2008/03/19 17:06:09 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: TransientContainer_1.java,v 1.14 2008/12/15 03:15:29 hburger Exp $
  * Description: Transient Container
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:06:09 $
+ * Date:        $Date: 2008/12/15 03:15:29 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,62 +45,78 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.transport.delegation;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.openmdx.base.accessor.generic.cci.Object_1_0;
+import org.openmdx.base.accessor.generic.spi.ObjectComparator_1;
+import org.openmdx.base.exception.InvalidCardinalityException;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.collection.Container;
+import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.compatibility.base.naming.PathComponent;
-import org.openmdx.compatibility.base.query.FilterProperty;
+import org.openmdx.compatibility.base.query.AbstractFilter;
+import org.openmdx.compatibility.base.query.Selector;
+import org.openmdx.model1.accessor.basic.cci.ModelHolder_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 
 
 /**
  * Transient Container
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked") 
 class TransientContainer_1
-    extends AbstractContainer
+    extends AbstractContainer<Object_1_0>
 {
 
     /**
-     * 
-     */
-    private static final long serialVersionUID = 3257007657234609973L;
-
-
-    /**
      * Constructor
+     * 
+     * @param modelHolder 
      */   
     TransientContainer_1(
+        ModelHolder_1_0 modelHolder
     ){
-        this.attributeFilter = null;
-        this.reference = new TreeMap();
+        this(
+            null, // attributeFilter
+            new TreeMap() // reference
+        );
     }
     
     /**
      * Constructor
      */   
     private TransientContainer_1(
-        FilterProperty[] attributeFilter,
+        Selector attributeFilter,
         Map reference
     ){
-        this.attributeFilter = attributeFilter;
+        super(attributeFilter);
         this.reference = reference;
     }
     
-    Set getEntrySet(
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3257007657234609973L;
+
+    private ModelHolder_1_0 modelHolder;
+    
+    /**
+    *
+    */
+   final Map<String,Object_1_0> reference;  
+
+    Set<Map.Entry<String, Object_1_0>> getEntrySet(
     ){
         return this.reference.entrySet();
     }
@@ -110,6 +125,14 @@ class TransientContainer_1
     //--------------------------------------------------------------------------
     // Extends AbstractContainer
     //--------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.compatibility.base.dataprovider.transport.delegation.AbstractContainer#getModel()
+     */
+    @Override
+    protected Model_1_0 getModel() {
+        return this.modelHolder == null ? null : this.modelHolder.getModel();
+    }
 
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.transport.delegation.AbstractContainer#initialQualifier()
@@ -157,10 +180,13 @@ class TransientContainer_1
     public boolean contains(
         Object element
     ){
-        if(this.attributeFilter!=null)throw new UnsupportedOperationException(
-            "Filtering not yet supported by transient container"
-        );
-        return this.reference.containsValue(element);
+        if(this.reference.containsValue(element)) {
+            return 
+               getSelector() == null ||
+               getSelector().accept(element);
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -174,25 +200,6 @@ class TransientContainer_1
         Object_1 element
     ){
         this.reference.values().remove(element);
-    }
-
-    /**
-     * Add an object to the collection.
-     *
-     * @param     element
-     *            the object to be added
-     *
-     * @exception ClassCastException
-     *            if the class of the specified criteria or element prevents it
-     *            from being added to this container.
-     * @exception IllegalArgumentException
-     *            if some aspect of the specified criteria or element prevents 
-     *            it from being added to this container.
-     */
-    public boolean add(
-        Object element
-    ){
-        throw new UnsupportedOperationException();
     }
 
 
@@ -229,31 +236,15 @@ class TransientContainer_1
      *            if some aspect of this filter prevents it from being
      *            applied to this container. 
      */
-    public Container subSet(
+    @SuppressWarnings("deprecation")
+    public org.openmdx.compatibility.base.collection.Container subSet(
         Object filter
     ){
-        if(filter == null) return this;
-        FilterProperty[] append = (FilterProperty[])filter;
-        List combined = this.attributeFilter == null ?
-            new ArrayList() :
-            new ArrayList(Arrays.asList(this.attributeFilter));
-        boolean equals = true;
-        for(
-            int i = 0;
-            i < append.length;
-            i++
-        ) if (! combined.contains(append[i])){
-            equals = false;
-            combined.add(append[i]); 
-        }
-        return equals ? 
-            this :
-            new TransientContainer_1(
-                (FilterProperty[])combined.toArray(
-                    new FilterProperty[combined.size()]
-                ),
-                this.reference
-            );
+        Selector selector = super.combineWith(filter);
+        return selector == null ? this : new TransientContainer_1(
+            selector,
+            this.reference
+        );
     }
 
 
@@ -277,16 +268,12 @@ class TransientContainer_1
      *            applied to this container. 
      * @exception InvalidCardinalityException
      *            if more than one object matches the filter. 
-     * @exception MarshalException
-     *            if object retrieval fails
      */
-    public Object get(
+    public Object_1_0 get(
         Object filter
     ){
-        if(this.attributeFilter!=null)throw new UnsupportedOperationException(
-            "Filtering not yet supported by transient container"
-        );
-        return this.reference.get(filter);
+        Object_1_0 candidate = this.reference.get(filter);
+        return getSelector() == null || getSelector().accept(candidate) ? candidate : null; 
     }
 
     /**
@@ -311,8 +298,8 @@ class TransientContainer_1
      *            it from being added to this container.
      */
     void add(
-        Object criteria,
-        Object element
+        String criteria,
+        Object_1_0 element
     ){
         this.reference.put(
             criteria == null ? PathComponent.createPlaceHolder().toString() : criteria,
@@ -343,16 +330,21 @@ class TransientContainer_1
     public List toList(
         Object order
     ){
-        if(attributeFilter!=null)throw new UnsupportedOperationException(
-            "Filtering not yet supported by transient container"
+        return new TransientList(
+            order == null ? null : new ObjectComparator_1((AttributeSpecifier[])order)
         );
-        if(order == null){
-            return new TransientList(this.reference.values());
-        } else {
-            throw new UnsupportedOperationException(
-                "Ordering not yet supported by transient container"
-            );
-        }
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Implements RefBaseObject
+    //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see javax.jmi.reflect.RefBaseObject#refMofId()
+     */
+    public String refMofId() {
+        return null; // Transient container's don't have a MOF id yet
     }
 
     
@@ -372,7 +364,7 @@ class TransientContainer_1
             text.append(
                 ": (transient, "
             ).append(
-                this.attributeFilter.length
+                getSelector() == null ? 0 : ((AbstractFilter)getSelector()).size()
             ).append(
                 " filter properties)"
             ).toString();
@@ -388,34 +380,52 @@ class TransientContainer_1
 
     
     //------------------------------------------------------------------------
-    // Instance members
-    //------------------------------------------------------------------------
-
-    /**
-     *
-     */
-    final Map reference;  
-        
-    /**
-     *
-     */
-    private final FilterProperty[] attributeFilter;
-
-
-    //------------------------------------------------------------------------
     // Class TransientList
     //------------------------------------------------------------------------
 
+    /**
+     * Transient List
+     */
     final class TransientList 
         extends AbstractList
     {
         
+        /**
+         * Constructor 
+         *
+         * @param comparator
+         */
         TransientList(
-            Collection collection
+            Comparator comparator
         ){
-            this.list = new ArrayList(collection);
+            Selector selector = getSelector();
+            for(Object_1_0 candidate : reference.values()) {
+                if(selector == null || selector.accept(candidate)) {
+                    if(comparator == null) {
+                        this.list.add(candidate);
+                    } else {
+                        int i = 0;
+                        while(
+                            i < list.size() &&
+                            comparator.compare(candidate, list.get(i)) > 0
+                        ){
+                            i++;
+                        }
+                        if(i < this.list.size()) {
+                            this.list.add(i, candidate);
+                        } else {
+                            this.list.add(candidate);
+                        }
+                    }
+                }
+            }
         }
 
+        /**
+         * 
+         */
+        private final List<Object_1_0> list = new ArrayList();
+        
         public int size(
         ){
             return this.list.size();
@@ -440,8 +450,6 @@ class TransientContainer_1
             }
         }
 
-        final private List list;
-        
     }
 
 }

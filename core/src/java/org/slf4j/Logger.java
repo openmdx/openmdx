@@ -22,7 +22,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  * ______________________________________________________________________
  *
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * JAVA 5 support added
@@ -30,10 +30,32 @@
 package org.slf4j;
 
 /**
+ * The org.slf4j.Logger interface is the main user entry point of SLF4J API. 
+ * It is expected that logging takes place through concrete implementations 
+ * of this interface.
+ *
+ * <h3>Typical usage pattern:</h3>
+ * <pre>
+ * import org.slf4j.Logger;
+ * import org.slf4j.LoggerFactory;
  * 
- * The main user interface to logging. It is expected that logging
- * takes place through concrete implementations of this interface.
- * 
+ * public class Wombat {
+ *
+ *   <span style="color:green">final static Logger logger = LoggerFactory.getLogger(Wombat.class);</span>
+ *   Integer t;
+ *   Integer oldT;
+ *
+ *   public void setTemperature(Integer temperature) {
+ *     oldT = t;        
+ *     t = temperature;
+ *     <span style="color:green">logger.debug("Temperature set to {}. Old temperature was {}.", t, oldT);</span>
+ *     if(temperature.intValue() > 50) {
+ *       <span style="color:green">logger.info("Temperature has risen above 50 degrees.");</span>
+ *     }
+ *   }
+ * }
+ * </pre>
+ *
  * @author Ceki G&uuml;lc&uuml;
  */
 public interface Logger {

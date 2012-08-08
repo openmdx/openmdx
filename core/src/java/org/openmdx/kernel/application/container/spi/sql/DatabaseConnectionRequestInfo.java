@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatabaseConnectionRequestInfo.java,v 1.4 2005/04/17 05:30:54 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: DatabaseConnectionRequestInfo.java,v 1.6 2008/10/13 09:56:40 hburger Exp $
  * Description: Database Connection Request Info
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/17 05:30:54 $
+ * Date:        $Date: 2008/10/13 09:56:40 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.application.container.spi.sql;
 
@@ -65,19 +64,27 @@ public class DatabaseConnectionRequestInfo
 
     /**
      * Constructor
+     * 
      * @param transactionIsolation the transaction isolation level; or
      * code>null</code> if it has not been specified.
+     * @param validationStatement the connection validation statement; or
+     * code>null</code> if it has not been specified.
+     * @param loginTimeOut 
      */
     public DatabaseConnectionRequestInfo(
-        Integer transactionIsolation
+        Integer transactionIsolation,
+        String validationStatement, 
+        Long loginTimeout
     ) {
         this.transactionIsolation = transactionIsolation;
+        this.validationStatement = validationStatement;
+        this.loginTimeout = loginTimeout;
     }
 
     /**
      * Implements <code>Serializable</code>.
      */
-    private static final long serialVersionUID = 3258689927104444210L;
+    private static final long serialVersionUID = 5762016497652692866L;
 
     /**
      * The requested transaction isolation
@@ -85,12 +92,45 @@ public class DatabaseConnectionRequestInfo
     private final Integer transactionIsolation;
 
     /**
+     * The connection validation statement
+     */
+    private final String validationStatement;
+    
+    /**
+     * The login timeout
+     */
+    private Long loginTimeout;
+
+    /**
      * @return Returns the transactionIsolation.
      */
-    public Integer getTransactionIsolation() {
+    Integer getTransactionIsolation() {
         return this.transactionIsolation;
     }
     
+    /**
+     * Retrieve validationStatement.
+     *
+     * @return Returns the validationStatement.
+     */
+    String getValidationStatement() {
+        return this.validationStatement;
+    }
+
+    /**
+     * Retrieve loginTimeout.
+     *
+     * @return Returns the loginTimeout.
+     */
+     Long getLoginTimeout() {
+         return this.loginTimeout;
+     }
+    
+    
+    //------------------------------------------------------------------------
+    // Extends Object
+    //------------------------------------------------------------------------    
+
     /**
      * Checks whether this instance is equal to another. 
      */
@@ -101,25 +141,26 @@ public class DatabaseConnectionRequestInfo
             true :
         that == null || this.getClass() != that.getClass() ?
             false :
-        this.transactionIsolation == null ?
-            ((DatabaseConnectionRequestInfo) that).transactionIsolation == null :
-            this.transactionIsolation.equals(((DatabaseConnectionRequestInfo) that).transactionIsolation);
+        (
+            this.transactionIsolation == null ?
+                ((DatabaseConnectionRequestInfo) that).transactionIsolation == null :
+                 this.transactionIsolation.equals(((DatabaseConnectionRequestInfo) that).transactionIsolation)
+        ) && (
+                this.validationStatement == null ?
+                    ((DatabaseConnectionRequestInfo) that).validationStatement == null :
+                     this.validationStatement.equals(((DatabaseConnectionRequestInfo) that).validationStatement)
+        );
     } 
      
     /**
      * Returns the hashCode of the ConnectionRequestInfo.
      */
     public int hashCode(){
-        return this.getTransactionIsolation() == null ? 
-            0 : 
-            this.getTransactionIsolation().intValue();
+        int hashCode = this.getTransactionIsolation() == null ? 0 : this.getTransactionIsolation().intValue();
+        hashCode += this.validationStatement == null ? 0 : this.validationStatement.hashCode();
+        return hashCode;
     }
     
-
-    //------------------------------------------------------------------------
-    // Extends Object
-    //------------------------------------------------------------------------
-
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
      */

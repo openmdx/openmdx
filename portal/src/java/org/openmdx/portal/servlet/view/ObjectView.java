@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectView.java,v 1.12 2008/05/27 23:18:51 wfro Exp $
+ * Name:        $Id: ObjectView.java,v 1.16 2008/11/10 17:10:16 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/27 23:18:51 $
+ * Date:        $Date: 2008/11/10 17:10:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.view;
 
@@ -69,11 +66,11 @@ import org.openmdx.application.log.AppLog;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ObjectReference;
 import org.openmdx.portal.servlet.ViewsCache;
-import org.openmdx.portal.servlet.control.ControlFactory;
 import org.openmdx.portal.servlet.control.InspectorControl;
 import org.openmdx.uses.org.apache.commons.collections.MapUtils;
 
@@ -91,20 +88,18 @@ public abstract class ObjectView
         ApplicationContext application,
         Map<Path,Action> historyActions,
         String lookupType,
-        Map restrictToElements,
-        ControlFactory controlFactory
+        Map restrictToElements
     ) {
         super(
             id,
             containerElementId,
             object,
-            application,
-            controlFactory
+            application
         );
         this.objectReference = new ObjectReference(
             object,
             application
-        );      
+        );
         this.historyActions = historyActions;
         this.lookupType = lookupType;
         this.restrictToElements = restrictToElements;   
@@ -116,6 +111,26 @@ public abstract class ObjectView
         return this.attributePane;
     }
 
+    //-------------------------------------------------------------------------
+    public org.openmdx.ui1.jmi1.Inspector getInspector(
+    ) {
+        if(this.inspector == null) {
+            if(this.object != null) {
+                String forClass = this.objectReference.getObject().refClass().refMofId();
+                try {
+                    this.inspector = this.application.getInspector(forClass);
+                }
+                catch(ServiceException e) {
+                    AppLog.warning(e.getMessage(), e.getCause());              
+                }
+                if(this.inspector == null) {
+                    AppLog.warning("can not get inspector for object " + (this.object == null ? null : this.objectReference.getObject().refMofId()));      
+                }
+            }
+        }
+        return this.inspector;
+    }
+        
     //-------------------------------------------------------------------------
     public ObjectReference getObjectReference(
     ) {
@@ -158,7 +173,10 @@ public abstract class ObjectView
                     parentReference = reference;
                 }
                 catch(Exception e) {
-                    AppLog.warning("can not get parent", e);
+                    ServiceException e0 = new ServiceException(e);
+                    if(e0.getExceptionCode() != BasicException.Code.AUTHORIZATION_FAILURE) {
+                        AppLog.warning("can not get parent", e);
+                    }
                 }
             }
             selectParentActions.add(
@@ -263,8 +281,7 @@ public abstract class ObjectView
                           this.application,
                           historyActions,
                           null,
-                          null,
-                          this.controlFactory
+                          null
                       );
                   }
               } catch(Exception e) {}          
@@ -278,8 +295,7 @@ public abstract class ObjectView
               this.application,
               MapUtils.orderedMap(new HashMap()),
               null,
-              null,
-              this.controlFactory
+              null
           );
       }
       catch(Exception e) {
@@ -292,7 +308,7 @@ public abstract class ObjectView
         boolean forEditing
     ) {
         return this.application.getLayout(
-           this.getObjectReference().getInspector().getForClass(),
+           this.getObjectReference().getObject().refClass().refMofId(),
            forEditing
         );
     }
@@ -316,6 +332,7 @@ public abstract class ObjectView
     // Variables
     //-------------------------------------------------------------------------
     protected InspectorControl inspectorControl = null;
+    private org.openmdx.ui1.jmi1.Inspector inspector = null;    
     protected ObjectReference objectReference;
     protected AttributePane attributePane = null;
     protected String lookupType = null;

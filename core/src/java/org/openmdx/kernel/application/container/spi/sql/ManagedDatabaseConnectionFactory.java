@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ManagedDatabaseConnectionFactory.java,v 1.8 2008/03/21 18:38:41 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ManagedDatabaseConnectionFactory.java,v 1.10 2008/10/13 09:54:30 hburger Exp $
  * Description: Managed Database Connection Factory
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:38:41 $
+ * Date:        $Date: 2008/10/13 09:54:30 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.application.container.spi.sql;
 
@@ -64,6 +63,7 @@ import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.ResourceAdapterInternalException;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
+import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 
 
@@ -135,23 +135,38 @@ public class ManagedDatabaseConnectionFactory implements ManagedConnectionFactor
         Subject subject, 
         ConnectionRequestInfo connectionRequestInfo
     ) throws ResourceException {
-        try {
+        try { 
+            Long jcaLoginTimeout = connectionRequestInfo instanceof DatabaseConnectionRequestInfo ?
+                ((DatabaseConnectionRequestInfo)connectionRequestInfo).getLoginTimeout() :
+                null;
+            if(jcaLoginTimeout == null || jcaLoginTimeout.longValue() == 0L) {
+                jcaLoginTimeout = this.connectionRequestInfo.getLoginTimeout();
+            }
+            int sqlLoginTimeout = jcaLoginTimeout == null ? 0 : jcaLoginTimeout.intValue() / 1000;
+            if(xaDataSource.getLoginTimeout() != sqlLoginTimeout) {
+                xaDataSource.setLoginTimeout(sqlLoginTimeout);
+            }
+        } catch (SQLException exception) {
+            propagate("Could not set login timout", exception); 
+            // Be lenient and continue!
+        }
+        try { 
+            XAConnection xaConnection;
             Set credentials = subject.getPrivateCredentials(PasswordCredential.class);
             if(credentials.isEmpty()) {
-                return new ManagedDatabaseConnection(
-                    this,
-                    this.xaDataSource.getXAConnection()
-                );
+                xaConnection = this.xaDataSource.getXAConnection();
             } else {
                 PasswordCredential credential = (PasswordCredential) credentials.iterator().next();
-                return new ManagedDatabaseConnection(
-                    this,
-                    this.xaDataSource.getXAConnection(
-                        credential.getUserName(),
-                        new String(credential.getPassword())
-                    )
+                xaConnection = this.xaDataSource.getXAConnection(
+                    credential.getUserName(),
+                    new String(credential.getPassword())
                 );
             }
+            return new ManagedDatabaseConnection(
+                this,
+                xaConnection, 
+                connectionRequestInfo
+            );
         } catch (SQLException exception) {
             throw propagate("Could not create managed connection", exception);
         }

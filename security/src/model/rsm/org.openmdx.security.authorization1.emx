@@ -351,7 +351,7 @@
           <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_hfpbxd6-EdmkJO73lqONhA" fontName="Arial" fontHeight="8" showListStereotype="Text" fillColor="13434879" lineColor="3342489" showStereotype="Image"/>
           <layoutConstraint xmi:type="notation:Bounds" xmi:id="_hfpbxt6-EdmkJO73lqONhA" x="7509" y="5452" width="4546" height="1329"/>
         </children>
-        <children xmi:id="_hfpb096-EdmkJO73lqONhA" sourceEdges="_hfvip96-EdmkJO73lqONhA _hfvisN6-EdmkJO73lqONhA" element="_3C7B8A60016D417F9A5701F3">
+        <children xmi:id="_hfpb096-EdmkJO73lqONhA" sourceEdges="_hfvisN6-EdmkJO73lqONhA" element="_3C7B8A60016D417F9A5701F3">
           <children xmi:id="_hfpb1t6-EdmkJO73lqONhA" type="ImageCompartment" element="_3C7B8A60016D417F9A5701F3">
             <layoutConstraint xmi:type="notation:Size" xmi:id="_hfpb196-EdmkJO73lqONhA" width="1320" height="1320"/>
           </children>
@@ -402,37 +402,6 @@
           <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_hfpb496-EdmkJO73lqONhA" fontName="Arial" fontHeight="8" italic="true" showListStereotype="Text" fillColor="10337791" lineColor="3342489" showStereotype="Image"/>
           <element xmi:type="uml:Class" href="org.openmdx.security.realm1.emx#_3C7B8A60016D417E21D70063?realm1/realm1/Privilege"/>
           <layoutConstraint xmi:type="notation:Bounds" xmi:id="_hfpb5N6-EdmkJO73lqONhA" x="18762" y="262" width="2963" height="1430"/>
-        </children>
-        <children xmi:id="_hfviVt6-EdmkJO73lqONhA" targetEdges="_hfvip96-EdmkJO73lqONhA">
-          <children xmi:id="_hfviWd6-EdmkJO73lqONhA" type="ImageCompartment">
-            <element xmi:type="uml:Class" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.filter1.emx#_3C7B8A60016D417F6A070389?org/filter1/Filter"/>
-            <layoutConstraint xmi:type="notation:Size" xmi:id="_hfviWt6-EdmkJO73lqONhA" width="1320" height="1320"/>
-          </children>
-          <children xmi:id="_hfviW96-EdmkJO73lqONhA" type="Stereotype">
-            <element xmi:type="uml:Class" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.filter1.emx#_3C7B8A60016D417F6A070389?org/filter1/Filter"/>
-          </children>
-          <children xmi:id="_hfviXN6-EdmkJO73lqONhA" type="Name">
-            <element xmi:type="uml:Class" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.filter1.emx#_3C7B8A60016D417F6A070389?org/filter1/Filter"/>
-          </children>
-          <children xmi:id="_hfviXd6-EdmkJO73lqONhA" type="AttributeCompartment">
-            <styles xmi:type="umlnotation:UMLListCompartmentStyle" xmi:id="_hfviXt6-EdmkJO73lqONhA"/>
-            <element xmi:type="uml:Class" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.filter1.emx#_3C7B8A60016D417F6A070389?org/filter1/Filter"/>
-          </children>
-          <children xmi:id="_hfviX96-EdmkJO73lqONhA" type="OperationCompartment">
-            <styles xmi:type="umlnotation:UMLListCompartmentStyle" xmi:id="_hfviYN6-EdmkJO73lqONhA"/>
-            <element xmi:type="uml:Class" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.filter1.emx#_3C7B8A60016D417F6A070389?org/filter1/Filter"/>
-          </children>
-          <children xmi:id="_hfviYd6-EdmkJO73lqONhA" visible="false" type="SignalCompartment">
-            <styles xmi:type="umlnotation:UMLListCompartmentStyle" xmi:id="_hfviYt6-EdmkJO73lqONhA"/>
-            <element xmi:type="uml:Class" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.filter1.emx#_3C7B8A60016D417F6A070389?org/filter1/Filter"/>
-          </children>
-          <children xmi:id="_hfviY96-EdmkJO73lqONhA" visible="false" type="StructureCompartment">
-            <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_hfviZN6-EdmkJO73lqONhA" canonical="false"/>
-            <element xmi:type="uml:Class" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.filter1.emx#_3C7B8A60016D417F6A070389?org/filter1/Filter"/>
-          </children>
-          <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_hfviV96-EdmkJO73lqONhA" fontName="Arial" fontHeight="8" showListStereotype="Text" fillColor="10337791" lineColor="3342489" showStereotype="Image"/>
-          <element xmi:type="uml:Class" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.filter1.emx#_3C7B8A60016D417F6A070389?org/filter1/Filter"/>
-          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_hfviWN6-EdmkJO73lqONhA" x="18880" y="5266" width="2963" height="1642"/>
         </children>
         <children xmi:id="_hfvibt6-EdmkJO73lqONhA" sourceEdges="_hfvijN6-EdmkJO73lqONhA" element="_3C7B8A60016D4180F81602ED">
           <children xmi:id="_hfvicd6-EdmkJO73lqONhA" type="ImageCompartment" element="_3C7B8A60016D4180F81602ED">
@@ -521,17 +490,6 @@
           <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_hfvipd6-EdmkJO73lqONhA" id="anchor50"/>
           <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_hfvipt6-EdmkJO73lqONhA" id="anchor50"/>
         </edges>
-        <edges xmi:id="_hfvip96-EdmkJO73lqONhA" element="_3C7B8A60016D4180F5FF03C0" source="_hfpb096-EdmkJO73lqONhA" target="_hfviVt6-EdmkJO73lqONhA">
-          <children xmi:id="_hfviqt6-EdmkJO73lqONhA" type="NameLabel" element="_3C7B8A60016D4180F5FF03C0">
-            <children xmi:id="_hfvirN6-EdmkJO73lqONhA" type="Stereotype" element="_3C7B8A60016D4180F5FF03C0"/>
-            <children xmi:id="_hfvird6-EdmkJO73lqONhA" visible="false" type="Name" element="_3C7B8A60016D4180F5FF03C0"/>
-            <layoutConstraint xmi:type="notation:Location" xmi:id="_hfviq96-EdmkJO73lqONhA" y="-185"/>
-          </children>
-          <styles xmi:type="umlnotation:UMLConnectorStyle" xmi:id="_hfviqN6-EdmkJO73lqONhA" fontName="Arial" fontHeight="8" routing="Rectilinear" lineColor="3342489" showStereotype="None"/>
-          <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_hfviqd6-EdmkJO73lqONhA" points="[2243, -50, -2633, 0]$[3395, -50, -1481, 0]"/>
-          <sourceAnchor xmi:type="notation:IdentityAnchor" xmi:id="_hfvirt6-EdmkJO73lqONhA" id="anchor50"/>
-          <targetAnchor xmi:type="notation:IdentityAnchor" xmi:id="_hfvir96-EdmkJO73lqONhA" id="anchor50"/>
-        </edges>
         <edges xmi:id="_hfvisN6-EdmkJO73lqONhA" element="_3C7B8A60016D4180F60F01CF" source="_hfpb096-EdmkJO73lqONhA" target="_hfpbtd6-EdmkJO73lqONhA">
           <children xmi:id="_hfvis96-EdmkJO73lqONhA" type="NameLabel" element="_3C7B8A60016D4180F60F01CF">
             <children xmi:id="_hfvitd6-EdmkJO73lqONhA" type="Stereotype" element="_3C7B8A60016D4180F60F01CF"/>
@@ -580,9 +538,6 @@
         </eAnnotations>
       </ownedComment>
       <generalization xmi:id="_3C7B8A60016D4180F60F01CF" general="_3C7B8A60016D417F99C001F6"/>
-      <generalization xmi:id="_3C7B8A60016D4180F5FF03C0">
-        <general xmi:type="uml:Class" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.filter1.emx#_3C7B8A60016D417F6A070389?org/filter1/Filter"/>
-      </generalization>
     </ownedMember>
     <ownedMember xmi:type="uml:Class" xmi:id="_3C7B8A60016D4180F81602ED" name="ResourcePrivilege">
       <ownedComment xmi:id="_hXPGld6-EdmkJO73lqONhA" body="The privilege's name corresponds usually to the resource's URI." annotatedElement="_3C7B8A60016D4180F81602ED">

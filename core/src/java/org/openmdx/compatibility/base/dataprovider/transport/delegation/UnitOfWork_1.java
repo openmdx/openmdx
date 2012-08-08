@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork_1.java,v 1.20 2008/06/03 16:30:59 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: UnitOfWork_1.java,v 1.30 2008/12/15 03:15:29 hburger Exp $
  * Description: Unit Of Work Implementation
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/03 16:30:59 $
+ * Date:        $Date: 2008/12/15 03:15:29 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,26 +45,31 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.transport.delegation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Date;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
-import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.persistence.spi.OptimisticTransaction_2_0;
 import org.openmdx.base.transaction.Synchronization_1_0;
 import org.openmdx.base.transaction.TransactionManager_1;
 import org.openmdx.base.transaction.UnitOfWork_1_2;
@@ -74,20 +78,12 @@ import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.base.query.Selector;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
+import org.slf4j.LoggerFactory;
 
 /**
- * SPICE Object Layer: Unit Of Work implementation.
+ * Unit Of Work implementation.
  */
-class UnitOfWork_1 
-    implements Serializable, UnitOfWork_1_2
-{
-
-
-    /**
-     * Implements <code>Serializable</code>
-     */
-    private static final long serialVersionUID = 3256437001975641907L;
-
+class UnitOfWork_1 implements Serializable, UnitOfWork_1_2 {
 
     /**
      * Constructor
@@ -97,7 +93,7 @@ class UnitOfWork_1
      * @param containerManaged
      * @param optimistic
      * @param userTransaction
-     * 
+     * @param optimisticTransaction 
      * @throws ServiceException BAD_PARAMETER 
      *         if the userTransaction is missing for a transactional 
      *         non-optimistic unit of work
@@ -107,87 +103,24 @@ class UnitOfWork_1
         boolean transactional,
         boolean containerManaged,
         boolean optimistic,
-        UserTransaction userTransaction
-    ) throws ServiceException{
+        UserTransaction userTransaction, 
+        OptimisticTransaction_2_0 optimisticTransaction
+    ){
         this.synchronization = synchronization;
         this.transactional = transactional;
         this.containerManaged = containerManaged;
         this.optimistic = optimistic;
-        this.transaction = userTransaction;
-        if(
-            !optimistic && 
-            transactional && 
-            userTransaction == null
-         ) throw new ServiceException(
-             BasicException.Code.DEFAULT_DOMAIN,
-             BasicException.Code.BAD_PARAMETER,
-             new BasicException.Parameter[]{
-                 new BasicException.Parameter("transactional", transactional),
-                 new BasicException.Parameter("containerManaged", containerManaged),
-                 new BasicException.Parameter("optimistic", optimistic)
-             },
-             "Transactional non-optimistic units of work require a user transaction"
-         );
+        this.userTransaction = userTransaction;
+        this.optimisticTransaction = optimisticTransaction;
+        this.opimisticTransactionCallback = optimisticTransaction == null ? 
+            null :
+            new OptimisticTransactionCallback();
     }
 
-    //------------------------------------------------------------------------
-    // Membership management
-    //------------------------------------------------------------------------
-
-    void add(
-        Object_1 member
-    ) throws ServiceException {
-        if(!isActive())throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.ILLEGAL_STATE,
-            null, 
-            "No active unit of work"
-        );
-        if(!this.members.contains(member))this.members.add(member);
-    }
-    
-    void remove(
-        Object_1 member
-    ) throws ServiceException {
-        this.members.remove(member);
-    }
-
-    boolean contains(
-        Object candidate
-    ){
-        return this.members.contains(candidate);
-    }
-    
-    List<?> include (
-        Path referenceFilter,
-        Selector attributeFilter
-    ){
-        return new Include(
-            referenceFilter, 
-            attributeFilter
-        );
-    }
-
-    List<?> exclude (
-        Path referenceFilter,
-        Selector attributeFilter
-    ){
-        return new Exclude(
-            referenceFilter, 
-            attributeFilter
-        );
-    }
-
-    void register(
-        Evictable container
-    ){
-        this.containers.add(container);
-    }
-        
-    
-    //------------------------------------------------------------------------
-    // Instance members
-    //------------------------------------------------------------------------
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3256437001975641907L;
 
     /**
      * The members of this unit of work
@@ -195,20 +128,26 @@ class UnitOfWork_1
     protected final List<Object_1> members = new ArrayList<Object_1>();
 
     /**
+     * The thread local information of an object
+     */
+    protected final Map<Object_1,TransactionalState_1> states = 
+        new IdentityHashMap<Object_1,TransactionalState_1>();
+
+    /**
      * The filtered containers created by this unit of work.
      */
     private final Collection<Evictable> containers = new ArrayList<Evictable>();
-                         
+
     /**
      *
      */
     private final Synchronization_1_0 synchronization;
-    
+
     /**
      *
      */
     private final boolean containerManaged;
-    
+
     /**
      *
      */
@@ -222,22 +161,125 @@ class UnitOfWork_1
     /**
      * 
      */
-    private UserTransaction transaction;
+    private UserTransaction userTransaction;
 
+    /**
+     * 
+     */
+    private OptimisticTransaction_2_0 optimisticTransaction;
+
+    /**
+     * 
+     */
+    private Synchronization opimisticTransactionCallback;
+    
     /**
      *
      */
     private boolean active = false;
-    
+
     /**
      * 
      */
     private boolean rollbackOnly = false;
-    
+
     /**
      * 
      */
-    private final int PREPARE_CYCLE_LIMIT = 8;
+    private final static int PREPARE_CYCLE_LIMIT = 8;
+
+    /**
+     * The transaction time, i.e.<ul>
+     * <li>The time point of the transaction's commit() invocation in case of an optimistic transaction
+     * <li>The time point of the transaction's begin() invocation in case of a non-optimistic transaction
+     * </ul>
+     */
+    private Date transactionTime = null;
+    
+    
+    //------------------------------------------------------------------------
+    // Membership management
+    //------------------------------------------------------------------------
+
+    TransactionalState_1 getState(
+        Object_1 member,
+        boolean optional
+    ) throws ServiceException {
+        TransactionalState_1 transactional = this.states.get(member);
+        if(transactional == null && !optional) {
+            this.states.put(
+                member,
+                transactional = new TransactionalState_1()
+            );
+        }
+        return transactional;
+    }
+
+    boolean add(
+        Object_1 member
+    ) throws ServiceException {
+        if(isActive()){
+            boolean transition = !this.members.contains(member);
+            if(transition){
+                this.members.add(member);
+            }
+            return transition;
+        } else {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                "No active unit of work"
+            );
+        }
+    }
+
+    void remove(
+        Object_1 member
+    ) throws ServiceException {
+        this.members.remove(member);
+        this.states.remove(member);
+    }
+
+    boolean contains(
+        Object candidate
+    ){
+        return this.members.contains(candidate);
+    }
+
+    List<?> include (
+        Path referenceFilter,
+        Selector attributeFilter
+    ){
+        return new Include(
+            this.members, 
+            referenceFilter, attributeFilter
+        );
+    }
+
+    List<?> exclude (
+        Path referenceFilter,
+        Selector attributeFilter
+    ){
+        return new Exclude(
+            this.members, 
+            referenceFilter, attributeFilter
+        );
+    }
+
+    void register(
+        Evictable container
+    ){
+        this.containers.add(container);
+    }
+
+    /**
+     * objFlush requires this information
+     * 
+     * @return the transaction time
+     */
+    protected Date getTransactionTime(){
+        return this.transactionTime;
+    }
     
     
     //------------------------------------------------------------------------
@@ -257,7 +299,7 @@ class UnitOfWork_1
     public void setRollbackOnly() {
         this.rollbackOnly = true;
     }
-    
+
     //------------------------------------------------------------------------
     // Implements UnitOfWork_1_0
     //------------------------------------------------------------------------
@@ -275,23 +317,21 @@ class UnitOfWork_1
         if(isActive())throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            null,
             "Unit of work is active"
         );
         if(isContainerManaged())throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            null,
             "A container managed transaction can't be started"
         );
         if(isTransactional() && !isOptimistic()) try {
-            this.transaction.begin();
+            this.transactionTime = new Date();
+            this.userTransaction.begin();
         } catch (NotSupportedException exception) {
             throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                null,
                 "Transaction could not be started"
             );
         } catch (SystemException exception) {
@@ -300,7 +340,7 @@ class UnitOfWork_1
         reset();
         this.active = true;
     }
-    
+
     /** 
      * Commit the current unit of work.
      * @throws ServiceException if units of work are managed by a container
@@ -311,13 +351,11 @@ class UnitOfWork_1
         if(isContainerManaged())throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            null,
             "A container managed transaction can't be commited"
         );
         if(! isActive())throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            null,
             "No unit of work is active"
         );
         if(this.rollbackOnly) {
@@ -325,20 +363,27 @@ class UnitOfWork_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ROLLBACK,
-                    null,
                     "The unit of work has been marked for rollback only"
                 );
             } finally {
                 afterCompletion(false);
             }
         } else {
-            if(isTransactional() && this.transaction != null) {
+            if(isTransactional() && this.userTransaction != null) {
                 TransactionManager_1.execute(
                     isOptimistic() ? 
-                        this.transaction : 
-                        new TransactionTerminator(this.transaction),
-                    this
+                        this.userTransaction : 
+                            new TransactionTerminator(this.userTransaction),
+                            this
                 );
+            } else if (isOptimistic() && this.optimisticTransaction != null) {
+                boolean committed = false;
+                try {
+                    this.optimisticTransaction.commit(this.opimisticTransactionCallback);
+                    committed = true;
+                } finally {
+                    afterCompletion(committed);
+                }
             } else  {
                 boolean committed = false;
                 try {
@@ -350,7 +395,7 @@ class UnitOfWork_1
             }
         }
     } 
-       
+
     /**
      * Roll back the current unit of work.
      * @throws ServiceException if units of work are managed by a container
@@ -361,18 +406,16 @@ class UnitOfWork_1
         if(isContainerManaged())throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            null,
             "A container managed transaction can't be rolled back"
         );
         if(! isActive())throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ILLEGAL_STATE,
-            null,
             "No unit of work is active"
         );
         afterCompletion(false);
     }       
-    
+
     /**
      * Verify the content of the current unit of work.
      * <p>
@@ -411,7 +454,7 @@ class UnitOfWork_1
     ){
         return this.active;
     }
-    
+
     /**
      * Optimistic units of work do not hold data store locks until commit time.
      *
@@ -421,7 +464,7 @@ class UnitOfWork_1
     ){
         return this.optimistic;
     }
-    
+
     /**
      * Transactional units of work do not hold data store locks until commit time.
      *
@@ -431,7 +474,7 @@ class UnitOfWork_1
     ){
         return this.transactional;
     }
-    
+
     /**
      * Container managed units of work are either non transactional or part of
      * a bigger unit of work.
@@ -454,7 +497,9 @@ class UnitOfWork_1
     public void afterBegin(
     ) throws ServiceException {
         this.active = true;
-        if(isContainerManaged()) reset();
+        if(isContainerManaged()) {
+            reset();
+        }
     }
 
     /**
@@ -464,6 +509,9 @@ class UnitOfWork_1
     public void beforeCompletion(
     ) throws ServiceException {
         SysLog.detail("Unit Of Work","flushing");
+        if(isOptimistic()) {
+            this.transactionTime = new Date();
+        }
         boolean preparing = true;
         for(
             int cycle = 0;
@@ -473,32 +521,28 @@ class UnitOfWork_1
             preparing = false;
             for(
                 int i=0;
-                i < this.members.size();
+                i < this.members.size(); // this.members.size() may grow
                 i++
             ){
-                Object_1 object = this.members.get(i);
-                if(!object.isPrepared()) try {
+                Object_1 member = this.members.get(i);
+                TransactionalState_1 memberState = this.getState(member, true);
+                if(memberState != null && !memberState.isPrepared()){
                     preparing = true;
-                    object.prepare();
-                } catch (JmiServiceException exception) {
-                    throw new ServiceException(exception);
+                    member.prepare();
                 }
             }
         }
         if(preparing) throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.QUOTA_EXCEEDED,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("maximum",PREPARE_CYCLE_LIMIT)
-            },
-            "Maximal number of prepare cycles exceeded"
+            "Maximal number of prepare cycles exceeded",
+            new BasicException.Parameter("maximum",PREPARE_CYCLE_LIMIT)
         );
         try {
             this.synchronization.beforeCompletion();
-            for(
-                Iterator<Object_1> i=this.members.iterator();
-                i.hasNext();
-            ) i.next().flush(false);
+            for(Object_1 member : this.members) {
+                member.flush();
+            }
             this.synchronization.afterCompletion(true);
         } catch (ServiceException exception) {
             this.synchronization.afterCompletion(false);
@@ -521,14 +565,20 @@ class UnitOfWork_1
             "Unit Of Work",
             committed ? 
                 "committed" : 
-                this.transactional || this.containerManaged ? "rolled back" : "aborted"
+                    this.transactional || this.containerManaged ? "rolled back" : "aborted"
         );
         this.active = false;
         notifyAll();
-        while(!this.members.isEmpty()){
-            this.members.remove(0).afterCompletion(committed);
+        for(Object_1 member : this.members) {
+            member.afterCompletion(committed);
         }
-        if(isContainerManaged()) reset();
+        if(isContainerManaged()) {
+            reset(); // includes this.members.clear();
+        } else {
+            this.members.clear();
+        }
+        this.states.clear();
+        this.transactionTime = null;
     }
 
     /**
@@ -541,11 +591,11 @@ class UnitOfWork_1
         Path candidate
     ){
         return 
-            candidate != null &&
-            candidate.getParent().equals(referenceFilter) &&
-            candidate.getBase().indexOf(';') == -1; 
+        candidate != null &&
+        candidate.getParent().equals(referenceFilter) &&
+        candidate.getBase().indexOf(';') == -1; 
     }
-    
+
 
     //------------------------------------------------------------------------
     // Class Include
@@ -554,16 +604,18 @@ class UnitOfWork_1
     /**
      * Include
      */
-    class Include extends FilteringList implements Selector {
-        
+    static final class Include extends FilteringList implements Selector {
+
         /**
          * Constructor
          * 
+         * @param members 
          * @param referenceFilter
          * @param attributeFilter
          */
         Include(
-            Path referenceFilter,
+            List<?> members,
+            Path referenceFilter, 
             Selector attributeFilter
         ){
             super(members);
@@ -578,17 +630,22 @@ class UnitOfWork_1
          * @see org.openmdx.compatibility.base.query.Selector#accept(java.lang.Object)
          */
         public boolean accept(Object candidate) {
-            if(!(candidate instanceof Object_1)) return false;
-            Object_1 object = (Object_1) candidate;
-            return 
+            if(!(candidate instanceof Object_1)) {
+                return false;
+            } else try {
+                Object_1 object = (Object_1) candidate;
+                return 
                 ! object.objIsDeleted() &&
                 isMemberOfContainer(this.referenceFilter, object.objGetPath()) && 
                 (this.attributeFilter == null ? 
                     object.objIsNew() : 
-                    object.objIsDirty() && this.attributeFilter.accept(candidate)
+                        object.objIsDirty() && this.attributeFilter.accept(candidate)
                 );
+            } catch (ServiceException exception) {
+                return false;
+            }
         }
-        
+
         /**
          * 
          */
@@ -598,7 +655,7 @@ class UnitOfWork_1
          * 
          */
         private final Selector attributeFilter;
-        
+
     }
 
 
@@ -609,16 +666,18 @@ class UnitOfWork_1
     /**
      * Exclude
      */
-    class Exclude extends FilteringList implements Selector {
-        
+    static final class Exclude extends FilteringList implements Selector {
+
         /**
          * Constructor
          * 
+         * @param members 
          * @param referenceFilter
          * @param attributeFilter
          */
         Exclude(
-            Path referenceFilter,
+            List<?> members,
+            Path referenceFilter, 
             Selector attributeFilter
         ){
             super(members);
@@ -633,14 +692,19 @@ class UnitOfWork_1
          * @see org.openmdx.compatibility.base.query.Selector#accept(java.lang.Object)
          */
         public boolean accept(Object candidate) {
-            if(!(candidate instanceof Object_1)) return false;
-            Object_1 object = (Object_1) candidate;
-            return 
+            if(!(candidate instanceof Object_1)) {
+                return false;
+            } else try {
+                Object_1 object = (Object_1) candidate;
+                return 
                 !object.objIsNew() &&
                 (attributeFilter ? object.objIsDirty() : object.objIsDeleted()) &&
                 isMemberOfContainer(this.referenceFilter, object.objGetPath());
+            } catch (ServiceException exception) {
+                return false;
+            }
         }
-        
+
         /**
          * 
          */
@@ -650,9 +714,50 @@ class UnitOfWork_1
          * 
          */
         private final boolean attributeFilter;
-        
+
     }
 
+
+    //------------------------------------------------------------------------
+    // Class OptimisticTransactionCallback
+    //------------------------------------------------------------------------
+    
+    /**
+     * Optimistic Transaction Callback
+     */
+    final class OptimisticTransactionCallback implements Synchronization {
+
+        /* (non-Javadoc)
+         * @see javax.transaction.Synchronization#afterCompletion(int)
+         */
+        public void afterCompletion(int status) {
+            try {
+                UnitOfWork_1.this.afterCompletion(status == Status.STATUS_COMMITTED);
+            } catch (ServiceException exception) {
+                LoggerFactory.getLogger(OptimisticTransactionCallback.class).warn(
+                    "After completion failure ignored", 
+                    exception
+                );
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see javax.transaction.Synchronization#beforeCompletion()
+         */
+        public void beforeCompletion() {
+            try {
+                UnitOfWork_1.this.beforeCompletion();
+            } catch (ServiceException exception) {
+                throw new RuntimeServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ROLLBACK,
+                    "Before completion failure leads to rollback"
+                );
+            }
+        }
+        
+    }
     
     //------------------------------------------------------------------------
     // Class NonOptimisticTransaction
@@ -661,14 +766,14 @@ class UnitOfWork_1
     /**
      * Non-optimistic UserTransaction Wrapper
      */
-    class TransactionTerminator implements UserTransaction {
-  
+    static final class TransactionTerminator implements UserTransaction {
+
         TransactionTerminator(
             UserTransaction delegate
         ){
             this.delegate = delegate;
         }
-        
+
         private final UserTransaction delegate;
 
         /* (non-Javadoc)
@@ -678,7 +783,7 @@ class UnitOfWork_1
             SysLog.trace(
                 "phase",
                 "Please ignore the previous 'begin' and the next 'afterBegin' entry"
-             );
+            );
         }
 
         /* (non-Javadoc)
@@ -715,7 +820,7 @@ class UnitOfWork_1
         public void setTransactionTimeout(int seconds) throws SystemException {
             this.delegate.setTransactionTimeout(seconds);
         }
-                
+
     }
-    
+
 }

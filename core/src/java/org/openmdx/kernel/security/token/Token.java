@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     OMEX/Security, http://www.omex.ch/
- * Name:        $Id: Token.java,v 1.3 2007/10/10 16:06:08 hburger Exp $
+ * Name:        $Id: Token.java,v 1.4 2008/09/10 08:55:30 hburger Exp $
  * Description: Token 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:08 $
+ * Date:        $Date: 2008/09/10 08:55:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -160,13 +160,13 @@ final class Token
             new BasicException(
     			BasicException.Code.DEFAULT_DOMAIN,
     			BasicException.Code.ILLEGAL_STATE,
+    			"The token has expired",
     			new BasicException.Parameter[]{
     				new BasicException.Parameter(
     					"expiration", 
     					new Date(this.expiration)
     				)
-    			},
-    			"The token has expired"
+    			}
             )
 		);		
 	}

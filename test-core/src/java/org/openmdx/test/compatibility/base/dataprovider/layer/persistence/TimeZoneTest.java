@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TimeZoneTest.java,v 1.1 2007/01/16 15:51:19 hburger Exp $
+ * Name:        $Id: TimeZoneTest.java,v 1.2 2008/11/21 17:24:39 hburger Exp $
  * Description: TestTimeZone 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/01/16 15:51:19 $
+ * Date:        $Date: 2008/11/21 17:24:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,8 +58,6 @@ import java.util.TimeZone;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
-import org.openmdx.kernel.text.StringBuilders;
-
 /**
  * TestTimeZone
  *
@@ -82,7 +80,7 @@ public class TimeZoneTest
                 null // defaults
             );
             System.out.println(
-                "Today: " + StringBuilders.newStringBuilder(
+                "Today: " + new StringBuilder(
                     64
                 ).append(
                     "TIMESTAMP '"

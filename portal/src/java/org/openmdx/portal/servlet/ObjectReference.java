@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReference.java,v 1.24 2008/06/14 00:00:14 wfro Exp $
+ * Name:        $Id: ObjectReference.java,v 1.29 2008/12/04 10:37:23 wfro Exp $
  * Description: ObjectReference 
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/14 00:00:14 $
+ * Date:        $Date: 2008/12/04 10:37:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,16 +52,12 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
 import java.io.Serializable;
 
 import org.openmdx.application.log.AppLog;
-import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -87,7 +83,7 @@ public class ObjectReference
 
     //-------------------------------------------------------------------------
     public ObjectReference(
-        BasicException exception,
+        ServiceException exception,
         ApplicationContext application
     ) {
 	    this.object = null;
@@ -101,9 +97,10 @@ public class ObjectReference
         if(this.object != null) {
 	        try {
 	            this.object.refRefresh();
-	        } catch(JmiServiceException e) {
+	        } 
+	        catch(Exception e) {
 	            this.object = null;
-	            this.exception = e.getExceptionStack();
+	            this.exception = new ServiceException(e);
 	        }
 	    }
     }
@@ -119,10 +116,10 @@ public class ObjectReference
   ) {
       if(this.exception != null) {
           if(this.exception.getExceptionCode() == BasicException.Code.NOT_FOUND) {
-              return TITLE_PREFIX_NOT_ACCESSIBLE + " (" + this.exception.getParameter("path") + ")";
+              return TITLE_PREFIX_NOT_ACCESSIBLE + " (" + this.exception.getCause().getParameter("path") + ")";
           }
           else if(this.exception.getExceptionCode() == BasicException.Code.AUTHORIZATION_FAILURE) {
-              return TITLE_PREFIX_NO_PERMISSION + " (" + this.exception.getParameter("path") + ")";              
+              return TITLE_PREFIX_NO_PERMISSION + " (" + this.exception.getCause().getParameter("path") + ")";              
           }
           else {
               return this.exception.getMessage();
@@ -150,7 +147,7 @@ public class ObjectReference
               }
 	      }
 	      catch(Exception e) {
-	          this.exception = BasicException.toStackedException(e);
+	          this.exception = new ServiceException(e);
 	          AppLog.detail(e.getMessage(), e.getCause());
 	          return this.getTitle();
 	      }
@@ -158,133 +155,107 @@ public class ObjectReference
       }
   }
 
-  //-------------------------------------------------------------------------
-  public RefObject_1_0 getObject(
-  ) {
-      return this.object;
-  }
+    //-------------------------------------------------------------------------
+    public RefObject_1_0 getObject(
+    ) {
+        return this.object;
+    }
     
-  //-------------------------------------------------------------------------
-  public String getLabel(
-  ) {
-    if(this.object == null) {
-        return "-";
+    //-------------------------------------------------------------------------
+    public String getLabel(
+    ) {
+        try {
+            return this.object == null ?
+                "-" :
+                this.application.getLabel(this.object.refClass().refMofId());
+        }
+        catch(ServiceException e) {
+            AppLog.warning(e.getMessage(), e.getCause());
+            return null;
+        }
     }
-    return this.application.getLabel(
-        this.getInspector().getForClass()    
-    );
-  }
   
-  //-------------------------------------------------------------------------
-  public String getIconKey(
-  ) {
-    if(this.object == null) {
-        return WebKeys.ICON_MISSING;
+    //-------------------------------------------------------------------------
+    public String getIconKey(
+    ) {
+        try {
+            return this.object == null ? 
+                WebKeys.ICON_MISSING : 
+                this.application.getIconKey(this.object.refClass().refMofId());
+        }
+        catch(ServiceException e) {
+            AppLog.warning(e.getMessage(), e.getCause());
+            return null;
+        }
     }
-    try {
-        return this.application.getIconKey(
-            this.getInspector().getForClass()    
+    
+    //-------------------------------------------------------------------------
+    /**
+     * Returns the background color of the field/value as W3C CSS color, 
+     * null if not defined.
+     */
+    public String getBackColor(      
+    ) {
+        try {
+            return this.object == null ?
+                null :
+                this.application.getBackColor(this.object.refClass().refMofId());
+        }
+        catch(ServiceException e) {
+            AppLog.warning(e.getMessage(), e.getCause());
+            return null;
+        }
+    }
+  
+    //-------------------------------------------------------------------------
+    /**
+     * Returns the color of the field/value as W3C CSS color, null if not
+     * defined.
+     */
+    public String getColor(      
+    ) {
+        try {
+            return this.object == null ?
+                null :
+                this.application.getColor(this.object.refClass().refMofId());
+        }
+        catch(ServiceException e) {
+            AppLog.warning(e.getMessage(), e.getCause());
+            return null;
+        }
+    }
+    
+    //-------------------------------------------------------------------------
+    public Action getSelectObjectAction(
+    ) {  
+        String title = this.getTitle();
+        Path retrievalPath = (this.object == null) || (this.exception != null) ? 
+            null : 
+            this.application.getObjectRetrievalIdentity(this.object);
+        if(retrievalPath == null) {
+            return new Action(
+                Action.EVENT_NONE,
+                null,
+                title,
+                this.getIconKey(),
+                true
+            );
+        }
+        return new Action(
+            Action.EVENT_SELECT_OBJECT,
+            new Action.Parameter[]{
+                new Action.Parameter(
+                    Action.PARAMETER_OBJECTXRI, 
+                    retrievalPath.toXri()
+                ),
+            },
+            title.trim().length() > 0 ? 
+                title : 
+                this.getLabel(),
+            this.getIconKey(),
+            true
         );
     }
-    catch(ServiceException e) {
-        AppLog.warning(e.getMessage(), e.getCause());
-        return WebKeys.ICON_MISSING;
-    }
-  }
-    
-  //-------------------------------------------------------------------------
-  /**
-   * Returns the background color of the field/value as W3C CSS color, 
-   * null if not defined.
-   */
-  public String getBackColor(      
-  ) {
-      if(this.object == null) {
-          return null;
-      }
-      try {
-          return this.application.getBackColor(
-              this.getInspector().getForClass()
-          );              
-      }
-      catch(ServiceException e) {
-          AppLog.warning(e.getMessage(), e.getCause());
-          return null;
-      }
-  }
-  
-  //-------------------------------------------------------------------------
-  /**
-   * Returns the color of the field/value as W3C CSS color, null if not
-   * defined.
-   */
-  public String getColor(      
-  ) {
-      if(this.object == null) {
-          return null;
-      }
-      try {
-          return this.application.getColor(
-              this.getInspector().getForClass()
-          );              
-      }
-      catch(ServiceException e) {
-          AppLog.warning(e.getMessage(), e.getCause());
-          return null;
-      }
-  }
-    
-  //-------------------------------------------------------------------------
-  public org.openmdx.ui1.jmi1.Inspector getInspector(
-  ) {
-      if(this.inspector == null) {
-          if(this.object != null) {
-    	      String forClass = object.refClass().refMofId();
-              try {
-                  this.inspector = this.application.getInspector(forClass);
-              }
-              catch(ServiceException e) {
-                  AppLog.warning(e.getMessage(), e.getCause());              
-              }
-    	      if(this.inspector == null) {
-    	          AppLog.warning("can not get inspector for object " + (this.object == null ? null : this.object.refMofId()));      
-    	      }
-          }
-      }
-      return this.inspector;
-  }
-  
-  //-------------------------------------------------------------------------
-  public Action getSelectObjectAction(
-  ) {  
-      String title = this.getTitle();
-      Path retrievalPath = this.object == null
-          ? null
-          : this.application.getObjectRetrievalIdentity(this.object);
-      if(retrievalPath == null) {
-          return new Action(
-              Action.EVENT_NONE,
-              null,
-              title,
-              this.getIconKey(),
-              true
-          );
-      }
-      return new Action(
-          Action.EVENT_SELECT_OBJECT,
-          new Action.Parameter[]{
-              new Action.Parameter(
-                  Action.PARAMETER_OBJECTXRI, 
-                  retrievalPath.toXri()
-              ),
-          },
-          title.trim().length() > 0
-              ? title
-              : this.getLabel(),
-          this.getIconKey(),
-          true
-      );
-  }
 
     //-------------------------------------------------------------------------
     public Action getSelectAndEditObjectAction(
@@ -347,7 +318,7 @@ public class ObjectReference
           
     //-------------------------------------------------------------------------
     public Action getEditObjectAction(
-    ) {
+    ) throws ServiceException {
         return this.getEditObjectAction(
             ViewMode.STANDARD
         );
@@ -356,7 +327,7 @@ public class ObjectReference
     //-------------------------------------------------------------------------
     public Action getEditObjectAction(
         ViewMode mode
-    ) {
+    ) throws ServiceException {
         return new Action(
             Action.EVENT_EDIT,  
             new Action.Parameter[]{
@@ -366,7 +337,7 @@ public class ObjectReference
             this.application.getTexts().getEditTitle(),
             this.application.getTexts().getEditTitle(),
             WebKeys.ICON_EDIT,
-            this.getInspector().isChangeable() &&
+            this.application.getInspector(this.object.refClass().refMofId()).isChangeable() &&
             this.application.getPortalExtension().isEnabled(
                 Ui_1.EDIT_OBJECT_OPERATION_NAME,
                 this.getObject(),
@@ -377,7 +348,7 @@ public class ObjectReference
   
     //-------------------------------------------------------------------------
     public Action getDeleteObjectAction(
-    ) {
+    ) throws ServiceException {
         return new Action(
             Action.EVENT_DELETE,
             new Action.Parameter[]{
@@ -386,7 +357,7 @@ public class ObjectReference
             this.application.getTexts().getDeleteTitle(),
             this.application.getTexts().getDeleteTitle(),
             WebKeys.ICON_DELETE,
-            this.getInspector().isChangeable() &&
+            this.application.getInspector(this.object.refClass().refMofId()).isChangeable() &&
             this.application.getPortalExtension().isEnabled(
                 Ui_1.DELETE_OBJECT_OPERATION_NAME,
                 this.getObject(),
@@ -452,61 +423,34 @@ public class ObjectReference
         }
     }
 
-  //-------------------------------------------------------------------------
-  public int getGridRowNestingLevel(
-  ) {
-      if(this.application == null) {
-          return 0;
-      }
-      else {
-          return this.application.getPortalExtension().getGridRowNestingLevel(
-              this.object
-          );
-      }
-  }
-  
-  //-------------------------------------------------------------------------
-  public String getGridRowLevelId(
-  ) {
-      if(this.application == null) {
-          return null;
-      }
-      else {
-          return this.application.getPortalExtension().getGridRowLevelId(
-              this.object
-          );
-      }
-  }
-  
-  //-------------------------------------------------------------------------
-  public String toString(
-  ) {
-    return this.getTitle();
-  }
-  
-  //-------------------------------------------------------------------------
-  public String refMofId(
-  ) {
-      if(this.object != null) {
-          return this.object.refMofId();
-      }
-      else {
-          return "";
-      }
-  }
+    //-------------------------------------------------------------------------
+    public String toString(
+    ) {
+        return this.getTitle();
+    }
 
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private static final long serialVersionUID = 3258133570026484790L;
+    //-------------------------------------------------------------------------
+    public String refMofId(
+    ) {
+        if(this.object != null) {
+            return this.object.refMofId();
+        }
+        else {
+            return "";
+        }
+    }
 
-  public static final String TITLE_PREFIX_NO_PERMISSION = "N/P";
-  public static final String TITLE_PREFIX_NOT_ACCESSIBLE = "N/A";
-  
-  private RefObject_1_0 object;
-  private BasicException exception;
-  private final ApplicationContext application;
-  private org.openmdx.ui1.jmi1.Inspector inspector = null;
+    //-------------------------------------------------------------------------
+    // Variables
+    //-------------------------------------------------------------------------
+    private static final long serialVersionUID = 3258133570026484790L;
+
+    public static final String TITLE_PREFIX_NO_PERMISSION = "N/P";
+    public static final String TITLE_PREFIX_NOT_ACCESSIBLE = "N/A";
+
+    private RefObject_1_0 object;
+    private ServiceException exception;
+    private final ApplicationContext application;
 }
 
 //--- End of File -----------------------------------------------------------

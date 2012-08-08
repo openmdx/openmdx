@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DecimalMarshaller.java,v 1.9 2008/04/09 12:34:01 hburger Exp $
+ * Name:        $Id: DecimalMarshaller.java,v 1.11 2008/09/26 15:27:16 hburger Exp $
  * Description: DecimalMarshaller class
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:01 $
+ * Date:        $Date: 2008/09/26 15:27:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,9 +53,6 @@ package org.openmdx.base.accessor.jmi.spi;
 import java.math.BigDecimal;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
-import org.openmdx.kernel.exception.BasicException;
 
 
 //---------------------------------------------------------------------------
@@ -63,76 +60,74 @@ import org.openmdx.kernel.exception.BasicException;
  * Number <-> BigDecimal marshaller. Marshals objects which are instance of
  * Number to the specific type BigDecimal.
  */
-public class DecimalMarshaller
-  implements Marshaller, ReluctantUnmarshalling 
-{
+public class DecimalMarshaller extends NormalizingMarshaller {
 
-  //-------------------------------------------------------------------------
-  private DecimalMarshaller(
-  ) {
-      super();
-  }
-  
-  //-------------------------------------------------------------------------
-  public static DecimalMarshaller getInstance(
-    boolean forward
-  ) {
-    return instance;
-  }
-
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object marshal(
-    Object source
-  ) throws ServiceException {
-    try {
-        return 
-            source == null ? null :
-            source instanceof BigDecimal ? source :
-            new BigDecimal(((Number)source).toString());
-    } catch (RuntimeException e) {
-        throw new ServiceException(
-            e,
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.TRANSFORMATION_FAILURE, 
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Could not marshal source to BigDecimal"
-        );
+    /**
+     * Constructor 
+     */
+    private DecimalMarshaller(
+    ) {
+        // Avoid external instantiation
     }
-  }
-  
-  //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
-  public Object unmarshal (
-    Object source
-  ) throws ServiceException {
-    try {
-        return source == null
-          ? null
-          : (BigDecimal)source;
-    } 
-    catch (RuntimeException e) {
-        throw new ServiceException(
-            e,
-            BasicException.Code.DEFAULT_DOMAIN, 
-            BasicException.Code.TRANSFORMATION_FAILURE, 
-            new BasicException.Parameter [] {
-              new BasicException.Parameter("source", source),
-              new BasicException.Parameter("source class", source.getClass().getName()),
-            },
-            "Could not unmarshal BigDecimal"
-        );
+
+    /**
+     * A singleton
+     */
+    static private final DecimalMarshaller instance = new DecimalMarshaller();
+
+    /**
+     * @deprecated Use {@link #getInstance()} instead
+     */
+    public static DecimalMarshaller getInstance(
+        boolean forward
+    ) {
+        return getInstance();
     }
-  }
 
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  static private final DecimalMarshaller instance = new DecimalMarshaller();
+    /**
+     * Provide a marshaller instance
+     * 
+     * @return an instance
+     */
+    public static DecimalMarshaller getInstance(
+    ) {
+        return instance;
+    }
 
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#normalize(java.lang.Object)
+     */
+    @Override
+    protected Object normalize(
+        Object source
+    ) throws ServiceException{
+        if(keep(source)) {
+            return source;
+        }
+        //
+        // Lenient
+        //
+        try {
+            return new BigDecimal(((Number)source).toString());
+        } catch (Exception exception) {
+            throw newServiceException(exception, source);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#isLenient()
+     */
+    @Override
+    protected boolean isLenient() {
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#targetClass()
+     */
+    @Override
+    protected Class<?> targetClass() {
+        return BigDecimal.class;
+    }
+    
 }
-  
-//--- End of File -----------------------------------------------------------

@@ -20,13 +20,8 @@
  * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
  * OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- * ______________________________________________________________________
- *
- * Copyright (c) 2008, OMEX AG, Switzerland
- * All rights reserved.
- * 
- * JAVA 5 support added
  */
+
 package org.slf4j.helpers;
 
 import java.util.HashMap;
@@ -93,5 +88,12 @@ public class BasicMarkerFactory implements IMarkerFactory {
     }
     return (markerMap.remove(name) != null);
   }
+
+  
+  public Marker getDetachedMarker(String name) {
+    return  new BasicMarker(name);
+  }
+  
+  
   
 }

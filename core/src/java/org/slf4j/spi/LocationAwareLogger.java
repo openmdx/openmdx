@@ -31,7 +31,7 @@ import org.slf4j.Marker;
  * An <b>optional</b> interface helping integration with logging systems capable of 
  * extracting location information. This interface is mainly used by SLF4J bridges 
  * such as jcl104-over-slf4j which need to provide hints so that the underlying logging
- * system can extract the correct locatin information (method name, line number, etc.).
+ * system can extract the correct location information (method name, line number, etc.).
  * 
  * 
  * @author Ceki Gulcu
@@ -47,7 +47,7 @@ public interface LocationAwareLogger extends Logger {
   
   
   /**
-   * Printing method which support for location information. 
+   * Printing method with support for location information. 
    * 
    * @param marker
    * @param fqcn The fully qualified class name of the <b>caller</b>

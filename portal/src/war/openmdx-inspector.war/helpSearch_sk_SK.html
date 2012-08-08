@@ -1,0 +1,88 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>openCRX - Rozšírené vyhľadávanie</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
+<table class="objectTitle">
+  <tr>
+    <td>Advanced Search</td>
+	<td>
+		<script>
+		  <!--
+		  document.write('<td align="right"><a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+		  -->
+		</script>
+	</td>
+  </tr>
+</table>
+
+ <div class="hh2">Rozšírené vyhľadávanie jednoducho</div>
+ <div class="normal">Môžete zvýšiť presnosť vyhľadávania pridaním operátorov ktoré 
+     upravia vaše kľúčové slová a čísla. Všetky voľby vypísané na tejto stránek môžu
+     byť vložené priamo do vyhľadávacieho poľa</div>
+ <div class="hh2">Základy</div> 
+ <div class="normal">Môžete zadať slovo/číslo alebo výraz, napr.<strong>'Miller'</strong>, <strong>'> 500'</strong> alebo <strong>'>=
+   Smith'</strong>, a potom</div>
+ <table cellpadding="0" cellspacing="10">
+   <tr valign="top">
+     <td>&#8226; kliknite na <strong>hlavičku stĺpca</strong> na vyhľadanie objektov
+       so zodpovedajúcou hodnotou v (<strong>všetky objekty</strong> sú
+       vyhľadávané bez ohľadu na nastavený filter a výsledky
+       predchádzajúceho vyhľadávania sú stratené)</td>
+	 <td bgcolor="#CCCCCC"><strong>New Search</strong><br />
+	 <img src="images/helpSearchTut0.gif" width="129" height="51" /></td>
+   </tr>
+   <tr valign="top">
+     <td>&#8226; Kliknite na <strong>[+] tlačidlo</strong> na vyhľadávanie objektov
+       so zodpovedajúcou hodnotou v čiastočnom atribúte (<strong>iba objekty obsiahnuté
+       v predchádzajúcich vyhľadávaniach alebo filtri</strong> budú
+       prehľadané, t. j. "pridaním tohto kritéria bude vyhľadávanie ďalej upresnené/obmedzené
+       na menšiu skupinu)</td>
+	 <td bgcolor="#CCCCCC"><strong>Add Condition</strong><br />
+	 <img src="images/helpSearchTut1.gif" width="129" height="51" /></td>
+   </tr>
+</table>
+ <div class="hh2">Operátory</div>
+ <div class="normal">Nasledujúce operátory sú podporované (avšak niektoré databázové systémy ich podporovať nemusia):</div>
+ <ul>
+ <li>znie ako (<strong>*</strong>)</li>
+ <li>ako (<strong>%</strong>), východzí operátor pre vyhľadávanie reťazcov</li>
+ <li>rovná sa (<strong>=</strong>), východzí operátor pre číselné, logické a kódové vyhľadávanie</li>
+ <li>nerovná sa (<strong><></strong>, <strong>!</strong>=)</li>
+ <li>menej (<strong><</strong>)</li>
+ <li>menej alebo sa rovná (<strong><=</strong>)</li>
+ <li>viac (<strong>></strong>)</li>
+ <li>viac alebo sa rovná <strong>(>=</strong>)</li>
+ </ul>
+ <div class="hh2">&quot;A&quot; vyhľadávania</div>
+ <div class="normal">Pre vyhľadanie objektov, ktoré spĺňajú viac ako jednu podmienku súčasne,
+použije sa znak &quot;<strong>&amp;</strong>&quot; medzi podmienkami. Napríklad pre vyhľadávanie objektov s hodnotami medzi
+   500 a 1000 (t.j. väčšie ako 500 a menšie ako 1000), iba napíšte: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
+ <div class="hh2">&quot;ALEBO&quot; vyhľadávania</div>
+<div class="normal">Pre vyhľadanie objektov, ktoré obsahujú slovo A alebo slovo B, použije sa 
+       bodkočiarka &quot;<strong>;</strong>&quot; medzi výrazmi. Napríklad,
+     pre vyhľadanie kontaktu s menami 'Smith' alebo 'Miller', iba napíšte: <strong>'= Smith; Miller'</strong></div>
+ <div class="hh2">Kombinované vyhľadávanie</div>
+ <div class="normal">Môžete ľubovoľne kombinovať rôzne spôsoby vyhľadávania. Napríklad pre vyhľadanie objektu
+   s hodnotami nižšími ako '1000', ale rôznymi od '500' a rôznymi od '600',
+   iba napíšte: <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
+ <div class="normal">Syntax pravidiel pre kombinované vyhľadávania je nasledujúci:</div>
+ <ul>
+   <li>searchExpr ::= filterValue { & filterValue }<br />
+   (--> string tokenizer with <strong>&</strong> as separator)</li>
+   <li>filterValue ::= [operator] value { ; value }<br />
+   (--> string tokenizer with <strong>;</strong> as separator)</li>
+ </ul>
+ <div class="hh2">Vyhľadávanie so značkami</div>
+ <div class="normal">
+   <p>Niektoré databázy umožňujú vyhľadávať pomocou značiek výberu. Pokiaľ sú podporované, môžete napríklad vyhľadať všetky kontakty s menom obsahujúcim 'ller' (napríklad Miller, Mueller) iba napísaním: <strong>'%%ller'<br />
+   VAROVANIE:</strong> vyhľadávanie za použitia značiek môže byť časovo náročné. Takéto vyhľadávania môžu znižovať odozvu systému u ostatných užívateľov! </p>
+ </div>
+</body>
+</html>

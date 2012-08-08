@@ -29,6 +29,11 @@
 			<config-property-type>java.lang.String</config-property-type>
 			<config-property-value>jdbc:sqlserver://localhost:1433;databaseName=openMDX_Test;selectMethod=cursor</config-property-value>
 		</config-property>
+		<config-property>
+			<config-property-name>ValidationStatement</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>SELECT GETDATE()</config-property-value>
+		</config-property>
 		<authentication-mechanism>
 			<authentication-mechanism-type>BasicPassword</authentication-mechanism-type>
 			<credential-interface>javax.resource.spi.security.PasswordCredential</credential-interface>

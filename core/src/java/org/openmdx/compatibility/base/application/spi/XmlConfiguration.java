@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XmlConfiguration.java,v 1.2 2008/03/21 18:45:22 hburger Exp $
+ * Name:        $Id: XmlConfiguration.java,v 1.3 2008/09/10 08:55:25 hburger Exp $
  * Description: Application Framework 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:45:22 $
+ * Date:        $Date: 2008/09/10 08:55:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -102,20 +102,20 @@ public class XmlConfiguration
 					fEx,
 					BasicException.Code.DEFAULT_DOMAIN, 
 					BasicException.Code.ACTIVATION_FAILURE, 
+					"Failed to open the file",
 					new BasicException.Parameter [] {
 						new BasicException.Parameter("FileName", source.getFile())
-					},
-					"Failed to open the file"
+					}
 				);
 			} catch (IOException ioEx) {
 				throw new ServiceException (
 					ioEx,
 					BasicException.Code.DEFAULT_DOMAIN, 
 					BasicException.Code.ACTIVATION_FAILURE, 
+					"Error reading a character from the file",
 					new BasicException.Parameter [] {
 						new BasicException.Parameter("FileName", source.getFile())
-					},
-					"Error reading a character from the file"
+					}
 				);
 			}
 			
@@ -126,10 +126,10 @@ public class XmlConfiguration
 			throw new ServiceException (
 				BasicException.Code.DEFAULT_DOMAIN,
 				BasicException.Code.ACTIVATION_FAILURE, 
+				"The URL type " + source.getProtocol() + " is not supported", 
 				new BasicException.Parameter [] {
 					new BasicException.Parameter("URL", source)
-				}, 
-				"The URL type " + source.getProtocol() + " is not supported"
+				}
 			); 
 		}
 	}

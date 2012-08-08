@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ShortMarshaller.java,v 1.8 2008/04/09 12:34:10 hburger Exp $
+ * Name:        $Id: ShortMarshaller.java,v 1.10 2008/09/26 15:27:16 hburger Exp $
  * Description: ShortMarshaller class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/09 12:34:10 $
+ * Date:        $Date: 2008/09/26 15:27:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,9 +51,6 @@
 package org.openmdx.base.accessor.jmi.spi;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.compatibility.base.marshalling.Marshaller;
-import org.openmdx.compatibility.base.marshalling.ReluctantUnmarshalling;
-import org.openmdx.kernel.exception.BasicException;
 
 
 //---------------------------------------------------------------------------
@@ -61,73 +58,74 @@ import org.openmdx.kernel.exception.BasicException;
  * Number <-> Short marshaller. Marshals objects which are instance of
  * Number to the specific type Short (which is also a Number).
  */
-public class ShortMarshaller 
-    implements Marshaller, ReluctantUnmarshalling 
-{
+public class ShortMarshaller extends NormalizingMarshaller {
 
-    //-------------------------------------------------------------------------
-    private ShortMarshaller() {
-        super();
+    /**
+     * Constructor 
+     */
+    private ShortMarshaller(
+    ) {
+        // Avoid external instantiation
     }
 
-    //-------------------------------------------------------------------------
-    public static ShortMarshaller getInstance(boolean forward) {
-        return ShortMarshaller.instance;
-    }
-
-    //-------------------------------------------------------------------------
-    public Object marshal(
-        Object source
-    ) throws ServiceException {
-        try {
-            return source == null
-                ? null
-                : new Short(((Number) source).shortValue());
-        } catch(RuntimeException e) {
-            throw new ServiceException(
-                e,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("source", source),
-                    new BasicException.Parameter(
-                        "source class",
-                        source.getClass().getName()),
-                    },
-                "Could not marshal source to Short"
-            );
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    public Object unmarshal(
-        Object source
-    ) throws ServiceException {
-        try {
-            return source == null
-                ? null
-                : new Short(((Number) source).shortValue());
-        } catch (RuntimeException e) {
-            throw new ServiceException(
-                e,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.TRANSFORMATION_FAILURE,
-                new BasicException.Parameter[] {
-                    new BasicException.Parameter("source", source),
-                    new BasicException.Parameter(
-                        "source class",
-                        source.getClass().getName()),
-                    },
-                "Could not marshal source to Short"
-            );
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    // Variables
-    //-------------------------------------------------------------------------
+    /**
+     * A singleton
+     */
     static private final ShortMarshaller instance = new ShortMarshaller();
 
-}
+    /**
+     * @deprecated Use {@link #getInstance()} instead
+     */
+    public static ShortMarshaller getInstance(
+        boolean forward
+    ) {
+        return getInstance();
+    }
 
-//--- End of File -----------------------------------------------------------
+    /**
+     * Provide a marshaller instance
+     * 
+     * @return an instance
+     */
+    public static ShortMarshaller getInstance(
+    ) {
+        return instance;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#normalize(java.lang.Object)
+     */
+    @Override
+    protected Object normalize(
+        Object source
+    ) throws ServiceException{
+        if(keep(source)) {
+            return source;
+        }
+        //
+        // Lenient
+        //
+        try {
+            return new Short(((Number)source).shortValue());
+        } catch (Exception exception) {
+            throw newServiceException(exception, source);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#isLenient()
+     */
+    @Override
+    protected boolean isLenient() {
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.jmi.spi.NormalizingMarshaller#targetClass()
+     */
+    @Override
+    protected Class<?> targetClass() {
+        return Short.class;
+    }
+    
+}

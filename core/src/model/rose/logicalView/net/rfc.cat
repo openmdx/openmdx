@@ -1,0 +1,68 @@
+
+(object Petal
+    version    	50
+    _written   	"Rose 8.3.0407.2800"
+    charSet    	0)
+
+(object Class_Category "rfc"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3C8B83370159"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "MimeType"
+	    quid       	"3C8B8343014D"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"3E66710F0058"
+		    exportControl 	"Public"))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Alias"
+	    quid       	"3C8B833E0145"
+	    title      	"Alias"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::net::rfc::MimeType" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(248, 191)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(147, 168)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	202
+			justify    	0
+			label      	"MimeType")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@1
+			location   	(147, 127)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	202
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B8343014D"
+		    width      	220
+		    height     	148
+		    annotation 	8
+		    autoResize 	TRUE)))))

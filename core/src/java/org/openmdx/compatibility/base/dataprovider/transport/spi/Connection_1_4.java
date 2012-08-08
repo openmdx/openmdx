@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Connection_1_4.java,v 1.4 2007/11/04 16:14:56 hburger Exp $
+ * Name:        $Id: Connection_1_4.java,v 1.6 2008/09/11 18:01:06 hburger Exp $
  * Description: Connection_1_4 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/11/04 16:14:56 $
+ * Date:        $Date: 2008/09/11 18:01:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,13 +74,13 @@ public interface Connection_1_4
      * @throws ServiceException
      */
     Object_1_0 cloneObject(
-      Path target, 
-      Object_1_0 original, 
-      boolean completelyDirty
+        Path target, 
+        Object_1_0 original, 
+        boolean completelyDirty
     ) throws ServiceException;
-    
+
     void evict();
 
     void clear();
-    
+
 }

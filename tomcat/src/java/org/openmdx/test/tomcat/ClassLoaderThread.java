@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ClassLoaderThread.java,v 1.3 2008/07/03 00:06:59 hburger Exp $
+ * Name:        $Id: ClassLoaderThread.java,v 1.4 2008/09/11 10:49:10 hburger Exp $
  * Description: Class Loader Thread
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/03 00:06:59 $
+ * Date:        $Date: 2008/09/11 10:49:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,7 +69,8 @@ public class ClassLoaderThread extends Thread {
 		super(runnable);
 	}
 	
-	private static int THREAD_COUNT = 1000;
+	private static int THREAD_COUNT = 1000; // 1000;
+	private static int APPLICATION_COUNT = 7;
 	
 	/**
 	 * @param args
@@ -87,10 +88,17 @@ public class ClassLoaderThread extends Thread {
 		URL... enterpriseApplicationArchives
 	){
 		System.out.println(new Date() + ": Preparing EAR class loader...");
-		ClassLoader classLoader = ClassLoaderTest.getClassLoader(
-			commonClassLoader, 
-			enterpriseApplicationArchives
-		);
+		ClassLoader[] classLoaders = new ClassLoader[APPLICATION_COUNT];
+		for(
+			int i = 0;
+			i < APPLICATION_COUNT;
+			i++
+		){
+			classLoaders[i] = ClassLoaderTest.getClassLoader(
+				commonClassLoader, 
+				enterpriseApplicationArchives
+			);
+		}
 		System.out.println(new Date() + ": Preparing threads...");
 		Thread[] threads = new Thread[THREAD_COUNT];
 		for(
@@ -99,7 +107,9 @@ public class ClassLoaderThread extends Thread {
 		    i++
 		){
 			threads[i] = new ClassLoaderThread(
-				new ClassLoaderTest(classLoader)
+				new ClassLoaderTest(
+					classLoaders[i % APPLICATION_COUNT]
+				)
 			);
 		}
 		System.out.println(new Date() + ": Starting threads...");

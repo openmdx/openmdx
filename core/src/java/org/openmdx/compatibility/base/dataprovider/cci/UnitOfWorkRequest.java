@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UnitOfWorkRequest.java,v 1.13 2008/03/21 18:45:25 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: UnitOfWorkRequest.java,v 1.15 2008/11/27 16:46:56 hburger Exp $
  * Description: UnitOfWorkRequest class
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:45:25 $
+ * Date:        $Date: 2008/11/27 16:46:56 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,25 +45,25 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.cci;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import javax.resource.ResourceException;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.resource.Records;
 
-@SuppressWarnings("unchecked")
-public class UnitOfWorkRequest 
-    extends DataproviderContext
-{
-
-    private static final long serialVersionUID = 3906366034620658742L;
+/**
+ * Unit Of Work Request
+ */
+public class UnitOfWorkRequest extends DataproviderContext {
 
     /**
      * Constructor
@@ -78,7 +77,7 @@ public class UnitOfWorkRequest
      */
     public UnitOfWorkRequest(
         boolean transactionalUnit,
-        DataproviderRequest[] requests
+        DataproviderRequest... requests
     ){
         this.requests = requests;
         this.transactionalUnit = transactionalUnit;     
@@ -91,12 +90,37 @@ public class UnitOfWorkRequest
      */
     private UnitOfWorkRequest(
         UnitOfWorkRequest that,
-        DataproviderRequest[] requests
+        DataproviderRequest... requests
     ){
         super(that);
         this.transactionalUnit = that.transactionalUnit;
         this.requests = requests;
     }
+
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3906366034620658742L;
+
+   /**
+    * The requests belonging to this unit of work
+    */
+   private final DataproviderRequest[] requests;
+
+   /**
+    * Flag telling whether the unit of work is a transaction of its own
+    */
+   private boolean transactionalUnit;
+
+   /**
+    * The context keys
+    */
+   private static final List<String> KEYS = Collections.unmodifiableList(
+       Arrays.asList(
+           "requests",
+           "contexts"
+       )
+   );
 
 
     //------------------------------------------------------------------------
@@ -145,8 +169,8 @@ public class UnitOfWorkRequest
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.cci.DataproviderContext#keys()
      */
-    protected Collection keys() {
-        return Arrays.asList(new String[]{"requests","contexts"});
+    protected Collection<String> keys() {
+        return KEYS;
     }
 
     /* (non-Javadoc)
@@ -185,21 +209,6 @@ public class UnitOfWorkRequest
             this.requests
         );
     }
-
-
-    //------------------------------------------------------------------------
-    // Variables
-    //------------------------------------------------------------------------
-
-    /**
-     *
-     */
-    private final DataproviderRequest[] requests;
-
-    /**
-     *
-     */
-    private boolean transactionalUnit;
 
 }
 

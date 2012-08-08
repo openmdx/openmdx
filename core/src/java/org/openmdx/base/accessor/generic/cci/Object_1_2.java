@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Object_1_2.java,v 1.1 2005/08/03 22:31:45 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Object_1_2.java,v 1.2 2008/09/22 23:38:22 hburger Exp $
  * Description: Object_1_1
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/08/03 22:31:45 $
+ * Date:        $Date: 2008/09/22 23:38:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -53,9 +53,8 @@ package org.openmdx.base.accessor.generic.cci;
 
 import org.openmdx.base.exception.ServiceException;
 
-
 /**
- * Object_1_1
+ * Object interface 1.2
  */
 public interface Object_1_2
     extends Object_1_0 
@@ -64,15 +63,15 @@ public interface Object_1_2
     /**
      * Tests whether this object can't leave its hollow state
      *
-     * @return  true if this instance is inaccessable
+     * @return  true if this instance is inaccessible
      */
-    boolean objIsInaccessable();
+    boolean objIsInaccessible();
 
     /**
-     * Retrieve inaccessabilityReason.
+     * Retrieve the inaccessibility reason.
      *
-     * @return Returns the inaccessabilityReason.
+     * @return Returns the inaccessibilityReason.
      */
-    ServiceException getInaccessabilityReason();
+    ServiceException getInaccessibilityReason();
 
 }

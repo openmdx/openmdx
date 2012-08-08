@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: NonConfigurableProperty.jt,v 1.1 2008/05/14 09:46:57 hburger Exp $
+ * Name:        $Id: NonConfigurableProperty.jt,v 1.2 2008/09/27 00:40:32 hburger Exp $
  * Description: JDO 2.0 Non-Configurable Properties
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/14 09:46:57 $
+ * Date:        $Date: 2008/09/27 00:40:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -78,7 +78,7 @@ public enum NonConfigurableProperty {
     //------------------------------------------------------------------------
 
     VendorName(Constants.NONCONFIGURABLE_PROPERTY_VENDOR_NAME),
-    VersionNumber(Constants.NONCONFIGURABLE_PROPERTY_VENDOR_NAME);
+    VersionNumber(Constants.NONCONFIGURABLE_PROPERTY_VERSION_NUMBER);
 
 #endif
 

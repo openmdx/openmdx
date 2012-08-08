@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: SessionEventHandler.java,v 1.13 2008/05/31 23:40:08 wfro Exp $
+ * Name:        $Id: SessionEventHandler.java,v 1.15 2008/09/10 16:21:44 wfro Exp $
  * Description: SessionEventHandler 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/31 23:40:08 $
+ * Date:        $Date: 2008/09/10 16:21:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.eventhandler;
 
@@ -122,6 +119,7 @@ public class SessionEventHandler {
                     
                 case Action.EVENT_LOGOFF:             
                     application.saveSettings(true);
+                    application.close();
                     request.getSession().setAttribute(
                         WebKeys.LOCALE_KEY, 
                         application.getCurrentLocaleAsString()

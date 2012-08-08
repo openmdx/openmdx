@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TabControl.java,v 1.13 2008/04/04 17:01:09 hburger Exp $
+ * Name:        $Id: TabControl.java,v 1.16 2008/12/07 23:44:23 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:09 $
+ * Date:        $Date: 2008/12/07 23:44:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -80,10 +77,11 @@ public abstract class TabControl
         super(
             id,
             locale,
-            localeAsIndex,
-            controlFactory
+            localeAsIndex
         );
-        this.tab = tab;
+        this.labels = tab == null ? null : tab.getTitle();
+        this.toolTips = tab == null ? null : tab.getToolTip();
+        this.iconKey = tab == null ? null : tab.getIconKey();
         this.paneIndex = paneIndex;
         this.tabIndex = tabIndex;
         
@@ -101,13 +99,32 @@ public abstract class TabControl
                       null,
                       locale,
                       localeAsIndex,
-                      this,
-                      fieldGroup,
-                      index
+                      fieldGroup
                   )
               );
             }
         }
+        this.fieldGroupControls = (FieldGroupControl[])fieldGroups.toArray(new FieldGroupControl[fieldGroups.size()]);
+    }
+  
+    //-----------------------------------------------------------------------
+    public TabControl(
+        String id,
+        String locale,
+        int localeAsIndex,
+        org.openmdx.ui1.jmi1.FormDefinition formDefinition,        
+        List<FieldGroupControl> fieldGroups
+    ) {
+        super(
+            id,
+            locale,
+            localeAsIndex
+        );
+        this.paneIndex = 0;
+        this.tabIndex = 0;
+        this.labels = formDefinition.getTitle();
+        this.toolTips = formDefinition.getToolTip();
+        this.iconKey = formDefinition.getIconKey();
         this.fieldGroupControls = (FieldGroupControl[])fieldGroups.toArray(new FieldGroupControl[fieldGroups.size()]);
     }
   
@@ -120,9 +137,9 @@ public abstract class TabControl
     //-------------------------------------------------------------------------
     public String getName(
     ) {
-        return this.localeAsIndex < this.tab.getTitle().size()
-          ? this.tab.getTitle().get(this.localeAsIndex)
-          : this.tab.getTitle().get(0);
+        return this.localeAsIndex < this.labels.size() ? 
+            this.labels.get(this.localeAsIndex) : 
+            this.labels.get(0);
     }
   
     //-----------------------------------------------------------------------
@@ -140,9 +157,11 @@ public abstract class TabControl
     //-----------------------------------------------------------------------
     // Members
     //-----------------------------------------------------------------------
-    protected final org.openmdx.ui1.jmi1.Tab tab;
     protected final int paneIndex;
     protected final int tabIndex;
+    protected final List<String> labels;
+    protected final List<String> toolTips;
+    protected final String iconKey;
     protected final FieldGroupControl[] fieldGroupControls;
     
 }

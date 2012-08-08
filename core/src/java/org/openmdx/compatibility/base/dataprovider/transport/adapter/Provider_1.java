@@ -1,11 +1,11 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Provider_1.java,v 1.24 2008/03/28 01:24:12 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Provider_1.java,v 1.30 2008/12/15 03:15:37 hburger Exp $
  * Description: Dataprovider Adapter: Provider
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/28 01:24:12 $
+ * Date:        $Date: 2008/12/15 03:15:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,22 +54,15 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.MappedRecord;
-import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0;
-import org.openmdx.base.accessor.generic.view.Manager_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.text.format.DateFormat;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSpecifier;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
@@ -88,7 +81,6 @@ import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.base.query.FilterOperators;
 import org.openmdx.compatibility.base.query.FilterProperty;
 import org.openmdx.compatibility.base.query.Quantors;
-import org.openmdx.compatibility.state1.view.DateStateContext;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
@@ -97,14 +89,9 @@ import org.openmdx.kernel.log.SysLog;
  * Provider_1_0 Implementation
  */
 //---------------------------------------------------------------------------
-@SuppressWarnings("unchecked")
 public class Provider_1
-    implements Provider_1_3, Serializable {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3906645319247737140L;
+    implements Provider_1_3, Serializable 
+{
 
     /**
      * Constructs a new provider.
@@ -143,6 +130,56 @@ public class Provider_1
     }
 
     /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3906645319247737140L;
+
+    /**
+     * 
+     */
+    private RequestCollection unitOfWorkChannel, shareableChannel;  
+
+    /**
+     * 
+     */
+    private final boolean transactionPolicyIsNew;
+
+    /**
+     * 
+     */
+    private final boolean persistentNewObjectsBecomeTransientUponRollback;
+
+    /**
+     * 
+     */
+    private boolean completing;
+
+    /**
+     * 
+     */
+    private Map<List<Object>,Map<Path,FindResult>> extents = 
+        new HashMap<List<Object>,Map<Path,FindResult>>();
+
+    /**
+     * The fallback provider forwards all requests to the delegate
+     */
+    private static final Path[] UNIVERSE = new Path[]{
+        new Path("")
+    };
+
+    private static final String[] FINAL_CLASSES = {
+        "org:openmdx:base:Authority",
+        "org:openmdx:base:Provider"
+    };
+
+    /**
+     * 
+     */
+    static final Path EXTENT_PATTERN = new Path(
+        new String[]{":*","provider",":*","segment",":*","extent"}
+    );
+
+    /**
      * A provider's exposed paths define which objects are provided by it.
      *
      * @return  the provider's exposed paths
@@ -151,7 +188,7 @@ public class Provider_1
     ) throws ServiceException {
         return UNIVERSE;
     }
-    
+
     /**
      *
      */
@@ -160,11 +197,18 @@ public class Provider_1
         return this.transactionPolicyIsNew;
     }
 
+    private RequestCollection getChannel(
+    ){
+        return this.completing ? 
+            this.unitOfWorkChannel : 
+                this.shareableChannel; 
+    }
+
 
     //------------------------------------------------------------------------
     // Life cycle management
     //------------------------------------------------------------------------
-    
+
     /**
      * Close the connection.
      * <p>
@@ -187,8 +231,8 @@ public class Provider_1
     ){
         return getChannel() == null;
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Query
     //------------------------------------------------------------------------
@@ -216,40 +260,39 @@ public class Provider_1
      * @exception ServiceException  NOT_SUPPORTED
      *            if no provider for the given reference filter is reachable.
      */
-    public List find(
+    public List<Object> find(
         Path referenceFilter,
         FilterProperty[] attributeFilter,
         AttributeSpecifier[] attributeSpecifier,
         Manager_1_0 manager
     ) throws ServiceException {
-        List keys = null;
+        List<Object> keys = null;
         boolean useExtent = referenceFilter.isLike(EXTENT_PATTERN);
         if(useExtent) { 
             if(
                 attributeFilter == null || 
                 attributeFilter.length == 0
-            ) return Collections.EMPTY_LIST;
+            ) {
+                return Collections.emptyList();
+            }
             keys = getKey(attributeFilter, attributeSpecifier, 1);
         } else {
             keys = getKey(attributeFilter, attributeSpecifier, 0);
             Path identities = referenceFilter.getChild(":*");
-            Map mappings = keys == null ? null : (Map)this.extents.get(keys);
-            if(mappings != null) for (
-                Iterator i = mappings.entrySet().iterator();
-                i.hasNext();
-            ){
-                Map.Entry e = (Map.Entry)i.next();
-                if(identities.isLike((Path)e.getKey())){
-                    ArrayList result = new ArrayList();
-                    for(
-                        Iterator j = ((List)e.getValue()).iterator();
-                        j.hasNext();
-                    ){
-                        Path candidate = (Path)j.next();
-                        if(candidate.isLike(identities)) result.add(candidate);
+            Map<Path,FindResult> mappings = keys == null ? null : this.extents.get(keys);
+            if(mappings != null) {
+                for (Map.Entry<Path,FindResult> e : mappings.entrySet()) {
+                    if(identities.isLike(e.getKey())){
+                        List<Object> result = new ArrayList<Object> ();
+                        for(Object j : e.getValue()) {
+                            Path candidate = (Path)j;
+                            if(candidate.isLike(identities)) {
+                                result.add(candidate);
+                            }
+                        }
+                        SysLog.detail("Return cached paths", identities);
+                        return result;
                     }
-                    SysLog.detail("Return cached paths", identities);
-                    return result;
                 }
             }
         }
@@ -271,19 +314,18 @@ public class Provider_1
         );
         if(useExtent){
             if(keys == null) return findResult;
-            List identities = (List)keys.remove(0);
-            Map mappings = (Map)this.extents.get(keys);
+            List<?> identities = (List<?>)keys.remove(0);
+            Map<Path,FindResult> mappings = this.extents.get(keys);
             if(mappings == null) this.extents.put(
                 keys,
-                mappings = new HashMap()
+                mappings = new HashMap<Path,FindResult>()
             );
-            for(
-                Iterator i = identities.iterator();
-                i.hasNext();
-            ) mappings.put(
-                new Path(i.next().toString()), 
-                findResult
-            );
+            for(Object identity : identities) {
+                mappings.put(
+                    new Path(identity.toString()), 
+                    findResult
+                );
+            }
         }
         return findResult;
     }
@@ -294,23 +336,23 @@ public class Provider_1
      * @param attributeFilter
      * @param attributeSpecifier
      */
-    private List getKey(
+    private List<Object> getKey(
         FilterProperty[] attributeFilter,
         AttributeSpecifier[] attributeSpecifier,
         int identityCount 
     ){
-        List key = new ArrayList();
-        Set filterProperties = new HashSet();
+        List<Object> key = new ArrayList<Object>();
+        Set<FilterProperty> filterProperties = new HashSet<FilterProperty>();
         if(attributeFilter != null) for(
-            int i = 0; 
-            i < attributeFilter.length; 
-            i++
+                int i = 0; 
+                i < attributeFilter.length; 
+                i++
         ){
             if(SystemAttributes.OBJECT_IDENTITY.equals(attributeFilter[i].name())){
                 if(
-                    attributeFilter[i].quantor() != Quantors.THERE_EXISTS ||
-                    attributeFilter[i].operator() != FilterOperators.IS_LIKE 
-                 ) return null;
+                        attributeFilter[i].quantor() != Quantors.THERE_EXISTS ||
+                        attributeFilter[i].operator() != FilterOperators.IS_LIKE 
+                ) return null;
                 key.add(attributeFilter[i].values());
             } else {
                 filterProperties.add(attributeFilter[i]);
@@ -319,15 +361,15 @@ public class Provider_1
         if(key.size() != identityCount) return null;
         key.add(filterProperties);
         if(attributeSpecifier != null) for(
-            int i = 0; 
-            i < attributeSpecifier.length;
-            i++
+                int i = 0; 
+                i < attributeSpecifier.length;
+                i++
         ) if (
-            attributeSpecifier[i].order() != Orders.ANY
+                attributeSpecifier[i].order() != Orders.ANY
         ) key.add(attributeSpecifier[i]);
         return key;
     }
-    
+
     /**
      * Reconstruct the list.
      *
@@ -345,7 +387,7 @@ public class Provider_1
      * @exception   ServiceException  NOT_SUPPORTED
      *              if no provider for the given reference filter is reachable.
      */
-    public List reconstruct(
+    public List<Object> reconstruct(
         Path referenceFilter,
         Manager_1_0 manager,
         InputStream criteria
@@ -377,7 +419,7 @@ public class Provider_1
      */
     public MappedRecord getDefaultFetchGroup(
         Path accessPath,
-        Set requiredSet,
+        Set<String> requiredSet,
         Manager_1_0 manager
     ) throws ServiceException {
         Path path = new Path(accessPath);
@@ -406,19 +448,15 @@ public class Provider_1
             AttributeSpecifier[] attributeSpecifiers = null;
             if(requiredSet != null) {
                 attributeSpecifiers = new AttributeSpecifier[
-                    requiredSet.size()
-                ];
+                                                             requiredSet.size()
+                                                             ];
                 int j = 0;
-                for(
-                    Iterator i = requiredSet.iterator(); 
-                    i.hasNext();
-                    j++ 
-                ) attributeSpecifiers[j]=new AttributeSpecifier(
-                    (String)i.next()
-                );
+                for(String attributeName : requiredSet) {
+                    attributeSpecifiers[j++]=new AttributeSpecifier(attributeName);
+                }
             }
             getChannel().addGetRequest(
-              path,
+                path,
                 AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
                 attributeSpecifiers,
                 object
@@ -444,6 +482,7 @@ public class Provider_1
      * @exception ServiceException  NOT_SUPPORTED
      *            if no provider for the given path is reachable.
      */
+    @SuppressWarnings("unchecked")
     public void getAttribute(
         Path accessPath,
         String name,
@@ -467,18 +506,14 @@ public class Provider_1
             name,
             source.getValues(name)
         );
-        for(
-            Iterator i = source.attributeNames().iterator();
-            i.hasNext();
-        ){
-            Object attributeName = i.next();
+        for(String attributeName : source.attributeNames()) {
             if(
                 !target.containsKey(attributeName) &&
                 !SystemAttributes.OBJECT_CLASS.equals(attributeName)
             ) {
                 target.put(
                     attributeName, 
-                    source.getValues((String)attributeName) 
+                    source.getValues(attributeName) 
                 );
             }
         }
@@ -645,7 +680,7 @@ public class Provider_1
             target
         );
     }  
-        
+
 
     //------------------------------------------------------------------------
     // Implements Provider_1_1
@@ -665,6 +700,19 @@ public class Provider_1
 
     
     //------------------------------------------------------------------------
+    // Implements Provider_1_3
+    //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.compatibility.base.dataprovider.transport.cci.Provider_1_3#getPrincipalChain()
+     */
+    public List<String> getPrincipalChain(
+    ) {
+        return this.unitOfWorkChannel.getPrincipalChain();
+    }
+
+
+    //------------------------------------------------------------------------
     // Implements Synchronization_1_0
     //------------------------------------------------------------------------
 
@@ -678,7 +726,7 @@ public class Provider_1
         this.unitOfWorkChannel.clear();
         this.extents.clear();
     } 
-       
+
     /**
      * The beforeCompletion method notifies a provider or plug-in that a
      * unit of work is about to be committed 
@@ -688,7 +736,7 @@ public class Provider_1
         this.unitOfWorkChannel.beginUnitOfWork(this.transactionPolicyIsNew);
         this.completing = true;
     } 
-         
+
     /**
      * TO DO: Replace by a more appropriate method name
      * <p>
@@ -710,13 +758,11 @@ public class Provider_1
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ROLLBACK,
-                    null,
                     "Transactional unit of work rolled back"
                 ) : new ServiceException(
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ABORT,
-                    null,
                     "Non-transactional or container-managed unit of work aborted"
                 );
             } finally {
@@ -729,99 +775,6 @@ public class Provider_1
     }
 
 
-    //------------------------------------------------------------------------
-    // Implements StateConnection_1Factory
-    //------------------------------------------------------------------------
-
-    /**
-     * Create a view context specific connection
-     * @param viewContext the view context
-     * 
-     * @return a view context specific connection
-     */
-    public ObjectFactory_1_0 getConnection(
-        InteractionSpec viewContext
-    ) throws ServiceException {
-        if(viewContext instanceof DateStateContext) {
-            DateStateContext context = (DateStateContext) viewContext;
-            return new Manager_1( 
-                new Connection_1(
-                    new Provider_1(
-                        this.shareableChannel.createRequestCollection(
-                            toBasicFormat(context.getValidFor()),
-                            toBasicFormat(context.getValidAt())
-                        ),
-                        this.transactionPolicyIsNew
-                    ),
-                    !this.transactionPolicyIsNew // containerManagedUnitOfWork
-                )
-            );
-        } else if(viewContext == null) {
-            throw new ServiceException (
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_PARAMETER,
-                null,
-                "View context is null"
-            );
-        } else {
-            throw new ServiceException (
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.BAD_PARAMETER,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("class", viewContext.getClass().getName())
-                },
-                "View context class is not among {" + DateStateContext.class.getName() + "}"
-            );
-        }
-            
-    }
-
-    /**
-     * Convert to basic date time format
-     * 
-     * @param source
-     * 
-     * @return
-     */
-    private static String toBasicFormat(
-        XMLGregorianCalendar source
-    ){
-        if(source == null) {
-            return null;
-        } else {
-            int year = source.getYear();
-            int month = source.getMonth();
-            int day = source.getDay();
-            return new StringBuilder(
-                8
-            ).append(
-                year
-            ).append(
-                month < 10 ? "0" : ""
-            ).append(
-                month
-            ).append(
-                day < 10 ? "0" : ""
-            ).append(
-                day
-            ).toString();
-        }
-    }
-
-    /**
-     * Convert to basic date format
-     * 
-     * @param source
-     * 
-     * @return
-     */
-    private static String toBasicFormat(
-        Date source
-    ){
-        return source == null ? null : DateFormat.getInstance().format(source);
-    }
-    
-    
     //------------------------------------------------------------------------
     // Implements Connection_1Factory
     //------------------------------------------------------------------------
@@ -858,66 +811,5 @@ public class Provider_1
         );
     }
 
-    
-    //------------------------------------------------------------------------
-    // Instance members
-    //------------------------------------------------------------------------
-
-    private RequestCollection getChannel(
-    ){
-        return this.completing ? 
-            this.unitOfWorkChannel : 
-            this.shareableChannel; 
-    }
-    
-    
-    /**
-     * 
-     */
-    private RequestCollection unitOfWorkChannel, shareableChannel;  
-    
-    /**
-     * 
-     */
-    private final boolean transactionPolicyIsNew;
-    
-    /**
-     * 
-     */
-    private final boolean persistentNewObjectsBecomeTransientUponRollback;
-
-    /**
-     * 
-     */
-    private boolean completing;
-
-    /**
-     * 
-     */
-    private Map extents = new HashMap();
-    
-    
-    //------------------------------------------------------------------------
-    // Class Members
-    //------------------------------------------------------------------------
-    
-    /**
-     * The fallback provider forwards all requests to the delegate
-     */
-    private static final Path[] UNIVERSE = new Path[]{
-        new Path("")
-    };
-
-    private static final String[] FINAL_CLASSES = new String[]{
-        "org:openmdx:base:Authority",
-        "org:openmdx:base:Provider"
-    };
-    
-    /**
-     * 
-     */
-    static final Path EXTENT_PATTERN = new Path(
-    	new String[]{":*","provider",":*","segment",":*","extent"}
-    );
 
 }

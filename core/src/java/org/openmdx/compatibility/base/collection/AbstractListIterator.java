@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractListIterator.java,v 1.1 2008/02/18 13:34:05 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: AbstractListIterator.java,v 1.2 2008/09/02 09:50:28 hburger Exp $
  * Description: SPICE Collections: Abstract List Iterator
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/18 13:34:05 $
+ * Date:        $Date: 2008/09/02 09:50:28 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.collection;
 
@@ -56,8 +55,7 @@ import java.util.ListIterator;
 /**
  * Abstract List Iterator
  */
-@SuppressWarnings("unchecked")
-public abstract class AbstractListIterator implements ListIterator {
+public abstract class AbstractListIterator<E> implements ListIterator<E> {
 
     /**
      * 
@@ -67,7 +65,7 @@ public abstract class AbstractListIterator implements ListIterator {
         super();
     }
 
-    protected abstract ListIterator getDelegate(
+    protected abstract ListIterator<E> getDelegate(
     );
     
     /* (non-Javadoc)
@@ -108,34 +106,41 @@ public abstract class AbstractListIterator implements ListIterator {
     /* (non-Javadoc)
      * @see java.util.Iterator#next()
      */
-    public Object next() {
+    public E next() {
+        this.currentIndex = getDelegate().nextIndex();
         return current = getDelegate().next();
     }
 
     /* (non-Javadoc)
      * @see java.util.ListIterator#previous()
      */
-    public Object previous() {
+    public E previous() {
+        this.currentIndex = getDelegate().previousIndex();
         return current = getDelegate().previous();
     }
 
     /* (non-Javadoc)
      * @see java.util.ListIterator#add(java.lang.Object)
      */
-    public void add(Object arg0) {
+    public void add(E arg0) {
         getDelegate().add(arg0);
     }
 
     /* (non-Javadoc)
      * @see java.util.ListIterator#set(java.lang.Object)
      */
-    public void set(Object arg0) {
+    public void set(E arg0) {
         getDelegate().set(arg0);
     }
 
     /**
      * 
      */
-    protected Object current = null;
+    protected E current = null;
+
+    /**
+     * 
+     */
+    protected int currentIndex;
     
 }

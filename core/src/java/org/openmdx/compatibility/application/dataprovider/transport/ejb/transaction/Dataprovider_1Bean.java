@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1Bean.java,v 1.12 2008/03/06 19:03:24 hburger Exp $
+ * Name:        $Id: Dataprovider_1Bean.java,v 1.14 2008/10/06 17:34:53 hburger Exp $
  * Description: Transaction Controller
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/06 19:03:24 $
+ * Date:        $Date: 2008/10/06 17:34:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -137,10 +137,10 @@ public class Dataprovider_1Bean
                     exception.getExceptionCode() == BasicException.Code.ROLLBACK ||
                     exception.getExceptionCode() == BasicException.Code.HEURISTIC
                 ) && (
-                    exception.getExceptionStack() != null &&
-                    exception.getExceptionStack().getCause() instanceof BasicException 
+                    exception.getCause() != null &&
+                    exception.getCause().getCause() != null 
                 ) ? new ServiceException(
-                    (BasicException)exception.getExceptionStack().getCause()
+                    exception.getCause().getCause()
                 ) : exception
             );          
         }

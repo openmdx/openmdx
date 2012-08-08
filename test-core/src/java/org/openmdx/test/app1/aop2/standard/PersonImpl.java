@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersonImpl.java,v 1.2 2008/04/25 15:33:07 hburger Exp $
+ * Name:        $Id: PersonImpl.java,v 1.3 2008/09/27 12:00:11 hburger Exp $
  * Description: Person 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 15:33:07 $
+ * Date:        $Date: 2008/09/27 12:00:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -185,7 +185,8 @@ public class PersonImpl extends AbstractObject {
      * @see org.openmdx.test.app1.cci2.Person#assignAddress(org.openmdx.test.app1.cci2.PersonAssignAddressParams)
      */
     public Void assignAddress(PersonAssignAddressParams in) {
-        System.out.println("Assigning addresses to " + sameObject().refMofId() + ": " + in.getAddress());
+        Person same = sameObject();
+        System.out.println("Assigning addresses to " + same.refMofId() + ": " + in.getAddress());
 //        List<Address> target = this.same.getAssignedAddress();
 //        List<Address> source = in.getAddress();
 //        List<Address> set = new ArrayList<Address>(source);

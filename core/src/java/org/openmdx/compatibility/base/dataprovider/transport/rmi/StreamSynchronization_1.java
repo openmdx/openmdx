@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StreamSynchronization_1.java,v 1.7 2008/03/19 17:08:16 hburger Exp $
+ * Name:        $Id: StreamSynchronization_1.java,v 1.8 2008/09/10 08:55:30 hburger Exp $
  * Description: Synchronization_1 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:08:16 $
+ * Date:        $Date: 2008/09/10 08:55:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -82,7 +82,7 @@ import org.openmdx.kernel.exception.BasicException;
  */
 @SuppressWarnings("unchecked")
 class StreamSynchronization_1 
-    implements StreamSynchronization_1_1 
+implements StreamSynchronization_1_1 
 {
 
     /**
@@ -200,7 +200,7 @@ class StreamSynchronization_1
         this.entries.add(entry);
         return entry;
     }
-    
+
     //------------------------------------------------------------------------
     // Implements Synchronization_1_0
     //------------------------------------------------------------------------
@@ -218,7 +218,7 @@ class StreamSynchronization_1
             while(i.hasNext()) ((Entry)i.next()).afterCompletion(false); 
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.transaction.Synchronization_1_0#afterBegin()
      */
@@ -235,7 +235,7 @@ class StreamSynchronization_1
         //
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements StreamSynchronization_1_0
     //------------------------------------------------------------------------
@@ -265,8 +265,8 @@ class StreamSynchronization_1
         this.entries.add(entry);
         return entry;
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Extends Object
     //------------------------------------------------------------------------
@@ -277,14 +277,14 @@ class StreamSynchronization_1
     public String toString() {
         return this.unitOfWorkId;
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Class Entry
     //------------------------------------------------------------------------
 
     private class Entry {
-        
+
         protected Entry (
         ) throws IOException {
             this.file = File.createTempFile(
@@ -295,20 +295,18 @@ class StreamSynchronization_1
         }
 
         protected final File file;
-        
+
         public void afterCompletion(
             boolean committed
         ) throws ServiceException {
             if(!this.file.delete()) new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.DEACTIVATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("file", this.file.toString())
-                },
-                "Could not delete stream buffer file"                    
+                "Could not delete stream buffer file",
+                new BasicException.Parameter("file", this.file.toString())
             ).log();
         }
-        
+
     }
 
     //------------------------------------------------------------------------
@@ -316,8 +314,8 @@ class StreamSynchronization_1
     //------------------------------------------------------------------------
 
     protected final class SourceEntry_1 
-        extends Entry
-        implements StreamSynchronization_1_0.SourceEntry
+    extends Entry
+    implements StreamSynchronization_1_0.SourceEntry
     {
 
         SourceEntry_1(
@@ -325,7 +323,7 @@ class StreamSynchronization_1
         ) throws IOException{
             this.length = nonTransactionalSource instanceof BinarySource_1_0 ?
                 cache((BinarySource_1_0)nonTransactionalSource) :
-                cache((CharacterSource_1_0)nonTransactionalSource);
+                    cache((CharacterSource_1_0)nonTransactionalSource);
         }
 
         SourceEntry_1(
@@ -333,7 +331,7 @@ class StreamSynchronization_1
         ) throws IOException{
             this.length = cache(nonTransactionalSource);
         }
-        
+
         SourceEntry_1(
             Reader nonTransactionalSource
         ) throws IOException{
@@ -342,14 +340,14 @@ class StreamSynchronization_1
 
         private Object transactionalSource;
         private final long length;
-        
+
         public InputStream getBinaryStream(
         ) throws IOException {
             InputStream stream = new FileInputStream(super.file);
             this.transactionalSource = stream;
             return stream;
         }
-        
+
         public Reader getCharacterStream(
         ) throws IOException {
             Reader stream = new InputStreamReader(
@@ -370,7 +368,7 @@ class StreamSynchronization_1
         ) {
             this.transactionalSource = transactionalSource;
         }
-        
+
         /**
          * Retrieve length.
          *
@@ -396,10 +394,8 @@ class StreamSynchronization_1
                     cause,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.COMMUNICATION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("file", file.toString())
-                    },
-                    "Could not close buffered input stream"                    
+                    "Could not close buffered input stream",
+                    new BasicException.Parameter("file", file.toString())
                 ).log();
             }
             this.transactionalSource = null;
@@ -413,9 +409,9 @@ class StreamSynchronization_1
             long length = 0L;
             try {
                 for(
-                    byte[] chunk = source.readBytes(chunkSize);
-                    chunk != null;
-                    chunk = source.readBytes(chunkSize)
+                        byte[] chunk = source.readBytes(chunkSize);
+                        chunk != null;
+                        chunk = source.readBytes(chunkSize)
                 ) {
                     length += chunk.length;
                     target.write(chunk);
@@ -444,9 +440,9 @@ class StreamSynchronization_1
             long length = 0L;
             try {
                 for(
-                    char[] chunk = source.readCharacters(chunkSize);
-                    chunk != null;
-                    chunk = source.readCharacters(chunkSize)
+                        char[] chunk = source.readCharacters(chunkSize);
+                        chunk != null;
+                        chunk = source.readCharacters(chunkSize)
                 ){
                     length += chunk.length;
                     target.write(chunk);
@@ -464,7 +460,7 @@ class StreamSynchronization_1
             }
             return length;
         }
-        
+
         private long cache(
             InputStream source
         ) throws IOException {            
@@ -473,9 +469,9 @@ class StreamSynchronization_1
             if(binaryChunk == null) binaryChunk = new byte[chunkSize];
             try {
                 for(
-                    int i = source.read(binaryChunk);
-                    i >= 0;
-                    i = source.read(binaryChunk)
+                        int i = source.read(binaryChunk);
+                        i >= 0;
+                        i = source.read(binaryChunk)
                 ){
                     length += i;
                     target.write(binaryChunk, 0, i);
@@ -505,9 +501,9 @@ class StreamSynchronization_1
             if(characterChunk == null) characterChunk = new char[chunkSize];
             try {
                 for(
-                    int i = source.read(characterChunk);
-                    i >= 0;
-                    i = source.read(characterChunk)
+                        int i = source.read(characterChunk);
+                        i >= 0;
+                        i = source.read(characterChunk)
                 ){
                     length += i;
                     target.write(characterChunk, 0, i);
@@ -527,23 +523,23 @@ class StreamSynchronization_1
         }
 
     }
-    
+
 
     //------------------------------------------------------------------------
     // Class SinkEntry
     //------------------------------------------------------------------------
 
     protected final class SinkEntry_1 
-        extends Entry 
-        implements StreamSynchronization_1_0.SinkEntry
+    extends Entry 
+    implements StreamSynchronization_1_0.SinkEntry
     {
-    
+
         SinkEntry_1(
             Sink_1_0 nonTransactionalSink
         ) throws IOException{
             this.nonTransactionalSink = nonTransactionalSink;
         }
-        
+
         SinkEntry_1(
             OutputStream nonTransactionalSink
         ) throws IOException{
@@ -560,14 +556,14 @@ class StreamSynchronization_1
 
         private Object transactionalSink;
         private Object nonTransactionalSink;
-        
+
         public OutputStream getBinaryStream(
         ) throws IOException {
             OutputStream stream = new FileOutputStream(super.file); 
             this.transactionalSink = stream;
             return stream;
         }
-        
+
         public Writer getCharacterStream(
         ) throws IOException {
             Writer stream = new OutputStreamWriter(
@@ -586,14 +582,14 @@ class StreamSynchronization_1
         public void setTransactionalSink(Sink_1_0 transactionalSink) {
             this.transactionalSink = transactionalSink;
         }
-        
+
         public void afterCompletion(
             boolean committed
         ) throws ServiceException {
             try {
                 if(this.transactionalSink != null) try {
                     if(this.transactionalSink instanceof Sink_1_0) {
-                       ((Sink_1_0)transactionalSink).close();
+                        ((Sink_1_0)transactionalSink).close();
                     } else if (this.transactionalSink instanceof OutputStream) {
                         ((OutputStream)this.transactionalSink).close();
                     } else if (this.transactionalSink instanceof Writer) {
@@ -604,10 +600,8 @@ class StreamSynchronization_1
                         cause,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.COMMUNICATION_FAILURE,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("file", this.file.toString())
-                        },
-                        "Could not prepare buffered output stream"                    
+                        "Could not prepare buffered output stream",
+                        new BasicException.Parameter("file", this.file.toString())
                     ).log();
                     if(committed) throw exception;
                 }
@@ -626,10 +620,8 @@ class StreamSynchronization_1
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.COMMUNICATION_FAILURE,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("file", this.file.toString())
-                        },
-                        "Could not flush buffered output stream"
+                        "Could not flush buffered output stream",
+                        new BasicException.Parameter("file", this.file.toString())
                     );
                 }
             } finally {
@@ -646,9 +638,9 @@ class StreamSynchronization_1
             InputStream source = new FileInputStream(file);
             try {
                 for(
-                    int i = source.read(binaryChunk);
-                    i >= 0;
-                    i = source.read(binaryChunk)
+                        int i = source.read(binaryChunk);
+                        i >= 0;
+                        i = source.read(binaryChunk)
                 ){
                     if(i == 0) continue;
                     byte[] chunk = i == binaryChunk.length ? binaryChunk : new byte[i];
@@ -675,9 +667,9 @@ class StreamSynchronization_1
             );
             try {
                 for(
-                    int i = source.read(characterChunk);
-                    i >= 0;
-                    i = source.read(characterChunk)
+                        int i = source.read(characterChunk);
+                        i >= 0;
+                        i = source.read(characterChunk)
                 ){
                     if(i == 0) continue;
                     char[] chunk = i == characterChunk.length ? characterChunk : new char[i];
@@ -701,11 +693,11 @@ class StreamSynchronization_1
             InputStream source = new FileInputStream(file);
             try {
                 for(
-                    int i = source.read(binaryChunk);
-                    i >= 0;
-                    i = source.read(binaryChunk)
+                        int i = source.read(binaryChunk);
+                        i >= 0;
+                        i = source.read(binaryChunk)
                 ) if(
-                    i != 0
+                        i != 0
                 ) target.write(binaryChunk, 0, i);
                 target.flush();
                 target.close();
@@ -728,11 +720,11 @@ class StreamSynchronization_1
             );
             try {
                 for(
-                    int i = source.read(characterChunk);
-                    i >= 0;
-                    i = source.read(characterChunk)
+                        int i = source.read(characterChunk);
+                        i >= 0;
+                        i = source.read(characterChunk)
                 ) if (
-                    i != 0
+                        i != 0
                 ) target.write(characterChunk, 0, i);
                 target.flush();
                 target.close();

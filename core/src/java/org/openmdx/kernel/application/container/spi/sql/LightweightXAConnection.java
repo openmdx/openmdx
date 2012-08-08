@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LightweightXAConnection.java,v 1.6 2008/03/21 18:38:40 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: LightweightXAConnection.java,v 1.9 2008/10/13 09:56:40 hburger Exp $
  * Description: Lightweight XAConnection
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:38:40 $
+ * Date:        $Date: 2008/10/13 09:56:40 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.application.container.spi.sql;
 
@@ -77,7 +76,7 @@ import org.openmdx.kernel.exception.Throwables;
  */
 @SuppressWarnings("unchecked")
 public class LightweightXAConnection
-    implements XAConnection, CloseCallback
+implements XAConnection, CloseCallback
 {
 
     /**
@@ -129,9 +128,9 @@ public class LightweightXAConnection
      */
     public synchronized void addConnectionEventListener(ConnectionEventListener listener) {
         (
-            this.connectionEventListeners == null ?
-            this.connectionEventListeners = new HashSet() :
-            this.connectionEventListeners
+                this.connectionEventListeners == null ?
+                    this.connectionEventListeners = new HashSet() :
+                        this.connectionEventListeners
         ).add(listener);
     }
 
@@ -180,8 +179,8 @@ public class LightweightXAConnection
         if(this.connectionEventListeners != null) {
             ConnectionEvent event = new ConnectionEvent(this);
             for(
-                Iterator i = this.connectionEventListeners.iterator();
-                i.hasNext();
+                    Iterator i = this.connectionEventListeners.iterator();
+                    i.hasNext();
             ) ((ConnectionEventListener)i.next()).connectionClosed(event);
         }
     }
@@ -210,11 +209,9 @@ public class LightweightXAConnection
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.TRANSACTION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("xid", xid),
-                        new BasicException.Parameter("onePhase", onePhase)
-                    },
-                    "Local transaction commit failed"
+                    "Local transaction commit failed",
+                    new BasicException.Parameter("xid", xid),
+                    new BasicException.Parameter("onePhase", onePhase)
                 );
             } else throw (XAException) Throwables.log(
                 Throwables.initCause(
@@ -222,11 +219,9 @@ public class LightweightXAConnection
                     null,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.TRANSACTION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("xid", xid),
-                        new BasicException.Parameter("onePhase", onePhase)
-                    },
-                    "Two-phase commit not supported by " + LightweightResource.class.getName()
+                    "Two-phase commit not supported by " + LightweightResource.class.getName(),
+                    new BasicException.Parameter("xid", xid),
+                    new BasicException.Parameter("onePhase", onePhase)
                 )
             );
 
@@ -251,7 +246,7 @@ public class LightweightXAConnection
         public void forget(
             Xid xid
         ) throws XAException {
-                //
+            //
         }
 
         public int getTransactionTimeout() throws XAException {
@@ -269,10 +264,8 @@ public class LightweightXAConnection
                     null,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.TRANSACTION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("xid", xid)
-                    },
-                    "Two-phase commit not supported by " + LightweightResource.class.getName()
+                    "Two-phase commit not supported by " + LightweightResource.class.getName(),
+                    new BasicException.Parameter("xid", xid)
                 )
             );
         }
@@ -291,10 +284,8 @@ public class LightweightXAConnection
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.TRANSACTION_FAILURE,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("xid", xid)
-                        },
-                        "Local transaction rollback failed"
+                        "Local transaction rollback failed",
+                        new BasicException.Parameter("xid", xid)
                     )
                 );
             }
@@ -321,10 +312,8 @@ public class LightweightXAConnection
                                 exception,
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.TRANSACTION_FAILURE,
-                                new BasicException.Parameter[]{
-                                    new BasicException.Parameter("xid", xid)
-                                },
-                                "Local transaction start failed"
+                                "Local transaction start failed",
+                                new BasicException.Parameter("xid", xid)
                             )
                         );
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LocalObjectHandler.java,v 1.3 2008/03/28 03:20:52 hburger Exp $
+ * Name:        $Id: LocalObjectHandler.java,v 1.5 2008/09/10 08:55:20 hburger Exp $
  * Description: Local Object Invocation Handler
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/28 03:20:52 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,7 +62,7 @@ import org.openmdx.kernel.exception.BasicException;
  * Local Object Invocation Handler
  */
 class LocalObjectHandler<H extends EJBLocalHome>
-    extends AbstractObjectHandler<LocalHomeHandler<H>>
+extends AbstractObjectHandler<LocalHomeHandler<H>>
 {
 
     /**
@@ -80,9 +80,9 @@ class LocalObjectHandler<H extends EJBLocalHome>
      * @see java.lang.reflect.InvocationHandler#invoke(java.lang.Object, java.lang.reflect.Method, java.lang.Object[])
      */
     public Object invoke(
-       Object proxy, 
-       Method method, 
-       Object[] args
+        Object proxy, 
+        Method method, 
+        Object[] args
     ) throws Throwable{
         if(EJBLocalObject.class == method.getDeclaringClass()) {
             String methodName = method.getName().intern();
@@ -115,39 +115,37 @@ class LocalObjectHandler<H extends EJBLocalHome>
     ) throws BasicException {
         try {
             return new LocalAction<H>(
-                this.homeHandler,
-                this.homeHandler.getInstanceMethod(
-                    methodName, 
-                    argumentClasses
-                ), 
-                this.homeHandler.getTransactionAttribute(
-                    "Local", 
-                    methodName,
-                    argumentClassNames
-                )
+                    this.homeHandler,
+                    this.homeHandler.getInstanceMethod(
+                        methodName, 
+                        argumentClasses
+                    ), 
+                    this.homeHandler.getTransactionAttribute(
+                        "Local", 
+                        methodName,
+                        argumentClassNames
+                    )
             );
         } catch (NoSuchMethodException exception) {
             throw new BasicException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("object", this),
-                    new BasicException.Parameter("methodName", this),
-                    new BasicException.Parameter("argumentClasses", argumentClassNames)
-                },
-                "The requested method is not supported by the given EJB instance"
+                "The requested method is not supported by the given EJB instance",
+                new BasicException.Parameter("object", this),
+                new BasicException.Parameter("methodName", this),
+                new BasicException.Parameter("argumentClasses", (Object[])argumentClassNames)
             );
         }
     }
 
-    
+
     /**
      * Action
      */
     protected static class LocalAction<H extends EJBLocalHome> 
-        extends AbstractAction<LocalHomeHandler<H>>
-        implements Action
+    extends AbstractAction<LocalHomeHandler<H>>
+    implements Action
     {
 
         /**
@@ -174,8 +172,8 @@ class LocalObjectHandler<H extends EJBLocalHome>
             Object callerContext = this.homeHandler.setBeanContext();
             try {
                 LocalTransactionContext transactionContext = new LocalTransactionContext(
-                     this.homeHandler.getTransactionManager(),
-                     this.transactionAttribute
+                    this.homeHandler.getTransactionManager(),
+                    this.transactionAttribute
                 );
                 try {
                     Object reply = delegateInvocation(arguments);
@@ -196,7 +194,7 @@ class LocalObjectHandler<H extends EJBLocalHome>
                 this.homeHandler.setCallerContext(callerContext);
             }
         }
-        
+
     }
 
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardTabControl.java,v 1.5 2008/06/20 23:42:05 wfro Exp $
+ * Name:        $Id: WizardTabControl.java,v 1.9 2008/12/07 23:44:22 wfro Exp $
  * Description: WizardTabControl
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/20 23:42:05 $
+ * Date:        $Date: 2008/12/07 23:44:22 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -64,6 +61,7 @@ import java.net.URLEncoder;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
+import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlPage;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.wizards.WizardDefinition;
@@ -104,17 +102,17 @@ public class WizardTabControl
     //-----------------------------------------------------------------------
     public String getOperationName(
     ) {        
-        return (this.tab != null) && (this.wizardDefinition.getLabel() == null)
-            ? super.getName()
-            : this.wizardDefinition.getLabel();
+        return (this.labels != null) && (this.wizardDefinition.getLabel() == null) ? 
+            super.getName() : 
+            this.wizardDefinition.getLabel();
     }
 
     //-----------------------------------------------------------------------
     public String getToolTip(
     ) {
-        return (this.tab != null) && (this.wizardDefinition.getToolTip() == null)
-            ? super.getToolTip()
-            : this.wizardDefinition.getToolTip();            
+        return (this.labels != null) && (this.wizardDefinition.getToolTip() == null) ? 
+            super.getToolTip() : 
+            this.wizardDefinition.getToolTip();            
     }
 
     //-----------------------------------------------------------------------
@@ -124,7 +122,8 @@ public class WizardTabControl
         String frame, 
         boolean forEditing
     ) throws ServiceException {
-        ShowObjectView view = (ShowObjectView)p.getView();        
+        ShowObjectView view = (ShowObjectView)p.getView();      
+        ApplicationContext app = view.getApplicationContext();
         if(frame == null) {
             int operationIndex = 100*(this.getPaneIndex() + 1) + this.getTabIndex();        
             String objectXri = view.getObjectReference().getObject().refMofId();     
@@ -133,12 +132,17 @@ public class WizardTabControl
                 encodedObjectXri = URLEncoder.encode(objectXri, "UTF-8");
             }
             catch(UnsupportedEncodingException e) {}
-            if(this.wizardDefinition.getOpenParameter().length() > 0) {
-                p.write("    <li><a href=\"#\"", p.getOnClick("javascript:window.open('.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');"), " id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");                    
+            if(app.getPortalExtension().isEnabled(this.getName(), view.getRefObject(), app)) {
+                if(this.wizardDefinition.getOpenParameter().length() > 0) {
+                    p.write("    <li><a href=\"#\" onclick=\"javascript:window.open('.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');\" id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");                    
+                }
+                else {
+                    p.write("    <li><a href=\".", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "\" target=\"", this.wizardDefinition.getTargetType(), "\" id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");
+                }
             }
             else {
-                p.write("    <li><a href=\".", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "\" target=\"", this.wizardDefinition.getTargetType(), "\" id=\"opTab", Integer.toString(operationIndex), "\">", this.getOperationName(), "...</a></li>");
-            }            
+                p.write("    <li><a href=\"#\" id=\"opTab", Integer.toString(operationIndex), "\"><span>", this.getName(), "</span></a></li>");                
+            }
         }
     }
 

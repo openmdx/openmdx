@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DependencyAwareExplorer_1.java,v 1.7 2008/03/21 20:14:53 hburger Exp $
+ * Name:        $Id: DependencyAwareExplorer_1.java,v 1.11 2008/11/27 16:46:56 hburger Exp $
  * Description: Dependency Aware Explorer Plug-In
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 20:14:53 $
+ * Date:        $Date: 2008/11/27 16:46:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.compatibility.base.application.configuration.Configuration;
@@ -105,19 +106,18 @@ import org.openmdx.kernel.log.SysLog;
  *      exposed path. 
  * </ol>
  */
-@SuppressWarnings("unchecked")
-public class DependencyAwareExplorer_1
-    extends Explorer_1
-{
+public class DependencyAwareExplorer_1 extends Explorer_1 {
 
     /**
      * Requests are re-ordered only if necessary  
      */
     private boolean reluctantReordering;
 
-    /* (non-Javadoc)
-     * @see org.openmdx.compatibility.runtime1.layer.application.AbstractExplorer_1#activate(short, org.openmdx.compatibility.base.application.configuration.Configuration, org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0)
+    /**
+     * A typed empty set
      */
+    private static final Set<Integer> EMPTY_SET = Collections.emptySet();
+    
     public void activate(
         short id,
         Configuration configuration,
@@ -157,58 +157,58 @@ public class DependencyAwareExplorer_1
             //
             // Get mappings
             //
-            Map mappingDependencies = new TreeMap();
-            Map mappingMembers = new HashMap();
+            Map<Integer,Set<Integer>> mappingDependencies = new TreeMap<Integer,Set<Integer>>();
+            Map<Integer,List<Integer>> mappingMembers = new HashMap<Integer,List<Integer>>();
             Integer[] mappings = new Integer[requests.length];
             for (
-                int i = 0; 
-                i < mappings.length; 
-                i++
+                    int i = 0; 
+                    i < mappings.length; 
+                    i++
             ) {
                 Integer mapping = getMapping(requests[i]);
                 mappings[i] = mapping;
-                Set mappingDependency = (Set) mappingDependencies.get(mapping);
+                Set<Integer> mappingDependency = mappingDependencies.get(mapping);
                 if (mappingDependency == null) {
                     mappingDependencies.put(
                         mapping,
-                        mappingDependency = new HashSet()
+                        mappingDependency = new HashSet<Integer>()
                     );
                 }
-                List mappingMember = (List) mappingMembers.get(mapping);
+                List<Integer> mappingMember = mappingMembers.get(mapping);
                 if (mappingMember == null) {
                     mappingMembers.put(
                         mapping,
-                        mappingMember = new ArrayList()
+                        mappingMember = new ArrayList<Integer>()
                     );
                 }
-                mappingMember.add(new Integer(i));
+                mappingMember.add(Integer.valueOf(i));
             }
             //
             // Get dependencies
             //
-            Set[] requestDependencies = new Set[mappings.length];
-            Set[] lenientDependencies = new Set[mappings.length];
+            Set<Integer>[] requestDependencies = Sets.newSetArray(mappings.length);
+            Set<Integer>[] lenientDependencies = Sets.newSetArray(mappings.length);
             for (
-                int i = 0; 
-                i < mappings.length; 
-                i++
+                    int i = 0; 
+                    i < mappings.length; 
+                    i++
             ) {
                 for (
-                    int j = 0; 
-                    j < mappings.length; 
-                    j++
+                        int j = 0; 
+                        j < mappings.length; 
+                        j++
                 ) {
                     if (i != j) {
                         if(dependsOn(requests[i], requests[j], true)) {
                             if (requestDependencies[i] == null) {
-                                requestDependencies[i] = new HashSet();
+                                requestDependencies[i] = new HashSet<Integer>();
                             }
-                            requestDependencies[i].add(new Integer(j));
-                            Set mappingDependency = (Set) mappingDependencies.get(mappings[i]);
+                            requestDependencies[i].add(Integer.valueOf(j));
+                            Set<Integer> mappingDependency = mappingDependencies.get(mappings[i]);
                             if (mappingDependency == null) {
                                 mappingDependencies.put(
                                     mappings[i],
-                                    mappingDependency = new HashSet()
+                                    mappingDependency = new HashSet<Integer>()
                                 );
                             }
                             if (!mappings[i].equals(mappings[j])) {
@@ -217,9 +217,9 @@ public class DependencyAwareExplorer_1
                         }
                         if(dependsOn(requests[i], requests[j], false)) {
                             if (lenientDependencies[i] == null) {
-                                lenientDependencies[i] = new HashSet();
+                                lenientDependencies[i] = new HashSet<Integer>();
                             }
-                            lenientDependencies[i].add(new Integer(j));
+                            lenientDependencies[i].add(Integer.valueOf(j));
                         }
                     }
                 }
@@ -227,45 +227,45 @@ public class DependencyAwareExplorer_1
             //
             // Resolve dependencies 
             //
-            List mappingOrder = resolve(mappingDependencies);
+            List<Integer> mappingOrder = resolve(mappingDependencies);
             if (mappingOrder == null) {
                 //
                 // Handle request dependencies
                 //            
-                List requestOrder = resolve(toMap(requestDependencies));
+                List<Integer> requestOrder = resolve(toMap(requestDependencies));
                 if(requestOrder == null) {
                     requestOrder = resolve(toMap(lenientDependencies));
                     if (requestOrder == null) {
                         SysLog.warning(
                             "Circular dependency detected, keeping original request order",
                             unitOfWork
-                       );
+                        );
                         //
                         // I guess there are statedObject features leading to 
                         // circular references of objects not being instances
                         // of org::openmdx::compatibility::state1::BasicState.
                         //
-                        requestOrder = new ArrayList();
+                        requestOrder = new ArrayList<Integer>();
                         for (
-                            int i = 0; 
-                            i < mappings.length; 
-                            i++
+                                int i = 0; 
+                                i < mappings.length; 
+                                i++
                         ){
-                            requestOrder.add(new Integer(i));
+                            requestOrder.add(Integer.valueOf(i));
                         }
                     } else {
                         SysLog.warning(
                             "Circular dependency detected, ordering by states and children only",
                             unitOfWork
-                       );
+                        );
                     }
                 }
                 int currentPosition = 0;
                 Integer currentMapping = mappings[currentPosition];
                 for (
-                    int nextPosition = 1; 
-                    nextPosition < requests.length; 
-                    nextPosition++
+                        int nextPosition = 1; 
+                        nextPosition < requests.length; 
+                        nextPosition++
                 ) {
                     Integer nextMapping = mappings[nextPosition];
                     if (!nextMapping.equals(currentMapping)) {
@@ -295,13 +295,9 @@ public class DependencyAwareExplorer_1
                     currentMapping
                 );
             } else {
-                for (
-                    Iterator i = mappingOrder.iterator(); 
-                    i.hasNext();
-                ) {
-                    Integer currentMapping = (Integer) i.next();
-                    List requestSequence = (List) mappingMembers.get(currentMapping);
-                    List requestOrder = resolve(
+                for (Integer currentMapping : mappingOrder) { 
+                    List<Integer> requestSequence = mappingMembers.get(currentMapping);
+                    List<Integer> requestOrder = resolve(
                         toMap(
                             requestDependencies,
                             requestSequence
@@ -366,11 +362,11 @@ public class DependencyAwareExplorer_1
     private final boolean isStateOf(
         DataproviderRequest stateCandidate,
         DataproviderRequest initialStateCandidate) {
-        SparseList statedObject = stateCandidate.object().getValues(
+        SparseList<?> statedObject = stateCandidate.object().getValues(
             State_1_Attributes.STATED_OBJECT);
         return 
-            statedObject != null && 
-            initialStateCandidate.path().equals(statedObject.get(0));
+        statedObject != null && 
+        initialStateCandidate.path().equals(statedObject.get(0));
     }
 
     private final boolean isChildOf(
@@ -396,24 +392,24 @@ public class DependencyAwareExplorer_1
         boolean referenceAware
     ) {
         return (
-            left.operation() == DataproviderOperations.OBJECT_CREATION && 
-            right.operation() == DataproviderOperations.OBJECT_CREATION && (
-                 isChildOf(left, right) || 
-                 isStateOf(left, right)
-            )
-        ) || (
-            left.operation() == DataproviderOperations.OBJECT_REMOVAL && 
-            isChildOf(right, left)
-        ) || (
-            referenceAware && (
-                (
-                    left.operation() == DataproviderOperations.OBJECT_REMOVAL && 
-                    isReferencedBy(left.path(), right)
-                ) || (
-                    right.operation() == DataproviderOperations.OBJECT_CREATION && 
-                    isReferencedBy(right.path(), left)
+                left.operation() == DataproviderOperations.OBJECT_CREATION && 
+                right.operation() == DataproviderOperations.OBJECT_CREATION && (
+                        isChildOf(left, right) || 
+                        isStateOf(left, right)
                 )
-            )
+        ) || (
+                left.operation() == DataproviderOperations.OBJECT_REMOVAL && 
+                isChildOf(right, left)
+        ) || (
+                referenceAware && (
+                        (
+                                left.operation() == DataproviderOperations.OBJECT_REMOVAL && 
+                                isReferencedBy(left.path(), right)
+                        ) || (
+                                right.operation() == DataproviderOperations.OBJECT_CREATION && 
+                                isReferencedBy(right.path(), left)
+                        )
+                )
         );
     }
 
@@ -427,10 +423,10 @@ public class DependencyAwareExplorer_1
     private boolean isReferencedBy(Path left, DataproviderRequest right) {
         short operation = right.operation();
         return (operation == DataproviderOperations.OBJECT_CREATION
-            || operation == DataproviderOperations.OBJECT_MODIFICATION
-            || operation == DataproviderOperations.OBJECT_OPERATION
-            || operation == DataproviderOperations.OBJECT_REPLACEMENT || operation == DataproviderOperations.OBJECT_SETTING)
-            && isReferencedBy(left, right.object());
+                || operation == DataproviderOperations.OBJECT_MODIFICATION
+                || operation == DataproviderOperations.OBJECT_OPERATION
+                || operation == DataproviderOperations.OBJECT_REPLACEMENT || operation == DataproviderOperations.OBJECT_SETTING)
+                && isReferencedBy(left, right.object());
     }
 
     /**
@@ -441,12 +437,9 @@ public class DependencyAwareExplorer_1
      * @return
      */
     private boolean isReferencedBy(Path left, DataproviderObject right) {
-        for (
-            Iterator a = right.attributeNames().iterator(); 
-            a.hasNext();
-        ){
+        for (String a : right.attributeNames()) {
             for (
-                Iterator v = right.getValues((String) a.next()).populationIterator(); 
+                Iterator<?> v = right.getValues(a).populationIterator(); 
                 v.hasNext();
             ){
                 if (left.equals(v.next())) {
@@ -463,10 +456,10 @@ public class DependencyAwareExplorer_1
      * @param source
      * @return
      */
-    private int[] toArray(List source) {
+    private int[] toArray(List<Integer> source) {
         int[] target = new int[source.size()];
         for (int i = 0; i < target.length; i++) {
-            target[i] = ((Integer) source.get(i)).intValue();
+            target[i] = source.get(i).intValue();
         }
         return target;
     }
@@ -477,16 +470,16 @@ public class DependencyAwareExplorer_1
      * @param source an array of sets
      * @return the map with all null entries replaced by empty sets.
      */
-    private Map toMap(Set[] source) {
-        Map target = new TreeMap();
+    private Map<Integer,Set<Integer>> toMap(Set<Integer>[] source) {
+        Map<Integer,Set<Integer>> target = new TreeMap<Integer,Set<Integer>>();
         for (
             int i = 0; 
             i < source.length; 
             i++
         ) {
             target.put(
-                new Integer(i),
-                source[i] == null ? Collections.EMPTY_SET : source[i]
+                Integer.valueOf(i),
+                source[i] == null ? EMPTY_SET : source[i]
             );
         }
         return target;
@@ -498,17 +491,13 @@ public class DependencyAwareExplorer_1
      * @param source an array of sets
      * @return the map with all null entries replaced by empty sets.
      */
-    private Map toMap(Set[] source, List selection) {
-        Map target = new TreeMap();
-        for (
-            Iterator i = selection.iterator(); 
-            i.hasNext();
-        ) {
-            Integer key = (Integer) i.next();
-            Set value = source[key.intValue()];
+    private Map<Integer,Set<Integer>> toMap(Set<Integer>[] source, List<Integer> selection) {
+        Map<Integer,Set<Integer>> target = new TreeMap<Integer,Set<Integer>>();
+        for (Integer key : selection){
+            Set<Integer> value = source[key.intValue()];
             target.put(
                 key, 
-                value == null ? Collections.EMPTY_SET : value
+                value == null ? EMPTY_SET : value
             );
         }
         return target;
@@ -522,14 +511,11 @@ public class DependencyAwareExplorer_1
      * @return the order in which the chunks should be processed;
      * or null of dependency resolution failed
      */
-    private List resolve(Map dependency) {
-        List order = new ArrayList();
-        Set pending = new HashSet();
-        for (
-            Iterator i = dependency.keySet().iterator(); 
-            i.hasNext();
-        ) {
-            if (!resolve(order, i.next(), dependency, pending)) { 
+    private List<Integer> resolve(Map<Integer,Set<Integer>> dependency) {
+        List<Integer> order = new ArrayList<Integer>();
+        Set<Integer> pending = new HashSet<Integer>();
+        for (Integer i : dependency.keySet()) {
+            if (!resolve(order, i, dependency, pending)) { 
                 return null; 
             }
         }
@@ -546,12 +532,12 @@ public class DependencyAwareExplorer_1
      * @return true if the dependencies could be resolved
      */
     private boolean resolve(
-        List order, 
-        Object key, 
-        Map dependency, 
-        Set pending
+        List<Integer> order, 
+        Integer key, 
+        Map<Integer,Set<Integer>> dependency, 
+        Set<Integer> pending
     ) {
-        Collection dependents = (Collection) dependency.get(key);
+        Collection<Integer> dependents = dependency.get(key);
         if (dependents == null || order.contains(key)) {
             return true;
         } else if (pending.contains(key)) {
@@ -559,11 +545,8 @@ public class DependencyAwareExplorer_1
         } else {
             pending.add(key);
             try {
-                for (
-                    Iterator i = dependents.iterator(); 
-                    i.hasNext();
-                ) {
-                    if (!resolve(order, i.next(), dependency, pending)) {
+                for (Integer i : dependents){
+                    if (!resolve(order, i, dependency, pending)) {
                         return false;
                     }
                 }
@@ -574,15 +557,13 @@ public class DependencyAwareExplorer_1
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ASSERTION_FAILURE,
-                        new BasicException.Parameter[] {
-                            new BasicException.Parameter("order", order),
-                            new BasicException.Parameter("key", key),
-                            new BasicException.Parameter("dependency", dependency),
-                            new BasicException.Parameter("pending", pending),
-                            new BasicException.Parameter("dependents", dependents)
-                        },
-                        "Unexpected Dependency Resolution Failure"
-                     )
+                        "Unexpected Dependency Resolution Failure",
+                        new BasicException.Parameter("order", order),
+                        new BasicException.Parameter("key", key),
+                        new BasicException.Parameter("dependency", dependency),
+                        new BasicException.Parameter("pending", pending),
+                        new BasicException.Parameter("dependents", dependents)
+                    )
                 );
                 return false;
             }

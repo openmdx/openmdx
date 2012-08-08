@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefClass_1.java,v 1.24 2008/07/06 21:01:46 wfro Exp $
+ * Name:        $Id: RefClass_1.java,v 1.32 2008/12/15 03:15:30 hburger Exp $
  * Description: RefClass_1 class
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.32 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/06 21:01:46 $
+ * Date:        $Date: 2008/12/15 03:15:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,10 +56,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -83,20 +80,17 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_4;
 import org.openmdx.base.accessor.jmi.spi.Jmi1ObjectInvocationHandler.StandardMarshaller;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.persistence.spi.AbstractManagerFactory;
 import org.openmdx.base.persistence.spi.Entity_2_0;
-import org.openmdx.compatibility.base.event.InstanceCallbackListener;
-import org.openmdx.compatibility.base.exception.StackedException;
 import org.openmdx.compatibility.base.marshalling.CachingMarshaller_1_0;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.mapping.Names;
 import org.openmdx.model1.mapping.java.Identifier;
-import org.openmdx.uses.org.apache.commons.collections.set.MapBackedSet;
 
 //---------------------------------------------------------------------------
 /**
@@ -106,8 +100,7 @@ import org.openmdx.uses.org.apache.commons.collections.set.MapBackedSet;
  * This implementation supports efficient serialization. The immediate
  * package is the only member. Other members are transient.
  */
-public abstract class RefClass_1
-  implements Jmi1Class, Serializable {
+public abstract class RefClass_1 implements Jmi1Class, Serializable {
 
     /**
      * Constructor 
@@ -119,11 +112,11 @@ public abstract class RefClass_1
     ) {
         this.immediatePackage = (RefPackage_1_4) refPackage;
     }
-    
-    
-  //-------------------------------------------------------------------------
-  // RefClass
-  //-------------------------------------------------------------------------
+
+
+    //-------------------------------------------------------------------------
+    // RefClass
+    //-------------------------------------------------------------------------
 
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
@@ -135,7 +128,7 @@ public abstract class RefClass_1
             this
         );
     }
-    
+
     //-------------------------------------------------------------------------
     /**
      * @param refClass refClass is supplied as class when constructing the object, i.e.
@@ -148,7 +141,7 @@ public abstract class RefClass_1
     ) {
         try {
             if(this.defaultImplConstructor == null) {
-        
+
                 /**
                  * extract the class name from the refMofId() which contains the
                  * fully qualified class name as ':' separated name components
@@ -160,7 +153,7 @@ public abstract class RefClass_1
                  * Check whether the instance-level implementation class must be loaded 
                  * from the standard location or from configured alternate location.
                  */
-        
+
                 // get the interface class
                 String classNameIntf =
                     packageName.replace(':', '.') + "." +
@@ -179,163 +172,46 @@ public abstract class RefClass_1
                         throw new ServiceException(e0);
                     }
                 }
-     
+
                 // get the constructor of generated instance-level implementation. This is used as default 
                 // implementation when no user-defined implementation can be found. Moreover, the default 
                 // instance-level objects are passed as parameter to the user-defined instance as delegation 
                 // object in the tie approach.
                 this.defaultImplConstructor = null;
                 if(!Names.JMI1_PACKAGE_SUFFIX.equals(bindingPackageSuffix)) {
-                    throw new JmiServiceException(
-                        new ServiceException(
-                            StackedException.DEFAULT_DOMAIN,
-                            StackedException.NOT_SUPPORTED,
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("binding.name", bindingPackageSuffix)
-                            },
-                            "Unsupported binding. Supported are " + Arrays.asList(Names.JMI1_PACKAGE_SUFFIX)
-                        )
+                    throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_SUPPORTED,
+                        "Unsupported binding",
+                        new BasicException.Parameter("supported", Names.JMI1_PACKAGE_SUFFIX),
+                        new BasicException.Parameter("actual", bindingPackageSuffix)
                     );
                 }
                 try {
                     this.defaultImplConstructor = Jmi1ObjectInvocationHandler.class.getConstructor(
-                        this.hasLegacyDelegate() ? new Class[]{
-                            Object_1_0.class,
-                            Jmi1Class.class
-                        } : new Class[]{
-                            PersistenceCapable.class,
-                            Jmi1Class.class  
-                        }
+                        this.hasLegacyDelegate() ? Object_1_0.class : PersistenceCapable.class,
+                        Jmi1Class.class
                     );
-                } 
-                catch(NoSuchMethodException e0) {
+                } catch(NoSuchMethodException e0) {
                     throw new ServiceException(e0);
                 }
-        
-                // Get the user-defined implementation class if present
-                this.userImplConstructor = null;
-                this.userImplConstructorTie = null;
-                if(this.immediatePackage.refUseOpenMdx1ImplLookup()) {
-        
-                    ModelElement_1_0 classDef = null;
-                    try {
-                        classDef = this.immediatePackage.refModel().getElement(this.refMofId());
-                        SysLog.trace("class definition found for", this.refMofId());
-                    } catch(ServiceException e) {
-                        SysLog.trace("class definition not found for", this.refMofId());
-                        throw e;
-                    }
-                    boolean enforceTie = false;
-        
-                    // test for possible alternate locations of implementation 
-                    String implPackageName = this.immediatePackage.refImplPackageName(packageName);
-                    SysLog.trace("configured implementation for package", packageName + "=" + implPackageName);
-                    while(
-                        (classDef != null) &&
-                        (implPackageName != null)
-                    ) {
-                        try {
-                            SysLog.trace("testing candidate implementation", implPackageName + "." + className + "Impl");
-                            Class userImplClass = Classes.getApplicationClass(implPackageName + "." + className + "Impl");
-                            // Try to find a constructor with signature (<Interface>). In
-                            // this case the user-defined class implements the tie approach.              
-                            try {
-                                this.userImplConstructorTie = userImplClass.getConstructor(
-                                    new Class[]{
-                                        this.intfClass
-                                    }
-                                );
-                                break;
-                            } catch(NoSuchMethodException e) {
-                                //
-                                // Try to find a constructor with signature (Object_1_0, RefClass). In this case
-                                // the user-defined class extends the generated instance-level class
-                                //
-                                if(enforceTie) {
-                                    throw new ServiceException(e);
-                                }
-                                try {
-                                    this.userImplConstructor = userImplClass.getConstructor(
-                                        new Class[]{
-                                            Object_1_0.class,
-                                            RefClass.class
-                                        }
-                                    );
-                                    break;
-                                } catch(NoSuchMethodException e1) {
-                                    throw new ServiceException(e1);
-                                }
-                            }
-                        }
-        
-                        // no user-defined implementation class found. Try to find an
-                        // implementation of a superclass of the requested class. If there
-                        // are no superclasses fall back to default implementation.
-                        catch(ClassNotFoundException e) {
-                            SysLog.trace("class not found", implPackageName + "." + className + "Impl");
-                            SysLog.trace("getting alternate candidate classes (superclasses defined in the same model package)");
-                            List candidates = new ArrayList();
-                            for(
-                                Iterator i = classDef.values("supertype").iterator();
-                                i.hasNext();
-                            ) {
-                                ModelElement_1_0 candidate = this.immediatePackage.refModel().getElement(i.next());
-                                if(((String)candidate.values("qualifiedName").get(0)).startsWith(packageName)) {
-                                    candidates.add(candidate);
-                                }
-                            }
-                            // no superclass --> no user-defined impl 
-                            if(candidates.size() == 0) {
-                                SysLog.trace("no candidates found");
-                                break;
-                            }
-                            if(candidates.size() > 1) {
-                                throw new ServiceException(
-                                    StackedException.DEFAULT_DOMAIN,
-                                    StackedException.ASSERTION_FAILURE,
-                                    new BasicException.Parameter[]{
-                                        new BasicException.Parameter("class", classDef.values("qualifiedName").get(0)),
-                                        new BasicException.Parameter("supertypes", candidates)
-                                    },
-                                    "multiple superclasses found for class within same package. multiple inheritance is not supported. To solve provide an implementation for class."
-                                );
-                            }
-                            classDef = (ModelElement_1_0)candidates.get(0);
-        
-                            // get corresponding interface class
-                            try {
-                                String qualifiedClassName = (String)classDef.values("qualifiedName").get(0);
-                                packageName = qualifiedClassName.substring(0, qualifiedClassName.lastIndexOf(':'));
-                                className = (String)classDef.values("name").get(0);
-                                this.intfClass = Classes.getApplicationClass(
-                                    packageName.replace(':', '.') + ".cci." + className
-                                );
-                                implPackageName = this.immediatePackage.refImplPackageName(packageName);
-                            }
-                            catch(ClassNotFoundException e1) {
-                                throw new ServiceException(e1);
-                            }
-                            enforceTie = true;
-                        }
-                    }
-                }
             }
-        
+
             // Prepare argument as Object_1_0
             Object delegateInstance = null;
             boolean legacyDelegate = hasLegacyDelegate();
             if(args == null) {
                 delegateInstance = legacyDelegate ?
                     this.immediatePackage.refObjectFactory().createObject(this.refMofId()) :
-                    this.immediatePackage.getDelegate().newInstance(getDelegateClass());
+                        this.immediatePackage.getDelegate().newInstance(getDelegateClass());
             } else if(args.size() != 1){
                 throw new ServiceException(
-                    StackedException.DEFAULT_DOMAIN,
-                    StackedException.ASSERTION_FAILURE,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "args must either be null or have exactly one element",
                     new BasicException.Parameter [] {
                         new BasicException.Parameter("args", args)
-                    },
-                    "args must either be null or have exactly one element"
+                    }
                 );
             } else {
                 Object argument = args.get(0);
@@ -351,12 +227,10 @@ public abstract class RefClass_1
                     } else if(argument instanceof RefObject_1_0) {
                         delegateInstance = ((RefObject_1_0)argument).refDelegate();
                     } else throw new ServiceException(
-                        StackedException.DEFAULT_DOMAIN,
-                        StackedException.ASSERTION_FAILURE,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("args", args)
-                        },
-                        "argument must be null or instanceof [Path|Object_1_0|RefObject_1_0]"
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "argument must be null or instanceof [Path|Object_1_0|RefObject_1_0]",
+                        new BasicException.Parameter("args", args)
                     );
                 } else {
                     if(argument instanceof Path) {
@@ -368,16 +242,14 @@ public abstract class RefClass_1
                     } else if (argument instanceof PersistenceCapable) {
                         delegateInstance = argument;
                     } else throw new ServiceException(
-                        StackedException.DEFAULT_DOMAIN,
-                        StackedException.ASSERTION_FAILURE,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("args", args)
-                        },
-                        "argument must be null or instanceof [Path|PersistenceCapable]"
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.ASSERTION_FAILURE,
+                        "argument must be null or instanceof [Path|PersistenceCapable]",
+                        new BasicException.Parameter("args", args)
                     );
                 }
             }
-        
+
             /**
              * Create an instance with the help of the constructors in the following order:
              * <ul>
@@ -387,74 +259,48 @@ public abstract class RefClass_1
              * </ul>
              */
             try {
-                RefObject_1_0 instance = null;
-                if(this.userImplConstructor != null) {
-                    instance = (RefObject_1_0)this.userImplConstructor.newInstance(
-                        new Object[]{
-                            delegateInstance,
-                            refClass
-                        }
+                Object defaultInstance = this.defaultImplConstructor.newInstance(
+                    delegateInstance,
+                    refClass
+                );
+                RefObject_1_0 instance;
+                if(defaultInstance instanceof InvocationHandler) {
+                    Set<Class<?>> mixedIn = refOutermostPackage().getMixedInInterfaces(
+                        refMofId()
                     );
-                } 
-                else {
-                    Object defaultInstance = this.defaultImplConstructor.newInstance(
-                        new Object[]{
-                            delegateInstance,
-                            refClass
-                        }
+                    instance = (RefObject_1_0) Proxy.newProxyInstance(
+                        this.getClass().getClassLoader(),
+                        legacyDelegate ? Classes.combineInterfaces(
+                            mixedIn, // append
+                            this.intfClass, PersistenceCapable.class // prepend
+                        ) :  Classes.combineInterfaces(
+                            mixedIn, // append
+                            this.intfClass, PersistenceCapable.class, Entity_2_0.class // prepend
+                        ),
+                        (InvocationHandler)defaultInstance
                     );
-                    if(defaultInstance instanceof InvocationHandler) {
-                        defaultInstance = Proxy.newProxyInstance(
-                            this.getClass().getClassLoader(),
-                            legacyDelegate ? 
-                                new Class[]{this.intfClass, PersistenceCapable.class} :
-                                new Class[]{this.intfClass, PersistenceCapable.class, Entity_2_0.class},
-                            (InvocationHandler)defaultInstance
-                        );
-                    }
-                    instance = (RefObject_1_0)defaultInstance;
-                    if(this.userImplConstructorTie != null) {
-                        RefObject_1_0 tieInstance = instance = (RefObject_1_0)this.userImplConstructorTie.newInstance(
-                            new Object[]{
-                                instance
-                            }
-                        );
-                        if(!this.intfClass.isInstance(instance)) {
-                            instance = (RefObject_1_0)this.immediatePackage.refObject(
-                                tieInstance,
-                                (RefObject_1_0)defaultInstance
-                            );
-                        }
-                    }
-                }
-                //
-                // Instance Lifecycle Listener's openMDX 1 API
-                // 
-                if(instance instanceof InstanceCallbackListener) {
-                    instance.refDelegate().objAddEventListener(
-                        null,
-                        (InstanceCallbackListener)instance
-                    );
-                }
-                //
-                // Instance Lifecycle Listener's openMDX 2 API
-                // 
-                if(
-                    instance instanceof ClearCallback ||
-                    instance instanceof StoreCallback ||
-                    instance instanceof DeleteCallback ||
-                    instance instanceof LoadCallback
-                ) {
-                    instance.refDelegate().objAddEventListener(
-                        null,
-                        InstanceCallbackAdapter_1.newInstance(instance)
-                    );
+                } else {
+                    instance = (RefObject_1_0) defaultInstance;
                 }
                 //
                 // Keep a reference to the newly created instance
                 //
                 if(args == null){
                     ((CachingMarshaller_1_0)refOutermostPackage()).cache(delegateInstance, instance);
+                    // TODO ensure instance callback registration
+                }
+                if(
+                  refOutermostPackage().isAccessor() && (
+                      instance instanceof ClearCallback ||
+                      instance instanceof DeleteCallback ||
+                      instance instanceof LoadCallback ||
+                      instance instanceof StoreCallback
+                  )
+                ){
+                  instance.refAddEventListener(
+                      null, 
+                      InstanceCallbackAdapter_1.newInstance(instance)
+                  );  
                 }
                 return instance;
             } catch(InvocationTargetException e) {
@@ -467,262 +313,262 @@ public abstract class RefClass_1
             } catch(InstantiationException e) {
                 throw new ServiceException(e);
             }
-            
+
         } catch (ServiceException exception) {
             throw new JmiServiceException(exception);
         }
     }
 
-  //-------------------------------------------------------------------------
-  /**
-   * RefClass_1 does not remember all created instances. Therefore this
-   * operation is not supported.
-   */
-  @SuppressWarnings("unchecked")
-  public Collection refAllOfType() {
-    throw new UnsupportedOperationException();
-  }
-
-  //-------------------------------------------------------------------------  
-  /**
-   * RefClass_1 does not remember all created instances. Therefore this 
-   * operation is not supported.
-   */
-  @SuppressWarnings("unchecked")
-  public Collection refAllOfClass() {
-    throw new UnsupportedOperationException();
-  }
-
-  //-------------------------------------------------------------------------  
-  /**
-   * The call is delegated to the refImmediatePackage().
-   */
-  @SuppressWarnings("unchecked")
-  public final RefStruct refCreateStruct(
-    RefObject structType,
-    List args
-  ) {
-    return this.immediatePackage.refCreateStruct(
-      structType,
-      args
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * The call is delegated to the refImmediatePackage().
-   */
-  @SuppressWarnings("unchecked")
-  public final RefStruct refCreateStruct(
-    String structName,
-    List args
-  ) {
-    return this.immediatePackage.refCreateStruct(
-      structName,
-      args
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * The call is delegated to the refImmediatePackage().
-   */
-  public final RefEnum refGetEnum(
-    RefObject enumType,
-    String literalName
-  ) {
-    return this.immediatePackage.refGetEnum(
-      enumType,
-      literalName
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * The call is delegated to the refImmediatePackage().
-   */
-  public final RefEnum refGetEnum(
-    String enumName,
-    String literalName
-  ) {
-    return this.immediatePackage.refGetEnum(
-      enumName,
-      literalName
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  // RefFeatured interface
-  //-------------------------------------------------------------------------
-
-  //-------------------------------------------------------------------------
-  /**
-   * RefClass_1 does not support class-level features. This operation
-   * is not supported.
-   */
-  public void refSetValue(
-    RefObject feature,
-    Object value
-  ) throws JmiException {
-    throw new UnsupportedOperationException();
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * RefClass_1 does not support class-level features. This operation
-   * is not supported.
-   */
-  public void refSetValue(
-    String featureName,
-    Object value
-  ) throws JmiException {
-    throw new UnsupportedOperationException();
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * RefClass_1 does not support class-level features. This operation
-   * is not supported.
-   */
-  public void refSetValue(
-    String featureName,
-    int index,
-    Object value
-  ) throws JmiException {
-    throw new UnsupportedOperationException();
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * RefClass_1 does not support class-level features. This operation
-   * is not supported.
-   */
-  public Object refGetValue(
-    RefObject feature
-  ) throws JmiException {
-    throw new UnsupportedOperationException();
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * RefClass_1 does not support class-level features. This operation
-   * is not supported.
-   */
-  public Object refGetValue(
-    RefObject feature,
-    int index
-  ) throws JmiException {
-    throw new UnsupportedOperationException();
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * RefClass_1 does not support class-level features. This operation
-   * is not supported.
-   */
-  public Object refGetValue(
-    String featureName
-  ) throws JmiException {
-    throw new UnsupportedOperationException();
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * RefClass_1 does not support class-level features. This operation
-   * is not supported.
-   */
-  public Object refGetValue(
-    String featureName,
-    int index
-  ) throws JmiException {
-    throw new UnsupportedOperationException();
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * RefClass_1 does not support class-level features. This operation
-   * is not supported.
-   */
-  @SuppressWarnings("unchecked")
-public Object refInvokeOperation(
-    RefObject requestedOperation,
-    List args
-  ) throws JmiException {
-    throw new UnsupportedOperationException();
-  }
-
-  //-------------------------------------------------------------------------
-  /**
-   * RefClass_1 does not support class-level features. This operation
-   * is not supported.
-   */
-  @SuppressWarnings("unchecked")
-public Object refInvokeOperation(
-    String operationName,
-    List args
-  ) throws JmiException {
-    throw new UnsupportedOperationException();
-  }
-
-  //-------------------------------------------------------------------------
-  // RefBaseObject
-  //-------------------------------------------------------------------------
-
-  //-------------------------------------------------------------------------
-  /**
-   * Returns the ModelElement_1_0 of this class.
-   */
-  public RefObject refMetaObject(
-  ) {
-    try {
-      return new RefMetaObject_1(
-          this.immediatePackage.refModel().getElement(
-          "org:omg:model1:Class"
-        )
-      );
+    //-------------------------------------------------------------------------
+    /**
+     * RefClass_1 does not remember all created instances. Therefore this
+     * operation is not supported.
+     */
+    @SuppressWarnings("unchecked")
+    public Collection refAllOfType() {
+        throw new UnsupportedOperationException();
     }
-    catch(ServiceException e) {
-      throw new JmiServiceException(e);
+
+    //-------------------------------------------------------------------------  
+    /**
+     * RefClass_1 does not remember all created instances. Therefore this 
+     * operation is not supported.
+     */
+    @SuppressWarnings("unchecked")
+    public Collection refAllOfClass() {
+        throw new UnsupportedOperationException();
     }
-  }
 
-  //-------------------------------------------------------------------------
-  public final RefPackage refImmediatePackage(
-  ) {
-    return this.immediatePackage;
-  }
+    //-------------------------------------------------------------------------  
+    /**
+     * The call is delegated to the refImmediatePackage().
+     */
+    @SuppressWarnings("unchecked")
+    public final RefStruct refCreateStruct(
+        RefObject structType,
+        List args
+    ) {
+        return this.immediatePackage.refCreateStruct(
+            structType,
+            args
+        );
+    }
 
-  //-------------------------------------------------------------------------
-  public final RefPackage refOutermostPackage(
-  ) {
-    return this.immediatePackage.refOutermostPackage();
-  }
+    //-------------------------------------------------------------------------
+    /**
+     * The call is delegated to the refImmediatePackage().
+     */
+    @SuppressWarnings("unchecked")
+    public final RefStruct refCreateStruct(
+        String structName,
+        List args
+    ) {
+        return this.immediatePackage.refCreateStruct(
+            structName,
+            args
+        );
+    }
 
-  //-------------------------------------------------------------------------  
-  /**
-   * Must be implemented by the concrete subclass.
-   */
-  public String refMofId(
-  ) throws JmiException {
-    throw new UnsupportedOperationException();
-  }
+    //-------------------------------------------------------------------------
+    /**
+     * The call is delegated to the refImmediatePackage().
+     */
+    public final RefEnum refGetEnum(
+        RefObject enumType,
+        String literalName
+    ) {
+        return this.immediatePackage.refGetEnum(
+            enumType,
+            literalName
+        );
+    }
 
-  //-------------------------------------------------------------------------
-  /**
-   * RefClass_1 does not supporte class-level features. Therefore verification
-   * is always successful.
-   */
-  @SuppressWarnings("unchecked")
-  public Collection refVerifyConstraints(
-    boolean deepVerify
-  ) {
-    return new ArrayList();
-  }
+    //-------------------------------------------------------------------------
+    /**
+     * The call is delegated to the refImmediatePackage().
+     */
+    public final RefEnum refGetEnum(
+        String enumName,
+        String literalName
+    ) {
+        return this.immediatePackage.refGetEnum(
+            enumName,
+            literalName
+        );
+    }
+
+    //-------------------------------------------------------------------------
+    // RefFeatured interface
+    //-------------------------------------------------------------------------
+
+    //-------------------------------------------------------------------------
+    /**
+     * RefClass_1 does not support class-level features. This operation
+     * is not supported.
+     */
+    public void refSetValue(
+        RefObject feature,
+        Object value
+    ) throws JmiException {
+        throw new UnsupportedOperationException();
+    }
+
+    //-------------------------------------------------------------------------
+    /**
+     * RefClass_1 does not support class-level features. This operation
+     * is not supported.
+     */
+    public void refSetValue(
+        String featureName,
+        Object value
+    ) throws JmiException {
+        throw new UnsupportedOperationException();
+    }
+
+    //-------------------------------------------------------------------------
+    /**
+     * RefClass_1 does not support class-level features. This operation
+     * is not supported.
+     */
+    public void refSetValue(
+        String featureName,
+        int index,
+        Object value
+    ) throws JmiException {
+        throw new UnsupportedOperationException();
+    }
+
+    //-------------------------------------------------------------------------
+    /**
+     * RefClass_1 does not support class-level features. This operation
+     * is not supported.
+     */
+    public Object refGetValue(
+        RefObject feature
+    ) throws JmiException {
+        throw new UnsupportedOperationException();
+    }
+
+    //-------------------------------------------------------------------------
+    /**
+     * RefClass_1 does not support class-level features. This operation
+     * is not supported.
+     */
+    public Object refGetValue(
+        RefObject feature,
+        int index
+    ) throws JmiException {
+        throw new UnsupportedOperationException();
+    }
+
+    //-------------------------------------------------------------------------
+    /**
+     * RefClass_1 does not support class-level features. This operation
+     * is not supported.
+     */
+    public Object refGetValue(
+        String featureName
+    ) throws JmiException {
+        throw new UnsupportedOperationException();
+    }
+
+    //-------------------------------------------------------------------------
+    /**
+     * RefClass_1 does not support class-level features. This operation
+     * is not supported.
+     */
+    public Object refGetValue(
+        String featureName,
+        int index
+    ) throws JmiException {
+        throw new UnsupportedOperationException();
+    }
+
+    //-------------------------------------------------------------------------
+    /**
+     * RefClass_1 does not support class-level features. This operation
+     * is not supported.
+     */
+    @SuppressWarnings("unchecked")
+    public Object refInvokeOperation(
+        RefObject requestedOperation,
+        List args
+    ) throws JmiException {
+        throw new UnsupportedOperationException();
+    }
+
+    //-------------------------------------------------------------------------
+    /**
+     * RefClass_1 does not support class-level features. This operation
+     * is not supported.
+     */
+    @SuppressWarnings("unchecked")
+    public Object refInvokeOperation(
+        String operationName,
+        List args
+    ) throws JmiException {
+        throw new UnsupportedOperationException();
+    }
+
+    //-------------------------------------------------------------------------
+    // RefBaseObject
+    //-------------------------------------------------------------------------
+
+    //-------------------------------------------------------------------------
+    /**
+     * Returns the ModelElement_1_0 of this class.
+     */
+    public RefObject refMetaObject(
+    ) {
+        try {
+            return new RefMetaObject_1(
+                this.immediatePackage.refModel().getElement(
+                    "org:omg:model1:Class"
+                )
+            );
+        }
+        catch(ServiceException e) {
+            throw new JmiServiceException(e);
+        }
+    }
+
+    //-------------------------------------------------------------------------
+    public final RefPackage refImmediatePackage(
+    ) {
+        return this.immediatePackage;
+    }
+
+    //-------------------------------------------------------------------------
+    public final RefPackage_1_6 refOutermostPackage(
+    ) {
+        return (RefPackage_1_6) this.immediatePackage.refOutermostPackage();
+    }
+
+    //-------------------------------------------------------------------------  
+    /**
+     * Must be implemented by the concrete subclass.
+     */
+    public String refMofId(
+    ) throws JmiException {
+        throw new UnsupportedOperationException();
+    }
+
+    //-------------------------------------------------------------------------
+    /**
+     * RefClass_1 does not support class-level features. Therefore verification
+     * is always successful.
+     */
+    @SuppressWarnings("unchecked")
+    public Collection refVerifyConstraints(
+        boolean deepVerify
+    ) {
+        return new ArrayList();
+    }
 
     //-------------------------------------------------------------------------
     // Implements Jmi1Class
     //-------------------------------------------------------------------------
-  
+
     /**
      * Convert a model class name to the corresponding delegate class
      * 
@@ -735,15 +581,15 @@ public Object refInvokeOperation(
         if(this.delegateClass == null) {
             PersistenceManagerFactory delegateManagerFactory = this.immediatePackage.getDelegate().getPersistenceManagerFactory();
             String bindingPackageSuffix = delegateManagerFactory instanceof AbstractManagerFactory 
-                ? ((AbstractManagerFactory)delegateManagerFactory).getBindingPackageSuffix() 
+            ? ((AbstractManagerFactory)delegateManagerFactory).getBindingPackageSuffix() 
                 : null;
             String[] modelClass = refMofId().split(":");
             StringBuilder javaClass = new StringBuilder();
             int iLimit = modelClass.length - 1;
             for(
-                int i = 0;
-                i < iLimit;
-                i++
+                    int i = 0;
+                    i < iLimit;
+                    i++
             ) {
                 javaClass.append(
                     Identifier.PACKAGE_NAME.toIdentifier(modelClass[i])
@@ -768,18 +614,16 @@ public Object refInvokeOperation(
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("mofId", this.refMofId()),
-                            new BasicException.Parameter("className", className)
-                        },
-                        "Class not found"
+                        "Class not found",
+                        new BasicException.Parameter("mofId", this.refMofId()),
+                        new BasicException.Parameter("className", className)
                     )
                 );
             }
         }
         return this.delegateClass;
     }
-  
+
     //------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.jmi.cci.Jmi1Class#hasLegacyDelegate()
@@ -802,7 +646,7 @@ public Object refInvokeOperation(
                     classDef,
                     this.hasLegacyDelegate() ?
                         this.getClass() :
-                        this.getDelegateClass()
+                            this.getDelegateClass()
                 );
             }
             return this.featureMapper;
@@ -811,14 +655,12 @@ public Object refInvokeOperation(
             throw new JmiServiceException(e);
         }
     }
-  
+
     //------------------------------------------------------------------------
     public StandardMarshaller getMarshaller(
     ) {
         if(this.marshaller == null) {
-            this.marshaller = new StandardMarshaller(
-                (org.openmdx.compatibility.base.marshalling.Marshaller) this.refOutermostPackage()
-            );
+            this.marshaller = new StandardMarshaller(this.refOutermostPackage());
         }
         return this.marshaller;
     }
@@ -831,11 +673,12 @@ public Object refInvokeOperation(
     @SuppressWarnings("unchecked")
     public Set<ModelElement_1_0> refFeaturesHavingNoImpl(
     ) {
-        return this.featuresHavingNoImpl == null ? 
-            this.featuresHavingNoImpl = MapBackedSet.decorate(new IdentityHashMap<ModelElement_1_0,Void>()):
-                this.featuresHavingNoImpl;
+        if(this.featuresHavingNoImpl == null) {
+            this.featuresHavingNoImpl = Maps.newConcurrentHashSet();
+        }
+        return this.featuresHavingNoImpl;
     }
-  
+
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
@@ -846,14 +689,12 @@ public Object refInvokeOperation(
     private RefPackage_1_4 immediatePackage = null;
 
     private transient Constructor<?> defaultImplConstructor = null;
-    private transient Constructor<?> userImplConstructor = null;
-    private transient Constructor<?> userImplConstructorTie = null;
     private transient Class<?> intfClass = null;
     private transient Class<?> delegateClass = null;
     private transient Set<ModelElement_1_0> featuresHavingNoImpl = null;
     private transient FeatureMapper featureMapper = null;
     private transient StandardMarshaller marshaller = null;
-  
+
 }
 
 //--- End of File -----------------------------------------------------------

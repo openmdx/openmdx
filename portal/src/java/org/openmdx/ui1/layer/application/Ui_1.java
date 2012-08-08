@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Ui_1.java,v 1.27 2008/04/04 11:47:15 hburger Exp $
+ * Name:        $Id: Ui_1.java,v 1.48 2008/12/09 13:45:36 wfro Exp $
  * Description: Ui_1 plugin
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.48 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:47:15 $
+ * Date:        $Date: 2008/12/09 13:45:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,15 +52,9 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.ui1.layer.application;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -89,7 +83,6 @@ import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
 import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
-import org.openmdx.compatibility.base.dataprovider.exporter.XmlExporter;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1;
 import org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0;
 import org.openmdx.compatibility.base.naming.Path;
@@ -104,15 +97,13 @@ import org.openmdx.model1.code.Multiplicities;
 import org.openmdx.model1.code.PrimitiveTypes;
 
 /**
- * Plugin implementation of the model org:openmdx:ui1. The plugin maps
- * ElementDefinitions to Elements.
+ * Implementation of the model org:openmdx:ui1.
  */
-@SuppressWarnings("unchecked")
-public class Ui_1
-extends Layer_1 {
+public class Ui_1 extends Layer_1 {
 
+    //------------------------------------------------------------------------
     private abstract class FeatureDefinition {
-        
+
         public FeatureDefinition(
             String name,
             String qualifiedName,
@@ -123,7 +114,7 @@ extends Layer_1 {
             this.container = container;
             this.modelElement = null;
         }
-        
+
         public FeatureDefinition(
             ModelElement_1_0 element
         ) {
@@ -157,9 +148,10 @@ extends Layer_1 {
         protected final String qualifiedName;
         protected final Object container;
         protected final ModelElement_1_0 modelElement;
-        
+
     }
-    
+
+    //------------------------------------------------------------------------
     private class StructuralFeatureDefinition extends FeatureDefinition {
 
         public StructuralFeatureDefinition(
@@ -179,9 +171,9 @@ extends Layer_1 {
             this.type = type;
             this.multiplicity = multiplicity;
             this.isChangeable = isChangeable;
-            this.isReference = isReference == null
-                ? false
-                : isReference.booleanValue();
+            this.isReference = isReference == null ? 
+                false : 
+                isReference.booleanValue();
             this.isReferenceStoredAsAttribute = false;
         }
 
@@ -191,9 +183,9 @@ extends Layer_1 {
             super(element);
             this.type = element.values("type").get(0);
             this.multiplicity = (String)element.values("multiplicity").get(0);
-            this.isChangeable = (element.getValues("isChangeable") == null) || (element.values("isChangeable").isEmpty()) 
-                ? new Boolean(Ui_1.this.changableDefaultValue)
-                : (Boolean)element.values("isChangeable").get(0);
+            this.isChangeable = (element.getValues("isChangeable") == null) || (element.values("isChangeable").isEmpty()) ? 
+                new Boolean(Ui_1.this.changableDefaultValue) : 
+                (Boolean)element.values("isChangeable").get(0);
             if(Ui_1.this.model.isAttributeType(element) || Ui_1.this.model.isStructureFieldType(element)) {
                 this.isReference = false;
                 this.isReferenceStoredAsAttribute = false;
@@ -232,12 +224,12 @@ extends Layer_1 {
         ) {
             return this.isReference;
         }
-        
+
         public boolean isReferenceStoredAsAttribute(
         ) {
             return this.isReferenceStoredAsAttribute;
         }
-        
+
         private final Object type;
         private final String multiplicity;
         private final Boolean isChangeable;
@@ -246,6 +238,7 @@ extends Layer_1 {
 
     }
 
+    //------------------------------------------------------------------------
     private class OperationDefinition extends FeatureDefinition {
 
         public OperationDefinition(
@@ -261,16 +254,16 @@ extends Layer_1 {
             );
             this.isQuery = isQuery;
         }
-        
+
         public OperationDefinition(
             ModelElement_1_0 element
         ) {
             super(element);
             this.isQuery = element.values("isQuery").isEmpty()
-                ? true
+            ? true
                 : ((Boolean)element.values("isQuery").get(0)).booleanValue();
         }
-        
+
         public boolean isQuery(
         ) {
             return this.isQuery;
@@ -279,21 +272,19 @@ extends Layer_1 {
         private final boolean isQuery;
 
     }
-    
+
     //------------------------------------------------------------------------
     public void activate(
         short id,
         Configuration configuration,
         Layer_1_0 delegation
     ) throws Exception, ServiceException {
-
         super.activate(
             id, 
             configuration, 
             delegation
         );
-
-        // get model
+        // Get model
         List models = configuration.values(SharedConfigurationEntries.MODEL);
         if (models.size() > 0) {
             this.model = (Model_1_3) models.get(0);
@@ -306,12 +297,10 @@ extends Layer_1 {
                 "A model must be configured with options 'modelPackage' and 'packageImpl'"
             );
         }
-
-        // get changableDefaultValue
+        // Get changableDefaultValue
         if (configuration.containsEntry("changableDefaultValue")) {
             this.changableDefaultValue = configuration.isOn("changableDefaultValue");
         }
-
         this.editObjectOperationDef = this.createBasicObjectOperationDef(EDIT_OBJECT_OPERATION_NAME, false);
         this.deleteObjectOperationDef = this.createBasicObjectOperationDef(DELETE_OBJECT_OPERATION_NAME, false);
         this.reloadObjectOperationDef = this.createBasicObjectOperationDef(RELOAD_OBJECT_OPERATION_NAME, true);
@@ -341,12 +330,13 @@ extends Layer_1 {
 
     //------------------------------------------------------------------------
     private void storeElement(
+        Path segmentIdentity,
         DataproviderObject element
     ) throws ServiceException {
         this.delegation.addSetRequest(
             element
         );
-        this.existingElements.put(
+        this.existingElements.get(segmentIdentity).put(
             element.path().getBase(),
             element
         );
@@ -354,12 +344,13 @@ extends Layer_1 {
 
     //------------------------------------------------------------------------
     private void storeElementDefinition(
+        Path segmentIdentity,
         DataproviderObject elementDefinition
     ) throws ServiceException {
         this.delegation.addSetRequest(
             elementDefinition
         );
-        this.existingElementDefinitions.put(
+        this.existingElementDefinitions.get(segmentIdentity).put(
             elementDefinition.path().getBase(),
             elementDefinition
         );
@@ -368,7 +359,7 @@ extends Layer_1 {
     //-------------------------------------------------------------------------
     private void setElementDefault(
         DataproviderObject_1_0 f,
-        List toolTip,
+        List<Object> toolTip,
         boolean isChangeable,
         String iconKey 
     ) throws ServiceException {
@@ -383,7 +374,7 @@ extends Layer_1 {
     //-------------------------------------------------------------------------
     private void setAbstractFieldDefault(
         DataproviderObject_1_0 f,
-        List toolTip,
+        List<Object> toolTip,
         boolean isChangeable,
         String iconKey,
         String color,
@@ -412,37 +403,37 @@ extends Layer_1 {
     //-------------------------------------------------------------------------
     private void setLabelledFieldDefault(
         DataproviderObject_1_0 f,
-        List label,
-        List shortLabel,
-        List toolTip,
+        List<Object> labels,
+        List<Object> shortLabels,
+        List<Object> toolTips,
         boolean isChangeable,
         String iconKey,
         String color,
         String backColor
     ) throws ServiceException {
-        List toolTipDefault = new ArrayList(toolTip);
+        List<Object> toolTipDefault = new ArrayList<Object>(toolTips);
         for(int i = 0; i < toolTipDefault.size(); i++) {
             // Set label as default toolTip
             if(
-                    ((toolTipDefault.get(i) == null) || ((String)toolTipDefault.get(i)).length() == 0) &&
-                    (i < label.size())
+                ((toolTipDefault.get(i) == null) || ((String)toolTipDefault.get(i)).length() == 0) &&
+                (i < labels.size())
             ) {
                 toolTipDefault.set(
                     i,
-                    label.get(i)
+                    labels.get(i)
                 );
             }
         }
-        List shortLabelDefault = new ArrayList(shortLabel);
+        List<Object> shortLabelDefault = new ArrayList<Object>(shortLabels);
         for(int i = 0; i < shortLabelDefault.size(); i++) {
             // Set label as default shortLabel
             if(
-                    ((shortLabelDefault.get(i) == null) || ((String)shortLabelDefault.get(i)).length() == 0) &&
-                    (i < label.size())
+                ((shortLabelDefault.get(i) == null) || ((String)shortLabelDefault.get(i)).length() == 0) &&
+                (i < labels.size())
             ) {
                 shortLabelDefault.set(
                     i,
-                    label.get(i)
+                    labels.get(i)
                 );
             }
         }
@@ -454,17 +445,17 @@ extends Layer_1 {
             color,
             backColor
         );
-        f.values("label").addAll(label);
+        f.values("label").addAll(labels);
         f.values("shortLabel").addAll(shortLabelDefault);
     }
 
     //-------------------------------------------------------------------------
     private void setValuedFieldDefault(
         DataproviderObject_1_0 f,
-        List label,
-        List shortLabel,
-        List displayValueExpr,
-        List toolTip,
+        List<Object> labels,
+        List<Object> shortLabels,
+        List<Object> displayValueExprs,
+        List<Object> toolTips,
         boolean isChangeable,
         String iconKey,
         String color,
@@ -480,9 +471,9 @@ extends Layer_1 {
     ) throws ServiceException {
         this.setLabelledFieldDefault(
             f,
-            label,
-            shortLabel,
-            toolTip,
+            labels,
+            shortLabels,
+            toolTips,
             isChangeable,
             iconKey,
             color,
@@ -491,7 +482,7 @@ extends Layer_1 {
         f.values("multiplicity").add(multiplicity);
         f.values("spanRow").add(spanRow);
         f.values("skipRow").add(skipRow);
-        f.values("displayValueExpr").addAll(displayValueExpr);
+        f.values("displayValueExpr").addAll(displayValueExprs);
         f.values("filterable").add(new Boolean(filterable));
         f.values("sortable").add(new Boolean(sortable));
         f.values("featureName").add(featureName);
@@ -511,8 +502,7 @@ extends Layer_1 {
         );
         objectReference.values("referenceName").add(feature.getName());
         objectReference.values("referencedTypeName").add(featureType.values("qualifiedName").get(0));
-
-        // reference
+        // Reference
         if(feature.isReference()) {
             objectReference.values("referenceIsStoredAsAttribute").add(
                 Boolean.valueOf(feature.isReferenceStoredAsAttribute)
@@ -541,7 +531,7 @@ extends Layer_1 {
                 );                
             }
         }
-        // attribute of type class
+        // Attribute of type class
         else {
             objectReference.values("referenceIsStoredAsAttribute").add(
                 Boolean.TRUE
@@ -558,9 +548,9 @@ extends Layer_1 {
         List o2
     ) throws ServiceException {
         for(
-                int i = 0;
-                i < java.lang.Math.min(o1.size(), o2.size());
-                i++
+            int i = 0;
+            i < java.lang.Math.min(o1.size(), o2.size());
+            i++
         ) {
             int res = ((Integer)o1.get(i)).compareTo((Integer)o2.get(i));
             if(res != 0) {
@@ -582,10 +572,10 @@ extends Layer_1 {
     }
 
     //-------------------------------------------------------------------------
-    private List getOrderObjectContainer(
+    private List<Object> getOrderObjectContainer(
         DataproviderObject_1_0 elementDefinition
     )  {
-        List order = elementDefinition.values("orderObjectContainer");
+        List<Object> order = elementDefinition.values("orderObjectContainer");
         if((order == null) || order.isEmpty()) {
             order = elementDefinition.values("order");
         }
@@ -612,9 +602,9 @@ extends Layer_1 {
         else {
             ModelElement_1_0 element = feature.getModelElement();
             return 
-            this.model.isAttributeType(element) 
-            || this.model.isStructureFieldType(element) 
-            || this.model.isReferenceType(element);
+                this.model.isAttributeType(element) 
+                || this.model.isStructureFieldType(element) 
+                || this.model.isReferenceType(element);
         }
     }
 
@@ -635,90 +625,108 @@ extends Layer_1 {
     //-------------------------------------------------------------------------
     /**
      * return element definition of container of containedFeature. level==0 -->
-     * return tab definition, level==1 returns field group definition. baseClass
+     * return tab definition, level==1 returns field group definition. inspectorClass
      * is the class which either defines or inherits containedFeature. Definition
-     * is first looked up for baseClass and if not found for defining class of
+     * is first looked up for inspectorClass and if not found for defining class of
      * containedFeature.
      */
     private DataproviderObject_1_0 getFeatureContainerDefinition(
+        Path segmentIdentity,
         String paneName,
         String tabName,
         String groupName,
         FeatureDefinition containedFeature,
         int level,
-        ModelElement_1_0 baseClass,
+        ModelElement_1_0 inspectorClass,
         boolean useDefaultIconKey
     ) throws ServiceException {
-
-        // try to find element with baseClass
+        // Try to find element with inspectorClass
         String containerName = 
-            "" + baseClass.values("qualifiedName").get(0) + ":Pane:" + paneName +
+            "" + inspectorClass.values("qualifiedName").get(0) + ":Pane:" + paneName +
             ":Tab:" + tabName +
             (level > 0 ? ":Group:" + groupName : "");
-        DataproviderObject elementDefinition = (DataproviderObject)this.existingElementDefinitions.get(containerName);
+        DataproviderObject elementDefinition = this.existingElementDefinitions.get(segmentIdentity).get(containerName);
         if(elementDefinition != null) {
             return elementDefinition;
         }
-
-        // fall back to defining class of feature
-        ModelElement_1_0 definingClass = this.model.getElement(
-            containedFeature.getContainer()
-        );
-        containerName = 
-            "" + definingClass.values("qualifiedName").get(0) + ":Pane:" + paneName +
-            ":Tab:" + tabName +
-            (level > 0 ? ":Group:" + groupName : "");
-        return this.getElementDefinition(
-            containerName,
-            "\"" + containerName + "\"",
-            useDefaultIconKey
-        );
+        if(!"Root".equals(segmentIdentity.getBase())) {
+            return this.getFeatureContainerDefinition(
+                segmentIdentity.getParent().getChild("Root"),
+                paneName, 
+                tabName, 
+                groupName, 
+                containedFeature, 
+                level, 
+                inspectorClass, 
+                useDefaultIconKey
+            );
+        }
+        else {
+            // Fall back to defining class of feature
+            ModelElement_1_0 definingClass = this.model.getElement(
+                containedFeature.getContainer()
+            );
+            containerName = 
+                "" + definingClass.values("qualifiedName").get(0) + ":Pane:" + paneName +
+                ":Tab:" + tabName +
+                (level > 0 ? ":Group:" + groupName : "");
+            return this.getElementDefinition(
+                segmentIdentity,
+                containerName,
+                "\"" + containerName + "\"",
+                useDefaultIconKey
+            );
+        }
     }
 
     //-------------------------------------------------------------------------
     private DataproviderObject_1_0 getAttributeContainerDefinition(
+        Path segmentIdentity,
         StructuralFeatureDefinition featureDef,
         List featureOrder,
         int level,
-        ModelElement_1_0 baseClass
+        ModelElement_1_0 inspectorClass
     ) throws ServiceException {
         return this.getFeatureContainerDefinition(
+            segmentIdentity,
             "Attr",
             "" + featureOrder.get(0),
             level > 0 ? "" + featureOrder.get(1) : null,
                 featureDef,
                 level,
-                baseClass,
+                inspectorClass,
                 true // default icon key for attribute containers
         );
     }
 
     //-------------------------------------------------------------------------
     private DataproviderObject_1_0 getOperationDefinition(
+        Path segmentIdentity,
         FeatureDefinition operationDef,
         String parameterName,
         int level,
-        ModelElement_1_0 baseClass
+        ModelElement_1_0 inspectorClass
     ) throws ServiceException {
         return this.getFeatureContainerDefinition(
+            segmentIdentity,
             "Op",
             "" + operationDef.getName(),
             parameterName,
             operationDef,
             level,
-            baseClass,
+            inspectorClass,
             true // default icon key for operations
         );
     }
 
     //-------------------------------------------------------------------------
-    private DataproviderObject_1_0 getElementDefinition(
+    private DataproviderObject getElementDefinition(
+        Path segmentIdentity,
         String elementName,
         String defaultLabel,
         boolean useDefaultIconKey
     ) throws ServiceException {
-
-        // verify whether definition already exists
+        // Verify whether definition already exists
         DataproviderObject elementDefinition = null;
         PathComponent components = new PathComponent(elementName);
         for(
@@ -726,101 +734,113 @@ extends Layer_1 {
             i < components.size(); 
             i++
         ) {
-            elementDefinition = (DataproviderObject)this.existingElementDefinitions.get(
-                new PathComponent(components.getSuffix(i)).toString()
-            );
-            if(elementDefinition != null) {
-                return elementDefinition;
+            if(
+                (this.existingElementDefinitions == null) ||
+                (this.existingElementDefinitions.get(segmentIdentity) == null) ||
+                (components.getSuffix(i) == null)
+            ) {
+                SysLog.error("Unable to retrieve element definition", Arrays.asList(elementName, this.existingElementDefinitions, this.existingElementDefinitions == null ? null : this.existingElementDefinitions.get(segmentIdentity), components.getSuffix(i)));
+            }
+            else {
+                elementDefinition = this.existingElementDefinitions.get(segmentIdentity).get(
+                    new PathComponent(components.getSuffix(i)).toString()
+                );
+                if(elementDefinition != null) {
+                    return elementDefinition;
+                }
             }
         }
-        SysLog.info("no configured definition found. creating default", elementName);
-        elementDefinition = new DataproviderObject(
-            this.segmentIdentity.getDescendant(new String[]{"elementDefinition", elementName})
-        );
-        elementDefinition.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:ElementDefinition");      
-
-        // active
-        elementDefinition.values("active").add(new Boolean(true));
-
-        // default iconKey
-        if(useDefaultIconKey) {
-            elementDefinition.values("iconKey").add(elementName);
-        }
-        // default label
-        if(elementDefinition.getValues("label") == null) {
-            List values = elementDefinition.values("label");
-            values.add(
-                defaultLabel == null ? "N/A" : defaultLabel
+        // No element definition found for element
+        
+        // Get from Root segment
+        if(!"Root".equals(segmentIdentity.getBase())) {
+            elementDefinition = this.getElementDefinition(
+                segmentIdentity.getParent().getChild("Root"),
+                elementName, 
+                defaultLabel, 
+                useDefaultIconKey
             );
         }
-        // default shortLabel
-        if(elementDefinition.getValues("shortLabel") == null) {        
-            List values = elementDefinition.values("shortLabel");
-            values.addAll(
-                elementDefinition.values("label")
+        // Create default definition if already in Root
+        else {
+            SysLog.info("no configured definition found. creating default", elementName);
+            elementDefinition = new DataproviderObject(
+                segmentIdentity.getDescendant(new String[]{"elementDefinition", elementName})
             );
-        }    
-        // default toolTip
-        List values = elementDefinition.values("toolTip");
-        values.add("toolTip of element " + elementName);
-
+            elementDefinition.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:ElementDefinition");      
+            // Active
+            elementDefinition.values("active").add(new Boolean(true));
+            // Default iconKey
+            if(useDefaultIconKey) {
+                elementDefinition.values("iconKey").add(elementName);
+            }
+            // Default label
+            if(elementDefinition.getValues("label") == null) {
+                List<Object> values = elementDefinition.values("label");
+                values.add(
+                    defaultLabel == null ? "N/A" : defaultLabel
+                );
+            }
+            // Default shortLabel
+            if(elementDefinition.getValues("shortLabel") == null) {        
+                List<Object> values = elementDefinition.values("shortLabel");
+                values.addAll(
+                    elementDefinition.values("label")
+                );
+            }    
+            // Default toolTip
+            List<Object> values = elementDefinition.values("toolTip");
+            values.add("toolTip of element " + elementName);
+        }
         this.storeElementDefinition(
+            segmentIdentity,
             elementDefinition
         );    
-        return elementDefinition;    
+        return elementDefinition;
     }
 
     //-------------------------------------------------------------------------
     private DataproviderObject_1_0 getInspectorElementDefinition(
+        Path segmentIdentity,
         StructuralFeatureDefinition classDef
     ) throws ServiceException {
         return this.getElementDefinition(
+            segmentIdentity,
             classDef,
             null,
-            "((bool)$this.refIsNew() || !(bool)$this.refIsPersistent() ? \"Untitled\" : new org.openmdx.compatibility.@base.naming.Path((String)$this.refMofId()).getBase())",
             true
         );    
     }
 
     //-------------------------------------------------------------------------
-    private DataproviderObject_1_0 getElementDefinition(
-        StructuralFeatureDefinition feature,
-        ModelElement_1_0 baseClass,
-        boolean useDefaultIconKey
-    ) throws ServiceException {
-        return this.getElementDefinition(
-            feature,
-            baseClass,
-            "$this." + feature.getName(),
-            useDefaultIconKey
-        );
-    }
-
-    //-------------------------------------------------------------------------
     /**
-     * get element defintion for feature. By default the feature is looked up
+     * Get element definition for feature. By default the feature is looked up
      * with its qualified name in the catalog of element definitions. However, if
-     * baseClass is specified then the feature is considered to be a member of
+     * inspectorClass is specified then the feature is considered to be a member of
      * the base class and a lookup is done <qualified name base class>:<feature name>.
      * If not found the lookup is done <qualified name feature>.
      */
     private DataproviderObject_1_0 getElementDefinition(
+        Path segmentIdentity,
         StructuralFeatureDefinition feature,
-        ModelElement_1_0 baseClass,
-        String displayValueExpr,
+        ModelElement_1_0 inspectorClass,
         boolean useDefaultIconKey
     ) throws ServiceException {
-
-        DataproviderObject elementDefinition = (DataproviderObject)this.getElementDefinition(
+        DataproviderObject elementDefinition = this.getElementDefinition(
+            segmentIdentity,
             feature.getQualifiedName(),
             feature.getName(),
             useDefaultIconKey
         );
-        // overload definition if a definition for baseClass exists
-        if(baseClass != null) {
-            String qualifiedNameBase = (String)baseClass.values("qualifiedName").get(0) + ":" + feature.getName();
-            if(this.existingElementDefinitions.get(qualifiedNameBase) != null) {
-                DataproviderObject overloadDefinition = (DataproviderObject)this.getElementDefinition(
+        // Overload definition if a definition for inspectorClass exists
+        if(inspectorClass != null) {
+            String qualifiedNameBase = (String)inspectorClass.values("qualifiedName").get(0) + ":" + feature.getName();
+            if(
+                (this.existingElementDefinitions.get(segmentIdentity).get(qualifiedNameBase) != null) ||
+                (this.existingElementDefinitions.get(segmentIdentity.getParent().getChild("Root")).get(qualifiedNameBase) != null)
+            ) {
+                DataproviderObject overloadDefinition = this.getElementDefinition(
+                    segmentIdentity,
                     qualifiedNameBase,
                     feature.getName(),
                     useDefaultIconKey
@@ -846,9 +866,8 @@ extends Layer_1 {
                 elementDefinition = definition;
             }
         }
-
-        // default order is (100000,0,0)
-        List values = elementDefinition.getValues("order");
+        // Default order is (100000,0,0)
+        List<Object> values = elementDefinition.getValues("order");
         if((values == null) || values.isEmpty()) {
             values = elementDefinition.values("order");
             // all customized fields have lower order than non-customized fields
@@ -856,13 +875,6 @@ extends Layer_1 {
             values.add(new Integer(0));
             values.add(new Integer(0));
         }
-
-        // default displayValueExpr
-        values = elementDefinition.getValues("displayValueExpr");
-        if((values == null) || values.isEmpty()) {
-            elementDefinition.values("displayValueExpr").add(displayValueExpr);
-        }
-
         // Default isSortable=false, isFilterable=false if non-modeled element
         if(feature.getModelElement() == null) {
             elementDefinition.values("sortable").add(
@@ -872,8 +884,7 @@ extends Layer_1 {
                 Boolean.FALSE
             );
         }
-
-        // default sizeXWeight
+        // Default sizeXWeight
         if(!feature.isReference()) {
             values = elementDefinition.getValues("sizeXWeight");
             if((values == null) || values.isEmpty()) {
@@ -899,13 +910,11 @@ extends Layer_1 {
         String typeName = (String)featureType.values("qualifiedName").get(0);
         boolean isAdditionalElementDefinition = 
             "org:openmdx:ui1:AdditionalElementDefinition".equals(definition.values(SystemAttributes.OBJECT_CLASS).get(0));
-
-        // default value
+        // Default value
         if(defaultValue != null) {
             field.values("defaultValue").add(defaultValue);
         }
-
-        // reference stored as attribute or attribute of type class
+        // Reference stored as attribute or attribute of type class
         boolean isReferenceField = this.isReferenceField(feature) && !isAdditionalElementDefinition;
         if(isReferenceField) {
             field.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:ObjectReferenceField");
@@ -915,11 +924,10 @@ extends Layer_1 {
             );
             field.values("titleIndex").add(
                 !definition.values("titleIndex").isEmpty() 
-                    ? definition.values("titleIndex").get(0)
+                ? definition.values("titleIndex").get(0)
                     : new Integer(0)
             );
         }
-
         // string | anyURI | unknown primitive type
         // elements which are defined with as AdditionalElementDefinition are always mapped
         // to TextBox. Additional definitions typically contain expressions such as
@@ -933,7 +941,6 @@ extends Layer_1 {
         ) {
             mapToString = true;
         }
-
         // decimal
         else if(
             PrimitiveTypes.DECIMAL.equals(typeName) ||
@@ -964,49 +971,45 @@ extends Layer_1 {
             }
             field.values("minValue").add(
                 !definition.values("minValue").isEmpty()
-                    ? new BigDecimal((String)definition.values("minValue").get(0))
-                    : defaultMinValue
+                ? new BigDecimal((String)definition.values("minValue").get(0))
+                : defaultMinValue
             );
             field.values("maxValue").add(
                 !definition.values("maxValue").isEmpty()
-                    ? new BigDecimal((String)definition.values("maxValue").get(0))
-                    : defaultMaxValue
+                ? new BigDecimal((String)definition.values("maxValue").get(0))
+                : defaultMaxValue
             );
             field.values("decimalPlaces").add(
                 !definition.values("decimalPlaces").isEmpty()
-                    ? new Integer(((Number)definition.values("decimalPlaces").get(0)).intValue())
-                    : defaultDecimalPlaces        
+                ? new Integer(((Number)definition.values("decimalPlaces").get(0)).intValue())
+                : defaultDecimalPlaces        
             );
             field.values("increment").add(
                 !definition.values("increment").isEmpty()
-                    ? new BigDecimal((String)definition.values("increment").get(0))
-                    : new BigDecimal(1)
+                ? new BigDecimal((String)definition.values("increment").get(0))
+                : new BigDecimal(1)
             );
             field.values("hasThousandsSeparator").add(
                 !definition.values("hasThousandsSeparator").isEmpty()
-                    ? (Boolean)definition.values("hasThousandsSeparator").get(0)
+                ? (Boolean)definition.values("hasThousandsSeparator").get(0)
                     : Boolean.TRUE
             );
         }
-
         // date
         else if(PrimitiveTypes.DATE.equals(typeName)) {
             field.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:DateField");
             field.values("format").add("d");
         }
-
         // dateTime
         else if(PrimitiveTypes.DATETIME.equals(typeName)) {
             field.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:DateField");
             field.values("format").add("g");
         }
-
         // boolean
         else if(PrimitiveTypes.BOOLEAN.equals(typeName)) {
             field.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:CheckBox");
             field.values("threeState").add(new Boolean(false));
         }
-
         // binary
         else if(PrimitiveTypes.BINARY.equals(typeName)) {
             field.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:DocumentBox");
@@ -1015,16 +1018,14 @@ extends Layer_1 {
             }
             field.values("inPlace").add(
                 !definition.values("inPlace").isEmpty()
-                    ? (Boolean)definition.values("inPlace").get(0)
+                ? (Boolean)definition.values("inPlace").get(0)
                     : Boolean.FALSE
             );
         }
-
         // unknown primitive types are mapped to string
         else if(this.model.isPrimitiveType(featureType)) {
             mapToString = true;
         }
-
         if(mapToString) {
             field.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:TextBox");
             field.values("wordWrap").add(new Boolean(true));
@@ -1032,28 +1033,27 @@ extends Layer_1 {
             field.values("multiline").add(new Boolean(false));
             field.values("maxLength").add(
                 !definition.values("maxLength").isEmpty()
-                    ? (Integer)definition.values("maxLength").get(0)
+                ? (Integer)definition.values("maxLength").get(0)
                     : new Integer(Integer.MAX_VALUE)
             );
             field.values("autoSize").add(new Boolean(true));
             field.values("acceptsTab").add(new Boolean(false));
             field.values("isPassword").add(
                 definition.values("isPassword").isEmpty()
-                    ? new Boolean(false)
-                    : definition.values("isPassword").get(0)
+                ? new Boolean(false)
+                : definition.values("isPassword").get(0)
             );
             field.values("textAlign").add(new Short((short)0));
             if(defaultMimeType != null) {
                 field.values("mimeType").add(defaultMimeType);
             }
         }
-
         // complete
         if(field.getValues(SystemAttributes.OBJECT_CLASS) != null) {
             // as default take changeability from model. 
             Boolean isChangeable = feature.isChangeable();
             isChangeable = (definition.getValues("changeable") == null) || definition.values("changeable").isEmpty()
-                ? isChangeable
+            ? isChangeable
                 : (Boolean)definition.values("changeable").get(0); 
             boolean isSortable = 
                 !"org:openmdx:base:ExtentCapable:identity".equals(feature.getQualifiedName()) &&
@@ -1069,23 +1069,23 @@ extends Layer_1 {
                 (String)definition.values("color").get(0), 
                 (String)definition.values("backColor").get(0), 
                 definition.values("multiplicity").isEmpty() 
-                    ? feature.getMultiplicity() 
+                ? feature.getMultiplicity() 
                     : (String)definition.values("multiplicity").get(0),
-                !definition.values("spanRow").isEmpty() 
+                    !definition.values("spanRow").isEmpty() 
                     ? (Integer)definition.values("spanRow").get(0) 
-                    : new Integer(1), 
-                !definition.values("skipRow").isEmpty() 
-                    ? (Integer)definition.values("skipRow").get(0) 
-                    : new Integer(0), 
-                definition.values("filterable").isEmpty() 
-                    ? !isReferenceField 
-                    : ((Boolean)definition.values("filterable").get(0)).booleanValue(),
-                definition.values("sortable").isEmpty() 
-                    ? isSortable 
-                    : ((Boolean)definition.values("sortable").get(0)).booleanValue(),
-                feature.getName(),
-                feature.getQualifiedName(),
-                (String)definition.values("dataBindingName").get(0)
+                        : new Integer(1), 
+                        !definition.values("skipRow").isEmpty() 
+                        ? (Integer)definition.values("skipRow").get(0) 
+                            : new Integer(0), 
+                            definition.values("filterable").isEmpty() 
+                            ? !isReferenceField 
+                                : ((Boolean)definition.values("filterable").get(0)).booleanValue(),
+                                definition.values("sortable").isEmpty() 
+                                ? isSortable 
+                                    : ((Boolean)definition.values("sortable").get(0)).booleanValue(),
+                                    feature.getName(),
+                                    feature.getQualifiedName(),
+                                    (String)definition.values("dataBindingName").get(0)
             );
         }
     }
@@ -1117,17 +1117,14 @@ extends Layer_1 {
 
     //-------------------------------------------------------------------------
     private void updateAndStoreFieldGroups(
-        Set modifiedGroups,
-        Map cachedDefinitions
+        Path segmentIdentity,
+        Set<String> modifiedGroups,
+        Map<Path,DataproviderObject_1_0> cachedDefinitions
     ) throws ServiceException {
-        for(
-            Iterator i = modifiedGroups.iterator();
-            i.hasNext();
-        ) {
-            DataproviderObject group = (DataproviderObject)this.existingElements.get(i.next());
+        for(String groupName: modifiedGroups) {
+            DataproviderObject group = this.existingElements.get(segmentIdentity).get(groupName);
             boolean customizedGroup = group.path().getBase().indexOf("Tab:100000") < 0;
-
-            // add column breaks to group
+            // Add column breaks to group
             // calculate columnSizeMin/Max of group 
             int currentColumn = 0;
             int currentColumnSizeMax = 0;
@@ -1146,12 +1143,11 @@ extends Layer_1 {
                 memberIndex++
             ) {
                 Path e = (Path)j.next();
-                DataproviderObject_1_0 elementDefinition = (DataproviderObject_1_0)cachedDefinitions.get(e);
+                DataproviderObject_1_0 elementDefinition = cachedDefinitions.get(e);
                 List columnBreak = elementDefinition.values("columnBreak");
                 if(
-                    (memberIndex > 0) &&
-                    ((!columnBreak.isEmpty() && ((Boolean)columnBreak.get(0)).booleanValue()) ||
-                    (!customizedGroup && (fieldIndex % defaultColumnHeight == 0)))
+//                    (memberIndex > 0) && // allow columnBreak at first element --> allows to skip column
+                    ((!columnBreak.isEmpty() && ((Boolean)columnBreak.get(0)).booleanValue()) || (!customizedGroup && (fieldIndex % defaultColumnHeight == 0)))
                 ) { 
                     group.values("columnSizeMin").add(new Integer(330));
                     group.values("columnSizeMax").add(new Integer(currentColumnSizeMax));
@@ -1161,7 +1157,7 @@ extends Layer_1 {
                     fieldIndex = 0;
                 }
                 currentColumnSizeMax = java.lang.Math.max(
-                    330 + ((Integer)((DataproviderObject_1_0)cachedDefinitions.get(e)).values("sizeXWeight").get(0)).intValue() * 100, 
+                    330 + ((Integer)(cachedDefinitions.get(e)).values("sizeXWeight").get(0)).intValue() * 100, 
                     currentColumnSizeMax
                 );
                 fieldIndex++;
@@ -1170,6 +1166,7 @@ extends Layer_1 {
             group.values("columnSizeMax").add(new Integer(Integer.MAX_VALUE));
             group.values("columnBreakAtElement").add(new Integer(Integer.MAX_VALUE));     
             this.storeElement(
+                segmentIdentity,
                 group
             );
         }
@@ -1182,52 +1179,41 @@ extends Layer_1 {
      * within the field groups. 
      */
     private void addElementsToAttributePane(
+        Path segmentIdentity,
         DataproviderObject_1_0 pane,
-        List featureDefinitions,
-        ModelElement_1_0 baseClass
+        List<StructuralFeatureDefinition> featureDefinitions,
+        ModelElement_1_0 inspectorClass
     ) throws ServiceException {
-
-        Map cachedDefinitions = new HashMap();
-        Set modifiedGroups = new HashSet();
-        Set modifiedTabs = new HashSet();
-        String paneName = baseClass.values("qualifiedName").get(0) + ":Pane:Attr";
-
-        // process all features
-        for(
-            Iterator i = featureDefinitions.iterator();
-            i.hasNext();
-        ) {
-            StructuralFeatureDefinition feature = (StructuralFeatureDefinition)i.next();
+        Map<Path,DataproviderObject_1_0> cachedDefinitions = new HashMap<Path,DataproviderObject_1_0>();
+        Set<String> modifiedGroups = new HashSet<String>();
+        Set<String> modifiedTabs = new HashSet<String>();
+        String paneName = inspectorClass.values("qualifiedName").get(0) + ":Pane:Attr";
+        // Process all features
+        for(StructuralFeatureDefinition feature: featureDefinitions) {
             if(!feature.isReference()) {
                 DataproviderObject_1_0 baseDefinition = this.getElementDefinition(
+                    segmentIdentity,
                     feature,
-                    baseClass,
+                    inspectorClass,
                     false // no default iconKey for attributes
                 );
                 if(((Boolean)baseDefinition.values("active").get(0)).booleanValue()) {
-
-                    List definitions = new ArrayList();
+                    List<DataproviderObject_1_0> definitions = new ArrayList<DataproviderObject_1_0>();
                     definitions.add(
                         baseDefinition
                     );
-
                     this.addAlternateElementDefinitions(
                         baseDefinition,
-                        baseClass,
+                        inspectorClass,
                         definitions
                     );
-                    this.addAdditionalElementDefintions(
+                    this.addAdditionalElementDefinitions(
                         baseDefinition,
-                        baseClass,
+                        inspectorClass,
                         definitions
                     );
-
-                    // map to tab/field group
-                    for(
-                        Iterator j = definitions.iterator();
-                        j.hasNext();
-                    ) {
-                        DataproviderObject definition = (DataproviderObject)j.next();
+                    // Map to tab/field group
+                    for(DataproviderObject_1_0 definition: definitions) {
                         Boolean definitionIsActive = Boolean.TRUE;
                         if(definition.values("active").get(0) instanceof String) {
                             SysLog.error("Value of attibute 'active' is not instanceof Boolean", definition);
@@ -1253,39 +1239,38 @@ extends Layer_1 {
                             }
                             String tabId = order.get(0).toString();
                             String groupId = order.get(1).toString();
-
-                            // get tab (create on demand)
+                            // Get tab (create on demand)
                             String tabName = paneName + ":Tab:" + tabId;
-                            DataproviderObject tab = (DataproviderObject)this.existingElements.get(tabName);
+                            DataproviderObject tab = this.existingElements.get(segmentIdentity).get(tabName);
                             if(tab == null) {
                                 DataproviderObject_1_0 tabElementDefinition = this.getAttributeContainerDefinition(
+                                    segmentIdentity,
                                     feature,
                                     order,
                                     0,
-                                    baseClass
+                                    inspectorClass
                                 );
                                 // skip element in case tab is not active
                                 if(!((Boolean)tabElementDefinition.values("active").get(0)).booleanValue()) {
                                     continue;
                                 }
                                 tab = new DataproviderObject(
-                                    this.segmentIdentity.getDescendant(new String[]{"element", tabName})
+                                    segmentIdentity.getDescendant(new String[]{"element", tabName})
                                 );
                                 tab.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:Tab");
                                 this.setElementDefault(
                                     tab,
                                     tabElementDefinition.values("toolTip"),
-                                    tabElementDefinition.values("changeable").isEmpty() 
-                                        ? this.changableDefaultValue 
-                                        : ((Boolean)tabElementDefinition.values("changeable").get(0)).booleanValue(),
+                                    tabElementDefinition.values("changeable").isEmpty() ? 
+                                        this.changableDefaultValue : 
+                                        ((Boolean)tabElementDefinition.values("changeable").get(0)).booleanValue(),
                                     "N/A"
                                 );
                                 tab.values("title").addAll(
                                     tabElementDefinition.values("label")
                                 );
                                 this.setElementDefinitionDefaultLayout(tab);
-
-                                // add tab to pane and sort by tabName
+                                // Add tab to pane and sort by tabName
                                 List members = pane.values("member");
                                 int k = 0;
                                 while(
@@ -1299,26 +1284,27 @@ extends Layer_1 {
                                     tab.path()
                                 );
                                 this.storeElement(
+                                    segmentIdentity,
                                     tab
                                 );
                             }
-
-                            // get field group (create on demand)
+                            // Get field group (create on demand)
                             String groupName = tabName + ":Group:" + groupId;
-                            DataproviderObject group = (DataproviderObject)this.existingElements.get(groupName);
+                            DataproviderObject group = this.existingElements.get(segmentIdentity).get(groupName);
                             if(group == null) {
                                 DataproviderObject_1_0 groupElementDefinition = this.getAttributeContainerDefinition(
+                                    segmentIdentity,
                                     feature,
                                     order,
                                     1,
-                                    baseClass
+                                    inspectorClass
                                 );
                                 // skip element in case field group is not active
                                 if(!((Boolean)groupElementDefinition.values("active").get(0)).booleanValue()) {
                                     continue;
                                 }
                                 group = new DataproviderObject(
-                                    this.segmentIdentity.getDescendant(new String[]{"element", groupName})
+                                    segmentIdentity.getDescendant(new String[]{"element", groupName})
                                 );
                                 group.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:FieldGroup");
                                 this.setLabelledFieldDefault(
@@ -1326,9 +1312,9 @@ extends Layer_1 {
                                     groupElementDefinition.values("label"),
                                     groupElementDefinition.values("shortLabel"),
                                     groupElementDefinition.values("toolTip"),
-                                    groupElementDefinition.values("changeable").isEmpty() 
-                                        ? this.changableDefaultValue 
-                                        : ((Boolean)groupElementDefinition.values("changeable").get(0)).booleanValue(),
+                                    groupElementDefinition.values("changeable").isEmpty() ? 
+                                        this.changableDefaultValue : 
+                                        ((Boolean)groupElementDefinition.values("changeable").get(0)).booleanValue(),
                                     "N/A",
                                     (String)groupElementDefinition.values("color").get(0),
                                     (String)groupElementDefinition.values("backColor").get(0)
@@ -1340,7 +1326,6 @@ extends Layer_1 {
                                 group.values("inPlaceEditable").addAll(
                                     groupElementDefinition.values("inPlace")
                                 );
-
                                 // add group to tab and sort by groupName
                                 List members = tab.values("member");
                                 int k = 0;
@@ -1355,19 +1340,19 @@ extends Layer_1 {
                                     group.path()
                                 );
                                 this.storeElement(
+                                    segmentIdentity,
                                     group
                                 );
                             }
-
                             // get field (create on demand)
                             String elementName = groupName + ":Field:" + feature.getName();
                             if(definition != baseDefinition) {
                                 elementName += ":" + definition.path().getBase();
                             }
-                            DataproviderObject element = (DataproviderObject)this.existingElements.get(elementName);
+                            DataproviderObject element = this.existingElements.get(segmentIdentity).get(elementName);
                             if(element == null) {
                                 element = new DataproviderObject(
-                                    this.segmentIdentity.getDescendant(new String[]{"element", elementName})
+                                    segmentIdentity.getDescendant(new String[]{"element", elementName})
                                 );
                                 this.mapField(
                                     element,
@@ -1375,19 +1360,19 @@ extends Layer_1 {
                                     definition,
                                     false,
                                     null,
-                                    null
+                                    (String)definition.values("defaultValue").get(0)
                                 );
                                 this.storeElement(
+                                    segmentIdentity,
                                     element
                                 );
-
                                 // add element to group and sort by order
-                                List members = group.values("member");
+                                List<Object> members = group.values("member");
                                 int l = 0;
                                 int r = members.size() - 1;
                                 while(l <= r) {
                                     int pos = (l + r) / 2;
-                                    DataproviderObject_1_0 def = (DataproviderObject_1_0)cachedDefinitions.get(members.get(pos));
+                                    DataproviderObject_1_0 def = cachedDefinitions.get(members.get(pos));
                                     if(def == null) {
                                         SysLog.error("Can not find member in list of cached definitions", Arrays.asList(new Object[]{members.get(pos), cachedDefinitions}));
                                         break;
@@ -1428,19 +1413,16 @@ extends Layer_1 {
                 }
             }      
         }
-
         this.updateAndStoreFieldGroups(
+            segmentIdentity,
             modifiedGroups,
             cachedDefinitions
         );
-
-        // store tabs
-        for(
-            Iterator i = modifiedTabs.iterator();
-            i.hasNext();
-        ) {
-            DataproviderObject tab = (DataproviderObject)this.existingElements.get(i.next());
+        // Store tabs
+        for(String tabName: modifiedTabs) {
+            DataproviderObject tab = this.existingElements.get(segmentIdentity).get(tabName);
             this.storeElement(
+                segmentIdentity,
                 tab
             );
         }
@@ -1452,33 +1434,30 @@ extends Layer_1 {
      * Caller must store container.
      */
     private void addFieldsToObjectContainer(
+        Path segmentIdentity,
         DataproviderObject_1_0 container,
         String containerName,
-        List featureDefinitions,
-        ModelElement_1_0 baseClass,
+        List<Object> showMemberRange,
+        List<StructuralFeatureDefinition> featureDefinitions,
+        ModelElement_1_0 inspectorClass,
         Map memberMimeTypes,
         Map memberDefaultValues
     ) throws ServiceException {
-
         /**
          * Iterate all features and create tabs and groups according to
          * the customized ordering of feature. If feature or ordering is
-         * not customized make sure that features of baseClass appear first
+         * not customized make sure that features of inspectorClass appear first
          * (--> must be at the end of orderedFeatures because of quick sort below)
          */
-        List orderedFeatures = new ArrayList();
+        List<StructuralFeatureDefinition> orderedFeatures = new ArrayList<StructuralFeatureDefinition>();
         StructuralFeatureDefinition featureN = null; // feature with name="name"
         StructuralFeatureDefinition featureD = null; // feature with name="description"
         StructuralFeatureDefinition featureT = null; // feature with name="title"
-        for(
-            Iterator i = featureDefinitions.iterator();
-            i.hasNext();
-        ) {
-            StructuralFeatureDefinition featureDefinition = (StructuralFeatureDefinition)i.next();        
-            // feature is member of baseClass
+        for(StructuralFeatureDefinition featureDefinition: featureDefinitions) {
+            // feature is member of inspectorClass
             if(
                 (featureDefinition.getModelElement() != null) &&
-                baseClass.values("content").contains(featureDefinition.getModelElement().path())
+                inspectorClass.values("content").contains(featureDefinition.getModelElement().path())
             ) {            
                 String featureName = (String)featureDefinition.getName();
                 if("name".equals(featureName)) {
@@ -1506,18 +1485,14 @@ extends Layer_1 {
         if(featureT != null) orderedFeatures.add(featureT);
         if(featureD != null) orderedFeatures.add(featureD);
         if(featureN != null) orderedFeatures.add(featureN);
-
         // Process all features 
-        Map elementDefinitions = new HashMap();
-        for(
-            Iterator i = orderedFeatures.iterator();
-            i.hasNext();
-        ) {
-            StructuralFeatureDefinition feature = (StructuralFeatureDefinition)i.next();
+        Map<Path,DataproviderObject_1_0> elementDefinitions = new HashMap<Path,DataproviderObject_1_0>();
+        for(StructuralFeatureDefinition feature: orderedFeatures) {
             if(this.isMemberOfObjectContainer(feature)) {
                 DataproviderObject_1_0 elementDefinition = this.getElementDefinition(
+                    segmentIdentity,
                     feature,
-                    baseClass,
+                    inspectorClass,
                     false // no default iconKey for fields
                 );
                 List order = this.getOrderObjectContainer(
@@ -1526,56 +1501,99 @@ extends Layer_1 {
                 if(((Boolean)elementDefinition.values("active").get(0)).booleanValue()) {
                     String elementName = containerName + ":" + feature.getName();
                     DataproviderObject element = new DataproviderObject(
-                        this.segmentIdentity.getDescendant(new String[]{"element", elementName})
+                        segmentIdentity.getDescendant(new String[]{"element", elementName})
                     );
                     this.mapField(
                         element,
                         feature,
                         elementDefinition,
                         true,
-                        memberMimeTypes == null
-                        ? null
-                            : (String)memberMimeTypes.get(feature.getName()),
-                            memberDefaultValues == null
-                            ? null
-                                : (String)memberDefaultValues.get(feature.getName())                  
+                        memberMimeTypes == null ? 
+                            null : 
+                            (String)memberMimeTypes.get(feature.getName()),
+                        memberDefaultValues == null ? 
+                            null : 
+                            (String)memberDefaultValues.get(feature.getName())                  
                     );
-                    if(element.getValues(SystemAttributes.OBJECT_CLASS) != null) {        
-                        this.storeElement(
-                            element
-                        );                
-                        elementDefinitions.put(
-                            element.path(),
-                            elementDefinition
-                        );
-
-                        // add element to container and sort by order
-                        List members = container.values("member");
-                        int l = 0;
-                        int r = members.size() - 1;
-                        while(l <= r) {
-                            int pos = (l + r) / 2;
-                            List existing = this.getOrderObjectContainer(
-                                (DataproviderObject_1_0)elementDefinitions.get(members.get(pos))
-                            );
-                            int res = this.compareOrder(
-                                order, 
-                                existing
-                            );
-                            if(res == 0) { l = pos; r = pos; break;} 
-                            else if(res > 0) l = pos + 1;
-                            else if(res < 0) r = pos - 1;
-                        }
-                        if(members.isEmpty()) {
-                            members.add(
-                                element.path()
-                            );
+                    if(element.getValues(SystemAttributes.OBJECT_CLASS) != null) {
+                        // Test whether element is in showMemberRange
+                        List<Object> elementOrder = this.getOrderObjectContainer(elementDefinition);
+                        boolean isInShowMemberRange = false;
+                        if(
+                            (showMemberRange != null) && 
+                            !showMemberRange.isEmpty()
+                        ) {
+                            for(Object r: showMemberRange) {
+                                String range = (String)r;
+                                List<Integer> orderFrom = null;
+                                List<Integer> orderTo = null;
+                                if(range.indexOf("-") > 0) {
+                                    orderFrom = new ArrayList<Integer>();
+                                    for(String e: range.substring(0, range.indexOf("-")).split(":")) {
+                                        orderFrom.add(Integer.valueOf(e));
+                                    }
+                                    orderTo = new ArrayList<Integer>();
+                                    for(String e: range.substring(range.indexOf("-") + 1).split(":")) {
+                                        orderTo.add(Integer.valueOf(e));
+                                    }
+                                }
+                                else {
+                                    orderFrom = new ArrayList<Integer>();
+                                    for(String e: range.split(":")) {
+                                        orderFrom.add(Integer.valueOf(e));
+                                    }
+                                    orderTo = null;
+                                }
+                                if(
+                                    (this.compareOrder(elementOrder, orderFrom) >= 0) &&
+                                    ((orderTo == null) || this.compareOrder(elementOrder, orderTo) <= 0)
+                                ) {
+                                    isInShowMemberRange = true;
+                                    break;
+                                }
+                            }
                         }
                         else {
-                            members.add(
-                                l,
-                                element.path()
+                            isInShowMemberRange = true;
+                        }
+                        if(isInShowMemberRange) {
+                            this.storeElement(
+                                segmentIdentity,
+                                element
+                            );                
+                            elementDefinitions.put(
+                                element.path(),
+                                elementDefinition
                             );
+    
+                            // add element to container and sort by order
+                            List<Object> members = container.values("member");
+                            int l = 0;
+                            int r = members.size() - 1;
+                            while(l <= r) {
+                                int pos = (l + r) / 2;
+                                List existing = this.getOrderObjectContainer(
+                                    (DataproviderObject_1_0)elementDefinitions.get(members.get(pos))
+                                );
+                                int res = this.compareOrder(
+                                    order, 
+                                    existing
+                                );
+                                if(res == 0) { l = pos; r = pos; break;} 
+                                else if(res > 0) l = pos + 1;
+                                else if(res < 0) r = pos - 1;
+                            }
+                            if(members.isEmpty()) {
+                                members.add(
+                                    element.path()
+                                );
+                            }
+                            else {
+                                members.add(
+                                    l,
+                                    element.path()
+                                );
+                            }
                         }
                     }
                 }
@@ -1584,14 +1602,15 @@ extends Layer_1 {
     }
 
     //-------------------------------------------------------------------------
-    private void addAdditionalElementDefintions(
+    @SuppressWarnings("unchecked")
+    private void addAdditionalElementDefinitions(
         DataproviderObject_1_0 baseDefinition,
-        ModelElement_1_0 baseClass,
-        List definitions
+        ModelElement_1_0 inspectorClass,
+        List<DataproviderObject_1_0> definitions
     ) throws ServiceException {
         // get additional element definitions. Construct an element 
         // definition on the base definition and override with additional definition
-        List additionalElementDefinitions = this.delegation.addFindRequest(
+        List<DataproviderObject_1_0> additionalElementDefinitions = this.delegation.addFindRequest(
             baseDefinition.path().getChild("additionalElementDefinition"),
             null,
             AttributeSelectors.ALL_ATTRIBUTES,
@@ -1599,11 +1618,7 @@ extends Layer_1 {
             Integer.MAX_VALUE,
             Directions.ASCENDING
         );
-        for(
-            Iterator j = additionalElementDefinitions.iterator();
-            j.hasNext();
-        ) {
-            DataproviderObject additionalDefinition = (DataproviderObject)j.next();
+        for(DataproviderObject_1_0 additionalDefinition: additionalElementDefinitions) {
             DataproviderObject target = new DataproviderObject(
                 additionalDefinition.path()
             );
@@ -1614,8 +1629,8 @@ extends Layer_1 {
             );
             // filter additional definition: add definition only if base class matches for class
             // or if forClass is unspecified
-            String baseClassName = (String)baseClass.values("qualifiedName").get(0);
-            if((target.getValues("forClass") == null) || target.values("forClass").contains(baseClassName)) {
+            String inspectorClassName = (String)inspectorClass.values("qualifiedName").get(0);
+            if((target.getValues("forClass") == null) || target.values("forClass").contains(inspectorClassName)) {
                 definitions.add(
                     target
                 );
@@ -1624,14 +1639,15 @@ extends Layer_1 {
     }
 
     //-------------------------------------------------------------------------
+    @SuppressWarnings("unchecked")
     private void addAlternateElementDefinitions(
         DataproviderObject_1_0 baseDefinition,
-        ModelElement_1_0 baseClass,
-        List definitions
+        ModelElement_1_0 inspectorClass,
+        List<DataproviderObject_1_0> definitions
     ) throws ServiceException {
         // get alternate element definitions. Construct an element 
         // definition on the base definition and override with alternate definition
-        List alternateElementDefinitions = this.delegation.addFindRequest(
+        List<DataproviderObject_1_0> alternateElementDefinitions = this.delegation.addFindRequest(
             baseDefinition.path().getChild("alternateElementDefinition"),
             null,
             AttributeSelectors.ALL_ATTRIBUTES,
@@ -1659,10 +1675,10 @@ extends Layer_1 {
     }
 
     //-------------------------------------------------------------------------
-    private Map getMemberMimeTypes(
+    private Map<String,Object> getMemberMimeTypes(
         DataproviderObject_1_0 containerDefinition
     ) {
-        Map memberMimeTypes = new HashMap();
+        Map<String,Object> memberMimeTypes = new HashMap<String,Object>();
         if(containerDefinition.getValues("memberElementName") != null) {
             for(int i = 0; i < containerDefinition.values("memberElementName").size(); i++) {
                 String name = (String)containerDefinition.values("memberElementName").get(i);
@@ -1682,10 +1698,10 @@ extends Layer_1 {
     }
 
     //-------------------------------------------------------------------------
-    private Map getMemberDefaultValues(
+    private Map<String,Object> getMemberDefaultValues(
         DataproviderObject_1_0 containerDefinition
     ) {
-        Map memberDefaultValues = new HashMap();
+        Map<String,Object> memberDefaultValues = new HashMap<String,Object>();
         if(containerDefinition.getValues("memberElementName") != null) {
             for(int i = 0; i < containerDefinition.values("memberElementName").size(); i++) {
                 String name = (String)containerDefinition.values("memberElementName").get(i);
@@ -1705,11 +1721,11 @@ extends Layer_1 {
     }
 
     //-------------------------------------------------------------------------
-    private List getStructFeatureDefinitions(
+    private List<StructuralFeatureDefinition> getStructFeatureDefinitions(
         ModelElement_1_0 paramType
     ) throws ServiceException {
         Collection fieldDefs = ((Map)paramType.values("field").get(0)).values();
-        List featureDefinitions = new ArrayList();
+        List<StructuralFeatureDefinition> featureDefinitions = new ArrayList<StructuralFeatureDefinition>();
         for(
             Iterator i = fieldDefs.iterator();
             i.hasNext();
@@ -1722,12 +1738,14 @@ extends Layer_1 {
     }
 
     //-------------------------------------------------------------------------
-    private List getStructuralFeatureDefinitions(
+    @SuppressWarnings("unchecked")
+    private List<StructuralFeatureDefinition> getStructuralFeatureDefinitions(
+        Path segmentIdentity,
         ModelElement_1_0 classDef,
         boolean includeSubtypes,
         boolean attributesOnly
     ) throws ServiceException {
-        List featureDefs = new ArrayList(
+        List<ModelElement_1_0> featureDefs = new ArrayList(
             this.model.getStructuralFeatureDefs(
                 classDef, 
                 includeSubtypes, 
@@ -1735,13 +1753,9 @@ extends Layer_1 {
                 attributesOnly
             ).values()          
         );
-        List featureDefinitions = new ArrayList();
+        Map<String,StructuralFeatureDefinition> featureDefinitions = new HashMap<String,StructuralFeatureDefinition>();
         // Add modeled structural features
-        for(
-            Iterator i = featureDefs.iterator();
-            i.hasNext();
-        ) {
-            ModelElement_1_0 featureDef = (ModelElement_1_0)i.next();
+        for(ModelElement_1_0 featureDef: featureDefs) {
             StructuralFeatureDefinition feature = new StructuralFeatureDefinition(featureDef);            
             if(feature.isReference()) {
                 // Only add reference features if not explicitly excluded and exposed end is not composite
@@ -1750,40 +1764,60 @@ extends Layer_1 {
                     !(REFERENCES_TO_EXCLUDE.contains(feature.getQualifiedName()) || REFERENCES_TO_EXCLUDE.contains(feature.getName())) &&
                     !AggregationKind.COMPOSITE.equals(exposedEnd.values("aggregation").get(0))
                 ) {
-                    featureDefinitions.add(feature);
+                    featureDefinitions.put(
+                        feature.getQualifiedName(),
+                        feature
+                    );
                 }
             }
             else {            
-                featureDefinitions.add(feature);
+                featureDefinitions.put(
+                    feature.getQualifiedName(),
+                    feature
+                );
             }
         }
+        // Add customized structural features for segment Root
+        for(StructuralFeatureDefinition featureDefinition: this.structuralFeatureDefinitions.get(segmentIdentity.getParent().getChild("Root"))) {
+            if(
+                (!featureDefinition.isReference() || !attributesOnly) &&
+                this.model.isSubtypeOf(classDef, featureDefinition.getContainer())
+            ) {                
+                featureDefinitions.put(
+                    featureDefinition.getQualifiedName(),
+                    featureDefinition
+                );
+            }
+        }      
         // Add customized structural features
-        for(
-            Iterator i = this.structualFeatureDefinitions.iterator();
-            i.hasNext();
-        ) {
-            StructuralFeatureDefinition featureDefinition = (StructuralFeatureDefinition)i.next();
+        for(StructuralFeatureDefinition featureDefinition: this.structuralFeatureDefinitions.get(segmentIdentity)) {
             if(
                 (!featureDefinition.isReference() || !attributesOnly) &&
                 this.model.isSubtypeOf(classDef, featureDefinition.getContainer())
             ) {
-                featureDefinitions.add(featureDefinition);
+                featureDefinitions.put(
+                    featureDefinition.getQualifiedName(),
+                    featureDefinition
+                );
             }
         }      
-        return featureDefinitions;
+        return new ArrayList<StructuralFeatureDefinition>(featureDefinitions.values());
     }
 
     //-------------------------------------------------------------------------
-    private List getOperationDefinitions(
+    @SuppressWarnings("unchecked")
+    private List<OperationDefinition> getOperationDefinitions(
+        Path segmentIdentity,
         ModelElement_1_0 classDef
     ) throws ServiceException {
-        List featureDefinitions = new ArrayList();
+        List<OperationDefinition> featureDefinitions = new ArrayList<OperationDefinition>();
         // Add modeled operations
+        Collection features = ((Map)classDef.values("allFeature").get(0)).values();
         for(
-            Iterator i = ((Map)classDef.values("allFeature").get(0)).values().iterator();
-            i.hasNext();
+            Iterator<ModelElement_1_0> i = features.iterator(); 
+            i.hasNext(); 
         ) {
-            ModelElement_1_0 feature = (ModelElement_1_0)i.next();
+            ModelElement_1_0 feature = i.next();
             if(this.model.isOperationType(feature)) {                    
                 featureDefinitions.add(
                     new OperationDefinition(feature)
@@ -1791,11 +1825,7 @@ extends Layer_1 {
             }
         }
         // Add customized operations
-        for(
-            Iterator i = this.operationDefinitions.iterator();
-            i.hasNext();
-        ) {
-            OperationDefinition featureDefinition = (OperationDefinition)i.next();
+        for(OperationDefinition featureDefinition: this.operationDefinitions.get(segmentIdentity)) {
             if(this.model.isSubtypeOf(classDef, featureDefinition.getContainer())) {
                 featureDefinitions.add(featureDefinition);
             }
@@ -1805,69 +1835,70 @@ extends Layer_1 {
 
     //-------------------------------------------------------------------------
     private void addReferenceTab(
-        DataproviderObject_1_0 pane,      
+        Path segmentIdentity,
+        Map<Path,DataproviderObject> panes,        
         StructuralFeatureDefinition feature,
         String forClass,
-        ModelElement_1_0 classDef,
-        Map elementDefinitions
+        ModelElement_1_0 inspectorClassDef,
+        Map<Path,DataproviderObject_1_0> elementDefinitions
     ) throws ServiceException {
-
         ModelElement_1_0 featureType = this.model.getDereferencedType(
             feature.getType()
         );
         DataproviderObject_1_0 baseDefinition = this.getElementDefinition(
+            segmentIdentity,
             feature,
-            classDef,
+            inspectorClassDef,
             false // no default iconKey for references
         );
-        if(
-            baseDefinition.values("active").isEmpty() || // default to true if active is not set
-            ((Boolean)baseDefinition.values("active").get(0)).booleanValue()
-        ) {
-            // Get additional definitions
-            List definitions = new ArrayList();
-            definitions.add(
-                baseDefinition
-            );
-            this.addAlternateElementDefinitions(
-                baseDefinition,
-                classDef,
-                definitions
-            );
-            this.addAdditionalElementDefintions(
-                baseDefinition,
-                classDef,
-                definitions
-            );
-
-            // Create ui object containers for base and additional definitions
-            for(
-                Iterator i = definitions.iterator(); 
-                i.hasNext(); 
-            ) {
-                DataproviderObject_1_0 definition = (DataproviderObject_1_0)i.next();
-
-                String alternateDefinitionNameSuffix = definition != baseDefinition
-                    ? ":" + definition.path().getBase()
-                    : "";
-
+        // Get additional definitions
+        List<DataproviderObject_1_0> definitions = new ArrayList<DataproviderObject_1_0>();
+        definitions.add(
+            baseDefinition
+        );
+        this.addAlternateElementDefinitions(
+            baseDefinition,
+            inspectorClassDef,
+            definitions
+        );
+        this.addAdditionalElementDefinitions(
+            baseDefinition,
+            inspectorClassDef,
+            definitions
+        );
+        // Create ui object containers for base and additional definitions
+        for(DataproviderObject_1_0 definition: definitions) {
+            if(
+                definition.values("active").isEmpty() || // default to true if active is not set
+                ((Boolean)definition.values("active").get(0)).booleanValue()
+            ) {            
+                DataproviderObject pane = this.addPane(
+                    segmentIdentity,
+                    PANE_TYPE_REFERENCE,
+                    inspectorClassDef,
+                    definition,
+                    panes
+                ); 
+                String alternateDefinitionNameSuffix = definition != baseDefinition ? 
+                    ":" + definition.path().getBase() : 
+                    "";
                 // Create new ObjectContainer if it is a reference of classDef
-                DataproviderObject container = (DataproviderObject)this.existingElements.get(
+                DataproviderObject container = this.existingElements.get(segmentIdentity).get(
                     this.model.getElement(feature.getContainer()).values("qualifiedName").get(0) + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix
                 );
                 if(
                     (container == null) ||
-                    (feature.getQualifiedName()).startsWith(classDef.values("qualifiedName").get(0) + ":")
+                    (feature.getQualifiedName()).startsWith(inspectorClassDef.values("qualifiedName").get(0) + ":")
                 ) { 
                     String containerName = forClass + ":Ref:" + feature.getName() + alternateDefinitionNameSuffix;
                     container = new DataproviderObject(
-                        this.segmentIdentity.getDescendant(new String[]{"element", containerName})
+                        segmentIdentity.getDescendant(new String[]{"element", containerName})
                     );
                     container.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:ObjectContainer");
                     Boolean isChangeable = feature.isChangeable();
-                    isChangeable = definition.values("changeable").isEmpty()
-                        ? isChangeable
-                        : (Boolean)definition.values("changeable").get(0);
+                    isChangeable = definition.values("changeable").isEmpty() ? 
+                        isChangeable : 
+                        (Boolean)definition.values("changeable").get(0);
                     this.setLabelledFieldDefault(
                         container,
                         definition.values("label"),
@@ -1887,20 +1918,20 @@ extends Layer_1 {
                     container.values("dataBindingName").addAll(
                         definition.values("dataBindingName")
                     );
-
                     // let the renderer set default label
                     container.values("label").clear();
-
                     this.setObjectReference(
                         container,
                         feature
                     );
-
-                    // container must contain all fields of referenced type and all its subtypes
+                    // Container must contain all fields of referenced type and all its subtypes
                     this.addFieldsToObjectContainer(
+                        segmentIdentity,
                         container,
                         containerName,
+                        definition.values("showMemberRange"),
                         this.getStructuralFeatureDefinitions(
+                            segmentIdentity,
                             featureType,
                             true, // includeSubtypes
                             true // attributesOnly
@@ -1909,12 +1940,12 @@ extends Layer_1 {
                         null,
                         null
                     );
-                    // limit number of members to maxMember (if defined)
-                    int maxMember = !definition.values("maxMember").isEmpty()
-                        ? ((Number)definition.values("maxMember").get(0)).intValue()
+                    // Limit number of members to maxMember (if defined)
+                    int maxMember = !definition.values("maxMember").isEmpty() ? 
+                        ((Number)definition.values("maxMember").get(0)).intValue()
                         : DEFAULT_MAX_MEMBER;
                     if(container.values("member").size() > maxMember) {
-                        List limitedMembers = new ArrayList(
+                        List<Object> limitedMembers = new ArrayList<Object>(
                             container.values("member").subList(0, maxMember)
                         );
                         container.clearValues("member").addAll(
@@ -1922,14 +1953,14 @@ extends Layer_1 {
                         );
                     }
                     this.storeElement(
+                        segmentIdentity,
                         container
                     );
                 }
-
-                // tab
+                // Tab
                 String tabName = pane.path().getBase() + ":Tab:" + feature.getName() + alternateDefinitionNameSuffix;
                 DataproviderObject tab = new DataproviderObject(
-                    this.segmentIdentity.getDescendant(new String[]{"element", tabName})
+                    segmentIdentity.getDescendant(new String[]{"element", tabName})
                 );
                 tab.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:Tab");
                 tab.values("title").addAll(
@@ -1939,9 +1970,8 @@ extends Layer_1 {
                     tab.path(),
                     definition
                 );
-
-                // add tab to pane and sort by order
-                List members = pane.values("member");
+                // Add tab to pane and sort by order
+                List<Object> members = pane.values("member");
                 int l = 0;
                 int r = members.size() - 1;
                 while(l <= r) {
@@ -1965,12 +1995,12 @@ extends Layer_1 {
                         tab.path()
                     );              
                 }
-
                 // add object container to tab
                 tab.values("member").add(
                     container.path()
                 );
                 this.storeElement(
+                    segmentIdentity,
                     tab
                 );
             }
@@ -1980,7 +2010,7 @@ extends Layer_1 {
     //-------------------------------------------------------------------------
     private String getPaneName(
         String paneType,
-        ModelElement_1_0 baseClass
+        ModelElement_1_0 inspectorClass
     ) throws ServiceException {
         String id = "Multi";
         if(PANE_TYPE_ATTRIBUTE.equals(paneType)) {
@@ -1992,39 +2022,39 @@ extends Layer_1 {
         else if(PANE_TYPE_OPERATION.equals(paneType)) {
             id = "Op";
         }
-        return baseClass == null
-        ? "Pane:" + paneType
-            : baseClass.values("qualifiedName").get(0) + ":Pane:" + id;
+        return inspectorClass == null ? 
+            "Pane:" + paneType : 
+            inspectorClass.values("qualifiedName").get(0) + ":Pane:" + id;
     }
 
     //-------------------------------------------------------------------------
     private DataproviderObject addTab(
         String tabName,
         String tabType,
-        DataproviderObject_1_0 uiDef,
+        DataproviderObject_1_0 tabDef,
         DataproviderObject pane,
-        Map tabDefs
+        Map<Path,DataproviderObject_1_0> tabDefs
     ) throws ServiceException {
-        Path tabIdentity = this.segmentIdentity.getDescendant(
+        Path segmentIdentity = pane.path().getPrefix(5);
+        Path tabIdentity = segmentIdentity.getDescendant(
             new String[]{"element", tabName}
         );
         DataproviderObject tab = new DataproviderObject(tabIdentity);
         tab.values(SystemAttributes.OBJECT_CLASS).add(tabType);
         this.setElementDefault(
             tab,
-            uiDef.values("toolTip"),
-            uiDef.values("changeable").isEmpty() 
-                ? this.changableDefaultValue 
-                : ((Boolean)uiDef.values("changeable").get(0)).booleanValue(),
-            (String)uiDef.values("iconKey").get(0)
+            tabDef.values("toolTip"),
+            tabDef.values("changeable").isEmpty() ? 
+                this.changableDefaultValue : 
+                ((Boolean)tabDef.values("changeable").get(0)).booleanValue(),
+            (String)tabDef.values("iconKey").get(0)
         );
         tab.values("title").addAll(
-            uiDef.values("label")
+            tabDef.values("label")
         );
         this.setElementDefinitionDefaultLayout(tab);
-
         // Add tab to pane and sort by order
-        List members = pane.values("member");
+        List<Object> members = pane.values("member");
         int l = 0;
         int r = members.size() - 1;
         while(l <= r) {
@@ -2033,7 +2063,7 @@ extends Layer_1 {
                 System.out.println("#ERR");
             }
             int res = this.compareOrder(
-                uiDef.values("order"),
+                tabDef.values("order"),
                 ((DataproviderObject_1_0)tabDefs.get(members.get(pos))).values("order")
             );
             if(res == 0) { l = pos; r = pos; break;} 
@@ -2042,63 +2072,64 @@ extends Layer_1 {
         }
         if(members.isEmpty()) {
             members.add(
-                tab.path()
+                tabIdentity
             );
         }
         else {
             members.add(
                 l,
-                tab.path()
+                tabIdentity
             );              
         }
         tabDefs.put(
-            tab.path(),
-            uiDef
+            tabIdentity,
+            tabDef
         );
-
         return tab;  
     }
 
     //-------------------------------------------------------------------------
     private DataproviderObject addPane(
+        Path segmentIdentity,
         String paneType,
-        ModelElement_1_0 baseClass,
+        ModelElement_1_0 inspectorClass,
         DataproviderObject_1_0 uiDef,
-        Map panes
+        Map<Path,DataproviderObject> panes
     ) throws ServiceException {
         String paneName = this.getPaneName(
             paneType, 
-            baseClass
+            inspectorClass
         );
-        Number paneOrder = uiDef == null
-            ? null
-            : !uiDef.values("order").isEmpty() 
-                ? (Number)uiDef.values("order").get(0)
-                : new Integer(90000);                     
+        Number paneOrder = uiDef == null ? 
+            null : 
+            !uiDef.values("order").isEmpty() ? 
+                (Number)uiDef.values("order").get(0) : 
+                new Integer(90000);                     
         DecimalFormat orderFormatter= new DecimalFormat("###00"); 
-        Path paneIdentity = this.segmentIdentity.getDescendant(
+        Path paneIdentity = segmentIdentity.getDescendant(
             new String[]{
                 "element",
-                paneOrder == null
-                    ? paneName
-                    : paneName + ":" + orderFormatter.format(paneOrder)
+                paneOrder == null ? 
+                    paneName : 
+                    paneName + ":" + orderFormatter.format(paneOrder)
             }
         );
         DataproviderObject_1_0 paneDef = this.getElementDefinition(
+            segmentIdentity,
             paneIdentity.getBase(),
             null,
             true
         );
-        DataproviderObject pane = (DataproviderObject)panes.get(paneIdentity);
+        DataproviderObject pane = panes.get(paneIdentity);
         if(pane == null) {
             pane = new DataproviderObject(paneIdentity);
             pane.values(SystemAttributes.OBJECT_CLASS).add(paneType);
             this.setElementDefault(
                 pane,
                 paneDef.values("toolTip"),
-                !paneDef.values("isChangeable").isEmpty() 
-                    ? ((Boolean)paneDef.values("isChangeable").get(0)).booleanValue() 
-                    : true, 
+                !paneDef.values("isChangeable").isEmpty() ? 
+                    ((Boolean)paneDef.values("isChangeable").get(0)).booleanValue() : 
+                    true, 
                 (String)paneDef.values("iconKey").get(0)
             );
             panes.put(
@@ -2111,41 +2142,39 @@ extends Layer_1 {
 
     //-------------------------------------------------------------------------
     private void addOperationPane(
-        Map panes,
+        Path segmentIdentity,
+        Map<Path,DataproviderObject> panes,
         OperationDefinition operationDef,
-        ModelElement_1_0 baseClass,
-        Map elementDefinitions
+        ModelElement_1_0 inspectorClass,
+        Map<Path,DataproviderObject_1_0> elementDefinitions
     ) throws ServiceException {
         DataproviderObject_1_0 baseDefinition = this.getOperationDefinition(
+            segmentIdentity,
             operationDef,
             null,
             0,
-            baseClass
+            inspectorClass
         );
         if(((Boolean)baseDefinition.values("active").get(0)).booleanValue()) {
-            List opDefs = new ArrayList();
+            List<DataproviderObject_1_0> opDefs = new ArrayList<DataproviderObject_1_0>();
             opDefs.add(baseDefinition);
-            this.addAdditionalElementDefintions(
+            this.addAdditionalElementDefinitions(
                 baseDefinition, 
-                baseClass, 
+                inspectorClass, 
                 opDefs
             );
-
-            // generate operation tabs for base definition and all alternate definitions
-            for(
-                Iterator i = opDefs.iterator(); 
-                i.hasNext(); 
-            ) {
-                DataproviderObject_1_0 opDef = (DataproviderObject_1_0)i.next();
+            // Generate operation tabs for base definition and all alternate definitions
+            for(DataproviderObject_1_0 opDef: opDefs) {
                 // Pane
                 DataproviderObject pane = this.addPane(
+                    segmentIdentity,
                     PANE_TYPE_OPERATION,
-                    baseClass,
+                    inspectorClass,
                     opDef,
                     panes
-                );            
+                );
                 // Tab
-                String tabName = this.getPaneName(PANE_TYPE_OPERATION, baseClass) + ":Tab:" + operationDef.getName();
+                String tabName = this.getPaneName(PANE_TYPE_OPERATION, inspectorClass) + ":Tab:" + operationDef.getName();
                 if(opDef != baseDefinition) {
                     tabName += ":" + opDef.path().getBase();
                 }	    
@@ -2159,7 +2188,6 @@ extends Layer_1 {
                 tab.values("operationName").add(
                     operationDef.getQualifiedName()
                 );
-                
                 if(tab.getValues("isQuery") != null) {
                     tab.values("isQuery").add(
                         Boolean.valueOf(operationDef.isQuery)
@@ -2175,14 +2203,15 @@ extends Layer_1 {
                         // create group and add to tab
                         ModelElement_1_0 paramDef = this.model.getElement(j.next());
                         DataproviderObject_1_0 groupElementDefinition = this.getOperationDefinition(
+                            segmentIdentity,
                             operationDef,
                             (String)paramDef.values("name").get(0),
                             1,
-                            baseClass
+                            inspectorClass
                         );
                         String groupName = tabName + ":Group:" + paramDef.values("name").get(0);
                         DataproviderObject group = new DataproviderObject(
-                            this.segmentIdentity.getDescendant(new String[]{"element", groupName})
+                            segmentIdentity.getDescendant(new String[]{"element", groupName})
                         );
                         group.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:FieldGroup");
                         this.setLabelledFieldDefault(
@@ -2190,9 +2219,9 @@ extends Layer_1 {
                             groupElementDefinition.values("label"),
                             groupElementDefinition.values("shortLabel"),
                             groupElementDefinition.values("toolTip"),
-                            groupElementDefinition.values("changeable").isEmpty() 
-                                ? this.changableDefaultValue 
-                                : ((Boolean)groupElementDefinition.values("changeable").get(0)).booleanValue(),
+                            groupElementDefinition.values("changeable").isEmpty() ? 
+                                this.changableDefaultValue : 
+                                ((Boolean)groupElementDefinition.values("changeable").get(0)).booleanValue(),
                             "N/A",
                             (String)groupElementDefinition.values("color").get(0),
                             (String)groupElementDefinition.values("backColor").get(0)
@@ -2207,15 +2236,16 @@ extends Layer_1 {
                         group.values("inPlaceEditable").addAll(
                             groupElementDefinition.values("inPlace")
                         );
-    
-                        // add fields of parameter to group
-                        ModelElement_1_0 paramType = this.model.getDereferencedType(
-                            paramDef.values("type").get(0)
+                        // Add fields of parameter to group
+                        ModelElement_1_0 paramType = this.model.getElementType(
+                            paramDef
                         );
                         if(this.model.isStructureType(paramType)) {
                             this.addFieldsToObjectContainer(
+                                segmentIdentity,
                                 group,
                                 groupName,
+                                null,
                                 this.getStructFeatureDefinitions(paramType),		              
                                 paramType,
                                 this.getMemberMimeTypes(opDef),
@@ -2226,11 +2256,13 @@ extends Layer_1 {
                         group.values("columnSizeMax").add(new Integer(600));
                         group.values("columnBreakAtElement").add(new Integer(999)); // no break
                         this.storeElement(
+                            segmentIdentity,
                             group
                         );
                     }
                 }
                 this.storeElement(
+                    segmentIdentity,
                     tab
                 );
             }
@@ -2238,12 +2270,13 @@ extends Layer_1 {
     }
 
     //-------------------------------------------------------------------------
-    private List getAdditionalInspectorDefinitions(
+    @SuppressWarnings("unchecked")
+    private List<DataproviderObject> getAdditionalInspectorDefinitions(
         DataproviderObject_1_0 inspectorDefinition
     ) throws ServiceException {
-        List inspectorDefinitions = new ArrayList();
-        // get additional inspector definitions
-        List additionalInspectorDefinitions = this.delegation.addFindRequest(
+        List<DataproviderObject> inspectorDefinitions = new ArrayList<DataproviderObject>();
+        // Get additional inspector definitions
+        List<DataproviderObject_1_0> additionalInspectorDefinitions = this.delegation.addFindRequest(
             inspectorDefinition.path().getChild("additionalElementDefinition"),
             null,
             AttributeSelectors.ALL_ATTRIBUTES,
@@ -2251,11 +2284,7 @@ extends Layer_1 {
             Integer.MAX_VALUE,
             Directions.ASCENDING
         );
-        for(
-            Iterator i = additionalInspectorDefinitions.iterator();
-            i.hasNext();
-        ) {
-            DataproviderObject additionalInspectorDefinition = (DataproviderObject)i.next();
+        for(DataproviderObject_1_0 additionalInspectorDefinition: additionalInspectorDefinitions) {
             DataproviderObject target = new DataproviderObject(
                 additionalInspectorDefinition.path()
             );
@@ -2286,16 +2315,15 @@ extends Layer_1 {
 
     //-------------------------------------------------------------------------
     private void createInspector(
+        Path segmentIdentity,
         String forClass
     ) throws RefException, ServiceException {
-
-        // return if inspector already exists or visited in unit of work
-        if(this.existingElements.get(forClass) != null) {
+        // Return if inspector already exists or visited in unit of work
+        if(this.existingElements.get(segmentIdentity).get(forClass) != null) {
             return;
         }
         ModelElement_1_0 classDef = this.model.getElement(forClass);
-
-        // create inspector for all supertypes
+        // Create inspector for all supertypes
         for(
             Iterator i = classDef.values("allSupertype").iterator();
             i.hasNext(); 
@@ -2303,39 +2331,38 @@ extends Layer_1 {
             ModelElement_1_0 supertype = this.model.getElement(i.next());
             if(supertype != classDef) {
                 this.createInspector(
+                    segmentIdentity,
                     (String)supertype.values("qualifiedName").get(0)
                 );
             }
         }
-
-        // inspector
+        // Inspector
         DataproviderObject_1_0 inspectorDefinition = this.getInspectorElementDefinition(
+            segmentIdentity,
             new StructuralFeatureDefinition(classDef)
         );
         DataproviderObject inspector = new DataproviderObject(
-            this.segmentIdentity.getDescendant(new String[]{"element", forClass})
+            segmentIdentity.getDescendant(new String[]{"element", forClass})
         );
         inspector.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:Inspector");
         inspector.values("toolTip").addAll(inspectorDefinition.values("toolTip"));
         inspector.values("changeable").add(
-            inspectorDefinition.values("changeable").isEmpty()
-                ? new Boolean(this.changableDefaultValue)
-                : inspectorDefinition.values("changeable").get(0)
+            inspectorDefinition.values("changeable").isEmpty() ? 
+            new Boolean(this.changableDefaultValue) : 
+            inspectorDefinition.values("changeable").get(0)
         );
         inspector.values("forClass").add(forClass);
         inspector.values("scaleX").add(new Integer(1));
         inspector.values("scaleY").add(new Integer(1));
-
-        // get additional inspector definitions
-        List inspectorDefinitions = new ArrayList();
+        // Get additional inspector definitions
+        List<DataproviderObject_1_0> inspectorDefinitions = new ArrayList<DataproviderObject_1_0>();
         inspectorDefinitions.add(inspectorDefinition);
         inspectorDefinitions.addAll(
             this.getAdditionalInspectorDefinitions(
                 inspectorDefinition
             )
         );
-
-        // add inspector title for each inspector definition
+        // Add inspector title for each inspector definition
         int ii = 0;
         for(
             Iterator i = inspectorDefinitions.iterator();
@@ -2344,7 +2371,7 @@ extends Layer_1 {
         ) {
             DataproviderObject definition = (DataproviderObject)i.next();
             DataproviderObject inspectorTitle = new DataproviderObject(
-                this.segmentIdentity.getDescendant(new String[]{"element", forClass + ":Title:" + ii})
+                segmentIdentity.getDescendant(new String[]{"element", forClass + ":Title:" + ii})
             );
             inspectorTitle.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:TextField");
             this.setValuedFieldDefault(
@@ -2367,28 +2394,25 @@ extends Layer_1 {
                 null
             );
             this.storeElement(
+                segmentIdentity,
                 inspectorTitle
             );
             inspector.values("member").add(
                 inspectorTitle.path()
             );
         }
-
-        Map panes = new TreeMap();
-        Map elementDefinitions = new HashMap();
-
+        Map<Path,DataproviderObject> panes = new TreeMap<Path,DataproviderObject>();
+        Map<Path,DataproviderObject_1_0> elementDefinitions = new HashMap<Path,DataproviderObject_1_0>();
         /**
          * Operation panes
          */    
-        List operationDefs = this.getOperationDefinitions(
+        List<OperationDefinition> operationDefs = this.getOperationDefinitions(
+            segmentIdentity,
             classDef
         );
-        for(
-            Iterator i = operationDefs.iterator(); 
-            i.hasNext(); 
-        ) {
-            OperationDefinition operationDef = (OperationDefinition)i.next();
+        for(OperationDefinition operationDef: operationDefs) {
             this.addOperationPane(
+                segmentIdentity,
                 panes,
                 operationDef,
                 classDef,
@@ -2396,34 +2420,38 @@ extends Layer_1 {
             );            
         }
         this.addOperationPane(
+            segmentIdentity,
             panes,
             this.editObjectOperationDef,
             classDef,
             elementDefinitions
         );
         this.addOperationPane(
+            segmentIdentity,
             panes,
             this.deleteObjectOperationDef,
             classDef,
             elementDefinitions
         );
         this.addOperationPane(
+            segmentIdentity,
             panes,
             this.navigateToParentOperationDef,
             classDef,
             elementDefinitions
         );
         this.addOperationPane(
+            segmentIdentity,
             panes,
             this.reloadObjectOperationDef,
             classDef,
             elementDefinitions
         );
-
         /**
          * Attribute pane
          */
         DataproviderObject paneAttr = this.addPane(
+            segmentIdentity,
             PANE_TYPE_ATTRIBUTE,
             classDef,
             null,
@@ -2431,8 +2459,10 @@ extends Layer_1 {
         );
         // Add features to attribute pane
         this.addElementsToAttributePane(
+            segmentIdentity,
             paneAttr,
             this.getStructuralFeatureDefinitions(
+                segmentIdentity,
                 classDef, 
                 false, // includeSubtypes
                 true // attributesOnly
@@ -2442,26 +2472,12 @@ extends Layer_1 {
         /**
          * Object container panes (reference panes)
          */    
-        for(
-            Iterator i = this.getStructuralFeatureDefinitions(classDef, false, false).iterator();
-            i.hasNext();
-        ) {
-            StructuralFeatureDefinition feature = (StructuralFeatureDefinition)i.next();
+        List<StructuralFeatureDefinition> structuralFeatureDefinitions = this.getStructuralFeatureDefinitions(segmentIdentity, classDef, false, false);
+        for(StructuralFeatureDefinition feature: structuralFeatureDefinitions) {
             if(feature.isReference()) {
-                DataproviderObject_1_0 elementDefinition = this.getElementDefinition(
-                    feature,
-                    classDef,
-                    true
-                );
-                // get/create reference pane
-                DataproviderObject pane = this.addPane(
-                    PANE_TYPE_REFERENCE,
-                    classDef,
-                    elementDefinition,
-                    panes
-                );              
                 this.addReferenceTab(
-                    pane,
+                    segmentIdentity,
+                    panes,
                     feature,
                     forClass,
                     classDef,
@@ -2469,7 +2485,6 @@ extends Layer_1 {
                 );
             }
         }
-
         // Store all panes and add to inspector
         for(
             Iterator i = panes.values().iterator();
@@ -2480,70 +2495,85 @@ extends Layer_1 {
                 pane.path()
             );                
             this.storeElement(
+                segmentIdentity,
                 pane
             );
         }
-
         this.storeElement(
+            segmentIdentity,
             inspector
         );
-
     }
 
     //------------------------------------------------------------------------
     private void assertCachedElements(
+        Path segmentIdentity
     ) throws ServiceException {
-        // prefetch all elements
-        if(this.existingElements == null) {
+        // Prefetch all elements
+        if(this.existingElements.get(segmentIdentity) == null) {
             Collection elements = this.delegation.addFindRequest(
-                this.segmentIdentity.getChild("element"),
+                segmentIdentity.getChild("element"),
                 new FilterProperty[]{},
                 AttributeSelectors.ALL_ATTRIBUTES,
                 0,
                 Integer.MAX_VALUE,
                 Directions.ASCENDING
             );
-            this.existingElements = new HashMap();
+            Map<String, DataproviderObject> existingElements = new HashMap<String, DataproviderObject>();
+            this.existingElements.put(
+                segmentIdentity,
+                existingElements
+            );
             for(
                 Iterator j = elements.iterator();
                 j.hasNext();
             ) {
                 DataproviderObject_1_0 element = (DataproviderObject_1_0)j.next();
-                this.existingElements.put(
+                existingElements.put(
                     element.path().getBase(),
-                    element
+                    new DataproviderObject(element)
                 );
             }
         }
-
-        // prefetch all element definitions
-        if(this.existingElementDefinitions == null) {
+        // Prefetch all element definitions
+        if(this.existingElementDefinitions.get(segmentIdentity) == null) {
             Collection elementDefinitions = this.delegation.addFindRequest(
-                this.segmentIdentity.getChild("elementDefinition"),
+                segmentIdentity.getChild("elementDefinition"),
                 new FilterProperty[]{},
                 AttributeSelectors.ALL_ATTRIBUTES,
                 0,
                 Integer.MAX_VALUE,
                 Directions.ASCENDING
             );
-            this.existingElementDefinitions = new HashMap();
+            Map<String,DataproviderObject> existingElementDefinitions = new HashMap<String,DataproviderObject>();
+            this.existingElementDefinitions.put(
+                segmentIdentity,
+                existingElementDefinitions
+            );
             for(
                 Iterator j = elementDefinitions.iterator();
                 j.hasNext();
             ) {
                 DataproviderObject_1_0 elementDefinition = (DataproviderObject_1_0)j.next();
-                this.existingElementDefinitions.put(
+                existingElementDefinitions.put(
                     elementDefinition.path().getBase(),
-                    elementDefinition
+                    new DataproviderObject(elementDefinition)
                 );
             }
         }
-
         // Prepare feature definitions
-        this.structualFeatureDefinitions = new ArrayList();
-        this.operationDefinitions = new ArrayList();
+        List<StructuralFeatureDefinition> structuralFeatureDefinitions = new ArrayList<StructuralFeatureDefinition>();
+        this.structuralFeatureDefinitions.put(
+            segmentIdentity,
+            structuralFeatureDefinitions
+        );
+        List<OperationDefinition> operationDefinitions = new ArrayList<OperationDefinition>();
+        this.operationDefinitions.put(
+            segmentIdentity,
+            operationDefinitions
+        );
         List featureDefinitions = this.delegation.addFindRequest(
-            this.segmentIdentity.getChild("featureDefinition"),
+            segmentIdentity.getChild("featureDefinition"),
             null,
             AttributeSelectors.ALL_ATTRIBUTES,
             0,
@@ -2561,7 +2591,7 @@ extends Layer_1 {
             if("org:openmdx:ui1:StructuralFeatureDefinition".equals(featureDefinition.values(SystemAttributes.OBJECT_CLASS).get(0))) {
                 String typeName = (String)featureDefinition.values("type").get(0);
                 try {
-                    this.structualFeatureDefinitions.add(
+                    structuralFeatureDefinitions.add(
                         new StructuralFeatureDefinition(
                             name,
                             qualifiedName,
@@ -2581,11 +2611,13 @@ extends Layer_1 {
             else if("org:openmdx:ui1:OperationDefinition".equals(featureDefinition.values(SystemAttributes.OBJECT_CLASS).get(0))) {
                 Boolean isQuery = (Boolean)featureDefinition.values("isQuery").get(0);
                 try {
-                    this.operationDefinitions.add(
+                    operationDefinitions.add(
                         new OperationDefinition(
                             name,
                             qualifiedName,
-                            isQuery == null ? true : isQuery.booleanValue(),
+                            isQuery == null ? 
+                                true : 
+                                isQuery.booleanValue(),
                             this.model.getElement(className)
                         )
                     );
@@ -2608,39 +2640,68 @@ extends Layer_1 {
     /**
      * any modification resets cached elements.
      */
-    public DataproviderReply create(ServiceHeader header,
-        DataproviderRequest request) throws ServiceException {
-        this.existingElementDefinitions = null;
-        this.existingElements = null;
-        return super.create(header, request);
+    public DataproviderReply create(
+        ServiceHeader header,
+        DataproviderRequest request
+    ) throws ServiceException {
+        this.existingElementDefinitions.clear();
+        this.existingElements.clear();
+        return super.create(
+            header, 
+            request
+        );
     }
 
-    public DataproviderReply modify(ServiceHeader header,
-        DataproviderRequest request) throws ServiceException {
-        this.existingElementDefinitions = null;
-        this.existingElements = null;
-        return super.modify(header, request);
+    //------------------------------------------------------------------------
+    public DataproviderReply modify(
+        ServiceHeader header,
+        DataproviderRequest request
+    ) throws ServiceException {
+        this.existingElementDefinitions.clear();
+        this.existingElements.clear();
+        return super.modify(
+            header, 
+            request
+        );
     }
 
-    public DataproviderReply remove(ServiceHeader header,
-        DataproviderRequest request) throws ServiceException {
-        this.existingElementDefinitions = null;
-        this.existingElements = null;
-        return super.remove(header, request);
+    //------------------------------------------------------------------------
+    public DataproviderReply remove(
+        ServiceHeader header,
+        DataproviderRequest request
+    ) throws ServiceException {
+        this.existingElementDefinitions.clear();
+        this.existingElements.clear();
+        return super.remove(
+            header, 
+            request
+        );
     }
 
-    public DataproviderReply replace(ServiceHeader header,
-        DataproviderRequest request) throws ServiceException {
-        this.existingElementDefinitions = null;
-        this.existingElements = null;
-        return super.replace(header, request);
+    //------------------------------------------------------------------------
+    public DataproviderReply replace(
+        ServiceHeader header,
+        DataproviderRequest request
+    ) throws ServiceException {
+        this.existingElementDefinitions.clear();
+        this.existingElements.clear();
+        return super.replace(
+            header, 
+            request
+        );
     }
 
-    public DataproviderReply set(ServiceHeader header, DataproviderRequest request)
-    throws ServiceException {
-        this.existingElementDefinitions = null;
-        this.existingElements = null;
-        return super.set(header, request);
+    //------------------------------------------------------------------------
+    public DataproviderReply set(
+        ServiceHeader header, 
+        DataproviderRequest request
+    ) throws ServiceException {
+        this.existingElementDefinitions.clear();
+        this.existingElements.clear();
+        return super.set(
+            header, 
+            request
+        );
     }
 
     //------------------------------------------------------------------------
@@ -2649,10 +2710,10 @@ extends Layer_1 {
         DataproviderRequest request
     ) throws ServiceException {
         if("assertableInspector".equals(request.path().getBase())) {
-            this.segmentIdentity = request.path().getPrefix(5);
-            this.assertCachedElements();
-            List assertableInspectors = new ArrayList();  
-            // return assertableInspector for all loaded classes
+            Path segmentIdentity = request.path().getPrefix(5);
+            this.assertCachedElements(segmentIdentity);
+            List<DataproviderObject> assertableInspectors = new ArrayList<DataproviderObject>();  
+            // Return assertableInspector for all loaded classes
             for(
                 Iterator i = this.model.getContent().iterator(); 
                 i.hasNext();
@@ -2666,6 +2727,7 @@ extends Layer_1 {
                         "org:openmdx:ui1:AssertableInspector"
                     );
                     DataproviderObject_1_0 inspectorDefinition = this.getInspectorElementDefinition(
+                        segmentIdentity,
                         new StructuralFeatureDefinition(elementDef)
                     );
                     this.getAdditionalInspectorDefinitions(
@@ -2743,51 +2805,75 @@ extends Layer_1 {
         ServiceHeader header,
         DataproviderRequest request
     ) throws ServiceException {
-
         String operation = request.path().get(
             request.path().size() - 2
         );
         DataproviderObject arguments = request.object();
-
         if("assertInspector".equals(operation)) {
             try {
-                this.segmentIdentity = request.path().getPrefix(5);
+                Path segmentIdentity = request.path().getPrefix(5);
                 String forClass = (String)arguments.values("forClass").get(0);
                 DataproviderObject_1_0 inspectorDef = null;
                 try {
                     inspectorDef = this.delegation.addGetRequest(
-                        this.segmentIdentity.getDescendant(new String[]{"element", forClass})
+                        segmentIdentity.getDescendant(new String[]{"element", forClass})
                     );
                 }
-                catch(ServiceException e) {}
-
-                if(inspectorDef == null) {          
-                    this.assertCachedElements();
-                    this.createInspector(forClass);
+                catch(ServiceException e) {} 
+                if(inspectorDef == null) {
+                    // Always assert perspective Root
+                    if(!"Root".equals(segmentIdentity.getBase())) {
+                        Path rootSegmentIdentity = segmentIdentity.getParent().getChild("Root");
+                        try {
+                            this.delegation.addGetRequest(
+                                rootSegmentIdentity.getDescendant(new String[]{"element", forClass})
+                            );
+                        } 
+                        catch(Exception e) {
+                            this.assertCachedElements(
+                                rootSegmentIdentity
+                            );
+                            this.createInspector(
+                                rootSegmentIdentity,
+                                forClass
+                            );
+                        }
+                    }
+                    this.assertCachedElements(
+                        segmentIdentity
+                    );
+                    this.createInspector(
+                        segmentIdentity,
+                        forClass
+                    );
+                    this.createInspector(
+                        segmentIdentity.getParent().getChild("Root"),
+                        forClass
+                    );                        
                 }
             }
             catch(ServiceException e) {
                 throw new ServiceException(
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.CREATION_FAILURE, 
+                    BasicException.Code.CREATION_FAILURE,
                     new BasicException.Parameter[]{
                         new BasicException.Parameter("typeName", "org:openmdx:ui1:CanNotCreateInspector"),
-                        new BasicException.Parameter("reason", e.getExceptionStack().toStringTopLevel(false))                
+                        new BasicException.Parameter("reason", e.getCause().toStringTopLevel(false))
                     },
-                    "inspector for class " + arguments.values("forClass").get(0) + " can not be created"
+                    "Inspector for class " + arguments.values("forClass").get(0) + " can not be created"
                 );
             }
             catch(Exception e) {
                 throw new ServiceException(
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.CREATION_FAILURE, 
+                    BasicException.Code.CREATION_FAILURE,
                     new BasicException.Parameter[]{
                         new BasicException.Parameter("typeName", "org:openmdx:ui1:CanNotCreateInspector"),
-                        new BasicException.Parameter("reason", e.getMessage())                
+                        new BasicException.Parameter("reason", e.getMessage())
                     },
-                    "inspector for class " + arguments.values("forClass").get(0) + " can not be created"
+                    "Inspector for class " + arguments.values("forClass").get(0) + " can not be created"
                 );
             }
             DataproviderObject result = new DataproviderObject(
@@ -2798,37 +2884,9 @@ extends Layer_1 {
             result.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:base:Void");
             return new DataproviderReply(result);
         }
-        else if("exportElements".equals(operation)) {
-            OutputStream os = new ByteArrayOutputStream();
-            PrintStream pw = new PrintStream(os);
-            XmlExporter exporter = new XmlExporter(
-                header,
-                this.getDelegation(),
-                pw,
-                this.model,
-                "UTF-8"
-            );
-            exporter.export(
-                Arrays.asList(new Path[]{this.segmentIdentity.getChild("elementDefinition")}),
-                "org/openmdx/ui1/xmi/ui1.xsd"
-            );
-            pw.flush();
-            String elementsAsXml = os.toString();
-            pw.close();
-            DataproviderObject result = new DataproviderObject(
-                request.path().getDescendant(
-                    new String[]{ "reply", super.uidAsString()}
-                )
-            );
-            result.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:ui1:ExportElementsResult");
-            result.values("elementsAsXml").add(
-                elementsAsXml
-            );
-            return new DataproviderReply(result);
-        }
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_SUPPORTED, 
+            BasicException.Code.NOT_SUPPORTED,
             new BasicException.Parameter[]{
                 new BasicException.Parameter("operation", operation)
             },
@@ -2851,7 +2909,6 @@ extends Layer_1 {
     private static final String PANE_TYPE_ATTRIBUTE = "org:openmdx:ui1:AttributePane";
     private static final String PANE_TYPE_REFERENCE = "org:openmdx:ui1:ReferencePane";
 
-//  private static final String TAB_TYPE_TAB = "org:openmdx:ui1:Tab";
     private static final String TAB_TYPE_OPERATION = "org:openmdx:ui1:OperationTab";
 
     private static final List REFERENCES_TO_EXCLUDE = Arrays.asList(
@@ -2859,20 +2916,21 @@ extends Layer_1 {
             "view",
             "org:openmdx:base:Segment:extent",
             "org:openmdx:base:ViewCapable:view",
-            "org:openmdx:base:RoleCapable:role",
-            "org:openmdx:base:ContextCapable:context",
-            "org:openmdx:compatibility:role1:Role:role"
+            "org:openmdx:base:ContextCapable:context"
         }
     );  
     private Model_1_3 model = null;
-    private Map existingElementDefinitions = null;
-    private Map existingElements = null;
-    private List structualFeatureDefinitions = null;
-    private List operationDefinitions = null;
+    private Map<Path,Map<String,DataproviderObject>> existingElementDefinitions =
+        new HashMap<Path,Map<String,DataproviderObject>>();
+    private Map<Path,Map<String,DataproviderObject>> existingElements =
+        new HashMap<Path,Map<String,DataproviderObject>>();
+    private Map<Path,List<StructuralFeatureDefinition>> structuralFeatureDefinitions = 
+        new HashMap<Path,List<StructuralFeatureDefinition>>();
+    private Map<Path,List<OperationDefinition>> operationDefinitions =
+        new HashMap<Path,List<OperationDefinition>>();
     private boolean changableDefaultValue = true;
 
     private RequestCollection delegation = null; // initialized in prolog()
-    private Path segmentIdentity = null; // initialized in operation()
 
     private OperationDefinition editObjectOperationDef = null;
     private OperationDefinition deleteObjectOperationDef = null;

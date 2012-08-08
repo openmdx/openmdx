@@ -1,7 +1,120 @@
+/* top navigation ------------------------------------------------------------------------*/
+#topnavi {
+  background:white;
+  padding:8px 0 0 10px;
+}
+#topnavi #nav ul {
+}
+#topnavi #nav li a img {
+  overflow:visible;
+}
+#topnavi #nav li {
+  margin:4px 0 0 0;
+  padding:1px 2px 4px 4px;
+}
+#topnavi #nav li a {
+  font-size: 88%;
+}
+#topnavi #nav li ul li {
+  margin:0;
+	padding: 3px 8px 3px 4px;
+}
+
+#navigation {
+  overflow:hidden;
+  list-style: none;
+  margin:0;
+  padding:4px 0 0 1px;
+}
+#navigation li {
+  float: left;
+  padding:0;
+  list-style: none;
+  background-color: white; /* to cater for users without images */
+}
+#navigation a {
+  display: block;
+  background: url('../images/tableft.gif') left top no-repeat;
+  color: #666;
+  padding:0 0 0 3px;
+  margin:0;
+  text-decoration: none;
+  font-weight: bold;
+}
+#navigation span {
+  display: block;
+  background: url('../images/tabright.gif') right top no-repeat;
+  margin-left:0px;
+  padding: 5px 9px 4px 4px;
+  font-size:90%;
+}
+#navigation a:hover {
+  background-position:0 -42px;
+  color: #333;
+}
+#navigation a:hover span {
+  background-position: 100% -42px;
+  color: #333;
+}
+#navigation li.selected a {
+  background-position: 0 -42px;
+}
+#navigation li.selected a span {
+  background-position: 100% -42px;
+}
+
+/* this is the menu stuff */
+#navigation li:hover, #navigation li.hover { /* IE fix for suckerfish */
+  position: static;
+}
+#navigation li ul {
+  position: absolute;
+  width:150px;
+  overflow:visible;
+  left: -999em;
+  margin:0;
+  padding:0;
+  background-color: white;
+  border-right:1px solid black;
+  border-bottom:1px solid black;
+  border-left:1px solid black;
+}
+#navigation li ul a, #navigation li ul a:link {
+  background-image: none;
+  background-color: white;
+  padding: 2px 4px 2px 6px;
+  width: 140px;
+  font-size: 88%;
+  font-weight:normal;
+}
+#navigation li ul a:hover {
+  background-color: #ddd;
+  color:black;
+}
+#navigation li:hover ul, #navigation li.sfhover ul {
+  left: auto;
+}
+
+/* Support for the "iehover-fix.js" */
+* html ul.navigation iframe {
+	position: absolute;
+	float: left;
+	/* account for the border */
+	left: -0.25em;
+	top: -0.25em;
+	z-index: 0;
+	filter: progid:DXImageTransform.Microsoft.Alpha(style=0,opacity=0);
+}
+
+/* this is for IE 5.0
+select.hide { visibility: hidden; }
+
+/* End Support for the "iehover-fix.js" */
+
 /* horizontal --------------------------------------------------------------------------- */
 #nav, #nav ul { /* all lists */
-	padding: 0;
-	margin: 0;
+  padding:0;
+	margin:0;
 	list-style:none;
   list-style-position:outside;
  	line-height: 1;
@@ -20,15 +133,15 @@
 	/*
 	border-left: solid 1px #FFFFFF;
 	*/
-  padding: 4px 6px 4px 2px;
+  padding: 4px 2px 4px 2px;
 }
 
 #nav li:hover, #nav li.sfhover {
   color: black;
-	background: #ddd;
+	background:#ddd;
 	margin-left: 1px;
 	/*
-	border-left: solid 1px black;
+	border-left: solid 1px #ddd;
 	*/
 }
 
@@ -49,7 +162,7 @@
 
 #nav li a {
 	text-decoration: none;
- 	font-size:8pt;
+ 	font-size:11px;
  	font-weight:bold;
 }
 
@@ -83,7 +196,7 @@
 
 #nav li ul li { /* second-level entries */
   float: none;
-	padding: 2px 8px 2px 2px;
+	padding: 3px 8px 3px 2px;
 	background-color: #FFFFFF;
 	border-left: none 0px #FFFFFF;
 }
@@ -92,12 +205,12 @@
   width: auto;
   white-space: nowrap;
   overflow: visible;
+	font-weight:normal;
 }
 
 #nav li ul li a span { /* disabled second-level entries */
   color: #bbb;
  	font-size:8pt;
- 	font-weight:bold;
 }
 
 #nav li ul li:hover, #nav li ul li.sfhover {
@@ -129,7 +242,9 @@ select.hide { visibility: hidden; }
 	margin: 0;
 	list-style: none;
   list-style-position:outside;
+	/*
 	line-height: 1;
+	*/
 	overflow: visible;
 }
 
@@ -140,15 +255,17 @@ select.hide { visibility: hidden; }
 }
 
 #navv li { /* all list items */
+/*
 	float : left;
-	width: auto; /* width needed or else Opera goes nuts */
 	line-height: 1.15em;
+*/
+	width: auto; /* width needed or else Opera goes nuts */
 }
 
 #navv li a {
 	text-decoration : none;
-	padding-top: 2px;
-	padding-bottom: 2px;
+	padding-top: 1px;
+	padding-bottom: 1px;
   display : block;
 	white-space: nowrap;
   overflow: hidden;

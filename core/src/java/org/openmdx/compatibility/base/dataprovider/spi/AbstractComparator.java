@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractComparator.java,v 1.6 2008/06/28 00:21:19 hburger Exp $
- * Description: Abstract Filter Class
- * Revision:    $Revision: 1.6 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: AbstractComparator.java,v 1.7 2008/09/22 23:38:20 hburger Exp $
+ * Description: Abstract Comparator
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/28 00:21:19 $
+ * Date:        $Date: 2008/09/22 23:38:20 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.spi;
 
@@ -64,13 +63,9 @@ import org.openmdx.compatibility.base.dataprovider.cci.Orders;
 
 
 /**
- * @author hburger
- *
- * To change the template for this generated type comment go to
- * Window>Preferences>Java>Code Generation>Code and Comments
+ * Abstract Comparator
  */
-@SuppressWarnings("unchecked")
-public abstract class AbstractComparator implements Comparator {
+public abstract class AbstractComparator<E> implements Comparator<E> {
 
     /**
      * 
@@ -89,15 +84,16 @@ public abstract class AbstractComparator implements Comparator {
      * @exception   ClassCastException
      *              If the filter is not applicable to the candidate
      */
-    protected abstract Iterator getValues(
-        Object candidate,
+    protected abstract Iterator<?> getValues(
+        E candidate,
         String attribute
     );
     
     /* (non-Javadoc)
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
-    public int compare(Object left, Object right) {
+    @SuppressWarnings("unchecked")
+    public int compare(E left, E right) {
         specifications: for(
             int i = 0;
             i < this.order.length;
@@ -118,7 +114,7 @@ public abstract class AbstractComparator implements Comparator {
                     break;
             }
             for(
-                Iterator 
+                Iterator<?> 
                     li = getValues(left, specifier.name()),
                     ri = getValues(right, specifier.name());
                 (ln = li.hasNext()) | (rn = ri.hasNext());

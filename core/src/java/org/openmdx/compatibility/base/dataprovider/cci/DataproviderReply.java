@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderReply.java,v 1.7 2008/03/21 18:45:24 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: DataproviderReply.java,v 1.9 2008/10/14 16:05:33 hburger Exp $
  * Description: DataproviderReply class
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:45:24 $
+ * Date:        $Date: 2008/10/14 16:05:33 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,13 +45,14 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.cci;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.resource.ResourceException;
@@ -60,7 +60,6 @@ import javax.resource.ResourceException;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.resource.Records;
 
-@SuppressWarnings("unchecked")
 public class DataproviderReply
     extends DataproviderContext
 {
@@ -93,9 +92,9 @@ public class DataproviderReply
      * Reply to successfull requests returning a collection of objects
      */
     public DataproviderReply(
-        List objects
+        List<DataproviderObject> objects
     ){
-        this.objects = (DataproviderObject[])objects.toArray(
+        this.objects = objects.toArray(
             new DataproviderObject[objects.size()]
         );
     }
@@ -157,8 +156,8 @@ public class DataproviderReply
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.cci.DataproviderContext#keys()
      */
-    protected Collection keys() {
-        return Arrays.asList(new String[]{"objects","contexts"});
+    protected Collection<String> keys() {
+        return KEYS;
     }
 
 
@@ -180,5 +179,12 @@ public class DataproviderReply
     //------------------------------------------------------------------------
     private DataproviderObject[] objects;
 
+    private static final List<String> KEYS = Collections.unmodifiableList(
+        Arrays.asList(
+            "objects",
+            "contexts"
+        )
+    );
+    
 }
 

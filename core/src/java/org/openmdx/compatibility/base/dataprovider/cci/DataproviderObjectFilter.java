@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataproviderObjectFilter.java,v 1.10 2008/03/21 18:45:24 hburger Exp $
+ * Name:        $Id: DataproviderObjectFilter.java,v 1.11 2008/11/10 17:23:45 hburger Exp $
  * Description: Dataprovider Object Filter
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:45:24 $
+ * Date:        $Date: 2008/11/10 17:23:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,7 +61,6 @@ import org.openmdx.compatibility.base.query.FilterProperty;
 /**
  * Dataprovider Object Filter
  */
-@SuppressWarnings("unchecked")
 public class DataproviderObjectFilter extends AbstractFilter {
 
     /**
@@ -88,13 +87,13 @@ public class DataproviderObjectFilter extends AbstractFilter {
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.query.AbstractFilter#getValues(java.lang.Object, java.lang.String)
      */
-    protected Iterator getValues(
+    protected Iterator<?> getValues(
         Object candidate, 
         String attribute
     ){
         try {
             DataproviderObject object = (DataproviderObject)candidate;
-            SparseList values = object.getValues(attribute);
+            SparseList<?> values = object.getValues(attribute);
             return 
                 values != null ? values.populationIterator() :
                 SystemAttributes.OBJECT_IDENTITY.equals(attribute) ? Collections.singleton(object.path()).iterator() :

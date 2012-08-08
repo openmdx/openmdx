@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Gateway_1Bean.java,v 1.2 2008/07/01 20:47:17 hburger Exp $
+ * Name:        $Id: Gateway_1Bean.java,v 1.3 2008/11/27 16:46:56 hburger Exp $
  * Description: Gateway Bean
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/01 20:47:17 $
+ * Date:        $Date: 2008/11/27 16:46:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -131,7 +131,7 @@ public class Gateway_1Bean
      */
     public UnitOfWorkReply[] process(
         ServiceHeader header,
-        UnitOfWorkRequest[] workingUnits
+        UnitOfWorkRequest... workingUnits
     ) {      
         try {
             logger.info(

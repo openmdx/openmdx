@@ -70,11 +70,7 @@
       </eAnnotations>
       <ownedMember xmi:type="uml:Package" xmi:id="_CijIkNilEduE967tta7-tw" name="compatibility">
         <eAnnotations xmi:id="_Ci_0gNilEduE967tta7-tw" source="uml2.diagrams"/>
-        <eAnnotations xmi:id="_IRtq0NilEduE967tta7-tw" source="uml2.ownedShortcuts">
-          <contents xmi:type="ecore:EAnnotation" xmi:id="_IRtq0dilEduE967tta7-tw" source="eObjectShortcut">
-            <references xmi:type="uml:Package" href="platform:/resource/openMDX%202%20~%20Core%20(RSM)/org.openmdx.compatibility.view1.emx#_3C7B8A60016D403F30960159?view1/view1"/>
-          </contents>
-        </eAnnotations>
+        <eAnnotations xmi:id="_IRtq0NilEduE967tta7-tw" source="uml2.ownedShortcuts"/>
       </ownedMember>
     </ownedMember>
   </ownedMember>

@@ -1,0 +1,23 @@
+
+(object Petal
+    version    	50
+    _written   	"Rose 8.3.0407.2800"
+    charSet    	0)
+
+(object Class_Category "omg"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3C61689D0096"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class_Category "model1"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\omg\\model1.cat"
+	    quid       	"3C3238A3033A")
+	(object Class_Category "PrimitiveTypes"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\omg\\PrimitiveTypes.cat"
+	    quid       	"3D0C708700E2"))
+    logical_presentations 	(list unit_reference_list))

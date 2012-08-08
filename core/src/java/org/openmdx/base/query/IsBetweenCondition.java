@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: IsBetweenCondition.java,v 1.5 2005/04/06 15:28:18 wfro Exp $
+ * Name:        $Id: IsBetweenCondition.java,v 1.6 2008/09/09 01:05:32 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/04/06 15:28:18 $
+ * Date:        $Date: 2008/09/09 01:05:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,7 @@ public class IsBetweenCondition
 public IsBetweenCondition(
   ) {
     super(
-        new Object[]{null, null}
+        null, null
     );
   }
   
@@ -80,7 +80,7 @@ public IsBetweenCondition(
         quantor,
         feature,
         fulfil,
-        new Object[]{lower, upper}
+        lower, upper
     );
   }
 

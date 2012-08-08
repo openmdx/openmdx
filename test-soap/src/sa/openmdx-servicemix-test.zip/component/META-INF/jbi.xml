@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<jbi xmlns="http://java.sun.com/xml/ns/jbi" version="1.0">
-  <services>
-    <consumes service-name="SOAP-PASS" endpoint-name="SOAP-PASS"/>
-  </services>
-</jbi>

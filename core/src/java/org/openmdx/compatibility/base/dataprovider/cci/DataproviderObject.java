@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderObject.java,v 1.32 2008/06/27 16:59:28 hburger Exp $
+ * Name:        $Id: DataproviderObject.java,v 1.38 2008/12/04 12:38:47 wfro Exp $
  * Description: spice: dataprovider object
- * Revision:    $Revision: 1.32 $
+ * Revision:    $Revision: 1.38 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/27 16:59:28 $
+ * Date:        $Date: 2008/12/04 12:38:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -68,13 +68,13 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.DataInput;
 import org.openmdx.base.io.DataOutput;
 import org.openmdx.base.io.Externalizable;
+import org.openmdx.base.resource.Records;
 import org.openmdx.compatibility.base.collection.CompactSparseList;
 import org.openmdx.compatibility.base.collection.OffsetArrayList;
 import org.openmdx.compatibility.base.collection.SparseList;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.collection.ArraysExtension;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.text.format.IndentingFormatter;
 
 
 /**
@@ -89,7 +89,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
  */
 @SuppressWarnings("unchecked")
 public class DataproviderObject
-    implements DataproviderObject_1_0, Serializable, Cloneable, Externalizable {
+implements DataproviderObject_1_0, Serializable, Cloneable, Externalizable {
 
     //-----------------------------------------------------------------------    
     final int getAttributeIndex(
@@ -108,16 +108,16 @@ public class DataproviderObject
         this.attributeNames[len] = internalName;
         return len;        
     }
-    
+
     //-----------------------------------------------------------------------
     SparseList getAttributeValue(
         int attributeIndex
     ) throws ServiceException {
         return this.attributeValues == null || attributeIndex >= this.attributeValues.length
-            ? null
+        ? null
             : this.attributeValues[attributeIndex];
     }
-    
+
     //-----------------------------------------------------------------------
     void setAttributeValue(
         int attributeIndex,
@@ -133,7 +133,7 @@ public class DataproviderObject
         }
         this.attributeValues[attributeIndex] = value;
     }
-    
+
     //-----------------------------------------------------------------------
     /**
      * Returns the dataprovider object's path object.
@@ -150,7 +150,7 @@ public class DataproviderObject
     public DataproviderObject(
     ) {        
     }
-    
+
     //-----------------------------------------------------------------------
     /**
      * Creates a dataprovider object referencing a specific path object.
@@ -161,7 +161,7 @@ public class DataproviderObject
         Path path
     ) {
         this.path = path;
-        this.attributeNames = new String[]{};
+        this.attributeNames = NO_ATTRIBUTES;
     }
 
     //-----------------------------------------------------------------------
@@ -186,10 +186,10 @@ public class DataproviderObject
             try {
                 this.setDigest(that.getDigest());
                 for(
-                    Iterator iterator = (
-                        attributeNames == null ? that.attributeNames() : attributeNames
-                    ).iterator();
-                    iterator.hasNext();
+                        Iterator iterator = (
+                                attributeNames == null ? that.attributeNames() : attributeNames
+                        ).iterator();
+                        iterator.hasNext();
                 ){
                     final String name = (String)iterator.next();
                     SparseList values = that.getValues(name);
@@ -198,7 +198,7 @@ public class DataproviderObject
                         this.setAttributeValue(
                             attributeIndex,
                             COMPACT 
-                                ? new CompactSparseList(values) :
+                            ? new CompactSparseList(values) :
                                 (SparseList) new OffsetArrayList(values)
                         );
                     }
@@ -256,20 +256,20 @@ public class DataproviderObject
      * Returns the attribute value list.
      * This method returns null if no such attribute exists.
      */
-    final public SparseList getValues(
+    final public SparseList<Object> getValues(
         String attributeName
     ) {
         try {
             int attributeIndex = this.getAttributeIndex(attributeName, false);
             return attributeIndex == -1
-                ? null
+            ? null
                 : this.getAttributeValue(attributeIndex);
         }
         catch(ServiceException e) {
             throw new RuntimeServiceException(e);
         }
     }
-    
+
     //-----------------------------------------------------------------------
     /**
      * Returns the modifiable attribute value list.
@@ -286,8 +286,8 @@ public class DataproviderObject
                     this.setAttributeValue(
                         attributeIndex, 
                         COMPACT 
-                            ? (SparseList)new CompactSparseList(1) 
-                            : (SparseList)new OffsetArrayList(1)
+                        ? (SparseList)new CompactSparseList(1) 
+                        : (SparseList)new OffsetArrayList(1)
                     );
                 }
             }
@@ -321,9 +321,9 @@ public class DataproviderObject
      */
     final public void clear(
     ) {
-        this.attributeNames = new String[]{};
+        this.attributeNames = NO_ATTRIBUTES;
     }
-    
+
     //-----------------------------------------------------------------------
     /**
      * Get a set view of the dataprovider object's attribute names
@@ -332,7 +332,7 @@ public class DataproviderObject
     ) {
         return new AttributeNames();
     }
-        
+
     //-----------------------------------------------------------------------
     /**
      * Checks whether the dataprovider object contains an attribute with the
@@ -348,7 +348,7 @@ public class DataproviderObject
             throw new RuntimeServiceException(e);
         }
     }
-    
+
     //-----------------------------------------------------------------------
     /**
      * The attributes are copied, subsequent changes to the original are
@@ -369,8 +369,8 @@ public class DataproviderObject
         try {
             boolean modified = false;
             for(
-                Iterator iterator = source.attributeNames().iterator();
-                iterator.hasNext();
+                    Iterator iterator = source.attributeNames().iterator();
+                    iterator.hasNext();
             ) {
                 final String attributeName = (String)iterator.next();
                 if (overwrite || ! containsAttributeName(attributeName)) {
@@ -379,8 +379,8 @@ public class DataproviderObject
                     this.setAttributeValue(
                         attributeIndex, 
                         COMPACT 
-                            ? new CompactSparseList(values) 
-                            : (SparseList) new OffsetArrayList(values)
+                        ? new CompactSparseList(values) 
+                        : (SparseList) new OffsetArrayList(values)
                     );
                     modified = true;
                 }
@@ -391,16 +391,16 @@ public class DataproviderObject
             throw new RuntimeServiceException(e);
         }
     } 
-    
+
     //------------------------------------------------------------------------
     // Implements Serializable
     //------------------------------------------------------------------------
-    
+
     private void writeObject(
         java.io.ObjectOutputStream stream
     ) throws IOException {
         try {
-            stream.writeUnshared(this.path.getComponents());
+            stream.writeObject(this.path);
             stream.writeUnshared(this.digest);
             stream.writeObject(this.attributeNames);
             for(int i = 0; i < this.attributeNames.length; i++) {
@@ -413,12 +413,10 @@ public class DataproviderObject
                             exception,
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.TRANSFORMATION_FAILURE,
-                            new BasicException.Parameter[]{
-                                new BasicException.Parameter("path", this.path),
-                                new BasicException.Parameter("attribute", this.attributeNames[i]),
-                                new BasicException.Parameter("values", this.getAttributeValue(i))
-                            },
-                            "DataproviderObject serialization failed"
+                            "DataproviderObject serialization failed",
+                            new BasicException.Parameter("path", this.path),
+                            new BasicException.Parameter("attribute", this.attributeNames[i]),
+                            new BasicException.Parameter("values", this.getAttributeValue(i))
                         )
                     );
                 }
@@ -429,13 +427,13 @@ public class DataproviderObject
             throw new IOException(e.getMessage());
         }
     }
-    
+
     //-----------------------------------------------------------------------
     private void readObject(
         java.io.ObjectInputStream stream
     ) throws java.io.IOException, ClassNotFoundException {
         try {
-            this.path = new Path((String[])stream.readUnshared());
+            this.path = (Path)stream.readObject();
             this.digest = (byte[])stream.readUnshared();
             this.attributeNames = (String[])stream.readObject();
             for(int i = 0; i < this.attributeNames.length; i++) {
@@ -457,11 +455,12 @@ public class DataproviderObject
     //-----------------------------------------------------------------------
     // Externalizable
     //-----------------------------------------------------------------------
-    
+
     //------------------------------------------------------------------------
     /* (non-Javadoc)
      * @see org.openmdx.base.io.Externalizable#readExternal(org.openmdx.base.io.DataInput)
      */
+    @SuppressWarnings("deprecation")
     public void readExternal(
         DataInput in
     ) throws IOException {
@@ -506,12 +505,10 @@ public class DataproviderObject
                             new BasicException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.TRANSFORMATION_FAILURE,
-                                new BasicException.Parameter[]{
-                                    new BasicException.Parameter("path", this.path),
-                                    new BasicException.Parameter("attribute", this.attributeNames[i]),
-                                    new BasicException.Parameter("tc", tc)
-                                },
-                                "DataproviderObject externalize failed. Unsupported type code"
+                                "DataproviderObject externalize failed. Unsupported type code",
+                                new BasicException.Parameter("path", this.path),
+                                new BasicException.Parameter("attribute", this.attributeNames[i]),
+                                new BasicException.Parameter("tc", tc)
                             )
                         );                        
                     }
@@ -563,11 +560,11 @@ public class DataproviderObject
                 else {
                     int size = values.size();
                     Object firstValue = size == 0 
-                        ? null 
+                    ? null 
                         : values.get(values.firstIndex());
                     if(
-                        (size == 0) || 
-                        (firstValue instanceof String)
+                            (size == 0) || 
+                            (firstValue instanceof String)
                     ) {
                         if(size == 1) {
                             out.writeShort(TC_NULL);
@@ -597,12 +594,10 @@ public class DataproviderObject
                             new BasicException(
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.TRANSFORMATION_FAILURE,
-                                new BasicException.Parameter[]{
-                                    new BasicException.Parameter("path", this.path),
-                                    new BasicException.Parameter("attribute", this.attributeNames[i]),
-                                    new BasicException.Parameter("values", this.getAttributeValue(i))
-                                },
-                                "DataproviderObject serialization failed"
+                                "DataproviderObject serialization failed",
+                                new BasicException.Parameter("path", this.path),
+                                new BasicException.Parameter("attribute", this.attributeNames[i]),
+                                new BasicException.Parameter("values", this.getAttributeValue(i))
                             )
                         );                        
                     }
@@ -615,7 +610,7 @@ public class DataproviderObject
             throw new IOException(e.getMessage());
         }
     }
-    
+
     //------------------------------------------------------------------------
     // Extends Object
     //------------------------------------------------------------------------
@@ -635,26 +630,32 @@ public class DataproviderObject
         try {
             List attributeValues = new ArrayList();
             for(int i = 0; i < this.attributeNames.length; i++) {
-                attributeValues.add(this.getAttributeValue(i));
+                List attributeValue = new ArrayList();
+                for(Object value: this.getAttributeValue(i)) {
+                    // Prevent recursion
+                    if(value instanceof DataproviderObject_1_0) {
+                        attributeValue.add(((DataproviderObject_1_0)value).path());
+                    }
+                    else {
+                        attributeValue.add(value);
+                    }
+                }
+                attributeValues.add(attributeValue);
             }
-            return this.path.toString() + ':' + IndentingFormatter.toString(
-            	ArraysExtension.asMap(
-            	    new String[]{
-            	        "digest", 
-            	        "attributes"
-            	    },	
-            		new Object[]{
-            	        this.digest, 
-            	        ArraysExtension.asMap(this.attributeNames, attributeValues.toArray())
-            	    }
-    			)
-    		);
-        }
-        catch(ServiceException e) {
-            throw new RuntimeServiceException(e);
+            return Records.getRecordFactory().asMappedRecord(
+                getClass().getName(), // recordName, 
+                this.path.toString(), // recordShortDescription, 
+                TO_STRING_FIELDS, 
+                new Object[]{
+                    this.digest, 
+                    ArraysExtension.asMap(this.attributeNames, attributeValues.toArray())
+                }
+            ).toString();
+        } catch (Exception exception) {
+            return super.toString();
         }
     }
-    
+
     //------------------------------------------------------------------------
     /**
      * Indicates whether some other object is "equal to" this one. 
@@ -673,14 +674,14 @@ public class DataproviderObject
         if (!(object instanceof DataproviderObject_1_0)) return false;
         DataproviderObject_1_0 that = (DataproviderObject_1_0)object;
         if (
-            ! this.path().equals(that.path()) ||
-            ! Arrays.equals(this.getDigest(), that.getDigest())
+                ! this.path().equals(that.path()) ||
+                ! Arrays.equals(this.getDigest(), that.getDigest())
         ) return false;
         Set attributeNames = new HashSet(this.attributeNames());
         attributeNames.addAll(that.attributeNames());
         for (
-            Iterator i = attributeNames.iterator();
-            i.hasNext();
+                Iterator i = attributeNames.iterator();
+                i.hasNext();
         ){
             String attributeName = (String)i.next();
             List thisAttribute = this.getValues(attributeName);
@@ -690,15 +691,24 @@ public class DataproviderObject
             // (thatAttribute == null) and !thisAttribute.isEmpty()
             //
             if(
-                !(
-                  (thisAttribute == null || thisAttribute.isEmpty()) && (thatAttribute == null || thatAttribute.isEmpty()) ||
-                  ((thisAttribute != null) && (thatAttribute != null) && thisAttribute.equals(thatAttribute))
-                )
+                    !(
+                            (thisAttribute == null || thisAttribute.isEmpty()) && (thatAttribute == null || thatAttribute.isEmpty()) ||
+                            ((thisAttribute != null) && (thatAttribute != null) && thisAttribute.equals(thatAttribute))
+                    )
             ) return false;
         }
         return true;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public final int hashCode() {
+        return this.path.hashCode();
+    }
+
+    
     //------------------------------------------------------------------------
     // Implements Cloneable
     //------------------------------------------------------------------------
@@ -748,7 +758,7 @@ public class DataproviderObject
         ) {
             this.pos = 0;
         }
-        
+
         public boolean hasNext(
         ) {
             return this.pos < DataproviderObject.this.attributeNames.length;
@@ -784,7 +794,7 @@ public class DataproviderObject
 
         private int pos = 0;
     }
-    
+
     class AttributeNames extends AbstractSet<String> {
 
         public Iterator iterator(
@@ -846,9 +856,9 @@ public class DataproviderObject
                 throw new RuntimeServiceException(e);
             }
         }
-                
+
     }
-    
+
     //------------------------------------------------------------------------
     // Variables
     //------------------------------------------------------------------------
@@ -858,7 +868,7 @@ public class DataproviderObject
     private static final short TC_STRING = 1;
     private static final short TC_NUMBER = 2;
     private static final short TC_PATH = 3;
-    
+
     /**
      * Tells whether the values are<ul>
      * <li><code>OffsetArrayList</code>s
@@ -866,10 +876,16 @@ public class DataproviderObject
      * </ul>
      */
     private final static boolean COMPACT = true;
-    
+
     private transient Path path;
     private transient byte[] digest;
     transient String[] attributeNames;
     private transient SparseList[] attributeValues;
+
+    private static final String[] NO_ATTRIBUTES = {};
+    private static final String[] TO_STRING_FIELDS = {
+        "digest", 
+        "attributes"
+    };
 
 }

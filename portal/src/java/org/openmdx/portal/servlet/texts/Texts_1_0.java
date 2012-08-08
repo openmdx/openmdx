@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Texts_1_0.java,v 1.10 2007/05/22 12:04:15 wfro Exp $
+ * Name:        $Id: Texts_1_0.java,v 1.14 2008/11/14 17:26:24 wfro Exp $
  * Description: Texts_1_0
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/05/22 12:04:15 $
+ * Date:        $Date: 2008/11/14 17:26:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.texts;
 
@@ -102,6 +99,7 @@ public interface Texts_1_0 {
     public String getErrorTextCannotEditObject();
     public String getErrorTextCannotNavigate();
     public String getErrorTextCannotSetLocale();
+    public String getErrorTextCannotSetPerspective();
     public String getErrorTextCannotDeleteObject();
     public String getErrorTextCanNotInvokeOperation();
     public String getErrorTextCanNotSetOperationResult();
@@ -125,6 +123,9 @@ public interface Texts_1_0 {
     public String getShowRowsOnInitTitle();
     public String getHideRowsOnInitTitle();
     public String getShowRowsText();
+    public String getExploreText();
+    public String getShowHeaderTitle();
+    public String getHideHeaderTitle();
 }
 
 //--- End of File -----------------------------------------------------------

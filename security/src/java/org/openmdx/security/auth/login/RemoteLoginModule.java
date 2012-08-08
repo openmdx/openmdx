@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     OMEX/Security, http://www.omex.ch/
- * Name:        $Id: RemoteLoginModule.java,v 1.14 2008/04/04 17:55:32 hburger Exp $
+ * Name:        $Id: RemoteLoginModule.java,v 1.15 2008/09/26 12:21:45 hburger Exp $
  * Description: Remote Login Module
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:55:32 $
+ * Date:        $Date: 2008/09/26 12:21:45 $
  * ====================================================================
  *
  * Copyright (c) 2004-2006, OMEX AG, Switzerland
@@ -37,7 +37,6 @@ import java.util.Set;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Transaction;
-import javax.jmi.reflect.RefException;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -49,23 +48,22 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
-import org.openmdx.base.cci.Authority;
-import org.openmdx.base.cci.Provider;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.jmi1.Authority;
+import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.text.conversion.UnicodeTransformation;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.security.authentication.spi.GenericPrincipal;
 import org.openmdx.kernel.security.authentication.spi.GenericPrincipals;
-import org.openmdx.security.authentication1.cci.AuthenticationContext;
-import org.openmdx.security.authentication1.jmi.Authentication1Package;
-import org.openmdx.security.realm1.cci.Credential;
-import org.openmdx.security.realm1.cci.Group;
-import org.openmdx.security.realm1.cci.Principal;
-import org.openmdx.security.realm1.cci.Realm;
-import org.openmdx.security.realm1.cci.ValidationResult;
-import org.openmdx.security.realm1.jmi.Realm1Package;
-import org.openmdx.security.realm1.query.PrincipalQuery;
+import org.openmdx.security.authentication1.jmi1.Authentication1Package;
+import org.openmdx.security.authentication1.jmi1.AuthenticationContext;
+import org.openmdx.security.realm1.cci2.PrincipalQuery;
+import org.openmdx.security.realm1.jmi1.Credential;
+import org.openmdx.security.realm1.jmi1.Group;
+import org.openmdx.security.realm1.jmi1.Principal;
+import org.openmdx.security.realm1.jmi1.Realm;
+import org.openmdx.security.realm1.jmi1.Realm1Package;
+import org.openmdx.security.realm1.jmi1.ValidationResult;
 
 /**
  * The remote authenticator's login module implementation.
@@ -143,7 +141,7 @@ public class RemoteLoginModule implements LoginModule {
      *
      * @param options A Map containing options that the authenticator's
      * authentication provider impl wants to pass to its login module impl.<ul>
-     * <li><b><code>"org.openmdx.security.realm1.cci.Realm"</code>:</b>
+     * <li><b><code>"org.openmdx.security.realm1.jmi1.Realm"</code>:</b>
      *     <em>(mandatory)</em>
      *     The realm's object id, i.e. 
      *     "xri://@openmdx*org.openmdx.secuyrity.realm1/provider/</code>&lsaquo;provider name&rsaquo;<code>/segment/</code>&lsaquo;sement name&rsaquo;<code>/realm/</code>&lsaquo;realm name&rsaquo;<code>
@@ -178,7 +176,7 @@ public class RemoteLoginModule implements LoginModule {
      *          <code>javax.security.auth.callback.PasswordCallback</code>'s
      *          echo is to be switched on or not
      *     <li>a <code>java.utilSet</code> of
-     *          <code>org.openmdx.security.realm1.cci.ValidationResult</code> 
+     *          <code>org.openmdx.security.realm1.jmi1.ValidationResult</code> 
      *          codes requiring their 
      *          <code>javax.security.auth.callback.PasswordCallback</code>'s
      *          echo to be switched on
@@ -186,7 +184,7 @@ public class RemoteLoginModule implements LoginModule {
      * </ul>
      * 
      * @exception <code>NullPointerException</code> if one of the following options is missing<ul>
-     * <li><code>"org.openmdx.security.realm1.cci.Realm"</code>
+     * <li><code>"org.openmdx.security.realm1.jmi1.Realm"</code>
      * <li><code>"javax.jdo.PersistenceManagerFactory"</code>
      * </ul>
      */
@@ -243,10 +241,10 @@ public class RemoteLoginModule implements LoginModule {
             );
             Provider realmProvider = realmAuthority.getProvider(this.realmId.get(2));
             Provider authenticationProvider = authenticationAuthority.getProvider(this.realmId.get(2));
-            org.openmdx.security.realm1.cci.Segment realmSegment = (org.openmdx.security.realm1.cci.Segment) realmProvider.getSegment(
+            org.openmdx.security.realm1.jmi1.Segment realmSegment = (org.openmdx.security.realm1.jmi1.Segment) realmProvider.getSegment(
                 this.realmId.get(4)
             );
-            org.openmdx.security.authentication1.cci.Segment authenticationSegment = (org.openmdx.security.authentication1.cci.Segment) authenticationProvider.getSegment(
+            org.openmdx.security.authentication1.jmi1.Segment authenticationSegment = (org.openmdx.security.authentication1.jmi1.Segment) authenticationProvider.getSegment(
                 this.realmId.get(4)
             );
             Authentication1Package authenticationPackage = (Authentication1Package) authenticationSegment.refImmediatePackage();
@@ -286,7 +284,7 @@ public class RemoteLoginModule implements LoginModule {
                 PrincipalQuery principalQuery = realm1Package.createPrincipalQuery();
                 principalQuery.name().equalTo(name);
                 principalQuery.disabled().isFalse();
-                List<?> principals = realm.getPrincipal(principalQuery);
+                List<Principal> principals = realm.getPrincipal(principalQuery);
                 switch (principals.size()) {
                     case 0: throw new FailedLoginException(
                         "Found no enabled principal named " + name
@@ -298,7 +296,7 @@ public class RemoteLoginModule implements LoginModule {
                     );
                 }
                 principal = (Principal) principals.get(0);
-                Collection<?> authCredentials = principal.getAuthCredential();
+                Collection<Credential> authCredentials = principal.getAuthCredential();
                 authenticationCredentials = authCredentials.toArray(
                     new Credential[]{}
                 );
@@ -310,7 +308,7 @@ public class RemoteLoginModule implements LoginModule {
                     i < authenticationCredentials.length;
                     i++
                 ) {
-                    org.openmdx.security.realm1.cci.CredentialRequestParams params =  realm1Package.createCredentialRequestParams(authenticationContext);               
+                    org.openmdx.security.realm1.jmi1.CredentialRequestParams params =  realm1Package.createCredentialRequestParams(authenticationContext);               
                     validationResult[i] = authenticationCredentials[i].request(params);
                 }
                 unitOfWork.commit();
@@ -352,16 +350,17 @@ public class RemoteLoginModule implements LoginModule {
                 unitOfWork.begin();
 //              persistenceManager.makeTransactional(principal);
                 authenticationContext = authenticationPackage.getAuthenticationContext(
-                ).createAuthenticationContext(realm);
+                ).createAuthenticationContext();
+                authenticationContext.setRealm(realm);
                 authenticationContext.setSubject(principal.getSubject());
-                authenticationSegment.addAuthenticationContext(authenticationContext);
+                authenticationSegment.getAuthenticationContext().add(authenticationContext);
                 for(
                     int i = 0;
                     i < validationResult.length;
                     i++
                 ) {
                     char[] password = passwordCallbacks[i].getPassword();
-                    org.openmdx.security.realm1.cci.CredentialValidateParams params = realm1Package.createCredentialValidateParams(
+                    org.openmdx.security.realm1.jmi1.CredentialValidateParams params = realm1Package.createCredentialValidateParams(
                         authenticationContext, 
                         validationResult[i].getState(), 
                         UnicodeTransformation.toByteArray(password, 0, password.length)
@@ -373,9 +372,6 @@ public class RemoteLoginModule implements LoginModule {
             } catch (JmiServiceException exception){
                 if(preparing) unitOfWork.rollback();
                 throw exception;
-            } catch (RefException exception) {
-                if(preparing) unitOfWork.rollback();
-                throw new RuntimeServiceException(exception);
             }
             for(
                 int i = 0;

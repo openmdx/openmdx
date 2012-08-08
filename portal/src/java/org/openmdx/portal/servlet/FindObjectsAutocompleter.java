@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsAutocompleter.java,v 1.23 2008/04/04 11:55:48 hburger Exp $
+ * Name:        $Id: FindObjectsAutocompleter.java,v 1.26 2008/11/27 23:57:00 wfro Exp $
  * Description: ListAutocompleteControl 
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:55:48 $
+ * Date:        $Date: 2008/11/27 23:57:00 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -206,15 +203,15 @@ public class FindObjectsAutocompleter
         ) {
             objectReference = (ObjectReference)currentValue.getValue(false);
         }
-        // Autogenerate id if none is specified
-        String acName = "ac_" + fieldName.replaceAll(":", "_").replaceAll("!", "_") + Integer.toString(index);
+        // Generate id if none is specified
+        String acName = "ac_" + fieldName.replace(':', '_').replace('!', '_').replace('*', '_') + Integer.toString(index);
         
         p.write("<div class=\"autocompleterMenu\">");
         p.write("  <ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
         p.write("    <li><a href=\"#\">", p.getImg("border=\"0\" alt=\"\" src=\"", p.getResourcePath("images/"), WebKeys.ICON_AUTOCOMPLETE_SELECT, "\""), "</a>");
         p.write("      <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
         for(int i = 0; i < findObjectsActions.length; i++) {
-            p.write("        <li", (i == 0 ? " class=\"selected\"" : ""), "><a href=\"#\"", p.getOnClick("javascript:navSelect(this);", acName, ".url= ", p.getEvalHRef(findObjectsActions[i], false), ";return false;"), "><span>&nbsp;&nbsp;&nbsp;</span>", htmlEncoder.encode(findObjectsActions[i].getTitle(), false), "</a></li>");
+            p.write("        <li", (i == 0 ? " class=\"selected\"" : ""), "><a href=\"#\" onclick=\"javascript:navSelect(this);", acName, ".url= ", p.getEvalHRef(findObjectsActions[i], false), ";return false;\"><span>&nbsp;&nbsp;&nbsp;</span>", htmlEncoder.encode(findObjectsActions[i].getTitle(), false), "</a></li>");
         }
         p.write("      </ul>");
         p.write("    </li>");

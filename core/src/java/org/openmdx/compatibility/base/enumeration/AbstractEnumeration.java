@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AbstractEnumeration.java,v 1.4 2008/03/21 20:15:39 hburger Exp $
+ * Name:        $Id: AbstractEnumeration.java,v 1.5 2008/09/09 14:49:28 hburger Exp $
  * Description: SPICE Collections: Abstract Enumeration 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 20:15:39 $
+ * Date:        $Date: 2008/09/09 14:49:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -231,7 +231,7 @@ public abstract class AbstractEnumeration
                         Modifier.isFinal(field.getModifiers())
                     ){
                         Object enumerationValue = constructor.newInstance(
-                            new Object[]{field.get(null)}
+                            field.get(null)
                         );
                         mappings[ENUMERATION_TO_STRING].put(
                             enumerationValue,

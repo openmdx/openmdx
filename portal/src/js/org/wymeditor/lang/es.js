@@ -1,6 +1,4 @@
-﻿if(!WYM_STRINGS) var WYM_STRINGS = new Array();
-
-var WYM_STRINGS_ES = {
+WYMeditor.STRINGS['es'] = {
     Strong:           'Resaltar',
     Emphasis:         'Enfatizar',
     Superscript:      'Superindice',
@@ -44,4 +42,3 @@ var WYM_STRINGS_ES = {
     Source_Code:      'Código fuente'
 };
 
-WYM_STRINGS['es'] = WYM_STRINGS_ES;

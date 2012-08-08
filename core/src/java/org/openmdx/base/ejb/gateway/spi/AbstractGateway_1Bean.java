@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractGateway_1Bean.java,v 1.8 2008/02/10 01:21:52 hburger Exp $
+ * Name:        $Id: AbstractGateway_1Bean.java,v 1.10 2008/09/10 08:55:20 hburger Exp $
  * Description: Gateway_1 Session Bean
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/10 01:21:52 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -112,7 +112,7 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
      * @return the <code>executionEnvironment</code>'s value
      */
     protected abstract Hashtable<?,?> getExecutionEnvironment();
-    
+
     /**
      * Create a new <code>InitialContext</code>
      * 
@@ -125,14 +125,14 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
         Hashtable<?,?> executionEnvironment = getExecutionEnvironment();
         return executionContext instanceof InitialContextFactory ?
             ((InitialContextFactory)executionContext).getInitialContext(executionEnvironment) :
-            new InitialContext(executionEnvironment);
+                new InitialContext(executionEnvironment);
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements SessionBean
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see javax.ejb.SessionBean#setSessionContext(javax.ejb.SessionContext)
      */
@@ -189,7 +189,7 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
     ) throws CreateException {
         //
     }
-    
+
     /* (non-Javadoc)
      * @see javax.ejb.SessionBean#ejbRemove()
      */
@@ -221,15 +221,15 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
     ){
         Exception exception = privilegedActionException.getException();
         return (
-            exception instanceof RemoteException &&
-            RemoteExceptions.isRetriable((RemoteException) exception)
+                exception instanceof RemoteException &&
+                RemoteExceptions.isRetriable((RemoteException) exception)
         ) || (
-            exception instanceof NamingException &&
-            NamingExceptions.isRetriable((NamingException) exception)
+                exception instanceof NamingException &&
+                NamingExceptions.isRetriable((NamingException) exception)
         );
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Implements Gateway_1_0
     //------------------------------------------------------------------------
@@ -244,44 +244,44 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
         final String id
     ) throws ServiceException {
         attempts: for(
-            int 
+                int 
                 attempt = TRY_WITH_CURRENT_CONTEXT, 
                 attemptLimit = TRY_WITH_CURRENT_CONTEXT;;
         ) try {
             Object[] bean = (Object[]) getExecutionContext().execute(
 
                 new PrivilegedExceptionAction<Object>() {
-   
-                   public Object run(
-                   ) throws Exception {
-                       Context initialContext = newInitialContext();
-                       try {
-                           EJBObject bean = (EJBObject) homeInterface.getDeclaredMethod(
-                              "create", 
-                              (Class[])null
-                           ).invoke(
-                              PortableRemoteObject.narrow(
-                                   initialContext.lookup(id),
-                                   homeInterface
-                               ), 
-                               (Object[])null
-                           );
-                           return new Object[]{
-                               bean,
-                               bean.getHandle()
-                           };
-                       } catch (InvocationTargetException exception) {
-                           Throwable throwable = exception.getTargetException();
-                           throw throwable instanceof Exception ? 
-                               (Exception) throwable :
-                               new UndeclaredThrowableException(throwable);
-                       } finally {
-                           initialContext.close();
-                       }
-                   }                 
-                    
+
+                    public Object run(
+                    ) throws Exception {
+                        Context initialContext = newInitialContext();
+                        try {
+                            EJBObject bean = (EJBObject) homeInterface.getDeclaredMethod(
+                                "create", 
+                                (Class[])null
+                            ).invoke(
+                                PortableRemoteObject.narrow(
+                                    initialContext.lookup(id),
+                                    homeInterface
+                                ), 
+                                (Object[])null
+                            );
+                            return new Object[]{
+                                bean,
+                                bean.getHandle()
+                            };
+                        } catch (InvocationTargetException exception) {
+                            Throwable throwable = exception.getTargetException();
+                            throw throwable instanceof Exception ? 
+                                (Exception) throwable :
+                                    new UndeclaredThrowableException(throwable);
+                        } finally {
+                            initialContext.close();
+                        }
+                    }                 
+
                 }
-                
+
             );
             return Classes.newProxyInstance(
                 new RemoteInvocationHandler(
@@ -294,33 +294,31 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
             );
         } catch (PrivilegedActionException exception) {
             int failedAttempt = attempt++;
-        	if(isRetriable(exception)) {
+            if(isRetriable(exception)) {
                 switch(failedAttempt) {
-	                case TRY_WITH_CURRENT_CONTEXT:
-	                    ExecutionContext executionContext = getExecutionContext();
-	                    if(executionContext instanceof Resettable) {
-	                        ((Resettable)executionContext).reset();
-	                        attempt = TRY_WITH_RESET_CONTEXT;
-	                        attemptLimit = RETRY_WITH_RESET_CONTEXT;
-	                    } else {
-	                        attemptLimit = RETRY_WITH_CURRENT_CONTEXT;
-	                    }
+                    case TRY_WITH_CURRENT_CONTEXT:
+                        ExecutionContext executionContext = getExecutionContext();
+                        if(executionContext instanceof Resettable) {
+                            ((Resettable)executionContext).reset();
+                            attempt = TRY_WITH_RESET_CONTEXT;
+                            attemptLimit = RETRY_WITH_RESET_CONTEXT;
+                        } else {
+                            attemptLimit = RETRY_WITH_CURRENT_CONTEXT;
+                        }
                 }
-        		if(attempt <= attemptLimit) {
+                if(attempt <= attemptLimit) {
                     SysLog.detail(RETRY_MESSAGE[failedAttempt], exception);
                     continue attempts;
                 }
-        	}        	
+            }        	
             throw new ServiceException(
                 exception.getException(),
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.COMMUNICATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("id", id),
-                    new BasicException.Parameter("home", homeInterface.getName()),
-                    new BasicException.Parameter("remote", remoteInterface.getName())
-                },
-                ABORT_MESSAGE[failedAttempt]
+                ABORT_MESSAGE[failedAttempt],
+                new BasicException.Parameter("id", id),
+                new BasicException.Parameter("home", homeInterface.getName()),
+                new BasicException.Parameter("remote", remoteInterface.getName())
             );
         } catch (RuntimeException exception) {
             new RuntimeServiceException(exception).log();
@@ -353,7 +351,7 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
             id
         );
     }
-    
+
 
     //------------------------------------------------------------------------
     // Implements Gateway_1_0Internal
@@ -378,16 +376,16 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
             proxy
         );
         attempts: for(
-            int 
+                int 
                 attempt = TRY_WITH_CURRENT_CONTEXT,
                 attemptLimit = this.getResetToken() == handler.getResetToken() ? 
                     RETRY_WITH_CURRENT_CONTEXT : 
-                    TRY_WITH_CURRENT_CONTEXT;;
+                        TRY_WITH_CURRENT_CONTEXT;;
         ) try {
             return getExecutionContext().execute(
 
                 new PrivilegedExceptionAction<Object>() {
-   
+
                     public Object run() throws Exception {
                         try {
                             return method.invoke(
@@ -398,7 +396,7 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
                             Throwable throwable = exception.getTargetException();
                             throw throwable instanceof Exception ? 
                                 (Exception) throwable :
-                                new UndeclaredThrowableException(throwable);
+                                    new UndeclaredThrowableException(throwable);
                         }                        
                     }
                 }
@@ -406,10 +404,10 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
             );
         } catch (SecurityException exception) {
             throw new PrivilegedActionException(
-                 new ConnectException(
-                     "Connection could not be established",
-                     exception
-                 ) // a RemoteExeption
+                new ConnectException(
+                    "Connection could not be established",
+                    exception
+                ) // a RemoteExeption
             );
         } catch (PrivilegedActionException exception) {
             int failedAttempt = attempt++;
@@ -417,16 +415,16 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
                 switch (failedAttempt) {
                     case TRY_WITH_CURRENT_CONTEXT:
                     case RETRY_WITH_CURRENT_CONTEXT:
-	                    if(attempt <= attemptLimit) {
-	                        handler.reset();
-	                    } else {
-		                    ExecutionContext executionContext = getExecutionContext();
-		                    if(executionContext instanceof Resettable) {
-		                        ((Resettable)executionContext).reset();
-		                        attempt = TRY_WITH_RESET_CONTEXT;
-		                        attemptLimit = RETRY_WITH_RESET_CONTEXT;
-		                    }
-	                    }
+                        if(attempt <= attemptLimit) {
+                            handler.reset();
+                        } else {
+                            ExecutionContext executionContext = getExecutionContext();
+                            if(executionContext instanceof Resettable) {
+                                ((Resettable)executionContext).reset();
+                                attempt = TRY_WITH_RESET_CONTEXT;
+                                attemptLimit = RETRY_WITH_RESET_CONTEXT;
+                            }
+                        }
                 }
                 if(attempt <= attemptLimit) {
                     SysLog.detail(RETRY_MESSAGE[failedAttempt], exception);
@@ -451,7 +449,7 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
         ExecutionContext executionContext = getExecutionContext();
         return executionContext instanceof Resettable ?
             ((Resettable)executionContext).getResetToken() :
-            -1L;    
+                -1L;    
     }
 
     /**
@@ -477,7 +475,7 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
     /**
      * Failure lof messages
      */
-    private final static String[] RETRY_MESSAGE = new String[]{
+    private final static String[] RETRY_MESSAGE = {
         "Trying the method invocation with the current context failed, going to retry the same method invocation with the current context",
         "Retrying the same method invocation with the current context failed, going to try the same method invocation with a reset context",
         "Trying the same method invocation with a reset context failed, going to retry the same method invocation with this reset context",
@@ -487,7 +485,7 @@ public abstract class AbstractGateway_1Bean implements SessionBean {
     /**
      * Failure lof messages
      */
-    private final static String[] ABORT_MESSAGE = new String[]{
+    private final static String[] ABORT_MESSAGE = {
         null,
         "Retrying to retrieve the remote EJB object failed with the current context which is not resettable",
         null,

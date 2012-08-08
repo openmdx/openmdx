@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardDefinitionFactory.java,v 1.14 2008/04/04 11:51:09 hburger Exp $
+ * Name:        $Id: WizardDefinitionFactory.java,v 1.17 2008/09/19 20:54:23 wfro Exp $
  * Description: WizardDefinitionFactory 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 11:51:09 $
+ * Date:        $Date: 2008/09/19 20:54:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 
 package org.openmdx.portal.servlet.wizards;
@@ -75,40 +72,40 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 
 public class WizardDefinitionFactory
-    implements Serializable {
-  
-   //-------------------------------------------------------------------------
-   public static WizardDefinition createWizardDefinition(
-       String path,
-       String locale,
-       short localeIndex,
-       InputStream is
-   ) throws ServiceException {
-       if(path.endsWith(".jsp")) {
-           return new JspWizardDefinition(
+implements Serializable {
+
+    //-------------------------------------------------------------------------
+    public static WizardDefinition createWizardDefinition(
+        String path,
+        String locale,
+        short localeIndex,
+        InputStream is
+    ) throws ServiceException {
+        if(path.endsWith(".jsp")) {
+            return new JspWizardDefinition(
                 path,
                 locale,
                 localeIndex,
                 is
             );
-       }
-       else if(path.endsWith(".config")) {
-           // Ignore configuration files
-           return null;
-       }
-       else {
-           throw new ServiceException(
-               BasicException.Code.DEFAULT_DOMAIN,
-               BasicException.Code.NOT_SUPPORTED, 
-               new BasicException.Parameter[]{
-                   new BasicException.Parameter("name", path)
-               },
-               "Unsupported wizard definition format. Supported formats are [.jsp]"
-           );
-       }
-   }
-   
-   //-------------------------------------------------------------------------
+        }
+        else if(path.endsWith(".config")) {
+            // Ignore configuration files
+            return null;
+        }
+        else {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.NOT_SUPPORTED,
+                new BasicException.Parameter[]{
+                    new BasicException.Parameter("name", path)
+                },
+                "Unsupported wizard definition format. Supported formats are [.jsp]"
+            );
+        }
+    }
+
+    //-------------------------------------------------------------------------
     public WizardDefinitionFactory(
         Map reports,
         Model_1_0 model
@@ -118,7 +115,7 @@ public class WizardDefinitionFactory
         this.model = model;
         AppLog.info("loaded wizards=" + this.allDefinitions.keySet());
     }
-  
+
     //-------------------------------------------------------------------------
     public List getWizardDefinitions(
         String locale
@@ -127,7 +124,7 @@ public class WizardDefinitionFactory
             locale
         );
     }
-  
+
     //-------------------------------------------------------------------------
     public WizardDefinition[] findWizardDefinitions(
         String forClass,
@@ -145,55 +142,55 @@ public class WizardDefinitionFactory
                 customizedDefinitions = new HashSet<String>()
             );
         }
-        
+
         int ii = 0;
         for(
-            Iterator i = wizardDefinitions.iterator();
-            i.hasNext();
-            ii++
+                Iterator i = wizardDefinitions.iterator();
+                i.hasNext();
+                ii++
         ) {
-          WizardDefinition wizardDefinition = (WizardDefinition)i.next();
-          try {
-              for(
-                  Iterator j = wizardDefinition.getForClass().iterator(); 
-                  j.hasNext(); 
-              ) {
-                  String wizardClass = (String)j.next();
-                  /**
-                   * A wizard definition matches if:
-                   * <ul>
-                   *   <li>orderKey == null and order is numeric
-                   *   <li>orderKey != null and is equal to order
-                   * </ul>  
-                   */                  
-                  List order = wizardDefinition.getOrder();
-                  if(
-                      model.isSubtypeOf(forClass, wizardClass) &&
-                      ((orderPattern == null) && !customizedDefinitions.contains(wizardDefinition.getName()) || 
-                      ((orderPattern != null) && (order != null) && order.contains(orderPattern)))
-                  ) {
-                      matchingWizardDefinitions.put(
-                          order + ":" + ii,
-                          wizardDefinition
-                      );
-                  }
-                  // Wizard is customized if multiple orders are customized and order is not numeric, i.e. a qualified element name
-                  boolean isCustomized = 
-                      (order != null) && 
-                      (order.size() >= 1) && 
-                      !Character.isDigit(((String)order.get(0)).charAt(0));
-                  if(isCustomized) {
-                      customizedDefinitions.add(
-                          wizardDefinition.getName()
-                      );
-                  }
-              }
-          }
-          catch(ServiceException e) {}
+            WizardDefinition wizardDefinition = (WizardDefinition)i.next();
+            try {
+                for(
+                        Iterator j = wizardDefinition.getForClass().iterator(); 
+                        j.hasNext(); 
+                ) {
+                    String wizardClass = (String)j.next();
+                    /**
+                     * A wizard definition matches if:
+                     * <ul>
+                     *   <li>orderKey == null and order is numeric
+                     *   <li>orderKey != null and is equal to order
+                     * </ul>  
+                     */                  
+                    List order = wizardDefinition.getOrder();
+                    if(
+                            model.isSubtypeOf(forClass, wizardClass) &&
+                            ((orderPattern == null) && !customizedDefinitions.contains(wizardDefinition.getName()) || 
+                                    ((orderPattern != null) && (order != null) && order.contains(orderPattern)))
+                    ) {
+                        matchingWizardDefinitions.put(
+                            order + ":" + ii,
+                            wizardDefinition
+                        );
+                    }
+                    // Wizard is customized if multiple orders are customized and order is not numeric, i.e. a qualified element name
+                    boolean isCustomized = 
+                        (order != null) && 
+                        (order.size() >= 1) && 
+                        !Character.isDigit(((String)order.get(0)).charAt(0));
+                    if(isCustomized) {
+                        customizedDefinitions.add(
+                            wizardDefinition.getName()
+                        );
+                    }
+                }
+            }
+            catch(ServiceException e) {}
         }
         return (WizardDefinition[])matchingWizardDefinitions.values().toArray(new WizardDefinition[matchingWizardDefinitions.size()]);
     }
-  
+
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Model_1_0.java,v 1.9 2008/04/15 18:37:30 hburger Exp $
+ * Name:        $Id: Model_1_0.java,v 1.10 2008/11/11 15:40:09 wfro Exp $
  * Description: Model_1_0 interface
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/15 18:37:30 $
+ * Date:        $Date: 2008/11/11 15:40:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -115,6 +115,13 @@ public interface Model_1_0 {
     Object element
   ) throws ServiceException;
 
+  /**
+   * Get dereferenced type of element.
+   */
+  public ModelElement_1_0 getElementType(
+      ModelElement_1_0 element
+  ) throws ServiceException;
+  
   /**
    * Return the model element of type org:omg:model1:Reference corresponding to path.
    */

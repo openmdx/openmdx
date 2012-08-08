@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackageFactory_1_2.java,v 1.1 2008/05/30 18:19:48 hburger Exp $
+ * Name:        $Id: RefPackageFactory_1_2.java,v 1.2 2008/11/07 18:57:32 hburger Exp $
  * Description: RefPackage factory for multithreaded persistence manager
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/30 18:19:48 $
+ * Date:        $Date: 2008/11/07 18:57:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,13 +50,9 @@
  */
 package org.openmdx.base.accessor.jmi.cci;
 
-import org.openmdx.base.persistence.spi.OptimisticTransaction_2_0;
-
 /**
  * View capable RefPackage factory
  */
 public interface RefPackageFactory_1_2 extends RefPackageFactory_1_1 {
-
-    OptimisticTransaction_2_0 getOptimisticTransaction();
-    
+    // Nothing to do anymore
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestTestApp_1Jmi.java,v 1.86 2008/07/01 21:55:22 hburger Exp $
+ * Name:        $Id: TestTestApp_1Jmi.java,v 1.102 2008/11/14 11:54:06 hburger Exp $
  * Description: Unit test for model app1
- * Revision:    $Revision: 1.86 $
+ * Revision:    $Revision: 1.102 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/01 21:55:22 $
+ * Date:        $Date: 2008/11/14 11:54:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,15 +54,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -72,37 +71,35 @@ import java.util.Map;
 import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
-import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.Query;
+import javax.jdo.Transaction;
+import javax.jmi.reflect.InvalidObjectException;
 import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
+import javax.resource.ResourceException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestResult;
 import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
+import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.log.AppLog;
-import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.base.accessor.generic.view.Manager_1;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
-import org.openmdx.base.accessor.jmi1.AccessorFactory_2;
-import org.openmdx.base.application.deploy.Deployment;
-import org.openmdx.base.application.deploy.InProcessDeployment;
-import org.openmdx.base.exception.BadParameterException;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.persistence.spi.Entity_2_0;
 import org.openmdx.base.text.conversion.SQLWildcards;
 import org.openmdx.base.text.format.DateFormat;
-import org.openmdx.compatibility.base.application.cci.Dataprovider_1Deployment;
-import org.openmdx.compatibility.base.application.cci.Model_1Deployment;
+import org.openmdx.compatibility.base.application.cci.Deployment_1;
 import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
 import org.openmdx.compatibility.base.dataprovider.cci.Directions;
@@ -111,22 +108,19 @@ import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
 import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
 import org.openmdx.compatibility.base.dataprovider.transport.adapter.Provider_1;
-import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1ConnectionFactory;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Provider_1_1;
 import org.openmdx.compatibility.base.dataprovider.transport.delegation.Connection_1;
 import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.compatibility.datastore1.jmi1.Datastore1Package;
 import org.openmdx.compatibility.datastore1.jmi1.QueryFilter;
-import org.openmdx.datastore1.cci.Database;
-import org.openmdx.datastore1.cci.Datastore;
 import org.openmdx.generic1.jmi1.BooleanProperty;
 import org.openmdx.generic1.jmi1.Generic1Package;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.persistence.cci.ConfigurableProperty;
 import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
 import org.openmdx.model1.accessor.basic.cci.Model_1_0;
 import org.openmdx.model1.accessor.basic.spi.Model_1;
+import org.openmdx.test.app1.cci2.CycleMember1Query;
 import org.openmdx.test.app1.cci2.InvoiceHasInvoicePosition;
 import org.openmdx.test.app1.cci2.InvoicePositionQuery;
 import org.openmdx.test.app1.cci2.PersonQuery;
@@ -138,7 +132,6 @@ import org.openmdx.test.app1.jmi1.AddressFormat;
 import org.openmdx.test.app1.jmi1.AddressFormatAsResult;
 import org.openmdx.test.app1.jmi1.App1Package;
 import org.openmdx.test.app1.jmi1.CanNotFormatNameException;
-import org.openmdx.test.app1.jmi1.Citizenship;
 import org.openmdx.test.app1.jmi1.CycleMember1;
 import org.openmdx.test.app1.jmi1.CycleMember1Class;
 import org.openmdx.test.app1.jmi1.CycleMember2;
@@ -165,31 +158,18 @@ import org.openmdx.test.app1.jmi1.PersonGroup;
 import org.openmdx.test.app1.jmi1.PersonGroupClass;
 import org.openmdx.test.app1.jmi1.PostalAddress;
 import org.openmdx.test.app1.jmi1.Product;
-import org.openmdx.test.app1.jmi1.RoleCapablePerson;
 import org.openmdx.test.app1.jmi1.Segment;
-import org.openmdx.test.app1.jmi1.SwissCitizenship;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.Datatypes;
+import org.w3c.cci2.SparseArray;
 import org.w3c.cci2.StringTypePredicate;
 
 /**
- * AbstractTestApp_1Jmiooleeee
+ * AbstractTestApp_1Jmi
  */
-public class TestTestApp_1Jmi
-extends TestCase {
-
-    protected TestTestApp_1Jmi(
-        String name
-    ) {
-        super(name);
-    }
-
-    protected long id;
+public class TestTestApp_1Jmi extends TestCase {
 
     //---------------------------------------------------------------------------  
-    protected String nextId(){
-        return "ID" + this.id++;
-    }
 
     //---------------------------------------------------------------------------  
     /**
@@ -209,30 +189,137 @@ extends TestCase {
      */
     public static Test suite(
     ) {
-        TestSuite suite = new TestSuite();
-        suite.addTest(new TestTestApp_1Jmi("JmiJdbc"));
+        TestSuite suite = new TestSuite("App1");
+        TestContext context = new TestContext(
+            suite.getName()
+        );
+        suite.addTest(new TestGateway("resetSegment", context));
+        TestSuite threaded = new SequentialThreads("1st");
+        threaded.addTest(new TestEntityProvider("testPackageAcquisition", context));
+        threaded.addTest(new TestEntityProvider("testMain", context));
+//      threaded.addTest(new TestEntityProvider("testInMemoryProvider", context));
+//      threaded.addTest(new TestEntityProvider("testSerialization", context));
+        threaded.addTest(new TestEntityProvider("removeSegment", context));
+        suite.addTest(threaded);
+        suite.addTest(new TestGateway("resetSegment", context));
+        threaded = new SequentialThreads("2nd");
+        threaded.addTest(new TestEntityProvider("testMain", context));
+        suite.addTest(threaded);
+//      suite.addTest(new TestGateway("testCR10006272", context));
+        suite.addTest(new TestGateway("testTearDown", context));
         return suite;
     }
 
-    //---------------------------------------------------------------------------  
-    protected void setUp(
-    ) throws Exception {
-        this.id = 500000l;
-        try {
+    /**
+     * SequentialThreads
+     */
+    static class SequentialThreads extends TestSuite {
+
+        /**
+         * Constructor 
+         *
+         */
+        SequentialThreads() {
+            super();
+        }
+
+        /**
+         * Constructor 
+         *
+         * @param name
+         */
+        SequentialThreads(String name) {
+            super(name);
+        }
+
+        /* (non-Javadoc)
+         * @see junit.framework.TestSuite#runTest(junit.framework.Test, junit.framework.TestResult)
+         */
+        @Override
+        public void runTest(
+            final Test test, 
+            final TestResult result
+        ) {
+            Thread thread = new Thread(
+                new Runnable(){
+                    public void run() {
+                        test.run(result);
+                    }
+                }
+            );
+
+            System.out.println("Starting Thread " + thread.getId());
+            thread.start();
+            try {
+                thread.join();
+                System.out.println("Thread " + thread.getId() + " terminated");
+            } catch (InterruptedException exception) {
+                result.addError(test, exception);
+            }
+            
+        }
+        
+    }
+    
+    
+    //---------------------------------------------------------------------------
+    static class ReadModels
+    implements Runnable {
+
+        public void run(
+        ) {
+            try {
+                Model_1_0 model = new Model_1();
+                for(
+                        int i = 0; i < 5000000;
+                        i++
+                ) {
+                    model.getElement("org:openmdx:base:BasicObject");
+                }
+            }
+            catch(ServiceException e) {
+                System.out.println("ReadModels catched Exception. Terminating");
+                System.out.println(e);
+            }
+            System.out.println("ReadModels terminated");
+        }
+    }
+
+    //---------------------------------------------------------------------------
+    public static class TestGateway extends TestCase {
+        
+        /**
+         * Constructor 
+         *
+         * @param name
+         * @param context
+         */
+        TestGateway(
+            String name, 
+            TestContext context
+        ) {
+            super(name);
+            this.context = context;
+        }
+
+        private final TestContext context;
+        /**
+         * For CR10006272
+         */
+        private RequestCollection channel;
+        
+        public void resetSegment(
+        ) throws Exception {
             System.out.println(">>>> **** Start Test: " + this.getName());
             AppLog.info("Start Test", this.getName());
 
-            this.model = new Model_1();
-
-            this.remoteConnection = connectionFactory.createConnection();
-
             this.channel = new RequestCollection(
                 new ServiceHeader(),
-                remoteConnection
+                this.context.getDataproviderConnection()
             );
 
             // remove segment and contained objects
-            Path segmentPath = new Path("xri:@openmdx:org.openmdx.test.app1/provider/" + this.getName() + "/segment/Standard");
+            Path segmentPath = new Path("xri:@openmdx:org.openmdx.test.app1/provider/" + PROVIDER_NAME + "/segment/" + SEGMENT_NAME);
             try {
                 channel.addGetRequest(
                     segmentPath,
@@ -259,25 +346,19 @@ extends TestCase {
             channel.endUnitOfWork();
 
             // get initial data from resource (segment, etc.)
-            try {
-                new XmlImporter(
-                    new ServiceHeader(),
-                    remoteConnection,
-                    true, // transactional
-                    true // split units of work 
-                ).process(
-                    new String[]{"xri:+resource/org/openmdx/test/test/app1/data.xml"}
-                );
-            }
-            catch(Exception e) {
-                System.out.println("XMLImporter reported: " + e.getMessage());
-                throw e; // no longer lenient
-            }
+            new XmlImporter(
+                new ServiceHeader(),
+                this.context.getDataproviderConnection(),
+                true, // transactional
+                true // split units of work 
+            ).process(
+                new String[]{"xri:+resource/org/openmdx/test/test/app1/data.xml"}
+            );
 
             // get layer.provider.dataprovider 
             Provider_1_1 provider = new Provider_1(
                 channel,
-                false, // getName().endsWith("Jdbc")
+                false, 
                 true
             );
             new Manager_1(
@@ -286,86 +367,79 @@ extends TestCase {
                     false
                 )
             );
+            File scratchFile = this.context.getScratchFile();
+            
+            if(scratchFile == null) scratchFile = File.createTempFile(getClass().getName(), null);
+            System.out.println ("Scratch File = " + scratchFile);
+
         }
-        catch (ServiceException e) {
-            e.printStackTrace();
-            throw e.log();
+    
+        public void testCR10006272() throws ServiceException{
+            Path personPath = new Path("xri:@openmdx:org.openmdx.test.app1/provider/" + PROVIDER_NAME + "/segment/" + SEGMENT_NAME + "/person");
+            List<?> findReply = channel.addFindRequest(
+                personPath,
+                null, // attributeFilter, 
+                AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
+                null, // attributeSpecifier, 
+                0, // position
+                1, // size
+                Directions.ASCENDING
+            );
+            assertFalse("CR10006272", findReply.isEmpty());
+            assertNotNull("CR10006272", findReply.get(0));
         }
 
-        if(scratchFile == null) scratchFile = File.createTempFile(getClass().getName(), null);
-        System.out.println ("Scratch File = " + scratchFile);
-
-    }
-
-    //---------------------------------------------------------------------------  
-    protected void tearDown(
-    ) throws Exception {
-        try {
-            this.remoteConnection.close();
+        public void testTearDown(
+        ) throws Exception {
+            this.context.close();
             System.out.println("<<<< **** End Test: " + this.getName());
             AppLog.info("End test",this.getName());
         }
-        catch(Exception e) {
-            System.out.println("error in tearDown");
-            throw e; // no longer lenient
-        }
+
     }
-
-    //---------------------------------------------------------------------------
-    public void runTest(
-    ) throws Throwable {
-        testProvider();
-    }
-
-    //---------------------------------------------------------------------------
-    static class ReadModels
-    implements Runnable {
-
-        public void run(
+    
+   public static class TestEntityProvider extends TestCase {
+        
+        /**
+         * Constructor 
+         *
+         * @param name
+         */
+        public TestEntityProvider(
+            String name,
+            TestContext context
         ) {
-            try {
-                Model_1_0 model = new Model_1();
-                for(
-                        int i = 0; i < 5000000;
-                        i++
-                ) {
-                    model.getElement("org:openmdx:base:BasicObject");
-                }
-            }
-            catch(ServiceException e) {
-                System.out.println("ReadModels catched Exception. Terminating");
-                System.out.println(e);
-            }
-            System.out.println("ReadModels terminated");
+            super(name);
+            this.context = context;
         }
-    }
 
-    //---------------------------------------------------------------------------
-    public void testProvider(
-    ) throws Exception {
+        private final TestContext context;
+        
+        protected long id;
+        
+        protected String nextId(){
+            return "ID" + this.id++;
+        }
 
-        try {
-            System.out.println("getting root package...");
-            Map<String,Object> properties = new HashMap<String,Object>();
-            properties.put(
-                ConfigurableProperty.PersistenceManagerFactoryClass.qualifiedName(),
-                AccessorFactory_2.class.getName()
-            );
-            properties.put(
-                ConfigurableProperty.ConnectionFactoryName.qualifiedName(),
-                "org/openmdx/test/app1/EntityProviderFactory"
-            );
-            PersistenceManagerFactory persistenceMangerFactory = JDOHelper.getPersistenceManagerFactory(properties);
-            PersistenceManager persistenceManager = persistenceMangerFactory.getPersistenceManager();
-            Authority app1 = (Authority) persistenceManager.getObjectById(new Path(App1Package.AUTHORITY_XRI));
-            RefPackage rootPkg = app1.refOutermostPackage();
+        public void testPackageAcquisition() throws ServiceException{
             Datastore1Package datastore1Package = (Datastore1Package)(
-                    (RefObject)persistenceManager.newInstance(QueryFilter.class)
+                    (RefObject)this.context.getPersistenceManager().newInstance(QueryFilter.class)
             ).refImmediatePackage();
-            System.out.println("Got " + datastore1Package);
+            assertEquals("MOF ID", "org:openmdx:compatibility:datastore1:datastore1", datastore1Package.refMofId());
+        }
+
+        public void testMain(
+        ) throws ServiceException, IOException, RefException{
+            this.id = 500000l;
+            PersistenceManager persistenceManager = this.context.getPersistenceManager();
+            System.out.println("getting root package...");
+//          Authority app1 = (Authority) persistenceManager.getObjectById(new Path(App1Package.AUTHORITY_XRI));
+            Authority app1 = (Authority) persistenceManager.getObjectById(Authority.class, App1Package.AUTHORITY_XRI);
+            RefPackage rootPkg = app1.refOutermostPackage();
             App1Package app1Package = (App1Package) (
                     (RefObject)persistenceManager.newInstance(Segment.class)
             ).refImmediatePackage();
+            
             Generic1Package generic1Package = (Generic1Package) rootPkg.refPackage("org:openmdx:generic1");
 
             // test thread-safety
@@ -400,15 +474,8 @@ extends TestCase {
             // BEGIN test model functions
             Model_1_0 model = ((RefRootPackage_1)rootPkg).refModel();
             rootPkg.refPackage(
-                "org:openmdx:test:compatibility:state1"
+                "test:openmdx:state2"
             );
-            System.out.println(
-                "org:openmdx:compatibility:role1:Role:roleType is attribute or stored as attribute=" + (
-                        model.isAttributeType("org:openmdx:compatibility:role1:Role:roleType") || 
-                        model.referenceIsStoredAsAttribute("org:openmdx:compatibility:role1:Role:roleType")
-                )
-            );
-
             PersonClass personClass = app1Package.getPerson();
             InternationalPostalAddressClass postalAddressClass = app1Package.getInternationalPostalAddress();
             EmailAddressClass emailAddressClass = app1Package.getEmailAddress();
@@ -419,51 +486,9 @@ extends TestCase {
             PersonGroupClass personGroupClass = app1Package.getPersonGroup();
 
             // segment
-            Provider provider = app1.getProvider(false, this.getName());
-            Segment segment = (Segment) provider.getSegment("Standard");
+            Provider provider = app1.getProvider(false, PROVIDER_NAME);
+            Segment segment = (Segment) provider.getSegment(SEGMENT_NAME);
             long startedAt = 0;
-
-
-            /**
-             * Test Role
-             */
-            if("Generic".equals(this.getName())) { // TODO: Enable roles for JMI Plugins
-                persistenceManager.currentTransaction().begin();
-                RoleCapablePerson person = app1Package.getRoleCapablePerson().createRoleCapablePerson();
-                person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1956-12-02"));
-                person.setPlaceOfBirth("Vienna (AUT)");
-                //
-                // TODO: use JMI to populate roles soon as the mapping is available
-                // 
-                Object_1_0 noJMI = person.refDelegate();
-                noJMI.objSetValue("role:DEU:object_class", "org:openmdx:test:app1:Citizenship");
-                noJMI.objSetValue("role:DEU:nationality", "German");
-                noJMI.objSetValue("role:CHE:object_class", "org:openmdx:test:app1:SwissCitizenship");
-                noJMI.objSetValue("role:CHE:nationality", "Swiss");
-                noJMI.objGetSet("role:CHE:placeOfCitizenship").add("Olten (SO)");
-                //
-                // TODO: Use JMI to retrieve the role collection as soon as the mapping is correct
-                //
-//              assertEquals("Citizenships", 2, person.getRole().size()); 
-                //
-                // Use JMI to retrieve individual roles 
-                //
-                Citizenship german = (Citizenship) person.getRole("DEU");
-                assertNotNull("German Citizenship", german);
-                assertEquals("Place Of Birth", "Vienna (AUT)", german.getPlaceOfBirth());
-                assertEquals("Date Of Birth", "1956-12-02", german.getBirthdate().toXMLFormat());
-                assertEquals("German Nationality", "German", german.getNationality());
-                SwissCitizenship swiss = (SwissCitizenship) person.getRole("CHE");
-                assertNotNull("Swiss Citizenship", swiss);
-                assertEquals("Place Of Birth", "Vienna (AUT)", swiss.getPlaceOfBirth());
-                assertEquals("Date Of Birth", "1956-12-02", swiss.getBirthdate().toXMLFormat());
-                assertEquals("Swiss Nationality", "Swiss", swiss.getNationality());
-                assertEquals("Place Of Citizenship", Collections.singleton("Olten (SO)"), swiss.getPlaceOfCitizenship());
-                Citizenship austrian = (Citizenship) person.getRole("AUT");
-                assertNull("Austrian Citizenship", austrian);
-                segment.addCitizen(false, nextId(), person);
-                persistenceManager.currentTransaction().commit();
-            }
 
             /**
              * Test Invoice
@@ -471,13 +496,11 @@ extends TestCase {
             InvoiceClass invoiceClass = app1Package.getInvoice();
             InvoicePositionClass invoicePositionClass = app1Package.getInvoicePosition();
 
-            persistenceManager.currentTransaction().begin();
-
             BooleanProperty booleanProperty = generic1Package.getBooleanProperty().createBooleanProperty();
 
             booleanProperty.setDescription("A SparseArray Of Flags");
             booleanProperty.getBooleanValue().put(0, Boolean.TRUE);
-
+            
             Invoice invoice = invoiceClass.createInvoice();        
             invoice.setDescription("this is an invoice for PG0");
             invoice.setProductGroupId("PG0");
@@ -486,11 +509,9 @@ extends TestCase {
             RefContainer refInvoices = (RefContainer) invoices;
             invoice.addProperty(false, "flag", booleanProperty);
 
-            if(TEST_REFLECTION) {
-                refInvoices.refAdd(RefContainer.REASSIGNABLE, nextId(), invoice);
-            } else {
-                segment.addInvoice(false, nextId(), invoice);
-            }
+            persistenceManager.currentTransaction().begin();
+            
+            refInvoices.refAdd(RefContainer.REASSIGNABLE, nextId(), invoice);
             assertNotNull("CR0003551", refGetPath(invoice));
             for(int i = 0; i < 10; i++) {
                 InvoicePosition invoicePosition = invoicePositionClass.createInvoicePosition();
@@ -501,6 +522,18 @@ extends TestCase {
                 assertNotNull("CR0003551", refGetPath(invoicePosition));
             }
             persistenceManager.currentTransaction().commit();
+            
+            synchronized(this) {
+                try {
+                    System.out.println("Wait 5 sec");
+                    Thread.yield();
+                    wait(5000);
+                    System.out.println("...done");
+                } catch (InterruptedException exception) {
+                    System.out.println("...interrupted");
+                }
+            }
+            
             {
                 System.out.println("Invoice instanceof " + Arrays.toString(invoice.getClass().getInterfaces()));
                 Path flagId = ((Path) JDOHelper.getObjectId(invoice)).getDescendant(
@@ -509,7 +542,9 @@ extends TestCase {
                 );
                 BooleanProperty flag = (BooleanProperty) persistenceManager.getObjectById(flagId);
                 assertNotNull("Flag", flag);
-                assertEquals("Flag[0]", flag.getBooleanValue().get(0), Boolean.TRUE);
+                SparseArray<Boolean> flags = flag.getBooleanValue();
+                assertNotNull("flags", flags);
+                assertEquals("Flag[0]", Boolean.TRUE, flags.get(0));
                 PersistenceManager m = JDOHelper.getPersistenceManager(flag);
                 assertSame(
                     "Class with root parent", 
@@ -524,14 +559,30 @@ extends TestCase {
                 //
                 // Read via extent
                 //
-                InvoicePositionQuery invoicePositionQuery = null;
-                invoicePositionQuery = app1Package.createInvoicePositionQuery();
+                InvoicePositionQuery invoicePositionQuery = app1Package.createInvoicePositionQuery();
                 invoicePositionQuery.identity().like(
                     sqlWildcards.toJDO(
                         segment.refMofId() + "/invoice/:*/invoicePosition/%"
                     )
                 );
                 List<InvoicePosition> invoicePositions = segment.getExtent(invoicePositionQuery);
+                assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(9).hasNext());
+                assertFalse("Invoice Positions: Second Last", invoicePositions.listIterator(10).hasNext());
+                assertEquals("Invoice Positions: Size", 10,invoicePositions.size());
+            }
+            {
+                //
+                // Read via Query
+                //
+                Query query = persistenceManager.newQuery(InvoicePosition.class);
+                InvoicePositionQuery invoicePositionQuery = (InvoicePositionQuery) query;
+                invoicePositionQuery.identity().like(
+                    sqlWildcards.toJDO(
+                        segment.refMofId() + "/invoice/:*/invoicePosition/%"
+                    )
+                );
+                query.setCandidates(segment.getExtent());                
+                List<InvoicePosition> invoicePositions = (List<InvoicePosition>) query.execute();
                 assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(9).hasNext());
                 assertFalse("Invoice Positions: Second Last", invoicePositions.listIterator(10).hasNext());
                 assertEquals("Invoice Positions: Size", 10,invoicePositions.size());
@@ -566,43 +617,6 @@ extends TestCase {
 //                  System.out.println("  price=" + product.getPrice());
                 }
                 System.out.println("time for retrieving 10 invoice positions (with price)=" + (System.currentTimeMillis() - startedAt));
-            }
-
-            /**
-             * Test JdbcPersistent view
-             */
-            // invoke JdbcPersistent operations on segment level
-            Datastore datastore = null; // TODO (Datastore)segment.getContext(false, "Datastore");
-            System.out.println("Datastore="+datastore);
-            if(datastore instanceof Database) try {
-                ((Database)datastore).updatePathComponents();
-            }
-            catch(JmiServiceException e) {
-                assertEquals("exception raised", BasicException.Code.NOT_SUPPORTED, e.getExceptionStack().getExceptionCode());
-                System.out.println(e.getMessage());
-            }
-
-            catch(RefException e) {
-
-
-
-                System.out.println(e.getMessage());
-                throw e; // no longer lenient
-            }
-            if(datastore instanceof Database) try {
-                ((Database)datastore).updateNormalizedPaths();
-            }
-            catch(JmiServiceException e) {
-                assertEquals("exception raised", BasicException.Code.NOT_SUPPORTED, e.getExceptionStack().getExceptionCode());
-                System.out.println(e.getMessage());
-            }
-
-            catch(RefException e) {
-
-
-
-                System.out.println(e.getMessage());
-                throw e; // no longer lenient
             }
 
             /**
@@ -685,7 +699,7 @@ extends TestCase {
                 postalAddress.setHouseNumber("57");
                 postalAddress.setPostalCode("8005");
                 postalAddress.setStreet("Bahnhofstr.");
-                postalAddress.setAddressLine(new String[]{"Familie", "Muster"});
+                postalAddress.setAddressLine("Familie", "Muster");
                 segment.addAddress(false, "0001", postalAddress);
 
                 // create a EmailAddress
@@ -767,7 +781,7 @@ extends TestCase {
                         refGetPath(segment).getSuffix(
                             refGetPath(segment).size() - 2
                         ),
-                        new String[]{"segment","Standard"}
+                        new String[]{"segment",SEGMENT_NAME}
                     )
                 );
             }
@@ -819,37 +833,31 @@ extends TestCase {
             );
 
             // invoke sendMessageTemplate (struct with object reference field)
-            try {
-                persistenceManager.currentTransaction().begin();
-                MessageTemplate messageTemplate = messageTemplateClass.createMessageTemplate();
-                messageTemplate.setText("hello world");
-                segment.addMessageTemplate(
-                    false,
-                    "template0",
-                    messageTemplate
-                );
-                persistenceManager.currentTransaction().commit();
-                persistenceManager.currentTransaction().begin();
-                EmailAddressSendMessageTemplateResult sendResult = emailAddress.sendMessageTemplate(
-                    app1Package.createEmailAddressSendMessageTemplateParams(
-                        messageTemplate,
-                        0,
-                        "hello world"
-                    )
-                );
-                assertNotNull("Send result", sendResult);
-                persistenceManager.currentTransaction().commit();
-            }
-            catch(Exception e) {
-                System.out.println(e.getMessage());
-                throw e;
-            }
+            persistenceManager.currentTransaction().begin();
+            MessageTemplate messageTemplate = messageTemplateClass.createMessageTemplate();
+            messageTemplate.setText("hello world");
+            segment.addMessageTemplate(
+                false,
+                "template0",
+                messageTemplate
+            );
+            persistenceManager.currentTransaction().commit();
+            persistenceManager.currentTransaction().begin();
+            EmailAddressSendMessageTemplateResult sendResult = emailAddress.sendMessageTemplate(
+                app1Package.createEmailAddressSendMessageTemplateParams(
+                    messageTemplate,
+                    0,
+                    "hello world"
+                )
+            );
+            assertNotNull("Send result", sendResult);
+            persistenceManager.currentTransaction().commit();
 
             // create a person without qualifier
             Person person;
 
 
-            {
+           {
                 //
                 // CR0003390 Code Accessor
                 // 
@@ -859,7 +867,7 @@ extends TestCase {
                 segment.refAddToUnitOfWork();
                 long initialMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
                 for(
-                        int i = 1, limit = 1000000;
+                        int i = 1, limit = DOES_NOT_EXIST_CHECK_IS_ENABLED ? 10000 : 5000000;
                         i < 1000;
                         i++
                 ){
@@ -871,7 +879,7 @@ extends TestCase {
                         currentMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
                         additionalMemoryUsage = currentMemoryUsage - initialMemoryUsage;
                         assertFalse(
-                            "Memory used up after " + i + " failed retrievals: " + additionalMemoryUsage,
+                           "Memory used up after " + i + " failed retrievals: " + additionalMemoryUsage,
                             additionalMemoryUsage > limit
                         );
                     }
@@ -915,7 +923,7 @@ extends TestCase {
 
             assertEquals("person.refMofId() must be object path", 1, new Path(person.refMofId()).size() % 2);
             assertEquals("person's path must be object path", 1, refGetPath(person).size() % 2);
-            assertEquals("person.refIdentity() must corrspond to its path", refGetPath(person).toXri(), person.getIdentity());
+            assertEquals("person.refIdentity() must corrspond to its path", refGetPath(person).toResourceIdentifier(), person.getIdentity());
             assertEquals("person.refMofId() must corrspond to its path", refGetPath(person).toXri(), person.refMofId());
 
             assertEquals(
@@ -1023,13 +1031,18 @@ extends TestCase {
             for(
                     Iterator<Address> i = assignedAddresses.iterator();
                     i.hasNext();
-            ) {
+                    j++
+            ){
                 // postal code refreshed
-                Address address = i.next();
-                if(j++ == 3) {
-//                  assertNull("Additional address", address);
-                    i.remove();
-                } else {
+                Address address;
+                try {
+                    address = i.next();
+                    if(address == null || refGetPath(address) == null) {
+                        throw new InvalidObjectException(
+                            address,
+                            "Returning null was the former behaviour"
+                        );
+                    }
                     if(refGetPath(address).equals(refGetPath(postalAddress))) {
                         if(address instanceof Entity_2_0) {
                             assertSame(
@@ -1045,7 +1058,10 @@ extends TestCase {
                             );
                         }
                     }
-                    System.out.println("assigned address=" + refGetPath(address));
+                    System.out.println("Assigned address " + j + ": " + refGetPath(address));
+                } catch (InvalidObjectException exception) {
+                    i.remove();
+                    System.out.println("Assigned address " + j + ": removed");
                 }
             }
             persistenceManager.currentTransaction().commit();
@@ -1089,7 +1105,11 @@ extends TestCase {
                 fail("constraint isFrozen --> object can not be updated");
             } catch(JDOFatalDataStoreException e) {
                 assertFalse("Additional address no longer new", JDOHelper.isNew(additionalAddress));
-                assertEquals("Additional address no longer persistent", OBJECT_BECOMES_TRANSIENT_AFTER_ROLLBACK, !JDOHelper.isPersistent(additionalAddress));
+                assertEquals(
+                    "Additional address no longer persistent", 
+                    OBJECT_BECOMES_TRANSIENT_AFTER_ROLLBACK, 
+                    !JDOHelper.isPersistent(additionalAddress)
+                );
             }
 
             for(
@@ -1271,12 +1291,12 @@ extends TestCase {
 
             // test refMetaObject      
             ModelElement_1_0 personDef = ((RefMetaObject_1)person.refMetaObject()).getElementDef();
-            /* ModelElement_1_0 salutationDef = */ this.model.getFeatureDef(
+            /* ModelElement_1_0 salutationDef = */ model.getFeatureDef(
                 personDef,
                 "salutation",
                 false
             );
-            /* salutationDef = */ this.model.getFeatureDef(
+            /* salutationDef = */ model.getFeatureDef(
                 personDef,
                 "blabla",
                 false
@@ -1463,7 +1483,6 @@ extends TestCase {
             );
             persistenceManager.currentTransaction().commit(); // result available after commit only               
             System.out.println("formatted name=" + formattedName.getFormattedName());
-
             // test exceptions
             try {
                 person.formatNameAs(
@@ -1545,13 +1564,7 @@ extends TestCase {
             );
 
             // ... and test whether they are removed
-            try {
-                segment.getPerson("0001").getAge();
-                fail("person 0001 not removed");
-            }
-            catch(Exception e) {
-                System.out.println("object 0001 removed");
-            }
+            assertNull("person 0001 not removed", segment.getPerson("0001"));
 
             // CR0003390 Code Accessor
             persistenceManager.currentTransaction().begin();
@@ -1586,14 +1599,13 @@ extends TestCase {
             persistenceManager.currentTransaction().rollback();
 
             // ... and test whether they are removed
-            try {
-                segment.getPerson(false,"NO2").refDelete();
-                fail("person NO2 removed");
-            }
-            catch(Exception e) {
-                System.out.println("object NO2 did not exist");
-            }
-
+            assertNull("Person N01", segment.getPerson(false,"NO1"));
+            segment.getPerson().remove(QualifierType.REASSIGNABLE,"NO1");
+            
+            // A non-existent person
+            assertNull("Person N02", segment.getPerson(false,"NO2"));
+            segment.getPerson().remove(QualifierType.REASSIGNABLE,"NO2");
+            
             // Add after failed removal
             persistenceManager.currentTransaction().begin();
             person = personClass.createPerson();
@@ -1610,21 +1622,8 @@ extends TestCase {
             segment.addPerson(false,"NO2", person);
             persistenceManager.currentTransaction().rollback();
 
-            try {
-                segment.getPerson("00053").getAge();
-                fail("person 00053 not removed");
-            }
-            catch(Exception e) {
-                System.out.println("object 00053 removed");
-            }
-
-            try {
-                segment.getPerson("00082").getAge();
-                fail("person 00082 not removed");
-            }
-            catch(Exception e) {
-                System.out.println("object 00082 removed");
-            }
+            assertNull("person 00053 not removed", segment.getPerson("00053"));
+            assertNull("person 00082 not removed", segment.getPerson("00082"));
 
             // postalAddress.formatAs
             AddressFormatAsResult formattedAddress = null;
@@ -1673,79 +1672,6 @@ extends TestCase {
                 }
             }
 
-            // Create and retrieve large amount of Persons to find memory leaks
-            if("JmiNone".equals(this.getName())) {
-
-                // Create persons
-                for(
-                        int i = 0;
-                        i <= LARGE_N_PERSONS;
-                        i++
-                ) {
-                    if(i % 100 == 0) {
-                        System.out.println(i + " persons created. Free memory " + Runtime.getRuntime().freeMemory());
-                    }
-                    persistenceManager.currentTransaction().begin();
-                    person = personClass.createPerson();
-                    person.setForeignId("F" + i);
-                    person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
-                    person.setBirthdateAsDateTime(new Date());
-                    person.setLastName("Muster" + i);
-                    person.setSalutation("Herr");
-                    person.setSex((short)0);
-                    person.getGivenName().add("Hans");
-                    person.getGivenName().add("Heiri");
-                    person.setGivenName(new String[]{"Hans", "Heiri"});
-                    person.getAssignedAddress().add(postalAddress);
-                    person.getPersonGroup().add(g0);
-                    person.getPersonGroup().add(g1);
-                    person.getPersonGroup().add(g2);
-                    segment.addPerson(false,"L000" + i, person);
-                    persistenceManager.currentTransaction().commit();
-                }
-
-                // Retrieve persons
-                int ii = 0;
-                int limit = 1000000;
-                Runtime runtime = Runtime.getRuntime();
-                long initialMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
-                System.out.println("initial memory usage " + initialMemoryUsage);
-                allPeople = segment.getPerson();
-                for(Person pers : allPeople) {
-                    if(ii++ % 100 == 0) {
-                        long currentMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
-                        System.out.println(ii + " persons retrieved. Current memory usage " + currentMemoryUsage);
-                        long additionalMemoryUsage = currentMemoryUsage - initialMemoryUsage;
-                        if(additionalMemoryUsage > limit) {
-                            runtime.gc();
-                            currentMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
-                            additionalMemoryUsage = currentMemoryUsage - initialMemoryUsage;
-                            assertFalse(
-                                "Memory used up after " + ii + " failed retrievals: " + additionalMemoryUsage,
-                                additionalMemoryUsage > limit
-                            );
-                        }
-                    }
-                    limit += 3500;
-                    persistenceManager.refresh(pers);
-                }
-            }
-            if(TEST_CR10006272) {
-                //
-                // For CR10006272
-                //
-                List<?> findReply = channel.addFindRequest(
-                    segment.refGetPath().getChild("person"),
-                    null, // attributeFilter, 
-                    AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
-                    null, // attributeSpecifier, 
-                    0, // position
-                    1, // size
-                    Directions.ASCENDING
-                );
-                assertFalse("CR10006272", findReply.isEmpty());
-                assertNotNull("CR10006272", findReply.get(0));
-            }
             //
             // test cycles
             //
@@ -1766,6 +1692,20 @@ extends TestCase {
             System.out.println("member1" + member1);
             System.out.println("member2" + member2);
 
+            {
+                assertNotNull("We need a member value for the next test", member2);
+                CycleMember1Query query = app1Package.createCycleMember1Query();
+                query.thereExistsM2().equalTo(member2);
+                query.m2().isNonNull();
+                try {
+                    query.thereExistsM2().equalTo(null);
+                    fail("equalTo's argument must not be null");
+                } catch (JmiServiceException exception) {
+                    assertEquals("equalTo(null)", BasicException.Code.BAD_PARAMETER, exception.getExceptionCode());
+                }
+            }
+
+            
             // test streams
             persistenceManager.currentTransaction().begin();
 
@@ -1837,48 +1777,116 @@ extends TestCase {
             }
             contentIs.close();
             System.out.println("OK");
+            
+        }
+        
+        public void testInMemoryProvider() throws ServiceException {
+            PersistenceManager persistenceManager = this.context.getPersistenceManager();
+            PersonClass personClass = getPackage().getPerson();
+            Segment segment = getSegment();
+            PostalAddress postalAddress = (PostalAddress) segment.getAddress(false, "0001");
+            PersonGroup g0 = segment.getPersonGroup(false, "g0");
+            PersonGroup g1 = segment.getPersonGroup(false, "g1");
+            PersonGroup g2 = segment.getPersonGroup(false, "g2");
 
-            // test serialize
-            if(TEST_SERIALIZATION) {
-                FileOutputStream ostream = new FileOutputStream(scratchFile);
+            // Create persons
+            for(
+                    int i = 0;
+                    i <= LARGE_N_PERSONS;
+                    i++
+            ) {
+                if(i % 100 == 0) {
+                    System.out.println(i + " persons created. Free memory " + Runtime.getRuntime().freeMemory());
+                }
+                persistenceManager.currentTransaction().begin();
+                Person person = personClass.createPerson();
+                person.setForeignId("F" + i);
+                person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
+                person.setBirthdateAsDateTime(new Date());
+                person.setLastName("Muster" + i);
+                person.setSalutation("Herr");
+                person.setSex((short)0);
+                person.getGivenName().add("Hans");
+                person.getGivenName().add("Heiri");
+                person.setGivenName(new String[]{"Hans", "Heiri"});
+                person.getAssignedAddress().add(postalAddress);
+                person.getPersonGroup().add(g0);
+                person.getPersonGroup().add(g1);
+                person.getPersonGroup().add(g2);
+                segment.addPerson(false,"L000" + i, person);
+                persistenceManager.currentTransaction().commit();
+            }
+
+            // Retrieve persons
+            int ii = 0;
+            int limit = 1000000;
+            Runtime runtime = Runtime.getRuntime();
+            long initialMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
+            System.out.println("initial memory usage " + initialMemoryUsage);
+            org.openmdx.test.app1.cci2.SegmentHasPerson.Person<Person> allPeople = segment.getPerson();
+            for(Person pers : allPeople) {
+                if(ii++ % 100 == 0) {
+                    long currentMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
+                    System.out.println(ii + " persons retrieved. Current memory usage " + currentMemoryUsage);
+                    long additionalMemoryUsage = currentMemoryUsage - initialMemoryUsage;
+                    if(additionalMemoryUsage > limit) {
+                        runtime.gc();
+                        currentMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
+                        additionalMemoryUsage = currentMemoryUsage - initialMemoryUsage;
+                        assertFalse(
+                            "Memory used up after " + ii + " failed retrievals: " + additionalMemoryUsage,
+                            additionalMemoryUsage > limit
+                        );
+                    }
+                }
+                limit += 3500;
+                persistenceManager.refresh(pers);
+            }
+        }
+        
+        public void testSerialization() throws ServiceException, IOException, ClassNotFoundException {
+            Segment segment = getSegment();
+            {
+                FileOutputStream ostream = new FileOutputStream(this.context.getScratchFile());
                 ObjectOutputStream s = new ObjectOutputStream(ostream);
                 s.writeObject(segment.getPerson());
                 s.flush();
                 ostream.close();
             }
+            {
+                FileInputStream istream = new FileInputStream(this.context.getScratchFile());
+                ObjectInputStream p = new ObjectInputStream(istream);
+                Collection<?> persons = (Collection<?>)p.readObject();
+                int j = 0;
+                for(Object q : persons) {
+                    System.out.println("person[" + j + "]=" + q);
+                }
+                istream.close();
+            }
         }
-        catch(ServiceException e) {
-            e.printStackTrace();
-            throw e.log();
-        }
-        catch(BadParameterException e) {
-            e.printStackTrace();
-            throw e; // no longer lenient
-        }
-        catch(RuntimeServiceException e) {
-            AppLog.error("exception", e.getExceptionStack());
-            throw e;
-        }
-        catch(JmiServiceException e) {
-            AppLog.error("exception", e.getExceptionStack());
-            throw e;
+        
+        public void removeSegment() throws ServiceException{
+            Transaction transaction = this.context.getPersistenceManager().currentTransaction();
+            transaction.begin();
+            getSegment().refDelete();
+            transaction.commit();
         }
 
-        // test deserialize
-        if(TEST_SERIALIZATION) try {
-            FileInputStream istream = new FileInputStream(scratchFile);
-            ObjectInputStream p = new ObjectInputStream(istream);
-            Collection<?> persons = (Collection<?>)p.readObject();
-            int j = 0;
-            for(Object q : persons) {
-                System.out.println("person[" + j + "]=" + q);
-            }
-            istream.close();
-        } catch(JmiServiceException e) {
-            System.out.println(e.getExceptionStack());
-            throw e;
+        protected Segment getSegment(
+        ) throws ServiceException{
+            return (Segment) this.context.getPersistenceManager().getObjectById(
+                Segment.class,
+                App1Package.AUTHORITY_XRI + "/provider/" + PROVIDER_NAME + "/segment/" + SEGMENT_NAME
+            );
         }
-    }
+        
+        protected App1Package getPackage() throws ServiceException{
+            return (App1Package) (
+                    (RefObject)this.context.getPersistenceManager().newInstance(Segment.class)
+            ).refImmediatePackage();
+        }
+
+   }
 
     /**
      * Object id accessor
@@ -1897,37 +1905,109 @@ extends TestCase {
                 new Path(objectId.toString());
     }
 
-
-    //---------------------------------------------------------------------------
-    // Variables    
-    //---------------------------------------------------------------------------    
-
-    /**
-     * 
-     */
-    protected Dataprovider_1_1Connection remoteConnection;
+    
+    //------------------------------------------------------------------------
+    // Class TestContext
+    //------------------------------------------------------------------------    
 
     /**
-     * 
+     * Test Context
      */
+    protected static class TestContext {
+
+        /**
+         * Constructor 
+         *
+         * @param name
+         */
+        public TestContext(
+            String name
+         ) {
+            this.name = name;
+        }
+        
+        /**
+         * 
+         */
+        private final String name;
+        
+        /**
+         * 
+         */
+        private File scratchFile;
+        
+        /**
+         * 
+         */
+        private Dataprovider_1_1Connection dataproviderConnection;
+        
+        /**
+         * 
+         */
+        private PersistenceManager persistenceManager;
+        
+        /**
+         * Retrieve scratchFile.
+         *
+         * @return Returns the scratchFile.
+         * @throws IOException 
+         */
+        protected File getScratchFile() throws IOException {
+            if(this.scratchFile == null) {
+                this.scratchFile = File.createTempFile(this.name, null);
+            }
+            System.out.println ("Scratch File = " + scratchFile);
+            return this.scratchFile;
+        }
+        
+        protected void close(){
+            if(this.persistenceManager != null) {
+                this.persistenceManager.close();
+                this.persistenceManager = null;
+            }
+            if(this.dataproviderConnection != null) {
+                this.dataproviderConnection.close();
+                this.dataproviderConnection = null;
+            }
+        }
+        
+        public Dataprovider_1_1Connection getDataproviderConnection(
+        ) throws ServiceException {
+            if(this.dataproviderConnection == null) {
+                this.dataproviderConnection = accessorFactory.createConnection();
+            }
+            return this.dataproviderConnection;
+        }
+        
+        /* (non-Javadoc)
+         * @see org.openmdx.base.persistence.spi.ManagerFactory_2_0#createManager()
+         */
+        public PersistenceManager getPersistenceManager(
+        ) throws ServiceException {
+            if(this.persistenceManager == null) try {
+                this.persistenceManager = accessorFactory.createManager();
+            } catch (ResourceException exception) {
+                throw new ServiceException(exception);
+            }
+            return this.persistenceManager;
+        }
+        
+    }
+    
+    
     static private int N_PERSONS = 100;
     static private int LARGE_N_PERSONS = 1000;
     static private int TEST_PERSON_COUNT = N_PERSONS - 1; // TODO one is missing for some reason 
-
+    
     /**
-     * TODO
+     * Tells Object_1's doesNotExist() is enabled 
      */
-    static final boolean TEST_CR10006272 = false;
+    private final static boolean DOES_NOT_EXIST_CHECK_IS_ENABLED = true;
 
     /**
      * TODO
      */
     static final boolean OBJECT_BECOMES_TRANSIENT_AFTER_ROLLBACK = false;
-
-    /**
-     * TODO
-     */
-    static final boolean TEST_SERIALIZATION = false;
 
     /**
      * TODO
@@ -1939,77 +2019,40 @@ extends TestCase {
      */
     static final boolean TEST_OBJECT_LAYER = false;
 
-    /**
-     * 
-     */
-    static final boolean TEST_REFLECTION = true;
-
-    /**
-     * For CR10006272
-     */
-    private RequestCollection channel;
-
-    private final static String CONNECTOR_URL =
-//      "file:../test-core/src/connector/openmdx-2/sql-server-2000.rar";
-        "file:../test-core/src/connector/openmdx-2/sql-server-2005.rar";
-//  "file:../test-core/src/connector/openmdx-xa/sql-server-2000.rar";
-//  "file:../test-core/src/connector/openmdx-xa/sql-server-2005.rar";
-//  "file:../test-core/src/connector/openmdx-xa/oracle-8.rar";
-    final private static String APPLICATION_URL =
-        "file:../test-core/src/ear/test-app1.ear";
-
-    private Model_1_0 model = null;
-
-    protected File scratchFile = null;
-
     protected final static SQLWildcards sqlWildcards = new SQLWildcards('\\');
 
-    /**
-     * Define whether deployment details should logged to the console
-     */
-    final private static boolean LOG_DEPLOYMENT_DETAIL = false;
+    protected static final String PROVIDER_NAME = "JmiJdbc";
 
-    /**
-     * The model deployment is shared
-     */
-    final private static Deployment modelDeployment = new Model_1Deployment(
-        "org:un",
-        "org:iso",
-        "org:w3c",
-        "org:openmdx:base",
-        "org:openmdx:compatibility:datastore1",
-        "org:openmdx:compatibility:document1",
-        "org:openmdx:compatibility:role1",
-        "org:openmdx:compatibility:state1",
-        "org:openmdx:compatibility:sequence1",
-        "org:openmdx:compatibility:view1",
-        "org:openmdx:deployment1",
-        "org:openmdx:generic1",
+    protected static final String SEGMENT_NAME = "Standard";
+    
+    
+    //---------------------------------------------------------------------------
+    // Deployment Configuration    
+    //---------------------------------------------------------------------------    
+    
+    private static final String[] CONNECTOR_URL = {
+        "file:../test-core/src/connector/openmdx-2/sql-server-2005.rar"
+//      "file:../test-core/src/connector/openmdx-2/oracle-10g.rar"
+    };
+    private static final String[] APPLICATION_URL = {
+        "file:../test-core/src/ear/test-app1.ear"
+    };
+    private static final String[] MODELS = {
         "org:openmdx:test:app1",
-        "org:openmdx:test:compatibility:role1",
-        "org:openmdx:test:compatibility:state1",
-        "org:omg:model1"
-    );
-
-    /**
-     * The dataprovider deployment is shared
-     */
-    final private static Deployment dataproviderDeployment = new InProcessDeployment(
+        "test:openmdx:state2"
+    };
+    private static final String GATEWAY_JNDI_NAME = 
+        "org/openmdx/test/app1/Gateway";
+    private static final String ENTITY_MANAGER_FACTORY_JNDI_NAME = 
+        "org/openmdx/test/app1/EntityProviderFactory";
+    protected static final Deployment_1 accessorFactory = new Deployment_1(
+        true, // in-process
         CONNECTOR_URL,
         APPLICATION_URL,
-        LOG_DEPLOYMENT_DETAIL ? System.out : null,
-            System.err
+        false, // log deployment detail
+        ENTITY_MANAGER_FACTORY_JNDI_NAME,
+        GATEWAY_JNDI_NAME,
+        MODELS
     );
-
-    /**
-     * DTD based deployment descriptors
-     */
-    protected final static Dataprovider_1ConnectionFactory connectionFactory = new Dataprovider_1Deployment(
-        dataproviderDeployment,
-        modelDeployment,
-        "org/openmdx/test/app1/Gateway"
-    );
-
+    
 }
-
-//--- End of File -----------------------------------------------------------

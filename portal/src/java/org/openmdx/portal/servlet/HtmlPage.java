@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: HtmlPage.java,v 1.46 2008/05/31 18:05:30 wfro Exp $
+ * Name:        $Id: HtmlPage.java,v 1.49 2008/11/12 10:36:53 wfro Exp $
  * Description: HtmlPage class
- * Revision:    $Revision: 1.46 $
+ * Revision:    $Revision: 1.49 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/31 18:05:30 $
+ * Date:        $Date: 2008/11/12 10:36:53 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -141,6 +138,9 @@ public class HtmlPage {
     private void append(
         CharSequence s
     ) {
+        if(s == null) { 
+            return;
+        }
         int count = s.length();
         int newLength = this.contentLength + count;        
         if(newLength > this.content.length) {
@@ -270,21 +270,6 @@ public class HtmlPage {
         return sb;
     }
     
-    
-    //-------------------------------------------------------------------------
-    public CharSequence getOnClick(
-        CharSequence... strings
-    ) {
-        StringBuilder sb = this.getStringBuilder(
-        ).append(
-            " onclick=\""
-        );
-        for(CharSequence s: strings) {
-            sb.append(s);
-        }
-        sb.append("\"");
-        return sb;
-    }
     
     //-------------------------------------------------------------------------
     public CharSequence getEvalHRef(

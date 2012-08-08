@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: CollectionChangeEvent.java,v 1.12 2008/01/08 16:16:31 hburger Exp $
+ * Name:        $Id: CollectionChangeEvent.java,v 1.14 2008/09/09 14:32:16 hburger Exp $
  * Description: openMDX Collection Change Event
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/08 16:16:31 $
+ * Date:        $Date: 2008/09/09 14:32:16 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,7 +53,9 @@ package org.openmdx.base.event;
 
 import java.beans.IndexedPropertyChangeEvent;
 
-import org.openmdx.kernel.collection.ArraysExtension;
+import javax.resource.ResourceException;
+
+import org.openmdx.base.resource.Records;
 
 
 /**
@@ -145,26 +147,24 @@ public class CollectionChangeEvent extends IndexedPropertyChangeEvent {
      */
     public String toString(
     ) {
-        return getClass().getName() + ": " + ArraysExtension.asMap(
-            new String[]{
-                "object",
-                "property",
-                "index",
-                "type",
-                "oldValue",
-                "newValue",
-                "propagationId"
-            },
-            new Object[]{
-                getSourceDescription(),
-                getPropertyName(),
-                getIndexDescription(),
-                EVENT_TYPE[this.type],
-                getOldValue(),
-                getNewValue(),
-                getPropagationId()
-            }
-        );
+        try {
+            return Records.getRecordFactory().asMappedRecord(
+                getClass().getName(), // recordName
+                null, // recordShortDescription, 
+                TO_STRING_FIELDS,
+                new Object[]{
+                    getSourceDescription(),
+                    getPropertyName(),
+                    getIndexDescription(),
+                    EVENT_TYPE[this.type],
+                    getOldValue(),
+                    getNewValue(),
+                    getPropagationId()
+                }
+            ).toString();
+        } catch (ResourceException exception) {
+            return super.toString();
+        }
     }
 
 
@@ -214,11 +214,21 @@ public class CollectionChangeEvent extends IndexedPropertyChangeEvent {
     /**
      * 
      */
-    private static final String[] EVENT_TYPE = new String[]{
+    private static final String[] EVENT_TYPE = {
         "clear", //CLEAR
         "add", // ADD
         "set", // SET
         "remove" // REMOVE
     };
 
+    private final static String[] TO_STRING_FIELDS = {
+        "object",
+        "property",
+        "index",
+        "type",
+        "oldValue",
+        "newValue",
+        "propagationId"
+    };
+    
 }

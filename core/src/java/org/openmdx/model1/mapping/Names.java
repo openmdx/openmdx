@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Names.java,v 1.7 2007/10/10 16:06:11 hburger Exp $
+ * Name:        $Id: Names.java,v 1.8 2008/11/07 17:47:41 hburger Exp $
  * Description: Names 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:06:11 $
+ * Date:        $Date: 2008/11/07 17:47:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -157,30 +157,6 @@ public class Names extends AbstractNames {
     }
 
     /**
-     * 
-     * @param openmdx1
-     * 
-     * @return
-     */
-    public static String cciPackageSuffix(
-        boolean openmdx1
-    ){
-        return openmdx1 ? null : CCI2_PACKAGE_SUFFIX;
-    }
-    
-    /**
-     * 
-     * @param openmdx1
-     * 
-     * @return
-     */
-    public static String jmiPackageSuffix(
-        boolean openmdx1
-    ){
-        return openmdx1 ? CCI1_PACKAGE_SUFFIX : JMI1_PACKAGE_SUFFIX;
-    }
-    
-    /**
      * openMDX 2 CCI package suffix
      */ 
     public static final String CCI2_PACKAGE_SUFFIX = "cci2";
@@ -194,11 +170,6 @@ public class Names extends AbstractNames {
      * openmdx 2 JMI package suffix
      */ 
     public static final String JMI1_PACKAGE_SUFFIX = "jmi1";
-
-    /**
-     * openmdx 1 CCI package suffix
-     */ 
-    public static final String CCI1_PACKAGE_SUFFIX = "cci";
 
     /**
      * openmdx 2 JDO package suffix

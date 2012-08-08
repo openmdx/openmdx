@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RemoteAuthenticationHandler.java,v 1.2 2006/05/22 08:54:28 hburger Exp $
+ * Name:        $Id: RemoteAuthenticationHandler.java,v 1.4 2008/09/24 22:20:41 wfro Exp $
  * Description: Remote Authentication Handler
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/05/22 08:54:28 $
+ * Date:        $Date: 2008/09/24 22:20:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -70,111 +70,110 @@ import org.openmdx.security.auth.servlet.spi.AbstractRemoteAuthenticationHandler
  * Remote Authentication Handler
  */
 public class RemoteAuthenticationHandler 
-    extends AbstractRemoteAuthenticationHandler 
+extends AbstractRemoteAuthenticationHandler 
 {
 
-    /**
-     * This handler's Dataprovider Connection Factory Instance
-     */
-    private Dataprovider_1HttpConnectionFactory connectionFactory;
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.security.auth.servlet.spi.AbstractAuthenticationHandler#init()
-     */
-    public void init() throws ServletException {
-        // 
-        // URL
-        //
-        String providerURL = this.getInitParameter(
-            "realm-provider-url", 
-            realmProviderURLDefault()
-        ); 
-        // 
-        // Security context
-        //
-        String username = this.getInitParameter(
-            "realm-access-username", 
-            realmAccessUsernameDefault()
-        ); 
-        String password = this.getInitParameter(
-            "realm-access-password", 
-            realmAccessPasswordDefault()
-        ); 
-        Subject subject = new Subject();
-        subject.getPrivateCredentials().add(
-             new PasswordCredential(
-                 username,
-                 password.toCharArray()
-             )
-        );
-        // 
-        // Connection Factory
-        //
-        this.connectionFactory = new Dataprovider_1HttpConnectionFactory();
-        try {
-            connectionFactory.initialize(
-                subject,
-                new URL(providerURL)
-            );
-        } catch (MalformedURLException exception) {
-            throw (UnavailableException) Throwables.initCause(
-                new UnavailableException(
-            		"Establishment of the realm's connection factory failed"
-                ),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.ACTIVATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("info", "$Id: RemoteAuthenticationHandler.java,v 1.2 2006/05/22 08:54:28 hburger Exp $"),
-                    new BasicException.Parameter("name", getServletName()),
-                    new BasicException.Parameter("realm-provider-url", providerURL),
-                    new BasicException.Parameter("realm-access-username", username),
-                    new BasicException.Parameter("realm-access-password", "n/a"),
-                    new BasicException.Parameter("debug", isDebug())
-                }, null
-            );
-        }
-        // 
-        // Log in case of debug
-        //
-        if(isDebug()) {
-            log("$Id: RemoteAuthenticationHandler.java,v 1.2 2006/05/22 08:54:28 hburger Exp $");
-            log("realm-provider-url: " + providerURL);
-            log("realm-access-username: " + username);
-            log("realm-access-password: n/a");
-        }
-        //
-        // Complete initialization
-        //
-        super.init();
-    }
+	/**
+	 * This handler's Dataprovider Connection Factory Instance
+	 */
+	private Dataprovider_1HttpConnectionFactory connectionFactory;
 
-    /* (non-Javadoc)
-     * @see org.openmdx.security.auth.servlet.spi.AbstractRemoteAuthenticationHandler#getConnectionFactory()
-     */
-    protected Dataprovider_1ConnectionFactory getConnectionFactory(
-    ) throws ServiceException {
-        return this.connectionFactory;
-    }
+	/* (non-Javadoc)
+	 * @see org.openmdx.security.auth.servlet.spi.AbstractAuthenticationHandler#init()
+	 */
+	public void init() throws ServletException {
+		// 
+		// URL
+		//
+		String providerURL = this.getInitParameter(
+				"realm-provider-url", 
+				realmProviderURLDefault()
+		); 
+		// 
+		// Security context
+		//
+		String username = this.getInitParameter(
+				"realm-access-username", 
+				realmAccessUsernameDefault()
+		); 
+		String password = this.getInitParameter(
+				"realm-access-password", 
+				realmAccessPasswordDefault()
+		); 
+		Subject subject = new Subject();
+		subject.getPrivateCredentials().add(
+				new PasswordCredential(
+						username,
+						password.toCharArray()
+				)
+		);
+		// 
+		// Connection Factory
+		//
+		this.connectionFactory = new Dataprovider_1HttpConnectionFactory();
+		try {
+			connectionFactory.initialize(
+					subject,
+					new URL(providerURL)
+			);
+		} catch (MalformedURLException exception) {
+			throw (UnavailableException) Throwables.initCause(
+					new UnavailableException(
+							"Establishment of the realm's connection factory failed"
+					),
+					exception,
+					BasicException.Code.DEFAULT_DOMAIN,
+					BasicException.Code.ACTIVATION_FAILURE,
+					null,
+					new BasicException.Parameter("info", "$Id: RemoteAuthenticationHandler.java,v 1.4 2008/09/24 22:20:41 wfro Exp $"),
+					new BasicException.Parameter("name", getServletName()),
+					new BasicException.Parameter("realm-provider-url", providerURL),
+					new BasicException.Parameter("realm-access-username", username),
+					new BasicException.Parameter("realm-access-password", "n/a"),
+					new BasicException.Parameter("debug", isDebug())
+			);
+		}
+		// 
+		// Log in case of debug
+		//
+		if(isDebug()) {
+			log("$Id: RemoteAuthenticationHandler.java,v 1.4 2008/09/24 22:20:41 wfro Exp $");
+			log("realm-provider-url: " + providerURL);
+			log("realm-access-username: " + username);
+			log("realm-access-password: n/a");
+		}
+		//
+		// Complete initialization
+		//
+		super.init();
+	}
 
-    /**
-     * Provide the "realm-access-username" default value.
-     * 
-     * @return the "realm-access-username" default value
-     */
-    protected String realmAccessUsernameDefault(
-    ){
-        return null; // was "b2e"
-    }
+	/* (non-Javadoc)
+	 * @see org.openmdx.security.auth.servlet.spi.AbstractRemoteAuthenticationHandler#getConnectionFactory()
+	 */
+	protected Dataprovider_1ConnectionFactory getConnectionFactory(
+	) throws ServiceException {
+		return this.connectionFactory;
+	}
 
-    /**
-     * Provide the "realm-access-password" default value.
-     * 
-     * @return the "realm-access-password" default value
-     */
-    protected String realmAccessPasswordDefault(
-    ){
-        return null; // was "b2ePassword
-    }
+	/**
+	 * Provide the "realm-access-username" default value.
+	 * 
+	 * @return the "realm-access-username" default value
+	 */
+	protected String realmAccessUsernameDefault(
+	){
+		return null; // was "b2e"
+	}
+
+	/**
+	 * Provide the "realm-access-password" default value.
+	 * 
+	 * @return the "realm-access-password" default value
+	 */
+	protected String realmAccessPasswordDefault(
+	){
+		return null; // was "b2ePassword
+	}
 
 }

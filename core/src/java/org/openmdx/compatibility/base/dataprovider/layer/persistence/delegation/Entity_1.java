@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Entity_1.java,v 1.8 2008/07/07 14:03:25 wfro Exp $
+ * Name:        $Id: Entity_1.java,v 1.16 2008/11/08 00:24:20 wfro Exp $
  * Description: Entity_1 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/07 14:03:25 $
+ * Date:        $Date: 2008/11/08 00:24:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -116,7 +116,7 @@ public class Entity_1
     protected Set<Path> getDirectAccessPaths(
     ) throws ServiceException {
         return new HashSet<Path>(
-            DEFAULT_DIRECT_ACCESS_PATHS
+                DEFAULT_DIRECT_ACCESS_PATHS
         );
     }
 
@@ -210,6 +210,22 @@ public class Entity_1
         if(request.isTransactionalUnit()) {
             this.entityManager.currentTransaction().commit();
         }
+        int ii = 0;
+        for(DataproviderRequest dataproviderRequest: request.getRequests()) {
+            if(dataproviderRequest.operation() == DataproviderOperations.OBJECT_OPERATION) {
+                Path replyPath = reply.getReplies()[ii].getObject().path();
+                RefStruct_1_0 operationResult = this.operationResults.get(replyPath);
+                reply.getReplies()[ii] = new DataproviderReply(
+                    DataproviderObjectMarshaller.toDataproviderObject(
+                        replyPath,
+                        operationResult,
+                        new ArrayList<Path>()
+                    )
+                );                
+            }
+            ii++;
+        }    
+        this.operationResults.clear();
         //
         // Dissociate entity manager
         //
@@ -254,11 +270,10 @@ public class Entity_1
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.PROCESSING_FAILURE,
-                null,
                 "Persistence manager acquisiion failure"
             );
         }
-        
+
         if(request.isTransactionalUnit()) {
             this.entityManager.currentTransaction().begin();
         }
@@ -276,10 +291,8 @@ public class Entity_1
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_FOUND,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("path",id)
-                },
-                "Object not found"
+                "Object not found",
+                new BasicException.Parameter("path",id)
             );
         } catch(RuntimeException exception) {
             throw new ServiceException(exception);
@@ -292,9 +305,9 @@ public class Entity_1
     ){
         return qualifier.startsWith("!") ?
             new Object[]{RefContainer.PERSISTENT, qualifier.substring(1)} :
-            new Object[]{RefContainer.REASSIGNABLE, qualifier};
+                new Object[]{RefContainer.REASSIGNABLE, qualifier};
     }
-    
+
     //---------------------------------------------------------------------------
     protected RefContainer getContainer(
         RefObject_1_0 _object,
@@ -313,7 +326,7 @@ public class Entity_1
         }
         return (RefContainer) object.refGetValue(featureName);
     }
-    
+
     //---------------------------------------------------------------------------
     /**
      * Retrieve object with given id. The object is retrieved by navigating
@@ -341,9 +354,9 @@ public class Entity_1
             mandatory
         );
         for(
-            int i = startFrom;
-            object != null && i < identity.size(); 
-            i+=2
+                int i = startFrom;
+                object != null && i < identity.size(); 
+                i+=2
         ) { 
             object = (RefObject_1_0)this.getContainer(
                 object,
@@ -358,10 +371,8 @@ public class Entity_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_FOUND,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("accessPath", identity)
-            },
-            "Object not found"
+            "Object not found",
+            new BasicException.Parameter("accessPath", identity)
         );
     }
 
@@ -390,9 +401,9 @@ public class Entity_1
                 )        
             );           
             for(
-                int i = 1;
-                i < this.retrievalSize && i < batch.size();
-                i++
+                    int i = 1;
+                    i < this.retrievalSize && i < batch.size();
+                    i++
             ) {
                 Path path = batch.get(i);
                 try {
@@ -462,20 +473,18 @@ public class Entity_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter(
-                            "operation",
-                            DataproviderOperations.toString(request.operation())
-                        )
-                    },
-                    "Unexpected operation"
+                    "Unexpected operation",
+                    new BasicException.Parameter(
+                        "operation",
+                        DataproviderOperations.toString(request.operation())
+                    )
                 );
         }
 
         // Complete and return as DataproviderObject
         List result = new ArrayList();
         int replySize = paths instanceof FetchSize 
-            ? ((FetchSize)paths).getFetchSize() 
+        ? ((FetchSize)paths).getFetchSize() 
             : FetchSize.DEFAULT_FETCH_SIZE; 
         if(replySize <= 0) replySize = this.retrievalSize;
         if(replySize > request.size()) replySize = request.size();
@@ -487,9 +496,9 @@ public class Entity_1
         int ii = 0;
         ListIterator iterator = null;
         for(
-            iterator = paths.listIterator(replyPosition);
-            iterator.hasNext() && ii < replySize;
-            ii++
+                iterator = paths.listIterator(replyPosition);
+                iterator.hasNext() && ii < replySize;
+                ii++
         ) {
             Object element = iterator.next();
             Path path;
@@ -511,6 +520,7 @@ public class Entity_1
                 )
             );
         }
+        this.entityManager.evictAll();
         DataproviderReply reply = new DataproviderReply(result);
         /**
          * Try to set context. If collection does not support the features
@@ -529,11 +539,11 @@ public class Entity_1
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC,
+                "Reply context population failure",
                 new BasicException.Parameter []{
                     new BasicException.Parameter("path", request.path()),
                     new BasicException.Parameter("context", DataproviderReplyContexts.HAS_MORE)                    
-                },
-                "Reply context population failure"
+                }
             ).log();
         }
         // TOTAL
@@ -548,11 +558,11 @@ public class Entity_1
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC,
+                "Reply context population failure",
                 new BasicException.Parameter []{
                     new BasicException.Parameter("path", request.path()),
                     new BasicException.Parameter("context", DataproviderReplyContexts.TOTAL)                    
-                },
-                "Reply context population failure"
+                }
             ).log();
         }
         /**
@@ -573,12 +583,10 @@ public class Entity_1
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.TOO_LARGE_RESULT_SET,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("size", paths.size()),
-                            new BasicException.Parameter("limit", String.valueOf(replySize))
-                        },
                         "A list exceeding the given limit " +
-                        "could not be prepared for reconstruction"
+                        "could not be prepared for reconstruction",
+                        new BasicException.Parameter("size", paths.size()),
+                        new BasicException.Parameter("limit", String.valueOf(replySize))
                     );
                 }
             } 
@@ -586,12 +594,10 @@ public class Entity_1
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.TOO_LARGE_RESULT_SET,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("size", paths.size()),
-                        new BasicException.Parameter("limit",String.valueOf(replySize)),
-                        new BasicException.Parameter("class",paths.getClass().getName())
-                    },
-                    "A non-reconstructable list's size exceeds the given limit"
+                    "A non-reconstructable list's size exceeds the given limit",
+                    new BasicException.Parameter("size", paths.size()),
+                    new BasicException.Parameter("limit",String.valueOf(replySize)),
+                    new BasicException.Parameter("class",paths.getClass().getName())
                 );
             }
         }
@@ -611,9 +617,9 @@ public class Entity_1
         List<String> modelClass = Arrays.asList(mofId.split(":"));
         int iLimit = modelClass.size() - 1;
         for(
-            int i = 0;
-            i < iLimit;
-            i++
+                int i = 0;
+                i < iLimit;
+                i++
         ){
             javaClass.append(
                 Identifier.PACKAGE_NAME.toIdentifier(modelClass.get(i))
@@ -633,21 +639,19 @@ public class Entity_1
                 )
             );
             return jmi1Class;
-            
+
         } catch (ClassNotFoundException exception) {
             throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.INVALID_CONFIGURATION,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("mofClass", mofId),
-                    new BasicException.Parameter("jmi1Class", javaClass)
-                },
-                "Class not found"
+                "Class not found",
+                new BasicException.Parameter("mofClass", mofId),
+                new BasicException.Parameter("jmi1Class", javaClass)
             );
         }
     }
-    
+
     //---------------------------------------------------------------------------
     protected RefObject_1_0 createObject(
         DataproviderRequest request
@@ -667,7 +671,7 @@ public class Entity_1
         }
         return object;
     }
-    
+
     //---------------------------------------------------------------------------
     public DataproviderReply create(
         ServiceHeader header,
@@ -779,8 +783,8 @@ public class Entity_1
         DataproviderRequest request
     ) throws ServiceException {
         if(
-            Boolean.TRUE.equals(this.objectIsNew.get(request.path())) ||
-            this.retrieveObject(request.path(), false) == null
+                Boolean.TRUE.equals(this.objectIsNew.get(request.path())) ||
+                this.retrieveObject(request.path(), false) == null
         ){
             DataproviderObject_1_0 object = request.object();
             // exclude Authority, Provider, Segment
@@ -815,17 +819,17 @@ public class Entity_1
         target.refDelete();
         return reply;
     }
-    
+
     //---------------------------------------------------------------------------
     protected String getFeatureName(
         DataproviderRequest request
     ) {
         Path path = request.path();    
         return path.size() % 2 == 0 
-            ? (String)path.get(path.size()-1) 
+        ? (String)path.get(path.size()-1) 
             : (String)path.get(path.size()-2);
     }
-    
+
     //---------------------------------------------------------------------------
     protected DataproviderObject otherOperation(
         ServiceHeader header,
@@ -847,19 +851,24 @@ public class Entity_1
             target = (RefObject_1_0)container.refGet(toSelector(objectName));
         }
         try {
-            return DataproviderObjectMarshaller.toDataproviderObject(
+            this.operationResults.put(
                 replyPath,
                 (RefStruct_1_0)target.refInvokeOperation(
                     featureName,
-                    DataproviderObjectMarshaller.toStructureValues(
-                        request.object(),
-                        this.objectCache,
-                        this.entityManager,
-                        this.model
+                    Arrays.asList(
+                        target.refOutermostPackage().refCreateStruct(
+                            (String)request.object().values(SystemAttributes.OBJECT_CLASS).get(0),
+                            DataproviderObjectMarshaller.toStructureValues(
+                                request.object(),
+                                this.objectCache,
+                                this.entityManager,
+                                this.model
+                            )
+                        )
                     )
-                ),
-                new ArrayList<Path>()
+                )
             );
+            return new DataproviderObject(replyPath);
         }
         catch(Exception e) {
             throw new ServiceException(e); 
@@ -897,7 +906,7 @@ public class Entity_1
     ) throws ServiceException {
         return null;
     }
-                
+
     //---------------------------------------------------------------------------
     // Members
     //---------------------------------------------------------------------------
@@ -908,6 +917,7 @@ public class Entity_1
     protected Map<Path,Boolean> objectIsNew = null;
     protected Map<Path,RefObject_1_0> objectCache = null;
     protected Map<String,Class<?>> classCache = null;
+    protected Map<Path,RefStruct_1_0> operationResults = new HashMap<Path,RefStruct_1_0>();
     @SuppressWarnings("unchecked")
     private static Subject DEFAULT_SUBJECT = new Subject(
         true,
@@ -921,7 +931,7 @@ public class Entity_1
         new Path("xri:@openmdx:*/provider/:*"),
         new Path("xri:@openmdx:*/provider/:*/segment/:*")
     );
-    
+
     /**
      * This value means that potentially expensive counting has been avoided.
      */
@@ -931,5 +941,5 @@ public class Entity_1
      * An entity manager is kept for a collection of units of work
      */
     private PersistenceManager entityManager;
-       
+
 }

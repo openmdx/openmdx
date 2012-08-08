@@ -1,0 +1,605 @@
+
+(object Petal
+    version    	50
+    _written   	"Rose 8.3.0407.2800"
+    charSet    	0)
+
+(object Class_Category "PrimitiveTypes"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3D0C708700E2"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "AggregationKind"
+	    quid       	"3C94B8630375"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"3E6671C30242"
+		    exportControl 	"Public")))
+	(object Class "any"
+	    quid       	"3C8B7F810212"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"3E66718400B1"
+		    exportControl 	"Public")))
+	(object Class "AttributeMode"
+	    quid       	"3C94BB40012A"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"3E6671CF0203"
+		    exportControl 	"Public")))
+	(object Class "DefinitionKind"
+	    quid       	"3C94BB5F01CF"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"3E6671D100DA"
+		    exportControl 	"Public")))
+	(object Class "EvaluationKind"
+	    quid       	"3C94B8D70390"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"3E6671C903A9"
+		    exportControl 	"Public")))
+	(object Class "MultiplicityType"
+	    quid       	"3C94B68001E0"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"3E6671C00139"
+		    exportControl 	"Public")))
+	(object Class "OperationMode"
+	    quid       	"3C94BAD70007"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"3E6671CD01D8"
+		    exportControl 	"Public")))
+	(object Class "ParameterDirection"
+	    quid       	"3C94B8B8018C"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"3E6671C70360"
+		    exportControl 	"Public")))
+	(object Class "PrimitiveKind"
+	    quid       	"3C94BBC701BA"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"3E6671DD0221"
+		    exportControl 	"Public")))
+	(object Class "ScopeKind"
+	    quid       	"3C94B8F30304"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"3E6671CB02DA"
+		    exportControl 	"Public")))
+	(object Class "VisibilityKind"
+	    quid       	"3C94B88601B3"
+	    stereotype 	"alias"
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "org::w3c::string"
+		    quid       	"3E6671C503C1"
+		    exportControl 	"Public"))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Main"
+	    quid       	"3C8B7F760234"
+	    title      	"Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	1977
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::org::omg::PrimitiveTypes::any" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(269, 167)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(133, 118)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"any")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@1
+			location   	(133, 77)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B7F810212"
+		    width      	290
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::omg::PrimitiveTypes::MultiplicityType" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(604, 166)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(468, 117)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"MultiplicityType")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@2
+			location   	(468, 76)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C94B68001E0"
+		    width      	290
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::omg::PrimitiveTypes::AggregationKind" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(945, 169)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(804, 120)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	282
+			justify    	0
+			label      	"AggregationKind")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@3
+			location   	(804, 79)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	282
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C94B8630375"
+		    width      	300
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::omg::PrimitiveTypes::VisibilityKind" @4
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1289, 169)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(1153, 120)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"VisibilityKind")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@4
+			location   	(1153, 79)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C94B88601B3"
+		    width      	290
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::omg::PrimitiveTypes::ParameterDirection" @5
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1640, 169)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@5
+			location   	(1483, 120)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	314
+			justify    	0
+			label      	"ParameterDirection")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@5
+			location   	(1483, 79)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	314
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C94B8B8018C"
+		    width      	332
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::omg::PrimitiveTypes::EvaluationKind" @6
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(269, 397)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@6
+			location   	(133, 348)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"EvaluationKind")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@6
+			location   	(133, 307)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C94B8D70390"
+		    width      	290
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::omg::PrimitiveTypes::ScopeKind" @7
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(606, 406)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@7
+			location   	(470, 357)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"ScopeKind")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@7
+			location   	(470, 316)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C94B8F30304"
+		    width      	290
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::omg::PrimitiveTypes::OperationMode" @8
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(944, 400)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@8
+			location   	(808, 351)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"OperationMode")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@8
+			location   	(808, 310)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C94BAD70007"
+		    width      	290
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::omg::PrimitiveTypes::AttributeMode" @9
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1295, 397)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@9
+			location   	(1159, 348)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"AttributeMode")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@9
+			location   	(1159, 307)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C94BB40012A"
+		    width      	290
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::omg::PrimitiveTypes::DefinitionKind" @10
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1636, 391)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@10
+			location   	(1500, 342)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"DefinitionKind")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@10
+			location   	(1500, 301)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C94BB5F01CF"
+		    width      	290
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)
+		(object ClassView "Class" "Logical View::org::omg::PrimitiveTypes::PrimitiveKind" @11
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(269, 625)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@11
+			location   	(133, 576)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"PrimitiveKind")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@11
+			location   	(133, 535)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	272
+			justify    	0
+			label      	"<<alias>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C94BBC701BA"
+		    width      	290
+		    height     	200
+		    annotation 	8
+		    autoResize 	TRUE)))
+	(object ClassDiagram "_LICENSE"
+	    quid       	"410406BA0029"
+	    title      	"_LICENSE"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object NoteView @12
+		    location   	(742, 1022)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@12
+			location   	(61, 68)
+			fill_color 	13434879
+			nlines     	46
+			max_width  	1327
+			label      	
+|This software is published under the BSD license
+|as listed below.
+|
+|Copyright (c) 2004, OMEX AG, Switzerland
+|All rights reserved.
+|
+|Redistribution and use in source and binary forms, with or without 
+|modification, are permitted provided that the following conditions 
+|are met:
+|
+|Redistribution and use in source and binary forms, with or
+|without modification, are permitted provided that the following
+|conditions are met:
+|
+|* Redistributions of source code must retain the above copyright
+|notice, this list of conditions and the following disclaimer.
+|
+|* Redistributions in binary form must reproduce the above copyright
+|notice, this list of conditions and the following disclaimer in
+|the documentation and/or other materials provided with the
+|distribution.
+|
+|* Neither the name of OMEX AG nor the names of the contributors
+|to openMDX may be used to endorse or promote products derived
+|from this software without specific prior written permission
+|
+|
+|THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+|CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+|INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+|MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+|DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+|BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+|EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+|TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+|DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+|ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+|OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+|OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+|POSSIBILITY OF SUCH DAMAGE.
+|
+|------------------
+|
+|This product includes software developed by the Apache Software
+|Foundation (http://www.apache.org/).
+			)
+		    line_color 	3342489
+		    fill_color 	16775658
+		    width      	1387
+		    height     	1920)))))

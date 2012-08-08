@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HardWiredObjects_1.java,v 1.1 2008/04/25 12:11:22 hburger Exp $
+ * Name:        $Id: HardWiredObjects_1.java,v 1.2 2008/09/10 18:10:56 hburger Exp $
  * Description: Hard-Wired Objects Layer
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 12:11:22 $
+ * Date:        $Date: 2008/09/10 18:10:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -78,7 +78,7 @@ import org.slf4j.LoggerFactory;
  * persistence plug-in in future.
  */
 public class HardWiredObjects_1
-    extends Standard_1 
+extends Standard_1 
 {
 
     /**
@@ -105,12 +105,12 @@ public class HardWiredObjects_1
      * 
      */
     private final Logger logger = LoggerFactory.getLogger(HardWiredObjects_1.class);
-    
-    
+
+
     //------------------------------------------------------------------------
     // Extends Layer_1
     //------------------------------------------------------------------------
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#activate(short, org.openmdx.compatibility.base.application.configuration.Configuration, org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0)
      */
@@ -177,10 +177,8 @@ public class HardWiredObjects_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_FOUND, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("path", objectId)
-                },
-                "Format not found"
+                "Format not found",
+                new BasicException.Parameter("path", objectId)
             );        
         }
         DataproviderObject reply = new DataproviderObject(original);
@@ -205,7 +203,7 @@ public class HardWiredObjects_1
         ).intern();
     }
 
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#get(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
      */
@@ -261,10 +259,8 @@ public class HardWiredObjects_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("reference", referenceName)
-                },
-                "update not allowed on references with constraint isFrozen"
+                "update not allowed on references with constraint isFrozen",
+                new BasicException.Parameter("reference", referenceName)
             );
         } else {
             //
@@ -274,7 +270,7 @@ public class HardWiredObjects_1
         }
     }
 
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#remove(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
      */
@@ -291,10 +287,8 @@ public class HardWiredObjects_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("reference", referenceName)
-                },
-                "update not allowed on references with constraint isFrozen"
+                "update not allowed on references with constraint isFrozen",
+                new BasicException.Parameter("reference", referenceName)
             );
         } else {
             //
@@ -303,7 +297,7 @@ public class HardWiredObjects_1
             return super.remove(header, request);
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#replace(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
      */
@@ -320,10 +314,8 @@ public class HardWiredObjects_1
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("reference", referenceName)
-                },
-                "update not allowed on references with constraint isFrozen"
+                "update not allowed on references with constraint isFrozen",
+                new BasicException.Parameter("reference", referenceName)
             );
         } else {
             //
@@ -332,7 +324,7 @@ public class HardWiredObjects_1
             return super.replace(header, request);
         }
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Layer_1#find(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
      */

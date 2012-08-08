@@ -22,7 +22,7 @@
 			<env-entry>
 				<env-entry-name>KERNEL/exposedPath[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-		       	<env-entry-value>xri:@openmdx:org.openmdx.test.datatypes1/provider/Persistent/segment/Default</env-entry-value>
+		       	<env-entry-value>xri://@openmdx*org.openmdx.test.datatypes1/provider/Persistent/segment/Default</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/namespaceId</env-entry-name>
@@ -47,16 +47,6 @@
 			<env-entry>
 				<env-entry-name>KERNEL/modelPackage[3]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:role1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[4]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:view1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[5]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>org:openmdx:test:datatypes1</env-entry-value>
 			</env-entry>
 			<env-entry>
@@ -67,22 +57,37 @@
 			<env-entry>
 				<env-entry-name>KERNEL/TYPE</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.type.Strict_1</env-entry-value>
+				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.type.Standard_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/APPLICATION</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.application.ProvidingUid_1</env-entry-value>
+				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.application.Standard_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/MODEL</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.model.StateWithHoles_1</env-entry-value>
+				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.model.Datatypes_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.persistence.jdbc.Database_1</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>INTERCEPTION/bypassedByLenientRequests</env-entry-name>
+				<env-entry-type>java.lang.Boolean</env-entry-type>
+				<env-entry-value>true</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>TYPE/bypassedByLenientRequests</env-entry-name>
+				<env-entry-type>java.lang.Boolean</env-entry-type>
+				<env-entry-value>true</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>APPLICATION/bypassedByLenientRequests</env-entry-name>
+				<env-entry-type>java.lang.Boolean</env-entry-type>
+				<env-entry-value>true</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>PERSISTENCE/allowsSqlSequenceFallback</env-entry-name>
@@ -108,7 +113,7 @@
 			  <env-entry>
 				<env-entry-name>PERSISTENCE/type[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-		        <env-entry-value>xri:@openmdx:org.openmdx.test.datatypes1/provider/Persistent/segment/:*</env-entry-value>
+		        <env-entry-value>xri://@openmdx*org.openmdx.test.datatypes1/provider/Persistent/segment/($..)</env-entry-value>
 			  </env-entry>
 			  <env-entry>
 				<env-entry-name>PERSISTENCE/typeName[0]</env-entry-name>
@@ -140,7 +145,7 @@
 			  <env-entry>
 				<env-entry-name>PERSISTENCE/type[1]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-		        <env-entry-value>xri:@openmdx:org.openmdx.test.datatypes1/provider/Persistent/segment/Default/:*/:*</env-entry-value>
+		        <env-entry-value>xri://@openmdx*org.openmdx.test.datatypes1/provider/Persistent/segment/Default/($..)/($..)</env-entry-value>
 			  </env-entry>
 			  <env-entry>
 				<env-entry-name>PERSISTENCE/typeName[1]</env-entry-name>
@@ -194,7 +199,7 @@
 			<env-entry>
 				<env-entry-name>KERNEL/exposedPath[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-		         <env-entry-value>xri:@openmdx:org.openmdx.test.datatypes1/provider/Persistent/segment/Numeric</env-entry-value>
+		         <env-entry-value>xri://@openmdx*org.openmdx.test.datatypes1/provider/Persistent/segment/Numeric</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/namespaceId</env-entry-name>
@@ -219,16 +224,6 @@
 			<env-entry>
 				<env-entry-name>KERNEL/modelPackage[3]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:role1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[4]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:view1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[5]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>org:openmdx:test:datatypes1</env-entry-value>
 			</env-entry>
 			<env-entry>
@@ -239,22 +234,37 @@
 			<env-entry>
 				<env-entry-name>KERNEL/TYPE</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.type.Strict_1</env-entry-value>
+				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.type.Standard_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/APPLICATION</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.application.ProvidingUid_1</env-entry-value>
+				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.application.Standard_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/MODEL</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.model.StateWithHoles_1</env-entry-value>
+				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.model.Datatypes_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.persistence.jdbc.Database_1</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>INTERCEPTION/bypassedByLenientRequests</env-entry-name>
+				<env-entry-type>java.lang.Boolean</env-entry-type>
+				<env-entry-value>true</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>TYPE/bypassedByLenientRequests</env-entry-name>
+				<env-entry-type>java.lang.Boolean</env-entry-type>
+				<env-entry-value>true</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>APPLICATION/bypassedByLenientRequests</env-entry-name>
+				<env-entry-type>java.lang.Boolean</env-entry-type>
+				<env-entry-value>true</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>PERSISTENCE/allowsSqlSequenceFallback</env-entry-name>
@@ -280,7 +290,7 @@
 			  <env-entry>
 				<env-entry-name>PERSISTENCE/type[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-		        <env-entry-value>xri:@openmdx:org.openmdx.test.datatypes1/provider/Persistent/segment/:*</env-entry-value>
+		        <env-entry-value>xri://@openmdx*org.openmdx.test.datatypes1/provider/Persistent/segment/($..)</env-entry-value>
 			  </env-entry>
 			  <env-entry>
 				<env-entry-name>PERSISTENCE/typeName[0]</env-entry-name>
@@ -312,7 +322,7 @@
 			  <env-entry>
 				<env-entry-name>PERSISTENCE/type[1]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-		        <env-entry-value>xri:@openmdx:org.openmdx.test.datatypes1/provider/Persistent/segment/Numeric/:*/:*</env-entry-value>
+		        <env-entry-value>xri://@openmdx*org.openmdx.test.datatypes1/provider/Persistent/segment/Numeric/($..)/($..)</env-entry-value>
 			  </env-entry>
 			  <env-entry>
 				<env-entry-name>PERSISTENCE/typeName[1]</env-entry-name>
@@ -401,7 +411,7 @@
 			<env-entry>
 				<env-entry-name>KERNEL/exposedPath[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-		         <env-entry-value>xri:@openmdx:org.openmdx.test.datatypes1/provider/Persistent/segment/Native</env-entry-value>
+		         <env-entry-value>xri://@openmdx*org.openmdx.test.datatypes1/provider/Persistent/segment/Native</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/namespaceId</env-entry-name>
@@ -426,16 +436,6 @@
 			<env-entry>
 				<env-entry-name>KERNEL/modelPackage[3]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:role1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[4]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:view1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[5]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>org:openmdx:test:datatypes1</env-entry-value>
 			</env-entry>
 			<env-entry>
@@ -446,22 +446,37 @@
 			<env-entry>
 				<env-entry-name>KERNEL/TYPE</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.type.Strict_1</env-entry-value>
+				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.type.Standard_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/APPLICATION</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.application.ProvidingUid_1</env-entry-value>
+				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.application.Standard_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/MODEL</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.model.StateWithHoles_1</env-entry-value>
+				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.model.Datatypes_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.persistence.jdbc.Database_1</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>INTERCEPTION/bypassedByLenientRequests</env-entry-name>
+				<env-entry-type>java.lang.Boolean</env-entry-type>
+				<env-entry-value>true</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>TYPE/bypassedByLenientRequests</env-entry-name>
+				<env-entry-type>java.lang.Boolean</env-entry-type>
+				<env-entry-value>true</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>APPLICATION/bypassedByLenientRequests</env-entry-name>
+				<env-entry-type>java.lang.Boolean</env-entry-type>
+				<env-entry-value>true</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>PERSISTENCE/allowsSqlSequenceFallback</env-entry-name>
@@ -487,7 +502,7 @@
 			  <env-entry>
 				<env-entry-name>PERSISTENCE/type[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-		        <env-entry-value>xri:@openmdx:org.openmdx.test.datatypes1/provider/Persistent/segment/:*</env-entry-value>
+		        <env-entry-value>xri://@openmdx:org.openmdx.test.datatypes1/provider/Persistent/segment/($..)</env-entry-value>
 			  </env-entry>
 			  <env-entry>
 				<env-entry-name>PERSISTENCE/typeName[0]</env-entry-name>
@@ -519,7 +534,7 @@
 			  <env-entry>
 				<env-entry-name>PERSISTENCE/type[1]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-		        <env-entry-value>xri:@openmdx:org.openmdx.test.datatypes1/provider/Persistent/segment/Native/:*/:*</env-entry-value>
+		        <env-entry-value>xri://@openmdx:org.openmdx.test.datatypes1/provider/Persistent/segment/Native/($..)/($..)</env-entry-value>
 			  </env-entry>
 			  <env-entry>
 				<env-entry-name>PERSISTENCE/typeName[1]</env-entry-name>
@@ -608,7 +623,7 @@
 			<env-entry>
 				<env-entry-name>KERNEL/exposedPath[0]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
- 		          <env-entry-value>xri:@openmdx:org.openmdx.test.datatypes1/provider/Volatile</env-entry-value>
+ 		          <env-entry-value>xri://@openmdx*org.openmdx.test.datatypes1/provider/Volatile</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/namespaceId</env-entry-name>
@@ -633,16 +648,6 @@
 			<env-entry>
 				<env-entry-name>KERNEL/modelPackage[3]</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:role1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[4]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org:openmdx:compatibility:view1</env-entry-value>
-			</env-entry>
-			<env-entry>
-				<env-entry-name>KERNEL/modelPackage[5]</env-entry-name>
-				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>org:openmdx:test:datatypes1</env-entry-value>
 			</env-entry>
 			<env-entry>
@@ -653,22 +658,37 @@
 			<env-entry>
 				<env-entry-name>KERNEL/TYPE</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.type.Strict_1</env-entry-value>
+				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.type.Standard_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/APPLICATION</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.application.ProvidingUid_1</env-entry-value>
+				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.application.Standard_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/MODEL</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
-				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.model.StateWithHoles_1</env-entry-value>
+				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.model.Datatypes_1</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
 				<env-entry-type>java.lang.String</env-entry-type>
 				<env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.persistence.none.InMemory_1</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>INTERCEPTION/bypassedByLenientRequests</env-entry-name>
+				<env-entry-type>java.lang.Boolean</env-entry-type>
+				<env-entry-value>true</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>TYPE/bypassedByLenientRequests</env-entry-name>
+				<env-entry-type>java.lang.Boolean</env-entry-type>
+				<env-entry-value>true</env-entry-value>
+			</env-entry>
+			<env-entry>
+				<env-entry-name>APPLICATION/bypassedByLenientRequests</env-entry-name>
+				<env-entry-type>java.lang.Boolean</env-entry-type>
+				<env-entry-value>true</env-entry-value>
 			</env-entry>
 			<env-entry>
 				<env-entry-name>PERSISTENCE/batchSize</env-entry-name>

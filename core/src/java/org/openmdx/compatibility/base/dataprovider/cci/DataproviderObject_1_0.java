@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DataproviderObject_1_0.java,v 1.4 2008/03/21 18:45:24 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: DataproviderObject_1_0.java,v 1.5 2008/10/13 14:08:51 hburger Exp $
  * Description: spice: dataprovider object interface
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:45:24 $
+ * Date:        $Date: 2008/10/13 14:08:51 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.cci;
 
@@ -60,7 +59,6 @@ import org.openmdx.compatibility.base.naming.Path;
 /**
  * Dataprovider objects implement this interface
  */
-@SuppressWarnings("unchecked")
 public interface DataproviderObject_1_0 {
 
     /**
@@ -83,7 +81,7 @@ public interface DataproviderObject_1_0 {
      * @return      the attribute value list; or null if no list with this
      *              name exists
      */
-    SparseList getValues(
+    SparseList<Object> getValues(
         String attributeName
     );
 
@@ -96,7 +94,7 @@ public interface DataproviderObject_1_0 {
      *
      * @return      the attribute value list (never null)
      */
-    SparseList values(
+    SparseList<Object> values(
         String attributeName
     );
 
@@ -109,7 +107,7 @@ public interface DataproviderObject_1_0 {
      *
      * @return      the attribute value list (never null)
      */
-    SparseList clearValues(
+    SparseList<Object> clearValues(
         String attributeName
     );
     
@@ -127,7 +125,7 @@ public interface DataproviderObject_1_0 {
     /**
      * Get a set view of the dataprovider object's attribute names
      */
-    Set attributeNames(
+    Set<String> attributeNames(
     );
         
     /**

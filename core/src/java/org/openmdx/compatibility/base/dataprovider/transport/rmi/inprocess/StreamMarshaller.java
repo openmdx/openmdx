@@ -1,15 +1,14 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StreamMarshaller.java,v 1.3 2008/03/19 17:08:26 hburger Exp $
+ * Name:        $Id: StreamMarshaller.java,v 1.6 2008/12/15 11:35:46 hburger Exp $
  * Description: Inprocess Stream Marshaller
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:08:26 $
+ * Date:        $Date: 2008/12/15 11:35:46 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
  * Copyright (c) 2008, OMEX AG, Switzerland
  * All rights reserved.
@@ -46,20 +45,18 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.transport.rmi.inprocess;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.CharArrayReader;
 import java.io.CharArrayWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Serializable;
-import java.util.Iterator;
+import java.rmi.Remote;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.stream.cci.Source_1_0;
@@ -67,103 +64,162 @@ import org.openmdx.base.stream.rmi.spi.StreamSynchronization_1_1;
 import org.openmdx.compatibility.base.collection.SparseList;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
 import org.openmdx.compatibility.base.dataprovider.transport.rmi.spi.DataproviderObjectInterceptor;
+import org.openmdx.kernel.application.container.spi.rmi.ByteString;
+import org.openmdx.kernel.application.container.spi.rmi.ByteStringInputStream;
+import org.openmdx.kernel.application.container.spi.rmi.CharacterString;
+import org.openmdx.kernel.application.container.spi.rmi.CharacterStringReader;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Marshals streams and service exceptions
  */
-@SuppressWarnings("unchecked")
 public class StreamMarshaller
     implements DataproviderObjectInterceptor
 {
-    
+
+    /* (non-Javadoc)
+     * @see org.openmdx.compatibility.base.dataprovider.transport.rmi.spi.DataproviderObjectInterceptor#unmarshal(java.rmi.Remote)
+     */
+    public Object unmarshal(Remote stream) {
+        throw new UnsupportedOperationException();
+    }
+
     //------------------------------------------------------------------------
-    public static class BinaryHolder 
-        implements Serializable  {
-    
+    public static class BinaryHolder implements Serializable  {
+
+        /**
+         * Constructor 
+         *
+         * @param stream
+         * 
+         * @throws IOException
+         */
         public BinaryHolder(
             InputStream stream
         ) throws IOException {
-             ByteArrayOutputStream out = new ByteArrayOutputStream();
-             int b;
-             while((b = stream.read()) != -1) {
-                 out.write(b);
-             }
-             this.bytes = out.toByteArray();
+            if(stream instanceof ByteStringInputStream) {
+                this.string = ((ByteStringInputStream)stream).getString();
+            } else {
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                int b;
+                while((b = stream.read()) != -1) {
+                    out.write(b);
+                }
+                this.string = new ByteString(out.toByteArray());
+            }
         }
-    
-        public byte[] getBytes(
-        ) {
-            return this.bytes;
+
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = 1300727842760003691L;
+
+        /**
+         * The content
+         */
+        private final ByteString string;
+
+        /**
+         * Create an input stream
+         * 
+         * @return a newly created input stream
+         */
+        public BinarySource_1InputStream toStream(
+        ){
+            return new BinarySource_1InputStream(this.string);
         }
-        
-        private static final long serialVersionUID = -839683168768777175L;
-        private byte[] bytes;
+
     }
-    
+
     //------------------------------------------------------------------------
     public static class BinarySource_1InputStream 
-        extends ByteArrayInputStream 
-        implements Source_1_0 {
-        
+    extends ByteStringInputStream 
+    implements Source_1_0 
+    {
+
         public BinarySource_1InputStream(
-            byte[] bytes
+            ByteString bytes
         ) {
             super(bytes);
-            this.length = bytes.length;
         }
-              
+
         public long length(
         ) {
-            return this.length;
+            return getString().length();
         }
-        
-        private final long length;
-        
+
     }
-    
+
     //------------------------------------------------------------------------
-    public static class CharacterHolder 
-        implements Serializable  {
-    
+    public static class CharacterHolder implements Serializable  {
+
+        /**
+         * Constructor 
+         *
+         * @param reader
+         * 
+         * @throws IOException
+         */
         public CharacterHolder(
             Reader reader
         ) throws IOException {
-             CharArrayWriter out = new CharArrayWriter();
-             int c;
-             while((c = reader.read()) != -1) {
-                 out.write(c);
-             }
-             this.chars = out.toCharArray();
+            if(reader instanceof CharacterStringReader) {
+                this.string = ((CharacterStringReader)reader).getString();
+            } else {
+                CharArrayWriter out = new CharArrayWriter();
+                int c;
+                while((c = reader.read()) != -1) {
+                    out.write(c);
+                }
+                this.string = new CharacterString(out.toCharArray());
+            }
         }
-    
-        public char[] getChars(
-        ) {
-            return this.chars;
+
+        /**
+         * Implements <code>Serializable</code>
+         */
+        private static final long serialVersionUID = -1526645671101459098L;
+
+        /**
+         * The content
+         */
+        private final CharacterString string;
+
+        /**
+         * Create an input stream
+         * 
+         * @return a newly created input stream
+         */
+        public CharacterSource_1Reader toStream(
+        ){
+            return new CharacterSource_1Reader(this.string);
         }
-        
-        private static final long serialVersionUID = 7856912513397409899L;
-        private char[] chars;
+
     }
-    
+
     //------------------------------------------------------------------------
     public static class CharacterSource_1Reader 
-        extends CharArrayReader 
-        implements Source_1_0 {
-        
+    extends CharacterStringReader 
+    implements Source_1_0 
+    {
+        /**
+         * Constructor 
+         *
+         * @param chars
+         */
         public CharacterSource_1Reader(
-            char[] chars
+            CharacterString chars
         ) {
             super(chars);
         }
-              
+
         public long length(
         ) {
-            return this.length();
+            return getString().length();
         }
-        
+
     }
-    
+
     //------------------------------------------------------------------------
     /**
      * Constructor
@@ -172,7 +228,7 @@ public class StreamMarshaller
     ){
         super();
     }
-    
+
     //------------------------------------------------------------------------
     // Streaming
     //------------------------------------------------------------------------
@@ -187,12 +243,8 @@ public class StreamMarshaller
     public void marshal(
         DataproviderObject object
     ) throws ServiceException {
-        for(
-            Iterator i = object.attributeNames().iterator();
-            i.hasNext();
-        ){
-            String feature = (String)i.next();
-            SparseList values = object.values(feature);
+        for(String feature : object.attributeNames()){
+            SparseList<Object> values = object.values(feature);
             Object value = values.get(0);
             try {
                 if(value instanceof InputStream) {
@@ -211,32 +263,29 @@ public class StreamMarshaller
                         )
                     );
                 }
-            } 
-            catch (Exception exception){
+            }  catch (Exception exception){
                 throw new ServiceException(
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.TRANSFORMATION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter(
-                            "path",
-                            object == null ? null : object.path()
-                        ),
-                        new BasicException.Parameter(
-                            "feature",
-                            feature
-                        ),
-                        new BasicException.Parameter(
-                            "class",
-                            value.getClass().getName()
-                        )
-                    },
-                    "marshalling of large object failed"
+                    "marshalling of large object failed",
+                    new BasicException.Parameter(
+                        "path",
+                        object == null ? null : object.path()
+                    ),
+                    new BasicException.Parameter(
+                        "feature",
+                        feature
+                    ),
+                    new BasicException.Parameter(
+                        "class",
+                        value.getClass().getName()
+                    )
                 );
             }   
         }        
     }
-        
+
     //-----------------------------------------------------------------------
     /**
      * Unmarshal an object
@@ -247,26 +296,19 @@ public class StreamMarshaller
     public void unmarshal(
         DataproviderObject object
     ) {
-        for(
-            Iterator i = object.attributeNames().iterator();
-            i.hasNext();
-        ){
-            SparseList values = object.values((String)i.next());
+        for(String feature : object.attributeNames()){
+            SparseList<Object> values = object.values(feature);
             Object value = values.get(0);
             if(value instanceof BinaryHolder) {
                 values.set(
                     0,
-                    new BinarySource_1InputStream(
-                        ((BinaryHolder)value).getBytes()
-                    )
+                    ((BinaryHolder)value).toStream()
                 );
             } 
             else if (value instanceof CharacterHolder) {
                 values.set(
                     0, 
-                    new CharacterSource_1Reader(
-                        ((CharacterHolder)value).getChars()
-                    )
+                    ((CharacterHolder)value).toStream()
                 );
             } 
         }        
@@ -282,32 +324,24 @@ public class StreamMarshaller
     public void intercept(
         DataproviderObject object
     ) throws ServiceException {
-        for(
-            Iterator i = object.attributeNames().iterator();
-            i.hasNext();
-        ){
-            String name = (String)i.next();
-            SparseList values = object.values(name);
+        for(String name : object.attributeNames()){
+            SparseList<Object> values = object.values(name);
             Object value = values.get(0);
             if(value instanceof BinaryHolder) {
                 values.set(
                     0,
-                    new BinarySource_1InputStream(
-                        ((BinaryHolder)value).getBytes()
-                    )
+                    ((BinaryHolder)value).toStream()
                 );
             } 
             else if (value instanceof CharacterHolder) {
                 values.set(
                     0, 
-                    new CharacterSource_1Reader(
-                        ((CharacterHolder)value).getChars()
-                    )
+                    ((CharacterHolder)value).toStream()
                 );
             } 
         }        
     }
-         
+
     //-----------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.transport.rmi.DataproviderObjectInterceptor#intercept(org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject, java.lang.String, java.io.File, int)

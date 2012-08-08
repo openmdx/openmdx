@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: CallbackContext.java,v 1.4 2008/03/21 18:37:13 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: CallbackContext.java,v 1.5 2008/12/15 11:35:46 hburger Exp $
  * Description: Callback Context
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:37:13 $
+ * Date:        $Date: 2008/12/15 11:35:46 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.security.rmi;
 
@@ -57,7 +56,6 @@ import java.security.PrivilegedExceptionAction;
 
 import org.openmdx.kernel.security.ExecutionContext;
 
-
 /**
  * Standard Callback Context
  */
@@ -65,8 +63,25 @@ public class CallbackContext
 	implements ExecutionContext 
 {
 
-    public CallbackContext() {
+    /**
+     * Constructor 
+     */
+    private CallbackContext() {
         super();
+    }
+
+    /**
+     * No need to have multiple instances of this class
+     */
+    private final static ExecutionContext instance = new CallbackContext();
+    
+    /**
+     * Retrieve an <code>ExecutionContext</code> instance
+     * 
+     * @return a <code>CallbackContext</code> instance
+     */
+    public static final ExecutionContext getInstance(){
+       return CallbackContext.instance;
     }
 
     
@@ -106,7 +121,7 @@ public class CallbackContext
      */
     public void close(
     ) {
-        //
+        // nothing to do
     }
 
 }

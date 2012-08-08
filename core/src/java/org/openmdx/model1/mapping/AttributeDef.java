@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: AttributeDef.java,v 1.6 2008/03/21 18:40:15 hburger Exp $
+ * Name:        $Id: AttributeDef.java,v 1.7 2008/11/11 15:40:46 wfro Exp $
  * Description: VelocityAttributeDef class
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:40:15 $
+ * Date:        $Date: 2008/11/11 15:40:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,8 +66,7 @@ public class AttributeDef
   //-------------------------------------------------------------------------
   public AttributeDef(
     ModelElement_1_0 attributeDef,
-    Model_1_3 model, 
-    boolean openmdx1
+    Model_1_3 model 
   ) throws ServiceException {
     this(
         (String)attributeDef.values("name").get(0),
@@ -75,14 +74,12 @@ public class AttributeDef
         (String)attributeDef.values("annotation").get(0),
         new HashSet(attributeDef.values("stereotype")),
         (String)attributeDef.values("visibility").get(0),
-        (String)model.getDereferencedType(
-            attributeDef.values("type").get(0),
-            openmdx1
+        (String)model.getElementType(
+            attributeDef
          ).values("qualifiedName").get(0),
         (String)attributeDef.values("multiplicity").get(0),
         (Boolean)attributeDef.values("isChangeable").get(0),
-        (Boolean)attributeDef.values("isDerived").get(0), 
-        openmdx1
+        (Boolean)attributeDef.values("isDerived").get(0) 
     );
   }
 
@@ -106,13 +103,12 @@ public class AttributeDef
           (String)attributeDef.values("annotation").get(0),
           new HashSet(attributeDef.values("stereotype")),
           (String)attributeDef.values("visibility").get(0),
-          (String)model.getDereferencedType(
-              attributeDef.values("type").get(0)
+          (String)model.getElementType(
+              attributeDef
            ).values("qualifiedName").get(0),
           (String)attributeDef.values("multiplicity").get(0),
           (Boolean)attributeDef.values("isChangeable").get(0),
-          (Boolean)attributeDef.values("isDerived").get(0), 
-          true
+          (Boolean)attributeDef.values("isDerived").get(0) 
       );
     }
   
@@ -126,8 +122,7 @@ public class AttributeDef
         String qualifiedTypeName,
         String multiplicity,
         Boolean isChangeable,
-        Boolean isDerived, 
-        boolean openmdx1
+        Boolean isDerived 
   ) {
    super(
       name, 
@@ -138,7 +133,7 @@ public class AttributeDef
       qualifiedTypeName, 
       multiplicity,
       isChangeable,
-      isDerived, openmdx1
+      isDerived
     );
     this.maxLength = 0;
     }
@@ -154,7 +149,7 @@ public class AttributeDef
     String multiplicity,
     Boolean isChangeable,
     Boolean isDerived,
-    int maxLength, boolean openmdx1
+    int maxLength
   ) {
     super(
       name, 
@@ -165,7 +160,7 @@ public class AttributeDef
       qualifiedTypeName, 
       multiplicity,
       isChangeable,
-      isDerived, openmdx1
+      isDerived
     );
     this.maxLength = maxLength;
   }

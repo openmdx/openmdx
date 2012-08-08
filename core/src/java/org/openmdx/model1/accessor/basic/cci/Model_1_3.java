@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Model_1_3.java,v 1.2 2007/03/12 14:58:58 hburger Exp $
+ * Name:        $Id: Model_1_3.java,v 1.3 2008/11/11 15:40:09 wfro Exp $
  * Description: Model interface 1.2
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/03/12 14:58:58 $
+ * Date:        $Date: 2008/11/11 15:40:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,19 +71,6 @@ public interface Model_1_3
      */
     ModelElement_1_0 getCompositeReference(
         ModelElement_1_0 classDef
-    ) throws ServiceException;
-
-    /**
-     * Dereferences the given 'element', i.e. if 'element' is an alias type returns the
-     * referenced element recursively.
-     * 
-     * @param element the element to be dereferenced
-     * @param xriAsString maps <code>org::oasis-open::xri</code> to 
-     * <code>org::oasis-open::XRI</code> if <code>false</code>
-     */
-    public ModelElement_1_0 getDereferencedType(
-      Object element,
-      boolean xriAsString
     ) throws ServiceException;
 
 }

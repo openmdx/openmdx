@@ -68,7 +68,7 @@ import org.openmdx.uses.org.apache.commons.collections.keyvalue.UnmodifiableMapE
  * UnsupportedOperationException on attempts to call that method.
  *
  * @since Commons Collections 3.0 (previously DoubleOrderedMap v2.0)
- * @version $Revision: 1.8 $ $Date: 2008/06/28 00:21:53 $
+ * @version $Revision: 1.9 $ $Date: 2008/09/09 14:32:16 $
  * 
  * @author Marc Johnson
  * @author Stephen Colebourne
@@ -83,7 +83,7 @@ public class TreeBidiMap implements OrderedBidiMap {
     private static final int SUM_OF_INDICES = KEY + VALUE;
     private static final int FIRST_INDEX = 0;
     private static final int NUMBER_OF_INDICES = 2;
-    private static final String[] dataName = new String[] { "key", "value" };
+    private static final String[] dataName = { "key", "value" };
     
     Node[] rootNode = new Node[2];
     int nodeCount = 0;

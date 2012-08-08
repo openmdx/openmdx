@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractObject.java,v 1.3 2008/04/25 15:16:56 hburger Exp $
+ * Name:        $Id: AbstractObject.java,v 1.4 2008/11/24 10:52:10 hburger Exp $
  * Description: Abstract Object
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/25 15:16:56 $
+ * Date:        $Date: 2008/11/24 10:52:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,10 @@ package org.openmdx.base.aop2.standard;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
+import javax.jdo.listener.ClearCallback;
+import javax.jdo.listener.DeleteCallback;
+import javax.jdo.listener.LoadCallback;
+import javax.jdo.listener.StoreCallback;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 
@@ -140,4 +144,41 @@ public abstract class AbstractObject {
         return ((BasePackage)this.same.refOutermostPackage().refPackage("org:openmdx:base")).createVoid();
     }
 
+    /* (non-Javadoc)
+     * @see javax.jdo.listener.ClearCallback#jdoPreClear()
+     */
+    protected void jdoPreClear() {
+        if(this.next instanceof ClearCallback) {
+            ((ClearCallback)this.next).jdoPreClear();
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.listener.StoreCallback#jdoPreStore()
+     */
+    protected void jdoPreStore() {
+        if(this.next instanceof StoreCallback) {
+            ((StoreCallback)this.next).jdoPreStore();
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.listener.LoadCallback#jdoPostLoad()
+     */
+    protected void jdoPostLoad() {
+        if(this.next instanceof LoadCallback) {
+            ((LoadCallback)this.next).jdoPostLoad();
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.listener.DeleteCallback#jdoPreDelete()
+     */
+    protected void jdoPreDelete() {
+        if(this.next instanceof DeleteCallback) {
+            ((DeleteCallback)this.next).jdoPreDelete();
+        }
+    }
+
+    
 }

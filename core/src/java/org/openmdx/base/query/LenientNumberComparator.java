@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LenientNumberComparator.java,v 1.4 2008/03/21 18:30:56 hburger Exp $
+ * Name:        $Id: LenientNumberComparator.java,v 1.5 2008/09/22 23:38:20 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:30:56 $
+ * Date:        $Date: 2008/09/22 23:38:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,7 +59,6 @@ import java.util.Comparator;
 /**
  * Allows comparison of not directly comparable classes
  */
-@SuppressWarnings("unchecked")
 public class LenientNumberComparator extends LenientCharacterComparator {
 
     /**
@@ -67,7 +66,7 @@ public class LenientNumberComparator extends LenientCharacterComparator {
      * 
      * @return  a lenient comparator using the default CharSequence comparator
      */
-    public static Comparator getInstance(
+    public static Comparator<Object> getInstance(
     ){
         return LenientNumberComparator.instance;
     }
@@ -76,7 +75,7 @@ public class LenientNumberComparator extends LenientCharacterComparator {
      * Use specific CharSequence comparator
      */
     public LenientNumberComparator(
-        Comparator charSequenceComparator
+        Comparator<Object> charSequenceComparator
     ) {
         super(charSequenceComparator);
     }
@@ -84,7 +83,7 @@ public class LenientNumberComparator extends LenientCharacterComparator {
     /**
      * 
      */
-    private static final Comparator instance = new LenientNumberComparator(null);
+    private static final Comparator<Object> instance = new LenientNumberComparator(null);
             
     
     //------------------------------------------------------------------------
@@ -176,7 +175,7 @@ public class LenientNumberComparator extends LenientCharacterComparator {
     private static boolean isAssignableToLong(
        Number number
     ){
-        Class type = number.getClass();
+        Class<? extends Number> type = number.getClass();
         return 
             type == Byte.TYPE ||
             type == Short.TYPE ||
@@ -191,7 +190,7 @@ public class LenientNumberComparator extends LenientCharacterComparator {
     private static boolean isAssignableToDouble(
         Number number
     ){
-        Class type = number.getClass();
+        Class<? extends Number> type = number.getClass();
         return 
             type == Float.TYPE ||
             type == Double.TYPE;

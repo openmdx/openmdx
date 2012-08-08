@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingFilterableMap.java,v 1.15 2008/04/21 17:03:59 hburger Exp $
+ * Name:        $Id: MarshallingFilterableMap.java,v 1.16 2008/10/02 17:32:13 hburger Exp $
  * Description: Marshalling Filterable Map
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/21 17:03:59 $
+ * Date:        $Date: 2008/10/02 17:32:13 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,15 +51,17 @@
 package org.openmdx.base.collection;
 
 import java.util.List;
+import java.util.Map;
 
+import org.openmdx.base.accessor.generic.cci.Object_1_0;
 import org.openmdx.compatibility.base.marshalling.Marshaller;
 
 /**
  * A Marshalling Filterable Map
  */
-public class MarshallingFilterableMap<K,V,M extends FilterableMap<K,?>>
-    extends MarshallingMap<K,V,M>
-    implements FilterableMap<K,V>, FetchSize 
+public class MarshallingFilterableMap
+    extends MarshallingMap<String,Object_1_0>
+    implements FilterableMap<String,Object_1_0>, FetchSize 
 {
 
     /**
@@ -70,7 +72,7 @@ public class MarshallingFilterableMap<K,V,M extends FilterableMap<K,?>>
      */
     public MarshallingFilterableMap(
         org.openmdx.base.persistence.spi.Marshaller marshaller, 
-        M container
+        FilterableMap<String,Object_1_0> container
     ) {
         super(marshaller, container);
     }
@@ -83,17 +85,25 @@ public class MarshallingFilterableMap<K,V,M extends FilterableMap<K,?>>
      */
     public MarshallingFilterableMap(
         Marshaller marshaller, 
-        M container
+        FilterableMap<String,Object_1_0> container
     ) {
         super(marshaller, container);
     }
 
     @SuppressWarnings("unchecked")
-    public FilterableMap<K,V> subMap(Object filter) {
-        return new MarshallingFilterableMap<K,V,M>(
+    public FilterableMap subMap(Object filter) {
+        return new MarshallingFilterableMap(
             super.marshaller,
-            (M)getDelegate().subMap(super.marshaller.unmarshal(filter))
+            getDelegate().subMap(super.marshaller.unmarshal(filter))
         );
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.collection.MarshallingMap#getDelegate()
+     */
+    @Override
+    protected FilterableMap<String,Object_1_0> getDelegate() {
+        return (FilterableMap<String,Object_1_0>) super.getDelegate();
     }
 
     /**
@@ -111,8 +121,8 @@ public class MarshallingFilterableMap<K,V,M extends FilterableMap<K,?>>
     // Implements FilterableMap
     //------------------------------------------------------------------------
     
-    public List<V> values(Object criteria) {
-        return new MarshallingSequentialList<V>(
+    public List<Object_1_0> values(Object criteria) {
+        return new MarshallingSequentialList<Object_1_0>(
             super.marshaller,
             getDelegate().values(super.marshaller.unmarshal(criteria))
         );
@@ -127,7 +137,7 @@ public class MarshallingFilterableMap<K,V,M extends FilterableMap<K,?>>
      */
     public int getFetchSize(
     ) {
-        M delegate = getDelegate();
+        Map<String,Object_1_0> delegate = getDelegate();
         return delegate instanceof FetchSize ?
             this.fetchSize = ((FetchSize)delegate).getFetchSize() :
             this.fetchSize;
@@ -139,7 +149,7 @@ public class MarshallingFilterableMap<K,V,M extends FilterableMap<K,?>>
         int fetchSize
     ){
         this.fetchSize = fetchSize;
-        M delegate = getDelegate();
+        Map<String,Object_1_0> delegate = getDelegate();
         if(delegate instanceof FetchSize) {
             ((FetchSize)delegate).setFetchSize(fetchSize);
         }

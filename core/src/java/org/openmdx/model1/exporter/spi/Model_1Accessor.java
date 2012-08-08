@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1Accessor.java,v 1.13 2008/03/21 18:40:08 hburger Exp $
+ * Name:        $Id: Model_1Accessor.java,v 1.14 2008/11/07 17:47:42 hburger Exp $
  * Description: Wrapper for a org::omg::model1 compliant in-process dataprovider.
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:40:08 $
+ * Date:        $Date: 2008/11/07 17:47:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -114,7 +114,7 @@ public class Model_1Accessor {
       this.dataprovider = new Dataprovider_1(
         new Configuration(),
         this.configurationProvider, 
-        null // self
+        null
       );
     }
     catch(ServiceException e) {

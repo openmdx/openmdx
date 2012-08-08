@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TestPersistenceManagerFactory.java,v 1.1 2006/05/12 20:11:22 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: TestPersistenceManagerFactory.java,v 1.2 2008/11/07 17:54:14 hburger Exp $
  * Description: Test Persistence Manager Factory
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/05/12 20:11:22 $
+ * Date:        $Date: 2008/11/07 17:54:14 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006, OMEX AG, Switzerland
+ * Copyright (c) 2006-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,87 +50,45 @@
  */
 package org.openmdx.test.base.accessor.jmi.spi;
 
+import static org.junit.Assert.assertArrayEquals;
+
 import java.util.Arrays;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.junit.Test;
+import org.openmdx.base.persistence.spi.AbstractManagerFactory;
 
-import org.openmdx.base.accessor.jmi.spi.PersistenceManagerFactory_1;
+/**
+ * Test Persistence Manager Factory
+ */
+public class TestPersistenceManagerFactory {
 
-public class TestPersistenceManagerFactory extends TestCase {
-
-	/**
-	 * Constructs a test case with the given name.
-	 */
-	public TestPersistenceManagerFactory(String name)
-	{
-		super(name);
-	}
-
-	/**
-	 * The batch TestRunner can be given a class to run directly.
-	 * To start the batch runner from your main you can write:
-	 */
-	public static void main (String[] args)
-	{
-		junit.textui.TestRunner.run (suite());
-	}
-
-	/**
-	 * A test runner either expects a static method suite as the
-	 * entry point to get a test to run or it will extract the
-	 * suite automatically.
-	 */
-	public static Test suite()
-	{
-		return new TestSuite(TestPersistenceManagerFactory.class);
-	}
-
-    /**
-     * 
-     */
+    @Test
     public void testPrincipalChain(
     ) {
-        assertEquals(
+        assertArrayEquals(
             "null",
             new String[]{}, 
-            PersistenceManagerFactory_1.getPrincipalChain(null)
+            AbstractManagerFactory.toPrincipalChain(null)
                 
         );
-        assertEquals(
+        assertArrayEquals(
             "empty", 
             new String[]{}, 
-            PersistenceManagerFactory_1.getPrincipalChain("")
+            AbstractManagerFactory.toPrincipalChain("")
         );
-        assertEquals(
+        assertArrayEquals(
             "principal", 
             new String[]{"principal"}, 
-            PersistenceManagerFactory_1.getPrincipalChain("principal")
+            AbstractManagerFactory.toPrincipalChain("principal")
         );
         String[] principals = new String[]{"principal0", "principal1", "principal2"}; 
-        assertEquals(
+        assertArrayEquals(
             "principals", 
             principals, 
-            PersistenceManagerFactory_1.getPrincipalChain(
+            AbstractManagerFactory.toPrincipalChain(
                 Arrays.asList(principals).toString()
             )
         );
     }
 
-    /**
-     * Asserts that two objects are equal. If they are not
-     * an AssertionFailedError is thrown with the given message.
-     */
-    static public void assertEquals(
-        String message, 
-        Object[] expected, 
-        Object[] actual
-    ) {
-        if(Arrays.equals(expected, actual)) return;
-        fail(
-            message + " expected:<" + Arrays.asList(expected) + "> but was:<" + Arrays.asList(actual) + ">"
-        );
-    }
-        
 }

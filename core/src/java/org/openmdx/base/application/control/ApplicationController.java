@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ApplicationController.java,v 1.15 2008/03/21 18:27:19 hburger Exp $
+ * Name:        $Id: ApplicationController.java,v 1.16 2008/09/09 14:49:28 hburger Exp $
  * Description: Base Application
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:27:19 $
+ * Date:        $Date: 2008/09/09 14:49:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -771,7 +771,7 @@ public class ApplicationController
                     Method meth = ExceptionListener.class.getMethod(
                                     methodName, new Class[]{CmdLineEvent.class});
 
-                    meth.invoke(this.application, new Object[]{event});
+                    meth.invoke(this.application, event);
                     return;
 
                 }catch(Throwable tx) { 

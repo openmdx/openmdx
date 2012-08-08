@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatabaseConnectionFactory.java,v 1.7 2008/03/21 18:38:39 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: DatabaseConnectionFactory.java,v 1.10 2008/10/13 09:56:40 hburger Exp $
  * Description: Database Connection Factory
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:38:39 $
+ * Date:        $Date: 2008/10/13 09:56:40 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.application.container.spi.sql;
 
@@ -75,7 +74,7 @@ import org.openmdx.kernel.exception.Throwables;
  */
 @SuppressWarnings("unchecked")
 public class DatabaseConnectionFactory
-    implements DataSource
+implements DataSource
 {
 
     /**
@@ -96,8 +95,8 @@ public class DatabaseConnectionFactory
             Collections.EMPTY_SET,
             DatabaseConnection.class
         ) : connectionManager;
-        this.managedConnectionFactory = managedConnectionFactory;
-        this.connectionRequestInfo = connectionRequestInfo;
+            this.managedConnectionFactory = managedConnectionFactory;
+            this.connectionRequestInfo = connectionRequestInfo;
     }
 
 
@@ -131,7 +130,7 @@ public class DatabaseConnectionFactory
      */
     public String toString(
     ) {
-       return getClass().getName() + ": " + this.connectionRequestInfo;
+        return getClass().getName() + ": " + this.connectionRequestInfo;
     }
 
 
@@ -157,7 +156,6 @@ public class DatabaseConnectionFactory
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.GENERIC,
-                    null,
                     null
                 )
             );
@@ -174,13 +172,13 @@ public class DatabaseConnectionFactory
         try {
             if(this.connectionManager instanceof ShareableConnectionManager){
                 return (Connection) new ShareableConnectionManager(
-                     Collections.singleton(
-                         new PasswordCredential(
-                             username,
-                             password.toCharArray()
-                         )
-                     ),
-                     DatabaseConnection.class
+                    Collections.singleton(
+                        new PasswordCredential(
+                            username,
+                            password.toCharArray()
+                        )
+                    ),
+                    DatabaseConnection.class
                 ).allocateConnection(
                     this.managedConnectionFactory,
                     this.connectionRequestInfo
@@ -197,7 +195,6 @@ public class DatabaseConnectionFactory
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.GENERIC,
-                    null,
                     null
                 )
             );
@@ -256,9 +253,9 @@ public class DatabaseConnectionFactory
         Class<?> iface
     ) throws SQLException {
         return
-            iface.isAssignableFrom(ConnectionManager.class) ||
-            iface.isAssignableFrom(ManagedConnectionFactory.class) ||
-            iface.isAssignableFrom(ConnectionRequestInfo.class);
+        iface.isAssignableFrom(ConnectionManager.class) ||
+        iface.isAssignableFrom(ManagedConnectionFactory.class) ||
+        iface.isAssignableFrom(ConnectionRequestInfo.class);
     }
 
     /* (non-Javadoc)
@@ -268,10 +265,10 @@ public class DatabaseConnectionFactory
         Class<T> iface
     ) throws SQLException {
         return (T) (
-            iface.isAssignableFrom(ConnectionManager.class) ? this.connectionManager :
-            iface.isAssignableFrom(ManagedConnectionFactory.class) ? this.managedConnectionFactory :
-            iface.isAssignableFrom(ConnectionRequestInfo.class) ? this.connectionRequestInfo :
-            null
+                iface.isAssignableFrom(ConnectionManager.class) ? this.connectionManager :
+                    iface.isAssignableFrom(ManagedConnectionFactory.class) ? this.managedConnectionFactory :
+                        iface.isAssignableFrom(ConnectionRequestInfo.class) ? this.connectionRequestInfo :
+                            null
         );
     }
 

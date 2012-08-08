@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork_1.java,v 1.3 2008/06/03 16:31:11 hburger Exp $
+ * Name:        $Id: UnitOfWork_1.java,v 1.5 2008/09/10 08:55:23 hburger Exp $
  * Description: UnitOfWork_1 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/03 16:31:11 $
+ * Date:        $Date: 2008/09/10 08:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,7 +51,7 @@
 package org.openmdx.base.accessor.jmi.spi;
 
 import javax.jdo.JDOException;
-import javax.jdo.Transaction;
+import javax.jdo.PersistenceManager;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
@@ -64,30 +64,32 @@ import org.openmdx.kernel.exception.BasicException;
  * UnitOfWork_1
  */
 class UnitOfWork_1
-    implements UnitOfWork_1_2
+implements UnitOfWork_1_2
 {
 
     /**
      * Constructor 
      *
-     * @param delegate
+     * @param persistenceManager
      */
-    UnitOfWork_1(Transaction delegate) {
-        this.delegate = delegate;
+    UnitOfWork_1(
+        PersistenceManager persistenceManager
+    ) {
+        this.persistenceManager = persistenceManager;
     }
 
     /**
      * 
      */
-    private final Transaction delegate;
-    
+    private final PersistenceManager persistenceManager;
+
     /* (non-Javadoc)
      * @see org.openmdx.base.transaction.UnitOfWork_1_0#begin()
      */
     public void begin(
     ) throws ServiceException {
         try {
-            this.delegate.begin();
+            this.persistenceManager.currentTransaction().begin();
         } catch (JDOException exception) {
             throw new ServiceException(exception);
         }
@@ -99,7 +101,7 @@ class UnitOfWork_1
     public void commit(
     ) throws ServiceException {
         try {
-            this.delegate.commit();
+            this.persistenceManager.currentTransaction().commit();
         } catch (JDOException exception) {
             throw new ServiceException(exception);
         }
@@ -110,7 +112,7 @@ class UnitOfWork_1
      */
     public boolean isActive() {
         try {
-            return this.delegate.isActive();
+            return this.persistenceManager.currentTransaction().isActive();
         } catch (JDOException exception) {
             throw new RuntimeServiceException(exception);
         }
@@ -121,7 +123,7 @@ class UnitOfWork_1
      */
     public boolean isOptimistic() {
         try {
-            return this.delegate.getOptimistic();
+            return this.persistenceManager.currentTransaction().getOptimistic();
         } catch (JDOException exception) {
             throw new RuntimeServiceException(exception);
         }
@@ -131,7 +133,7 @@ class UnitOfWork_1
      * @see org.openmdx.base.transaction.UnitOfWork_1_0#isTransactional()
      */
     public boolean isTransactional() {
-        return !this.delegate.getNontransactionalWrite();
+        return !this.persistenceManager.currentTransaction().getNontransactionalWrite();
     }
 
     /* (non-Javadoc)
@@ -140,7 +142,7 @@ class UnitOfWork_1
     public void rollback(
     ) throws ServiceException {
         try {
-            this.delegate.rollback();
+            this.persistenceManager.currentTransaction().rollback();
         } catch (JDOException exception) {
             throw new ServiceException(exception);
         }
@@ -154,7 +156,6 @@ class UnitOfWork_1
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_IMPLEMENTED,
-            null,
             "Verification only mode not supported"
         );
     }
@@ -196,22 +197,20 @@ class UnitOfWork_1
 
     private Synchronization getSynchronization() throws ServiceException{
         try {
-            return (Synchronization)this.delegate;
+            return (Synchronization)this.persistenceManager.currentTransaction();
         } catch (ClassCastException exception) {
             throw new ServiceException(
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.NOT_SUPPORTED,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("class", this.delegate.getClass().getName())
-                },
-                "Synchronization is not supported by the delegate"
+                "Synchronization is not supported by the delegate",
+                new BasicException.Parameter("class", this.persistenceManager.currentTransaction().getClass().getName())
             );
         }
-        
+
     }
 
-    
+
     //------------------------------------------------------------------------
     // Implements UnitOfWork_1_2
     //------------------------------------------------------------------------
@@ -221,15 +220,15 @@ class UnitOfWork_1
      */
     public boolean getRollbackOnly(
     ) {
-        return this.delegate.getRollbackOnly();
+        return this.persistenceManager.currentTransaction().getRollbackOnly();
     }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.transaction.UnitOfWork_1_2#setRollbackOnly()
      */
     public void setRollbackOnly() {
-        this.delegate.setRollbackOnly();
+        this.persistenceManager.currentTransaction().setRollbackOnly();
     }
 
-    
+
 }

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StreamMarshaller.java,v 1.20 2008/03/19 17:09:22 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: StreamMarshaller.java,v 1.22 2008/12/15 11:35:46 hburger Exp $
  * Description: RMIMapper class
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/19 17:09:22 $
+ * Date:        $Date: 2008/12/15 11:35:46 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.compatibility.base.dataprovider.transport.rmi.weblogic;
 
@@ -82,7 +81,7 @@ import org.openmdx.base.stream.rmi.weblogic.CharacterSource_1;
 import org.openmdx.base.stream.rmi.weblogic.CharacterSource_1Proxy;
 import org.openmdx.compatibility.base.collection.SparseList;
 import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
-import org.openmdx.compatibility.base.dataprovider.transport.rmi.spi.DataproviderObjectInterceptor;
+import org.openmdx.compatibility.base.dataprovider.transport.rmi.spi.AbstractMarshaller;
 import org.openmdx.compatibility.kernel.application.cci.Classes;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.security.ExecutionContext;
@@ -91,9 +90,7 @@ import org.openmdx.kernel.security.ExecutionContext;
  * Marshalls remote streams and service exceptions
  */
 @SuppressWarnings("unchecked")
-public class StreamMarshaller
-    implements DataproviderObjectInterceptor
-{
+public class StreamMarshaller extends AbstractMarshaller {
 
     /**
      * Public constructor for factory
@@ -102,7 +99,7 @@ public class StreamMarshaller
     ){
         try {
             this.callbackContext = (ExecutionContext) Classes.getApplicationClass(
-                    CALLBACK_CONTEXT_CLASS
+                CALLBACK_CONTEXT_CLASS
             ).newInstance();
             this.noCallbackContext = null;
         } catch (Exception e) {
@@ -111,21 +108,19 @@ public class StreamMarshaller
                 e,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                new BasicException.Parameter[]{
-                     new BasicException.Parameter("callbackContextClass", CALLBACK_CONTEXT_CLASS)
-                },
-                "Failed to load the WebLogic callback context class"
+                "Failed to load the WebLogic callback context class",
+                new BasicException.Parameter("callbackContextClass", CALLBACK_CONTEXT_CLASS)
             );
         }
     }
-    
+
     /**
      * The callback <code>ExecutionContext</code> instance to be loaded 
      * dynamically.
      */
     private static final String CALLBACK_CONTEXT_CLASS = 
         "org.openmdx.weblogic.security.rmi.CallbackContext";
-    
+
     /**
      * WebLogic Callback Context Holder
      */
@@ -136,7 +131,7 @@ public class StreamMarshaller
      * Context.
      */
     private RuntimeServiceException noCallbackContext;
-    
+
     /**
      * Return the callback context if it could be allocated.
      * 
@@ -144,15 +139,15 @@ public class StreamMarshaller
      * 
      * @throws ServiceException
      */
-    private ExecutionContext getCallbackContext(){
+    protected ExecutionContext getCallbackContext(){
         if(this.noCallbackContext == null) {
             return this.callbackContext;
         } else {
             throw this.noCallbackContext;
         }
     }
-    
-    
+
+
     //------------------------------------------------------------------------
     // Streaming
     //------------------------------------------------------------------------
@@ -170,8 +165,8 @@ public class StreamMarshaller
         DataproviderObject object
     ) throws ServiceException {
         for(
-            Iterator i = object.attributeNames().iterator();
-            i.hasNext();
+                Iterator i = object.attributeNames().iterator();
+                i.hasNext();
         ){
             String feature = (String)i.next();
             SparseList values = object.values(feature);
@@ -225,26 +220,24 @@ public class StreamMarshaller
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.TRANSFORMATION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter(
-                            "path",
-                            object == null ? null : object.path()
-                        ),
-                        new BasicException.Parameter(
-                            "feature",
-                            feature
-                        ),
-                        new BasicException.Parameter(
-                            "class",
-                            value.getClass().getName()
-                        )
-                    },
-                    "marshalling of large object failed"
+                    "marshalling of large object failed",
+                    new BasicException.Parameter(
+                        "path",
+                        object == null ? null : object.path()
+                    ),
+                    new BasicException.Parameter(
+                        "feature",
+                        feature
+                    ),
+                    new BasicException.Parameter(
+                        "class",
+                        value.getClass().getName()
+                    )
                 );
             }   
         }
     }
-        
+
     /**
      * The optional argument length is stored at position 1
      * 
@@ -256,7 +249,7 @@ public class StreamMarshaller
         Object length = values.get(1);
         return length instanceof Long ? ((Long)length).longValue() : -1L;
     }
-    
+
     /**
      * Unmarshal an object
      *
@@ -267,8 +260,8 @@ public class StreamMarshaller
         DataproviderObject object
     ){
         for(
-            Iterator i = object.attributeNames().iterator();
-            i.hasNext();
+                Iterator i = object.attributeNames().iterator();
+                i.hasNext();
         ){
             SparseList values = object.values((String)i.next());
             Object value = values.get(0);
@@ -278,7 +271,7 @@ public class StreamMarshaller
                     new BinarySource_1InputStream(
                         (BinarySource_1_0)value,
                         getCallbackContext()
-                     )
+                    )
                 );
                 values.set(
                     1,
@@ -297,25 +290,25 @@ public class StreamMarshaller
                     null
                 );
             } else if (value instanceof BinarySink_1_0) {
-            	values.set(
-            		0,
-					new BinarySink_1OutputStream(
-					    (BinarySink_1_0)value,
+                values.set(
+                    0,
+                    new BinarySink_1OutputStream(
+                        (BinarySink_1_0)value,
                         getCallbackContext()
                     )
-				);
+                );
                 values.set(
                     1,
                     null
                 );
             } else if (value instanceof CharacterSink_1_0) {
-            	values.set(
-            		0,
-					new CharacterSink_1Writer(
-					    (CharacterSink_1_0)value,
+                values.set(
+                    0,
+                    new CharacterSink_1Writer(
+                        (CharacterSink_1_0)value,
                         getCallbackContext()
-					)
-				);
+                    )
+                );
                 values.set(
                     1,
                     null
@@ -358,8 +351,8 @@ public class StreamMarshaller
         DataproviderObject object
     ) throws ServiceException {
         for(
-            Iterator i = object.attributeNames().iterator();
-            i.hasNext();
+                Iterator i = object.attributeNames().iterator();
+                i.hasNext();
         ){
             String name = (String)i.next();
             SparseList values = object.values(name);
@@ -399,12 +392,10 @@ public class StreamMarshaller
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.TRANSFORMATION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("path", object.path()),
-                        new BasicException.Parameter("feature", name),
-                        new BasicException.Parameter("class", value.getClass().getName())
-                    },
-                    "Creating a stream proxy failed"
+                    "Creating a stream proxy failed",
+                    new BasicException.Parameter("path", object.path()),
+                    new BasicException.Parameter("feature", name),
+                    new BasicException.Parameter("class", value.getClass().getName())
                 );
             }
         }
@@ -421,8 +412,8 @@ public class StreamMarshaller
             intercept(object);
         } else {
             for(
-                Iterator i = object.attributeNames().iterator();
-                i.hasNext();
+                    Iterator i = object.attributeNames().iterator();
+                    i.hasNext();
             ){
                 String name = (String)i.next();
                 SparseList values = object.values(name);
@@ -433,8 +424,8 @@ public class StreamMarshaller
                             (BinarySource_1_0)value
                         );
 //                      BinarySource_1_0 newValue = new BinarySource_1(
-//                          entry.getBinaryStream(),
-//                          entry.getLength()
+//                      entry.getBinaryStream(),
+//                      entry.getLength()
 //                      );
 //                      entry.setTransactionalSource(newValue);
                         values.set(0, entry.getBinaryStream());
@@ -444,8 +435,8 @@ public class StreamMarshaller
                             (CharacterSource_1_0)value
                         );
 //                      CharacterSource_1_0 newValue = new CharacterSource_1(
-//                          entry.getCharacterStream(),
-//                          entry.getLength()
+//                      entry.getCharacterStream(),
+//                      entry.getLength()
 //                      );
 //                      entry.setTransactionalSource(newValue);
                         values.set(0, entry.getCharacterStream());
@@ -455,7 +446,7 @@ public class StreamMarshaller
                             (BinarySink_1_0)value
                         );
 //                      BinarySink_1_0 newValue = new BinarySink_1(
-//                          entry.getBinaryStream()
+//                      entry.getBinaryStream()
 //                      );
 //                      entry.setTransactionalSink(newValue);
                         values.set(0, entry.getBinaryStream());
@@ -464,7 +455,7 @@ public class StreamMarshaller
                             (CharacterSink_1_0)value
                         );
 //                      CharacterSink_1_0 newValue = new CharacterSink_1(
-//                          entry.getCharacterStream()
+//                      entry.getCharacterStream()
 //                      );
 //                      entry.setTransactionalSink(newValue);
                         values.set(0, entry.getCharacterStream());
@@ -473,8 +464,8 @@ public class StreamMarshaller
                             (InputStream)value
                         );
 //                      BinarySource_1_0 newValue = new BinarySource_1(
-//                          entry.getBinaryStream(),
-//                          entry.getLength()
+//                      entry.getBinaryStream(),
+//                      entry.getLength()
 //                      );
 //                      entry.setTransactionalSource(newValue);
                         values.set(0, entry.getBinaryStream());
@@ -484,8 +475,8 @@ public class StreamMarshaller
                             (Reader)value
                         );
 //                      CharacterSource_1_0 newValue = new CharacterSource_1(
-//                          entry.getCharacterStream(),
-//                          entry.getLength()
+//                      entry.getCharacterStream(),
+//                      entry.getLength()
 //                      );
 //                      entry.setTransactionalSource(newValue);
                         values.set(0, entry.getCharacterStream());
@@ -495,7 +486,7 @@ public class StreamMarshaller
                             (OutputStream)value
                         );
 //                      BinarySink_1_0 newValue = new BinarySink_1(
-//                          entry.getBinaryStream()
+//                      entry.getBinaryStream()
 //                      );
 //                      entry.setTransactionalSink(newValue);
                         values.set(0, entry.getBinaryStream());
@@ -504,7 +495,7 @@ public class StreamMarshaller
                             (Writer)value
                         );
 //                      CharacterSink_1_0 newValue = new CharacterSink_1(
-//                          entry.getCharacterStream()
+//                      entry.getCharacterStream()
 //                      );
 //                      entry.setTransactionalSink(newValue);
                         values.set(0, entry.getCharacterStream());
@@ -514,13 +505,11 @@ public class StreamMarshaller
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.TRANSFORMATION_FAILURE,
-                        new BasicException.Parameter[]{
-                            new BasicException.Parameter("unitOfWork", synchronization.toString()),
-                            new BasicException.Parameter("path", object.path()),
-                            new BasicException.Parameter("feature", name),
-                            new BasicException.Parameter("class", value.getClass().getName())
-                        },
-                        "Creating a stream proxy failed"
+                        "Creating a stream proxy failed",
+                        new BasicException.Parameter("unitOfWork", synchronization.toString()),
+                        new BasicException.Parameter("path", object.path()),
+                        new BasicException.Parameter("feature", name),
+                        new BasicException.Parameter("class", value.getClass().getName())
                     );
                 }
             }

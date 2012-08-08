@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FilterLoader.java,v 1.15 2008/04/04 17:01:12 hburger Exp $
+ * Name:        $Id: FilterLoader.java,v 1.17 2008/11/10 15:16:45 wfro Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:12 $
+ * Date:        $Date: 2008/11/10 15:16:45 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.loader;
 
@@ -150,7 +147,7 @@ public class FilterLoader
         );
 
         // Create a filter for each referenced type (only if there is more than one referenced type)
-        Map assertableInspectors = uiContext.getAssertableInspectors();
+        Map assertableInspectors = uiContext.getAssertableInspectors(UiContext.MAIN_PERSPECTIVE);
         if(referencedType.values("allSubtype").size() > 1) {
             for(Iterator k = referencedType.values("allSubtype").iterator(); k.hasNext(); ) {
                 ModelElement_1_0 subtype = model.getElement(k.next());
@@ -306,7 +303,7 @@ public class FilterLoader
                     }
                     // Default filters for all customized features
                     for(
-                        Iterator j = uiContext.getUiSegment().getFeatureDefinition().iterator();
+                        Iterator j = uiContext.getUiSegment(UiContext.MAIN_PERSPECTIVE).getFeatureDefinition().iterator();
                         j.hasNext();
                     ) {
                         org.openmdx.ui1.jmi1.FeatureDefinition featureDefinition = (org.openmdx.ui1.jmi1.FeatureDefinition)j.next();

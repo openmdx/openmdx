@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: StreamOperationAwareLayer_1.java,v 1.7 2008/03/21 20:17:18 hburger Exp $
+ * Name:        $Id: StreamOperationAwareLayer_1.java,v 1.9 2008/09/10 08:55:25 hburger Exp $
  * Description: Stream Operation Aware Layer_1_0 Implementation
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 20:17:18 $
+ * Date:        $Date: 2008/09/10 08:55:25 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -93,7 +93,7 @@ public abstract class StreamOperationAwareLayer_1 extends Layer_1 {
         Configuration configuration = getConfiguration();
         return configuration.containsEntry(key) && !configuration.values(key).isEmpty() ?
             ((String)configuration.values(key).get(0)) :
-            defaultValue;
+                defaultValue;
     }
 
     /**
@@ -112,9 +112,9 @@ public abstract class StreamOperationAwareLayer_1 extends Layer_1 {
         Configuration configuration = getConfiguration();
         return configuration.containsEntry(key) && !configuration.values(key).isEmpty() ?
             ((Number)configuration.values(key).get(0)).intValue() :
-            defaultValue;
+                defaultValue;
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.dataprovider.spi.Operation_1_0#operation(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
      */
@@ -127,7 +127,7 @@ public abstract class StreamOperationAwareLayer_1 extends Layer_1 {
             request.path().size() - 2
         );
         Path replyPath = request.path().getDescendant(
-            new String[]{"reply", super.uidAsString()}
+            "reply", super.uidAsString()
         );
         boolean binaryStream = 
             SystemOperations.GET_BINARY_STREAM.equals(operationName) &&
@@ -160,18 +160,16 @@ public abstract class StreamOperationAwareLayer_1 extends Layer_1 {
                     feature, 
                     (Writer)stream, 
                     position, replyPath
-                 );
+                );
             } catch (RuntimeException exception) {
                 throw new ServiceException(
                     exception,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ASSERTION_FAILURE,
-                    new BasicException.Parameter[]{
-                        new BasicException.Parameter("path", request.path()),
-                        new BasicException.Parameter(SystemOperations.GET_STREAM_FEATURE, featureAttribute),
-                        new BasicException.Parameter(SystemOperations.GET_STREAM_POSITION, positionAttribute),
-                    },
-                    "Invalid stream operation request"
+                    "Invalid stream operation request",
+                    new BasicException.Parameter("path", request.path()),
+                    new BasicException.Parameter(SystemOperations.GET_STREAM_FEATURE, featureAttribute),
+                    new BasicException.Parameter(SystemOperations.GET_STREAM_POSITION, positionAttribute)
                 );
             }
         } else {
@@ -179,9 +177,9 @@ public abstract class StreamOperationAwareLayer_1 extends Layer_1 {
         }
         return response == null ?
             super.operation(header, request) :
-            new DataproviderReply(response);         
+                new DataproviderReply(response);         
     }
-    
+
     /**
      * This method is overridden by a subclass if ith supports other operations.
      * 
@@ -203,11 +201,9 @@ public abstract class StreamOperationAwareLayer_1 extends Layer_1 {
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("path", request.path()),
-                new BasicException.Parameter("operation", operation),
-            },
-            "Operation not supported"
+            "Operation not supported",
+            new BasicException.Parameter("path", request.path()),
+            new BasicException.Parameter("operation", operation)
         );
     }
 
@@ -236,12 +232,10 @@ public abstract class StreamOperationAwareLayer_1 extends Layer_1 {
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("path", objectPath),
-                new BasicException.Parameter(SystemOperations.GET_STREAM_FEATURE, feature),
-                new BasicException.Parameter(SystemOperations.GET_STREAM_POSITION, position),
-            },
-            "Character stream retrieval not supported"
+            "Character stream retrieval not supported",
+            new BasicException.Parameter("path", objectPath),
+            new BasicException.Parameter(SystemOperations.GET_STREAM_FEATURE, feature),
+            new BasicException.Parameter(SystemOperations.GET_STREAM_POSITION, position)
         );
     }
 
@@ -270,12 +264,10 @@ public abstract class StreamOperationAwareLayer_1 extends Layer_1 {
         throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.NOT_SUPPORTED,
-            new BasicException.Parameter[]{
-                new BasicException.Parameter("path", objectPath),
-                new BasicException.Parameter(SystemOperations.GET_STREAM_FEATURE, feature),
-                new BasicException.Parameter(SystemOperations.GET_STREAM_POSITION, position),
-            },
-            "Binary stream retrieval not supported"
+            "Binary stream retrieval not supported",
+            new BasicException.Parameter("path", objectPath),
+            new BasicException.Parameter(SystemOperations.GET_STREAM_FEATURE, feature),
+            new BasicException.Parameter(SystemOperations.GET_STREAM_POSITION, position)
         );
     }
 
@@ -306,7 +298,7 @@ public abstract class StreamOperationAwareLayer_1 extends Layer_1 {
         long objectSize
     ){
         DataproviderObject result = new DataproviderObject(replyPath);
-  	    result.values(SystemAttributes.OBJECT_CLASS).add(SystemOperations.GET_STREAM_RESULT);
+        result.values(SystemAttributes.OBJECT_CLASS).add(SystemOperations.GET_STREAM_RESULT);
         result.values(SystemOperations.GET_STREAM_LENGTH).add(new Long(objectSize));
         return result;
     }

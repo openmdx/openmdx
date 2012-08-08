@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectView.java,v 1.59 2008/04/04 17:01:13 hburger Exp $
+ * Name:        $Id: ShowObjectView.java,v 1.66 2008/11/12 16:10:58 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.59 $
+ * Revision:    $Revision: 1.66 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/04 17:01:13 $
+ * Date:        $Date: 2008/11/12 16:10:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.view;
 
@@ -73,7 +70,6 @@ import org.openmdx.compatibility.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
-import org.openmdx.portal.servlet.control.ControlFactory;
 import org.openmdx.portal.servlet.control.ShowInspectorControl;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.openmdx.uses.org.apache.commons.collections.MapUtils;
@@ -91,8 +87,7 @@ public class ShowObjectView
         ApplicationContext application, 
         Map<Path,Action> historyActions, 
         String lookupType,
-        Map restrictToElements, 
-        ControlFactory controlFactory
+        Map restrictToElements 
     ) throws ServiceException {
         super(
             id, 
@@ -103,14 +98,10 @@ public class ShowObjectView
             application, 
             historyActions,
             lookupType,
-            restrictToElements,
-            controlFactory
+            restrictToElements
         );
-        ShowInspectorControl inspectorControl = controlFactory.createShowInspectorControl(
-            id,
-            application.getCurrentLocaleAsString(),
-            application.getCurrentLocaleAsIndex(),
-            this.objectReference.getInspector(),
+        ShowInspectorControl inspectorControl = this.application.createShowInspectorControl(
+            id, 
             this.getRefObject().refClass().refMofId()
         );
         this.inspectorControl = inspectorControl;
@@ -293,6 +284,32 @@ public class ShowObjectView
         return actions.values().toArray(new Action[actions.size()]);
     }
 
+    //-------------------------------------------------------------------------  
+    public Action[] getSelectPerspectiveAction(        
+    ) {
+        Path[] uiSegmentPaths = this.getApplicationContext().getUiContext().getUiSegmentPaths();
+        List<Action> selectPerspectiveActions = new ArrayList<Action>();
+        int ii = 0;
+        for(Path uiSegmentPath: uiSegmentPaths) {
+            org.openmdx.ui1.jmi1.Segment uiSegment = null;
+            try {
+                uiSegment = this.getApplicationContext().getUiContext().getUiSegment(ii);
+            } catch(Exception e) {}
+            selectPerspectiveActions.add(
+                new Action(
+                    Action.EVENT_SELECT_PERSPECTIVE,
+                    new Action.Parameter[]{
+                        new Action.Parameter(Action.PARAMETER_ID, String.valueOf(ii))
+                    },
+                    uiSegmentPath.getBase(),
+                    this.application.getPortalExtension().isEnabled(uiSegment, this.application)
+                )
+            );
+            ii++;
+        }
+        return selectPerspectiveActions.toArray(new Action[selectPerspectiveActions.size()]);
+    }
+      
     // -------------------------------------------------------------------------
     public OperationPane[] getOperationPane(
     ) {

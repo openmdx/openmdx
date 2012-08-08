@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractEJBHome.java,v 1.2 2008/02/08 16:52:21 hburger Exp $
+ * Name:        $Id: AbstractEJBHome.java,v 1.3 2008/09/10 08:55:20 hburger Exp $
  * Description: Abstract Enterprise Java Bean Home
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/02/08 16:52:21 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -75,8 +75,8 @@ import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
  * Abstract Enterprise Java Bean Home
  */
 public abstract class AbstractEJBHome
-    extends AbstractRemoteObject
-    implements HomeConfiguration, EJBHome 
+extends AbstractRemoteObject
+implements HomeConfiguration, EJBHome 
 {
 
     /**
@@ -87,7 +87,7 @@ public abstract class AbstractEJBHome
     ) throws RemoteException{
         super();
     }
-    
+
     /**
      * The EJB instance pool
      */
@@ -112,7 +112,7 @@ public abstract class AbstractEJBHome
             );
         }        
     }
-     
+
     /**
      * Return a Bean instance to the pool.
      *
@@ -128,13 +128,11 @@ public abstract class AbstractEJBHome
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.SYSTEM_EXCEPTION,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("name", this.beanName),
-                    new BasicException.Parameter("url", this.jndiURL)
-                },
-                "Enterprise Java Bean instance release failed"
-             );
-             SysLog.warning(failure.getMessage(), failure.getCause());
+                "Enterprise Java Bean instance release failed",
+                new BasicException.Parameter("name", this.beanName),
+                new BasicException.Parameter("url", this.jndiURL)
+            );
+            SysLog.warning(failure.getMessage(), failure.getCause());
         }        
     }
 
@@ -143,9 +141,9 @@ public abstract class AbstractEJBHome
      *
      * @param ejbInstance an {@link #acquireBeanInstance acquired} Bean instance to be invalidated.
      */
-     void invalidateBeanInstance(
+    void invalidateBeanInstance(
         Object ejbInstance
-     ){
+    ){
         try {
             this.instancePool.invalidateObject(ejbInstance);
         } catch (Exception exception) {
@@ -153,16 +151,14 @@ public abstract class AbstractEJBHome
                 exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.SYSTEM_EXCEPTION,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("name", this.beanName),
-                    new BasicException.Parameter("url", this.jndiURL)
-                },
-                "Enterprise Java Bean instance invalidation failed"
-             );
-             SysLog.warning(failure.getMessage(), failure.getCause());
+                "Enterprise Java Bean instance invalidation failed",
+                new BasicException.Parameter("name", this.beanName),
+                new BasicException.Parameter("url", this.jndiURL)
+            );
+            SysLog.warning(failure.getMessage(), failure.getCause());
         }        
     }
-     
+
     /**
      * 
      */
@@ -170,7 +166,7 @@ public abstract class AbstractEJBHome
         String methodInterface, 
         String methodName, 
         String[] methodParameters
-     ) {
+    ) {
         return this.containerTransaction.getTransactionAttribute(
             methodInterface,
             methodName, 
@@ -178,66 +174,66 @@ public abstract class AbstractEJBHome
         );
     }
 
-     
-    
-     //------------------------------------------------------------------------
-     // Implements EJBHome
-     //------------------------------------------------------------------------
 
-     /**
-      * This method must be overridden by a subclass unless it represents a
-      * session bean home.
-      * 
-      * @see javax.ejb.EJBHome#remove(java.lang.Object)
-      */
-     public void remove(Object obejct) throws RemoteException, RemoveException {
-         throw new RemoteException(this.beanName + " is a Session Bean");
-     }
-     
-     /**
-      * This method must be overridden by a subclass unless it represents a
-      * session bean home.
-      * 
-      * @see javax.ejb.EJBHome#remove(javax.ejb.Handle)
-      */
-     public void remove(Handle handle) throws RemoteException, RemoveException {
-         throw new RemoteException(this.beanName + " is a Session Bean");
-     }
 
-     /* (non-Javadoc)
-      * @see javax.ejb.EJBHome#getEJBMetaData()
-      */
-     public EJBMetaData getEJBMetaData() throws RemoteException {
-         return null; //... 
-     }
-     
-     /* (non-Javadoc)
-      * @see javax.ejb.EJBHome#getHomeHandle()
-      */
-     public HomeHandle getHomeHandle() throws RemoteException {
-         return new URLContextHomeHandle(this.jndiURL, ContextFactory.getProviderURL());
-     }
-         
+    //------------------------------------------------------------------------
+    // Implements EJBHome
+    //------------------------------------------------------------------------
 
-     //------------------------------------------------------------------------
+    /**
+     * This method must be overridden by a subclass unless it represents a
+     * session bean home.
+     * 
+     * @see javax.ejb.EJBHome#remove(java.lang.Object)
+     */
+    public void remove(Object obejct) throws RemoteException, RemoveException {
+        throw new RemoteException(this.beanName + " is a Session Bean");
+    }
+
+    /**
+     * This method must be overridden by a subclass unless it represents a
+     * session bean home.
+     * 
+     * @see javax.ejb.EJBHome#remove(javax.ejb.Handle)
+     */
+    public void remove(Handle handle) throws RemoteException, RemoveException {
+        throw new RemoteException(this.beanName + " is a Session Bean");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.ejb.EJBHome#getEJBMetaData()
+     */
+    public EJBMetaData getEJBMetaData() throws RemoteException {
+        return null; //... 
+    }
+
+    /* (non-Javadoc)
+     * @see javax.ejb.EJBHome#getHomeHandle()
+     */
+    public HomeHandle getHomeHandle() throws RemoteException {
+        return new URLContextHomeHandle(this.jndiURL, ContextFactory.getProviderURL());
+    }
+
+
+    //------------------------------------------------------------------------
     // Implements Home
     //------------------------------------------------------------------------
-    
+
     /**
      * The home's JNDI url
      */
     private String jndiURL = null;
-    
+
     /**
      * The home's JNDI url
      */
     private String beanName = null;
-    
+
     /**
      * The container's transaction manager
      */
     private TransactionManager transactionManager = null;
-    
+
     /**
      * The EJB instance class
      */
@@ -272,7 +268,7 @@ public abstract class AbstractEJBHome
         this.containerTransaction = containerTransaction;
         this.transactionManager = transactionManager;
     }
-    
+
     /**
      * Undeploy an Enterprise Java Bean Home
      */
@@ -288,7 +284,7 @@ public abstract class AbstractEJBHome
     public TransactionManager getTransactionManager() {
         return this.transactionManager;
     }
-    
+
     /**
      * Retrieve an instance method
      * 
@@ -306,7 +302,7 @@ public abstract class AbstractEJBHome
         return this.instanceClass.getMethod(name, parameterTypes);
     }
 
-    
+
     //------------------------------------------------------------------------
     // Extends Object
     //------------------------------------------------------------------------
@@ -322,7 +318,7 @@ public abstract class AbstractEJBHome
     //------------------------------------------------------------------------
     // Delegates to ContextSwitcher
     //------------------------------------------------------------------------
-    
+
     /**
      * The EJB instance pool
      */
@@ -356,5 +352,5 @@ public abstract class AbstractEJBHome
         return null;
     }
 
-    
+
 }

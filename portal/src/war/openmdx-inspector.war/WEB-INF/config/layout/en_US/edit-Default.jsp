@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: edit-Default.jsp,v 1.37 2008/06/01 16:40:52 wfro Exp $
+ * Name:        $Id: edit-Default.jsp,v 1.44 2008/08/27 13:21:18 wfro Exp $
  * Description: edit-Default.jsp
- * Revision:    $Revision: 1.37 $
+ * Revision:    $Revision: 1.44 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/01 16:40:52 $
+ * Date:        $Date: 2008/08/27 13:21:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -103,7 +103,7 @@ org.openmdx.portal.servlet.texts.*
 	// Title
 	Control title = view.createControl(
   		"title",
-  		ObjectTitleControl.class
+  		EditObjectTitleControl.class
   	);
 
 	// Attributes
@@ -119,7 +119,6 @@ org.openmdx.portal.servlet.texts.*
 		edit.addControl(title);
 		edit.addControl(attributes);
 %>
-<!--[if IE]><!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><![endif]-->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html dir="<%= texts.getDir() %>">
 <head>
@@ -131,8 +130,8 @@ org.openmdx.portal.servlet.texts.*
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<link href="_style/colors.css" rel="stylesheet" type="text/css">
 	<link href="_style/calendar-small.css" rel="stylesheet" type="text/css">
-	<!--[if lt IE 7]><script type="text/javascript" src="javascript/iehover-fix.js"></script><![endif]-->
 	<script type="text/javascript" src="javascript/portal-all.js"></script>
+	<!--[if lt IE 7]><script type="text/javascript" src="javascript/iehover-fix.js"></script><![endif]-->
 	<script type="text/javascript" src="javascript/calendar/lang/calendar-<%= app.getCurrentLocaleAsString() %>.js"></script>
 	<script language="javascript" type="text/javascript">
     history.forward(); // prevent going back to this page by breaking history
@@ -148,31 +147,44 @@ org.openmdx.portal.servlet.texts.*
 	  }
 	</script>
 	<link rel="stylesheet" type="text/css" href="_style/ssf.css" >
-	<link rel="stylesheet" type="text/css" href="javascript/yui-ext/resources/css/yui-ext.css" >
-	<link rel="stylesheet" type="text/css" href="javascript/yui-ext/resources/css/ytheme-gray.css" >
 	<link rel="stylesheet" type="text/css" href="_style/n2default.css" >
+	<link rel="stylesheet" type="text/css" href="javascript/yui/build/assets/skins/sam/container.css" >
 	<link rel='shortcut icon' href='images/favicon.ico' />
 <%
 	prolog.paint(p, PagePrologControl.FRAME_POST_PROLOG, false);
 	p.flush();
 %>
 </head>
-<body class="ytheme-gray" onload="initPage();">
+<body class="yui-skin-sam" onload="initPage();">
 <iframe class="popUpFrame" id="DivShim" src="blank.html" scrolling="no" frameborder="0" style="position:absolute; top:0px; left:0px; display:none;"></iframe>
+<%
+	if(view.getMode() != ViewMode.EMBEDDED) {
+		EditObjectControl.paintEditPopups(p);
+		p.flush();
+	}
+%>
 <%@ include file="../../../../edit-header.html" %>
-<div id="header">&nbsp;
+<div id="container">
+	<div id="wrap">
+		<div id="eheader">
 <%
 	north.paint(p, true);
 	p.flush();
 %>&nbsp;
-</div>
+		</div> <!-- header -->
+		<div id="content-wrap">
+			<div id="econtent">
 <%
 	edit.paint(p, true);
 	epilog.paint(p, true);
 	p.close(false);
 %>
-<%@ include file="../../../../edit-note.html" %>
+			  <br>
 <%@ include file="../../../../edit-footer.html" %>
+			</div> <!-- content -->
+		</div> <!-- content-wrap -->
+	<div> <!-- wrap -->
+</div> <!-- container -->
 </body>
 </html>
 <%

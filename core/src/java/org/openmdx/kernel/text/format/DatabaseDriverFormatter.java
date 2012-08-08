@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatabaseDriverFormatter.java,v 1.8 2006/01/13 16:52:31 hburger Exp $
+ * Name:        $Id: DatabaseDriverFormatter.java,v 1.9 2008/09/09 14:19:59 hburger Exp $
  * Description: Database Driver Formatter
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2006/01/13 16:52:31 $
+ * Date:        $Date: 2008/09/09 14:19:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -164,7 +164,7 @@ public class DatabaseDriverFormatter
                     "propertyInfo"
                 },
                 new Object[]{
-                    "" + this.driver.getMinorVersion() + "." + this.driver.getMajorVersion(),
+                    Integer.toString(this.driver.getMinorVersion()) + "." + this.driver.getMajorVersion(),
                     getURLAcceptance(),
                     getPropertyInfo()
                 }
@@ -172,7 +172,7 @@ public class DatabaseDriverFormatter
         );
     }
 
-    private static final String[] DRIVER_PROPERTY_INFO_KEYS = new String[]{
+    private static final String[] DRIVER_PROPERTY_INFO_KEYS = {
         "name",
         "description",
         "value",

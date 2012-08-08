@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestDeployment.java,v 1.32 2008/01/25 01:00:44 hburger Exp $
+ * Name:        $Id: TestDeployment.java,v 1.33 2008/11/21 17:20:05 hburger Exp $
  * Description: Container Test
- * Revision:    $Revision: 1.32 $
+ * Revision:    $Revision: 1.33 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/01/25 01:00:44 $
+ * Date:        $Date: 2008/11/21 17:20:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
@@ -71,6 +70,7 @@ import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.LinkRef;
+import javax.naming.NameClassPair;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
@@ -222,7 +222,7 @@ public class TestDeployment extends TestCase {
       Context applicationContext = Contexts.getSubcontext(this.context, "_application");
 
       assertEquals("Application Display Name", "openMDX/Test.Core CR0003173", application.getDisplayName());
-      List modules = application.getModules();
+      List<Module> modules = application.getModules();
       
       // check whether module order is ok
       assertEquals("Modules", 1, modules.size());
@@ -280,7 +280,7 @@ public class TestDeployment extends TestCase {
       assertEquals("Deployment.SessionBean.TransactionType", "Bean", sessionBeanManaging.getTransactionType());
 
       // check container transaction
-      List containerTransactionsManaging = sessionBeanManaging.getContainerTransaction();
+      List<Deployment.ContainerTransaction> containerTransactionsManaging = sessionBeanManaging.getContainerTransaction();
       assertNull("No container transaction for bean-managed EJB", containerTransactionsManaging);
 
       // check deployed references
@@ -393,7 +393,7 @@ public class TestDeployment extends TestCase {
     assertTrue("Application Verification", report.isSuccess());
     System.out.println("Application '" + application.getDisplayName() + "' verified\n---\n");
     assertEquals("Application Display Name", "openMDX test1 EAR", application.getDisplayName());
-    List modules = application.getModules();
+    List<Module> modules = application.getModules();
     
     // check whether module order is ok
     assertEquals("Modules", 4, modules.size());
@@ -466,7 +466,7 @@ public class TestDeployment extends TestCase {
     assertEquals("Deployment.SessionBean.TransactionType", "Bean", sessionBeanWerner.getTransactionType());
 
     // check container transaction
-    List containerTransactionsWerner = sessionBeanWerner.getContainerTransaction();
+    List<Deployment.ContainerTransaction> containerTransactionsWerner = sessionBeanWerner.getContainerTransaction();
     assertNull("No container transaction for bean-managed EJB", containerTransactionsWerner);
 
     // check deployed references
@@ -521,7 +521,7 @@ public class TestDeployment extends TestCase {
     assertEquals("Deployment.SessionBean.TransactionType", "Container", sessionBeanHarald.getTransactionType());
 
     // check container transaction
-    List containerTransactionsHarald = sessionBeanHarald.getContainerTransaction();
+    List<Deployment.ContainerTransaction> containerTransactionsHarald = sessionBeanHarald.getContainerTransaction();
     assertEquals("Default container transactions size", 0, containerTransactionsHarald.size());
 
     // check deployed references
@@ -578,13 +578,13 @@ public class TestDeployment extends TestCase {
         new LinkRef(REMOTE_LINK_REF)
     );
     // check container transaction
-    List containerTransactionsRoger = sessionBeanRoger.getContainerTransaction();
+    List<Deployment.ContainerTransaction> containerTransactionsRoger = sessionBeanRoger.getContainerTransaction();
     assertEquals("Container transactions size", 1, containerTransactionsRoger.size());
     Deployment.ContainerTransaction containerTransactionRoger = (Deployment.ContainerTransaction) containerTransactionsRoger.get(0);
     assertEquals("Transaction attribute", "Required", containerTransactionRoger.getTransAttribute());
-    List methodsRoger = containerTransactionRoger.getMethod();
+    List<Method> methodsRoger = containerTransactionRoger.getMethod();
     assertEquals("Container transaction method size", 1, methodsRoger.size());
-    Deployment.Method methodRoger = (Method) methodsRoger.get(0);
+    Deployment.Method methodRoger = methodsRoger.get(0);
     assertEquals("Container transaction method name", "*", methodRoger.getMethodName());
     assertEquals("Method interface", "Remote", methodRoger.getMethodIntf());
     assertNull("Method arguments", methodRoger.getMethodParams());
@@ -766,9 +766,9 @@ public class TestDeployment extends TestCase {
     assertEquals("Connector.ResourceAdapter.ConnectionImplClass", "org.openmdx.compatibility.base.dataprovider.transport.http.Dataprovider_1HttpConnection", resAdapter.getConnectionImplClass());
     assertEquals("Connector.ResourceAdapter.ReauthenticationSupport", false, resAdapter.getReauthenticationSupport());
     
-    List authenticationMechanisms = resAdapter.getAuthenticationMechanism();
+    List<Deployment.AuthenticationMechanism> authenticationMechanisms = resAdapter.getAuthenticationMechanism();
     assertEquals("Connector.ResourceAdapter.getAuthenticationMechanism.size", 1, authenticationMechanisms.size());
-    AuthenticationMechanism authenticationMechanismType = (AuthenticationMechanism)authenticationMechanisms.get(0);
+    AuthenticationMechanism authenticationMechanismType = authenticationMechanisms.get(0);
     assertEquals("Connector.ResourceAdapter.getAuthenticationMechanism[0].AuthenticationMechanismType", "BasicPassword", authenticationMechanismType.getAuthenticationMechanismType());
     assertEquals("Connector.ResourceAdapter.getAuthenticationMechanism[0].CredentialInterface", "javax.resource.spi.security.PasswordCredential", authenticationMechanismType.getCredentialInterface());
     
@@ -832,14 +832,10 @@ public class TestDeployment extends TestCase {
   }
 
   private Module getModuleById(
-    Collection modules,
+    Collection<Module> modules,
     String moduleId
   ) {
-    for(
-      Iterator it = modules.iterator();
-      it.hasNext();
-    ) {
-      Module module = (Module)it.next();
+    for(Module module : modules){
       if (module.getModuleURI().equals(moduleId))
       {
         return module;
@@ -851,14 +847,10 @@ public class TestDeployment extends TestCase {
   }
   
   private Component getComponentByName(
-    Collection components,
+    Collection<? extends Component> components,
     String name
   ) {
-    for(
-      Iterator it = components.iterator();
-      it.hasNext();
-    ) {
-      Component component = (Component)it.next();
+    for(Component component : components) {
       if (component.getName().equals(name))
       {
         return component;
@@ -1051,7 +1043,7 @@ public class TestDeployment extends TestCase {
   ) {
     SysLog.trace(indent + name + " [Context]");
     try {
-      NamingEnumeration bindings = ctx.list(name);
+      NamingEnumeration<NameClassPair> bindings = ctx.list(name);
 
       while (bindings.hasMore()) {
           Binding bd = (Binding)bindings.next();
@@ -1074,11 +1066,8 @@ public class TestDeployment extends TestCase {
     Application application
   ) {
     SysLog.trace("application: display name=" + application.getDisplayName());
-    for(
-      Iterator it = application.getModules().iterator();
-      it.hasNext();
-    ) {
-      this.traceContents((Module)it.next());
+    for(Module module : application.getModules()) {
+      this.traceContents(module);
     }
   }
   
@@ -1096,11 +1085,7 @@ public class TestDeployment extends TestCase {
     {
       SysLog.trace("         " + module.getApplicationClassPath()[i]);        
     }
-    for(
-      Iterator it = module.getComponents().iterator();
-      it.hasNext();
-    ) {
-      Component component = (Component)it.next();
+    for(Component component : module.getComponents()){
       if (component instanceof SessionBeanDeploymentDescriptor)
       {
         this.traceContents((SessionBeanDeploymentDescriptor)component);
@@ -1125,21 +1110,15 @@ public class TestDeployment extends TestCase {
     SysLog.trace("         maximumCapacity=" + sbDD.getMaximumCapacity());
     SysLog.trace("         initialCapacity=" + sbDD.getInitialCapacity());
     SysLog.trace("         timeout=" + sbDD.getMaximumWait());
-    for(
-      Iterator it = sbDD.getEnvironmentEntries().iterator();
-      it.hasNext();
-    ) {
-      EnvEntryDeploymentDescriptor eeDD = (EnvEntryDeploymentDescriptor) it.next();
+    Collection<EnvEntryDeploymentDescriptor> eeddC = sbDD.getEnvironmentEntries();
+    for(EnvEntryDeploymentDescriptor eeDD : eeddC){
       SysLog.trace("         Environment Entry:");
       SysLog.trace("            name=" + eeDD.getName());
       SysLog.trace("            type=" + eeDD.getType());
       SysLog.trace("            value=" + eeDD.getValue());
     }
-    for(
-      Iterator it = sbDD.getEjbLocalReferences().iterator();
-      it.hasNext();
-    ) {
-      EjbLocalReferenceDeploymentDescriptor elrDD = (EjbLocalReferenceDeploymentDescriptor) it.next();
+    Collection<EjbLocalReferenceDeploymentDescriptor> elrddC = sbDD.getEjbLocalReferences();
+    for(EjbLocalReferenceDeploymentDescriptor elrDD : elrddC) {
       SysLog.trace("         EJB Local References:");
       SysLog.trace("            name=" + elrDD.getName());
       SysLog.trace("            local-jndi-name=" + elrDD.getLocalJndiName());
@@ -1148,11 +1127,8 @@ public class TestDeployment extends TestCase {
       SysLog.trace("            local=" + elrDD.getLocal());
       SysLog.trace("            localHome=" + elrDD.getLocalHome());
     }
-    for(
-      Iterator it = sbDD.getEjbRemoteReferences().iterator();
-      it.hasNext();
-    ) {
-      EjbRemoteReferenceDeploymentDescriptor errDD = (EjbRemoteReferenceDeploymentDescriptor) it.next();
+    Collection<EjbRemoteReferenceDeploymentDescriptor> errddC = sbDD.getEjbRemoteReferences();
+    for(EjbRemoteReferenceDeploymentDescriptor errDD : errddC) {
       SysLog.trace("         EJB Remote References:");
       SysLog.trace("            name=" + errDD.getName());
       SysLog.trace("            jndi-name=" + errDD.getJndiName());
@@ -1182,7 +1158,7 @@ public class TestDeployment extends TestCase {
   private Deployment deployment;
   private Context context;
   private File directory;
-  protected Map applicationClientEnvironment = new HashMap();
+  protected Map<String,String> applicationClientEnvironment = new HashMap<String,String>();
   
   private static final String LOCAL_LINK_REF = "./local";
   private static final String REMOTE_LINK_REF = "./remote";

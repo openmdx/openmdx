@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AssociationEndDef.java,v 1.4 2008/04/18 11:56:16 hburger Exp $
+ * Name:        $Id: AssociationEndDef.java,v 1.5 2008/10/13 14:08:51 hburger Exp $
  * Description: VelocityClassDef class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/18 11:56:16 $
+ * Date:        $Date: 2008/10/13 14:08:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -76,7 +76,7 @@ public class AssociationEndDef extends ElementDef {
             getString(associationEndDef.values("name")),
             getString(associationEndDef.values("qualifiedName")),
             getString(associationEndDef.values("annotation")),
-            new HashSet<String>(associationEndDef.values("stereotype"))
+            new HashSet<Object>(associationEndDef.values("stereotype"))
         );      
         this.associationEndDef = associationEndDef;        
         this.model = model;

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ManagedDatabaseConnection.java,v 1.8 2008/03/21 18:38:41 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ManagedDatabaseConnection.java,v 1.9 2008/10/09 22:32:49 hburger Exp $
  * Description: Managed Database Connection
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:38:41 $
+ * Date:        $Date: 2008/10/09 22:32:49 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005, OMEX AG, Switzerland
+ * Copyright (c) 2005-2008, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.kernel.application.container.spi.sql;
 
@@ -55,6 +54,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -75,16 +75,34 @@ import javax.security.auth.Subject;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
 
+import org.openmdx.kernel.application.container.spi.resource.Validatable;
 import org.openmdx.kernel.callback.CloseCallback;
 
 /**
  * Managed Database Connection
  */
-@SuppressWarnings("unchecked")
 public class ManagedDatabaseConnection
-    implements ManagedConnection, CloseCallback 
+    implements ManagedConnection, CloseCallback, Validatable 
 {
- 
+
+    /**
+     * Constructor 
+     *
+     * @param managedConnectionFactory
+     * @param xaConnection
+     * @param connectionRequestInfo
+     * @throws ResourceException
+     */
+    public ManagedDatabaseConnection (
+        ManagedConnectionFactory managedConnectionFactory,
+        XAConnection xaConnection, 
+        ConnectionRequestInfo connectionRequestInfo
+    ) throws ResourceException {
+        this.managedConnectionFactory = managedConnectionFactory;
+        this.xaConnection = xaConnection;
+        this.connectionRequestInfo = connectionRequestInfo;
+    }
+    
     /**
      * A managed database connection
      */
@@ -96,14 +114,14 @@ public class ManagedDatabaseConnection
     private Connection connection = null;
 
     /**
-     * Application level connections assoicated with this managed connection
+     * Application level connections associated with this managed connection
      */
-    private final Collection connections = new ArrayList();
+    private final Collection<DatabaseConnection> connections = new ArrayList<DatabaseConnection>();
     
     /**
      * The connection event listeners.
      */
-    private Set listeners = null;
+    private Set<ConnectionEventListener> listeners = null;
        
     /**
      * The managed coonnection's log writer.
@@ -119,22 +137,21 @@ public class ManagedDatabaseConnection
      * ManagedConnectionMetaData cache
      */
     private final ManagedConnectionMetaData metaData = new MetaData();
+    
+    /**
+     * The connection request info instance
+     */
+    private final ConnectionRequestInfo connectionRequestInfo;
 
     /**
      * Keep the factory reference for matching 
      */
     ManagedConnectionFactory managedConnectionFactory;
     
-    /**
-     * Constructor
-     */
-    public ManagedDatabaseConnection (
-        ManagedConnectionFactory managedConnectionFactory,
-        XAConnection xaConnection
-    ) throws ResourceException {
-        this.managedConnectionFactory = managedConnectionFactory;
-        this.xaConnection = xaConnection;
-    }
+
+    //------------------------------------------------------------------------
+    // Implements ManagedConnection
+    //------------------------------------------------------------------------
     
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnection#getConnection(javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
@@ -155,8 +172,9 @@ public class ManagedDatabaseConnection
      */
     synchronized Connection getConnection(
     ) throws SQLException{
-        if(this.connection == null) this.connection = this.xaConnection.getConnection();
-        return this.connection;
+        return 
+            this.connection == null ? this.connection = this.xaConnection.getConnection() :
+            this.connection;
     }
 
     /* (non-Javadoc)
@@ -186,18 +204,22 @@ public class ManagedDatabaseConnection
      */
     public synchronized void cleanup() throws ResourceException {
         try {
-            if(this.connection != null) this.connection.close();
+            if(this.connection != null) {
+                this.connection.close();
+            }
         } catch (SQLException exception) {
             propagate("Could not close managed connection handle", exception);
         } finally {
             this.connection = null;
             if(!this.connections.isEmpty()) {
-                if(this.logWriter != null) logWriter.println(
-                    "Cleanup found " + this.connections.size() + 
-                    " open handles for database connection " + this.managedConnectionFactory
-                );
+                if(this.logWriter != null) {
+                    logWriter.println(
+                        "Cleanup found " + this.connections.size() + 
+                        " open handles for database connection " + this.managedConnectionFactory
+                    );
+                }
                 for(
-                    Iterator i = this.connections.iterator();
+                    Iterator<DatabaseConnection> i = this.connections.iterator();
                     i.hasNext();
                 ){
                     postClose(i.next());
@@ -213,12 +235,13 @@ public class ManagedDatabaseConnection
     public synchronized void associateConnection(
         Object connection
     ) throws ResourceException {
+        DatabaseConnection databaseConnection = (DatabaseConnection) connection;
         try {
-            ((DatabaseConnection)connection).setDelegate(this, getConnection());
+            databaseConnection.setDelegate(this, getConnection());
         } catch (SQLException exception) {
             throw propagate("Could not initialize connection handle", exception);
         }
-        this.connections.add(connection);
+        this.connections.add(databaseConnection);
     }
 
     /* (non-Javadoc)
@@ -227,11 +250,12 @@ public class ManagedDatabaseConnection
     public void postClose(
         Object connection
     ){
-        ((DatabaseConnection)connection).setDelegate(null, null);
-        this.connections.remove(connection);
+        DatabaseConnection databaseConnection = (DatabaseConnection) connection;
+        databaseConnection.setDelegate(null, null);
+        this.connections.remove(databaseConnection);
         if(this.listeners != null) {
             ConnectionEvent event = new ConnectionEvent(this, ConnectionEvent.CONNECTION_CLOSED);
-            event.setConnectionHandle(connection);
+            event.setConnectionHandle(databaseConnection);
             fire(event);
         }
     }
@@ -242,7 +266,9 @@ public class ManagedDatabaseConnection
     public synchronized void addConnectionEventListener(
         ConnectionEventListener connectionEventListener
     ) {
-        if(this.listeners == null) this.listeners = new HashSet();
+        if(this.listeners == null) {
+            this.listeners = new HashSet<ConnectionEventListener>();
+        }
         this.listeners.add(connectionEventListener);
     }
 
@@ -349,30 +375,73 @@ public class ManagedDatabaseConnection
     void fire(
         ConnectionEvent event
     ){
-        if(this.listeners != null) for(
-            Iterator i = this.listeners.iterator();
-            i.hasNext();
-        ){
-            ConnectionEventListener listener = (ConnectionEventListener) i.next();
-            switch (event.getId()) {
-                case ConnectionEvent.CONNECTION_CLOSED:
-                    listener.connectionClosed(event);
-                    break;
-                case ConnectionEvent.CONNECTION_ERROR_OCCURRED:
-                    listener.connectionErrorOccurred(event);
-                    break;
-                case ConnectionEvent.LOCAL_TRANSACTION_COMMITTED:
-                    listener.localTransactionCommitted(event);
-                    break;
-                case ConnectionEvent.LOCAL_TRANSACTION_ROLLEDBACK:
-                    listener.localTransactionRolledback(event);                    
-                    break;
-                case ConnectionEvent.LOCAL_TRANSACTION_STARTED:
-                    listener.localTransactionStarted(event);
-                    break;
+        if(this.listeners != null) {
+            for (ConnectionEventListener listener : this.listeners) {
+                switch (event.getId()) {
+                    case ConnectionEvent.CONNECTION_CLOSED:
+                        listener.connectionClosed(event);
+                        break;
+                    case ConnectionEvent.CONNECTION_ERROR_OCCURRED:
+                        listener.connectionErrorOccurred(event);
+                        break;
+                    case ConnectionEvent.LOCAL_TRANSACTION_COMMITTED:
+                        listener.localTransactionCommitted(event);
+                        break;
+                    case ConnectionEvent.LOCAL_TRANSACTION_ROLLEDBACK:
+                        listener.localTransactionRolledback(event);                    
+                        break;
+                    case ConnectionEvent.LOCAL_TRANSACTION_STARTED:
+                        listener.localTransactionStarted(event);
+                        break;
+                }
             }
         }        
     }
+    
+    
+    //------------------------------------------------------------------------
+    // Implements Validatable
+    //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.application.container.spi.resource.Validatable#validate()
+     */
+    public boolean validate() {
+        if(this.connectionRequestInfo instanceof DatabaseConnectionRequestInfo) {
+            String validationStatement = ((DatabaseConnectionRequestInfo)connectionRequestInfo).getValidationStatement();
+            if(validationStatement != null) try {
+                Connection connection = this.xaConnection.getConnection();
+                connection.setAutoCommit(true);
+                try {
+                    Statement statement = connection.createStatement();
+                    try {
+                        statement.execute(validationStatement);
+                    } finally {
+                        statement.close();
+                    }
+                } finally {
+                    connection.close();
+                }
+                return true;
+            } catch (SQLException exception) {
+                try {
+                    PrintWriter log = this.managedConnectionFactory.getLogWriter();
+                    if(log != null) {
+                        log.println("Database connection validation failure: " + exception);
+                    }
+                } catch (ResourceException ignore) {
+                    // Do not log logging failures
+                }
+                return false;
+            }
+        }
+        return true;
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Extends Object
+    //------------------------------------------------------------------------    
     
     /* (non-Javadoc)
      * @see java.lang.Object#toString()
@@ -381,22 +450,28 @@ public class ManagedDatabaseConnection
         return getClass().getName() + ": " + this.managedConnectionFactory;
     }
 
+    
+    
+    //------------------------------------------------------------------------
+    // Class DatabaseTransaction
+    //------------------------------------------------------------------------
+    
     /**
      * Local Database Transaction
      */
     class DatabaseTransaction implements LocalTransaction {
 
         public void begin() throws ResourceException {
-            try {
+//          try {
 //              managedConnection.setReadOnly(false);
-                getConnection().setAutoCommit(false);
+//              getConnection().setAutoCommit(false);
                 fire(ConnectionEvent.LOCAL_TRANSACTION_STARTED);
-            } catch (SQLException exception) {
-                throw propagate(
-                    "Transaction initialization failed",
-                    exception
-                );
-            }            
+//          } catch (SQLException exception) {
+//              throw propagate(
+//                  "Transaction initialization failed",
+//                  exception
+//              );
+//          }            
         }
     
         public void commit() throws ResourceException {
@@ -425,9 +500,14 @@ public class ManagedDatabaseConnection
         
     }
     
+    
+    //------------------------------------------------------------------------
+    // Class MetaData
+    //------------------------------------------------------------------------
+    
     /**
-     * Class MetaData
-     */
+     * Meta Data
+     */ 
     class MetaData implements ManagedConnectionMetaData {
 
         private DatabaseMetaData getDelegate() throws SQLException{

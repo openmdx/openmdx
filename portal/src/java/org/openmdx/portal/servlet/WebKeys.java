@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WebKeys.java,v 1.25 2008/06/01 11:24:19 wfro Exp $
+ * Name:        $Id: WebKeys.java,v 1.29 2008/08/21 08:37:27 wfro Exp $
  * Description: WebKeys 
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/06/01 11:24:19 $
+ * Date:        $Date: 2008/08/21 08:37:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -126,16 +123,15 @@ public class WebKeys {
     public static final String ICON_SHOW_GRID_CONTENT = "show_content" + ICON_TYPE;    
     public static final String ICON_SEARCH_PANEL = "search_panel" + ICON_TYPE;
     public static final String ICON_UI_MODE = "uiMode";
+    public static final String ICON_HEADER_SHOW = "headerShow" + ICON_TYPE;
+    public static final String ICON_HEADER_HIDE = "headerHide" + ICON_TYPE;
+    public static final String ICON_LOGOFF_SELECTED = "logoffSelected" + ICON_TYPE;
+    public static final String ICON_SAVE_SELECTED = "saveSelected" + ICON_TYPE;
        
     // Configuration parameters
     public static final String CONFIG_USER_HOME = "userHome";
     public static final String CONFIG_HTML_ENCODER = "httpEncoder";
     public static final String CONFIG_ROLE_MAPPER = "roleMapper";
-    
-    // User settings
-    public static final String SETTING_GUI_MODE = "Gui.Look";
-    public static final String SETTING_GUI_MODE_BASIC = "basic";
-    public static final String SETTING_GUI_MODE_STANDARD = "standard";
     
     // Special Characters    
     public static final String TAB_GROUPING_CHARACTER = "\u00bb";

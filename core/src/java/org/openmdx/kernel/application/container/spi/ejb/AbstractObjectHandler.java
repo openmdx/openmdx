@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractObjectHandler.java,v 1.2 2008/03/27 19:16:29 hburger Exp $
+ * Name:        $Id: AbstractObjectHandler.java,v 1.4 2008/09/10 08:55:20 hburger Exp $
  * Description: Abstract Enterprise Java Bean Object Invocation Handler
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/27 19:16:29 $
+ * Date:        $Date: 2008/09/10 08:55:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -181,8 +181,8 @@ abstract class AbstractObjectHandler<H extends AbstractHomeHandler>
                     new BasicException.Parameter("bean", "<invalidated>") :
                     new BasicException.Parameter("beanClass", ejbInstance.getClass().getName()),
                 new BasicException.Parameter("methodName", this.method.getName()),
-                new BasicException.Parameter("formalClasses", getFormalTypes(this.method.getParameterTypes())),
-                new BasicException.Parameter("actualClasses", getActualTypes(arguments))
+                new BasicException.Parameter("formalClasses", (Object[])getFormalTypes(this.method.getParameterTypes())),
+                new BasicException.Parameter("actualClasses", (Object[])getActualTypes(arguments))
             };
         }
 
@@ -212,8 +212,8 @@ abstract class AbstractObjectHandler<H extends AbstractHomeHandler>
                         cause,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.SYSTEM_EXCEPTION,
-                        getParameters(beanInstance, arguments),
-                        "Enterprise Java Bean method delegation failure"
+                        "Enterprise Java Bean method delegation failure",
+                        getParameters(beanInstance, arguments)
                     );
                 }
             } catch (IllegalAccessException throwable) {
@@ -221,16 +221,16 @@ abstract class AbstractObjectHandler<H extends AbstractHomeHandler>
                     throwable,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.SYSTEM_EXCEPTION,
-                    getParameters(beanInstance, arguments),
-                    "Enterprise Java Bean method delegation failure"
+                    "Enterprise Java Bean method delegation failure",
+                    getParameters(beanInstance, arguments)
                 );
             } catch (IllegalArgumentException throwable) {
                 throw new BasicException(
                     throwable,
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.SYSTEM_EXCEPTION,
-                    getParameters(beanInstance, arguments),
-                    "Enterprise Java Bean method delegation failure"
+                    "Enterprise Java Bean method delegation failure",
+                    getParameters(beanInstance, arguments)
                 );
             } finally {
                 if(beanInstance != null) {

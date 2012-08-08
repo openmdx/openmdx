@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LenientCharacterComparator.java,v 1.9 2008/03/21 18:30:56 hburger Exp $
+ * Name:        $Id: LenientCharacterComparator.java,v 1.10 2008/09/22 23:38:20 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/03/21 18:30:56 $
+ * Date:        $Date: 2008/09/22 23:38:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,15 +56,14 @@ import java.util.Comparator;
 /**
  * Allows comparison of not directly comparable classes
  */
-@SuppressWarnings("unchecked")
-public class LenientCharacterComparator implements Comparator {
+public class LenientCharacterComparator implements Comparator<Object> {
 
     /**
      * Factory for a LenientComparator using the default CharSequence comparator
      * 
      * @return  a linient comparator using the default CharSequence comparator
      */
-    public static Comparator getInstance(
+    public static Comparator<Object> getInstance(
     ){
         return LenientCharacterComparator.instance;
     }
@@ -73,7 +72,7 @@ public class LenientCharacterComparator implements Comparator {
      * Use specific CharSequence camparator
      */
     public LenientCharacterComparator(
-        Comparator charSequenceComparator
+        Comparator<Object> charSequenceComparator
     ) {
         this.charSequenceComparator = charSequenceComparator;
     }
@@ -81,12 +80,12 @@ public class LenientCharacterComparator implements Comparator {
     /**
      * 
      */
-    private final Comparator charSequenceComparator;
+    private final Comparator<Object> charSequenceComparator;
 
     /**
      * 
      */
-    private static final Comparator instance = new LenientCharacterComparator(null);
+    private static final Comparator<Object> instance = new LenientCharacterComparator(null);
 
 
     //------------------------------------------------------------------------
@@ -96,6 +95,7 @@ public class LenientCharacterComparator implements Comparator {
     /* (non-Javadoc)
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
+    @SuppressWarnings("unchecked")
     public int compare(
         Object first,
         Object second

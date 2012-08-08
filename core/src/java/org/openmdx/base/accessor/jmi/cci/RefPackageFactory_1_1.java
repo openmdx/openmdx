@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackageFactory_1_1.java,v 1.2 2007/10/10 16:05:52 hburger Exp $
+ * Name:        $Id: RefPackageFactory_1_1.java,v 1.4 2008/12/15 03:15:30 hburger Exp $
  * Description: View Capable RefPackage Factory
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2007/10/10 16:05:52 $
+ * Date:        $Date: 2008/12/15 03:15:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,8 @@ package org.openmdx.base.accessor.jmi.cci;
 
 import javax.resource.cci.InteractionSpec;
 
+import org.openmdx.base.accessor.jmi.spi.RefPackage_1_6;
+
 
 /**
  * View capable RefPackage factory
@@ -65,7 +67,7 @@ public interface RefPackageFactory_1_1 extends RefPackageFactory_1_0 {
      * 
      * @return a context specific RefPackage
      */
-    RefPackage_1_2 getRefPackage(
+    RefPackage_1_6 getRefPackage(
         InteractionSpec viewContext
     );
     

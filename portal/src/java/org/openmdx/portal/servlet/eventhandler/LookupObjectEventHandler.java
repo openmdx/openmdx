@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: LookupObjectEventHandler.java,v 1.13 2008/05/31 23:40:07 wfro Exp $
+ * Name:        $Id: LookupObjectEventHandler.java,v 1.16 2008/11/10 15:16:44 wfro Exp $
  * Description: LookupObjectEventHandler 
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/31 23:40:07 $
+ * Date:        $Date: 2008/11/10 15:16:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.eventhandler;
 
@@ -119,7 +116,6 @@ public class LookupObjectEventHandler {
                             lookupType, 
                             currentView.getRefObject(),
                             filterValues,
-                            currentView.getControlFactory(),
                             application
                         );
                     }
@@ -156,7 +152,7 @@ public class LookupObjectEventHandler {
                   }
                   catch(Exception e) {
                       try {
-                          FeatureDefinition featureDef = application.getUiContext().getUiSegment().getFeatureDefinition(referenceName);
+                          FeatureDefinition featureDef = application.getFeatureDefinition(referenceName);
                           if(featureDef instanceof StructuralFeatureDefinition) {
                               lookupType = model.getElement(((StructuralFeatureDefinition)featureDef).getType());
                           }
@@ -178,7 +174,6 @@ public class LookupObjectEventHandler {
                       lookupType,
                       startWith,
                       filterValues,
-                      currentView.getControlFactory(),
                       application
                   );
                 }

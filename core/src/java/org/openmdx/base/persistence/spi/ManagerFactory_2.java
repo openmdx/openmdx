@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ManagerFactory_2.java,v 1.5 2008/07/04 13:40:48 hburger Exp $
+ * Name:        $Id: ManagerFactory_2.java,v 1.8 2008/09/10 08:55:27 hburger Exp $
  * Description: ManagerFactory_2 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/07/04 13:40:48 $
+ * Date:        $Date: 2008/09/10 08:55:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,15 +56,17 @@ import javax.jdo.PersistenceManagerFactory;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.resource.ResourceException;
+import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
 import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.EntityManagerFactory_2LocalHome;
+import org.openmdx.kernel.exception.BasicException;
 
 /**
  * ManagerFactory_2
  */
 public class ManagerFactory_2
-    implements ManagerFactory_2_0
+implements ManagerFactory_2_0
 {
 
     /**
@@ -82,7 +84,7 @@ public class ManagerFactory_2
      * 
      */
     private final PersistenceManagerFactory delegate;
-    
+
     /**
      * Factory method 
      * 
@@ -95,7 +97,7 @@ public class ManagerFactory_2
     ){
         return new ManagerFactory_2(delegate);
     }
-    
+
     /**
      * Factory method 
      * 
@@ -108,10 +110,23 @@ public class ManagerFactory_2
     ){
         try {
             Context initialContext = new InitialContext();
+            Object instance = null;
             try {
-                EntityManagerFactory_2LocalHome home = (EntityManagerFactory_2LocalHome) initialContext.lookup(jndiName);
+                instance = initialContext.lookup(jndiName);
+                EntityManagerFactory_2LocalHome home = (EntityManagerFactory_2LocalHome)instance;
                 return home.create();
-            } finally {
+            }
+            catch(ClassCastException e){
+                throw new BasicException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.BIND_FAILURE,
+                    "Can not cast instance to " + EntityManagerFactory_2LocalHome.class.getName(),
+                    new BasicException.Parameter("instance", instance),
+                    new BasicException.Parameter("classloader.instance", (instance == null ? null : instance.getClass().getClassLoader())),
+                    new BasicException.Parameter("classloader.cast", EntityManagerFactory_2LocalHome.class.getClassLoader())
+                );
+            }            
+            finally {
                 initialContext.close();
             }
         } catch (Exception exception) {
@@ -122,7 +137,7 @@ public class ManagerFactory_2
                 exception
             );
         }
-       
+
     }
 
     /**
@@ -148,14 +163,18 @@ public class ManagerFactory_2
             object.getClass().getName()
         );
     }
-    
+
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.ManagerFactory_2_0#createManager(javax.security.auth.Subject)
      */
     public PersistenceManager createManager(
         Subject subject
     ) throws ResourceException {
-        return null; // TODO
+        PasswordCredential credential = AbstractManagerFactory.getCredential(subject);
+        return this.delegate.getPersistenceManager(
+            credential.getUserName(),
+            String.valueOf(credential.getPassword())
+        );
     }
 
     /* (non-Javadoc)

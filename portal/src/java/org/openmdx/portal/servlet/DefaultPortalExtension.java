@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultPortalExtension.java,v 1.39 2008/04/29 18:17:37 wfro Exp $
+ * Name:        $Id: DefaultPortalExtension.java,v 1.53 2008/12/15 17:25:20 wfro Exp $
  * Description: DefaultEvaluator
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.53 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/04/29 18:17:37 $
+ * Date:        $Date: 2008/12/15 17:25:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet;
 
@@ -121,8 +118,10 @@ import org.openmdx.portal.servlet.attribute.DateValue;
 import org.openmdx.portal.servlet.attribute.NumberValue;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 import org.openmdx.portal.servlet.attribute.TextValue;
-import org.openmdx.portal.servlet.control.ControlFactory;
+import org.openmdx.portal.servlet.control.Control;
 import org.openmdx.portal.servlet.control.GridControl;
+import org.openmdx.portal.servlet.databinding.CompositeObjectDataBinding;
+import org.openmdx.portal.servlet.databinding.ReferencedObjectDataBinding;
 import org.openmdx.portal.servlet.view.Grid;
 import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
@@ -145,7 +144,10 @@ public class DefaultPortalExtension
             : obj.toString();
     }
     
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------    
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTitle(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, short, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
+     */
     public String getTitle(
         RefObject_1_0 refObj, 
         short locale,
@@ -200,16 +202,44 @@ public class DefaultPortalExtension
       }
     }
   
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------    
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#isEnabled(java.lang.String, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext)
+     */
     public boolean isEnabled(
-        String uiElementName, 
+        String elementName, 
         RefObject_1_0 refObj,
-        ApplicationContext context
+        ApplicationContext applicationContext
     ) {
-        return true;
+        return elementName != null;
     }
   
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------    
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#isEnabled(org.openmdx.portal.servlet.control.Control, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext)
+     */
+    public boolean isEnabled(
+        Control control, 
+        RefObject_1_0 refObj,
+        ApplicationContext applicationContext
+    ) {
+        return control != null;
+    }
+    //-------------------------------------------------------------------------     
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#isEnabled(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext)
+     */
+    public boolean isEnabled(
+        RefObject_1_0 refObj,
+        ApplicationContext applicationContext
+    ) {
+        return refObj != null;
+    }
+    
+    //-------------------------------------------------------------------------    
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getIdentityQueryFilterClause(java.lang.String)
+     */
     public String getIdentityQueryFilterClause(        
         String qualifiedReferenceName
     ) {
@@ -217,20 +247,9 @@ public class DefaultPortalExtension
     }
     
     //-------------------------------------------------------------------------    
-    public int getGridRowNestingLevel(
-        RefObject_1_0 refObj
-    ) {
-        return 0;
-    }
-
-    //-------------------------------------------------------------------------
-    public String getGridRowLevelId(
-        RefObject_1_0 refObj
-    ) {
-        return null;
-    }
-
-    //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getGridPageSize(java.lang.String)
+     */
     public int getGridPageSize(
         String referencedTypeName
     ) {
@@ -238,24 +257,33 @@ public class DefaultPortalExtension
         return 15;
     }
     
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------    
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#hasGridColours(java.lang.String)
+     */
     public boolean hasGridColours(
         String referencedTypeName
     ) {
         return false;
     }
     
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------    
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#isLookupType(org.openmdx.model1.accessor.basic.cci.ModelElement_1_0)
+     */
     public boolean isLookupType(
         ModelElement_1_0 classDef
     ) {
         String qualifiedName = (String)classDef.values("qualifiedName").get(0);
         return 
             !"org:openmdx:base:BasicObject".equals(qualifiedName) &&
-            !"org:openmdx:compatibility:view1:ViewCapable".equals(qualifiedName);
+            !"org:openmdx:base:ContextCapable".equals(qualifiedName);
     }
     
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------    
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getAutocompleter(org.openmdx.portal.servlet.ApplicationContext, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String)
+     */
     public Autocompleter_1_0 getAutocompleter(
         ApplicationContext application,
         RefObject_1_0 context,
@@ -272,7 +300,7 @@ public class DefaultPortalExtension
             catch(Exception e) {
                 try {
                     // Fallback to customized feature definitions
-                    FeatureDefinition lookupFeature = application.getUiContext().getUiSegment().getFeatureDefinition(qualifiedFeatureName);
+                    FeatureDefinition lookupFeature = application.getFeatureDefinition(qualifiedFeatureName);
                     if(lookupFeature instanceof StructuralFeatureDefinition) {
                         lookupType = model.getElement(((StructuralFeatureDefinition)lookupFeature).getType());
                     }
@@ -296,7 +324,8 @@ public class DefaultPortalExtension
                 Map lookupReferenceNames = new TreeMap();
                 ModelElement_1_0 lookupObjectClass = ((RefMetaObject_1)lookupObject.refMetaObject()).getElementDef();
                 Map lookupObjectFeatures = model.getStructuralFeatureDefs(lookupObjectClass, true, false, false);
-                ModelElement_1_0 extendCapableClass = model.getElement("org:openmdx:base:ExtentCapable");
+                ModelElement_1_0 extentCapableClass = model.getElement("org:openmdx:base:ExtentCapable");
+                ModelElement_1_0 contextCapableClass = model.getElement("org:openmdx:base:ContextCapable");
                 ModelElement_1_0 basicObjectClass = model.getElement("org:openmdx:base:BasicObject");
                 // Find composite reference of lookup object which references objects of type lookup type
                 int ii = 0;
@@ -316,7 +345,8 @@ public class DefaultPortalExtension
                             );
                         }
                         if(
-                            !referencedType.equals(extendCapableClass) && 
+                            !referencedType.equals(extentCapableClass) && 
+                            !referencedType.equals(contextCapableClass) && 
                             !referencedType.equals(basicObjectClass) &&
                             !AggregationKind.NONE.equals(referencedEnd.values("aggregation").get(0)) &&
                             allReferencedTypes.contains(lookupType.path()) 
@@ -346,10 +376,9 @@ public class DefaultPortalExtension
                                 ) {
                                     int order = 10000 * (filterByFeatures.size() + 1);
                                     try {
-                                        org.openmdx.ui1.jmi1.ElementDefinition field = 
-                                            application.getUiContext().getUiSegment().getElementDefinition(
-                                                (String)attributeDef.values("qualifiedName").get(0)
-                                            );
+                                        org.openmdx.ui1.jmi1.ElementDefinition field = application.getUiElementDefinition(
+                                            (String)attributeDef.values("qualifiedName").get(0)
+                                        );
                                         org.openmdx.ui1.jmi1.AssertableInspector referencedTypeInspector =
                                             application.getAssertableInspector((String)referencedType.values("qualifiedName").get(0));                                        
                                         String referencedTypeLabel =  application.getLabel(
@@ -433,7 +462,10 @@ public class DefaultPortalExtension
         return null;
     }
         
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------    
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getFindObjectsBaseFilter(org.openmdx.portal.servlet.ApplicationContext, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.lang.String)
+     */
     public List getFindObjectsBaseFilter(
         ApplicationContext application,
         RefObject_1_0 context,
@@ -518,7 +550,7 @@ public class DefaultPortalExtension
                 catch(Exception e) {
                     try {
                         // Fallback: lookup feature in ui repository as feature definition
-                        FeatureDefinition featureDef = application.getUiContext().getUiSegment().getFeatureDefinition(feature);
+                        FeatureDefinition featureDef = application.getFeatureDefinition(feature);
                         if(featureDef instanceof StructuralFeatureDefinition) {
                             featureTypeName = ((StructuralFeatureDefinition)featureDef).getType();
                         }
@@ -560,11 +592,9 @@ public class DefaultPortalExtension
                       // single-valued
                       if(valueHolder.isSingleValued()) {
                         // cat all values into one string
-                        String multiLineString = "";
-                        for(int j = 0; j < newValues.size(); j++) {
-                          multiLineString += multiLineString.length() == 0 ? "" : "\n";
-                          multiLineString += "" + newValues.get(j);
-                        }
+                        String multiLineString = parameterValues.size() == 0 ?
+                            "" :
+                            (String)parameterValues.get(0);
                         String mappedNewValue = multiLineString.length() == 0 ? null : multiLineString;
                         if(target instanceof RefObject) {
                           boolean isModified = !areEqual(
@@ -1253,8 +1283,7 @@ public class DefaultPortalExtension
                     // code
                     else if(valueHolder instanceof CodeValue) {
                       AppLog.trace("Code value " + attribute.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));
-                      Map longTexts = ((CodeValue)valueHolder).getLongText(false, true);
-        
+                      Map longTexts = ((CodeValue)valueHolder).getLongText(false, false);        
                       // single-valued
                       if(valueHolder.isSingleValued()) {
                         try {
@@ -1720,7 +1749,10 @@ public class DefaultPortalExtension
         }
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------    
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getLookupObject(org.openmdx.model1.accessor.basic.cci.ModelElement_1_0, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext, javax.jdo.PersistenceManager)
+     */
     public RefObject_1_0 getLookupObject(
         ModelElement_1_0 lookupType,
         RefObject_1_0 startFrom,
@@ -1756,13 +1788,23 @@ public class DefaultPortalExtension
               }
           }
           Path currentIdentity = current.refGetPath();
+          // In case current is corrupt for some reason
+          if(currentIdentity == null) {
+              break;
+          }
           if(
               (objectToShow != null) ||
               (currentIdentity.size() < 7)
           ) break;
           // go to parent
           currentIdentity = currentIdentity.getParent().getParent();
-          current = (RefObject_1_0)pm.getObjectById(currentIdentity);
+          try {
+              current = (RefObject_1_0)pm.getObjectById(currentIdentity);
+          }
+          catch(Exception e) {
+              ServiceException e0 = new ServiceException(e);
+              AppLog.warning("Can not get object", Arrays.asList(currentIdentity, e.getMessage()));
+          }
         }
         
         // If not found get root object which is in the composition hierarchy
@@ -1788,14 +1830,13 @@ public class DefaultPortalExtension
       
     //-------------------------------------------------------------------------
     /**
-     * get view required which allows to lookup referenced types
+     * Get view required which allows to lookup referenced types
      */
     public ObjectView getLookupView(
         String id,
         ModelElement_1_0 lookupType,
         RefObject_1_0 startFrom,
         String filterValues,
-        ControlFactory controlFactory,
         ApplicationContext application
     ) throws ServiceException {
         RefObject_1_0 lookupObject = this.getLookupObject(
@@ -1812,13 +1853,15 @@ public class DefaultPortalExtension
             application,
             MapUtils.orderedMap(new HashMap()),
             qualifiedNameLookupType,
-            null, //compositionHierarchy,
-            controlFactory
+            null //compositionHierarchy,
         );
         return view;
     }
     
     //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#hasUserDefineableQualifier(org.openmdx.ui1.jmi1.Inspector, org.openmdx.portal.servlet.ApplicationContext)
+     */
     public boolean hasUserDefineableQualifier(
         org.openmdx.ui1.jmi1.Inspector inspector,
         ApplicationContext application
@@ -1916,6 +1959,9 @@ public class DefaultPortalExtension
     }
     
     //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getDateStyle(java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
+     */
     public int getDateStyle(
        String qualifiedFeatureName,
        ApplicationContext application
@@ -1923,7 +1969,10 @@ public class DefaultPortalExtension
         return java.text.DateFormat.SHORT;
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------    
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTimeStyle(java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
+     */
     public int getTimeStyle(
        String qualifiedFeatureName,
        ApplicationContext application
@@ -1932,13 +1981,30 @@ public class DefaultPortalExtension
     }
     
     //-------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getDataBinding(java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
+     */
     public DataBinding_1_0 getDataBinding(
        String dataBindingName,
        ApplicationContext application
     ) {
-        return new DefaultDataBinding();
+        if(
+            (dataBindingName != null) && 
+            dataBindingName.startsWith(CompositeObjectDataBinding.class.getName())
+        ) {
+            return new CompositeObjectDataBinding(
+                dataBindingName.indexOf("?") < 0 ?
+                    "" :
+                    dataBindingName.substring(dataBindingName.indexOf("?") + 1)
+            );
+        }
+        else if(ReferencedObjectDataBinding.class.getName().equals(dataBindingName)) {
+            return new ReferencedObjectDataBinding();
+        }
+        else {
+            return new DefaultDataBinding();
+        }
     }
-    
     
     //-------------------------------------------------------------------------
     /**

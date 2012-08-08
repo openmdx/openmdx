@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReportTabControl.java,v 1.3 2008/05/01 21:43:57 wfro Exp $
+ * Name:        $Id: ReportTabControl.java,v 1.8 2008/11/12 10:36:53 wfro Exp $
  * Description: WizardTabControl
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2008/05/01 21:43:57 $
+ * Date:        $Date: 2008/11/12 10:36:53 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,9 +52,6 @@
  * This product includes yui, the Yahoo! UI Library
  * (License - based on BSD).
  *
- * This product includes yui-ext, the yui extension
- * developed by Jack Slocum (License - based on BSD).
- * 
  */
 package org.openmdx.portal.servlet.control;
 
@@ -111,52 +108,6 @@ public class ReportTabControl
         return this.reportDefinition.getName();
     }
     
-    //-------------------------------------------------------------------------
-    private void writeOperationParameterDialog(
-        HtmlPage p,
-        int operationIndex,
-        String okTitle,
-        String cancelTitle
-    ) throws ServiceException {
-        p.write("  <script type=\"text/javascript\">");
-        p.write("      var Operation", Integer.toString(operationIndex), " = function(){");
-        p.write("      var dialog;");
-        p.write("");
-        p.write("      return {");
-        p.write("");
-        p.write("        submitHandler : function(btn, evtObject) {");
-        p.write("             document.op", Integer.toString(operationIndex), "Form.submit();");
-        p.write("             this.hide();");
-        p.write("        },");
-        p.write("");
-        p.write("        showDialog : function(){");
-        p.write("            if(!dialog){");
-        p.write("                dialog = new YAHOO.ext.BasicDialog(\"op", Integer.toString(operationIndex), "Dialog\", {");
-        p.write("                        modal:true,");
-        p.write("                        autoTabs:false,");
-        p.write("                        autoScroll:false,");
-        p.write("                        resizeable:false,");
-        p.write("                        width:\"60%\",");
-        p.write("                        shim:true,");
-        p.write("                        shadow:true,");
-        p.write("                        minWidth:250,");
-        p.write("                        minHeight:50,");
-        p.write("                        proxyDrag: false");
-        p.write("                });");
-        p.write("                dialog.addKeyListener(27, dialog.hide, dialog);");
-        p.write("                dialog.addButton('", okTitle, "', this.submitHandler, dialog);");
-        p.write("                dialog.addButton('", cancelTitle, "', dialog.hide, dialog);");
-        p.write("            }");
-        p.write("            var elt = getEl('op", Integer.toString(operationIndex), "Form');");
-        p.write("            dialog.resizeTo(elt.getWidth(), elt.getHeight()+100);");        
-        p.write("            dialog.show();");
-        p.write("        }");
-        p.write("      };");
-        p.write("    }();");
-        p.write("");
-        p.write("  </script>");
-    }
-    
     //-----------------------------------------------------------------------
     @Override
     public void paint(
@@ -169,27 +120,24 @@ public class ReportTabControl
         
         // Report menu entries
         if(frame == null) {
-            int operationIndex = 100*(this.getPaneIndex() + 1) + this.getTabIndex();        
-            p.write("    <li><a href=\"#\"", " id=\"op", Integer.toString(operationIndex), "Trigger\"", p.getOnClick("javascript:Operation", Integer.toString(operationIndex), ".showDialog();"), " >", this.getOperationName(), "...</a></li>");
+            String operationId = Integer.toString(100*(this.getPaneIndex() + 1) + this.getTabIndex());     
+            p.write("    <li><a href=\"#\"", " id=\"op", operationId, "Trigger\" onclick=\"javascript:$('op", operationId, "Dialog').style.display='block';if(!op", operationId, "Dialog){op", operationId, "Dialog = new YAHOO.widget.Panel('op", operationId, "Dialog', {zindex:20000, fixedcenter:true, close:true, visible:false, constraintoviewport:true, modal:true}); op", operationId, "Dialog.cfg.queueProperty('keylisteners', new YAHOO.util.KeyListener(document, {keys:27}, {fn:op", operationId, "Dialog.hide, scope:op", operationId, "Dialog, correctScope:true})); op", operationId, "Dialog.render();} op", operationId, "Dialog.show();\">", this.getToolTip(), "...</a></li>");
         }        
         // Report input fields
         else if(FRAME_PARAMETERS.equals(frame)) {
             int operationIndex = 100*(this.getPaneIndex() + 1) + this.getTabIndex();        
             String formId = "op" + operationIndex + "Form";
-            p.write("<div id=\"op", Integer.toString(operationIndex), "Dialog\" style=\"visibility:hidden;position:absolute;top:0px;\">");
-            this.writeOperationParameterDialog(
-                p, 
-                operationIndex,
-                texts.getOkTitle(),
-                texts.getCancelTitle()                    
-            );
-            p.write("  <div class=\"ydlg-hd\">", this.getToolTip(), "</div>");
-            p.write("  <div class=\"ydlg-bd\">");     
-            p.write("<form id=\"", formId, "\" name=\"", formId, "\" action=\"", this.reportDefinition.getAction(), "\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"get\" target=\"_blank\" >");
-            p.write("  <input type=\"hidden\" name=\"__report\" value=\"", this.getName(), "\">");
+            p.write("<script language=\"javascript\" type=\"text/javascript\">");
+            p.write("  var op", Integer.toString(operationIndex), "Dialog = null;");
+            p.write("</script>");            
+            p.write("<div id=\"op", Integer.toString(operationIndex), "Dialog\" class=\"opDialog\">");
+            p.write("  <div class=\"hd\">", this.getToolTip(), "</div> <!-- name of operation -->");
+            p.write("  <div class=\"bd\">");                        
+            p.write("    <form id=\"", formId, "\" name=\"", formId, "\" action=\"", this.reportDefinition.getAction(), "\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"get\" target=\"_blank\" >");
+            p.write("      <input type=\"hidden\" name=\"__report\" value=\"", this.getName(), "\">");
             ReportDefinition.Parameter[] parameters = this.reportDefinition.getParameter();
-            p.write("    <div class=\"opFieldGroupName\">Report parameters</div>");
-            p.write("    <table class=\"opFieldGroup\">");
+            p.write("      <div class=\"opFieldGroupName\">Report parameters</div>");
+            p.write("      <table class=\"opFieldGroup\">");
             int tabIndex = 1;
             for(
                 int v = 0; 
@@ -201,59 +149,60 @@ public class ReportTabControl
                 String label = parameter.getLabel();
                 label += label.length() == 0 ? "" : ":";
                 String stringifiedValue = parameter.getDefaultValue();
-                String field = parameter.getName();
-                p.write("      <td class=\"label\"><span class=\"nw\">", label, "</span></td>");
+                String field = parameter.getName();                
+                p.write("          <td class=\"label\"><span class=\"nw\">", label, "</span></td>");
                 if("dateTime".equals(parameter.getDataType())) {
                     int calId = operationIndex*100 + tabIndex;
                     String calendarFormat = DateValue.getCalendarFormat(
                         DateValue.getLocalizedDateTimeFormatter(null, true, application)
                     );
-                    p.write("      <td>");
-                    // Firefox Caret Bug Workaround: <div style=...
-                    p.write("        <div style=\"overflow:auto;\"><input type=\"text\" class=\"valueR\" id=\"cal_field", Integer.toString(calId), "\" name=\"", field, "\" tabindex=\"" + tabIndex, "\" value=\"", stringifiedValue, "\"></div>");
-                    p.write("      </td>");
-                    p.write("      <td class=\"addon\">");
-                    p.write("        <a>", p.getImg("class=\"popUpButton\" id=\"cal_trigger", Integer.toString(calId), "\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/"), "cal", p.getImgType(), "\""), "</a>");
-                    p.write("        <script language=\"javascript\" type=\"text/javascript\">");
-                    p.write("          Calendar.setup({");
-                    p.write("            inputField   : \"cal_field", Integer.toString(calId), "\",");
-                    p.write("            ifFormat     : \"", calendarFormat, "\",");
-                    p.write("            timeFormat   : \"24\",");
-                    p.write("            button       : \"cal_trigger", Integer.toString(calId), "\",");
-                    p.write("            align        : \"Tr\",");
-                    p.write("            singleClick  : true,");
-                    p.write("            showsTime    : true");
-                    p.write("          });");
-                    p.write("        </script>");
-                    p.write("      </td>");
+                    p.write("          <td>");
+                    p.write("          </td>");
+                    p.write("          <td class=\"addon\">");
+                    p.write("            <a>", p.getImg("class=\"popUpButton\" id=\"cal_trigger", Integer.toString(calId), "\" border=\"0\" alt=\"Click to open Calendar\" src=\"", p.getResourcePath("images/"), "cal", p.getImgType(), "\""), "</a>");
+                    p.write("            <script language=\"javascript\" type=\"text/javascript\">");
+                    p.write("              Calendar.setup({");
+                    p.write("                inputField   : \"cal_field", Integer.toString(calId), "\",");
+                    p.write("                ifFormat     : \"", calendarFormat, "\",");
+                    p.write("                timeFormat   : \"24\",");
+                    p.write("                button       : \"cal_trigger", Integer.toString(calId), "\",");
+                    p.write("                align        : \"Tr\",");
+                    p.write("                singleClick  : true,");
+                    p.write("                showsTime    : true");
+                    p.write("              });");
+                    p.write("            </script>");
+                    p.write("          </td>");
                 }
                 else {
-                    p.write("      <td>");
-                    // Firefox Caret Bug Workaround: <div style=...
-                    p.write("        <div style=\"overflow:auto;\"><input type=\"text\" class=\"valueL\" tabindex=\"", Integer.toString(tabIndex), "\" name=\"", field, "\" value=\"", stringifiedValue, "\"></div>");
-                    p.write("      </td>");
-                    p.write("      <td class=\"addon\"></td>");
+                    p.write("          <td>");
+                    p.write("            <input type=\"text\" class=\"valueL\" tabindex=\"", Integer.toString(tabIndex), "\" name=\"", field, "\" value=\"", stringifiedValue, "\">");                    
+                    p.write("          </td>");
+                    p.write("          <td class=\"addon\"></td>");
                 }
-                p.write("    </tr>");
+                p.write("        </tr>");
                 tabIndex++;
             }
             if(this.reportDefinition.askForReportFormat()) {
-                p.write("      <tr>");
-                p.write("        <td class=\"label\"><span class=\"nw\">Report type:</span></td>");
-                p.write("        <td>");
-                p.write("          <select class=\"valueL\" name=\"__format\" tabindex=\"", Integer.toString(tabIndex), "\">");
-                p.write("            <option  value=\"html\">HTML");
-                p.write("            <option  value=\"pdf\">PDF");
-                p.write("            <option  value=\"xml\">XML");
-                p.write("          </select>");
-                p.write("        </td>");
-                p.write("        <td class=\"addon\"></td>");
-                p.write("      </tr>");
+                p.write("        <tr>");
+                p.write("          <td class=\"label\"><span class=\"nw\">Report type:</span></td>");
+                p.write("          <td>");
+                p.write("            <select class=\"valueL\" name=\"__format\" tabindex=\"", Integer.toString(tabIndex), "\">");
+                p.write("              <option  value=\"html\">HTML");
+                p.write("              <option  value=\"pdf\">PDF");
+                p.write("              <option  value=\"xml\">XML");
+                p.write("            </select>");
+                p.write("          </td>");
+                p.write("          <td class=\"addon\"></td>");
+                p.write("        </tr>");
                 tabIndex++;
             }
-            p.write("    </table>");
-            p.write("  </form>");   
-            p.write("</div>");
+            p.write("      </table>");
+            p.write("      <div style=\"text-align:right;padding-top:8px;\">");
+            p.write("        <input type=\"submit\" value=\"", texts.getOkTitle(), "\" onclick=\"javascript:op", Integer.toString(operationIndex), "Dialog.hide();\" />");
+            p.write("        <input type=\"button\" value=\"", texts.getCancelTitle(), "\" onclick=\"javascript:op", Integer.toString(operationIndex), "Dialog.hide();\" />");
+            p.write("      </div>");                                    
+            p.write("    </form>");   
+            p.write("  </div>");
             p.write("</div>");
         }
     }

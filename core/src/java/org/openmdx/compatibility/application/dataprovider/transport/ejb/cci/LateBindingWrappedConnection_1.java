@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LateBindingWrappedConnection_1.java,v 1.6 2005/06/13 04:57:43 hburger Exp $
+ * Name:        $Id: LateBindingWrappedConnection_1.java,v 1.9 2008/11/27 16:46:56 hburger Exp $
  * Description: Late Binding Wrapped Connection
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2005/06/13 04:57:43 $
+ * Date:        $Date: 2008/11/27 16:46:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,21 +61,20 @@ import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkReply;
 import org.openmdx.compatibility.base.dataprovider.cci.UnitOfWorkRequest;
 import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
-import org.openmdx.compatibility.base.exception.StackedException;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Late Binding Wrapped Connection
  */
 public class LateBindingWrappedConnection_1 
-    implements Dataprovider_1_1Connection 
+implements Dataprovider_1_1Connection 
 {
 
     /**
      * 
      */
     protected static final String DEFAULT_WRAPPER_NAME = "ejb/dataproviderRequiresNew";
-    
+
     /**
      * Constructor
      * 
@@ -102,7 +101,7 @@ public class LateBindingWrappedConnection_1
             DEFAULT_WRAPPER_NAME
         );
     }
-    
+
     /**
      * Constructor
      * 
@@ -132,7 +131,7 @@ public class LateBindingWrappedConnection_1
         this.processor = dataprovider;
         this.wrapperName = wrapperName;
     }
-    
+
     /**
      * The processor
      */
@@ -162,11 +161,11 @@ public class LateBindingWrappedConnection_1
         Context initialContext = new InitialContext();
         try {
             DataproviderWrapper_1_0Local wrapper = (
-                (DataproviderWrapper_1LocalHome) initialContext.lookup(this.wrapperName)
+                    (DataproviderWrapper_1LocalHome) initialContext.lookup(this.wrapperName)
             ).create();            
             return new Dataprovider_1_0WrappedConnection(
-                 wrapper,
-                 this.dataprovider
+                wrapper,
+                this.dataprovider
             );
         } finally {
             initialContext.close();
@@ -188,12 +187,10 @@ public class LateBindingWrappedConnection_1
         } catch (Exception exception) {
             throw new RuntimeServiceException(
                 exception,
-                StackedException.DEFAULT_DOMAIN,
-                StackedException.COMMUNICATION_FAILURE,
-                new BasicException.Parameter[]{
-                    new BasicException.Parameter("wrapper",this.wrapperName)
-                },
-                "Could not establish connection to dataprovider"
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.COMMUNICATION_FAILURE,
+                "Could not establish connection to dataprovider",
+                new BasicException.Parameter("wrapper",this.wrapperName)
             );
         }
         return this.dataprovider;
@@ -231,7 +228,7 @@ public class LateBindingWrappedConnection_1
      */
     public UnitOfWorkReply[] process(
         ServiceHeader header,
-        UnitOfWorkRequest[] workingUnits
+        UnitOfWorkRequest... workingUnits
     ) {
         return getDelegate().process(header, workingUnits);
     }
