@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractTransaction_1.java,v 1.7 2010/12/23 17:42:52 hburger Exp $
+ * Name:        $Id: AbstractTransaction_1.java,v 1.10 2011/11/25 14:51:58 hburger Exp $
  * Description: AbstractTransaction_1 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/23 17:42:52 $
+ * Date:        $Date: 2011/11/25 14:51:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -58,13 +58,14 @@ import javax.jdo.spi.PersistenceCapable;
 import javax.transaction.Synchronization;
 
 import org.openmdx.base.accessor.rest.spi.Synchronization_2_0;
+import org.openmdx.base.persistence.cci.UnitOfWork;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * AbstractTransaction_1
  */
 public abstract class AbstractTransaction_1
-    implements Transaction, Synchronization_2_0 {
+    implements Transaction, UnitOfWork, Synchronization_2_0 {
 
     /**
      * Provide the delegate
@@ -255,7 +256,7 @@ public abstract class AbstractTransaction_1
 
     
     //-----------------------------------------------------------------------
-    // Synchronization
+    // Implements Synchronization
     //-----------------------------------------------------------------------
     
 //  @Override
@@ -273,10 +274,29 @@ public abstract class AbstractTransaction_1
 
     
     //-----------------------------------------------------------------------
-    // Synchronization_2_0
+    // Implements UnitOfWork
     //-----------------------------------------------------------------------
 
     /* (non-Javadoc)
+	 * @see org.openmdx.base.persistence.cci.UnitOfWork#setForgetOnly()
+	 */
+	public void setForgetOnly() {
+        ((UnitOfWork)this.getDelegate()).setForgetOnly();                
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.persistence.cci.UnitOfWork#isForgetOnly()
+	 */
+	public boolean isForgetOnly() {
+        return ((UnitOfWork)this.getDelegate()).isForgetOnly();                
+	}
+
+	
+    //-----------------------------------------------------------------------
+    // Implements Synchronization_2_0
+    //-----------------------------------------------------------------------
+
+	/* (non-Javadoc)
      * @see org.openmdx.base.accessor.rest.spi.Synchronization_2_0#afterBegin()
      */
 //  @Override
@@ -291,5 +311,33 @@ public abstract class AbstractTransaction_1
     public void clear() {
         ((Synchronization_2_0)this.getDelegate()).clear();                
     }
-
+   
+    /**
+     * Retrieve a delegate of the given type
+     * 
+     * @param type
+     * @param transaction
+     * 
+     * @return the delegate of the given type
+     * 
+     * @exception NullPointerException if either argument is <code>null</code>
+     * @exception IllegalArgumentException if the transaction has no delegate of the given type
+     */
+    public static <T> T getDelegate(
+    	Class<T> type,
+    	Transaction transaction
+    ){
+    	Transaction current = transaction;
+    	while(!type.isInstance(current)) {
+    		if(current instanceof AbstractTransaction_1) {
+        		current = ((AbstractTransaction_1)current).getDelegate();
+    		} else {
+    	    	throw new IllegalArgumentException(
+	        		"The given transaction has no delegate of type " + type.getName() + ": " +  transaction.getClass().getName()
+	        	);
+    		}
+    	}
+		return type.cast(current);
+    }
+    
 }

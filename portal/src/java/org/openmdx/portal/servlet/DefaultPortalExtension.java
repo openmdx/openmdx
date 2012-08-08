@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultPortalExtension.java,v 1.100 2010/12/07 12:55:49 wfro Exp $
+ * Name:        $Id: DefaultPortalExtension.java,v 1.123 2011/12/23 15:52:32 wfro Exp $
  * Description: DefaultEvaluator
- * Revision:    $Revision: 1.100 $
+ * Revision:    $Revision: 1.123 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/07 12:55:49 $
+ * Date:        $Date: 2011/12/23 15:52:32 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -75,6 +75,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -110,6 +111,12 @@ import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.IsGreaterCondition;
+import org.openmdx.base.query.IsGreaterOrEqualCondition;
+import org.openmdx.base.query.IsInCondition;
+import org.openmdx.base.query.IsLikeCondition;
+import org.openmdx.base.query.Quantifier;
+import org.openmdx.base.query.SoundsLikeCondition;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
@@ -124,10 +131,12 @@ import org.openmdx.portal.servlet.control.Control;
 import org.openmdx.portal.servlet.control.GridControl;
 import org.openmdx.portal.servlet.databinding.CompositeObjectDataBinding;
 import org.openmdx.portal.servlet.databinding.ReferencedObjectDataBinding;
+import org.openmdx.portal.servlet.view.Grid;
 import org.openmdx.portal.servlet.view.ObjectView;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.ui1.jmi1.FeatureDefinition;
 import org.openmdx.ui1.jmi1.StructuralFeatureDefinition;
+import org.openmdx.ui1.jmi1.ValuedField;
 
 public class DefaultPortalExtension
   implements PortalExtension_1_0, Serializable {
@@ -149,8 +158,17 @@ public class DefaultPortalExtension
     ) {
         return this.toS(obj).replace(" ", "&nbsp;");
     }
-
     
+    //-------------------------------------------------------------------------
+	@Override
+    public String getTitle(
+    	int action, 
+    	String name, 
+    	ApplicationContext application
+    ) {
+		return name;
+    }
+
 	//-------------------------------------------------------------------------    
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#getTitle(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, short, java.lang.String, org.openmdx.portal.servlet.ApplicationContext)
@@ -231,36 +249,40 @@ public class DefaultPortalExtension
   
     //-------------------------------------------------------------------------    
     /* (non-Javadoc)
-     * @see org.openmdx.portal.servlet.PortalExtension_1_0#isEnabled(java.lang.String, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#hasPermission(java.lang.String, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.util.Set, org.openmdx.portal.servlet.ApplicationContext)
      */
-    public boolean isEnabled(
+    public boolean hasPermission(
         String elementName, 
-        RefObject_1_0 refObj,
-        ApplicationContext applicationContext
+        RefObject_1_0 object,
+        ApplicationContext app,
+        String action
     ) {
-        return elementName != null;
+        return false;
     }
   
-    //-------------------------------------------------------------------------    
+    //-------------------------------------------------------------------------
     /* (non-Javadoc)
-     * @see org.openmdx.portal.servlet.PortalExtension_1_0#isEnabled(org.openmdx.portal.servlet.control.Control, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#hasPermission(org.openmdx.portal.servlet.control.Control, org.openmdx.base.accessor.jmi.cci.RefObject_1_0, java.util.Set, org.openmdx.portal.servlet.ApplicationContext)
      */
-    public boolean isEnabled(
+    public boolean hasPermission(
         Control control, 
-        RefObject_1_0 refObj,
-        ApplicationContext applicationContext
-    ) {
-        return control != null;
+        RefObject_1_0 object,
+        ApplicationContext app,
+        String action        
+    ) {    	
+        return false;
     }
+    
     //-------------------------------------------------------------------------     
     /* (non-Javadoc)
      * @see org.openmdx.portal.servlet.PortalExtension_1_0#isEnabled(org.openmdx.base.accessor.jmi.cci.RefObject_1_0, org.openmdx.portal.servlet.ApplicationContext)
      */
-    public boolean isEnabled(
-        RefObject_1_0 refObj,
-        ApplicationContext applicationContext
+    public boolean hasPermission(
+        RefObject_1_0 object,
+        ApplicationContext app,
+        String action
     ) {
-        return refObj != null;
+        return false;
     }
     
     //-------------------------------------------------------------------------    
@@ -271,7 +293,7 @@ public class DefaultPortalExtension
     	org.openmdx.ui1.jmi1.ValuedField field,
     	String filterValue,
     	int queryFilterStringParamCount,
-    	ApplicationContext application
+    	ApplicationContext app
     ) {
         return null;
     }
@@ -503,24 +525,6 @@ public class DefaultPortalExtension
     ) {
         return new ArrayList<Condition>();
     }
-    
-    //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
-    private static boolean areEqual(
-        Object v1,
-        Object v2
-    ) {
-        if(v1 == null) return v2 == null;
-        if(v2 == null) return v1 == null;
-        if(
-            (v1 instanceof Comparable) && 
-            (v2 instanceof Comparable) &&
-            (v1.getClass().equals(v2.getClass()))
-        ) {
-            return ((Comparable)v1).compareTo(v2) == 0;
-        }
-        return v1.equals(v2);
-    }
 
     //-------------------------------------------------------------------------
     protected Locale getCurrentLocale(
@@ -532,7 +536,7 @@ public class DefaultPortalExtension
             locale.substring(locale.indexOf("_") + 1)
         );      
     }
-  
+
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     static protected Map<String,Object> targetAsValueMap(
@@ -540,7 +544,7 @@ public class DefaultPortalExtension
     ) {
     	return (Map<String,Object>)target;
     }
-    
+
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     static protected Collection<Object> valueAsCollection(
@@ -548,7 +552,7 @@ public class DefaultPortalExtension
     ) {
     	return (Collection<Object>)value;
     }
-    
+
     //-------------------------------------------------------------------------
     protected Object getValue(
     	AttributeValue valueHolder,
@@ -570,7 +574,7 @@ public class DefaultPortalExtension
 	        );    		
     	}
     }
-    
+
     //-------------------------------------------------------------------------
     protected void setValue(
     	AttributeValue valueHolder,
@@ -595,7 +599,7 @@ public class DefaultPortalExtension
 	        );    		
     	}
     }
-    
+
     //-------------------------------------------------------------------------
     /**
      * Maps the request input to the specified object. The object must either
@@ -603,7 +607,7 @@ public class DefaultPortalExtension
      */
     public void updateObject(
         Object target,
-        Map<String,Object[]> parameterMap,
+        Map<String,String[]> parameterMap,
         Map<String,Attribute> fieldMap,
         ApplicationContext app
     ) {
@@ -656,18 +660,20 @@ public class DefaultPortalExtension
                 	  new StringTokenizer("", "\n", true) : 
                 	  new StringTokenizer((String)parameterValues.get(0), "\n\r", true);
                   List<String> newValues = new ArrayList<String>();
-                  boolean lastTokenIsDelim = false;
+                  boolean lastTokenIsNewLine = false;
                   while(tokenizer.hasMoreTokens()) {
                 	  String token = tokenizer.nextToken();
                 	  if(!"#NULL".equals(token)) {
-                		  if("\n".equals(token) || "\r".equals(token)) {
-                			  if(lastTokenIsDelim) {
+                		  if("\n".equals(token)) {
+                			  if(lastTokenIsNewLine) {
                 				  newValues.add("");
                 			  }
-                			  lastTokenIsDelim = true;
+                			  lastTokenIsNewLine = true;
+                		  } else if("\r".equals(token)) {
+                			  // Skip
                 		  } else {
                 			  newValues.add(token);
-                			  lastTokenIsDelim = false;
+                			  lastTokenIsNewLine = false;
                 		  }
                 	  }
                   }
@@ -690,31 +696,25 @@ public class DefaultPortalExtension
                       // single-valued
                       if(valueHolder.isSingleValued()) {
                         // cat all values into one string
-                        String multiLineString = parameterValues.size() == 0 ?
+                        String multiLineString = parameterValues.isEmpty() ?
                             "" :
                             (String)parameterValues.get(0);
                         String mappedNewValue = multiLineString.length() == 0 ? null : multiLineString;
                         if(target instanceof RefObject) {
-                          boolean isModified = !DefaultPortalExtension.areEqual(
-                        	  this.getValue(
-                        		  valueHolder, 
-                        		  target, 
-                        		  featureName, 
-                        		  app
-                        	  ),
-                              mappedNewValue
-                          );
-                          SysLog.trace("modify feature", featureName + "=" + isModified);
-                          if(isModified) {
-                        	  this.setValue(
-                        		  valueHolder, 
-                        		  target, 
-                        		  featureName, 
-                        		  mappedNewValue, 
-                        		  app
-                        	  );
-                        	  modifiedFeatures.add(featureName);
-                          }
+                        	Object value = this.getValue(
+                      		  	valueHolder, 
+                      		  	target, 
+                      		  	featureName, 
+                      		  	app
+                        	);
+                    		this.setValue(
+                    			valueHolder, 
+                    			target, 
+                    			featureName, 
+                    			value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+                    			app
+                    		);
+                    		modifiedFeatures.add(featureName);
                         }
                         else {
                             targetAsValueMap(target).put(
@@ -746,68 +746,53 @@ public class DefaultPortalExtension
                             }
                         }
                         List<String> mappedNewValues = newValues;
-                        boolean isModified = !DefaultPortalExtension.areEqual(
-                            values,
-                            mappedNewValues
-                        );
-                        SysLog.trace("modify feature", featureName + "=" + isModified);
-                        if(isModified) {
-                            if(target instanceof RefObject) {
-                            	this.setValue(
-                            		valueHolder, 
-                            		target, 
-                            		featureName, 
-                            		mappedNewValues, 
-                            		app
-                            	);
-                            }
-                            else {
-                                values.clear();
-                                values.addAll(mappedNewValues);
-                            }
-                            modifiedFeatures.add(featureName);
+                        if(target instanceof RefObject) {
+                        	this.setValue(
+                        		valueHolder, 
+                        		target, 
+                        		featureName, 
+                        		mappedNewValues, 
+                        		app
+                        	);
                         }
+                        else {
+                            values.clear();
+                            values.addAll(mappedNewValues);
+                        }
+                        modifiedFeatures.add(featureName);
                       }
                     }
         
                     // number
                     else if(valueHolder instanceof NumberValue) {
-                      SysLog.trace("Number value " + feature.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));
-        
                       // single-valued
                       if(valueHolder.isSingleValued()) {
                         try {    
                           BigDecimal number = app.parseNumber(
-                              newValues.size() == 0 ? "" : ((String)newValues.get(0)).trim()
+                              newValues.isEmpty() ? "" : ((String)newValues.get(0)).trim()
                           );
                           if(number == null) {
                               number = valueHolder.isOptionalValued() ? 
                             	  null : 
-                            	  new BigDecimal(0);
+                            	  BigDecimal.ZERO;
                           }
                           if(number == null) {
                               Object mappedNewValue = null;
                               if(target instanceof RefObject) {
-                                boolean isModified = !DefaultPortalExtension.areEqual(
-                                	this.getValue(
-                                		valueHolder, 
-                                		target, 
-                                		featureName, 
-                                		app
-                                	),
-                                    mappedNewValue
-                                );
-                                SysLog.trace("modify feature", featureName + "=" + isModified);
-                                if(isModified) {
-                                	this.setValue(
-                                		valueHolder, 
-                                		target, 
-                                		featureName, 
-                                		mappedNewValue, 
-                                		app
-                                	);
-                                    modifiedFeatures.add(featureName);
-                                }
+                            	  Object value = this.getValue(
+                            		  valueHolder, 
+                            		  target, 
+                            		  featureName, 
+                            		  app
+                            	  );
+                        		  this.setValue(
+                        			  valueHolder, 
+                        			  target, 
+                        			  featureName, 
+                        			  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+                        			  app
+                        		  );
+                        		  modifiedFeatures.add(featureName);
                               }
                               else {
                                   targetAsValueMap(target).put(
@@ -819,26 +804,20 @@ public class DefaultPortalExtension
                           else if(PrimitiveTypes.INTEGER.equals(featureTypeName)) {
                               Integer mappedNewValue = new Integer(number.intValue());
                               if(target instanceof RefObject) {
-                                boolean isModified = !DefaultPortalExtension.areEqual(
-                                	this.getValue(
-                                		valueHolder, 
-                                		target, 
-                                		featureName, 
-                                		app
-                                	),
-                                    mappedNewValue
-                                );
-                                SysLog.trace("modify feature", featureName + "=" + isModified);
-                                if(isModified) {
-                                	this.setValue(
-                                		valueHolder, 
-                                		target, 
-                                		featureName, 
-                                		mappedNewValue, 
-                                		app
-                                	);
-                                    modifiedFeatures.add(featureName);
-                                }
+                            	  Object value = this.getValue(
+                            		  valueHolder, 
+                            		  target, 
+                            		  featureName, 
+                            		  app
+                            	  );
+                        		  this.setValue(
+                        			  valueHolder, 
+                        			  target, 
+                        			  featureName, 
+                        			  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+                        			  app
+                        		  );
+                        		  modifiedFeatures.add(featureName);
                               }
                               else {
                                   targetAsValueMap(target).put(
@@ -850,26 +829,20 @@ public class DefaultPortalExtension
                           else if(PrimitiveTypes.LONG.equals(featureTypeName)) {
                               Long mappedNewValue = new Long(number.longValue());
                               if(target instanceof RefObject) {
-                                  boolean isModified = !DefaultPortalExtension.areEqual(
-                                	  this.getValue(
-                                		  valueHolder, 
-                                		  target, 
-                                		  featureName, 
-                                		  app
-                                	  ),
-                                      mappedNewValue
-                                  );
-                                  SysLog.trace("modify feature", featureName + "=" + isModified);
-                                  if(isModified) {
-                                	  this.setValue(
-                                		  valueHolder, 
-                                		  target, 
-                                		  featureName, 
-                                		  mappedNewValue, 
-                                		  app
-                                	  );
-                                      modifiedFeatures.add(featureName);
-                                  }
+                            	  Object value = this.getValue(
+                            		  valueHolder, 
+                            		  target, 
+                            		  featureName, 
+                            		  app
+                            	  );
+                            	  this.setValue(
+                            		  valueHolder, 
+                            		  target, 
+                            		  featureName, 
+                            		  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+                            		  app
+                            	  );
+                                  modifiedFeatures.add(featureName);
                               }
                               else {
                                   targetAsValueMap(target).put(
@@ -881,25 +854,20 @@ public class DefaultPortalExtension
                           else if(PrimitiveTypes.DECIMAL.equals(featureTypeName)) {
                               BigDecimal mappedNewValue = number;
                               if(target instanceof RefObject) {
-                                boolean isModified = !DefaultPortalExtension.areEqual(
-                                	this.getValue(
-                                		valueHolder, 
-                                		target, 
-                                		featureName, 
-                                		app
-                                	),
-                                    mappedNewValue
-                                );
-                                if(isModified) {
-                              	  	this.setValue(
-                              	  		valueHolder, 
-                              	  		target, 
-                              	  		featureName, 
-                              	  		mappedNewValue, 
-                              	  		app
-                              	  	);
-                                    modifiedFeatures.add(featureName);
-                                }
+                            	  Object value = this.getValue(
+                            		  valueHolder, 
+                            		  target, 
+                            		  featureName, 
+                            		  app
+                            	  );
+                        		  this.setValue(
+                        			  valueHolder, 
+                        			  target, 
+                        			  featureName, 
+                        			  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+                          	  		  app
+                        		  );
+                        		  modifiedFeatures.add(featureName);
                               }
                               else {
                                   targetAsValueMap(target).put(
@@ -908,29 +876,23 @@ public class DefaultPortalExtension
                                   );
                               }
                           }
-                          else { //if(PrimitiveTypes.SHORT.equals(featureTypeName)) {
+                          else {
                               Short mappedNewValue = new Short(number.shortValue());
                               if(target instanceof RefObject) {
-                            	  boolean isModified = !DefaultPortalExtension.areEqual(
-                            		  this.getValue(
-	                                	  valueHolder, 
-	                                	  target, 
-	                                	  featureName, 
-	                                	  app
-                            		  ),
-                                      mappedNewValue
-                                  );
-                                  SysLog.trace("modify feature", featureName + "=" + isModified);
-                                  if(isModified) {
-                                	  this.setValue(
-                                		  valueHolder, 
-                                		  target, 
-                                		  featureName, 
-                                		  mappedNewValue, 
-                                		  app
-                                	  );
-                                      modifiedFeatures.add(featureName);
-                                  }
+                            	  Object value = this.getValue(
+                                	  valueHolder, 
+                                	  target, 
+                                	  featureName, 
+                                	  app
+                        		  );
+                            	  this.setValue(
+                            		  valueHolder, 
+                            		  target, 
+                            		  featureName, 
+                            		  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+                            		  app
+                            	  );
+                                  modifiedFeatures.add(featureName);
                               }
                               else {
                                   targetAsValueMap(target).put(
@@ -1033,33 +995,25 @@ public class DefaultPortalExtension
                             );
                           }
                         }
-                        boolean isModified = !DefaultPortalExtension.areEqual(
-                          values,
-                          mappedNewValues
-                        );
-                        SysLog.trace("modify feature", featureName + "=" + isModified);
-                        if(isModified) {
-                            if(target instanceof RefObject) {
-                          	  	this.setValue(
-                          	  		valueHolder, 
-                          	  		target, 
-                          	  		featureName, 
-                          	  		mappedNewValues, 
-                          	  		app
-                          	  	);
-                            }
-                            else {
-                                values.clear();
-                                values.addAll(mappedNewValues);
-                            }
-                            modifiedFeatures.add(featureName);
+                        if(target instanceof RefObject) {
+                      	  	this.setValue(
+                      	  		valueHolder, 
+                      	  		target, 
+                      	  		featureName, 
+                      	  		mappedNewValues, 
+                      	  		app
+                      	  	);
                         }
+                        else {
+                            values.clear();
+                            values.addAll(mappedNewValues);
+                        }
+                        modifiedFeatures.add(featureName);
                       }
                     }
-        
+
                     // date
                     else if(valueHolder instanceof DateValue) {
-                      SysLog.trace("Date value " + feature.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));
                       SimpleDateFormat dateParser = DateValue.getLocalizedDateFormatter(
                           featureName, 
                           true, 
@@ -1075,29 +1029,23 @@ public class DefaultPortalExtension
                       // single-valued
                       if(valueHolder.isSingleValued()) {
                         try {
-                          if(newValues.size() == 0) {
+                          if(newValues.isEmpty()) {
                             Object mappedNewValue = null;
                             if(target instanceof RefObject) {
-                            	boolean isModified = !DefaultPortalExtension.areEqual(
-                            		this.getValue(
-                            			valueHolder, 
-                            			target, 
-                            			featureName, 
-                            			app
-                            		),
-                            		mappedNewValue
-                            	);
-                            	SysLog.trace("modify feature", featureName + "=" + isModified);
-                            	if(isModified) {
-                              	  	this.setValue(
-                              	  		valueHolder, 
-                              	  		target, 
-                              	  		featureName, 
-                              	  		mappedNewValue, 
-                              	  		app
-                              	  	);
-                              	  	modifiedFeatures.add(featureName);
-                            	}
+                            	Object value = this.getValue(
+                        			valueHolder, 
+                        			target, 
+                        			featureName, 
+                        			app
+                        		);
+                          	  	this.setValue(
+                          	  		valueHolder, 
+                          	  		target, 
+                          	  		featureName, 
+                          	  		value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+                          	  		app
+                          	  	);
+                          	  	modifiedFeatures.add(featureName);
                             }
                             else {
                                 targetAsValueMap(target).put(
@@ -1125,6 +1073,7 @@ public class DefaultPortalExtension
                             		  100 * (currentYear / 100 - (Math.abs(currentYear % 100 - year % 100) < 50 ? 0 : 1))
                             	  );
                               }
+                              // date
                               if(PrimitiveTypes.DATE.equals(featureTypeName)) {
                                 XMLGregorianCalendar mappedNewValueDate = DefaultPortalExtension.xmlDatatypeFactory().newXMLGregorianCalendarDate(
                                     cal.get(Calendar.YEAR),
@@ -1133,26 +1082,20 @@ public class DefaultPortalExtension
                                     DatatypeConstants.FIELD_UNDEFINED
                                 );
                                 if(target instanceof RefObject) {
-                                	boolean isModified = !DefaultPortalExtension.areEqual(
-	                                	this.getValue(
-	                                		valueHolder, 
-	                                		target, 
-	                                		featureName, 
-	                                		app
-	                                	),
-	                                	mappedNewValue
+                                	Object value = this.getValue(
+                                		valueHolder, 
+                                		target, 
+                                		featureName, 
+                                		app
                                 	);
-                                	SysLog.trace("modify feature", featureName + "=" + isModified);
-                                	if(isModified) {
-	                                  	this.setValue(
-	                                  		valueHolder, 
-	                                		target, 
-	                                		featureName, 
-	                                		mappedNewValueDate, 
-	                                		app
-	                                	);
-	                                  	modifiedFeatures.add(featureName);
-                                	}
+                                  	this.setValue(
+                                  		valueHolder, 
+                                		target, 
+                                		featureName, 
+                                		value instanceof Collection ? Collections.singletonList(mappedNewValueDate) : mappedNewValueDate, 
+                                		app
+                                	);
+                                  	modifiedFeatures.add(featureName);
                                 }
                                 else {
                                     targetAsValueMap(target).put(
@@ -1161,29 +1104,24 @@ public class DefaultPortalExtension
                                     );
                                 }
                               }
+                              // dateTime
                               else if(PrimitiveTypes.DATETIME.equals(featureTypeName)) {
                             	  mappedNewValue = cal.getTime();
                                   if(target instanceof RefObject) {
-	                                  boolean isModified = !DefaultPortalExtension.areEqual(
-	                                	  this.getValue(
-	                                		  valueHolder, 
-	                                		  target, 
-	                                		  featureName, 
-	                                		  app
-	                                	  ),
-	                                      mappedNewValue
-	                                  );
-	                                  SysLog.trace("modify feature", featureName + "=" + isModified);
-	                                  if(isModified) {
-	                                	  this.setValue(
-	                                		  valueHolder, 
-	                                		  target, 
-	                                		  featureName, 
-	                                		  mappedNewValue, 
-	                                		  app
-	                                	  );	                                	  
-	                                      modifiedFeatures.add(featureName);
-	                                  }
+                                	  Object value = this.getValue(
+                                		  valueHolder, 
+                                		  target, 
+                                		  featureName, 
+                                		  app
+                                	  );
+                                	  this.setValue(
+                                		  valueHolder, 
+                                		  target, 
+                                		  featureName, 
+                                		  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+                                		  app
+                                	  );	                                	  
+                                      modifiedFeatures.add(featureName);
                                   }
                                   else {
                                       targetAsValueMap(target).put(
@@ -1299,34 +1237,26 @@ public class DefaultPortalExtension
                             );
                           }
                         }
-                        boolean isModified = !DefaultPortalExtension.areEqual(
-                          values,
-                          mappedNewValues
-                        );
-                        SysLog.trace("modify feature", featureName + "=" + isModified);
-                        if(isModified) {
-                            if(target instanceof RefObject) {
-	                          	  this.setValue(
-	                        		  valueHolder, 
-	                        		  target, 
-	                        		  featureName, 
-	                        		  mappedNewValues, 
-	                        		  app
-	                        	  );
-                            }
-                            else {
-                                values.clear();
-                                values.addAll(mappedNewValues);
-                            }
-                            modifiedFeatures.add(featureName);
+                        if(target instanceof RefObject) {
+                          	  this.setValue(
+                        		  valueHolder, 
+                        		  target, 
+                        		  featureName, 
+                        		  mappedNewValues, 
+                        		  app
+                        	  );
                         }
+                        else {
+                            values.clear();
+                            values.addAll(mappedNewValues);
+                        }
+                        modifiedFeatures.add(featureName);
                       }
                     }
         
                     // object reference
                     else if(valueHolder instanceof ObjectReferenceValue) {
                       if(!((String)key).endsWith(".Title")) {
-                    	SysLog.trace("ObjRef value " + feature.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));        
                         // single-valued
                         if(valueHolder.isSingleValued()) {
                           String xri = null;
@@ -1336,7 +1266,6 @@ public class DefaultPortalExtension
                           // If set and invalid and newValues is empty report an error
                           boolean xriSetAsTitleIsInvalid = false;
                           if((titleValues != null) && (titleValues.length > 0)) {
-                        	SysLog.trace("ObjRef title value", titleValues[0]);
                             if(titleValues[0].toString().length() == 0) {
                               xri = ""; // reference removed by user
                             }
@@ -1372,7 +1301,6 @@ public class DefaultPortalExtension
                           if(xriSetAsTitleIsInvalid && newValues.size() == 0) {
                               // title N/A (object not available) and N/P (no permission) is set by show object. Ignore.
                               if(!((String)titleValues[0]).startsWith("N/A") && !((String)titleValues[0]).startsWith("N/P")) {
-                            	  SysLog.trace("xri entered as title is not valid", titleValues);
                             	  app.addErrorMessage(
                             		  app.getTexts().getErrorTextInvalidObjectReference(),
                                       new String[]{feature.getLabel(), (String)titleValues[0]}
@@ -1384,7 +1312,6 @@ public class DefaultPortalExtension
                               if((xri == null) && (newValues.size() > 0)) {
                                 xri = (String)newValues.get(0);
                               }
-                              SysLog.trace("ObjRef xri", xri);
                               try {
                                 Object mappedNewValue = (xri == null) || "".equals(xri) ? 
                                 	null : 
@@ -1395,30 +1322,14 @@ public class DefaultPortalExtension
                                 			JDOHelper.getPersistenceManager(target).getObjectById(
 		                                		mappedNewValue
 		                                	);
-                                    boolean isModified = true;
-                                    // force modify in case the referenced object does not exist
-                                    try {
-	                                    isModified = !DefaultPortalExtension.areEqual(
-	                                    	this.getValue(
-	                                    		valueHolder, 
-	                                    		target, 
-	                                    		featureName, 
-	                                    		app
-	                                    	),
-	                                        mappedNewValue
-	                                    );
-                                  } catch(Exception e) {}
-                                  SysLog.trace("modify feature", featureName + "=" + isModified);
-                                  if(isModified) {
-                                	  this.setValue(
-                                		  valueHolder, 
-                                		  target, 
-                                		  featureName, 
-                                		  mappedNewValue, 
-                                		  app
-                                	  );
-                                      modifiedFeatures.add(featureName);
-                                  }
+                                	this.setValue(
+                                		valueHolder, 
+                                		target, 
+                                		featureName, 
+                                		mappedNewValue, 
+                                		app
+                                	);
+                                	modifiedFeatures.add(featureName);
                                 }
                                 else {
                                     targetAsValueMap(target).put(
@@ -1454,7 +1365,6 @@ public class DefaultPortalExtension
         
                     // code
                     else if(valueHolder instanceof CodeValue) {
-                      SysLog.trace("Code value " + feature.getLabel(), Arrays.asList((Object[])parameterMap.get(key)));
                       Map longTexts = ((CodeValue)valueHolder).getLongText(false, false);        
                       // single-valued
                       if(valueHolder.isSingleValued()) {
@@ -1464,31 +1374,25 @@ public class DefaultPortalExtension
                               System.err.println("WARNING: can not get CodeValueContainer with name " + featureName + ". Add " + featureName + " to the name list of a CodeValueContainer");
                               longTexts = new TreeMap();
                           }
-                          Short mappedNewValue = newValues.size() == 0 ? 
-                        	  new Short((short)0) : 
-                        	  (Short)longTexts.get(newValues.get(0).toString());
+                          Short mappedNewValue = newValues.isEmpty() ? 
+                        	  (short)0 : 
+                        		  (Short)longTexts.get(newValues.get(0).toString());
                           if(mappedNewValue != null) {
                               if(target instanceof RefObject) {
-                                  boolean isModified = !DefaultPortalExtension.areEqual(
-                                  	  this.getValue(
-	                                	  valueHolder, 
-	                                	  target, 
-	                                	  featureName, 
-	                                	  app
-                                  	  ),
-                                      mappedNewValue
-                                  );
-                                  SysLog.trace("modify feature", featureName + "=" + isModified);
-                                  if(isModified) {
-                                	  this.setValue(
-                                		  valueHolder, 
-                                		  target, 
-                                		  featureName, 
-                                		  mappedNewValue, 
-                                		  app
-                                	  );
-                                      modifiedFeatures.add(featureName);
-                                  }
+                            	  Object value = this.getValue(
+                                	  valueHolder, 
+                                	  target, 
+                                	  featureName, 
+                                	  app
+                              	  );
+                            	  this.setValue(
+                            		  valueHolder, 
+                            		  target, 
+                            		  featureName, 
+                            		  value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+                            		  app
+                            	  );
+                                  modifiedFeatures.add(featureName);
                               }
                               else {
                                   targetAsValueMap(target).put(
@@ -1544,7 +1448,6 @@ public class DefaultPortalExtension
                           try {
                             String longText = j.next().toString();
                             Short code = (Short)longTexts.get(longText);
-                            SysLog.trace("code mapping", longText + " to code=" + code);
                             if(code != null) {
                               mappedNewValues.add(
                                 code
@@ -1566,33 +1469,25 @@ public class DefaultPortalExtension
                             );
                           }
                         }
-                        boolean isModified = !DefaultPortalExtension.areEqual(
-                          values,
-                          mappedNewValues
-                        );
-                        SysLog.trace("modify feature", featureName + "=" + isModified);
-                        if(isModified) {
-                            if(target instanceof RefObject) {
-                          	  	this.setValue(
-                          	  		valueHolder, 
-                          	  		target, 
-                          	  		featureName, 
-                          	  		mappedNewValues, 
-                          	  		app
-                          	  	);
-                            }
-                            else {
-                                values.clear();
-                                values.addAll(mappedNewValues);
-                            }
-                            modifiedFeatures.add(featureName);
+                        if(target instanceof RefObject) {
+                      	  	this.setValue(
+                      	  		valueHolder, 
+                      	  		target, 
+                      	  		featureName, 
+                      	  		mappedNewValues, 
+                      	  		app
+                      	  	);
                         }
+                        else {
+                            values.clear();
+                            values.addAll(mappedNewValues);
+                        }
+                        modifiedFeatures.add(featureName);
                       }
                     }
-        
+
                     // boolean
                     else if(valueHolder instanceof BooleanValue) {
-                      SysLog.trace("Boolean: " + feature.getLabel() + "=" + Arrays.asList((Object[])parameterMap.get(key)));
         
                       // single-valued
                       if(valueHolder.isSingleValued()) {
@@ -1604,26 +1499,20 @@ public class DefaultPortalExtension
                                 app.getTexts().getTrueText().equals(newValues.get(0)))
                             );
                         if(target instanceof RefObject) {
-                        	boolean isModified = !DefaultPortalExtension.areEqual(
-                        		this.getValue(
-	                        		valueHolder, 
-	                        		target, 
-	                        		featureName, 
-	                        		app
-	                        	),
-                                mappedNewValue
-                          );
-                          SysLog.trace("modify feature", featureName + "=" + isModified);
-                          if(isModified) {
-                        	  this.setValue(
-                        		  valueHolder, 
-                        		  target, 
-                        		  featureName, 
-                        		  mappedNewValue, 
-                        		  app
-                        	  );
-                              modifiedFeatures.add(featureName);
-                          }
+                        	Object value = this.getValue(
+                        		valueHolder, 
+                        		target, 
+                        		featureName, 
+                        		app
+                        	);
+                    		this.setValue(
+                    			valueHolder, 
+                    			target,
+                    			featureName, 
+                    			value instanceof Collection ? Collections.singletonList(mappedNewValue) : mappedNewValue, 
+                    			app
+                    		);
+                    		modifiedFeatures.add(featureName);
                         }
                         else {
                             targetAsValueMap(target).put(
@@ -1666,41 +1555,32 @@ public class DefaultPortalExtension
                                 )
                             );
                         }
-                        boolean isModified = !DefaultPortalExtension.areEqual(
-                            values,
-                            mappedNewValues
-                        );
-                        SysLog.trace("modify feature", featureName + "=" + isModified);
-                        if(isModified) {
-                            if(target instanceof RefObject) {
-                          	  this.setValue(
-                        		  valueHolder, 
-                        		  target, 
-                        		  featureName, 
-                        		  mappedNewValues, 
-                        		  app
-                        	  );
-                            }
-                            else {
-                                values.clear();
-                                values.addAll(mappedNewValues);
-                            }
-                            modifiedFeatures.add(featureName);
+                        if(target instanceof RefObject) {
+                        	this.setValue(
+                        		valueHolder, 
+                        		target, 
+                        		featureName, 
+                        		mappedNewValues, 
+                        		app
+                        	);
                         }
+                        else {
+                            values.clear();
+                            values.addAll(mappedNewValues);
+                        }
+                        modifiedFeatures.add(featureName);
                       }
                     }
-        
+
                     // binary
                     else if(valueHolder instanceof BinaryValue) {
-                      SysLog.trace("Binary: " + feature.getLabel());
                       String fileNameInfo = app.getTempFileName("" + key, ".INFO");
         
                       // single-valued
                       if(valueHolder.isSingleValued()) {
         
                         // reset value to null
-                        if(newValues.size() == 0) {
-                          SysLog.trace("reset to null");
+                        if(newValues.isEmpty()) {
         
                           // reset bytes
                           try {
@@ -1763,7 +1643,6 @@ public class DefaultPortalExtension
         
                         // get binary stream and store
                         else {
-                          SysLog.trace("modify feature", featureName + "=true");
                           modifiedFeatures.add(featureName);
         
                           boolean uploadStreamValid = true;
@@ -1995,7 +1874,6 @@ public class DefaultPortalExtension
     		lookupType,
     		compositionHierarchy
     	);
-    	SysLog.trace("composition hierarchy", compositionHierarchy);        
     	RefObject_1_0 objectToShow = null;        
     	// get object to show. This is the first object which is member
     	// of the composition hierarchy of the referenced object.
@@ -2298,17 +2176,264 @@ public class DefaultPortalExtension
     }
 
     //-------------------------------------------------------------------------
+	/* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getNewUserRole(org.openmdx.portal.servlet.ApplicationContext, org.openmdx.base.naming.Path)
+     */
+    @Override
+    public String getNewUserRole(
+    	ApplicationContext app, 
+    	Path requestedObjectIdentity
+    ) {
+    	// Return new user role depending on the segment name of the requested object: principal@segment.
+	    return app.getCurrentUserRole().substring(0, app.getCurrentUserRole().indexOf("@") + 1) + requestedObjectIdentity.get(4);
+    }
+
+    //-------------------------------------------------------------------------
+	/* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getGridActions(org.openmdx.portal.servlet.view.Grid)
+     */
+    @Override
+    public List<Action> getGridActions(
+    	ObjectView view,
+    	Grid grid
+    ) throws ServiceException {
+    	return Collections.<Action>emptyList();
+    }
+    
+    //-------------------------------------------------------------------------
+	/* (non-Javadoc)
+     * @see org.openmdx.portal.servlet.PortalExtension_1_0#getActionFactory()
+     */
+    @Override
+    public ActionFactory_1_0 getActionFactory(
+    ) {
+    	return this.actionFactory;
+    }
+
+    //-------------------------------------------------------------------------
+    @Override
+    public boolean checkPrincipal(
+        Path realmIdentity,
+        String principalName,
+        PersistenceManager pm
+    ) throws ServiceException {
+    	return false;
+    }
+    
+    //-------------------------------------------------------------------------
+    /**
+     * Return set of roles for specified principal in given realm.
+     * This role mapper is based on the openMDX/Security model. 
+     */
+    @Override
+    public List<String> getUserRoles(
+        Path realmIdentity,
+        String principalName,
+        PersistenceManager pm
+    )  throws ServiceException {
+    	return Collections.emptyList();
+    }
+
+    //-----------------------------------------------------------------------
+    @Override
+    public String getAdminPrincipal(
+        String realmName
+    ) {
+        return ADMIN_PRINCIPAL_PREFIX + realmName;
+    }
+  
+    //-----------------------------------------------------------------------
+    @Override
+    public boolean isRootPrincipal(
+        String principalName
+    ) {
+        return principalName.startsWith(ROOT_PRINCIPAL_NAME);
+    }
+    
+    //-------------------------------------------------------------------------
+    @Override
+    public void setLastLoginAt(
+    	Path realmIdentity,
+    	String segmentName,
+    	String principalName,
+    	PersistenceManager pm    	
+    ) throws ServiceException {
+    	// no op
+    }
+    
+    //-------------------------------------------------------------------------
+    @Override
+    public String getAutostartUrl(
+    	ApplicationContext app
+    ) {
+        return app.getSettings().getProperty(UserSettings.AUTOSTART_URL);
+    }
+
+    //-------------------------------------------------------------------------
+    public static class DefaultConditionParser implements ConditionParser {
+
+		private int offset;
+    	private final ValuedField field;
+    	private final Condition defaultCondition;
+		
+    	public DefaultConditionParser(
+        	final ValuedField field,
+        	final Condition defaultCondition
+        ) {
+    		this.offset = 0;
+    		this.field = field;
+    		this.defaultCondition = defaultCondition;
+    	}
+		
+    	@Override
+    	public Condition parse(
+    		String token
+    	) {
+    		String feature = field.getFeatureName();
+    		if(token.startsWith(">=")) {
+    			this.offset = 2;
+    			return
+    				new IsGreaterOrEqualCondition(
+    					Quantifier.THERE_EXISTS,
+    					feature,
+    					true,
+    					(Object[])null
+    				);
+    		}
+    		else if(token.startsWith("<=")) {
+    			this.offset = 2;
+    			return new IsGreaterCondition(
+    				Quantifier.THERE_EXISTS,
+    				feature,
+    				false,
+    				(Object[])null
+    			);
+    		}
+    		else if(token.startsWith("<>")) {
+    			this.offset = 2;
+    			return new IsInCondition(
+    				Quantifier.THERE_EXISTS,
+    				feature,
+    				false,
+    				(Object[])null
+    			);
+    		}
+    		else if(token.startsWith("<")) {
+    			this.offset = 1;
+    			return new IsGreaterOrEqualCondition(
+    				Quantifier.THERE_EXISTS,
+    				feature,
+    				false,
+    				(Object[])null
+    			);
+    		}
+    		else if(token.startsWith(">")) {
+    			this.offset = 1;
+    			return new IsGreaterCondition(
+    				Quantifier.THERE_EXISTS,
+    				feature,
+    				true,
+    				(Object[])null
+    			);
+    		}
+    		else if(token.startsWith("*")) {
+    			this.offset = 1;
+    			return new SoundsLikeCondition(
+    				Quantifier.THERE_EXISTS,
+    				feature,
+    				true,
+    				(Object[])null
+    			);
+    		}
+    		else if(token.startsWith("!*")) {
+    			this.offset = 2;
+    			return new SoundsLikeCondition(
+    				Quantifier.THERE_EXISTS,
+    				feature,
+    				false,
+    				(Object[])null
+    			);
+    		}
+    		else if(token.startsWith("%")) {
+    			this.offset = 1;
+    			return new IsLikeCondition(
+    				Quantifier.THERE_EXISTS,
+    				feature,
+    				true,
+    				(Object[])null
+    			);
+    		}
+    		else if(token.startsWith("!%")) {
+    			this.offset = 2;
+    			return new IsLikeCondition(
+    				Quantifier.THERE_EXISTS,
+    				feature,
+    				false,
+    				(Object[])null
+    			);
+    		}
+    		else if(token.startsWith("=")) {
+    			this.offset = 1;
+    			return new IsInCondition(
+    				Quantifier.THERE_EXISTS,
+    				feature,
+    				true,
+    				(Object[])null
+    			);
+    		}
+    		else if(token.startsWith("!=")) {
+    			this.offset = 2;
+    			return new IsInCondition(
+    				Quantifier.THERE_EXISTS,
+    				feature,
+    				false,
+    				(Object[])null
+    			);
+    		}
+    		else {
+    			this.offset = 0;
+    			return this.defaultCondition;
+    		}
+    	}
+
+    	@Override
+    	public int getOffset(
+    	) {
+    		return this.offset;
+    	}
+
+    }
+
+    //-------------------------------------------------------------------------
+    @Override
+    public ConditionParser getConditionParser(
+    	final ValuedField field,
+    	final Condition defaultCondition
+    ) {
+    	return new DefaultConditionParser(
+    		field,
+    		defaultCondition
+    	);
+    }
+
+    //-------------------------------------------------------------------------
+    // Members
+    //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3690195425844146744L;
 
     protected static final Set<String> WELL_KNOWN_PROTOCOLS = 
         new HashSet<String>(Arrays.asList("http:/", "https:/", "Outlook:", "file:/"));
       
+    public static final String ADMIN_PRINCIPAL_PREFIX = "admin-";
+    public static final String ROOT_REALM_NAME = "Root";
+    public static final String ROOT_PRINCIPAL_NAME = ADMIN_PRINCIPAL_PREFIX + ROOT_REALM_NAME;
+    
     /**
      * A lazy initialized DatatypeFactory instance
      */
     private static DatatypeFactory datatypeFactory = null;
 
-    /**
+    /**.
      * @return a Datatype Factory Instance
      */
     protected static synchronized DatatypeFactory xmlDatatypeFactory(
@@ -2321,6 +2446,8 @@ public class DefaultPortalExtension
         }
         return DefaultPortalExtension.datatypeFactory;
     }
+    
+    private DefaultActionFactory actionFactory = new DefaultActionFactory();
     
 }
 

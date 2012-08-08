@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestDatatypes.java,v 1.9 2010/11/10 16:54:57 hburger Exp $
+ * Name:        $Id: TestDatatypes.java,v 1.16 2011/12/11 17:01:29 hburger Exp $
  * Description: Test Oracle
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/10 16:54:57 $
+ * Date:        $Date: 2011/12/11 17:01:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,11 +51,20 @@
 package test.openmdx.datatypes1;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -65,10 +74,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.UUID;
 
+import javax.jdo.FetchPlan;
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
+import javax.jdo.Query;
 import javax.jdo.Transaction;
 import javax.naming.NamingException;
 import javax.naming.spi.NamingManager;
@@ -88,6 +100,8 @@ import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.state2.spi.Order;
+import org.w3c.cci2.ImmutableDatatype;
 import org.w3c.format.DateTimeFormat;
 import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi2.Datatypes;
@@ -190,13 +204,28 @@ public class TestDatatypes  {
         this.values[2][VALUE8] = datatypeFactory.newXMLGregorianCalendarDate(2006,DatatypeConstants.DECEMBER,01,DatatypeConstants.FIELD_UNDEFINED);
         this.values[2][VALUE9] = new URI("mailto:info@openmdx.org");
         this.values[2][VALUE10] = new byte[]{};
-        this.values[2][VALUE11A] = datatypeFactory.newDurationYearMonth("-P12Y6M");
-        this.values[2][VALUE11B] = datatypeFactory.newDurationDayTime("-P5DT4H3M2.010S");
-        this.values[2][VALUE11a] = datatypeFactory.newDurationYearMonth("-P150M");
-        this.values[2][VALUE11b] = datatypeFactory.newDurationDayTime("-PT446582.010S");
+        this.values[2][VALUE11a] = datatypeFactory.newDurationYearMonth("-P12Y6M");
+        this.values[2][VALUE11b] = datatypeFactory.newDurationDayTime("-P5DT4H3M2.010S");
+        this.values[2][VALUE11A] = datatypeFactory.newDurationYearMonth("-P150M");
+        this.values[2][VALUE11B] = datatypeFactory.newDurationDayTime("-PT446582.010S");
         System.out.println("Acquiring persistence manager factory...");
     }
 
+    @Test
+    public void testCR20019941() throws IOException, ClassNotFoundException{
+        XMLGregorianCalendar original = Datatypes.create(XMLGregorianCalendar.class, "20000401");
+        assertTrue("Date is immutable", original instanceof ImmutableDatatype<?>);
+        XMLGregorianCalendar copy = copy(original);
+        assertNotSame("Immutable date gets mutable", original.getClass(), copy.getClass());
+        assertFalse("A Date's copy is mutable", copy instanceof ImmutableDatatype<?>);
+        assertEquals("2000-04-01", copy.toXMLFormat());
+        original = (XMLGregorianCalendar) original.clone();
+        assertFalse("A Date's clone is mutable", original instanceof ImmutableDatatype<?>);
+        copy = copy(original);
+        assertEquals("2000-04-01", copy.toXMLFormat());
+        assertSame("Mutable date remains the mutable", original.getClass(), copy.getClass());
+    }
+    
     @Test
     public void testDate(){
         XMLGregorianCalendar firstOfApril = DatatypeFactories.immutableDatatypeFactory().toDate(
@@ -309,7 +338,6 @@ public class TestDatatypes  {
         }
     }
 
-    @Ignore // TODO re-activate  
     @Test
     public void testNative(
     ) throws Exception{
@@ -324,17 +352,82 @@ public class TestDatatypes  {
         }
     }
 
-//    @Test
-//    public void testVolatile(
-//    ) throws Exception{
-//        try {
-//            storeDatatypes("Volatile", "Native");
-//            retrieveDatatypes("Volatile", "Native");
-//        } catch(Exception exception) {
-//            SysLog.error("Exception", exception);
-//            throw exception;
-//        }
-//    }
+    @Test
+    public void testCR10009964() throws Exception{
+        storeBulk(
+            "Persistent", 
+            "Bulk", 
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-08T20:00:09.000Z"), 
+            60000L, // 60 s
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-09T23:59:59.999Z"),
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-08"), // Tue Sep 08 2009
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-10") // Thu Sep 10 2009
+        );
+        validateBulk(
+            "Persistent", 
+            "Bulk", 
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-08T22:00:00.000Z"), // Wed Sep 09 00:00:00 CEST 2009 
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-09T21:59:59.000Z"), // Wed Sep 09 23:59:59 CEST 2009
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
+            24 * 60 / 3,
+            Integer.valueOf(FetchPlan.FETCH_SIZE_OPTIMAL)
+        );
+        validateBulk(
+            "Persistent", 
+            "Bulk", 
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-08T22:00:00.000Z"), // Wed Sep 09 00:00:00 CEST 2009 
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-09T21:59:59.000Z"), // Wed Sep 09 23:59:59 CEST 2009
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
+            24 * 60 / 3,
+            Integer.valueOf(500000)
+        );
+        validateBulk(
+            "Persistent", 
+            "Bulk", 
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-08T22:00:00.000Z"), // Wed Sep 09 00:00:00 CEST 2009 
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-09T21:59:59.000Z"), // Wed Sep 09 23:59:59 CEST 2009
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
+            24 * 60 / 3,
+            Integer.valueOf(13)
+        );
+        validateBulk(
+            "Persistent", 
+            "Bulk", 
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-08T22:00:00.000Z"), // Wed Sep 09 00:00:00 CEST 2009 
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-09T21:59:59.000Z"), // Wed Sep 09 23:59:59 CEST 2009
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
+            24 * 60 / 3,
+            Integer.valueOf(FetchPlan.FETCH_SIZE_GREEDY)
+        );
+        validateBulk(
+            "Persistent", 
+            "Bulk", 
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-08T22:00:00.000Z"), // Wed Sep 09 00:00:00 CEST 2009 
+            DateTimeFormat.EXTENDED_UTC_FORMAT.parse("2009-09-09T21:59:59.000Z"), // Wed Sep 09 23:59:59 CEST 2009
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
+            Datatypes.create(XMLGregorianCalendar.class, "2012-09-09"), // Wed Sep 09 2009
+            24 * 60 / 3,
+            null
+        );
+    }
+
+    @Ignore
+    @Test
+    public void testVolatile(
+    ) throws Exception{
+        try {
+            storeDatatypes("Volatile", "Native");
+            retrieveDatatypes("Volatile", "Native");
+        } catch(Exception exception) {
+            SysLog.error("Exception", exception);
+            throw exception;
+        }
+    }
 
     /**
      * Clear and Populate
@@ -358,7 +451,7 @@ public class TestDatatypes  {
         Datatypes1Package datatypes1Package = (Datatypes1Package) 
         authority.refOutermostPackage().refPackage("test:openmdx:datatypes1");
         //
-        // Reset workshop1 segment
+        // Reset datatypes1 segment
         //
         Provider provider = authority.getProvider(providerName);
         System.out.println("Creating datatypes1 Segment...");
@@ -373,7 +466,7 @@ public class TestDatatypes  {
         provider.addSegment(false, segmentName, segment);
         unitOfWork.commit();
         //
-        // Populate state1 segment
+        // Populate datatypes1 segment
         //
         unitOfWork.begin();
         for(
@@ -383,11 +476,132 @@ public class TestDatatypes  {
         ){
             NonStated nonStated = datatypes1Package.getNonStated().createNonStated();
             setData(nonStated, this.values[i]);
+            nonStated.setSegment(segment);
             segment.addNonStated(false, String.valueOf(i), nonStated);
         }
         unitOfWork.commit();
     }
 
+    /**
+     * Clear and Populate
+     * 
+     * @param providerName
+     * @param segmentName
+     * @param begin the begin of the period to be filled with entries
+     * @param step the "distance" between entries
+     * @param end the end of the period to be filled with entries
+     * @throws Exception
+     */
+    protected void storeBulk(
+        String providerName, 
+        String segmentName, 
+        Date begin, 
+        long step, 
+        Date end,
+        XMLGregorianCalendar... dates
+    ) throws Exception {
+        System.out.println("Acquire persistence manager...");
+        PersistenceManager persistenceManager = entityManagerFactory.getPersistenceManager();
+        Transaction unitOfWork = persistenceManager.currentTransaction();
+        Authority authority = (Authority) persistenceManager.getObjectById(
+            Authority.class,
+            Datatypes1Package.AUTHORITY_XRI
+        );
+        Datatypes1Package datatypes1Package = (Datatypes1Package) 
+        authority.refOutermostPackage().refPackage("test:openmdx:datatypes1");
+        //
+        // Reset datatypes1 segment
+        //
+        Provider provider = authority.getProvider(providerName);
+        System.out.println("Creating datatypes1 Segment...");
+        Segment segment = (Segment) provider.getSegment(segmentName);
+        if(segment != null) {
+            unitOfWork.begin();
+            segment.refDelete();
+            unitOfWork.commit();
+        }
+        unitOfWork.begin();
+        segment = datatypes1Package.getSegment().createSegment();
+        provider.addSegment(false, segmentName, segment);
+        unitOfWork.commit();
+        //
+        // Populate datatypes1 segment
+        //
+        unitOfWork.begin();
+        int i = 0;
+        for(
+            Date d =  begin;
+            d.compareTo(end) <= 0;
+            d = new Date(d.getTime() + step)
+        ){
+            NonStated nonStated = datatypes1Package.getNonStated().createNonStated();
+            setData(nonStated, this.values[0]);
+            nonStated.setValue7(d);
+            if(dates != null & dates.length > 0) {
+                nonStated.setValue8(dates[i++ % dates.length]);
+            }
+            nonStated.setSegment(segment);
+            segment.addNonStated(true, UUID.randomUUID().toString(), nonStated);
+        }
+        unitOfWork.commit();
+    }
+
+    /**
+     * Count
+     * 
+     * @param providerName
+     * @param segmentName
+     * @param dateTimeLowerBound the lower bound of the date/time selection
+     * @param dateTimeUpperBound the upper bound of the date/time selection
+     * @param dateLowerBound the lower bound of the date selection
+     * @param dateUpperBound the upper bound of the date selection
+     * @param expectedCount the expected number of entries in the selection
+     * @param fetchSize the fetch size to be used, full segment scan if <code>null</code>
+     * 
+     * @throws Exception
+     */
+    protected void validateBulk(
+        String providerName, 
+        String segmentName,
+        Date dateTimeLowerBound,
+        Date dateTimeUpperBound,
+        XMLGregorianCalendar dateLowerBound,
+        XMLGregorianCalendar dateUpperBound,
+        int expectedCount,
+        Integer fetchSize
+    ) throws Exception {
+        System.out.println("Acquire persistence manager...");
+        PersistenceManager persistenceManager = entityManagerFactory.getPersistenceManager();
+        Authority authority = (Authority) persistenceManager.getObjectById(
+            Authority.class,
+            Datatypes1Package.AUTHORITY_XRI
+        );
+        Provider provider = authority.getProvider(providerName);
+        System.out.println("Creating datatypes1 Segment...");
+        Segment segment = (Segment) provider.getSegment(segmentName);
+        int actualCount;
+        if(fetchSize == null) {
+            actualCount = 0;
+            for(NonStated nonStated : segment.<NonStated>getNonStated()) {
+                Date value7 = nonStated.getValue7();
+                XMLGregorianCalendar value8 = nonStated.getValue8();
+                if(
+                    Order.compareValidFrom(value7, dateTimeLowerBound) >= 0 && Order.compareInvalidFrom(value7, dateTimeUpperBound) <= 0 &&
+                    Order.compareValidFrom(value8, dateLowerBound) >= 0 && Order.compareValidTo(value8, dateUpperBound) <= 0
+                ) {
+                    actualCount++;
+                }
+            }
+        } else {
+            NonStatedQuery query = (NonStatedQuery) persistenceManager.newQuery(NonStated.class);
+            query.value7().between(dateTimeLowerBound, dateTimeUpperBound);
+            query.value8().between(dateLowerBound, dateUpperBound);
+            ((Query)query).getFetchPlan().setFetchSize(fetchSize.intValue());
+            actualCount = segment.getNonStated(query).size();
+        }
+        assertEquals("Number of entries in the range [" + DateTimeFormat.BASIC_UTC_FORMAT.format(dateTimeLowerBound) + ".." + DateTimeFormat.BASIC_UTC_FORMAT.format(dateTimeUpperBound) + "]", expectedCount, actualCount);
+    } 
+    
     /**
      * Clear and Populate
      * 
@@ -408,7 +622,7 @@ public class TestDatatypes  {
             Datatypes1Package.AUTHORITY_XRI
         );
         //
-        // Reset workshop1 segment
+        // Reset datatypes1 segment
         //
         Provider provider = authority.getProvider(providerName);
         System.out.println("Creating datatypes1 Segment...");
@@ -442,7 +656,7 @@ public class TestDatatypes  {
             Datatypes1Package.AUTHORITY_XRI
         );
         //
-        // Reset workshop1 segment
+        // Reset datatypes1 segment
         //
         Provider provider = authority.getProvider(providerName);
         System.out.println("Creating datatypes1 Segment...");
@@ -500,11 +714,11 @@ public class TestDatatypes  {
             Datatypes1Package.AUTHORITY_XRI
         );
         //
-        // Reset workshop1 segment
+        // Reset datatypes1 segment
         //
         Provider provider = authority.getProvider(providerName);
         Datatypes1Package datatypes1Package = (Datatypes1Package) authority.refOutermostPackage().refPackage("test:openmdx:datatypes1");
-        System.out.println("Validating state1 Segment...");
+        System.out.println("Validating datatypes1 Segment...");
         Segment segment = (Segment) provider.getSegment(segmentName);
         for(
             int i = 0;
@@ -631,7 +845,17 @@ public class TestDatatypes  {
             70, // minutes
             0 // seconds
         );
-        System.out.println("70 min: " + t);
+        assertEquals("70 min", "P0Y0M0DT0H70M0S", t.toString());
     }
 
+    private <T> T copy(T t) throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        ObjectOutput target = new ObjectOutputStream(buffer);
+        target.writeObject(t);
+        ObjectInput source = new ObjectInputStream(
+            new ByteArrayInputStream(buffer.toByteArray())
+        );
+        return (T) source.readObject();
+    }
+    
 }

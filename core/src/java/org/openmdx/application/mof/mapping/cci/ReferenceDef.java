@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ReferenceDef.java,v 1.4 2009/06/09 12:45:18 hburger Exp $
- * Description: VelocityReferenceDef class
- * Revision:    $Revision: 1.4 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: ReferenceDef.java,v 1.8 2011/10/28 18:13:09 hburger Exp $
+ * Description: ReferenceDef class
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2011/10/28 18:13:09 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
  */
 package org.openmdx.application.mof.mapping.cci;
 
@@ -55,31 +54,27 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 
-@SuppressWarnings("unchecked")
-public class ReferenceDef 
-  extends StructuralFeatureDef {
+@SuppressWarnings({"rawtypes","unchecked"})
+public class ReferenceDef extends StructuralFeatureDef {
 
-    /**
-     * Constructor 
-     *
-     * @param referenceDef
-     * @param model
-     * @param openmdx1
-     * @throws ServiceException
-     */
+  /**
+   * Constructor 
+   *
+   * @param referenceDef
+   * @param model
+   * @throws ServiceException
+   */
   public ReferenceDef(
     ModelElement_1_0 referenceDef,
-    Model_1_0 model, 
-    boolean openmdx1
+    Model_1_0 model
   ) throws ServiceException {
       this(
           referenceDef,
           model,
-          openmdx1,
           getAssociationDef(referenceDef, model)
       );
   }
@@ -89,14 +84,12 @@ public class ReferenceDef
    *
    * @param referenceDef
    * @param model
-   * @param openmdx1
    * @param associationDef
    * @throws ServiceException
    */
   private ReferenceDef(
       ModelElement_1_0 referenceDef,
       Model_1_0 model, 
-      boolean openmdx1,
       ModelElement_1_0 associationDef
   ) throws ServiceException {
       this(
@@ -111,7 +104,6 @@ public class ReferenceDef
           getQualifierTypeName(referenceDef, model, "referencedEnd"),
           (Boolean)referenceDef.objGetValue("isChangeable"),
           model.referenceIsDerived(referenceDef),
-          true,
           getExposedEndName(referenceDef, model),
           getExposedEndQualifiedTypeName(referenceDef, model),
           getQualifierName(referenceDef, model, "exposedEnd"),
@@ -123,7 +115,7 @@ public class ReferenceDef
           isShared(referenceDef, model) 
         );
   }
-  
+
   /**
    * Constructor 
    *
@@ -138,7 +130,6 @@ public class ReferenceDef
    * @param qualifiedQualifierTypeName
    * @param isChangeable
    * @param isDerived
-   * @param openmdx1
    * @param exposedEndName
    * @param exposedEndQualifiedTypeName
    * @param exposedEndQualifierName
@@ -161,12 +152,11 @@ public class ReferenceDef
       String qualifiedQualifierTypeName,
       Boolean isChangeable,
       Boolean isDerived, 
-      boolean openmdx1,
       String exposedEndName,
-      String exposedEndQualifiedTypeName, 
+      String exposedEndQualifiedTypeName,
       String exposedEndQualifierName, 
       String exposedEndQualifiedQualifierTypeName, 
-      String referencedEndQualifiedTypeName,
+      String referencedEndQualifiedTypeName, 
       String associationName,
       String qualifiedAssociationName,
       boolean composite,
@@ -283,10 +273,7 @@ public class ReferenceDef
     ModelElement_1_0 referenceDef,
     Model_1_0 model
   ) throws ServiceException {
-    ModelElement_1_0 exposedEnd = model.getElement(
-      referenceDef.objGetValue("referencedEnd")
-    );
-    return AggregationKind.COMPOSITE.equals(exposedEnd.objGetValue("aggregation"));
+      return ModelHelper.isCompositeEnd(referenceDef, false);
   }
   
   //-------------------------------------------------------------------------
@@ -294,10 +281,7 @@ public class ReferenceDef
       ModelElement_1_0 referenceDef,
       Model_1_0 model
     ) throws ServiceException {
-      ModelElement_1_0 exposedEnd = model.getElement(
-        referenceDef.objGetValue("referencedEnd")
-      );
-      return AggregationKind.SHARED.equals(exposedEnd.objGetValue("aggregation"));
+      return ModelHelper.isSharedEnd(referenceDef, false);
     }
   
   //-------------------------------------------------------------------------

@@ -2,7 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
-@SuppressWarnings({"serial","unchecked"})
+@SuppressWarnings({"serial","rawtypes"})
 public final class VisibilityKindEnum implements VisibilityKind {
     public static final VisibilityKindEnum PUBLIC_VIS = new VisibilityKindEnum("public_vis");
     public static final VisibilityKindEnum PROTECTED_VIS = new VisibilityKindEnum("protected_vis");

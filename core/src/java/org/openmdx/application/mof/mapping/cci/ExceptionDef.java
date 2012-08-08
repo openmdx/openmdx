@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ExceptionDef.java,v 1.4 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: ExceptionDef.java,v 1.5 2011/03/25 14:16:24 hburger Exp $
  * Description: VelocityExceptionDef class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2011/03/25 14:16:24 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,7 +63,6 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.exception.BasicException;
 
-@SuppressWarnings("unchecked")
 public class ExceptionDef 
 extends FeatureDef {
 
@@ -76,7 +75,7 @@ extends FeatureDef {
             mapName((String)exceptionDef.objGetValue("name")),
             (String)exceptionDef.objGetValue("qualifiedName"),
             (String)exceptionDef.objGetValue("annotation"),
-            new HashSet(exceptionDef.objGetList("stereotype")),
+            new HashSet<Object>(exceptionDef.objGetList("stereotype")),
             (String)exceptionDef.objGetValue("visibility"),
             getParameters(exceptionDef, model)
         );
@@ -90,19 +89,19 @@ extends FeatureDef {
     }
 
     //-------------------------------------------------------------------------
-    private static List getParameters(
+    private static List<AttributeDef> getParameters(
         ModelElement_1_0 exceptionDef,
         Model_1_0 model 
     ) throws ServiceException {  
 
-        HashMap params = new HashMap();
+        HashMap<String,ModelElement_1_0> params = new HashMap<String,ModelElement_1_0>();
         for(
-            Iterator i = exceptionDef.objGetList("content").iterator();
+            Iterator<?> i = exceptionDef.objGetList("content").iterator();
             i.hasNext();
         ) {
             ModelElement_1_0 param = model.getElement(i.next());
             params.put(
-                param.objGetValue("name"),
+                (String)param.objGetValue("name"),
                 param
             );
         }
@@ -117,11 +116,11 @@ extends FeatureDef {
         }
         // set exeption parameters (as attributes)
         ModelElement_1_0 inParamType = model.getElementType(
-            ((ModelElement_1_0)params.get("in"))
+            params.get("in")
         );
-        List parameters = new ArrayList();
+        List<AttributeDef> parameters = new ArrayList<AttributeDef>();
         for(
-            Iterator i = inParamType.objGetList("content").iterator();
+            Iterator<?> i = inParamType.objGetList("content").iterator();
             i.hasNext();
         ) {
             ModelElement_1_0 field = model.getElement(i.next());
@@ -142,9 +141,9 @@ extends FeatureDef {
         String name,
         String qualifiedName,
         String annotation,
-        Set stereotype,
+        Set<?> stereotype,
         String visibility,
-        List parameters
+        List<AttributeDef> parameters
     ) {
         super(
             name, 
@@ -157,7 +156,7 @@ extends FeatureDef {
     }
 
     //-------------------------------------------------------------------------
-    public List getParameters(
+    public List<AttributeDef> getParameters(
     ) {
         return this.parameters;
     }
@@ -165,6 +164,6 @@ extends FeatureDef {
     //-------------------------------------------------------------------------
     // Variables
     //-------------------------------------------------------------------------
-    private final List parameters;
+    private final List<AttributeDef> parameters;
 
 }

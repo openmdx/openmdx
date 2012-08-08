@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightDeploymentManager.java,v 1.6 2010/04/09 09:33:38 hburger Exp $
+ * Name:        $Id: LightweightDeploymentManager.java,v 1.7 2011/06/21 22:55:06 hburger Exp $
  * Description: Lightweight Deployment Manager
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/09 09:33:38 $
+ * Date:        $Date: 2011/06/21 22:55:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,7 +61,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.enterprise.deploy.model.DeployableObject;
 import javax.enterprise.deploy.shared.ActionType;
@@ -85,7 +84,7 @@ import javax.enterprise.deploy.spi.status.ProgressObject;
 import org.openmdx.kernel.application.container.lightweight.LightweightContainer;
 import org.openmdx.kernel.application.deploy.spi.Report;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.url.URLInputStream;
 
 /**
@@ -108,8 +107,6 @@ public class LightweightDeploymentManager implements DeploymentManager {
 
 	private Locale locale;
 
-	private final Logger logger = LoggerFactory.getLogger();
-	
 	final LightweightContainer.Mode mode;
 	
 	private final Target[] targets; 
@@ -432,13 +429,13 @@ public class LightweightDeploymentManager implements DeploymentManager {
 					Object[] logParameters = new Object[]{resourceAdapter.getKey(),report};
 					if(report.isSuccess()){
 						completed.add(moduleIDList[resourceAdapter.getKey()]);
-						this.logger.log(
+						SysLog.log(
 							Level.INFO,
 							"Deployment of resource adapter {0} succeeded: {1}",
 							logParameters
 						);
 					} else {
-						this.logger.log(
+						SysLog.log(
 							Level.INFO,
 							"Deployment of resource adapter {0} failed: {1}",
 							logParameters
@@ -449,21 +446,21 @@ public class LightweightDeploymentManager implements DeploymentManager {
 					Report[] reports = lightweightContainer.deployApplication(application.getValue());
 					Object[] logParameters = new Object[]{application.getKey(),reports[0]}; 
 					if(reports[0].isSuccess()){
-						this.logger.log(
+						SysLog.log(
 							Level.INFO,
 							"Deployment of enterprise application {0} succeeded: {1}",
 							logParameters
 							
 						);
 					} else {
-						this.logger.log(
+						SysLog.log(
 							Level.WARNING,
 							"Deployment of enterprise application {0} failed: {1}",
 							logParameters
 						);
 					}
 					for(int i = 1; i < reports.length; i++) {
-						this.logger.log(Level.INFO,"Module {0}: {1}", new Object[]{i, reports[i]});
+						SysLog.log(Level.INFO,"Module {0}: {1}", new Object[]{i, reports[i]});
 					}
 				}
 				return new Progress(
@@ -473,7 +470,7 @@ public class LightweightDeploymentManager implements DeploymentManager {
 					completed.toArray(new TargetModuleID[completed.size()])							
 				);
 			} catch (Exception exception) {
-                this.logger.log(
+                SysLog.log(
                     Level.WARNING,
                     "Could not start target",
                     BasicException.newStandAloneExceptionStack(

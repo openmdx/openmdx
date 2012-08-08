@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ModelUtils.java,v 1.5 2010/09/21 16:02:24 hburger Exp $
+ * Name:        $Id: ModelUtils.java,v 1.6 2011/07/01 16:16:42 hburger Exp $
  * Description: ModelUtils
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/21 16:02:24 $
+ * Date:        $Date: 2011/07/01 16:16:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2006-2008, OMEX AG, Switzerland
+ * Copyright (c) 2006-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,9 +53,12 @@ package org.openmdx.base.mof.spi;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.ModelHelper;
 
+/**
+ * @deprecated use ModelHelper
+ */
+ @Deprecated
 public class ModelUtils {
 
     /**
@@ -67,32 +70,14 @@ public class ModelUtils {
      * @return the featur's multiplicity
      * 
      * @throws ServiceException
+     * 
+     * @deprecated use {@link ModelHelper#getMultiplicity(ModelElement_1_0)}
      */
+    @Deprecated
     public static String getMultiplicity(
         ModelElement_1_0 featureDef
     ) throws ServiceException{
-        Model_1_0 model = featureDef.getModel();
-        String multiplicity = (String) featureDef.objGetValue("multiplicity");
-        if(model.isReferenceType(featureDef)) {
-            ModelElement_1_0 referencedEnd = model.getElement(
-                featureDef.objGetValue("referencedEnd")
-            );
-            if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
-                ModelElement_1_0 qualifierType = model.getDereferencedType(
-                    referencedEnd.objGetValue("qualifierType")
-                );
-                multiplicity = model.isNumericType(qualifierType) ? 
-                    Multiplicities.LIST : 
-                        Multiplicities.MAP;
-            } else if (Multiplicities.MULTI_VALUE.equals(multiplicity)) {
-                // map aggregation none, multiplicity 0..n, no qualifier to
-                // <<set>>
-                // in case <<list>> semantic is required it must be modeled as
-                // aggregation none, multiplicity 0..1, numeric qualifier
-                multiplicity = Multiplicities.SET;
-            }
-        }
-        return multiplicity;
+    	return ModelHelper.getMultiplicity(featureDef).toString();
     }
 
     /**
@@ -103,22 +88,14 @@ public class ModelUtils {
      * @return <code>true</code> if the given feature is derived
      * 
      * @throws ServiceException
+     * 
+     * @deprecated use {@link ModelHelper#isDerived(ModelElement_1_0)}
      */
+    @Deprecated
     public static boolean isDerived(
         ModelElement_1_0 featureDef
     ) throws ServiceException {
-        Model_1_0 model = featureDef.getModel();
-        if(featureDef.isAttributeType()) {
-            return Boolean.TRUE.equals(featureDef.objGetValue("isDerived"));
-        }
-        else if(featureDef.isReferenceType()) {
-            ModelElement_1_0 referencedEnd = model.getElement(featureDef.objGetValue("referencedEnd"));
-            ModelElement_1_0 association = model.getElement(referencedEnd.objGetValue("container"));
-            return Boolean.TRUE.equals(association.objGetValue("isDerived"));
-        }
-        else {
-            return false;
-        }
+    	return ModelHelper.isDerived(featureDef);
     }
     
     /**
@@ -129,18 +106,14 @@ public class ModelUtils {
      * @return <code>true</code> if the given feature is changeable
      * 
      * @throws ServiceException
+     * 
+     * @deprecated use {@link ModelHelper#isChangeable(ModelElement_1_0)}
      */
+    @Deprecated
     public static boolean isChangeable(
         ModelElement_1_0 feature
     ) throws ServiceException{
-        return feature.getModel().isReferenceType(feature) ? (
-            !feature.getModel().referenceIsDerived(feature) 
-        ) : (
-            !((Boolean)feature.objGetValue("isDerived")).booleanValue() && 
-            ((Boolean)feature.objGetValue("isChangeable")).booleanValue()
-        );
+    	return ModelHelper.isChangeable(feature);
     }
 
 }
-
-//--- End of File -----------------------------------------------------------

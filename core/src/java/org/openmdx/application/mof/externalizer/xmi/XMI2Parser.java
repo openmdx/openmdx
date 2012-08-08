@@ -1,17 +1,17 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMI2Parser.java,v 1.8 2010/04/15 16:44:50 wfro Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: XMI2Parser.java,v 1.12 2011/06/10 12:52:37 hburger Exp $
  * Description: XMI2 Parser
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/15 16:44:50 $
+ * Date:        $Date: 2011/06/10 12:52:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,8 +46,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 
 package org.openmdx.application.mof.externalizer.xmi;
@@ -88,12 +88,12 @@ import org.openmdx.application.mof.externalizer.xmi.uml1.UML1Stereotype;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1StructuralFeature;
 import org.openmdx.application.mof.externalizer.xmi.uml1.UML1VisibilityKind;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.kernel.exception.BasicException;
 import org.xml.sax.Attributes;
 import org.xml.sax.Locator;
 import org.xml.sax.XMLReader;
 
 
-@SuppressWarnings("unchecked")
 public class XMI2Parser
     implements XMIParser {
 
@@ -127,7 +127,7 @@ public class XMI2Parser
         String modelUri,
         XMIImporter_1 importer,
         XMIReferenceResolver resolver,
-        Stack scope
+        Stack<String> scope
     ) throws Exception {
 
         this.importer = importer;
@@ -168,12 +168,13 @@ public class XMI2Parser
     //---------------------------------------------------------------------------
     public void startDocument(
     ) {
-        this.elementStack = new Stack();
-        this.associationEnds = new HashMap();
+        this.elementStack = new Stack<UML1ModelElement>();
+        this.associationEnds = new HashMap<String,UML1ModelElement>();
     }
 
     //---------------------------------------------------------------------------
-    public void startElement(
+    @SuppressWarnings("unchecked")
+	public void startElement(
         String namespaceURI,
         String localName,
         String qName,
@@ -316,6 +317,18 @@ public class XMI2Parser
             );
             String memberEnds = atts.getValue("memberEnd");
             String[] memberEndIds = memberEnds.split(" ");
+            if(memberEndIds.length != 2) {
+                ServiceException e0 = new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "Association has invalid ends",
+                    new BasicException.Parameter("association.id", associationDef.getId()),
+                    new BasicException.Parameter("association.name", associationDef.getName()),
+                    new BasicException.Parameter("member ends", memberEnds)
+                );
+                e0.log();
+                this.error("Can not process nested model " + atts.getValue("href") + ". Reason=" + e0.getMessage());                
+            }
             associationDef.setExposedEndId(memberEndIds[0]);
             associationDef.setReferencedEndId(memberEndIds[1]);
             String navigableOwnedEnds = atts.getValue("navigableOwnedEnd");
@@ -376,7 +389,7 @@ public class XMI2Parser
         // returnResult
         else if("returnResult".equals(qName)) {
             if(!this.elementStack.isEmpty()) {
-                UML1ModelElement operationDef = (UML1ModelElement)this.elementStack.peek();
+                UML1ModelElement operationDef = this.elementStack.peek();
                 if(operationDef instanceof UML1Operation) {
                     UML1Parameter parameterDef =
                         new UML1Parameter(
@@ -399,10 +412,10 @@ public class XMI2Parser
         // ownedParameter
         else if("ownedParameter".equals(qName)) {
             if(!this.elementStack.isEmpty()) {
-                UML1ModelElement operationDef = (UML1ModelElement)this.elementStack.peek();
+                UML1ModelElement operationDef = this.elementStack.peek();
                 if(operationDef instanceof UML1Operation) {
                     String name = atts.getValue("name");
-                    Set stereotypes = new HashSet();
+                    Set<String> stereotypes = new HashSet<String>();
                     // openMDX compatibility. Allow stereotypes as prefix for parameter names
                     if((name != null) && (name.indexOf("<<") >= 0) && (name.indexOf(">>") >= 0)) {
                         StringTokenizer tokenizer = new StringTokenizer(name.substring(name.indexOf("<<") + 2, name.indexOf(">>")), " ,");
@@ -438,7 +451,7 @@ public class XMI2Parser
         else if("ownedComment".equals(qName)) {
             String body = atts.getValue("body");
             if(!this.elementStack.isEmpty()) {
-                UML1ModelElement element = (UML1ModelElement)elementStack.peek();
+                UML1ModelElement element = elementStack.peek();
                 if(body != null) {
                     element.getComment().add(
                         body
@@ -450,7 +463,7 @@ public class XMI2Parser
         else if("generalization".equals(qName)) {
             String supertype = resolver.lookupXMIId(atts.getValue("general"));
             if(!this.elementStack.isEmpty()) {
-                UML1ModelElement element = (UML1ModelElement)elementStack.peek();
+                UML1ModelElement element = elementStack.peek();
                 if((supertype != null) && (element instanceof UML1Class)) {
                     ((UML1Class)element).getSuperclasses().add(supertype);
                 }
@@ -472,7 +485,7 @@ public class XMI2Parser
                 }
                 String supertype = resolver.lookupXMIId(id);
                 if(!this.elementStack.isEmpty()) {
-                    UML1ModelElement element = (UML1ModelElement)elementStack.peek();
+                    UML1ModelElement element = elementStack.peek();
                     if((supertype != null) && (element instanceof UML1Class)) {
                         ((UML1Class)element).getSuperclasses().add(supertype);
                     }
@@ -496,7 +509,7 @@ public class XMI2Parser
         // details
         else if("details".equals(qName)) {
             if(!this.elementStack.isEmpty()) {
-                UML1ModelElement element = (UML1ModelElement)elementStack.peek();
+                UML1ModelElement element = elementStack.peek();
                 // Stereotype
                 if(element instanceof UML1Stereotype) {
                     ((UML1Stereotype)element).setDataValue(atts.getValue("key"));
@@ -506,7 +519,7 @@ public class XMI2Parser
         // lowerValue
         else if("lowerValue".equals(qName)) {
             if(!this.elementStack.isEmpty()) {
-                UML1ModelElement element = (UML1ModelElement)elementStack.peek();
+                UML1ModelElement element = elementStack.peek();
                 if(element instanceof UML1StructuralFeature) {
                     UML1StructuralFeature feature = (UML1StructuralFeature)element;
                     if(feature.getMultiplicityRange() == null) {
@@ -532,7 +545,7 @@ public class XMI2Parser
         // upperValue
         else if("upperValue".equals(qName)) {
             if(!this.elementStack.isEmpty()) {
-                UML1ModelElement element = (UML1ModelElement)elementStack.peek();
+                UML1ModelElement element = elementStack.peek();
                 if(element instanceof UML1StructuralFeature) {
                     UML1StructuralFeature feature = (UML1StructuralFeature)element;
                     if(feature.getMultiplicityRange() == null) {
@@ -558,7 +571,7 @@ public class XMI2Parser
         // qualifier
         else if("qualifier".equals(qName)) {
             if(!this.elementStack.isEmpty()) {
-                UML1ModelElement element = (UML1ModelElement)elementStack.peek();
+                UML1ModelElement element = elementStack.peek();
                 if(element instanceof UML1AssociationEnd) {
                     UML1AssociationEnd associationEndDef = (UML1AssociationEnd)element;
                     UML1Attribute qualifier =
@@ -662,7 +675,7 @@ public class XMI2Parser
                     id = id.substring(0, id.indexOf("?"));
                 }
                 if(!this.elementStack.isEmpty()) {
-                    UML1ModelElement element = (UML1ModelElement)this.elementStack.peek();
+                    UML1ModelElement element = this.elementStack.peek();
                     if(element instanceof UML1StructuralFeature) {
                         ((UML1StructuralFeature)element).setType(
                             resolver.lookupXMIId(id)
@@ -685,7 +698,8 @@ public class XMI2Parser
     }
 
     //---------------------------------------------------------------------------
-    public void endElement(
+    @SuppressWarnings("unchecked")
+	public void endElement(
         String namespaceURI,
         String localName,
         String qName
@@ -703,7 +717,7 @@ public class XMI2Parser
                 if(!this.elementStack.isEmpty()) {
                     Object attributeDef = this.elementStack.pop();
                     if(!this.elementStack.isEmpty()) {
-                        UML1ModelElement classDef = (UML1ModelElement)this.elementStack.peek();
+                        UML1ModelElement classDef = this.elementStack.peek();
                         if((classDef instanceof UML1Class) && (attributeDef instanceof UML1Attribute)) {
                             ((UML1Class)classDef).getFeature().add(attributeDef);
                         }
@@ -713,7 +727,7 @@ public class XMI2Parser
             // ownedMember
             else if("packagedElement".equals(qName) || "ownedMember".equals(qName)) {
                 if(!this.elementStack.isEmpty()) {
-                    UML1ModelElement element = (UML1ModelElement)this.elementStack.pop();
+                    UML1ModelElement element = this.elementStack.pop();
                     if(element instanceof UML1Package) {
                         this.importer.processUMLPackage((UML1Package)element);
                     }
@@ -746,10 +760,10 @@ public class XMI2Parser
             // ownedOperation
             else if("ownedOperation".equals(qName)) {
                 if(!this.elementStack.isEmpty()) {
-                    UML1ModelElement operationDef = (UML1ModelElement)this.elementStack.pop();
+                    UML1ModelElement operationDef = this.elementStack.pop();
                     if(operationDef instanceof UML1Operation) {
                         if(!this.elementStack.isEmpty()) {
-                            UML1ModelElement classDef = (UML1ModelElement)this.elementStack.peek();
+                            UML1ModelElement classDef = this.elementStack.peek();
                             if(classDef instanceof UML1Class) {
                                 ((UML1Class)classDef).getFeature().add(
                                     operationDef
@@ -774,7 +788,7 @@ public class XMI2Parser
             // body
             else if("body".equals(qName)) {
                 if(!this.elementStack.isEmpty()) {
-                    UML1ModelElement element = (UML1ModelElement)this.elementStack.peek();
+                    UML1ModelElement element = this.elementStack.peek();
                     if(this.value.length() > 0) {
                     	element.getComment().add(this.value.toString());
                     }
@@ -789,12 +803,12 @@ public class XMI2Parser
             // eAnnotations
             else if("eAnnotations".equals(qName)) {
                 if(!this.elementStack.isEmpty()) {
-                    UML1ModelElement element = (UML1ModelElement)this.elementStack.peek();
+                    UML1ModelElement element = this.elementStack.peek();
                     // apply stereotype to element
                     if(element instanceof UML1Stereotype) {
                         if(this.elementStack.size() > 1) {
                             this.elementStack.pop();
-                            ((UML1ModelElement)this.elementStack.peek()).getStereotypes().add(
+                            this.elementStack.peek().getStereotypes().add(
                                 ((UML1Stereotype)element).getDataValue()
                             );
                         }
@@ -908,9 +922,9 @@ public class XMI2Parser
     private final StringBuffer value = new StringBuffer();
     private String modelUri = null;
     private Locator locator = null;
-    private Stack scope = null;
-    private Stack elementStack = null;
-    private Map associationEnds = null;
+    private Stack<String> scope = null;
+    private Stack<UML1ModelElement> elementStack = null;
+    private Map<String,UML1ModelElement> associationEnds = null;
     private XMIImporter_1 importer = null;
     private XMIReferenceResolver resolver = null;
     private PrintStream infos = null;

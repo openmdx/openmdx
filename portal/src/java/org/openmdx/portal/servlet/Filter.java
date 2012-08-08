@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Filter.java,v 1.13 2010/06/01 09:10:40 hburger Exp $
+ * Name:        $Id: Filter.java,v 1.14 2011/11/28 09:24:47 wfro Exp $
  * Description: Filter
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.14 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 09:10:40 $
+ * Date:        $Date: 2011/11/28 09:24:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -60,8 +60,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
-
-import javax.resource.ResourceException;
 
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Extension;
@@ -299,25 +297,20 @@ implements Serializable {
     //-------------------------------------------------------------------------
     public String toString(
     ) {
-        try {
-            return Records.getRecordFactory().asMappedRecord(
-                this.getClass().getName(), 
-                this.groupName + '-' + this.labels,
-                TO_STRING_FIELDS,
-                new Object[]{
-                    this.name,
-                    this.labels,
-                    this.groupName,
-                    this.iconKey,
-                    this.order,
-                    this.getCondition(),
-                    this.getOrderSpecifier()
-                }
-            ).toString();
-        } 
-        catch (ResourceException exception) {
-            return super.toString();
-        }
+        return Records.getRecordFactory().asMappedRecord(
+            this.getClass().getName(), 
+            this.groupName + '-' + this.labels,
+            TO_STRING_FIELDS,
+            new Object[]{
+                this.name,
+                this.labels,
+                this.groupName,
+                this.iconKey,
+                this.order,
+                this.getCondition(),
+                this.getOrderSpecifier()
+            }
+        ).toString();
     }
 
     //-------------------------------------------------------------------------

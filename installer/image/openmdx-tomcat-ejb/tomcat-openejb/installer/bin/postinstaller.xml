@@ -1,8 +1,0 @@
-<project 
-	name="openmdx-tomcat-ejb-postinstaller" 
-	xmlns:antcontrib="antlib:net.sf.antcontrib"
->
-	<target name="postinstall">
-		<mkdir dir="@@INSTALLDIR@@/apache-tomcat-6/temp"/>
-	</target>
-</project>

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceHelper.java,v 1.23 2010/06/30 13:10:33 hburger Exp $
+ * Name:        $Id: PersistenceHelper.java,v 1.30 2011/11/19 16:38:04 hburger Exp $
  * Description: PersistenceHelper 
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.30 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/30 13:10:33 $
+ * Date:        $Date: 2011/11/19 16:38:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -64,12 +64,12 @@ import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.ExtentCollection;
+import org.openmdx.base.persistence.spi.FilterCollection;
 import org.openmdx.base.persistence.spi.QueryExtension;
-import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.Extension;
+import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.AnyTypePredicate;
@@ -91,14 +91,17 @@ public class PersistenceHelper {
      * 
      * @param object
      * 
-     * @return a clone
+     * @return a clone, or <code>null</code> if the class is not cloneable
+     * 
+     * @exception RuntimeException if cloning fails 
      */
     @SuppressWarnings("unchecked")
     public static <T> T clone(
-        T object
+        T object,
+        String... exclude
     ) {
         if(object instanceof org.openmdx.base.persistence.spi.Cloneable) {
-            return ((org.openmdx.base.persistence.spi.Cloneable<T>)object).openmdxjdoClone();
+            return ((org.openmdx.base.persistence.spi.Cloneable<T>)object).openmdxjdoClone(exclude);
         }
         if(object instanceof java.lang.Cloneable) try {
             return (T) object.getClass(
@@ -111,6 +114,7 @@ public class PersistenceHelper {
             throw exception;
         } catch (Exception exception) {
             throw new RuntimeServiceException(
+                exception,
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.GENERIC,
                 "A class declared as Cloneable can't be cloned",
@@ -122,32 +126,6 @@ public class PersistenceHelper {
         return null;
     }
 
-    /**
-     * Return the container's id
-     * 
-     * @param container a container
-     * 
-     * @return the container id, or <code>null</code> if the container's owner is <em>transient</em>.
-     */
-    public static Path getContainerId(
-        Object container
-    ){
-        return container instanceof PersistenceCapableCollection ? ((PersistenceCapableCollection)container).openmdxjdoGetContainerId() : null;
-    }
-
-    /**
-     * Return a container's transient id
-     * 
-     * @param container a container
-     * 
-     * @return the transient container id, or <code>null</code> if the container's owner is <em>persistent</em>.
-     */
-    public static TransientContainerId getTransientContainerId(
-        Object container
-    ){
-        return container instanceof PersistenceCapableCollection ? ((PersistenceCapableCollection)container).openmdxjdoGetTransientContainerId() : null;
-    }
-    
     /**
      * A way to avoid fetching an object just to retrieve its object id
      * 
@@ -206,6 +184,10 @@ public class PersistenceHelper {
      * @param xriPattern the object id pattern either as a Path or XRI string representation
      * 
      * @return the candidate collection
+     * 
+     * @exception ClassCastException if the xriPattern is neither assignable to 
+     * org.openmdx.base.naming.Path nor to java-lang.String
+     * @exception RuntimeServiceException in case of an invalid xriPattern String
      */
     public static <E> Collection<E> getCandidates(
         Extent<E> extent,
@@ -213,10 +195,45 @@ public class PersistenceHelper {
     ){
         return new ExtentCollection<E>(
             extent, 
-            xriPattern instanceof Path ? (Path)xriPattern : new Path((String)xriPattern)
+            xriPattern instanceof String ? new Path((String)xriPattern) : (Path)xriPattern
         );
     }
 
+    /**
+     * Retrieve a filter collection for a sub-query
+     * 
+     * @param predicate the predicate to be used as sub-query
+     * 
+     * @return the filter collection
+     * 
+     * @exception NullPointerException if the predicate is null
+     * @exception IllegalArgumentException if the predicate is neither a Filter nor a
+     * RefPRedicate_1_0.
+     */
+    public static <E> Collection<E> asSubquery(
+        AnyTypePredicate predicate
+    ){
+        if (predicate instanceof RefQuery_1_0) {
+            return new FilterCollection<E>(((RefQuery_1_0)predicate).refGetFilter());
+        } else if(predicate instanceof Filter) {
+            return new FilterCollection<E>((Filter)predicate);
+        } else if(predicate == null) {
+            throw new NullPointerException("The predicate must not be null");
+        } else {
+            throw BasicException.initHolder(
+                new IllegalArgumentException(
+                    "The given argument is inapprpriate for creating a filter collection",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN, 
+                        BasicException.Code.BAD_PARAMETER, 
+                        new BasicException.Parameter("supported", Filter.class.getName(), RefQuery_1_0.class.getName()),
+                        new BasicException.Parameter("actual", predicate.getClass().getName())
+                    )
+                )
+            );
+        }
+    }
+    
     public static void setClasses(
         AnyTypePredicate query,
         Class<? extends RefObject>... classes 
@@ -227,6 +244,18 @@ public class PersistenceHelper {
             ConditionType.IS_IN,
             Arrays.asList(classes)
         );
+    }
+    
+    /**
+     * Retrieve the object's last XRI segment
+     * 
+     * @return the last segment of the actual or future XRI; or <code>null</code> if the object is not contained yet
+     */
+    public static String getLastXRISegment(
+    	Object pc
+    ){
+        PersistenceManager_1_0 pm = (PersistenceManager_1_0) JDOHelper.getPersistenceManager(pc);
+    	return pm.getLastXRISegment(pc);
     }
     
 }

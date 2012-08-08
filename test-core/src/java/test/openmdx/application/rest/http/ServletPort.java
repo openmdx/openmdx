@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ServletPort.java,v 1.18 2010/12/13 16:25:38 hburger Exp $
+ * Name:        $Id: ServletPort.java,v 1.21 2011/08/20 19:58:32 hburger Exp $
  * Description: ServletPort 
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/13 16:25:38 $
+ * Date:        $Date: 2011/08/20 19:58:32 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -128,7 +128,7 @@ public class ServletPort
                     return initParameters.get(name);
                 }
 
-                @SuppressWarnings("unchecked")
+                @SuppressWarnings("rawtypes")
                 public Enumeration getInitParameterNames() {
                     return Collections.enumeration(initParameters.keySet());
                 }
@@ -216,10 +216,13 @@ public class ServletPort
          * @see org.openmdx.base.resource.spi.AbstractInteraction#open()
          */
         @Override
+        @SuppressWarnings("rawtypes")
         protected void open(
         ) throws ResourceException {
             ServletMessage message = new ServletMessage(CONNECT_SPEC, CONNECT_XRI);
-            message.request.getParameterMap().put("UserName", new String[]{getConnectionUserName()});
+            Map parameters = message.request.getParameterMap();
+            parameters.put("UserName", new String[]{getConnectionUserName()});
+            parameters.put("RefInitializeOnCreate", new String[]{Boolean.FALSE.toString()});
             try {
                 message.execute();
             } catch (ServiceException exception) {
@@ -268,7 +271,7 @@ public class ServletPort
             /* (non-Javadoc)
              * @see javax.servlet.http.HttpSession#getAttributeNames()
              */
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings("rawtypes")
             public Enumeration getAttributeNames() {
                 validate();
                 return Collections.enumeration(this.attributes.keySet());
@@ -544,7 +547,7 @@ public class ServletPort
                 }
 
             //  @Override
-                @SuppressWarnings("unchecked")
+                @SuppressWarnings("rawtypes")
                 public Enumeration getHeaderNames() {
                     return Collections.enumeration(
                         this.headers.keySet()
@@ -552,7 +555,7 @@ public class ServletPort
                 }
 
             //  @Override
-                @SuppressWarnings("unchecked")
+                @SuppressWarnings("rawtypes")
                 public Enumeration getHeaders(String name) {
                     String header = this.headers.get(name.toLowerCase());
                     final String[] values = header == null ? NO_VALUES : header.split(","); 
@@ -673,7 +676,7 @@ public class ServletPort
                 }
 
             //  @Override
-                @SuppressWarnings("unchecked")
+                @SuppressWarnings("rawtypes")
                 public Enumeration getAttributeNames() {
                     throw new UnsupportedOperationException();
                 }
@@ -745,7 +748,7 @@ public class ServletPort
                 }
 
             //  @Override
-                @SuppressWarnings("unchecked")
+                @SuppressWarnings("rawtypes")
                 public Enumeration getLocales() {
                     throw new UnsupportedOperationException();
                 }
@@ -757,13 +760,13 @@ public class ServletPort
                 }
 
             //  @Override
-                @SuppressWarnings("unchecked")
+                @SuppressWarnings("rawtypes")
                 public Map getParameterMap() {
                     return this.parameters;
                 }
 
             //  @Override
-                @SuppressWarnings("unchecked")
+                @SuppressWarnings("rawtypes")
                 public Enumeration getParameterNames() {
                     return Collections.enumeration(this.parameters.keySet());
                 }

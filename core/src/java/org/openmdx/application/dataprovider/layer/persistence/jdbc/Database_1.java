@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Database_1.java,v 1.11 2010/12/17 23:19:54 hburger Exp $
- * Description: Database_1Jdbc2 plugin
- * Revision:    $Revision: 1.11 $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Database_1.java,v 1.19 2011/08/24 07:12:59 hburger Exp $
+ * Description: JDBC 2 Database Plug-In
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/17 23:19:54 $
+ * Date:        $Date: 2011/08/24 07:12:59 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 
@@ -58,32 +57,111 @@ import java.io.StringReader;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-// import java.sql.SQLFeatureNotSupportedException;
+import java.util.Arrays;
+import java.util.Collection;
 
+import org.openmdx.application.dataprovider.cci.DataproviderRequest;
+import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
-import org.openmdx.base.mof.spi.ModelUtils;
+import org.openmdx.base.mof.cci.ModelHelper;
+import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.Quantifier;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.BinaryLargeObject;
 import org.w3c.cci2.BinaryLargeObjects;
 import org.w3c.cci2.CharacterLargeObjects;
 
-/*
+/**
  * Concrete implementation of the AbstractDatabase_1 plugin using Jdbc2 driver
  * features. 
  */
-//---------------------------------------------------------------------------
+@SuppressWarnings({"rawtypes","unchecked"})
 public class Database_1 extends AbstractDatabase_1 {
 
-    //---------------------------------------------------------------------------
+    /**
+     * Constructor 
+     */
     public Database_1(
     ) {
+        super();
+    }
+    
+    /**
+     * The list of aspect base classes may be extended by overriding isAspectBaseClass()
+     */
+    private static final Collection<String> ASPECT_BASE_CLASSES = Arrays.asList(
+        "org:openmdx:state2:DateState",
+        "org:openmdx:state2:DateTimeState",
+        "org:openmdx:role2:Role"
+    );
+    
+    /**
+     * Tells whether the class denotes an aspect base class to be to be checked indirectly only
+     * through their core reference.
+     *  
+     * @param qualifiedClassName
+     * 
+     * @return <code>true</code> if the class shall be checked indirectly only
+     */
+    protected boolean isAspectBaseClass(
+        String qualifiedClassName
+    ){
+        return ASPECT_BASE_CLASSES.contains(qualifiedClassName);
+    }
+    
+    @Override
+    protected FilterProperty mapInstanceOfFilterProperty(
+        DataproviderRequest request,
+        Collection<String> qualifiedClassNames
+    ) throws ServiceException {
+        int aspectBaseClasses = 0;
+        AspectBaseClasses: for(String qualifiedClassName : qualifiedClassNames) {
+            if(isAspectBaseClass(qualifiedClassName)) {
+                aspectBaseClasses++;
+            } else {
+                break AspectBaseClasses;
+            }
+        }
+        if(aspectBaseClasses == qualifiedClassNames.size()) {
+            for(FilterProperty filterProperty : request.attributeFilter()) {
+                if(
+                    "core".equals(filterProperty.name()) &&
+                    Quantifier.valueOf(filterProperty.quantor()) == Quantifier.THERE_EXISTS
+                ){
+                    // Skip 'object_instanceof' predicate because a 'core' predicate is supplied as well
+                    return null;
+                } 
+            }
+            return new FilterProperty(
+                Quantifier.THERE_EXISTS.code(),
+                "core",  
+                ConditionType.IS_NOT_IN.code()
+            );
+        }
+        return super.mapInstanceOfFilterProperty(request, qualifiedClassNames);
+    }
+        
+    /**
+     * Tells whether the given connection supports scroll sensitive result sets
+     * 
+     * @param connection
+     * 
+     * @return <code>true</code> if the given connection supports scroll sensitive result sets
+     */
+    protected boolean allowScrollSensitiveResultSet(
+        Connection connection
+    ){
+        try {
+            String databaseProductName = connection.getMetaData().getDatabaseProductName();
+            return Boolean.parseBoolean(this.jdbcDriverSqlProperties.getProperty(databaseProductName + ".ALLOW.SCROLLSENSITIVE.RESULTSET"));            
+        } catch(Exception e) {
+            return false;
+        }
     }
     
     //---------------------------------------------------------------------------
@@ -93,30 +171,15 @@ public class Database_1 extends AbstractDatabase_1 {
         String statement,
         boolean updatable
     ) throws SQLException {
-        if(updatable) {
-            return conn.prepareStatement(
-                statement,
-                ResultSet.TYPE_FORWARD_ONLY,
-                ResultSet.CONCUR_UPDATABLE
-            );
-        }
-        else {
-            String databaseProductName = "N/A";
-            try {
-                DatabaseMetaData dbm = conn.getMetaData();
-                databaseProductName = dbm.getDatabaseProductName();
-            } catch(Exception e) {
-                // ignore
-            }
-            boolean allowScrollSensitiveResultSet = Boolean.valueOf(this.jdbcDriverSqlProperties.getProperty(databaseProductName + ".ALLOW.SCROLLSENSITIVE.RESULTSET")).booleanValue();            
-            return conn.prepareStatement(
-                statement,
-                allowScrollSensitiveResultSet
-                ? this.resultSetType
-                    : ResultSet.TYPE_FORWARD_ONLY,
-                    ResultSet.CONCUR_READ_ONLY
-            );
-        }
+        return updatable ? conn.prepareStatement(
+            statement,
+            ResultSet.TYPE_FORWARD_ONLY,
+            ResultSet.CONCUR_UPDATABLE
+        ) : conn.prepareStatement(
+            statement,
+            allowScrollSensitiveResultSet(conn) ? this.resultSetType : ResultSet.TYPE_FORWARD_ONLY,
+            ResultSet.CONCUR_READ_ONLY
+        );
     }
 
     //---------------------------------------------------------------------------
@@ -146,11 +209,7 @@ public class Database_1 extends AbstractDatabase_1 {
         String attributeName,
         ModelElement_1_0 attributeDef
     ) throws ServiceException, SQLException {
-
-        boolean isStream = 
-            attributeDef != null && 
-            Multiplicities.STREAM.equals(ModelUtils.getMultiplicity(attributeDef));
-
+        boolean isStream = attributeDef != null && ModelHelper.getMultiplicity(attributeDef).isStreamValued();
         // Blob
         if(val instanceof Blob) {
             Blob blob = (Blob)val;
@@ -192,11 +251,7 @@ public class Database_1 extends AbstractDatabase_1 {
         String attributeName,
         ModelElement_1_0 attributeDef
     ) throws ServiceException, SQLException {
-        
-        boolean isStream = 
-            attributeDef != null && 
-            Multiplicities.STREAM.equals(ModelUtils.getMultiplicity(attributeDef));
-
+        boolean isStream = attributeDef != null && ModelHelper.getMultiplicity(attributeDef).isStreamValued();
         // Clob
         if(val instanceof Clob) {
             Clob clob = (Clob)val;
@@ -371,7 +426,6 @@ public class Database_1 extends AbstractDatabase_1 {
     }
 
     //---------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     @Override
     FastResultSet setPosition(
         ResultSet rs,

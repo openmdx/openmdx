@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: jre-1.6-properties.xml,v 1.10 2010/01/07 18:15:09 wfro Exp $
+= Name:        $Id: jre-1.6-properties.xml,v 1.12 2011/11/02 14:20:07 wfro Exp $
 = Description: openMDX/Core jre-1.6 Platform Properties
-= Revision:    $Revision: 1.10 $
-= Date:        $Date: 2010/01/07 18:15:09 $
+= Revision:    $Revision: 1.12 $
+= Date:        $Date: 2011/11/02 14:20:07 $
 = Copyright:   (c) 2003-2004 OMEX AG
 =======================================================================
 =
@@ -45,4 +45,5 @@
 = 
 -->
 <project name="openmdx-core-jre-1.6-properties">
+	<property name="tomcat.version" value="7"/>
 </project>

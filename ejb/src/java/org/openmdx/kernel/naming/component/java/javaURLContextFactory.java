@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: javaURLContextFactory.java,v 1.2 2009/03/31 17:06:10 hburger Exp $
+ * Name:        $Id: javaURLContextFactory.java,v 1.3 2011/06/21 22:55:34 hburger Exp $
  * Description: java URL Context Factory
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:06:10 $
+ * Date:        $Date: 2011/06/21 22:55:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,7 +52,6 @@ package org.openmdx.kernel.naming.component.java;
 
 import java.util.Hashtable;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.Name;
@@ -60,7 +59,7 @@ import javax.naming.NamingException;
 import javax.naming.NoInitialContextException;
 import javax.naming.spi.ObjectFactory;
 
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.naming.spi.ClassLoaderContext;
 import org.openmdx.kernel.naming.spi.ClassLoadertContextFactory;
 
@@ -82,7 +81,7 @@ public class javaURLContextFactory implements ObjectFactory {
         try {
             return initialContext.getContext(contextName, classLoader);
         } catch (NamingException exception) {
-            logger.log(
+            SysLog.log(
             	Level.SEVERE,
             	"Initialization of class loader specific context \"" +
 				contextName + "\" in namespace \"" + URL_PREFIX + "\" failed",            		
@@ -122,11 +121,6 @@ public class javaURLContextFactory implements ObjectFactory {
         }
     }
 
-    /**
-     * To log instantiation failures
-     */
-    final static private Logger logger = LoggerFactory.getLogger();
-    
     /**
      * The URL scheme supported by this factory
      */

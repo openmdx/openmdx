@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeUtility.java,v 1.21 2010/04/21 14:49:49 wfro Exp $
+ * Name:        $Id: CodeUtility.java,v 1.24 2011/11/07 23:38:56 wfro Exp $
  * Description: CodeUtility
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/21 14:49:49 $
+ * Date:        $Date: 2011/11/07 23:38:56 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -63,6 +63,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -88,7 +89,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * Command line utility which supports the management of openCRX code files:
+ * Command line utility which supports the management of openMDX/Portal Code code files:
  * <ul>
  *   <li>merge: merges locale separated code files (en_US, de_DE) to one merged file.</li> 
  *   <li>split: splits a merged code file to locale separated files.</li>
@@ -423,20 +424,16 @@ public class CodeUtility {
                       if("org:opencrx:kernel:code1:CodeValueEntry".equals(mergedCodeEntryFacade.getObjectClass())) {
                           MappedRecord codeEntry = codes.get(key);
                           Object_2Facade codeEntryFacade = Object_2Facade.newInstance(codeEntry);
-                          if(mergedCodeEntryFacade.getAttributeValues("shortText") != null) {
-                        	  mergedCodeEntryFacade.attributeValuesAsList("shortText").add(
-                              (codeEntryFacade != null) && (codeEntryFacade.attributeValuesAsList("shortText").size() > 0) ? 
-                            	  codeEntryFacade.attributeValue("shortText") : 
-                            	  "" // empty string as default
-                            );
-                          }
-                          if(mergedCodeEntryFacade.getAttributeValues("longText") != null) {
-                        	  mergedCodeEntryFacade.attributeValuesAsList("longText").add(
-                              (codeEntryFacade != null) && (codeEntryFacade.attributeValuesAsList("longText").size() > 0) ? 
-                            	  codeEntryFacade.attributeValue("longText") : 
-                            	  ""  // empty string as default
-                            );
-                          }
+                    	  mergedCodeEntryFacade.attributeValuesAsList("shortText").add(
+                          (codeEntryFacade != null && !codeEntryFacade.attributeValuesAsList("shortText").isEmpty()) ? 
+                        	  codeEntryFacade.attributeValue("shortText") : 
+                        	  "" // empty string as default
+                    	  );
+                    	  mergedCodeEntryFacade.attributeValuesAsList("longText").add(
+                          (codeEntryFacade != null && codeEntryFacade.attributeValuesAsList("longText").isEmpty()) ? 
+                        	  codeEntryFacade.attributeValue("longText") : 
+                        	  ""  // empty string as default
+                    	  );
                       }
                     }
                     // add if it does not exist. Only add for locale=0 (en_US)
@@ -528,14 +525,18 @@ public class CodeUtility {
                               // shortText
                               s = "      <" + locale.get(k) + "_short>";
                               w.write(s, 0, s.length());
-                              s = (String)entryFacade.attributeValuesAsList("shortText").get(k);
+                              s = k < entryFacade.attributeValuesAsList("shortText").size() ?
+                            	  (String)entryFacade.attributeValuesAsList("shortText").get(k) :
+                            		  "";
                               fw.write(s, 0, s.length());
                               s = "</" + locale.get(k) + "_short>\n";
                               w.write(s, 0, s.length());
                               // longText
                               s = "      <" + locale.get(k) + "_long>";
                               w.write(s, 0, s.length());
-                              s = (String)entryFacade.attributeValuesAsList("longText").get(k);
+                              s = k < entryFacade.attributeValuesAsList("longText").size() ?
+                            	  (String)entryFacade.attributeValuesAsList("longText").get(k) :
+                            		  "";
                               fw.write(s, 0, s.length());
                               s = "</" + locale.get(k) + "_long>\n";
                               w.write(s, 0, s.length());
@@ -567,20 +568,15 @@ public class CodeUtility {
   protected void run(
 	  String[] args
   ) throws ServiceException {
-      this.locale = new ArrayList();
+      this.locales = new ArrayList();
       this.sourceDir = new File(".");
       this.targetDir = new File(".");
       String command = "merge";
 	  for(int i = 0; i < args.length; i++) {
-	      // locales. get locale and assert en_US to be the first in the list
-	      if("--locale".equals(args[i])) {
-	    	  int j = i + 1;
-	    	  while(j < args.length && !args[j].startsWith("--")) {
-	    		  this.locale.add(args[j]);
-	    		  j++;
-	    	  }
-	      }
-	      // sourceDir
+	      if("--locale".equals(args[i]) && (i + 1 < args.length)) {
+	    	  String[] locales = args[i+1].split("/");
+	    	  this.locales.addAll(Arrays.asList(locales));
+	      }	      // sourceDir
 	      else if("--sourceDir".equals(args[i]) && (i + 1 < args.length)) {
 	          this.sourceDir = new File(args[i+1]);
 	      }
@@ -595,19 +591,19 @@ public class CodeUtility {
 	    	  command = "merge";
 	      }
 	  }
-      if(this.locale.isEmpty() || !"en_US".equals(this.locale.get(0))) {
-          this.locale.add(0, "en_US");
+      if(this.locales.isEmpty() || !"en_US".equals(this.locales.get(0))) {
+          this.locales.add(0, "en_US");
       }	  
       if("merge".equals(command)){
           this.merge(
-        	  this.locale, 
+        	  this.locales, 
         	  this.sourceDir, 
         	  this.targetDir
           );
       }
       else if("split".equals(command)){
           this.split(
-        	  this.locale, 
+        	  this.locales, 
         	  this.sourceDir, 
         	  this.targetDir
           );
@@ -624,7 +620,7 @@ public class CodeUtility {
   //-------------------------------------------------------------------------
   // Variables    
   //-------------------------------------------------------------------------    
-  private List locale = null;
+  private List locales = null;
   private File sourceDir = null;
   private File targetDir = null;
   

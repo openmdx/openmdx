@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SQLWildcards.java,v 1.5 2009/01/15 21:12:11 hburger Exp $
+ * Name:        $Id: SQLWildcards.java,v 1.6 2011/04/12 15:44:03 hburger Exp $
  * Description: SQL Wildcards 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/15 21:12:11 $
+ * Date:        $Date: 2011/04/12 15:44:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,7 +59,7 @@ import java.util.Iterator;
 /**
  * SQL Wildcards
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class SQLWildcards {
 
     /**

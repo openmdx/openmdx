@@ -1,22 +1,21 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: OperationAwareLayer_1.java,v 1.17 2010/09/21 16:28:36 hburger Exp $
+ * Name:        $Id: OperationAwareLayer_1.java,v 1.19 2012/01/05 23:20:20 hburger Exp $
  * Description: Stream Operation Aware Layer_1_0 Implementation
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/21 16:28:36 $
+ * Date:        $Date: 2012/01/05 23:20:20 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2009, OMEX AG, Switzerland
+ * Copyright (c) 2005-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
- * Redistribution and use in source and binary forms, with or without 
- * modification, are permitted provided that the following conditions 
- * are met:
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
  *   notice, this list of conditions and the following disclaimer.
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.dataprovider.spi;
 
@@ -63,6 +62,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -77,9 +77,12 @@ import org.openmdx.kernel.exception.BasicException;
  */
 public abstract class OperationAwareLayer_1 extends Layer_1 {
 
-    //-----------------------------------------------------------------------
+    /**
+     * Constructor 
+     */
     public OperationAwareLayer_1(
     ) {
+        super();
     }
     
     //-----------------------------------------------------------------------
@@ -135,7 +138,13 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
     //-----------------------------------------------------------------------
     public class LayerInteraction extends Layer_1.LayerInteraction {
         
-        public LayerInteraction(
+        /**
+         * Constructor 
+         *
+         * @param connection
+         * @throws ResourceException
+         */
+        protected LayerInteraction(
             Connection connection
         ) throws ResourceException {
             super(connection);
@@ -168,7 +177,7 @@ public abstract class OperationAwareLayer_1 extends Layer_1 {
                     output
                 );
             } else {
-                Object_2Facade responseFacade = ResourceHelper.getObjectFacade(response);
+                Object_2Facade responseFacade = Facades.asObject(response);
                 output.setPath(responseFacade.getPath());
                 output.setBody(responseFacade.getValue());
             }

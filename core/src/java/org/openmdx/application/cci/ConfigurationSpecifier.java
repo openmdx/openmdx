@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ConfigurationSpecifier.java,v 1.1 2009/01/05 13:44:54 wfro Exp $
+ * Name:        $Id: ConfigurationSpecifier.java,v 1.2 2012/01/05 23:20:20 hburger Exp $
  * Description: Application Framework 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/05 13:44:54 $
+ * Date:        $Date: 2012/01/05 23:20:20 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-3023, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,22 +45,26 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.cci;
 
 
 /**
  * Class to declare the application's options
+ * 
+ * @deprecated The activation pattern has been replaced by the Java Bean 
+ * pattern
  */
+@Deprecated
 public class ConfigurationSpecifier { 
 
-        public final String usage;	
-        public final boolean required;
-        public final int minimum;
+    public final String usage;	
+    public final boolean required;
+    public final int minimum;
 	public final int maximum;
-        public final Object[] defaults;
+    public final Object[] defaults;
 	public final boolean sensitive;
 		
 	/**

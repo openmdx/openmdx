@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.2 2010/06/08 12:54:19 hburger Exp $
+ * Name:        $Id: PlugIn_1.java,v 1.4 2012/01/07 01:37:44 hburger Exp $
  * Description: StandardPlugIn 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/08 12:54:19 $
+ * Date:        $Date: 2012/01/07 01:37:44 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,11 +57,21 @@ import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.spi.SharedObjects;
+import org.openmdx.state2.spi.Configuration;
 
 /**
  * Standard Plug-In
  */
 public class PlugIn_1 implements PlugIn_1_0 {
+
+    /**
+     * Constructor 
+     */
+    public PlugIn_1() {
+        super();
+    }
 
     /* (non-Javadoc)
      * @see org.openmdx.base.aop1.PlugIn#getInterceptor(org.openmdx.base.accessor.view.Interceptor_1)
@@ -74,13 +84,19 @@ public class PlugIn_1 implements PlugIn_1_0 {
         Model_1_0 model = view.getModel();
         ModelElement_1_0 dataObjectType = model.getElement(view.objGetDelegate().objGetClass());
         if(model.isSubtypeOf(dataObjectType, "org:openmdx:base:Removable")) {
-            //
-            // Removable Capability
-            //
-            interceptor = new org.openmdx.base.aop1.Removable_1(
-                view,
-                interceptor
-            );
+            Path objectId = view.jdoGetObjectId();
+            boolean validTimeUnique = objectId == null ? 
+                model.isSubtypeOf(dataObjectType, "org:openmdx:state2:StateCapable") && Boolean.TRUE.equals(interceptor.objGetValue("validTimeUnique")) :
+                SharedObjects.getPlugInObject(view.jdoGetPersistenceManager(), Configuration.class).isValidTimeUnique(objectId); 
+            if(!validTimeUnique) {
+                //
+                // Removable Capability
+                //
+                interceptor = new org.openmdx.base.aop1.Removable_1(
+                    view,
+                    interceptor
+                );
+            }
         }
         if(model.isSubtypeOf(dataObjectType, "org:openmdx:base:Segment")) {
             interceptor = new Segment_1(

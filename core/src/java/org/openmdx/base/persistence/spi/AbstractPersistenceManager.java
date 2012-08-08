@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: AbstractPersistenceManager.java,v 1.18 2010/10/23 21:45:01 hburger Exp $
+ * Name:        $Id: AbstractPersistenceManager.java,v 1.20 2011/10/04 23:15:12 hburger Exp $
  * Description: Abstract PersistenceManager
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/23 21:45:01 $
+ * Date:        $Date: 2011/10/04 23:15:12 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,6 +69,7 @@ import org.openmdx.kernel.resource.spi.CloseCallback;
  *
  * @since openMDX 2.0
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class AbstractPersistenceManager implements PersistenceManager {
 
     /**
@@ -85,6 +86,11 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
         this.instanceLifecycleListener = instanceLifecycleListener;
     }
 
+    /**
+     * The non-null key for unqualified user objects
+     */
+    private static final Object USER_OBJECT_KEY = new Object();
+    
     /**
      * The connection factory
      */
@@ -196,7 +202,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#evictAll(java.util.Collection)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public void evictAll(Collection pcs) {
         PersistenceManagers.evictAll(this, pcs);
     }
@@ -205,7 +210,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#refreshAll(java.util.Collection)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public void refreshAll(Collection pcs) {
         PersistenceManagers.refreshAll(this, pcs);
     }
@@ -222,7 +226,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#getObjectById(java.lang.Class, java.lang.Object)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public <T> T getObjectById(Class<T> cls, Object key) {
         return (T) this.getObjectById(
             this.newObjectIdInstance(cls, key)
@@ -233,7 +236,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#getObjectsById(java.util.Collection, boolean)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public Collection getObjectsById(Collection oids, boolean validate) {
         return PersistenceManagers.getObjectsById(this, validate, oids);
     }
@@ -242,7 +244,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#getObjectsById(java.util.Collection)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public Collection getObjectsById(Collection oids) {
         return this.getObjectsById(oids, true);
     }
@@ -275,7 +276,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#deletePersistentAll(java.util.Collection)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public void deletePersistentAll(Collection pcs) {
         PersistenceManagers.deletePersistentAll(this, pcs);
     }
@@ -292,7 +292,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.util.Collection, boolean)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public void makeTransientAll(Collection pcs, boolean useFetchPlan) {
         PersistenceManagers.makeTransientAll(this, pcs, useFetchPlan);
     }
@@ -309,7 +308,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.util.Collection)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public void makeTransientAll(Collection pcs) {
         this.makeTransientAll(pcs, false);
     }
@@ -318,7 +316,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#makeTransactionalAll(java.util.Collection)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public void makeTransactionalAll(Collection pcs) {
         PersistenceManagers.makeTransactionalAll(this, pcs);
     }
@@ -327,7 +324,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#makeNontransactionalAll(java.util.Collection)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public void makeNontransactionalAll(Collection pcs) {
         PersistenceManagers.makeNontransactionalAll(this, pcs);
     }
@@ -344,16 +340,14 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#retrieveAll(java.util.Collection)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public void retrieveAll(Collection pcs) {
-        this.retrieveAll(false, pcs);
+        this.retrieveAll(pcs, false);
     }
 
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(java.util.Collection, boolean)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public void retrieveAll(Collection pcs, boolean useFetchPlan) {
         PersistenceManagers.retrieveAll(this, useFetchPlan, pcs);
     }
@@ -371,7 +365,11 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      */
 //  @Override
     public void setUserObject(Object o) {
-        this.userObjects.put(null, o);
+        if(o == null) {
+            removeUserObject(USER_OBJECT_KEY);
+        } else {
+            putUserObject(USER_OBJECT_KEY, o);
+        }
     }
 
     /* (non-Javadoc)
@@ -379,7 +377,7 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      */
 //  @Override
     public Object getUserObject() {
-        return this.userObjects.get(null);
+        return getUserObject(USER_OBJECT_KEY);
     }
 
     /* (non-Javadoc)
@@ -474,7 +472,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#addInstanceLifecycleListener(javax.jdo.listener.InstanceLifecycleListener, java.lang.Class[])
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public void addInstanceLifecycleListener(
         InstanceLifecycleListener listener,
         Class... classes
@@ -504,7 +501,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#evictAll(boolean, java.lang.Class)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public void evictAll(boolean subclasses, Class pcClass) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }
@@ -513,7 +509,6 @@ public abstract class AbstractPersistenceManager implements PersistenceManager {
      * @see javax.jdo.PersistenceManager#getFetchGroup(java.lang.Class, java.lang.String)
      */
 //  @Override
-    @SuppressWarnings("unchecked")
     public FetchGroup getFetchGroup(Class arg0, String arg1) {
         throw new UnsupportedOperationException("Operation not supported by AbstractPersistenceManager");
     }

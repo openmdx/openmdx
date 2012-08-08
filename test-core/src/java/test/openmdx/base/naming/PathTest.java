@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PathTest.java,v 1.4 2010/06/03 15:58:00 hburger Exp $
+ * Name:        $Id: PathTest.java,v 1.5 2011/11/21 06:32:15 hburger Exp $
  * Description: class TestPath 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:58:00 $
+ * Date:        $Date: 2011/11/21 06:32:15 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -199,8 +199,9 @@ public class PathTest extends TestCase {
     /**
      * Write the test case method in the fixture class.
      * Be sure to make it public, or it can't be invoked through reflection. 
-     */
-    public void testAppend(
+     */    
+    @SuppressWarnings("deprecation")
+	public void testAppend(
     ) throws Throwable {
         Path   path1_c = (Path)path1.clone();
         Path   path2_c = (Path)path2.clone();

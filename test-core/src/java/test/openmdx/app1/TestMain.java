@@ -1,15 +1,15 @@
 /*
  * ====================================================================
- * Name:        $Id: TestMain.java,v 1.66 2010/12/22 10:05:03 hburger Exp $
+ * Name:        $Id: TestMain.java,v 1.102 2012/01/05 16:31:46 hburger Exp $
  * Description: Unit test for model app1
- * Revision:    $Revision: 1.66 $
+ * Revision:    $Revision: 1.102 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/22 10:05:03 $
+ * Date:        $Date: 2012/01/05 16:31:46 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -90,18 +90,20 @@ import javax.jdo.JDOException;
 import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.JDOHelper;
 import javax.jdo.JDOOptimisticVerificationException;
+import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
 import javax.jdo.Query;
 import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.InvalidCallException;
 import javax.jmi.reflect.InvalidObjectException;
+import javax.jmi.reflect.RefBaseObject;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.naming.NamingException;
 import javax.naming.spi.NamingManager;
-import javax.resource.ResourceException;
 import javax.resource.cci.ConnectionFactory;
+import javax.resource.spi.CommException;
 import javax.servlet.ServletException;
 import javax.transaction.Status;
 import javax.transaction.UserTransaction;
@@ -127,14 +129,17 @@ import org.openmdx.audit2.jmi1.UnitOfWork;
 import org.openmdx.audit2.spi.Configuration;
 import org.openmdx.audit2.spi.InvolvementPersistence;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
+import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.accessor.jmi.spi.DelegatingRefObject_1_0;
 import org.openmdx.base.accessor.jmi.spi.EntityManagerFactory_1;
 import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
 import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
 import org.openmdx.base.accessor.rest.spi.Synchronization_2_0;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
+import org.openmdx.base.aop0.UpdateAvoidance;
 import org.openmdx.base.cci2.ExtentCapable;
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.ServiceException;
@@ -143,24 +148,31 @@ import org.openmdx.base.jmi1.Modifiable;
 import org.openmdx.base.jmi1.Provider;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.cci.UserObjects;
+import org.openmdx.base.persistence.spi.Queries;
 import org.openmdx.base.persistence.spi.SharedObjects;
+import org.openmdx.base.persistence.spi.TransientContainerId;
+import org.openmdx.base.query.Condition;
+import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.Filter;
+import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.rest.spi.ConnectionFactoryAdapter;
 import org.openmdx.base.transaction.TransactionAttributeType;
 import org.openmdx.generic1.cci2.PropertyQuery;
-import org.openmdx.generic1.cci2.StringProperty;
+import org.openmdx.generic1.cci2.PropertySetHasProperties;
 import org.openmdx.generic1.cci2.UriPropertyQuery;
 import org.openmdx.generic1.jmi1.BooleanProperty;
 import org.openmdx.generic1.jmi1.DecimalProperty;
 import org.openmdx.generic1.jmi1.Generic1Package;
 import org.openmdx.generic1.jmi1.IntegerProperty;
 import org.openmdx.generic1.jmi1.Property;
+import org.openmdx.generic1.jmi1.StringProperty;
 import org.openmdx.generic1.jmi1.UriProperty;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.lightweight.naming.NonManagedInitialContextFactoryBuilder;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.naming.ComponentEnvironment;
@@ -170,6 +182,7 @@ import org.w3c.cci2.Container;
 import org.w3c.cci2.SparseArray;
 import org.w3c.cci2.StringTypePredicate;
 import org.w3c.format.DateTimeFormat;
+import org.w3c.spi.DatatypeFactories;
 import org.w3c.spi.StateAccessor;
 import org.w3c.spi2.Datatypes;
 
@@ -180,10 +193,12 @@ import test.openmdx.app1.cci2.InvoiceHasInvoicePosition;
 import test.openmdx.app1.cci2.InvoicePositionQuery;
 import test.openmdx.app1.cci2.InvoiceQuery;
 import test.openmdx.app1.cci2.PersonQuery;
+import test.openmdx.app1.cci2.ProductQuery;
 import test.openmdx.app1.cci2.SegmentHasAddress;
 import test.openmdx.app1.cci2.SegmentHasPerson;
 import test.openmdx.app1.jmi1.Address;
 import test.openmdx.app1.jmi1.AddressFormat;
+import test.openmdx.app1.jmi1.AddressFormatAsParams;
 import test.openmdx.app1.jmi1.AddressFormatAsResult;
 import test.openmdx.app1.jmi1.App1Package;
 import test.openmdx.app1.jmi1.CanNotFormatNameException;
@@ -195,6 +210,8 @@ import test.openmdx.app1.jmi1.Document;
 import test.openmdx.app1.jmi1.DocumentClass;
 import test.openmdx.app1.jmi1.EmailAddress;
 import test.openmdx.app1.jmi1.EmailAddressClass;
+import test.openmdx.app1.jmi1.EmailAddressSendMessageParams;
+import test.openmdx.app1.jmi1.EmailAddressSendMessageTemplateParams;
 import test.openmdx.app1.jmi1.EmailAddressSendMessageTemplateResult;
 import test.openmdx.app1.jmi1.InternationalPostalAddress;
 import test.openmdx.app1.jmi1.InternationalPostalAddressClass;
@@ -206,12 +223,16 @@ import test.openmdx.app1.jmi1.MessageTemplate;
 import test.openmdx.app1.jmi1.MessageTemplateClass;
 import test.openmdx.app1.jmi1.NameFormat;
 import test.openmdx.app1.jmi1.Person;
+import test.openmdx.app1.jmi1.PersonAssignAddressParams;
 import test.openmdx.app1.jmi1.PersonClass;
+import test.openmdx.app1.jmi1.PersonDateOpParams;
 import test.openmdx.app1.jmi1.PersonDateOpResult;
+import test.openmdx.app1.jmi1.PersonFormatNameAsParams;
 import test.openmdx.app1.jmi1.PersonFormatNameAsResult;
 import test.openmdx.app1.jmi1.PersonGroup;
 import test.openmdx.app1.jmi1.PersonGroupClass;
 import test.openmdx.app1.jmi1.PostalAddress;
+import test.openmdx.app1.jmi1.PostalAddressSendMessageParams;
 import test.openmdx.app1.jmi1.Product;
 import test.openmdx.application.rest.http.ServletPort;
 
@@ -222,12 +243,9 @@ import test.openmdx.application.rest.http.ServletPort;
 @SuiteClasses(
     {
         TestMain.LocalConnectionTest.class,
-        TestMain.ProxyConnectionSetUp.class,
         TestMain.ProxyConnectionTest.class,
-        TestMain.ContainerManagedOptimisticTransactionSetUp.class,
-        TestMain.ContainerManagedTransactionTest.class,
-        TestMain.ContainerManagedPessimisticTransactionSetUp.class,
-        TestMain.ContainerManagedTransactionTest.class
+        TestMain.OptimisticContainerManagedTransactionTest.class,
+        TestMain.PessimisticContainerManagedTransactionTest.class
     }
 )
 public class TestMain {
@@ -236,7 +254,6 @@ public class TestMain {
     protected static final String AUDIT_PROVIDER_NAME = "Audit";
     protected static final String DATA_PROVIDER_NAME = "Data";
     protected static final String SEGMENT_NAME = "Standard";
-    protected static PersistenceManagerFactory entityManagerFactory = null;
 
     protected static final Path DATA_SEGMENT_ID = new Path(
         "xri://@openmdx*test.openmdx.app1/provider"
@@ -251,32 +268,6 @@ public class TestMain {
     ) throws NamingException{
         if(!NamingManager.hasInitialContextFactoryBuilder()) {
             NonManagedInitialContextFactoryBuilder.install(null);
-        }
-        entityManagerFactory = JDOHelper.getPersistenceManagerFactory(
-            "test-Main-EntityManagerFactory"
-        );
-    }
-
-
-    //---------------------------------------------------------------------------
-    static class ReadModels implements Runnable {
-
-        public void run(
-        ) {
-            try {
-                Model_1_0 model = Model_1Factory.getModel();
-                for(
-                        int i = 0; i < 5000000;
-                        i++
-                ) {
-                    model.getElement("org:openmdx:base:BasicObject");
-                }
-            }
-            catch(ServiceException e) {
-                System.out.println("ReadModels catched Exception. Terminating");
-                System.out.println(e);
-            }
-            System.out.println("ReadModels terminated");
         }
     }
 
@@ -314,10 +305,11 @@ public class TestMain {
         protected String taskId;
         private final Object taskIdentifier;
         private final Date start = new Date();
+        protected PersistenceManagerFactory entityManagerFactory;
 
         @Before
         public  void setUp(){
-            entityManagerFactory.getDataStoreCache().pinAll(true, AddressFormat.class);
+            entityManagerFactory = newEntityManagerFactory();
             this.entityManager = entityManagerFactory.getPersistenceManager();
             this.authority = this.entityManager.getObjectById(
                 Authority.class,
@@ -337,6 +329,24 @@ public class TestMain {
         public  void tearDown(){
             this.entityManager.close();
             this.entityManager = null;
+        }
+        
+        protected PersistenceManagerFactory newEntityManagerFactory(){
+            PersistenceManagerFactory entityManagerFactory = JDOHelper.getPersistenceManagerFactory(
+                configuration(),
+                "test-Main-EntityManagerFactory"
+            );
+            entityManagerFactory.getDataStoreCache().pinAll(true, AddressFormat.class);
+            return entityManagerFactory;
+        }
+        
+        /**
+         * Provide the configuration to be amendet by subclasses
+         * 
+         * @return the configuration used for overriding
+         */
+        protected Map<String, Object> configuration(){
+            return new HashMap<String, Object>();
         }
 
         protected void begin(){
@@ -359,7 +369,7 @@ public class TestMain {
 
 
     //------------------------------------------------------------------------
-    // Class AbstractTests
+    // Class RepeatableTest
     //------------------------------------------------------------------------
 
     /**
@@ -367,20 +377,65 @@ public class TestMain {
      */
     protected abstract static class RepeatableTest extends AbstractTest {
 
-        static private boolean USES_DB_OBJECT_WITH_ID_AS_KEY = false;
-        static private final int INSPECTION_COUNT = 100;
+        /**
+         * Constructor 
+         *
+         */
+        protected RepeatableTest() {
+            this.structureCreation = structureCreationSeed;
+            structureCreationSeed = next(structureCreationSeed);
+        }
+
+        /**
+         * The initial value changes from instantiation to instantiation
+         */
+        static private StructureCreation structureCreationSeed = StructureCreation.values()[0]; 
+
+        /**
+         * The initial value changes from query to query
+         */
+        private StructureCreation structureCreation; 
+        
+        static private final boolean RID_AND_OID_ARE_SEPARATED = true;
+        static private final int INSPECTION_COUNT = 250;
+        static private final int MEMBER_COUNT = 9;
         static private final int N_PERSONS = 100;
         static private final int LARGE_N_PERSONS = 1000;
         static private final int TEST_PERSON_COUNT = N_PERSONS - 1; // TODO one is missing for some reason
         static private final int SIMILAR_NAME_COUNT = 3; 
-
+        private final boolean VALIDATE_PERSISTENCE_MANAGER = !(this instanceof ProxyConnectionTest); // TODO include Proxy Connections
+        
         protected long id;
 
+        /**
+         * Switch back and forth to test both variants
+         * 
+         * @return <code>true</code> if the package should be used to
+         * acquire structures.
+         */
+        protected StructureCreation nextStructureCreation(){
+            return this.structureCreation = next(this.structureCreation);
+        }
+
+        /**
+         * Round robin
+         * 
+         * @param value the current structure creation kind
+         * 
+         * @return the next structure creation kind
+         */
+        private static StructureCreation next(StructureCreation value){
+            return StructureCreation.values()[
+                (value.ordinal() + 1) % StructureCreation.values().length                                   
+            ];
+        }
+        
         protected String nextId(){
             return "ID" + this.id++;
         }
 
-        protected void testCR20019014(){
+        @SuppressWarnings("unchecked")
+		protected void testCR20019014(){
             PropertyQuery query = (PropertyQuery) entityManager.newQuery(
                 Property.class
             );
@@ -388,41 +443,6 @@ public class TestMain {
                 query,
                 IntegerProperty.class, DecimalProperty.class
             );
-        }
-        
-        protected void testCR20018667(){
-            final Path PERSON_AND_DESCENDANTS = DATA_SEGMENT_ID.getDescendant(
-                "person",
-                "%"
-            ).lock();
-            {
-                //
-                // An audit1 query 
-                //
-                org.openmdx.compatibility.audit1.cci2.UnitOfWorkQuery query = (org.openmdx.compatibility.audit1.cci2.UnitOfWorkQuery) entityManager.newQuery(
-                    org.openmdx.compatibility.audit1.jmi1.UnitOfWork.class
-                );
-                query.thereExistsInvolved().elementOf(
-                    PersistenceHelper.getCandidates(
-                        entityManager.getExtent(Person.class),
-                        PERSON_AND_DESCENDANTS
-                    )
-                );
-            }
-            {
-                //
-                // ... and its negation
-                //
-                org.openmdx.compatibility.audit1.cci2.UnitOfWorkQuery query = (org.openmdx.compatibility.audit1.cci2.UnitOfWorkQuery) entityManager.newQuery(
-                    org.openmdx.compatibility.audit1.jmi1.UnitOfWork.class
-                );
-                query.thereExistsInvolved().notAnElementOf(
-                    PersistenceHelper.getCandidates(
-                        entityManager.getExtent(Person.class),
-                        PERSON_AND_DESCENDANTS
-                    )
-                );
-            }
         }
         
         protected void testCR20018726(
@@ -442,6 +462,21 @@ public class TestMain {
             }
         }
 
+        protected void testCR20019917(){
+            try {
+                super.taskId = "CR20019917";
+                Object userObject = new Object();
+                this.entityManager.setUserObject(userObject);
+                assertSame("initial UserObject", userObject, this.entityManager.getUserObject());
+                this.entityManager.setUserObject(BigDecimal.ONE);
+                assertSame("intermediate UserObject", BigDecimal.ONE, this.entityManager.getUserObject());
+                this.entityManager.setUserObject(null);
+                assertNull("final UserObject", this.entityManager.getUserObject());
+            } finally {
+                super.taskId = null;
+            }
+        }
+        
         @SuppressWarnings("deprecation")
         protected void testCR20019462(
         ) throws ServiceException{
@@ -466,7 +501,7 @@ public class TestMain {
                 super.taskId = "CR20018800";
                 PersistenceManager original = this.entityManager;
                 List<String> originalPrinicpals = UserObjects.getPrincipalChain(original); 
-                PersistenceManager sibling = TestMain.entityManagerFactory.getPersistenceManager();
+                PersistenceManager sibling = entityManagerFactory.getPersistenceManager();
                 List<String> siblingPrinicpals = UserObjects.getPrincipalChain(sibling); 
                 assertEquals("sibling", originalPrinicpals, siblingPrinicpals);
                 PersistenceManagerFactory factory = original.getPersistenceManagerFactory();
@@ -600,7 +635,6 @@ public class TestMain {
             } finally {
                 super.taskId = null;
             }
-
             //
             // CR20018821
             //
@@ -619,203 +653,626 @@ public class TestMain {
             }
 
             //
+            // CR20019971
+            //
+            try {
+                super.taskId = "CR20019971";
+            	InvoicePosition position = this.entityManager.newInstance(InvoicePosition.class);
+            	assertNull("Not yet contained", position.getInvoice());                         
+            	Invoice invoice = this.entityManager.newInstance(Invoice.class);
+            	invoice.addInvoicePosition(position);
+            	assertSame("Transient but contained", invoice, position.getInvoice());
+            } finally {
+            	super.taskId = null;
+            }
+            //
+            // CR20019996
+            //
+            BooleanProperty booleanProperty;
+            try {
+                super.taskId = "CR20019996";
+                booleanProperty = generic1Package.getBooleanProperty().createBooleanProperty();
+                booleanProperty.refSetValue("org:openmdx:generic1:Property:description","A SparseArray Of Flags");
+                booleanProperty.getBooleanValue().put(0, Boolean.TRUE);
+            } finally {
+                super.taskId = null;
+            }
+            //
             // Test Invoice
             //
+            Invoice invoice;
             try {
                 super.taskId = "CR0003551";
                 InvoiceClass invoiceClass = app1Package.getInvoice();
                 InvoicePositionClass invoicePositionClass = app1Package.getInvoicePosition();
-
-                BooleanProperty booleanProperty = generic1Package.getBooleanProperty().createBooleanProperty();
-
-                booleanProperty.setDescription("A SparseArray Of Flags");
-                booleanProperty.getBooleanValue().put(0, Boolean.TRUE);
-
-                Invoice invoice = invoiceClass.createInvoice();        
+                invoice = invoiceClass.createInvoice();        
                 invoice.setDescription("this is an invoice for PG0");
                 invoice.setProductGroupId("PG0");
-                assertNull("CR0003551", refGetPath(invoice));
-                RefContainer<Invoice> refInvoices = (RefContainer<Invoice>) segment.<Invoice>getInvoice();
+                assertNull("CR0003551", JDOHelper.getObjectId(invoice));
+                @SuppressWarnings("unchecked")
+				RefContainer<Invoice> refInvoices = (RefContainer<Invoice>) segment.<Invoice>getInvoice();
+                assertNull("Not yet contained", PersistenceHelper.getLastXRISegment(booleanProperty));
                 invoice.addProperty(false, "flag", booleanProperty);
-
+                assertFalse(JDOHelper.isPersistent(booleanProperty));
+                assertEquals("Transient object has alread XRI qualifier", "flag", PersistenceHelper.getLastXRISegment(booleanProperty));
                 this.begin();
                 refInvoices.refAdd(RefContainer.REASSIGNABLE, nextId(), invoice);
-                // this.invoiceId = invoice.refGetPath();
-                assertNotNull("CR0003551", refGetPath(invoice));
+                assertNotNull("CR0003551", JDOHelper.getObjectId(invoice));
                 for(int i = 0; i < 10; i++) {
                     InvoicePosition invoicePosition = invoicePositionClass.createInvoicePosition();
                     invoicePosition.setDescription("this is an invoice position for P" + i);
                     invoicePosition.setProductId("P" + i);
-                    assertNull("CR0003551", refGetPath(invoicePosition));
+                    assertNull("CR0003551", JDOHelper.getObjectId(invoicePosition));
                     invoice.addInvoicePosition(false, nextId(), invoicePosition);
-                    assertNotNull("CR0003551", refGetPath(invoicePosition));
+                    assertNotNull("CR0003551", JDOHelper.getObjectId(invoicePosition));
                 }
                 this.commit();
-                
-                //
-                // CR20019372
-                //
+                assertTrue(JDOHelper.isPersistent(booleanProperty));
+                assertEquals("Persistent object has alread XRI qualifier", "flag", PersistenceHelper.getLastXRISegment(booleanProperty));
+            } finally {
+                super.taskId = null;
+            }
+            //
+            // CR20019962
+            //
+            try {
+                super.taskId = "CR20019962";
+                invoice.getInvoicePosition((InvoicePositionQuery)null);
                 try {
-                    this.taskId = "CR20019372";
-                    this.begin();
-                    Invoice auditInvoice = this.entityManager.newInstance(Invoice.class);
-                    auditInvoice.setDescription("An invoice for audit tests");
-                    auditInvoice.setProductGroupId("PG0");
-                    StringProperty stringProperty = this.entityManager.newInstance(StringProperty.class);
-                    stringProperty.setDescription("Non-application id");
-                    stringProperty.getStringValue().put(1, "CR20019479");
-                    auditInvoice.getProperty().add(stringProperty);
-                    segment.addInvoice("CR20019372", auditInvoice);
-                    UriProperty uriProperty = this.entityManager.newInstance(UriProperty.class);
-                    uriProperty.setDescription("Non-application id");
-                    uriProperty.getUriValue().put(2, URI.create("xri://+ChangeRequest/20019533"));
-                    auditInvoice.getProperty().add(uriProperty);
-                    for(int i = 0; i < 5; i++){
-                        InvoicePosition auditPosition = this.entityManager.newInstance(InvoicePosition.class);
-                        auditPosition.setDescription("An invoice position for audit tests");
-                        auditPosition.setProductId("P" + i);
-                        auditInvoice.addInvoicePosition("IP" + i, auditPosition);
-                    }
-                    this.commit();
-                    this.begin();
-                    auditInvoice.setDescription("Invoice CR20019372");
-                    for(int i = 0; i < 5; i+=2){
-                        InvoicePosition auditPosition = auditInvoice.getInvoicePosition("IP" + i);
-                        auditPosition.setDescription("P" + i + ", an invoice position for audit tests");
-                    }
-                    this.commit();
-                } finally {
-                    super.taskId = null;
-                }
-                
-                //
-                // CR20019533
-                //
+                    invoice.getInvoicePosition((String)null);
+                    fail("null is not allowed as qualifier");
+                } catch (JmiServiceException exception) {
+                	assertEquals("Invalid Argument", BasicException.Code.DEFAULT_DOMAIN, exception.getExceptionDomain());
+                	assertEquals("Invalid Argument", BasicException.Code.BAD_PARAMETER, exception.getExceptionCode());
+                }            
                 try {
-                    this.taskId = "CR20019533";
-                    UriPropertyQuery query = (UriPropertyQuery) this.entityManager.newQuery(UriProperty.class);
-                    query.thereExistsUriValue().equalTo(URI.create("xri://+ChangeRequest/20019533"));
-                    List<UriProperty> properties = segment.getInvoice("CR20019372").<UriProperty>getProperty(query);
-                    assertEquals(1, properties.size());
-                    assertFalse("Plug-in-provided id", properties.get(0).refGetPath().getLastComponent().isPlaceHolder());
-                } finally {
-                    super.taskId = null;
+                    invoice.getInvoicePosition(false,(String)null);
+                    fail("null is not allowed as qualifier");
+                } catch (JmiServiceException exception) {
+                	assertEquals("Invalid Argument", BasicException.Code.DEFAULT_DOMAIN, exception.getExceptionDomain());
+                	assertEquals("Invalid Argument", BasicException.Code.BAD_PARAMETER, exception.getExceptionCode());
+                }            
+            } finally {
+                super.taskId = null;
+            }            
+            //
+            // CR20019959
+            //
+            try {
+                super.taskId = "CR20019959";
+                {
+                    
+                    ProductQuery productQuery = (ProductQuery) entityManager.newQuery(Product.class);
+                    productQuery.createdAt().lessThanOrEqualTo(new Date());
+                    InvoicePositionQuery invoicePositionQuery = (InvoicePositionQuery) entityManager.newQuery(InvoicePosition.class);
+                    invoicePositionQuery.product().elementOf(PersistenceHelper.asSubquery(productQuery));            
+                    @SuppressWarnings("unused") // We must not execute this query as the product reference is derived!
+					List<InvoicePosition> invoicePositions = invoice.getInvoicePosition(invoicePositionQuery);
                 }
-                
-//                synchronized(this) {
-//                    try {
-//                        System.out.println("Wait 5 sec");
-//                        Thread.yield();
-//                        wait(5000);
-//                        System.out.println("...done");
-//                    } catch (InterruptedException exception) {
-//                        System.out.println("...interrupted");
-//                    }
-//                }
+                {   
+                    InvoicePositionQuery invoicePositionQuery = (InvoicePositionQuery) entityManager.newQuery(InvoicePosition.class);
+                    invoicePositionQuery.productId().equalTo("P6");
+                    InvoiceQuery invoiceQuery = (InvoiceQuery) entityManager.newQuery(Invoice.class);
+                    invoiceQuery.thereExistsInvoicePosition().elementOf(PersistenceHelper.asSubquery(invoicePositionQuery));
+                    List<Invoice> invoices = segment.getInvoice(invoiceQuery);
+                    if (!RID_AND_OID_ARE_SEPARATED) {
+                        assertFalse("There exist invoices including product P6", invoices.isEmpty());
+                    }
+                    
+                }
+            } finally {
+                super.taskId = null;
+            }
+            //
+            // CR0000823
+            //
+            try {
+            	super.taskId = "CR0000823";
+                Person person = persistenceManager.newInstance(Person.class);
+                person.setGivenName("Klaus", "Maria");
+                //
+                // Before the unit of work's begin
+                //
+                assertEquals("Second part of first name", "Maria", person.getGivenName().get(1));
+                assertNull("LastName", person.getLastName());
+                if(persistenceManager.getPersistenceManagerFactory().getProperties().contains(Constants.OPTION_TRANSACTIONAL_TRANSIENT)) {
+                    this.begin();
+                    persistenceManager.makeTransactional(person);
+                    person.setLastName("Brandauer");
+                    //
+                    // In the unit of work
+                    //
+                    assertEquals("Second part of first name", "Maria", person.getGivenName().get(1));
+                    assertEquals("LastName", "Brandauer", person.getLastName());
+                    this.rollback();
+                    //
+                    // After the unit of work's roll-back
+                    //
+                    assertEquals("Second part of first name", "Maria", person.getGivenName().get(1));
+                    assertNull("LastName", person.getLastName());
+                } else {
+                    try {
+                        this.begin();
+                        persistenceManager.makeTransactional(person);
+                        fail(Constants.OPTION_TRANSACTIONAL_TRANSIENT + " is not supported");
+                    } catch (JDOUnsupportedOptionException expected) {
+                        person.setLastName("Brandauer");
+                        //
+                        // In the unit of work
+                        //
+                        assertEquals("Second part of first name", "Maria", person.getGivenName().get(1));
+                        assertEquals("LastName", "Brandauer", person.getLastName());
+                        this.rollback();
+                        //
+                        // After the unit of work's roll-back
+                        //
+                        assertEquals("Second part of first name", "Maria", person.getGivenName().get(1));
+                        assertEquals("LastName", "Brandauer", person.getLastName());
+                    }
+                }
+            } finally {
+            	super.taskId = null;
+            }
+            
+            //
+            // CR20019835
+            //
+            try {
+                super.taskId = "CR20019835";
+                this.begin();
+                Invoice i4711 = this.entityManager.newInstance(Invoice.class);
+                i4711.setDescription("K\u00F6lnische W\u00E4sser");
+                i4711.setInternationalProductGroupIdentification("K-4711");
+                segment.addInvoice("CR20019862", i4711);
+                this.commit();
+                fail("Missing mandatory feature ProductGroupId");
+            } catch (JDOFatalDataStoreException exception) {
+                assertEquals(
+                    "Missing mandatory feature ProductGroupId", 
+                    BasicException.Code.VALIDATION_FAILURE, 
+                    Throwables.getCause(exception, null).getExceptionCode()
+                );
+            } finally {
+                super.taskId = null;
+            }
+            //
+            // CR20019862
+            //
+            try {
+                super.taskId = "CR20019862";
+                {
+                    this.begin();
+                    Invoice i4711 = this.entityManager.newInstance(Invoice.class);
+                    i4711.setDescription("K\u00F6lnische W\u00E4sser");
+                    i4711.setInternationalProductGroupIdentification("K-4711");
+                    i4711.setProductGroupId("4711");
+                    segment.addInvoice("CR20019862", i4711);
+                    this.commit();
+                }
+                {
+                    InvoiceQuery query = (InvoiceQuery) this.entityManager.newQuery(Invoice.class);
+                    query.thereExistsInternationalProductGroupIdentification().like("K-.*");
+                    List<Invoice> groups = segment.getInvoice(query);
+                    assertEquals("K\u00F6lnisch Wasser", 1, groups.size());
+                }
+            } finally {
+                super.taskId = null;
+            }
+            //
+            // CR20019372
+            //
+            try {
+                this.taskId = "CR20019372";
+                this.begin();
+                Invoice auditInvoice = this.entityManager.newInstance(Invoice.class);
+                auditInvoice.setDescription("An invoice for audit tests");
+                auditInvoice.setProductGroupId("PG0");
+                StringProperty stringProperty = this.entityManager.newInstance(StringProperty.class);
+                stringProperty.setDescription("Non-application id");
+                stringProperty.getStringValue().put(1, "CR20019479");
+                auditInvoice.getProperty().add(stringProperty);
+                segment.addInvoice("CR20019372", auditInvoice);
+                UriProperty uriProperty = this.entityManager.newInstance(UriProperty.class);
+                uriProperty.setDescription("Non-application id");
+                uriProperty.getUriValue().put(2, URI.create("xri://+ChangeRequest/20019533"));
+                auditInvoice.getProperty().add(uriProperty);
+                for(int i = 0; i < 5; i++){
+                    InvoicePosition auditPosition = this.entityManager.newInstance(InvoicePosition.class);
+                    auditPosition.setDescription("An invoice position for audit tests");
+                    auditPosition.setProductId("P" + i);
+                    auditInvoice.addInvoicePosition("IP" + i, auditPosition);
+                }
+                this.commit();
+                this.begin();
+                auditInvoice.setDescription("Invoice CR20019372");
+                for(int i = 0; i < 5; i+=2){
+                    InvoicePosition auditPosition = auditInvoice.getInvoicePosition("IP" + i);
+                    auditPosition.setDescription("P" + i + ", an invoice position for audit tests");
+                }
+                this.commit();
+            } finally {
+                super.taskId = null;
+            }
+            Invoice propertyHolder = segment.getInvoice("CR20019372");
+            Path propertyId = null;
+            //
+            // CR20019629
+            //
+            try {
+                this.taskId = "CR20019629";
+                Collection<Property> properties = propertyHolder.<Property>getProperty();
+            	this.begin();
+                assertEquals(2, properties.size());
+                UriProperty uriProperty = this.entityManager.newInstance(UriProperty.class);
+                uriProperty.getUriValue().put(0, URI.create("xri://+ChangeRequest/20019629"));
+                propertyHolder.addProperty(this.taskId, uriProperty);
+                assertEquals(3, properties.size());
+                for(Property property : new ArrayList<Property>(properties)) {
+                    if(property instanceof StringProperty) {
+                        propertyId = property.refGetPath();
+                    }
+                    property.refDelete();
+                }
+                for(Property property : properties) {
+                    fail("There should be no properties left: " + property);
+                }
+            } finally {
+                this.rollback();
+                super.taskId = null;
+            }
+            //
+            // CR20019858
+            //
+            try {
+                super.taskId = "CR20019858";
+                final String propertyValue = "CR20019479";
+                final Integer propertyIndex = Integer.valueOf(1);
+                PropertySetHasProperties.Property<StringProperty> properties = propertyHolder.<StringProperty>getProperty();
+                StringProperty property = properties.get(QualifierType.REASSIGNABLE, propertyId.getBase());
+                assertEquals("Property value", propertyValue, property.getStringValue().get(propertyIndex));
+                this.begin();
+                property.getStringValue().put(propertyIndex, propertyValue);
+                this.commit();
+            } finally {
+                super.taskId = null;
+            }
+            //
+            // CR20019915
+            //
+            try {
+                super.taskId = "CR20019915";
+                PropertySetHasProperties.Property<Property> container = propertyHolder.<Property>getProperty();
+                List<Property> list = propertyHolder.<Property>getProperty((PropertyQuery)null);
+                this.begin();
+                //
+                // After begin
+                //
+                assertEquals("List size after begin", 2, list.size());
+                assertEquals("Container size after begin", 2, container.size());
+                //
+                // Add new property
+                //
+                IntegerProperty newProperty = this.entityManager.newInstance(IntegerProperty.class);
+                newProperty.getIntegerValue().put(0, Integer.valueOf(20019915));
+                propertyHolder.addProperty(this.taskId, newProperty);
+                //
+                // After insert
+                //
+                System.out.println("CR20019915: List");
+                assertEquals("List size after insert", 3, list.size());
+                for(Property p : list) {
+                    System.out.println(p.refClass().refMofId() + ": " + p.refMofId());
+                }
+                System.out.println("CR20019915: Container");
+                assertEquals("Container size after insert", 3, container.size());
+                for(Property p : container) {
+                    System.out.println(p.refClass().refMofId() + ": " + p.refMofId());
+                }
+                //
+                // Before roll back
+                //
+                assertEquals("List size before roll back", 3, list.size());
+                assertEquals("Container size before roll back", 3, container.size());
+                this.rollback();
+            } finally {
+                super.taskId = null;
+            }
+            
+            // CR20019816
+            //
+            if(VALIDATE_PERSISTENCE_MANAGER) try {
+                this.taskId = "CR20019816";
+            	this.begin();
+                PersistenceManager differentManager = newEntityManagerFactory().getPersistenceManager();
+				UriProperty uriProperty = differentManager.newInstance(UriProperty.class);
+                uriProperty.getUriValue().put(0, URI.create("xri://+ChangeRequest/20019816"));
+                try {
+	                propertyHolder.addProperty(this.taskId, uriProperty);
+	                fail("Data Object Manager Mismatch");
+                } catch (RuntimeException exception) {
+                	assertEquals(
+                		"Data Object Manager Mismatch", 
+                		BasicException.Code.BAD_PARAMETER, 
+                		BasicException.toExceptionStack(exception).getExceptionCode()
+                	);
+                }
+            } finally {
+                this.rollback();
+                super.taskId = null;
+            }                
+            //
+            // CR20019533
+            //
+            try {
+                this.taskId = "CR20019533";
+                UriPropertyQuery query = (UriPropertyQuery) this.entityManager.newQuery(UriProperty.class);
+                query.thereExistsUriValue().equalTo(URI.create("xri://+ChangeRequest/20019533"));
+                List<UriProperty> properties = propertyHolder.<UriProperty>getProperty(query);
+                assertEquals(1, properties.size());
+                assertFalse("Plug-in-provided id", properties.get(0).refGetPath().getLastComponent().isPlaceHolder());
+            } finally {
+                super.taskId = null;
+            }
+            {
+                System.out.println("Invoice instanceof " + Arrays.toString(invoice.getClass().getInterfaces()));
+                Path flagId = ((Path) JDOHelper.getObjectId(invoice)).getDescendant(
+                    "property",
+                    "flag"
+                );
+                BooleanProperty flag = (BooleanProperty) persistenceManager.getObjectById(flagId);
+                assertNotNull("Flag", flag);
+                SparseArray<Boolean> flags = flag.getBooleanValue();
+                assertNotNull("flags", flags);
+                assertEquals("Flag[0]", Boolean.TRUE, flags.get(0));
+                PersistenceManager m = JDOHelper.getPersistenceManager(flag);
+                assertSame(
+                    "Class with root parent", 
+                    persistenceManager, 
+                    m
+                );
+                if(this instanceof LocalConnectionTest) {
+                    assertTrue("Implementation detail", flag instanceof DelegatingRefObject_1_0);
+                    DelegatingRefObject_1_0 entity = (DelegatingRefObject_1_0) flag;
+                    Object dataObject = entity.openmdxjdoGetDataObject();
+                    assertTrue(dataObject instanceof PersistenceCapable);
+                    assertTrue(dataObject instanceof RefObject_1_0);
+                    ObjectView_1_0 objectView = ((RefObject_1_0)dataObject).refDelegate();
+                    assertNotNull(objectView);
+                    assertNotSame("Made persistent", entity.openmdxjdoGetDelegate(), dataObject);
+                }
+                if(this instanceof ProxyConnectionTest) {
+                    assertFalse("Implementation detail", flag instanceof DelegatingRefObject_1_0);
+                }
+            }
+            {
+                //
+                // Read via extent
+                //
+                String xriPattern = segment.refGetPath().getDescendant("invoice",":*","invoicePosition","%").toXRI(); 
+                InvoicePositionQuery invoicePositionQuery = (InvoicePositionQuery) PersistenceHelper.newQuery(
+                    entityManager.getExtent(InvoicePosition.class),
+                    xriPattern
+                );
+                List<InvoicePosition> invoicePositions = segment.getExtent(invoicePositionQuery);
+                assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(14).hasNext());
+                assertFalse("Invoice Positions: Last", invoicePositions.listIterator(15).hasNext());
+                assertEquals("Invoice Positions: Size", 15,invoicePositions.size());
+            }
+            {
+                //
+                // Read via Query
+                //
+                Path xriPattern = segment.refGetPath().getDescendant("invoice",":*","invoicePosition","%");
+                Query query = PersistenceHelper.newQuery(
+                    entityManager.getExtent(InvoicePosition.class),
+                    xriPattern
+                );
+                query.setCandidates(segment.getExtent());                
+                @SuppressWarnings("unchecked")
+				List<InvoicePosition> invoicePositions = (List<InvoicePosition>) query.execute();
+                assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(14).hasNext());
+                assertFalse("Invoice Positions: Last", invoicePositions.listIterator(15).hasNext());
+                assertEquals("Invoice Positions: Size", 15,invoicePositions.size());
+            }
+            {
+                InvoicePositionQuery invoicePositionQuery = app1Package.createInvoicePositionQuery();
+                // get products without price. price is an expensive derived
+                // atttribute. Therefore this iteration should be much faster
+                // than the next one
+                startedAt = System.currentTimeMillis();
+                InvoiceHasInvoicePosition.InvoicePosition<InvoicePosition> allInvoicePositions = invoice.getInvoicePosition();
+                Collection<InvoicePosition> someInvoicePositions = invoicePositionQuery == null ?
+                    allInvoicePositions :
+                        allInvoicePositions.getAll(invoicePositionQuery);
+                for(InvoicePosition invoicePosition : someInvoicePositions) {
+                    Product product = invoicePosition.getProduct();
+                    product.getDescription();
+                }
+                System.out.println("time for retrieving 10 invoice positions (without price)=" + (System.currentTimeMillis() - startedAt));
 
-                {
-                    System.out.println("Invoice instanceof " + Arrays.toString(invoice.getClass().getInterfaces()));
-                    Path flagId = ((Path) JDOHelper.getObjectId(invoice)).getDescendant(
-                        "property",
-                        "flag"
-                    );
-                    BooleanProperty flag = (BooleanProperty) persistenceManager.getObjectById(flagId);
-                    assertNotNull("Flag", flag);
-                    SparseArray<Boolean> flags = flag.getBooleanValue();
-                    assertNotNull("flags", flags);
-                    assertEquals("Flag[0]", Boolean.TRUE, flags.get(0));
-                    PersistenceManager m = JDOHelper.getPersistenceManager(flag);
-                    assertSame(
-                        "Class with root parent", 
-                        persistenceManager, 
-                        m
-                    );
-                    if(this instanceof LocalConnectionTest) {
-                        assertTrue("Implementation detail", flag instanceof DelegatingRefObject_1_0);
-                        DelegatingRefObject_1_0 entity = (DelegatingRefObject_1_0) flag;
-                        Object dataObject = entity.openmdxjdoGetDataObject();
-                        assertTrue(dataObject instanceof PersistenceCapable);
-                        assertTrue(dataObject instanceof RefObject_1_0);
-                        ObjectView_1_0 objectView = ((RefObject_1_0)dataObject).refDelegate();
-                        assertNotNull(objectView);
-                        assertNotSame("Made persistent", entity.openmdxjdoGetDelegate(), dataObject);
+                startedAt = System.currentTimeMillis();
+                allInvoicePositions  = invoice.getInvoicePosition();
+                for(InvoicePosition invoicePosition : allInvoicePositions){
+                    Product product = invoicePosition.getProduct();
+                    String description = product.getDescription();
+                    if(description == null) {
+                        description = product.refGetPath().getBase();
                     }
-                    if(this instanceof ProxyConnectionTest) {
-                        assertFalse("Implementation detail", flag instanceof DelegatingRefObject_1_0);
+                    System.out.println("Product " + description + " costs " + product.getPrice());
+                }
+                System.out.println("time for retrieving 10 invoice positions (with price)=" + (System.currentTimeMillis() - startedAt));
+            }
+            try {
+                super.taskId = "CR20019855";
+                for(Invoice i : segment.<Invoice>getInvoice()) {
+                    for(InvoicePosition p : i.<InvoicePosition>getInvoicePosition()) {
+                        assertNotNull("The product id is mandatory", p.getProductId());
                     }
                 }
-                {
+            } finally {
+                super.taskId = null;
+            }
+            //
+            // CR20019668 
+            // 
+            try {
+                this.taskId = "CR20019668";
+                RefQuery_1_0 query = (RefQuery_1_0) Queries.prepareQuery(
+                    persistenceManager.newQuery(Invoice.class), 
+                    segment.getInvoice(), 
+                    "forAllDescription().unlike(\"./.\");thereExistsInvoicePosition().productId().like(\"P.*\");forAllProperty().name().equalTo(\"FLAG\")"
+                );
+                List<Condition> conditions = query.refGetFilter().getCondition();
+                assertEquals("Conditions", 4, conditions.size());
+                assertEquals("Condition 0", SystemAttributes.OBJECT_INSTANCE_OF, conditions.get(0).getFeature());
+                assertEquals("Condition 0", Quantifier.THERE_EXISTS, conditions.get(0).getQuantifier());
+                assertEquals("Condition 0", ConditionType.IS_IN, conditions.get(0).getType());
+                assertEquals("Condition 0", 1, conditions.get(0).getValue().length);
+                assertEquals("Condition 0", "test:openmdx:app1:Invoice", conditions.get(0).getValue(0));
+                assertEquals("Condition 1", "description", conditions.get(1).getFeature());
+                assertEquals("Condition 1", Quantifier.FOR_ALL, conditions.get(1).getQuantifier());
+                assertEquals("Condition 1", ConditionType.IS_UNLIKE, conditions.get(1).getType());
+                assertEquals("Condition 1", 1, conditions.get(1).getValue().length);
+                assertEquals("Condition 1", "./.", conditions.get(1).getValue(0));
+                assertEquals("Condition 2", "invoicePosition", conditions.get(2).getFeature());
+                assertEquals("Condition 2", Quantifier.THERE_EXISTS, conditions.get(2).getQuantifier());
+                assertEquals("Condition 2", ConditionType.IS_IN, conditions.get(2).getType());
+                assertEquals("Condition 2", 1, conditions.get(2).getValue().length);
+                assertTrue("Condition 2", conditions.get(2).getValue(0) instanceof Filter);
+                List<Condition> conditions2 = ((Filter)conditions.get(2).getValue(0)).getCondition();
+                assertEquals("Conditions 2", 2, conditions2.size());
+                assertEquals("Condition 2.0", SystemAttributes.OBJECT_INSTANCE_OF, conditions2.get(0).getFeature());
+                assertEquals("Condition 2.0", Quantifier.THERE_EXISTS, conditions2.get(0).getQuantifier());
+                assertEquals("Condition 2.0", ConditionType.IS_IN, conditions2.get(0).getType());
+                assertEquals("Condition 2.0", 1, conditions2.get(0).getValue().length);
+                assertEquals("Condition 2.0", "test:openmdx:app1:InvoicePosition", conditions2.get(0).getValue(0));
+                assertEquals("Condition 2.1", "productId", conditions2.get(1).getFeature());
+                assertEquals("Condition 2.1", Quantifier.THERE_EXISTS, conditions2.get(1).getQuantifier());
+                assertEquals("Condition 2.1", ConditionType.IS_LIKE, conditions2.get(1).getType());
+                assertEquals("Condition 2.1", 1, conditions2.get(1).getValue().length);
+                assertEquals("Condition 2.1", "P.*", conditions2.get(1).getValue(0));
+                assertEquals("Condition 3", "property", conditions.get(3).getFeature());
+                assertEquals("Condition 3", Quantifier.FOR_ALL, conditions.get(3).getQuantifier());
+                assertEquals("Condition 3", ConditionType.IS_IN, conditions.get(3).getType());
+                assertEquals("Condition 3", 1, conditions.get(3).getValue().length);
+                assertTrue("Condition 3", conditions.get(3).getValue(0) instanceof Filter);
+                List<Condition> conditions3 = ((Filter)conditions.get(3).getValue(0)).getCondition();
+                assertEquals("Conditions 3", 2, conditions3.size());
+                assertEquals("Condition 3.0", SystemAttributes.OBJECT_INSTANCE_OF, conditions3.get(0).getFeature());
+                assertEquals("Condition 3.0", Quantifier.THERE_EXISTS, conditions3.get(0).getQuantifier());
+                assertEquals("Condition 3.0", ConditionType.IS_IN, conditions3.get(0).getType());
+                assertEquals("Condition 3.0", 1, conditions3.get(0).getValue().length);
+                assertEquals("Condition 3.0", "org:openmdx:generic1:Property", conditions3.get(0).getValue(0));
+                assertEquals("Condition 3.1", "name", conditions3.get(1).getFeature());
+                assertEquals("Condition 3.1", Quantifier.THERE_EXISTS, conditions3.get(1).getQuantifier());
+                assertEquals("Condition 3.1", ConditionType.IS_IN, conditions3.get(1).getType());
+                assertEquals("Condition 3.1", 1, conditions3.get(1).getValue().length);
+                assertEquals("Condition 3.1", "FLAG", conditions3.get(1).getValue(0));
+            } finally {
+                super.taskId = null;
+            }
+            //
+            // CR20019771: ModelAware filter 
+            // 
+            try {
+                this.taskId = "CR20019771";
+                //
+                // Complex query.
+                //
+                if (!RID_AND_OID_ARE_SEPARATED) {
                     //
-                    // Read via extent
-                    //
-                    String xriPattern = segment.refGetPath().getDescendant("invoice",":*","invoicePosition","%").toXRI(); 
-                    InvoicePositionQuery invoicePositionQuery = (InvoicePositionQuery) PersistenceHelper.newQuery(
-                        entityManager.getExtent(InvoicePosition.class),
-                        xriPattern
-                    );
-                    List<InvoicePosition> invoicePositions = segment.getExtent(invoicePositionQuery);
-                    assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(14).hasNext());
-                    assertFalse("Invoice Positions: Last", invoicePositions.listIterator(15).hasNext());
-                    assertEquals("Invoice Positions: Size", 15,invoicePositions.size());
-                }
-                {
-                    //
-                    // Read via Query
-                    //
-                    Path xriPattern = segment.refGetPath().getDescendant("invoice",":*","invoicePosition","%");
-                    Query query = PersistenceHelper.newQuery(
-                        entityManager.getExtent(InvoicePosition.class),
-                        xriPattern
-                    );
-                    query.setCandidates(segment.getExtent());                
-                    List<InvoicePosition> invoicePositions = (List<InvoicePosition>) query.execute();
-                    assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(14).hasNext());
-                    assertFalse("Invoice Positions: Last", invoicePositions.listIterator(15).hasNext());
-                    assertEquals("Invoice Positions: Size", 15,invoicePositions.size());
-                }
-                {
-                    InvoicePositionQuery invoicePositionQuery = app1Package.createInvoicePositionQuery();
-                    // get products without price. price is an expensive derived
-                    // atttribute. Therefore this iteration should be much faster
-                    // than the next one
-                    startedAt = System.currentTimeMillis();
-                    InvoiceHasInvoicePosition.InvoicePosition<InvoicePosition> allInvoicePositions = invoice.getInvoicePosition();
-                    Collection<InvoicePosition> someInvoicePositions = invoicePositionQuery == null ?
-                        allInvoicePositions :
-                            allInvoicePositions.getAll(invoicePositionQuery);
-                    for(InvoicePosition invoicePosition : someInvoicePositions) {
-                        Product product = invoicePosition.getProduct();
-                        product.getDescription();
-                        //                  System.out.println("product[" + i + "]");
-                        //                  System.out.println("  description=" + product.getDescription());
-                    }
-                    System.out.println("time for retrieving 10 invoice positions (without price)=" + (System.currentTimeMillis() - startedAt));
-
-                    startedAt = System.currentTimeMillis();
-                    allInvoicePositions  = invoice.getInvoicePosition();
-                    for(InvoicePosition invoicePosition : allInvoicePositions){
-                        Product product = invoicePosition.getProduct();
-                        String description = product.getDescription();
-                        if(description == null) {
-                            description = product.refGetPath().getBase();
-                        }
-                        System.out.println("Product " + description + " costs " + product.getPrice());
-                        //                  System.out.println("product[" + i + "]");
-                        //                  System.out.println("  description=" + product.getDescription());
-                        //                  System.out.println("  price=" + product.getPrice());
-                    }
-                    System.out.println("time for retrieving 10 invoice positions (with price)=" + (System.currentTimeMillis() - startedAt));
-                }
-                if (USES_DB_OBJECT_WITH_ID_AS_KEY) {
-                    //
-                    // Complex query. 
-                    // Complex queries only work with DbObjectWithIdAsKey
+                    // Complex queries only work either with DbObjectWithIdAsKey...
                     //
                     InvoiceQuery invoiceQuery = (InvoiceQuery)persistenceManager.newQuery(Invoice.class);
                     invoiceQuery.thereExistsInvoicePosition().productId().like("P.*");
-                    invoiceQuery.thereExistsProperty().name().equalTo("flag");
                     List<Invoice> matchingInvoices = segment.getInvoice(invoiceQuery);
-                    assertEquals("Complex query", matchingInvoices.size(), 10);
+                    assertEquals("Complex query", 2, matchingInvoices.size());
+                } 
+                try {
+                    //
+                    // ... or on transient objects
+                    //
+                    this.begin();
+                    {
+                        //
+                        // Containment
+                        //
+                        final int positionCount = 10;
+                        final int propertyCount = 4;
+                        Invoice transientInvoice = persistenceManager.newInstance(Invoice.class);
+                        for(int i = 0; i < positionCount; i++) {
+                            InvoicePosition invoicePosition = persistenceManager.newInstance(InvoicePosition.class);
+                            transientInvoice.addInvoicePosition("T" + i, invoicePosition);
+                            for(int j = 0; j < propertyCount; j++) {
+                                IntegerProperty positionProperty = persistenceManager.newInstance(IntegerProperty.class);
+                                String prefix = 
+                                    i % 2 == 0 && j % 2 == 0 ? "EVEN" : 
+                                    i % 2 == 1 && j % 2 == 1 ? "ODD" :
+                                    "MIXED";
+                                positionProperty.getIntegerValue().put(j, 1000 * i + j);
+                                positionProperty.setDescription(prefix + "[" + i + "," + j + "]");
+                                invoicePosition.addProperty("P" + j, positionProperty);
+                            }
+                            assertEquals("Properties/Position", propertyCount, invoicePosition.getProperty().size());
+                        }
+                        assertEquals("Positions/Invoice", positionCount, transientInvoice.getInvoicePosition().size());
+                        InvoicePositionQuery positionQuery = (InvoicePositionQuery) persistenceManager.newQuery(InvoicePosition.class);
+                        positionQuery.thereExistsProperty().thereExistsDescription().like("ODD.*");
+                        assertEquals("ODDs", positionCount / 2, transientInvoice.getInvoicePosition(positionQuery).size());
+                    }
+                    {
+                        //
+                        // References stored as attributes
+                        //
+                        final int personCount = 10;
+                        final int groupCount = 4;
+                        test.openmdx.app1.jmi1.Segment transientSegment = persistenceManager.newInstance(test.openmdx.app1.jmi1.Segment.class);
+                        PersonGroup[] groups = new PersonGroup[groupCount];
+                        for(int i = 0; i < groupCount; i++) {
+                            groups[i] = persistenceManager.newInstance(PersonGroup.class);
+                            String name = "G" + i;
+                            groups[i].setName(name);
+                            transientSegment.addPersonGroup(name, groups[i]);
+                        }
+                        assertEquals("Groups/Segment", groupCount, transientSegment.getPersonGroup().size());
+                        for(int j = 0; j < personCount; j++) {
+                            Person person = persistenceManager.newInstance(Person.class);
+                            if(j > 0) {
+                                PersonGroup group = groups[j % groupCount];
+                                person.getPersonGroup().add(group);
+                            }
+                            transientSegment.addPerson("P" + j, person);
+                        }
+                        assertEquals("People/Segment", personCount, transientSegment.getPerson().size());
+                        {
+                            PersonQuery personQuery = (PersonQuery) persistenceManager.newQuery(Person.class);
+                            personQuery.thereExistsPersonGroup().name().equalTo("G1");
+                            assertEquals("Some G1", 3, transientSegment.getPerson(personQuery).size());
+                        }
+                        {
+                            PersonQuery personQuery = (PersonQuery) persistenceManager.newQuery(Person.class);
+                            personQuery.thereExistsPersonGroup().name().equalTo("G3");
+                            assertEquals("Some G3", 2, transientSegment.getPerson(personQuery).size());
+                        }
+                        {
+                            PersonQuery personQuery = (PersonQuery) persistenceManager.newQuery(Person.class);
+                            personQuery.forAllPersonGroup().name().equalTo("G3");
+                            assertEquals("All G3", 3, transientSegment.getPerson(personQuery).size());
+                        }
+                        {
+                            PersonQuery personQuery = (PersonQuery) persistenceManager.newQuery(Person.class);
+                            personQuery.forAllPersonGroup().name().like("G.*");
+                            assertEquals("All Start With G", personCount, transientSegment.getPerson(personQuery).size());
+                        }
+                        {
+                            PersonQuery personQuery = (PersonQuery) persistenceManager.newQuery(Person.class);
+                            personQuery.thereExistsPersonGroup().name().like("G.*");
+                            assertEquals("Some Start With G", personCount - 1, transientSegment.getPerson(personQuery).size());
+                        }
+                    }
+                } finally {
+                    // Person objects are still incomplete
+                    this.rollback();
                 }
             } finally {
                 super.taskId = null;
@@ -914,19 +1371,13 @@ public class TestMain {
                 emailAddress = emailAddressClass.createEmailAddress();
                 emailAddress.setAddress("hans.muster@app1.ch");
                 segment.addAddress(false, "0002", emailAddress);
-                assertEquals(
-                    "Transient added address count",
-                    2,
-                    segment.getAddress().size()
-                );
+                int addressCount = segment.getAddress().size(); 
+                assertEquals("Transient added address count", 2, addressCount);
                 switch(i){
                     case 0: {
                         this.rollback();
-                        assertEquals(
-                            "Rolled back address count",
-                            0,
-                            segment.getAddress().size()
-                        );
+                        addressCount = segment.getAddress().size(); 
+                        assertEquals("Rolled back address count", 0, addressCount);
                     } break;
                     case 1: {
                         this.commit();
@@ -941,31 +1392,19 @@ public class TestMain {
                         this.entityManager.retrieve(retrievedAddress);
                         this.begin();
                         segment.getAddress().clear();
-                        assertEquals(
-                            "Transient cleared address count",
-                            0,
-                            segment.getAddress().size()
-                        );
+                        addressCount = segment.getAddress().size(); 
+                        assertEquals("Transient cleared address count", 0, addressCount);
                         this.commit();
-                        assertEquals(
-                            "Cleared persistent address count",
-                            0,
-                            segment.getAddress().size()
-                        );
+                        addressCount = segment.getAddress().size(); 
+                        assertEquals("Cleared persistent address count", 0, addressCount);
                     } break;
                     case 2: {
                         segment.getAddress().clear();
-                        assertEquals(
-                            "Cleared transient address count",
-                            0,
-                            segment.getAddress().size()
-                        );
+                        addressCount = segment.getAddress().size(); 
+                        assertEquals("Cleared transient address count", 0, addressCount);
                         this.commit();
-                        assertEquals(
-                            "Cleared committed address count",
-                            0,
-                            segment.getAddress().size()
-                        );
+                        addressCount = segment.getAddress().size(); 
+                        assertEquals("Cleared committed address count", 0, addressCount);
                         assertTrue(
                             "Cleared committed address count",
                             segment.getAddress().isEmpty()
@@ -975,28 +1414,23 @@ public class TestMain {
                         EmailAddress transientAddress = emailAddressClass.createEmailAddress();
                         transientAddress.setAddress("john.player@games.net");
                         segment.addAddress(false, "0003", transientAddress);
-                        assertEquals(
-                            "Transient added address count",
-                            3,
-                            segment.getAddress().size()
-                        );
+                        addressCount = segment.getAddress().size(); 
+                        assertEquals("Transient added address count", 3, addressCount);
                         transientAddress.refDelete(); // segment.getAddress().remove(transientAddress);
                         this.commit();
-                        assertEquals(
-                            "Commited address count",
-                            2,
-                            segment.getAddress().size()
-                        );
+                        addressCount = segment.getAddress().size(); 
+                        assertEquals("Commited address count", 2, addressCount);
                     } break;
                     default:
                         fail("No more instructions");
                 }
             }
+            Path segmentId = (Path) JDOHelper.getObjectId(segment);
             assertTrue(
                 "Identity should be available outside the unit of work",
                 Arrays.equals(
-                    refGetPath(segment).getSuffix(
-                        refGetPath(segment).size() - 2
+                    segmentId.getSuffix(
+                        segmentId.size() - 2
                     ),
                     new String[]{"segment",SEGMENT_NAME}
                 )
@@ -1059,9 +1493,10 @@ public class TestMain {
                 super.taskId = "CR220019366";
                 Address original = segment.getAddress("0001");
                 assertEquals("Address.id()", "0001", original.getId());
-                PersistenceManager sibling = TestMain.entityManagerFactory.getPersistenceManager();
+                PersistenceManager sibling = entityManagerFactory.getPersistenceManager();
                 Path xri = new Path(original.refMofId()); 
-                RefContainer<Address> container = (RefContainer<Address>) sibling.getObjectById(xri.getParent());
+                @SuppressWarnings("unchecked")
+				RefContainer<Address> container = (RefContainer<Address>) sibling.getObjectById(xri.getParent());
                 Address copy = container.refGet(RefContainer.REASSIGNABLE, xri.getBase());
                 assertEquals("Address.id()", "0001", copy.getId());
                 assertNotSame(original, copy);
@@ -1150,12 +1585,37 @@ public class TestMain {
             );
             this.commit();
             this.begin();
+            EmailAddressSendMessageTemplateParams emailAddressSendMessageTemplateParams;
+            switch(this.nextStructureCreation()){
+                case BY_PACKAGE:
+                    emailAddressSendMessageTemplateParams = app1Package.createEmailAddressSendMessageTemplateParams(
+                        messageTemplate,
+                        0,
+                        "hello world"
+                    ); 
+                    break;
+                case BY_MEMBER:
+                    emailAddressSendMessageTemplateParams = Datatypes.create(
+                        EmailAddressSendMessageTemplateParams.class,
+                        Datatypes.member(EmailAddressSendMessageTemplateParams.Member.body, messageTemplate),
+                        Datatypes.member(EmailAddressSendMessageTemplateParams.Member.priority, 0),
+                        Datatypes.member(EmailAddressSendMessageTemplateParams.Member.subject, "hello world")
+                    );
+                    break;
+                case BY_POSITION:
+                    emailAddressSendMessageTemplateParams = Datatypes.create(
+                        EmailAddressSendMessageTemplateParams.class,
+                            messageTemplate,
+                            0,
+                            "hello world"
+                        );
+                    break;
+                default: 
+                    emailAddressSendMessageTemplateParams = null;
+            }
+            
             EmailAddressSendMessageTemplateResult sendResult = emailAddress.sendMessageTemplate(
-                app1Package.createEmailAddressSendMessageTemplateParams(
-                    messageTemplate,
-                    0,
-                    "hello world"
-                )
+                emailAddressSendMessageTemplateParams
             );
             assertNotNull("Send result", sendResult);
             this.commit();
@@ -1227,10 +1687,10 @@ public class TestMain {
                 person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1963-01-01"));
                 person.setLastName("Rossi");
                 person.setSalutation("Signor");
-                person.setSex((short)0);
                 person.getGivenName().add("Alfonso");
                 int age = GregorianCalendar.getInstance().get(GregorianCalendar.YEAR) - 1963;
                 assertEquals("Age", age, person.getAge()); 
+                person.setSex((short)0);
                 segment.addPerson(false, nextId(), person);
                 this.commit();
                 fail("'Signor' was expected not to be supported");
@@ -1240,28 +1700,118 @@ public class TestMain {
                 super.taskId = null;
             }
 
-            this.begin();
-            person = personClass.createPerson();
-            person.setForeignId("FX");
-            person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "1960-01-01"));
-            person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
-            /* d = */ person.getBirthdateAsDateTime();
-            person.setLastName("MusterX");
-            person.setSalutation("Herr");
-            person.setSex((short)0);
-            person.getGivenName().add("Hans");
-            person.getGivenName().add("Heiri");
-            person.setGivenName("Hans", "Heiri");
-            SparseArray<String> additionalInfo = person.getAdditionalInfo();
-            additionalInfo.put(0, "Null");
-            additionalInfo.put(2, "Zwei");
-            person.getAssignedAddress().addAll(Arrays.asList(postalAddress,emailAddress));
-            segment.addPerson(false, nextId(), person);
-            this.commit();
+            try {
+                super.taskId = "CR20019721";
+                this.begin();
+                person = personClass.createPerson();
+                person.setForeignId("FX");
+                XMLGregorianCalendar birthDate = DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("1960-01-01");
+                birthDate.setTimezone(-1);
+                person.setBirthdate(birthDate);
+                person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
+                assertEquals(
+                	"Born at noon", 
+                	"1960-01-01T12:00:00.000Z", 
+                	DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime())
+                );
+                person.setLastName("MusterX");
+                person.setSalutation("Herr");
+                person.setSex((short)0);
+                person.setGivenName("Hans", "Heiri");
+                SparseArray<String> additionalInfo = person.getAdditionalInfo();
+                additionalInfo.put(0, "Null");
+                additionalInfo.put(2, "Zwei");
+                person.getAssignedAddress().addAll(Arrays.asList(postalAddress,emailAddress));
+                if(this instanceof ProxyConnectionTest) {
+                    try {
+                        segment.addPerson(person);
+                        fail("Birthdate with time zone is invalid: " + birthDate);
+                    } catch (JmiServiceException expected) {
+                        BasicException exceptionStack = BasicException.toExceptionStack(expected);
+                        assertEquals("Unit of work has to be rolled back", BasicException.Code.TRANSFORMATION_FAILURE, exceptionStack.getExceptionCode());
+                        assertEquals("Unit of work has to be rolled back", CommException.class.getName(), exceptionStack.getExceptionClass());
+                        assertEquals("cause", BasicException.Code.BAD_PARAMETER, exceptionStack.getCause(null).getExceptionCode());
+                        assertEquals("cause", IllegalArgumentException.class.getName(), exceptionStack.getCause(null).getExceptionClass());
+                    } finally {
+                        this.rollback();
+                    }
+                } else if(this instanceof OptimisticContainerManagedTransactionTest) {
+                    try {
+                        segment.addPerson(person);
+                        this.commit();
+                        fail("Birthdate with time zone is invalid: " + birthDate);
+                    } catch (JDOFatalDataStoreException expected) {
+                        BasicException exceptionStack = BasicException.toExceptionStack(expected);
+                        assertEquals("Unit of work has to be rolled back", BasicException.Code.TRANSFORMATION_FAILURE, exceptionStack.getExceptionCode());
+                        assertEquals("Initial Cause", BasicException.Code.GENERIC, exceptionStack.getCause(null).getExceptionCode());
+                        assertTrue(
+                        	"Initial Cause", 
+                        	IllegalArgumentException.class.getName().equals(exceptionStack.getCause(null).getExceptionClass()) || // JRE 6
+                        	NumberFormatException.class.getName().equals(exceptionStack.getCause(null).getExceptionClass()) // JRE 5.0
+                        );
+                    }
+                } else if(this instanceof PessimisticContainerManagedTransactionTest) {
+                    try {
+                        segment.addPerson(person);
+                        this.commit();
+                        fail("Birthdate with time zone is invalid: " + birthDate);
+                    } catch (JDOFatalDataStoreException expected) {
+                        BasicException exceptionStack = BasicException.toExceptionStack(expected);
+                        assertEquals("Unit of work should have been rolled back", BasicException.Code.TRANSFORMATION_FAILURE, exceptionStack.getExceptionCode());
+                        assertEquals("Unit of work should have been rolled back", BasicException.Code.GENERIC, exceptionStack.getCause(null).getExceptionCode());
+                        assertTrue(
+                        	"Initial Cause", 
+                        	IllegalArgumentException.class.getName().equals(exceptionStack.getCause(null).getExceptionClass()) || // JRE 6
+                        	NumberFormatException.class.getName().equals(exceptionStack.getCause(null).getExceptionClass()) // JRE 5.0
+                        );
+                    }
+                } else {
+                    try {
+                        segment.addPerson(person);
+                        this.commit();
+                        fail("Birthdate with time zone is invalid: " + birthDate);
+                    } catch (JDOFatalDataStoreException expected) {
+                        BasicException exceptionStack = BasicException.toExceptionStack(expected);
+                        assertEquals("Unit of work should have been rolled back", BasicException.Code.ROLLBACK, exceptionStack.getExceptionCode());
+                        assertEquals("Initial Cause", BasicException.Code.GENERIC, exceptionStack.getCause(null).getExceptionCode());
+                        assertTrue(
+                        	"Initial Cause", 
+                        	IllegalArgumentException.class.getName().equals(exceptionStack.getCause(null).getExceptionClass()) || // JRE 6
+                        	NumberFormatException.class.getName().equals(exceptionStack.getCause(null).getExceptionClass()) // JRE 5.0
+                        );
+                    }
+                }
+            } finally {
+                super.taskId = null;
+            }
             
-
+            {
+                this.begin();
+                person = personClass.createPerson();
+                person.setForeignId("FX");
+                XMLGregorianCalendar birthDate = Datatypes.create(XMLGregorianCalendar.class, "1960-01-01");
+                person.setBirthdate(birthDate);
+                person.setBirthdateAsDateTime(Datatypes.create(Date.class, "19600101T120000.000Z"));
+                assertEquals(
+                	"Born at noon", 
+                	"1960-01-01T12:00:00.000Z", 
+                	DateTimeFormat.EXTENDED_UTC_FORMAT.format(person.getBirthdateAsDateTime())
+                );
+                person.setLastName("MusterX");
+                person.setSalutation("Herr");
+                person.setSex((short)0);
+                person.getGivenName().add("Hans");
+                person.getGivenName().add("Heiri");
+                SparseArray<String> additionalInfo = person.getAdditionalInfo();
+                additionalInfo.put(0, "Null");
+                additionalInfo.put(2, "Zwei");
+                person.getAssignedAddress().addAll(Arrays.asList(postalAddress,emailAddress));
+                segment.addPerson(false, nextId(), person);
+                this.commit();
+            }
+            
             Path personId = (Path) JDOHelper.getObjectId(person);
-            if(!(this instanceof ContainerManagedTransactionTest)){
+            if(!(this instanceof AbstractContainerManagedTransactionTest)){
                 {
                     this.begin();
                     person.getAdditionalInfo().put(10, "Ten");
@@ -1328,11 +1878,11 @@ public class TestMain {
                     assertEquals("CR20018969.2", "2", tail.get(2));
                 }
             }
-
+            Path pId = (Path) JDOHelper.getObjectId(person);
             assertEquals("person.refMofId() must be object path", 1, new Path(person.refMofId()).size() % 2);
-            assertEquals("person's path must be object path", 1, refGetPath(person).size() % 2);
-            assertEquals("person.refIdentity() must corrspond to its path", refGetPath(person).toXRI(), person.getIdentity());
-            assertEquals("person.refMofId() must corrspond to its path", refGetPath(person).toXRI(), person.refMofId());
+            assertEquals("person's path must be object path", 1, pId.size() % 2);
+            assertEquals("person.refIdentity() must corrspond to its path", pId.toXRI(), person.getIdentity());
+            assertEquals("person.refMofId() must corrspond to its path", pId.toXRI(), person.refMofId());
 
             assertEquals(
                 "Initial postal code without country code",
@@ -1366,7 +1916,7 @@ public class TestMain {
                 // postal code not yet refreshed
                 List<Address> addresses = person.getAssignedAddress();
                 Address address = addresses.get(i);
-                System.out.println("assigned address=" + refGetPath(address));
+                System.out.println("assigned address=" + JDOHelper.getObjectId(address));
             }
 
             PostalAddress additionalAddress;
@@ -1389,7 +1939,7 @@ public class TestMain {
             List<Address> assignedAddresses = person.getAssignedAddress();
             for(Address address : assignedAddresses) {
                 // postal code refreshed
-                if(refGetPath(address).equals(refGetPath(postalAddress))) {
+                if(JDOHelper.getObjectId(address).equals(JDOHelper.getObjectId(postalAddress))) {
                     if(address instanceof DelegatingRefObject_1_0) {
                         assertSame(
                             "created and retrieved object should be the same",
@@ -1404,7 +1954,7 @@ public class TestMain {
                         );
                     }
                 }
-                System.out.println("assigned address=" + refGetPath(address));
+                System.out.println("assigned address=" + JDOHelper.getObjectId(address));
             }
             assertEquals("number of assigned addresses", 5, person.getAssignedAddress().size());
     
@@ -1412,16 +1962,47 @@ public class TestMain {
             // perform an assign. It is just there to see whether the operation
             // invocation works.
             this.begin();
-            person.assignAddress(
-                app1Package.createPersonAssignAddressParams(
-                    Arrays.asList(
-                        new Address[]{
-                            postalAddress,
-                            emailAddress
-                        }
-                    )
-                )
-            );
+            PersonAssignAddressParams personAssignAddressParams;
+            switch(this.nextStructureCreation()) {
+                case BY_MEMBER:
+                    personAssignAddressParams = Datatypes.create(
+                        PersonAssignAddressParams.class,
+                        Datatypes.member(
+                            PersonAssignAddressParams.Member.address,
+                            Arrays.asList(
+                                new Address[]{
+                                    postalAddress,
+                                    emailAddress
+                                }
+                            )
+                        )
+                    );
+                    break;
+                case BY_PACKAGE:
+                    personAssignAddressParams = app1Package.createPersonAssignAddressParams(
+                        Arrays.asList(
+                            new Address[]{
+                                postalAddress,
+                                emailAddress
+                            }
+                        )
+                    );
+                    break;
+                case BY_POSITION:
+                    personAssignAddressParams = Datatypes.create(
+                        PersonAssignAddressParams.class,
+                        Arrays.asList(
+                            new Address[]{
+                                postalAddress,
+                                emailAddress
+                            }
+                        )
+                    );
+                    break;
+                default:
+                    personAssignAddressParams = null;
+            }
+            person.assignAddress(personAssignAddressParams);
             this.commit();
 
             //
@@ -1468,7 +2049,7 @@ public class TestMain {
                         address = i.next();
                         assertNotNull("Returning null was the former behaviour", address);
                         assertNotNull("Returning null was the former behaviour", JDOHelper.getObjectId(address)); // was current object id
-                        if(refGetPath(address).equals(refGetPath(postalAddress))) {
+                        if(JDOHelper.getObjectId(address).equals(JDOHelper.getObjectId(postalAddress))) {
                             if(address instanceof DelegatingRefObject_1_0) {
                                 assertSame(
                                     "created and retrieved object should be the same",
@@ -1483,7 +2064,7 @@ public class TestMain {
                                 );
                             }
                         }
-                        System.out.println("Assigned address " + j + ": " + refGetPath(address));
+                        System.out.println("Assigned address " + j + ": " + JDOHelper.getObjectId(address));
                     } catch (InvalidObjectException exception) {
                         i.remove();
                         System.out.println("Assigned address " + j + ": removed");
@@ -1506,12 +2087,14 @@ public class TestMain {
                     String invoiceId = this.taskId + (char)('a' + i);
                     this.begin();
                     Invoice additionalInvoice = this.entityManager.newInstance(Invoice.class);
+                    additionalInvoice.setProductGroupId("PG" + i);
                     additionalInvoice.setDescription("Invoice # " + invoiceId);
                     assertFalse("Step " + i + " Additional invoice not yet deleted", JDOHelper.isDeleted(additionalInvoice));
                     assertFalse("Step " + i + " Additional invoice not yet persistent", JDOHelper.isPersistent(additionalInvoice));
                     assertFalse("Step " + i + " Additional invoice not yet new", JDOHelper.isNew(additionalInvoice));
                     assertFalse("Step " + i + " Additional invoice not yet persistent", JDOHelper.isDirty(additionalInvoice));
                     InvoicePosition additionalPosition = this.entityManager.newInstance(InvoicePosition.class);
+                    additionalPosition.setProductId("P" + i);
                     assertFalse("Step " + i + " Additional position not yet deleted", JDOHelper.isDeleted(additionalPosition));
                     assertFalse("Step " + i + " Additional position not yet persistent", JDOHelper.isPersistent(additionalPosition));
                     assertFalse("Step " + i + " Additional position not yet new", JDOHelper.isNew(additionalPosition));
@@ -1780,6 +2363,7 @@ public class TestMain {
                 super.taskId = "CR20019430";
                 this.begin();
                 g0 = personGroupClass.createPersonGroup();
+                g0.setName("Group 0");
                 segment.addPersonGroup(
                     false,
                     "g0",
@@ -1819,8 +2403,6 @@ public class TestMain {
                 person.setLastName("Muster" + i);
                 person.setSalutation("Herr");
                 person.setSex((short)0);
-                person.getGivenName().add("Hans");
-                person.getGivenName().add("Heiri");
                 person.setGivenName(new String[]{"Hans", "Heiri"});
                 person.getAssignedAddress().add(postalAddress);
                 person.getPersonGroup().add(g0);
@@ -1842,7 +2424,7 @@ public class TestMain {
                 }
             }
             this.commit();
-
+            
             // get person on 'composite' association 'SegmentHasPerson'
             person = segment.getPerson(false,"0001");
             System.out.println("person.age=" + person.getAge());
@@ -1856,27 +2438,35 @@ public class TestMain {
             assertTrue("segment.address must be instance of Container", segment.refGetValue("address") instanceof RefContainer<?>);
             assertTrue("postalAddress.address must be instance of String", emailAddress.refGetValue("address") instanceof String);
             //
-            // test performance of accessor.jmi of reading all attributes of person 1000 times
+            // test performance of accessor.jmi of reading all non-derived attributes of person INSPECTION_COUNT times
             //
-            startedAt = System.currentTimeMillis();
-            for(
-                    int i = 0;
-                    i < INSPECTION_COUNT;
-                    i++
-            ) {
-                person.getLastName();
-                person.getForeignId();
-                person.getGivenName();
-                person.getSex();
-                person.getSalutation();
-                person.getBirthdate();
-                person.getBirthdateAsDateTime();
-                person.getAdditionalInfo();
-                person.getMemberOfGroup();
-                person.getAge();
-                person.getCreationDateTime();
+            for(int j = 0; j < 2; j++) {
+                startedAt = System.currentTimeMillis();
+                for(
+                        int i = 0;
+                        i < INSPECTION_COUNT;
+                        i++
+                ) {
+                    person.getLastName();
+                    person.getForeignId();
+                    person.getGivenName();
+                    person.getSex();
+                    person.getSalutation();
+                    person.getBirthdate();
+                    person.getBirthdateAsDateTime();
+                    person.getAdditionalInfo();
+                    person.getMemberOfGroup();
+    //                person.getAge();
+    //                person.getCreationDateTime();
+                }
             }
-            System.out.println("time for inspecting person " + INSPECTION_COUNT + " times [jmi]=" + (System.currentTimeMillis() - startedAt));
+            {
+                long elapsed = System.currentTimeMillis() - startedAt;
+                System.out.println(
+                    "time for inspecting person " + INSPECTION_COUNT + " times [JMI]=" + elapsed + " ms, i.e. " + 
+                    BigDecimal.valueOf(elapsed).divide(BigDecimal.valueOf(INSPECTION_COUNT * MEMBER_COUNT), 3, BigDecimal.ROUND_HALF_UP) + " ms per feature"
+                );
+            }
             //
             // test the performance of reflective JMI accesses
             //
@@ -1895,10 +2485,16 @@ public class TestMain {
                 person.refGetValue("birthdateAsDateTime");
                 person.refGetValue("additionalInfo");
                 person.refGetValue("memberOfGroup");
-                person.refGetValue("age");
-                person.refGetValue("creationDateTime");
+//                person.refGetValue("age");
+//                person.refGetValue("creationDateTime");
             }
-            System.out.println("time for inspecting person " + INSPECTION_COUNT + " times [jmi reflective]=" + (System.currentTimeMillis() - startedAt));
+            {
+                long elapsed = System.currentTimeMillis() - startedAt;
+                System.out.println(
+                    "time for inspecting person " + INSPECTION_COUNT + " times [refGetValue()]=" + elapsed + " ms, i.e. " + 
+                    BigDecimal.valueOf(elapsed).divide(BigDecimal.valueOf(INSPECTION_COUNT * MEMBER_COUNT), 3, BigDecimal.ROUND_HALF_UP) + " ms per feature"
+                );
+            }
             if(this instanceof LocalConnectionTest) {
                 DataObject_1_0 personData = ((RefObject_1_0) ((DelegatingRefObject_1_0) person).openmdxjdoGetDataObject()).refDelegate();
                 startedAt = System.currentTimeMillis();
@@ -1916,10 +2512,14 @@ public class TestMain {
                     personData.objGetValue("birthdateAsDateTime");
                     personData.objGetValue("additionalInfo");
                     personData.objGetValue("memberOfGroup");
-                    personData.objGetValue("age");
-                    personData.objGetValue("creationDateTime");
+//                    personData.objGetValue("age");
+//                    personData.objGetValue("creationDateTime");
                 }
-                System.out.println("time for inspecting person " + INSPECTION_COUNT + " times [data object]=" + (System.currentTimeMillis() - startedAt));
+                long elapsed = System.currentTimeMillis() - startedAt;
+                System.out.println(
+                    "time for inspecting person " + INSPECTION_COUNT + " times [objGetValue()]=" + elapsed + " ms, i.e. " + 
+                    BigDecimal.valueOf(elapsed).divide(BigDecimal.valueOf(INSPECTION_COUNT * MEMBER_COUNT), 3, BigDecimal.ROUND_HALF_UP) + " ms per feature"
+                );
             }
             // test refMetaObject      
             ModelElement_1_0 personDef = ((RefMetaObject_1)person.refMetaObject()).getElementDef();
@@ -1958,6 +2558,25 @@ public class TestMain {
 
             System.out.println("person.age=" + person.getAge());
             System.out.println("person givenName=" + person.getGivenName().get(0));
+            //
+            // 20019656 isEmpty()'s iteration
+            //
+            SegmentHasPerson.Person<Person> allPeople = segment.getPerson();
+            try {
+                super.taskId = "CR20019656";
+                int count = 0;
+                People: for(@SuppressWarnings("unused") Person aPerson : allPeople) {
+                    if(++count > 50) {
+                        break People;
+                    }
+                }
+                if(allPeople.isEmpty()) {
+                    fail("There should be people");
+                }
+            } finally {
+                super.taskId = null;
+            }
+            
             {
                 int people = segment.getForeignPerson().size();
                 System.out.println("Number of people: " + people);
@@ -2038,14 +2657,13 @@ public class TestMain {
                 "Maasteer"
             );
             {
-                int people = segment.getPerson().size();
+                int people = allPeople.size();
                 assertEquals(
                     "1 added by XmlImporter, 1 added with addPerson(), N_PERSONS added by addPerson()",
                     N_PERSONS + 2, 
                     people
                 );
     
-                SegmentHasPerson.Person<Person> allPeople = segment.getPerson();
                 List<Person> maasteer = allPeople.getAll(personQuery);
                 int numberOfPersons = maasteer.size();
                 assertEquals(
@@ -2201,7 +2819,12 @@ public class TestMain {
                 this.entityManager.flush();
                 assertTrue("Post-flush state", JDOHelper.isDirty(person));
                 assertTrue("Post-flush attribute retrieval", person.getGivenName().isEmpty());
-                person.setGivenName(new String[]{"Heiri"});
+                person.setGivenName("Heiri");
+                person.setLastName("Imhof");
+                person.setForeignId("HI");
+                person.setBirthdate(Datatypes.create(XMLGregorianCalendar.class, "20000401"));
+                person.setBirthdateAsDateTime(Datatypes.create(Date.class, "20000401T120000.000Z"));
+                person.setSalutation("Herr");
                 this.commit();
                 assertEquals("givenName", Collections.singletonList("Heiri"), person.getGivenName());
                 assertFalse("Post-commit state", JDOHelper.isDirty(person));
@@ -2221,18 +2844,67 @@ public class TestMain {
             } finally {
                 super.taskId = null;
             }
-
-            this.begin();
-            person.getGivenName().clear();
-            assertTrue("No givenName", person.getGivenName().isEmpty());
-            this.commit();
-            assertTrue("No givenName", person.getGivenName().isEmpty());
-
+            //
+            // Empty given name
+            //
+            if(!(this instanceof AbstractContainerManagedTransactionTest)) try {
+                super.taskId = "CR20019967";
+	            assertFalse("A givenName", person.getGivenName().isEmpty());
+                PersistenceManager anotherManager = newEntityManagerFactory().getPersistenceManager();
+	            try {
+	                Person samePerson = anotherManager.getObjectById(Person.class, person.refMofId()); 
+		            anotherManager.currentTransaction().begin();
+		            samePerson.getGivenName().clear();
+		            assertTrue("No givenName", samePerson.getGivenName().isEmpty());
+		            anotherManager.currentTransaction().commit();
+		            assertTrue("No givenName", samePerson.getGivenName().isEmpty());
+		            anotherManager.refresh(samePerson);
+		            assertTrue("No givenName", samePerson.getGivenName().isEmpty());
+	            } finally {
+	            	if(anotherManager.currentTransaction().isActive()) {
+	            		anotherManager.currentTransaction().rollback();
+	            	}
+	            	anotherManager.close();
+	            }
+                anotherManager = newEntityManagerFactory().getPersistenceManager();
+	            try {
+	                Person samePerson = anotherManager.getObjectById(Person.class, person.refMofId()); 
+		            assertTrue("No givenName", samePerson.getGivenName().isEmpty());
+	            } finally {
+	            	if(anotherManager.currentTransaction().isActive()) {
+	            		anotherManager.currentTransaction().rollback();
+	            	}
+	            	anotherManager.close();
+	            }
+	            this.entityManager.refresh(person);
+	            assertTrue("No givenName", person.getGivenName().isEmpty());
+            } finally {
+                super.taskId = null;
+            }
             // person.formatAs
             this.begin(); // isQuery() is false      
-            PersonFormatNameAsResult formattedName = person.formatNameAs(
-                app1Package.createPersonFormatNameAsParams("Standard")
-            );
+            PersonFormatNameAsParams personFormatNameAsParams;
+            switch(this.nextStructureCreation()) {
+                case BY_MEMBER:
+                    personFormatNameAsParams = Datatypes.create(
+                        PersonFormatNameAsParams.class, 
+                        Datatypes.member(PersonFormatNameAsParams.Member.type, "Standard")
+                    );
+                    break;
+                case BY_PACKAGE:
+                    personFormatNameAsParams = app1Package.createPersonFormatNameAsParams("Standard");
+                    break;
+                case BY_POSITION:
+                    personFormatNameAsParams = Datatypes.create(
+                        PersonFormatNameAsParams.class, 
+                        "Standard"
+                    );
+                    break;
+                default:
+                    personFormatNameAsParams = null;
+                
+            }
+            PersonFormatNameAsResult formattedName = person.formatNameAs(personFormatNameAsParams);
             this.commit(); // result available after commit only               
             System.out.println("formatted name=" + formattedName.getFormattedName());
             System.out.println("formatted name as set=" + formattedName.getFormattedNameAsSet());
@@ -2241,14 +2913,52 @@ public class TestMain {
 
             // test optional argument
             this.begin(); // isQuery() is false               
-            formattedName = person.formatNameAs(
-                app1Package.createPersonFormatNameAsParams(
-                    null // default value is Standard
-                )
-            );
+            switch(this.nextStructureCreation()) {
+                case BY_MEMBER:
+                    personFormatNameAsParams = Datatypes.create(
+                        PersonFormatNameAsParams.class, 
+                        Datatypes.member(PersonFormatNameAsParams.Member.type, null)
+                    );
+                    break;
+                case BY_PACKAGE:
+                    personFormatNameAsParams = app1Package.createPersonFormatNameAsParams(
+                        null // default value is Standard
+                    );
+                    break;
+                case BY_POSITION:
+                    personFormatNameAsParams = Datatypes.create(
+                        PersonFormatNameAsParams.class, 
+                        (String)null
+                    );
+                    break;
+                default:
+                    personFormatNameAsParams = null;
+            }
+            formattedName = person.formatNameAs(personFormatNameAsParams);
             this.commit(); // result available after commit only               
             System.out.println("formatted name=" + formattedName.getFormattedName());
             try {
+                switch(this.nextStructureCreation()) {
+                    case BY_MEMBER:
+                        personFormatNameAsParams = Datatypes.create(
+                            PersonFormatNameAsParams.class, 
+                            Datatypes.member(PersonFormatNameAsParams.Member.type, "InvalidFormat")
+                        );
+                        break;
+                    case BY_PACKAGE:
+                        personFormatNameAsParams = app1Package.createPersonFormatNameAsParams(
+                            "InvalidFormat"
+                        );
+                        break;
+                    case BY_POSITION:
+                        personFormatNameAsParams = Datatypes.create(
+                            PersonFormatNameAsParams.class, 
+                            "InvalidFormat"
+                        );
+                        break;
+                    default:
+                        personFormatNameAsParams = null;
+                }
                 person.formatNameAs(
                     app1Package.createPersonFormatNameAsParams(
                         "InvalidFormat"
@@ -2256,22 +2966,56 @@ public class TestMain {
                 );
                 fail("CanNotFormatNameException expected");
             } catch(CanNotFormatNameException e) {
+                e.toString();
                 System.out.println("formatNameAs() raised exception as expected \n" + e.getMessage());
             }
-
+            
+            try {
+                super.taskId = "CR20019666";
+                throw new CanNotFormatNameException(
+                    super.taskId
+                );
+            } catch(CanNotFormatNameException e) {
+                e.toString();
+                System.out.println("TestMain raised exception as expected \n" + e.getMessage());
+            } finally {
+                super.taskId = null;
+            }
+            
             // test dateOp (date and dateTime in operation parameter)
             // Test for non-query operation with result 
             this.begin();
             Date dateTimeNow = new Date();
-            PersonDateOpResult dateOpResult = person.dateOp(
-                app1Package.createPersonDateOpParams(
-                    Datatypes.create(
-                        XMLGregorianCalendar.class, 
-                        DateTimeFormat.BASIC_UTC_FORMAT.format(dateTimeNow).substring(0, 8)
-                    ),
-                    dateTimeNow
-                )
+            XMLGregorianCalendar dateIn = Datatypes.create(
+                XMLGregorianCalendar.class, 
+                DateTimeFormat.BASIC_UTC_FORMAT.format(dateTimeNow).substring(0, 8)
             );
+            PersonDateOpParams personDateOpParams;
+            switch(nextStructureCreation()) {
+                case BY_MEMBER:
+                    personDateOpParams = Datatypes.create(
+                        PersonDateOpParams.class,
+                        Datatypes.member(PersonDateOpParams.Member.dateIn, dateIn),
+                        Datatypes.member(PersonDateOpParams.Member.dateTimeIn, dateTimeNow)
+                    );
+                    break;
+                case BY_PACKAGE:
+                    personDateOpParams = app1Package.createPersonDateOpParams(
+                        dateIn,
+                        dateTimeNow
+                    );
+                    break;
+                case BY_POSITION:
+                    personDateOpParams = Datatypes.create(
+                        PersonDateOpParams.class,
+                        dateIn,
+                        dateTimeNow
+                    );
+                    break;
+                default:
+                    personDateOpParams = null;
+            }
+            PersonDateOpResult dateOpResult = person.dateOp(personDateOpParams);
             this.commit();
             System.out.println("dateOp.dateResult=" + dateOpResult.getDateResult());
             System.out.println("dateOp.dateTimeResult=" + dateOpResult.getDateTimeResult());
@@ -2390,19 +3134,33 @@ public class TestMain {
 
                 // postalAddress.formatAs
                 AddressFormatAsResult formattedAddress = null;
-                formattedAddress = postalAddress.formatAs(
-                    app1Package.createAddressFormatAsParams(
-                        "Standard"
-                    )
-                );
+                AddressFormatAsParams addressFormatAsParams;
+                switch(nextStructureCreation()) {
+                    case BY_MEMBER:
+                        addressFormatAsParams = Datatypes.create(
+                            AddressFormatAsParams.class,
+                            Datatypes.member(AddressFormatAsParams.Member.type, "Standard")
+                        );
+                        break;
+                    case BY_PACKAGE:
+                        addressFormatAsParams = app1Package.createAddressFormatAsParams(
+                            "Standard"
+                        );
+                        break;
+                    case BY_POSITION:
+                        addressFormatAsParams = Datatypes.create(
+                            AddressFormatAsParams.class,
+                            "Standard"
+                        );
+                        break;
+                    default:
+                        addressFormatAsParams = null;
+                }
+                formattedAddress = postalAddress.formatAs(addressFormatAsParams);
                 System.out.println("formatted address=" + formattedAddress.getFormattedAddress());
 
                 // emailAddress.formatAs
-                formattedAddress = emailAddress.formatAs(
-                    app1Package.createAddressFormatAsParams(
-                        "Standard"
-                    )
-                );
+                formattedAddress = emailAddress.formatAs(addressFormatAsParams);
                 System.out.println("formatted address=" + formattedAddress.getFormattedAddress());
 
                 // get addresses by iterator
@@ -2413,27 +3171,125 @@ public class TestMain {
 
                     // invoke sendMessage on PostalAddress
                     if(address instanceof PostalAddress) {
-                        this.begin(); // isQuery() is false               
-                        ((PostalAddress)address).sendMessage(
-                            app1Package.createPostalAddressSendMessageParams(
-                                new byte[]{'h', 'e', 'l', 'l', 'o'}
-                            )
-                        );
+                        this.begin(); // isQuery() is false
+                        byte[] document =  new byte[]{'h', 'e', 'l', 'l', 'o'};
+                        PostalAddressSendMessageParams postalAddressSendMessageParams;
+                        switch(nextStructureCreation()) {
+                            case BY_MEMBER:
+                                postalAddressSendMessageParams = Datatypes.create(
+                                    PostalAddressSendMessageParams.class,
+                                    Datatypes.member(PostalAddressSendMessageParams.Member.document, document)
+                                );
+                                break;
+                            case BY_PACKAGE:
+                                postalAddressSendMessageParams = app1Package.createPostalAddressSendMessageParams(document);
+                                break;
+                            case BY_POSITION:
+                                postalAddressSendMessageParams = Datatypes.create(
+                                    PostalAddressSendMessageParams.class,
+                                    document
+                                );
+                                break;
+                            default:
+                                postalAddressSendMessageParams = null;
+                        }
+                        ((PostalAddress)address).sendMessage(postalAddressSendMessageParams);
                         this.commit();
                     }
                     else if(address instanceof EmailAddress) {
-                        this.begin(); // isQuery() is false               
-                        ((EmailAddress)address).sendMessage(
-                            app1Package.createEmailAddressSendMessageParams(
-                                "hello"
-                            )
-                        );
+                        this.begin(); // isQuery() is false   
+                        EmailAddressSendMessageParams emailAddressSendMessageParams;
+                        switch(nextStructureCreation()) {
+                            case BY_MEMBER:
+                                emailAddressSendMessageParams = Datatypes.create(
+                                    EmailAddressSendMessageParams.class,
+                                    Datatypes.member(EmailAddressSendMessageParams.Member.text, "hello")
+                                );
+                                break;
+                            case BY_PACKAGE:
+                                emailAddressSendMessageParams = app1Package.createEmailAddressSendMessageParams(
+                                    "hello"
+                                );
+                                break;
+                            case BY_POSITION:
+                                emailAddressSendMessageParams = Datatypes.create(
+                                    EmailAddressSendMessageParams.class,
+                                    "hello"
+                                );
+                                break;
+                            default:
+                                emailAddressSendMessageParams = null;
+                        }
+                        ((EmailAddress)address).sendMessage(emailAddressSendMessageParams);
                         this.commit();
                     }
                     else {
                         fail("address format " + address.getClass().getName() + " unknown");
                     }
                 }
+            } finally {
+                super.taskId = null;
+            }
+            
+            try {
+                super.taskId = "CR20019669";
+                SegmentHasAddress.Address<Address> addresses = segment.getAddress();
+                assertTrue(
+                    "Persistence Capable Container",
+                    addresses instanceof PersistenceCapable
+                );
+                assertEquals(
+                    "Container Id", 
+                    ((Path)JDOHelper.getObjectId(segment)).getChild("address"), 
+                    JDOHelper.getObjectId(addresses)
+                );
+                PersistenceManager manager = JDOHelper.getPersistenceManager(addresses);
+                assertSame(
+                    "Container Persistence Manager", 
+                    JDOHelper.getPersistenceManager(segment), 
+                    manager
+                );
+            } finally {
+                super.taskId = null;
+            }
+
+            try {
+                super.taskId = "CR20019669";
+                SegmentHasAddress.Address<Address> addresses = segment.getAddress();
+                PersistenceManager manager = JDOHelper.getPersistenceManager(addresses);
+                Object addressId = JDOHelper.getObjectId(addresses);
+                String xri = ((Path)addressId).toXRI();
+                assertEquals(
+                    "Validating a RefContainer's string representation",
+                    SegmentHasAddress.Address.class.getName() + ": " + xri, 
+                    addresses.toString()
+                );
+                Object transientAddressId = JDOHelper.getTransactionalObjectId(addresses);
+                assertTrue("Transient container id", transientAddressId instanceof TransientContainerId);
+                {
+                    RefBaseObject container =  (RefBaseObject) manager.getObjectById(transientAddressId);
+                    assertTrue("The container's JMI class", container instanceof SegmentHasAddress.Address<?>);
+                    assertEquals(addresses, container);
+                    assertSame("The container's manager", manager, JDOHelper.getPersistenceManager(container));
+                    assertEquals("The container's id", xri, container.refMofId());
+                }
+                {
+                    RefBaseObject container =  (RefBaseObject) manager.getObjectById(addressId);
+                    assertTrue("The container's JMI class", container instanceof SegmentHasAddress.Address<?>);
+                    assertEquals(addresses, container);
+                    assertEquals("The container's id", xri, container.refMofId());
+                    assertSame("The container's manager", manager, JDOHelper.getPersistenceManager(container));
+                }
+            } finally {
+                super.taskId = null;
+            }
+            
+            try {
+                super.taskId = "CR20019719";
+                personQuery = app1Package.createPersonQuery();
+                personQuery.createdAt().equalTo(new Date());
+                List<Person> people = segment.<Person>getPerson().getAll(personQuery);
+                assertTrue(people.isEmpty());
             } finally {
                 super.taskId = null;
             }
@@ -2626,6 +3482,14 @@ public class TestMain {
                         new URL("xri://+resource/test/openmdx/app1/data.xml")
                     )
                 );
+                if(this instanceof LocalConnectionTest) {
+	                //
+	                // CR20019858
+	                //
+	                UpdateAvoidance updateAvoidance = UserObjects.getPlugInObject(this.entityManager, UpdateAvoidance.class);
+	                assertNotNull(UpdateAvoidance.class.getSimpleName(), updateAvoidance);
+	                updateAvoidance.touchAllDirtyObjects(this.entityManager.currentTransaction());
+                }
                 this.commit();
                 File file = File.createTempFile("data", ".zip");
                 Exporter.export(
@@ -2702,8 +3566,10 @@ public class TestMain {
                 {
                     FileInputStream fileInputStream = new FileInputStream(file);
                     ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
-                    Collection<test.openmdx.app1.cci2.Person> jpaPeople = (Collection<test.openmdx.app1.cci2.Person>) objectInputStream.readObject();
-                    Collection<test.openmdx.app1.cci2.Address> jpaAddresses = (Collection<test.openmdx.app1.cci2.Address>) objectInputStream.readObject();
+                    @SuppressWarnings("unchecked")
+					Collection<test.openmdx.app1.cci2.Person> jpaPeople = (Collection<test.openmdx.app1.cci2.Person>) objectInputStream.readObject();
+                    @SuppressWarnings("unchecked")
+					Collection<test.openmdx.app1.cci2.Address> jpaAddresses = (Collection<test.openmdx.app1.cci2.Address>) objectInputStream.readObject();
                     test.openmdx.app1.cci2.Document jpaDocument = (test.openmdx.app1.cci2.Document) objectInputStream.readObject();
                     assertEquals("people", cardinality, jpaPeople.size());
                     assertEquals("addresses", 1, jpaAddresses.size());
@@ -2958,7 +3824,7 @@ public class TestMain {
             id = "all units of work"; 
             task = AuditQueries.getUnitOfWorkForTimeRange(super.entityManager, from, null);
             dumpTask(id + scope, task);
-            assertEquals(id + scope, (16 * create + 18) * factor, task.size());
+            assertEquals(id + scope, (16 * create + 17) * factor, task.size());
             id = "units of work involving people"; 
             task = AuditQueries.getUnitOfWorkInvolvingObject(
                 from, 
@@ -2969,7 +3835,7 @@ public class TestMain {
                 )
             );
             dumpTask(id + scope, task);
-            assertEquals(id + scope, (3 * create + 9) * factor, task.size());
+            assertEquals(id + scope, (3 * create + 8) * factor, task.size());
             id = "units of work involving deleted object";
             Path addressId = DATA_SEGMENT_ID.getDescendant("address","CR0002096"); 
             task = AuditQueries.getUnitOfWorkInvolvingObject(
@@ -2999,7 +3865,7 @@ public class TestMain {
                 }
             }
         }
-        
+
         private void dumpTask(
             String title,
             Collection<UnitOfWork> task
@@ -3008,12 +3874,6 @@ public class TestMain {
                 System.out.println(title);
                 for(UnitOfWork unitOfWork : task){
                     System.out.println("\t" + unitOfWork.getUnitOfWorkId() + " (" + DateTimeFormat.EXTENDED_UTC_FORMAT.format(unitOfWork.getCreatedAt()) + ")");
-                    if(unitOfWork instanceof org.openmdx.compatibility.audit1.jmi1.UnitOfWork) {
-                        System.out.println("\t\tinvolved");
-                        for(Object involved : (Collection<?>)PersistenceHelper.getFeatureReplacingObjectById(unitOfWork, "involved")){
-                            System.out.println("\t\t\t" + ((Path)involved).toXRI());
-                        }
-                    }
                     System.out.println("\t\tinvolvement");
                     for(Involvement involvement : unitOfWork.<Involvement>getInvolvement()) {
                         System.out.println("\t\t\t" + getResourceIdentifier(involvement));
@@ -3138,29 +3998,19 @@ public class TestMain {
             ).refImmediatePackage();
         }
 
+        
+        //--------------------------------------------------------------------
+        // Enum StructureCreation
+        //--------------------------------------------------------------------
+
+        /**
+         * Structure Creation Mode 
+         */
+        protected static enum StructureCreation {
+            BY_PACKAGE, BY_POSITION, BY_MEMBER;
+        }
+        
     }
-
-    /**
-     * Object id accessor
-     * 
-     * @param refObject
-     * 
-     * @return the object id as path
-     */
-    static Path refGetPath(
-        RefObject refObject
-    ){
-        Object objectId = JDOHelper.getObjectId(refObject);
-        return
-        objectId instanceof Path ? (Path) objectId :
-            objectId == null ? null :
-                new Path(objectId.toString());
-    }
-
-
-    //------------------------------------------------------------------------
-    // Class LocalConnectionTest
-    //------------------------------------------------------------------------
 
     /**
      * 1st Run
@@ -3173,181 +4023,63 @@ public class TestMain {
 //          super.testInMemoryProvider();
             super.resetAuditSegment();
             super.resetDataSegment();
+            super.testCR20019917();
             super.testCR20019462();
             super.testCR20018726();
-            super.testCR20018667();
             super.testCR20019014();
             super.testMain();
             super.testAudit(1);
         }
-
-    }
-
-    
-    //------------------------------------------------------------------------
-    // Class ProxyConnectionSetUp
-    //------------------------------------------------------------------------
-
-    /**
-     * Replaces the entity manager factory
-     */
-    public static class ProxyConnectionSetUp {
-     
-        /**
-         * Tells whether a servlet connection shall be used
-         * @return
-         */
-        protected boolean useServlet(){
-            return true;
-        }
-        
-        /**
-         * Switch to proxy set-up
-         * 
-         * @throws ResourceException 
-         * @throws ServletException 
-         */
-        @Test
-        public void reInitialize() throws ResourceException, ServletException{
-            ConnectionFactory inboundConnectionFactory = useServlet() ?  new ConnectionFactoryAdapter(
-                new ServletPort(
-                    Collections.singletonMap(
-                        "entity-manager-factory-name",
-                        "jdo:test-Main-EntityManagerFactory"
-                    )
-                ),
-                true, // supportsLocalTransactionDemarcation
-                TransactionAttributeType.NEVER
-            ) : InboundConnectionFactory_2.newInstance(
-                "jdo:test-Main-EntityManagerFactory"
-            );
-            Map<String,Object> dataManagerProxyConfiguration = new HashMap<String,Object>();
-            dataManagerProxyConfiguration.put(
-                ConfigurableProperty.ConnectionFactory.qualifiedName(),
-                inboundConnectionFactory
-            );
-            dataManagerProxyConfiguration.put(
-                ConfigurableProperty.PersistenceManagerFactoryClass.qualifiedName(),
-                EntityManagerProxyFactory_2.class.getName()
-            );    
-            PersistenceManagerFactory outboundConnectionFactory = JDOHelper.getPersistenceManagerFactory(
-                dataManagerProxyConfiguration
-            );
-
-            Map<String,Object> entityManagerConfiguration = new HashMap<String,Object>();
-            entityManagerConfiguration.put(
-                ConfigurableProperty.ConnectionFactory.qualifiedName(),
-                outboundConnectionFactory
-            );
-            entityManagerConfiguration.put(
-                ConfigurableProperty.PersistenceManagerFactoryClass.qualifiedName(),
-                EntityManagerFactory_1.class.getName()
-            );    
-            entityManagerFactory = JDOHelper.getPersistenceManagerFactory(
-                entityManagerConfiguration
-            );
-            
-        }
         
     }
 
     
     //------------------------------------------------------------------------
-    // Class AbstractContainerManagedTransactionSetUp
+    // Class AbstractContainerManagedTransactionTest
     //------------------------------------------------------------------------
 
     /**
-     * Replaces the entity manager factory
+     * 3rd Run
      */
-    public abstract static class AbstractContainerManagedTransactionSetUp {
-     
+    public static abstract class AbstractContainerManagedTransactionTest extends LocalConnectionTest {
+
+        /**
+         * Constructor 
+         */
+        protected AbstractContainerManagedTransactionTest() {
+            super();
+        }
+
+        private UserTransaction userTransaction;
+        
         /**
          * Defines whether the unit of work is optimistic or pessimistic
          * 
          * @return <code>true</code> if the unit of work is optimistic
          */
         protected abstract Boolean isOptimistic();
-        
-        /**
-         * Switch container managed transaction set-up
-         * 
-         * @throws ResourceException 
-         * @throws ServletException 
+                
+        /* (non-Javadoc)
+         * @see test.openmdx.app1.TestMain.AbstractTest#configuration()
          */
-        @Test
-        public void reInitialize() throws ResourceException, ServletException {
-            Map<String,Object> override = new HashMap<String, Object>();
-            override.put(
+        @Override
+        protected Map<String, Object> configuration() {
+            Map<String,Object> amendment = super.configuration();
+            amendment.put(
                 ConfigurableProperty.TransactionType.qualifiedName(), 
                 Constants.JTA
             );
-            override.put(
+            amendment.put(
                 ConfigurableProperty.ContainerManaged.qualifiedName(),
                 Boolean.TRUE.toString()
             );
-            override.put(
+            amendment.put(
                 ConfigurableProperty.Optimistic.qualifiedName(),
                 this.isOptimistic().toString()
             );
-            entityManagerFactory = JDOHelper.getPersistenceManagerFactory(
-                override,
-                "test-Main-EntityManagerFactory"
-            );
+            return amendment;
         }
-        
-    }
 
-    //------------------------------------------------------------------------
-    // Class ContainerManagedOptimisticTransactionSetUp
-    //------------------------------------------------------------------------
-
-    /**
-     * Replaces the entity manager factory
-     */
-    public static class ContainerManagedOptimisticTransactionSetUp extends AbstractContainerManagedTransactionSetUp {
-
-        /* (non-Javadoc)
-         * @see test.openmdx.app1.TestMain.AbstractContainerManagedTransactionSetUp#isOptimistic()
-         */
-        @Override
-        protected Boolean isOptimistic() {
-            return Boolean.TRUE;
-        }
-     
-        
-    }
-
-    //------------------------------------------------------------------------
-    // Class ContainerManagedPessimisticTransactionSetUp
-    //------------------------------------------------------------------------
-
-    /**
-     * Replaces the entity manager factory
-     */
-    public static class ContainerManagedPessimisticTransactionSetUp extends AbstractContainerManagedTransactionSetUp {
-
-        /* (non-Javadoc)
-         * @see test.openmdx.app1.TestMain.AbstractContainerManagedTransactionSetUp#isOptimistic()
-         */
-        @Override
-        protected Boolean isOptimistic() {
-            return Boolean.FALSE;
-        }
-     
-        
-    }
-    
-    //------------------------------------------------------------------------
-    // Class ContainerManagedTransactionTest
-    //------------------------------------------------------------------------
-
-    /**
-     * 3rd Run
-     */
-    public static class ContainerManagedTransactionTest extends LocalConnectionTest {
-
-        private UserTransaction userTransaction;
-        
         @Override
         public void run(
         ) throws Exception{
@@ -3359,7 +4091,6 @@ public class TestMain {
             super.resetDataSegment();
             super.testCR20019462();
             super.testCR20018726();
-            super.testCR20018667();
             super.testCR20019014();
             super.testMain();
             this.userTransaction.rollback();
@@ -3447,6 +4178,48 @@ public class TestMain {
 
     
     //------------------------------------------------------------------------
+    // Class OptimisticContainerManagedTransactionTest
+    //------------------------------------------------------------------------
+
+    /**
+     * Test Optimistic Container-Managed Transactions
+     */
+    public static class OptimisticContainerManagedTransactionTest extends AbstractContainerManagedTransactionTest {
+
+        /* (non-Javadoc)
+         * @see test.openmdx.app1.TestMain.AbstractContainerManagedTransactionTest#isOptimistic()
+         */
+        @Override
+        protected Boolean isOptimistic() {
+            return Boolean.TRUE;
+        }
+        
+        
+    }
+    
+
+    //------------------------------------------------------------------------
+    // Class PessimisticContainerManagedTransactionTest
+    //------------------------------------------------------------------------
+
+    /**
+     * Test Optimistic Container-Managed Transactions
+     */
+    public static class PessimisticContainerManagedTransactionTest extends AbstractContainerManagedTransactionTest {
+
+        /* (non-Javadoc)
+         * @see test.openmdx.app1.TestMain.AbstractContainerManagedTransactionTest#isOptimistic()
+         */
+        @Override
+        protected Boolean isOptimistic() {
+            return Boolean.FALSE;
+        }
+        
+        
+    }
+    
+
+    //------------------------------------------------------------------------
     // Class ProxyConnectionTest
     //------------------------------------------------------------------------
 
@@ -3454,6 +4227,62 @@ public class TestMain {
      * 2nd Run
      */
     public static class ProxyConnectionTest extends RepeatableTest {
+
+        /**
+         * Tells whether a servlet connection shall be used
+         * @return
+         */
+        protected boolean useServlet(){
+            return true;
+        }
+        
+        /* (non-Javadoc)
+         * @see test.openmdx.app1.TestMain.AbstractTest#newEntityManagerFactory()
+         */
+        @Override
+        protected PersistenceManagerFactory newEntityManagerFactory() {
+            try {
+                ConnectionFactory inboundConnectionFactory = useServlet() ?  new ConnectionFactoryAdapter(
+                    new ServletPort(
+                        Collections.singletonMap(
+                            "entity-manager-factory-name",
+                            "jdo:test-Main-EntityManagerFactory"
+                        )
+                    ),
+                    true, // supportsLocalTransactionDemarcation
+                    TransactionAttributeType.NEVER
+                ) : InboundConnectionFactory_2.newInstance(
+                    "jdo:test-Main-EntityManagerFactory"
+                );
+                Map<String,Object> dataManagerProxyConfiguration = new HashMap<String,Object>();
+                dataManagerProxyConfiguration.put(
+                    ConfigurableProperty.ConnectionFactory.qualifiedName(),
+                    inboundConnectionFactory
+                );
+                dataManagerProxyConfiguration.put(
+                    ConfigurableProperty.PersistenceManagerFactoryClass.qualifiedName(),
+                    EntityManagerProxyFactory_2.class.getName()
+                );    
+                PersistenceManagerFactory outboundConnectionFactory = JDOHelper.getPersistenceManagerFactory(
+                    dataManagerProxyConfiguration
+                );
+    
+                Map<String,Object> entityManagerConfiguration = new HashMap<String,Object>();
+                entityManagerConfiguration.put(
+                    ConfigurableProperty.ConnectionFactory.qualifiedName(),
+                    outboundConnectionFactory
+                );
+                entityManagerConfiguration.put(
+                    ConfigurableProperty.PersistenceManagerFactoryClass.qualifiedName(),
+                    EntityManagerFactory_1.class.getName()
+                );    
+                return JDOHelper.getPersistenceManagerFactory(
+                    entityManagerConfiguration
+                );
+            } catch (ServletException exception) {
+                throw new JDOFatalDataStoreException("Unable to provide proxy persistence manager factory", exception);
+            }
+        }
 
         @Test
         public void run(

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateState_1.java,v 1.20 2010/12/02 08:03:40 hburger Exp $
+ * Name:        $Id: DateState_1.java,v 1.26 2011/07/01 16:16:42 hburger Exp $
  * Description: Date State
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/02 08:03:40 $
+ * Date:        $Date: 2011/07/01 16:16:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,6 +58,7 @@ import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_BY;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -71,12 +72,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
-import org.openmdx.base.mof.spi.ModelUtils;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
+import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.ViewKind;
 import org.openmdx.state2.spi.Order;
@@ -289,10 +292,9 @@ public class DateState_1
     protected boolean isInvolved(
         DataObject_1_0 candidate, 
         DateStateContext context, 
-        boolean exact, 
-        boolean removed
+        AccessMode accessMode
     ) throws ServiceException {
-        if(super.isInvolved(candidate, context, exact, removed)) {
+        if(super.isInvolved(candidate, context, accessMode)) {
             //
             // Valid Time Test
             // 
@@ -307,15 +309,7 @@ public class DateState_1
                         (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")
                     ) <= 0;
                 case TIME_RANGE_VIEW:
-                    return !exact ? (
-                        Order.compareValidFromToValidTo(
-                            context.getValidFrom(), 
-                            (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")
-                        ) <= 0 && Order.compareValidFromToValidTo(
-                            (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom"),
-                            context.getValidTo()
-                        ) <= 0 
-                    ) : candidate.jdoIsNew() ? (
+                	return accessMode == AccessMode.UNDERLYING_STATE ? (
                         Order.compareValidFrom(
                             context.getValidFrom(), 
                             (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom")
@@ -324,17 +318,25 @@ public class DateState_1
                             context.getValidTo()
                         ) >= 0 
                     ) : (
-                        Order.equal(
-                            context.getValidFrom(),
-                            (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom")
-                        ) && Order.equal(
-                            context.getValidTo(),
-                            (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")
-                        )
+                		Order.compareValidFromToValidTo(
+	                        context.getValidFrom(), 
+	                        (XMLGregorianCalendar) candidate.objGetValue("stateValidTo")
+	                    ) <= 0 && Order.compareValidFromToValidTo(
+	                        (XMLGregorianCalendar) candidate.objGetValue("stateValidFrom"),
+	                        context.getValidTo()
+	                    ) <= 0 
                     );
+        		default:
+        			throw new RuntimeServiceException(
+        				BasicException.Code.DEFAULT_DOMAIN,
+        				BasicException.Code.ASSERTION_FAILURE,
+        				"Unexpected view kind",
+        				new BasicException.Parameter("context", context)
+        			);
             }
+        } else {
+	        return false;
         }
-        return false;
     }
 
     /**
@@ -358,7 +360,7 @@ public class DateState_1
                 predecessor != null;
                 predecessor = successor
             ){
-                boolean merge;
+                final boolean merge;
                 if(i.hasNext()) {
                     successor = i.next();
                     merge = adjacent(predecessor, successor) && similar(predecessor, successor);
@@ -444,6 +446,7 @@ public class DateState_1
      * 
      * @return <code>true</code> if all attributes apart from the ones to be ignored are equal
      */
+    @SuppressWarnings("unchecked")
     protected boolean similar(
         DataObject_1_0 left,
         DataObject_1_0 right
@@ -452,23 +455,38 @@ public class DateState_1
         if(!type.equals(right.objGetClass())) {
             return false;
         }
-        Set<String> attributes = left.objDefaultFetchGroup();        
-        attributes.addAll(right.objDefaultFetchGroup());
-        attributes.removeAll(ignorableAttributes());
         Model_1_0 model = getModel();
         ModelElement_1_0 classifier = model.getElement(type);
-        for(String attribute : attributes) {
-            ModelElement_1_0 attributeDef = 
-                attribute.indexOf(':') < 0 ? model.getFeatureDef(classifier, attribute, false) : 
-                null;
-            if(attributeDef != null && !Boolean.TRUE.equals(attributeDef.objGetValue("isDerived"))) {            
-                String multiplicity = ModelUtils.getMultiplicity(attributeDef);
-                boolean matching =  
-                    Multiplicities.LIST.equals(multiplicity) ? left.objGetList(attribute).equals(right.objGetList(attribute)) :
-                    Multiplicities.SET.equals(multiplicity) ? left.objGetSet(attribute).equals(right.objGetSet(attribute)) :
-                    Multiplicities.SPARSEARRAY.equals(multiplicity) ? left.objGetSparseArray(attribute).equals(right.objGetSparseArray(attribute)) :
-                    equal(left.objGetValue(attribute),right.objGetValue(attribute));
-                if(!matching){
+        Map<String,Multiplicity> postponed = null;
+        Set<String> leftFetched = left.objDefaultFetchGroup();
+        Set<String> rightFetched = right.objDefaultFetchGroup();
+        Collection<String> ignorable = ignorableAttributes();
+        for(Map.Entry<String,ModelElement_1_0> feature : ((Map<String,ModelElement_1_0>)classifier.objGetValue("allFeature")).entrySet()){
+            ModelElement_1_0 featureDef = feature.getValue();
+            String featureName = feature.getKey();
+            if(!ignorable.contains(featureName) && this.isAttribute(featureDef) && !ModelHelper.isDerived(featureDef)) {
+            	Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
+                if(leftFetched.contains(featureName) && rightFetched.contains(featureName)) {
+                	//
+                	// Compare cached values first
+                	//
+                    if(!equal(featureName,multiplicity,left,right)) {
+                        return false;
+                    }
+                } else {
+                	//
+                	// Compare values to be lazily fetched later non
+                	//
+                    if(postponed == null) {
+                        postponed = new HashMap<String, Multiplicity>();
+                    }
+                    postponed.put(featureName, multiplicity);
+                }
+            }
+        }
+        if(postponed != null) {
+            for(Map.Entry<String, Multiplicity> entry : postponed.entrySet()) {
+                if(!equal(entry.getKey(),entry.getValue(),left,right)) {
                     return false;
                 }
             }
@@ -476,6 +494,50 @@ public class DateState_1
         return true;
     }
 
+    /**
+     * Tells whether a feature is either an attribute or a reference stored as attribute.
+     * 
+     * @param featureDef
+     * @return <code>true</code> if the feature is either an attribute or a reference stored as attribute
+     * 
+     * @throws ServiceException
+     */
+    private boolean isAttribute(
+    	ModelElement_1_0 featureDef
+    ) throws ServiceException {
+    	Model_1_0 model = featureDef.getModel();
+    	return model.isAttributeType(featureDef) || (
+    		model.isReferenceType(featureDef) && model.referenceIsStoredAsAttribute(featureDef)
+    	);
+    }
+    /**
+     * 
+     * @param attribute
+     * @param multiplicity
+     * @param left
+     * @param right
+     * 
+     * @return <code>>true<code> if the values are equal
+     * @throws ServiceException
+     */
+    private boolean equal(
+        String attribute, 
+        Multiplicity multiplicity, 
+        DataObject_1_0 left,
+        DataObject_1_0 right
+    ) throws ServiceException{
+    	switch(multiplicity) {
+	    	case LIST:
+	    		return left.objGetList(attribute).equals(right.objGetList(attribute));
+	    	case SET:
+	    		return left.objGetSet(attribute).equals(right.objGetSet(attribute));
+	    	case SPARSEARRAY:
+	    		return left.objGetSparseArray(attribute).equals(right.objGetSparseArray(attribute));
+	    	default:
+	    		return equal(left.objGetValue(attribute),right.objGetValue(attribute));
+    	}
+    }
+    
     /**
      * Tests whether the two objects are either equal or both <code>null</code>
      * 

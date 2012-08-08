@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PersistenceCapableCollection.java,v 1.3 2010/10/27 14:06:20 hburger Exp $
+ * Name:        $Id: PersistenceCapableCollection.java,v 1.4 2011/04/12 15:44:01 hburger Exp $
  * Description: Persistence Capable Collection
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/27 14:06:20 $
+ * Date:        $Date: 2011/04/12 15:44:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,8 +52,7 @@ package org.openmdx.base.persistence.spi;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.PersistenceManager;
-
-import org.openmdx.base.naming.Path;
+import javax.jdo.spi.PersistenceCapable;
 
 /**
  * Persistence Capable Collection
@@ -64,42 +63,14 @@ import org.openmdx.base.naming.Path;
  * @see javax.jdo.PersistenceManager
  * @see org.openmdx.base.persistence.cci.PersistenceHelper
  */
-public interface PersistenceCapableCollection {
+public interface PersistenceCapableCollection extends PersistenceCapable {
     
-    /**
-     * Tells whether the container belongs to a persistent object
-     * 
-     * @return <code>true</code> if the container belongs to a persistent object
-     */
-    boolean openmdxjdoIsPersistent();
-
-    /**
-     * Retrieve the container's id
-     * 
-     * @return the owner XRI amended by the container's unqualified reference name
-     */
-    Path openmdxjdoGetContainerId();
-
-    /**
-     * Retrieve the container's transient id
-     * 
-     * @return the container's transient id
-     */
-    TransientContainerId openmdxjdoGetTransientContainerId();
-
     /** 
      * Retrieve the associated Data Object Manager.
      * 
      * @return the associated Data Object Manager
      */
     PersistenceManager openmdxjdoGetDataObjectManager();
-
-    /** 
-     * Retrieve the associated PersistenceManager.
-     * 
-     * @return the associated PersistenceManager
-     */
-    PersistenceManager openmdxjdoGetPersistenceManager();
 
     /**
      * Evict the collection

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RequestedMessage.java,v 1.4 2010/06/02 13:39:35 hburger Exp $
+ * Name:        $Id: RequestedMessage.java,v 1.5 2011/04/12 12:05:03 hburger Exp $
  * Description: Request Message
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:39:35 $
+ * Date:        $Date: 2011/04/12 12:05:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,7 +67,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * An operation response listener
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class RequestedMessage
     implements DataproviderReplyListener, Serializable, MessageRecord
 {

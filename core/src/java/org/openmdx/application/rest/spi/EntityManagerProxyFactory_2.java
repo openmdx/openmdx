@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: EntityManagerProxyFactory_2.java,v 1.10 2010/12/22 00:13:20 hburger Exp $
+ * Name:        $Id: EntityManagerProxyFactory_2.java,v 1.12 2011/08/08 14:21:34 hburger Exp $
  * Description: Entity Manager Proxy Factory
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/22 00:13:20 $
+ * Date:        $Date: 2011/08/08 14:21:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,7 +52,9 @@ package org.openmdx.application.rest.spi;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.jdo.Constants;
 import javax.jdo.JDODataStoreException;
@@ -86,10 +88,12 @@ import org.openmdx.base.transaction.TransactionAttributeType;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.BeanFactory;
 import org.openmdx.kernel.loading.Factory;
+import org.w3c.cci2.SparseArray;
 
 /**
  * Entity Manager Proxy Factory
  */
+@SuppressWarnings({"rawtypes"})
 public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFactory<DataObjectManager_1_0> {
 
     /**
@@ -105,8 +109,9 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
         // Data Manager Properties
         // 
         try {
+            Properties properties = PropertiesConfigurationProvider.toProperties(configuration);
             Configuration dataManagerConfiguration = PropertiesConfigurationProvider.getConfiguration(
-                PropertiesConfigurationProvider.toProperties(configuration),
+                properties,
                 "org", "openmdx", "jdo", "DataManager"
             );
             this.optimalFetchSize = (Integer) dataManagerConfiguration.values(
@@ -115,6 +120,30 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
             this.cacheThreshold = (Integer) dataManagerConfiguration.values(
                 "cacheThreshold"
             ).get(0);
+            SparseArray<?> plugIns = dataManagerConfiguration.values(
+                "plugIn"
+            );
+            if(plugIns.isEmpty()) {
+                this.plugIns = DEFAULT_PLUG_INS;
+            } else {
+                this.plugIns = new PlugIn_1_0[plugIns.size()];
+                ListIterator<?> p = plugIns.populationIterator();
+                for(
+                    int i = 0;
+                    i < this.plugIns.length;
+                    i++
+                ){
+                    this.plugIns[i] = new BeanFactory<PlugIn_1_0>(
+                        "class",
+                        PropertiesConfigurationProvider.getConfiguration(
+                            properties,
+                            toSection(p.next())
+                        ).entries()
+                    ).instantiate();
+                }
+            }
+            
+            
         } catch (ServiceException exception) {
             throw BasicException.initHolder(
                 new JDOFatalDataStoreException(
@@ -350,6 +379,11 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
     private static final long serialVersionUID = 7461507288357096266L;
 
     /**
+     * The aop0 plug-ins
+     */
+    private final PlugIn_1_0[] plugIns;
+
+    /**
      * The optimal fetch size
      */
     private final Integer optimalFetchSize;
@@ -367,7 +401,7 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
     /**
      * The standard plug-ins
      */
-    private static final PlugIn_1_0[] STANDARD_PLUG_INS = {
+    private static final PlugIn_1_0[] DEFAULT_PLUG_INS = {
         new ProxyPlugIn_1()
     };
     
@@ -380,7 +414,6 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
      * 
      * @return a new <code>PersistenceManagerFactory</code>
      */
-    @SuppressWarnings("unchecked")
     public static PersistenceManagerFactory getPersistenceManagerFactory (
         Map props
     ){
@@ -435,7 +468,7 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
                     )
                 ), 
                 null, // connection2
-                STANDARD_PLUG_INS, 
+                this.plugIns, 
                 this.optimalFetchSize, 
                 this.cacheThreshold, 
                 connectionSpec  
@@ -466,6 +499,19 @@ public class EntityManagerProxyFactory_2 extends AbstractPersistenceManagerFacto
         );
     }
 
+    /**
+     * Provide a configuration entry's section
+     * 
+     * @param name the configuration entry
+     * 
+     * @return the configuration entry's section
+     */
+    private static String[] toSection(
+        Object name
+    ){
+        return ((String)name).split("\\.");
+    }
+    
     static {
         EntityManagerProxyFactory_2.DEFAULT_CONFIGURATION.put(
             ConfigurableProperty.TransactionType.qualifiedName(),

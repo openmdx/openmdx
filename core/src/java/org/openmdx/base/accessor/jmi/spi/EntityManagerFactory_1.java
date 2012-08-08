@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: EntityManagerFactory_1.java,v 1.22 2010/08/09 13:12:05 hburger Exp $
+ * Name:        $Id: EntityManagerFactory_1.java,v 1.23 2011/04/12 12:11:38 hburger Exp $
  * Description: Entity Manager Factory
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:12:05 $
+ * Date:        $Date: 2011/04/12 12:11:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -112,6 +112,7 @@ import org.w3c.cci2.SparseArray;
  * </ul>
  * </ol>
  */
+@SuppressWarnings("rawtypes")
 public class EntityManagerFactory_1
     extends AbstractPersistenceManagerFactory<PersistenceManager_1_0> {
 
@@ -362,7 +363,6 @@ public class EntityManagerFactory_1
      * 
      * @return a new <code>PersistenceManagerFactory</code>
      */
-    @SuppressWarnings("unchecked")
     public static PersistenceManagerFactory getPersistenceManagerFactory (
         Map props
     ){
@@ -659,8 +659,6 @@ public class EntityManagerFactory_1
         /* (non-Javadoc)
          * @see javax.jdo.datastore.DataStoreCache#evictAll(java.lang.Class, boolean)
          */
-        @SuppressWarnings("unchecked")
-    //  @Override
         public void evictAll(Class pcClass, boolean subclasses) {
             evictAll(subclasses, pcClass);
         }
@@ -668,8 +666,6 @@ public class EntityManagerFactory_1
         /* (non-Javadoc)
          * @see javax.jdo.datastore.DataStoreCache#evictAll(boolean, java.lang.Class)
          */
-        @SuppressWarnings("unchecked")
-    //  @Override
         public void evictAll(boolean subclasses, Class pcClass) {
             try {
                 this.delegate.evictAll(subclasses, this.mapping.getModelClassName(pcClass));
@@ -716,8 +712,6 @@ public class EntityManagerFactory_1
         /* (non-Javadoc)
          * @see javax.jdo.datastore.DataStoreCache#pinAll(java.lang.Class, boolean)
          */
-        @SuppressWarnings("unchecked")
-    //  @Override
         public void pinAll(Class pcClass, boolean subclasses) {
             pinAll(subclasses, pcClass);
         }
@@ -725,8 +719,6 @@ public class EntityManagerFactory_1
         /* (non-Javadoc)
          * @see javax.jdo.datastore.DataStoreCache#pinAll(boolean, java.lang.Class)
          */
-        @SuppressWarnings("unchecked")
-    //  @Override
         public void pinAll(boolean subclasses, Class pcClass) {
             try {
                 this.delegate.pinAll(subclasses, this.mapping.getModelClassName(pcClass));
@@ -773,8 +765,6 @@ public class EntityManagerFactory_1
         /* (non-Javadoc)
          * @see javax.jdo.datastore.DataStoreCache#unpinAll(java.lang.Class, boolean)
          */
-        @SuppressWarnings("unchecked")
-    //  @Override
         public void unpinAll(Class pcClass, boolean subclasses) {
             unpinAll(subclasses, pcClass);
         }
@@ -782,8 +772,6 @@ public class EntityManagerFactory_1
         /* (non-Javadoc)
          * @see javax.jdo.datastore.DataStoreCache#unpinAll(boolean, java.lang.Class)
          */
-        @SuppressWarnings("unchecked")
-    //  @Override
         public void unpinAll(boolean subclasses, Class pcClass) {
             try {
                 this.delegate.unpinAll(subclasses, this.mapping.getModelClassName(pcClass));

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Dataprovider_1.java,v 1.17 2010/08/06 12:25:39 hburger Exp $
+ * Name:        $Id: Dataprovider_1.java,v 1.19 2012/01/05 23:20:20 hburger Exp $
  * Description: The dataprovider kernel
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:25:39 $
+ * Date:        $Date: 2012/01/05 23:20:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2012, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,19 +50,13 @@
  */
 package org.openmdx.application.dataprovider.kernel;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.openmdx.application.cci.ConfigurationProvider_1_0;
-import org.openmdx.application.cci.ConfigurationSpecifier;
 import org.openmdx.application.configuration.Configuration;
-import org.openmdx.application.dataprovider.cci.DataproviderLayers;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
@@ -70,11 +64,10 @@ import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.spi.Model_1Factory;
-import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.loading.BeanFactory;
 import org.openmdx.kernel.loading.Classes;
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.SparseArray;
 
 public class Dataprovider_1 implements Dataprovider_1_0 {
@@ -96,153 +89,43 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
     ) throws ServiceException {
         this.kernelConfiguration = configurationProvider.getConfiguration(
             KERNEL_CONFIGURATION_SECTION,
-            kernelConfigurationSpecification
+            null
         );
         String namespace = this.kernelConfiguration.getFirstValue(
             SharedConfigurationEntries.NAMESPACE_ID
         );
-        this.kernelConfiguration.getFirstValue(
-            SharedConfigurationEntries.PERSISTENCE_MANAGER_BINDING
-        );
-
         try {
-            this.logger.log(
+            SysLog.log(
                 Level.FINEST,
                 "Creating kernel for namespace \"{0}\": {1}",
-                new Object[]{
-                    namespace,
-                    kernelConfiguration
-                }
+                namespace,
+                kernelConfiguration
             );
-
+            //
             // NAMESPACE_ID
+            //
             dataproviderConfiguration.values(
                 SharedConfigurationEntries.NAMESPACE_ID
             ).put(0, namespace);
-
-            // EXPOSED_PATH
-            SparseArray<Path> exposedPaths = dataproviderConfiguration.values(
-                SharedConfigurationEntries.EXPOSED_PATH
-            );
-            for(
-                ListIterator<?> iterator = kernelConfiguration.values(SharedConfigurationEntries.EXPOSED_PATH).populationIterator();
-                iterator.hasNext();
-            ) {
-                exposedPaths.put(
-                    iterator.nextIndex(),
-                    toPath(iterator.next())
-                );
-            }
-
-            // DELEGATION_PATH
-            SparseArray<Path> delegationPaths = dataproviderConfiguration.values(
-                SharedConfigurationEntries.DELEGATION_PATH
-            );
-            for(
-                    ListIterator<?> iterator = kernelConfiguration.values(
-                        SharedConfigurationEntries.DELEGATION_PATH
-                    ).populationIterator();
-                    iterator.hasNext();
-            ) delegationPaths.put(
-                iterator.nextIndex(),
-                toPath(iterator.next())
-            );
-
-            // MODEL
-            dataproviderConfiguration.values(
-                SharedConfigurationEntries.MODEL_PACKAGE
-            ).putAll(
-                kernelConfiguration.values(SharedConfigurationEntries.MODEL_PACKAGE)
-            );
-            dataproviderConfiguration.values(
-                SharedConfigurationEntries.PACKAGE_IMPL
-            ).putAll(
-                kernelConfiguration.values(SharedConfigurationEntries.PACKAGE_IMPL)
-            );
-            List<String> modelPackages = new ArrayList<String>();
-            for(Object modelPackage : dataproviderConfiguration.values(SharedConfigurationEntries.MODEL_PACKAGE).values()) {
-                modelPackages.add((String) modelPackage);
-            }
-            if(!modelPackages.isEmpty()) {
-                Model_1Factory.getModel().addModels(modelPackages);
-            }
-
+            //
             // DATAPROVIDER_CONNECTION
+            //
             dataproviderConfiguration.values(
                 SharedConfigurationEntries.DATAPROVIDER_CONNECTION_FACTORY
             ); // Like that even an initially empty entry is sharable
-
-            // Load, configure and activate plug-ins
-            Configuration[] layerConfigurations = new Configuration[LAYERS];
-            for(
-                    short step = LOAD_PLUGIN;
-                    step <= ACTIVATE_PLUGIN;
-                    step++
-            ) for(
-                    short layer = DataproviderLayers.PERSISTENCE;
-                    layer <= DataproviderLayers.INTERCEPTION;
-                    layer++
-            ) try {
-                switch (step) {
-                    case LOAD_PLUGIN:
-                        String className = kernelConfiguration.getFirstValue(
-                            DataproviderLayers.toString(layer)
-                        );
-                        layers[layer]=Classes.<Layer_1>getApplicationClass(
-                            className
-                        ).newInstance();
-                        break;
-                    case CONFIGURE_PLUGIN:
-                        // Load configuration
-                        Configuration layerConfiguration =
-                            configurationProvider.getConfiguration(
-                                new String[]{DataproviderLayers.toString(layer)},
-                                layers[layer].configurationSpecification()
-                            );
-
-                        // Propagate dataprovider configuration entries
-                        Map<String,SparseArray<?>> source = dataproviderConfiguration.entries();
-                        Map<String,SparseArray<?>> target = layerConfiguration.entries();
-                        Object name;
-                        for(
-                                Iterator<?> names = source.keySet().iterator();
-                                names.hasNext();
-                        ) if (
-                                ! target.containsKey(name = names.next())
-                        ) target.put(name.toString(), source.get(name));
-
-                        layerConfigurations[layer] = layerConfiguration;
-                        break;
-                    case ACTIVATE_PLUGIN:
-                        layers[layer].activate(
-                            layer,
-                            layerConfigurations[layer],
-                            layer == 0 ? null : layers[layer-1]
-                        );
-                        break;
-                }
-            } catch (Exception exception) {
-
-                String id = DataproviderLayers.toString(layer);
-                String className = kernelConfiguration.getFirstValue(id);
-                throw new ServiceException(
-                    exception,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ACTIVATION_FAILURE,
-                    "Could not activate " + id + " layer plugin " + className,
-                    new BasicException.Parameter("layer",id),
-                    new BasicException.Parameter("class",className),
-                    new BasicException.Parameter("step",step)
-                ).log();
-            }
-            this.logger.log(
+            //
+            // Delegate
+            //
+            String[] plugIns = kernelConfiguration.getValues("plugIn");
+            this.delegate = plugIns.length == 0 ? 
+                createDelegateFromLegacyConfiguration(dataproviderConfiguration, configurationProvider) :
+                createDelegate(dataproviderConfiguration, configurationProvider, plugIns);
+            SysLog.log(
                 Level.FINER,
                 "Kernel for namespace \"{0}\" created: {}",
-                new Object[]{namespace,kernelConfiguration}
+                namespace, 
+                kernelConfiguration
             );
-
-            this.delegation = layers[DataproviderLayers.INTERCEPTION];
-
         } catch (Exception exception) {
             throw new ServiceException(
                 exception,
@@ -254,66 +137,174 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
         }
     }
 
-    //------------------------------------------------------------------------
-    public Layer_1 getDelegate(
-    ) {
-        return this.delegation;
-    }
-    
-    //------------------------------------------------------------------------
-    // Instance Members
-    //------------------------------------------------------------------------
+    static private final String[] KERNEL_CONFIGURATION_SECTION = {
+        "KERNEL"
+    };
 
+    static private final String[] LEGACY_LAYER_NAMES = {
+        "PERSISTENCE",
+        "MODEL",
+        "APPLICATION",
+        "TYPE",
+        "INTERCEPTION"
+    };
+    
     /**
      * Initialized when the kernel is ready to act as dataprovider connection.
      */
-    private Layer_1 delegation = null;
+    private final Layer_1 delegate;
 
-    /**
-     * The layer instances
-     */
-    final protected Layer_1[] layers = new Layer_1[LAYERS];
-
-    /**
-     * The logger instance
-     */
-    private final Logger logger = LoggerFactory.getLogger();
-
+    private final Configuration kernelConfiguration;
     
-    //------------------------------------------------------------------------
-    // Class Members
-    //------------------------------------------------------------------------
+    /**
+     * The 5-layer legacy configuration
+     * 
+     * @param dataproviderConfiguration
+     * @param configurationProvider
+     * 
+     * @return the delegate
+     * 
+     * @throws ServiceException 
+     */
+    private Layer_1 createDelegateFromLegacyConfiguration(
+        Configuration dataproviderConfiguration,
+        ConfigurationProvider_1_0 configurationProvider
+    ) throws ServiceException{
+        Layer_1 layer = null;
+        //
+        // Load
+        //
+        Map<String,Layer_1> layers = new HashMap<String, Layer_1>();
+        for(String layerName : LEGACY_LAYER_NAMES) {
+            String className = kernelConfiguration.getFirstValue(layerName);
+            try {
+                layers.put(
+                    layerName, 
+                    Classes.<Layer_1>getApplicationClass(className).newInstance()
+                );
+            } catch (Exception exception) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ACTIVATION_FAILURE,
+                    "Could not create " + layerName + " plugin " + className,
+                    new BasicException.Parameter("layer", layerName),
+                    new BasicException.Parameter("class", className)
+                ).log();
+            }
+        }
+        //
+        // Configure
+        //
+        Map<String,Configuration> layerConfigurations = new HashMap<String, Configuration>();
+        for(String layerName : LEGACY_LAYER_NAMES) {
+            try {
+                Configuration layerConfiguration = configurationProvider.getConfiguration(
+                    new String[]{layerName},
+                    null
+                );
+                Map<String,SparseArray<?>> source = dataproviderConfiguration.entries();
+                Map<String,SparseArray<?>> target = layerConfiguration.entries();
+                for(Map.Entry<String,SparseArray<?>> entry : source.entrySet()) {
+                    if(!target.containsKey(entry.getKey())) {
+                        target.put(entry.getKey(), entry.getValue());
+                    }
+                }
+                layerConfigurations.put(layerName, layerConfiguration);
+            } catch (Exception exception) {
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.INVALID_CONFIGURATION,
+                    "Could not configure " + layerName + " plugin",
+                    new BasicException.Parameter("layer", layerName)
+                ).log();
+            }
+        }
+        //
+        // Activate
+        //
+        short layerId =  0;
+        for(String layerName : LEGACY_LAYER_NAMES) {
+            Layer_1 current = layers.get(layerName);
+            try {
+                current.activate(
+                    layerId++,
+                    layerConfigurations.get(layerName),
+                    layer
+                );
+                layer = current;
+            } catch (Exception exception) {
+                String className = current.getClass().getName();
+                throw new ServiceException(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ACTIVATION_FAILURE,
+                    "Could not create " + layerName + " plugin " + className,
+                    new BasicException.Parameter("layer", layerName),
+                    new BasicException.Parameter("class", className)
+                ).log();
+            }
+        }
+        return layer;
+    }
 
     /**
-     * Number of layers
+     * The standard plug-ins are Java Beans
+     * 
+     * @param dataproviderConfiguration
+     * @param configurationProvider
+     * @param plugIns
+     * 
+     * @return the delegate
+     * @throws ServiceException 
      */
-    final static int LAYERS = DataproviderLayers.INTERCEPTION + 1;
-
+    private Layer_1 createDelegate(
+        Configuration dataproviderConfiguration,
+        ConfigurationProvider_1_0 configurationProvider,
+        String[] plugIns
+    ) throws ServiceException{
+        Layer_1 layer = null;
+        //
+        // Load
+        //
+        Map<String,Layer_1> layers  = new HashMap<String, Layer_1>();
+        for(String plugIn : plugIns) {
+            layers.put(
+                plugIn,
+                new BeanFactory<Layer_1>(
+                    "class",
+                    configurationProvider.getConfiguration(
+                        new String[]{plugIn},
+                        null
+                    ).entries()
+                ).instantiate()
+            );
+        }
+        //
+        // Activate
+        //
+        short layerId = 0;
+        for(String layerName : plugIns) {
+            Layer_1 current = layers.get(layerName);
+            current.activate(
+                layerId++,
+                this.kernelConfiguration,
+                layer
+            );
+            layer = current;
+        }
+        return layer;
+    }
+    
     /**
-     * Plugin activation step
+     * Retrieve the delegation stack
+     * 
+     * @return the entry point for the delegation stack
      */
-    final private static short LOAD_PLUGIN         = 0;
-
-    /**
-     * Plugin activation step
-     */
-    final private static short CONFIGURE_PLUGIN    = 1;
-
-    /**
-     * Plugin activation step
-     */
-    final private static short ACTIVATE_PLUGIN    = 2;
-
-    /**
-     * The toPath method accepts any input class
-     */
-    protected final static Path toPath(
-        Object path
-    ){
-        return
-            path == null ? null : 
-            path instanceof Path ? (Path)path : 
-            new Path(path.toString());
+    public Layer_1 getDelegate(
+    ) {
+        return this.delegate;
     }
     
     /**
@@ -329,80 +320,16 @@ public class Dataprovider_1 implements Dataprovider_1_0 {
         List<DataproviderRequest> requests,
         List<DataproviderReply> replies
     ){
-        this.logger.log(
+        SysLog.log(
             Level.FINEST,
             "{0} requested by {1}",
-            new Object[]{requests, header.getPrincipalChain()}
+            requests, header.getPrincipalChain()
         );
-        return delegation.process(
+        return getDelegate().process(
             header, 
             requests,
             replies
         );
     }
 
-    //-----------------------------------------------------------------------
-    // Members
-    //-----------------------------------------------------------------------
-    static private final String[] KERNEL_CONFIGURATION_SECTION = {"KERNEL"};
-
-    protected final Configuration kernelConfiguration;
-    
-    /**
-     * The kernel's specific configuration specifiers.
-     */
-    private final static  Map<String,ConfigurationSpecifier> kernelConfigurationSpecification = 
-        new HashMap<String,ConfigurationSpecifier>();
-    
-    static {
-        for(
-            int layer = DataproviderLayers.PERSISTENCE;
-            layer <= DataproviderLayers.INTERCEPTION;
-            layer++
-        ) kernelConfigurationSpecification.put(
-            DataproviderLayers.toString(layer),
-            new ConfigurationSpecifier (
-                DataproviderLayers.toString(layer) + " layer plug-in class",
-                true, 1, 1
-            )
-        );
-        kernelConfigurationSpecification.put(
-            SharedConfigurationEntries.NAMESPACE_ID,
-              new ConfigurationSpecifier (
-                "The namespace ID. Where <value> is a simple string",
-                true, 1, 1
-            )
-        );
-        kernelConfigurationSpecification.put(
-            SharedConfigurationEntries.EXPOSED_PATH,
-            new ConfigurationSpecifier (
-                "A requests is not accepted " +
-                    " unless its path starts with one of the exposed ones",
-                true, 1, 100
-            )
-        );
-        kernelConfigurationSpecification.put(
-            SharedConfigurationEntries.DELEGATION_PATH,
-            new ConfigurationSpecifier (
-                "Requests to be delegated use the dataprovider with the same " +
-                    "index as its matching delegation path.",
-                false, 1, 100
-            )
-        );
-        kernelConfigurationSpecification.put(
-            SharedConfigurationEntries.MODEL_PACKAGE,
-            new ConfigurationSpecifier (
-                "Optional model packages specified as full qualified class names.",
-                true, 0, 100
-              )
-          );
-        kernelConfigurationSpecification.put(
-            SharedConfigurationEntries.PERSISTENCE_MANAGER_BINDING,
-            new ConfigurationSpecifier (
-                "The persistence manager bindig, e.g. cci2, jmi1,...",
-                false, 0, 1
-              )
-          );
-    }
-        
 }

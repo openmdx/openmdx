@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1ObjectPredicateInvocationHandler.java,v 1.8 2010/06/02 13:43:29 hburger Exp $
+ * Name:        $Id: Jmi1ObjectPredicateInvocationHandler.java,v 1.10 2011/08/19 22:28:19 hburger Exp $
  * Description: Jmi1ObjectPredicateInvocationHandler 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:43:29 $
+ * Date:        $Date: 2011/08/19 22:28:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2007-2009, OMEX AG, Switzerland
+ * Copyright (c) 2007-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -59,7 +59,6 @@ import java.util.Collections;
 import org.openmdx.base.query.AnyTypeCondition;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
-import org.openmdx.base.query.Quantifier;
 import org.w3c.cci2.AnyTypePredicate;
 
 /**
@@ -161,16 +160,19 @@ public class Jmi1ObjectPredicateInvocationHandler extends Jmi1QueryInvocationHan
             // Add subquery as filter property to parent query
             String featureName = this.predicate.getFeatureName();
             boolean exists = false;
-            for(Condition condition: this.predicate.getQuery().refGetFilter().getCondition()) {
-                if(condition.getFeature().equals(featureName)) {
+            Conditions: for(Condition condition: this.predicate.getQuery().refGetFilter().getCondition()) {
+                if(
+                    condition.getFeature().equals(featureName) &&
+                    condition.getQuantifier() == this.predicate.quantifier
+                ) {
                     exists = true;
-                    break;
+                    break Conditions;
                 }
             }
             if(!exists) {
                 this.predicate.getQuery().refGetFilter().getCondition().add(
                     new AnyTypeCondition(
-                        Quantifier.THERE_EXISTS,
+                        this.predicate.quantifier,
                         featureName,
                         ConditionType.IS_IN,
                         super.getQuery().refGetFilter()

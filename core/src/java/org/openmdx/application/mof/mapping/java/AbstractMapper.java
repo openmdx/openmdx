@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractMapper.java,v 1.7 2010/05/26 15:35:24 hburger Exp $
+ * Name:        $Id: AbstractMapper.java,v 1.10 2011/07/08 13:20:51 wfro Exp $
  * Description: JMITemplate 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/26 15:35:24 $
+ * Date:        $Date: 2011/07/08 13:20:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,10 +68,12 @@ import org.openmdx.application.mof.mapping.java.metadata.Visibility;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.cci.Stereotypes;
+import org.openmdx.kernel.exception.BasicException;
 
 // ---------------------------------------------------------------------------
 public abstract class AbstractMapper
@@ -158,23 +160,43 @@ public abstract class AbstractMapper
         Boolean returnValue,
         TypeMode featureUsage
     ) throws ServiceException {
-        String multiplicity = featureDef.getMultiplicity();
-        String type = featureDef.getQualifiedTypeName();
-        return 
-            Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ? (
-                this.model.isPrimitiveType(type) ? this.getObjectType(type) : getFeatureType(type, null, returnValue, featureUsage, "") 
-            ) :
-            Multiplicities.SINGLE_VALUE.equals(multiplicity) ? ( 
-                this.model.isPrimitiveType(type) ? this.getType(type) : getFeatureType(type, null, returnValue, featureUsage, "") 
-            ) :
-            Multiplicities.LIST.equals(multiplicity) ? this.getType(featureDef, "java.util.List", returnValue, featureUsage) :
-            Multiplicities.SET.equals(multiplicity) ? this.getType(featureDef, "java.util.Set", returnValue, featureUsage) :
-            Multiplicities.SPARSEARRAY.equals(multiplicity) ? this.getType(featureDef, "org.w3c.cci2.SparseArray", returnValue, featureUsage) :
-            Multiplicities.STREAM.equals(multiplicity) ? (
-                PrimitiveTypes.BINARY.equals(type) ? "java.io.InputStream" :
-                PrimitiveTypes.STRING.equals(type) ? "java.io.Reader" :
-                "java.io.DataInput" 
-            ) : this.getType(featureDef, "java.util.List", returnValue, featureUsage);
+    	Multiplicity multiplicity = ModelHelper.toMultiplicity(featureDef.getMultiplicity());
+    	if(multiplicity == null) {
+        	return this.getType(featureDef, "java.util.List", returnValue, featureUsage); // TODO verify whether this branch is really necessary
+        } else {
+	        switch(multiplicity) { 
+		        case OPTIONAL: {
+		            String type = featureDef.getQualifiedTypeName();
+		        	return this.model.isPrimitiveType(type) ? this.getObjectType(type) : getFeatureType(type, null, returnValue, featureUsage, "");
+		        }
+		        case SINGLE_VALUE: {
+		            String type = featureDef.getQualifiedTypeName();
+		        	return this.model.isPrimitiveType(type) ? this.getType(type) : getFeatureType(type, null, returnValue, featureUsage, "") ;
+		        }
+		        case LIST:
+		        	return this.getType(featureDef, "java.util.List", returnValue, featureUsage);
+		        case SET:
+		        	return this.getType(featureDef, "java.util.Set", returnValue, featureUsage);
+		        case SPARSEARRAY:
+		        	return this.getType(featureDef, "org.w3c.cci2.SparseArray", returnValue, featureUsage);
+		        case STREAM: {
+		            String type = featureDef.getQualifiedTypeName();
+		        	return 
+		        		PrimitiveTypes.BINARY.equals(type) ? "java.io.InputStream" :
+		                PrimitiveTypes.STRING.equals(type) ? "java.io.Reader" :
+		                "java.io.DataInput";
+		        }
+		        default:
+		        	throw new ServiceException(
+		        		BasicException.Code.DEFAULT_DOMAIN,
+		        		BasicException.Code.NOT_SUPPORTED,
+		        		"Unsupported multiplicity",
+		        		new BasicException.Parameter("feature", featureDef.getQualifiedName()),
+		        		new BasicException.Parameter("type", featureDef.getQualifiedTypeName()),
+		        		new BasicException.Parameter("multiplicity", featureDef.getMultiplicity())
+		        	);
+	        }
+        }
     }
         
     // -----------------------------------------------------------------------
@@ -403,61 +425,71 @@ public abstract class AbstractMapper
         String accessModifier,
         StructuralFeatureDef featureDef
     ) throws ServiceException {
-        if (Multiplicities.OPTIONAL_VALUE.equals(featureDef.getMultiplicity())) {
-            this.pw.println("  " + accessModifier + ' ' + this.getObjectType(featureDef.getQualifiedTypeName()) + ' ' + featureDef.getBeanGetterName() + " (");
-            this.pw.println("  ) {");
-            this.pw.println("    return (" + this.getObjectType(featureDef.getQualifiedTypeName()) +  ")this.refGetValue(\"" + featureDef.getName() + "\", 0);");
-            this.pw.println("  }");
-        } 
-        else if (Multiplicities.SINGLE_VALUE.equals(featureDef.getMultiplicity())) {
-            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef.getQualifiedTypeName()) );
-            this.pw.println(featureDef.getBeanGetterName() + " (");
-            this.pw.println("  ) {");
-            this.pw.println("    return (" + this.getObjectType(featureDef.getQualifiedTypeName()) +  ")this.refGetValue(\"" + featureDef.getName() + "\", 0);");
-            this.pw.println("  }");
-        } else if (Multiplicities.LIST.equals(featureDef.getMultiplicity())) {
+    	Multiplicity multiplicity = ModelHelper.toMultiplicity(featureDef.getMultiplicity());
+    	if(multiplicity == null) { // TODO verify whether this branch is really necessary
             this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER) + ' ' + featureDef.getBeanGetterName() + " (");
             this.pw.println("  ) {");
             this.pw.println("    return (" + this.getType(featureDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
             this.pw.println("  }");
-        } else if (Multiplicities.SET.equals(featureDef.getMultiplicity())) {
-            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER) + ' ' + featureDef.getBeanGetterName() + " (");
-            this.pw.println("  ) {");
-            this.pw.println("    return (" + this.getType(featureDef, "java.util.Set", Boolean.FALSE, TypeMode.MEMBER) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
-            this.pw.println("  }");
-        } else if (Multiplicities.MAP.equals(featureDef.getMultiplicity())) {
-            this.pw.println("  " + accessModifier + ' ' + this.getMapType(featureDef, java.lang.String.class, Boolean.TRUE) + ' ' + featureDef.getBeanGetterName() + " (");
-            this.pw.println("  ) {");
-            this.pw.println("    return (" + this.getMapType(featureDef, java.lang.String.class, Boolean.FALSE) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
-            this.pw.println("  }");
-        } else if (Multiplicities.SPARSEARRAY.equals(featureDef.getMultiplicity())) {
-            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER) + ' ' + featureDef.getBeanGetterName() + " (");
-            this.pw.println("  ) {");
-            this.pw.println("    return (" + this.getType(featureDef, "org.w3c.cci2.SparseArray", Boolean.FALSE, TypeMode.MEMBER) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
-            this.pw.println("  }");
-        } else if (Multiplicities.STREAM.equals(featureDef.getMultiplicity())) {
-            if (PrimitiveTypes.BINARY.equals(featureDef.getQualifiedTypeName())) {
-                this.pw.println("  " + accessModifier + " java.io.InputStream " + featureDef.getBeanGetterName() + " (");
-                this.pw.println("  ) {");
-                this.pw.println("    return (java.io.InputStream)this.refGetValue(\"" + featureDef.getName() + "\", 0);");
-                this.pw.println("  }");
-            } else if (PrimitiveTypes.STRING.equals(featureDef.getQualifiedTypeName())) {
-                this.pw.println("  " + accessModifier + " java.io.Reader " + featureDef.getBeanGetterName() + " (");
-                this.pw.println("  ) {");
-                this.pw.println("    return (java.io.Reader)this.refGetValue(\"" + featureDef.getName() + "\", 0);");
-                this.pw.println("  }");
-            } else {
-                this.pw.println("  " + accessModifier + " java.io.DataInput " + featureDef.getBeanGetterName() + " (");
-                this.pw.println("  ) {");
-                this.pw.println("    return (java.io.DataInput)this.refGetValue(\"" + featureDef.getName() + "\", 0);");
-                this.pw.println("  }");
-            }
-        } else {
-            this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER) + ' ' + featureDef.getBeanGetterName() + " (");
-            this.pw.println("  ) {");
-            this.pw.println("    return (" + this.getType(featureDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
-            this.pw.println("  }");
-        }
+    	} else {
+	    	switch(multiplicity){
+	    		case OPTIONAL:
+	                this.pw.println("  " + accessModifier + ' ' + this.getObjectType(featureDef.getQualifiedTypeName()) + ' ' + featureDef.getBeanGetterName() + " (");
+	                this.pw.println("  ) {");
+	                this.pw.println("    return (" + this.getObjectType(featureDef.getQualifiedTypeName()) +  ")this.refGetValue(\"" + featureDef.getName() + "\", 0);");
+	                this.pw.println("  }");
+	                break;
+	    		case SINGLE_VALUE:
+	                this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef.getQualifiedTypeName()) );
+	                this.pw.println(featureDef.getBeanGetterName() + " (");
+	                this.pw.println("  ) {");
+	                this.pw.println("    return (" + this.getObjectType(featureDef.getQualifiedTypeName()) +  ")this.refGetValue(\"" + featureDef.getName() + "\", 0);");
+	                this.pw.println("  }");
+	                break;
+	    		case LIST:
+	                this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.List", Boolean.TRUE, TypeMode.MEMBER) + ' ' + featureDef.getBeanGetterName() + " (");
+	                this.pw.println("  ) {");
+	                this.pw.println("    return (" + this.getType(featureDef, "java.util.List", Boolean.FALSE, TypeMode.MEMBER) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+	                this.pw.println("  }");
+	                break;
+	    		case SET:
+	                this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "java.util.Set", Boolean.TRUE, TypeMode.MEMBER) + ' ' + featureDef.getBeanGetterName() + " (");
+	                this.pw.println("  ) {");
+	                this.pw.println("    return (" + this.getType(featureDef, "java.util.Set", Boolean.FALSE, TypeMode.MEMBER) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+	                this.pw.println("  }");
+	                break;
+	    		case MAP:
+	                this.pw.println("  " + accessModifier + ' ' + this.getMapType(featureDef, java.lang.String.class, Boolean.TRUE) + ' ' + featureDef.getBeanGetterName() + " (");
+	                this.pw.println("  ) {");
+	                this.pw.println("    return (" + this.getMapType(featureDef, java.lang.String.class, Boolean.FALSE) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+	                this.pw.println("  }");
+	                break;
+	    		case SPARSEARRAY:
+	                this.pw.println("  " + accessModifier + ' ' + this.getType(featureDef, "org.w3c.cci2.SparseArray", Boolean.TRUE, TypeMode.MEMBER) + ' ' + featureDef.getBeanGetterName() + " (");
+	                this.pw.println("  ) {");
+	                this.pw.println("    return (" + this.getType(featureDef, "org.w3c.cci2.SparseArray", Boolean.FALSE, TypeMode.MEMBER) + ")this.refGetValue(\"" + featureDef.getName() + "\");");
+	                this.pw.println("  }");
+	                break;
+	    		case STREAM:
+	                if (PrimitiveTypes.BINARY.equals(featureDef.getQualifiedTypeName())) {
+	                    this.pw.println("  " + accessModifier + " java.io.InputStream " + featureDef.getBeanGetterName() + " (");
+	                    this.pw.println("  ) {");
+	                    this.pw.println("    return (java.io.InputStream)this.refGetValue(\"" + featureDef.getName() + "\", 0);");
+	                    this.pw.println("  }");
+	                } else if (PrimitiveTypes.STRING.equals(featureDef.getQualifiedTypeName())) {
+	                    this.pw.println("  " + accessModifier + " java.io.Reader " + featureDef.getBeanGetterName() + " (");
+	                    this.pw.println("  ) {");
+	                    this.pw.println("    return (java.io.Reader)this.refGetValue(\"" + featureDef.getName() + "\", 0);");
+	                    this.pw.println("  }");
+	                } else {
+	                    this.pw.println("  " + accessModifier + " java.io.DataInput " + featureDef.getBeanGetterName() + " (");
+	                    this.pw.println("  ) {");
+	                    this.pw.println("    return (java.io.DataInput)this.refGetValue(\"" + featureDef.getName() + "\", 0);");
+	                    this.pw.println("  }");
+	                }
+	                break;
+    		}
+    	}
     }
     
     // -----------------------------------------------------------------------
@@ -720,45 +752,51 @@ public abstract class AbstractMapper
 
     protected String getParseExpression(
         String qualifiedTypeName, 
-        String multiplicity,
+        Multiplicity multiplicity,
         String expression
     ) throws ServiceException {
         if(this.model.isPrimitiveType(qualifiedTypeName)) {
-            if(Multiplicities.OPTIONAL_VALUE.equals(multiplicity)) {
-                return PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName) ? (
-                    expression + " == null ? null : java.lang.Boolean.valueOf(" + expression + ")"
-                ) : PrimitiveTypes.SHORT.equals(qualifiedTypeName) ? (
-                    expression + " == null ? null : java.lang.Short.valueOf(" + expression + ")"
-                ) : PrimitiveTypes.LONG.equals(qualifiedTypeName) ? (
-                    expression + " == null ? null : java.lang.Long.valueOf(" + expression + ")"
-                ) : PrimitiveTypes.INTEGER.equals(qualifiedTypeName) ? ( 
-                    expression + " == null ? null : java.lang.Integer.valueOf(" + expression + ")"
-                ) : PrimitiveTypes.STRING.equals(qualifiedTypeName) ? (                      
-                    expression
-                ) : PrimitiveTypes.ANYURI.equals(qualifiedTypeName) ? ( 
-                    expression + " == null ? null : java.net.URI.create(" + expression + ")"
-                ) : PrimitiveTypes.DECIMAL.equals(qualifiedTypeName) ? (
-                    expression + " == null ? null : new java.math.BigDecimal(" + expression + ")"    
-                ) : "null // TODO support parsing of type " + qualifiedTypeName; 
-            } else if (Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
-                return PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName) ? (
-                    "java.lang.Boolean.parseBoolean(" + expression + ")"
-                ) : PrimitiveTypes.SHORT.equals(qualifiedTypeName) ? (
-                    "java.lang.Short.parseShort(" + expression + ")"
-                ) : PrimitiveTypes.LONG.equals(qualifiedTypeName) ? (
-                    "java.lang.Long.parseLong(" + expression + ")"
-                ) : PrimitiveTypes.INTEGER.equals(qualifiedTypeName) ? ( 
-                    "java.lang.Integer.parseInt(" + expression + ")"
-                ) : PrimitiveTypes.STRING.equals(qualifiedTypeName) ? (                      
-                    expression
-                ) : PrimitiveTypes.ANYURI.equals(qualifiedTypeName) ? ( 
-                    "java.net.URI.create(" + expression + ")"
-                ) : PrimitiveTypes.DECIMAL.equals(qualifiedTypeName) ? (
-                    "new java.math.BigDecimal(" + expression + ")"    
-                ) : "null // TODO support parsing of of type " + qualifiedTypeName; 
-            } else {
-                return "null // TODO support parsing of multi-valued arguments";
+            if(multiplicity != null) {
+                switch(multiplicity) {
+                    case OPTIONAL: 
+                        return PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName) ? (
+                            expression + " == null ? null : java.lang.Boolean.valueOf(" + expression + ")"
+                        ) : PrimitiveTypes.SHORT.equals(qualifiedTypeName) ? (
+                            expression + " == null ? null : java.lang.Short.valueOf(" + expression + ")"
+                        ) : PrimitiveTypes.LONG.equals(qualifiedTypeName) ? (
+                            expression + " == null ? null : java.lang.Long.valueOf(" + expression + ")"
+                        ) : PrimitiveTypes.INTEGER.equals(qualifiedTypeName) ? ( 
+                            expression + " == null ? null : java.lang.Integer.valueOf(" + expression + ")"
+                        ) : PrimitiveTypes.STRING.equals(qualifiedTypeName) ? (                      
+                            expression
+                        ) : PrimitiveTypes.ANYURI.equals(qualifiedTypeName) ? ( 
+                            expression + " == null ? null : java.net.URI.create(" + expression + ")"
+                        ) : PrimitiveTypes.DECIMAL.equals(qualifiedTypeName) ? (
+                            expression + " == null ? null : new java.math.BigDecimal(" + expression + ")"    
+                        ) : (
+                            expression + " // type " + qualifiedTypeName + " is implicitely mapped to java.lang.String"
+                        ); 
+                    case SINGLE_VALUE:
+                        return PrimitiveTypes.BOOLEAN.equals(qualifiedTypeName) ? (
+                            "java.lang.Boolean.parseBoolean(" + expression + ")"
+                        ) : PrimitiveTypes.SHORT.equals(qualifiedTypeName) ? (
+                            "java.lang.Short.parseShort(" + expression + ")"
+                        ) : PrimitiveTypes.LONG.equals(qualifiedTypeName) ? (
+                            "java.lang.Long.parseLong(" + expression + ")"
+                        ) : PrimitiveTypes.INTEGER.equals(qualifiedTypeName) ? ( 
+                            "java.lang.Integer.parseInt(" + expression + ")"
+                        ) : PrimitiveTypes.STRING.equals(qualifiedTypeName) ? (                      
+                            expression
+                        ) : PrimitiveTypes.ANYURI.equals(qualifiedTypeName) ? ( 
+                            "java.net.URI.create(" + expression + ")"
+                        ) : PrimitiveTypes.DECIMAL.equals(qualifiedTypeName) ? (
+                            "new java.math.BigDecimal(" + expression + ")"    
+                        ) : (
+                            expression + " // type " + qualifiedTypeName + " is implicitely mapped to java.lang.String"
+                        ); 
+                }
             }
+            return "null // TODO support parsing of multi-valued arguments";
         } else {
             return "null // TODO support parsing of non-primitive arguments";
         }
@@ -813,8 +851,8 @@ public abstract class AbstractMapper
         StructuralFeatureDef featureDef
     ){
         return
-            Multiplicities.SINGLE_VALUE.equals(featureDef.getMultiplicity()) ||
-            Multiplicities.OPTIONAL_VALUE.equals(featureDef.getMultiplicity()) ?
+            Multiplicity.SINGLE_VALUE.toString().equals(featureDef.getMultiplicity()) ||
+            Multiplicity.OPTIONAL.toString().equals(featureDef.getMultiplicity()) ?
             "org.w3c.cci2.SimpleTypeOrder" :
             null; // "org.w3c.cci2.MultivaluedTypeOrder" no longer supported
     }
@@ -921,7 +959,7 @@ public abstract class AbstractMapper
     ) {
         this.pw.println("//////////////////////////////////////////////////////////////////////////////");
         this.pw.println("//");
-        this.pw.println("// Name: $Id: AbstractMapper.java,v 1.7 2010/05/26 15:35:24 hburger Exp $");
+        this.pw.println("// Name: $Id: AbstractMapper.java,v 1.10 2011/07/08 13:20:51 wfro Exp $");
         this.pw.println("// Generated by: openMDX Java Mapper");
         this.pw.println("// Date: " + new Date().toString());
         this.pw.println("//");

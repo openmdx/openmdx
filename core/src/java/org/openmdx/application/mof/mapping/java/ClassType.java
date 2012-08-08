@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ClassType.java,v 1.3 2010/06/02 13:42:31 hburger Exp $
+ * Name:        $Id: ClassType.java,v 1.4 2011/04/12 15:29:26 hburger Exp $
  * Description: Class Type 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:42:31 $
+ * Date:        $Date: 2011/04/12 15:29:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,7 +62,6 @@ import org.openmdx.base.mof.cci.Stereotypes;
 /**
  * Class Type
  */
-@SuppressWarnings("unchecked")
 public enum ClassType {
     
     /**
@@ -285,7 +284,7 @@ public enum ClassType {
         ClassDef classDef
     ){
         for(
-            Iterator i = classDef.getSupertypes().iterator();
+            Iterator<?> i = classDef.getSupertypes().iterator();
             i.hasNext();
          ){
              ClassDef c = (ClassDef) i.next();
@@ -306,7 +305,7 @@ public enum ClassType {
         String qualifiedName,
         String packageSuffix
     ){
-        List nameComponents = MapperUtils.getNameComponents(qualifiedName);
+        List<?> nameComponents = MapperUtils.getNameComponents(qualifiedName);
         return AbstractMapper.getNamespace(
             MapperUtils.getNameComponents(
                 MapperUtils.getPackageName(qualifiedName)

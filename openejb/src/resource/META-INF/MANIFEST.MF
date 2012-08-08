@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Specification-Title: J2EE Specification
-Specification-Vendor: Sun Microsystems, Inc.
-Specification-Version: 1.3
-J2EE-DeploymentFactory-Implementation-Class: org.openmdx.openejb.deplo
- yment.OpenEJBDeploymentFactory

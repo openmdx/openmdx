@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractURLConnection.java,v 1.7 2010/06/02 13:46:30 hburger Exp $
+ * Name:        $Id: AbstractURLConnection.java,v 1.8 2011/04/12 15:44:00 hburger Exp $
  * Description: Delegating URL connection
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:46:30 $
+ * Date:        $Date: 2011/04/12 15:44:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,6 +68,7 @@ import java.util.Map;
 /**
  * An delegating URLConnection support class.
  */
+@SuppressWarnings({"rawtypes"})
 public abstract class AbstractURLConnection
     extends URLConnection
 {
@@ -185,7 +186,6 @@ public abstract class AbstractURLConnection
      * @see java.net.URLConnection#getContent(java.lang.Class[])
      */
     @Override
-    @SuppressWarnings("unchecked")
     public Object getContent(Class[] classes)
         throws IOException {
         return this.delegate.getContent(classes);

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BasicException.java,v 1.44 2010/11/10 06:30:03 hburger Exp $
+ * Name:        $Id: BasicException.java,v 1.47 2011/06/21 22:33:00 hburger Exp $
  * Description: Basic Exception
- * Revision:    $Revision: 1.44 $
+ * Revision:    $Revision: 1.47 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/10 06:30:03 $
+ * Date:        $Date: 2011/06/21 22:33:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -232,11 +232,6 @@ public final class BasicException extends Exception {
     }
     
     /**
-     * The basic exception logger
-     */
-    private static final Logger logger = LoggerFactory.getLogger();
-    
-    /**
      * The holder will not be serialized
      */
     private transient Throwable source;
@@ -361,6 +356,7 @@ public final class BasicException extends Exception {
     public static <T extends Holder> T log(
         T holder
     ){
+        Logger logger = LoggerFactory.getLogger();
         if(logger.isLoggable(Level.WARNING)) {
             LogRecord record = new ForeignLogRecord(
                 logger.getName(), 
@@ -713,7 +709,7 @@ public final class BasicException extends Exception {
      * @see org.openmdx.kernel.exception.ExceptionStack#getDescription()
      */
     public String getDescription() {
-        if(this.description == null && this.source != null) {
+        if(this.description == null && this.source != null && !(source instanceof Holder)) {
             this.description = this.source.getMessage();
         }
         return this.description;
@@ -1378,8 +1374,9 @@ public final class BasicException extends Exception {
     //------------------------------------------------------------------------
     
     /**
-     * The interface <code>Holder</code> defines an exception halding exception
-     * stack, i.e. its chain of causes consists of <code>BasicException</code>s.
+     * The interface <code>Holder</code> defines an exception holding an 
+     * exception stack, i.e. its chain of causes consists of 
+     * <code>BasicException</code>s.
      */
     public interface Holder {
         
@@ -1427,7 +1424,7 @@ public final class BasicException extends Exception {
         /**
          * This method is required by the log handler
          * 
-         * @return the exception's messgae
+         * @return the exception's message
          */
         String getMessage();
 
@@ -1558,8 +1555,8 @@ public final class BasicException extends Exception {
          */
         public Parameter(
             String name,
-            long value)
-        {
+            long value
+        ){
             this.name = name;
             this.value = String.valueOf(value);
         }
@@ -1574,8 +1571,8 @@ public final class BasicException extends Exception {
          */
         public Parameter(
             String name,
-            int value)
-        {
+            int value
+        ){
             this.name = name;
             this.value = String.valueOf(value);
         }
@@ -1590,8 +1587,8 @@ public final class BasicException extends Exception {
          */
         public Parameter(
             String name,
-            short value)
-        {
+            short value
+        ){
             this.name = name;
             this.value = String.valueOf(value);
         }
@@ -1606,8 +1603,8 @@ public final class BasicException extends Exception {
          */
         public Parameter(
             String name,
-            byte value)
-        {
+            byte value
+        ){
             this.name = name;
             this.value = String.valueOf(value);
         }
@@ -1622,8 +1619,8 @@ public final class BasicException extends Exception {
          */
         public Parameter(
             String name,
-            char value)
-        {
+            char value
+        ){
             this.name = name;
             this.value = String.valueOf(value);
         }
@@ -1638,8 +1635,8 @@ public final class BasicException extends Exception {
          */
         public Parameter(
             String name,
-            boolean value)
-        {
+            boolean value
+        ){
             this.name = name;
             this.value = String.valueOf(value);
         }

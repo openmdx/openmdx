@@ -97,10 +97,6 @@ org.openmdx.base.text.format
 org.openmdx.base.wbxml
 org.openmdx.base.xml
 org.openmdx.base.xml.stream
-org.openmdx.compatibility.audit1.aop1
-org.openmdx.compatibility.audit1.cci2
-org.openmdx.compatibility.audit1.jmi1
-org.openmdx.compatibility.audit1.jpa3
 org.openmdx.compatibility.jmi1
 org.openmdx.compatibility.kernel.url.protocol.xri
 org.openmdx.generic1.cci2

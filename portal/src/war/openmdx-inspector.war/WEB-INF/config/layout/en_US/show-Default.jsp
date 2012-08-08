@@ -2,17 +2,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: show-Default.jsp,v 1.92 2009/10/21 14:52:50 wfro Exp $
+ * Name:        $Id: show-Default.jsp,v 1.99 2011/04/13 13:11:33 wfro Exp $
  * Description: Default.jsp
- * Revision:    $Revision: 1.92 $
+ * Revision:    $Revision: 1.99 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/21 14:52:50 $
+ * Date:        $Date: 2011/04/13 13:11:33 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -175,7 +175,11 @@ org.openmdx.portal.servlet.texts.*
 			"Dashboard",
 			DashboardControl.class
 		);
-		
+		// WorkspaceDashboard
+		Control workspaceDashboard = view.createControl(
+			"WorkspaceDashboard",
+			WorkspaceDashboardControl.class
+		);		
 %>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html dir="<%= texts.getDir() %>">
@@ -282,16 +286,29 @@ org.openmdx.portal.servlet.texts.*
 				</ul>
 			</div> <!-- topnavi -->
 <%
+			RootMenuControl.paintMenuFlyIn(p);
 			navigation.paint(p, false);
 			menuOps.paint(p, false);
 			p.flush();
 %>
 		</div> <!-- header -->
 		<div id="content-wrap">
-			<div id="<%= app.getPanelState("Header") == 0 ? "content" : "contentNH" %>">
-				<div id="UserDialog"><div id="UserDialogWait" class="hidden" /></div></div>
+<%
+			boolean hideWorkspaceDashboard = Boolean.valueOf(app.getSettings().getProperty(UserSettings.HIDE_WORKSPACE_DASHBOARD));
+%>		
+			<div id="<%= "content" + (app.getPanelState("Header") == 0 ? "HeaderYes" : "HeaderNo") + (hideWorkspaceDashboard ? "LeftNo" : "LeftYes") %>">
 <%@ include file="../../../../show-header.html" %>
 <%
+				if(!hideWorkspaceDashboard) {
+%>
+					<div id="paneLeft">
+<%
+						workspaceDashboard.paint(p, false);
+						p.flush();
+%>		
+					</div> <!--  paneLeft -->
+<%
+				}
 				errors.paint(p, false);
 				operationResults.paint(p, false);
 				// No dashboards in lookup mode
@@ -300,6 +317,7 @@ org.openmdx.portal.servlet.texts.*
 				}
 				p.flush();
 %>
+				<div id="UserDialog"><div id="UserDialogWait" class="hidden" /></div></div>
 				<div id="aPanel">
 <%
 					attributes.paint(p, false);

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FormControl.java,v 1.7 2010/03/28 00:49:52 wfro Exp $
+ * Name:        $Id: FormControl.java,v 1.8 2011/04/15 12:03:06 wfro Exp $
  * Description: TabControl
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/28 00:49:52 $
+ * Date:        $Date: 2011/04/15 12:03:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -149,7 +149,7 @@ public class FormControl
     
     //-------------------------------------------------------------------------
     public void updateObject(
-        Map<String,Object[]> parameterMap,
+        Map<String,String[]> parameterMap,
         Object object,
         ApplicationContext application,
         PersistenceManager pm

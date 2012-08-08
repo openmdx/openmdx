@@ -8,7 +8,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 6"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX 2 ~ Core (jre-1.6)"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Groovy (jre-1.6)"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/openMDX 2 ~ Security (jre-1.6)"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ OSGi Enterprise (jre-1.6)"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ OSGi Extension (jre-1.6)"/>
 	<classpathentry kind="output" path="build/jre-1.6/eclipse"/>

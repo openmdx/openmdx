@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestDateState.java,v 1.2 2009/09/18 12:44:37 hburger Exp $
+ * Name:        $Id: TestDateState.java,v 1.3 2011/11/18 16:46:01 hburger Exp $
  * Description: TestState 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/18 12:44:37 $
+ * Date:        $Date: 2011/11/18 16:46:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -80,7 +80,7 @@ import test.openmdx.state2.jmi1.StateA;
 import test.openmdx.state2.jmi1.StateD;
 
 /**
- * TestState
+ * Test Date State
  */
 public class TestDateState {
 
@@ -213,7 +213,7 @@ public class TestDateState {
         System.out.println("aC: " + aC.size());
 //        assertTrue("aC", aC.isEmpty());
         for(int aI = 0; aI < 3; aI++) {
-            Segment sV = DateStateViews.getViewForTimeRange(
+            Segment sV = DateStateViews.<Segment,Segment>getViewForTimeRange(
                 segment,
                 aI < 1 ? null : Datatypes.create(XMLGregorianCalendar.class, "20000101"),
                 aI > 1 ? null : Datatypes.create(XMLGregorianCalendar.class, "20001231")
@@ -231,7 +231,7 @@ public class TestDateState {
             System.out.println("dC: " + dC.size());
             StateD[] dA = new StateD[3];
             for(int dI = 0; dI < 3; dI++){
-                StateA aV = DateStateViews.getViewForTimeRange(
+                StateA aV = DateStateViews.<StateA,StateA>getViewForTimeRange(
                     a,
                     Datatypes.create(XMLGregorianCalendar.class, dI < 2 ? "20000101" : "20000701"), 
                     Datatypes.create(XMLGregorianCalendar.class, dI > 0 ? "20001231" : "20000630")

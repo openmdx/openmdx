@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightConnectionManager.java,v 1.4 2010/08/03 14:02:32 hburger Exp $
+ * Name:        $Id: LightweightConnectionManager.java,v 1.5 2011/08/19 22:28:19 hburger Exp $
  * Description: LightweightConnectionManager
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/03 14:02:32 $
+ * Date:        $Date: 2011/08/19 22:28:19 $
  * ====================================================================
  *
  * This software is published under the BSD licenseas listed below.
@@ -398,8 +398,6 @@ public class LightweightConnectionManager
         extends AbstractSet<ManagedConnection>
         implements Synchronization 
     {
-
-        private static final long serialVersionUID = 3257009851963356210L;
 
         private final Set<ManagedConnection> delegate = new HashSet<ManagedConnection>();
         

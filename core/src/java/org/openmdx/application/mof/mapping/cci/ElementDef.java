@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ElementDef.java,v 1.2 2010/06/02 13:42:22 hburger Exp $
+ * Name:        $Id: ElementDef.java,v 1.3 2011/04/12 15:29:18 hburger Exp $
  * Description: VelocityElementDef class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:42:22 $
+ * Date:        $Date: 2011/04/12 15:29:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,7 +54,7 @@ package org.openmdx.application.mof.mapping.cci;
 import java.util.HashSet;
 import java.util.Set;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class ElementDef {
 
   //-------------------------------------------------------------------------

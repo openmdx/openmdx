@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VerifyingDeploymentManager.java,v 1.2 2009/03/31 17:06:10 hburger Exp $
+ * Name:        $Id: VerifyingDeploymentManager.java,v 1.3 2011/06/21 22:55:06 hburger Exp $
  * Description: DeploymentManager
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/03/31 17:06:10 $
+ * Date:        $Date: 2011/06/21 22:55:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,13 +57,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.openmdx.kernel.application.deploy.spi.Deployment;
 import org.openmdx.kernel.application.deploy.spi.LightweightClassLoader;
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.openmdx.kernel.xml.EntityMapper;
 import org.openmdx.kernel.xml.ValidatingDocumentBuilder;
@@ -252,13 +251,13 @@ public class VerifyingDeploymentManager implements Deployment {
     ) throws IOException, SAXException, ParserConfigurationException {
 
         URL applicationXmlUrl = VerifyingDeploymentManager.getNestedArchiveUrl(earURL, APPLICATION_XML);
-        this.logger.log(Level.FINEST,"accessing file '" + APPLICATION_XML + "'|{0}", applicationXmlUrl);
+        SysLog.log(Level.FINEST,"accessing file '" + APPLICATION_XML + "'|{0}", applicationXmlUrl);
         Document document = this.documentBuilder.parse(applicationXmlUrl);
         ApplicationDeploymentDescriptor appDD = new ApplicationDeploymentDescriptor(earURL, applicationXmlUrl);
         appDD.parseXml(document.getDocumentElement());
-        this.logger.log(Level.FINEST,"EAR detected|{0}", appDD.getDisplayName());
+        SysLog.log(Level.FINEST,"EAR detected|{0}", appDD.getDisplayName());
 
-        this.logger.log(Level.FINEST,"The EAR's application client modules|{0}", appDD.getApplicationClientModuleURIs());
+        SysLog.log(Level.FINEST,"The EAR's application client modules|{0}", appDD.getApplicationClientModuleURIs());
         for(
             Iterator<String> it = appDD.getApplicationClientModuleURIs().iterator();
             it.hasNext();
@@ -266,7 +265,7 @@ public class VerifyingDeploymentManager implements Deployment {
             String applicationClientModule = it.next();
             if (applicationClientModule.length() > 0)
             {
-            	this.logger.log(Level.FINEST,"Parsing application client module|{0}", applicationClientModule);
+            	SysLog.log(Level.FINEST,"Parsing application client module|{0}", applicationClientModule);
                 appDD.addModule(
                     this.parseApplicationClientModule(
                         VerifyingDeploymentManager.getNestedArchiveUrl(earURL, applicationClientModule),
@@ -277,7 +276,7 @@ public class VerifyingDeploymentManager implements Deployment {
             }
         }
 
-        this.logger.log(Level.FINEST,"The EAR's connector modules|{0}", appDD.getConnectorModuleURIs());
+        SysLog.log(Level.FINEST,"The EAR's connector modules|{0}", appDD.getConnectorModuleURIs());
         for(
                 Iterator<String> it = appDD.getConnectorModuleURIs().iterator();
                 it.hasNext();
@@ -285,7 +284,7 @@ public class VerifyingDeploymentManager implements Deployment {
             String connectorModule = it.next();
             if (connectorModule.length() > 0)
             {
-            	this.logger.log(Level.FINEST,"Parsing connector module|{0}", connectorModule);
+            	SysLog.log(Level.FINEST,"Parsing connector module|{0}", connectorModule);
                 appDD.addModule(
                     this.parseConnectorModule(
                         VerifyingDeploymentManager.getNestedArchiveUrl(earURL, connectorModule),
@@ -296,7 +295,7 @@ public class VerifyingDeploymentManager implements Deployment {
             }
         }
 
-        this.logger.log(Level.FINEST,"The EAR's EJB modules|{0}", appDD.getEjbModuleURIs());
+        SysLog.log(Level.FINEST,"The EAR's EJB modules|{0}", appDD.getEjbModuleURIs());
         for(
                 Iterator<String> it = appDD.getEjbModuleURIs().iterator();
                 it.hasNext();
@@ -304,7 +303,7 @@ public class VerifyingDeploymentManager implements Deployment {
             String ejbModule = it.next();
             if (ejbModule.length() > 0)
             {
-            	this.logger.log(Level.FINEST,"Parsing EJB module|{0}", ejbModule);
+            	SysLog.log(Level.FINEST,"Parsing EJB module|{0}", ejbModule);
                 appDD.addModule(
                     this.parseEjbModule(
                         VerifyingDeploymentManager.getNestedArchiveUrl(earURL, ejbModule),
@@ -315,7 +314,7 @@ public class VerifyingDeploymentManager implements Deployment {
             }
         }
 
-        this.logger.log(Level.FINEST,"The EAR's Web modules|{0}", appDD.getWebApplicationURIs());
+        SysLog.log(Level.FINEST,"The EAR's Web modules|{0}", appDD.getWebApplicationURIs());
         for(
             int i = 0, iLimit = appDD.getWebApplicationURIs().size();
             i < iLimit;
@@ -323,7 +322,7 @@ public class VerifyingDeploymentManager implements Deployment {
         ){
             String webApplication = (String) appDD.getWebApplicationURIs().get(i);
             if (webApplication.length() > 0) {
-            	this.logger.log(Level.FINEST,"Parsing Web module|{0}", webApplication);
+            	SysLog.log(Level.FINEST,"Parsing Web module|{0}", webApplication);
                 String contextRoot = (String) appDD.getContextRoots().get(i);
                 try {
                     appDD.addModule(
@@ -335,7 +334,7 @@ public class VerifyingDeploymentManager implements Deployment {
                         )
                     );
                 } catch (IOException exception) {
-                    this.logger.log(
+                    SysLog.log(
                     	Level.WARNING,
                     	"Could not parse Web module|{0}|{1}", 
                     	new Object[]{webApplication, exception.getMessage()}
@@ -355,7 +354,7 @@ public class VerifyingDeploymentManager implements Deployment {
 
         // read and parse ejb-jar.xml (mandatory)
         URL ejbJarXmlUrl = VerifyingDeploymentManager.getNestedArchiveUrl(moduleURL, EJB_JAR_XML);
-        this.logger.log(Level.FINEST,"Accessing file '" + EJB_JAR_XML + "'|{0}", ejbJarXmlUrl);
+        SysLog.log(Level.FINEST,"Accessing file '" + EJB_JAR_XML + "'|{0}", ejbJarXmlUrl);
         Document ejbJarXmlDocument = this.documentBuilder.parse(ejbJarXmlUrl);
         ModuleDeploymentDescriptor moduleDD = new ModuleDeploymentDescriptor(
             moduleID,
@@ -366,13 +365,13 @@ public class VerifyingDeploymentManager implements Deployment {
 
         // read and parse openmdx-ejb-jar.xml (optional)
         URL openMdxXmlUrl = VerifyingDeploymentManager.getNestedArchiveUrl(moduleURL, OPENMDX_EJB_JAR_XML);
-        this.logger.log(Level.FINEST,"Accessing file '" + OPENMDX_EJB_JAR_XML + "'|{0}", openMdxXmlUrl);
+        SysLog.log(Level.FINEST,"Accessing file '" + OPENMDX_EJB_JAR_XML + "'|{0}", openMdxXmlUrl);
         try {
             Document openMdxXmlDocument = this.documentBuilder.parse(openMdxXmlUrl);
             moduleDD.parseOpenMdxXml(openMdxXmlDocument.getDocumentElement());
         }
         catch (FileNotFoundException ex) {
-            this.logger.log(
+            SysLog.log(
             	Level.FINER,"Optional file '" + OPENMDX_EJB_JAR_XML + "' does not exist for module|{}", 
             	moduleURL
             );
@@ -382,7 +381,7 @@ public class VerifyingDeploymentManager implements Deployment {
         moduleDD.setModuleClassPath(new URL[]{moduleURL});
 
         // read and access manifest file to set application class path (optional)
-        moduleDD.setApplicationClassPath(LightweightClassLoader.getManifestClassPath(moduleURL, this.logger));
+        moduleDD.setApplicationClassPath(LightweightClassLoader.getManifestClassPath(moduleURL));
 
         return moduleDD;
     }
@@ -395,7 +394,7 @@ public class VerifyingDeploymentManager implements Deployment {
     ) throws IOException, SAXException, ParserConfigurationException {
         // read and parse web.xml (mandatory)
         URL webXmlUrl = VerifyingDeploymentManager.getNestedArchiveUrl(moduleURL, WEB_XML);
-        this.logger.log(
+        SysLog.log(
         	Level.FINEST,
         	"Accessing file '" + WEB_XML + "'|{0}",  
         	webXmlUrl
@@ -409,7 +408,7 @@ public class VerifyingDeploymentManager implements Deployment {
         );
         moduleDD.parseXml(webXmlDocument.getDocumentElement());
         // read and access manifest file to set application class path (optional)
-        moduleDD.setApplicationClassPath(LightweightClassLoader.getManifestClassPath(moduleURL, this.logger));
+        moduleDD.setApplicationClassPath(LightweightClassLoader.getManifestClassPath(moduleURL));
         return moduleDD;
     }
 
@@ -422,7 +421,7 @@ public class VerifyingDeploymentManager implements Deployment {
 
         // read and parse rar.xml (mandatory)
         URL raXmlUrl = VerifyingDeploymentManager.getNestedArchiveUrl(moduleURL, RA_XML);
-        this.logger.log(
+        SysLog.log(
         	Level.FINEST,
         	"Accessing file '" + RA_XML + "'|{0}", 
         	raXmlUrl
@@ -433,7 +432,7 @@ public class VerifyingDeploymentManager implements Deployment {
 
         // read and parse openmdx-connector.xml (optional)
         URL openMdxXmlUrl = VerifyingDeploymentManager.getNestedArchiveUrl(moduleURL, OPENMDX_CONNECTOR_XML);
-        this.logger.log(
+        SysLog.log(
         	Level.FINEST,
         	"Accessing file '" + OPENMDX_CONNECTOR_XML + "'|{0}", 
         	openMdxXmlUrl
@@ -443,7 +442,7 @@ public class VerifyingDeploymentManager implements Deployment {
             connectorDD.parseOpenMdxXml(openMdxXmlDocument.getDocumentElement());
         }
         catch (FileNotFoundException ex) {
-            this.logger.log(
+            SysLog.log(
             	Level.FINER,
             	"Optional file '" + OPENMDX_CONNECTOR_XML + "' does not exist for module|{0}", 
             	moduleURL.toExternalForm()
@@ -454,7 +453,7 @@ public class VerifyingDeploymentManager implements Deployment {
         connectorDD.setModuleClassPath(new URL[]{moduleURL});
 
         // read and access manifest file to set application class path (optional)
-        connectorDD.setApplicationClassPath(LightweightClassLoader.getManifestClassPath(moduleURL, this.logger));
+        connectorDD.setApplicationClassPath(LightweightClassLoader.getManifestClassPath(moduleURL));
 
         return connectorDD;
     }
@@ -467,7 +466,7 @@ public class VerifyingDeploymentManager implements Deployment {
 
         // read and parse rar.xml (mandatory)
         URL appClientXmlUrl = VerifyingDeploymentManager.getNestedArchiveUrl(applicationClientURL, APPLICATION_CLIENT_XML);
-        this.logger.log(Level.FINEST,"Accessing file '" + APPLICATION_CLIENT_XML + "'|{0}", appClientXmlUrl);
+        SysLog.log(Level.FINEST,"Accessing file '" + APPLICATION_CLIENT_XML + "'|{0}", appClientXmlUrl);
         Document appClientXmlDocument = this.documentBuilder.parse(appClientXmlUrl);
         ApplicationClientDeploymentDescriptor appClientDD = new ApplicationClientDeploymentDescriptor(
             moduleID,
@@ -478,7 +477,7 @@ public class VerifyingDeploymentManager implements Deployment {
 
         // read and parse openmdx-connector.xml (optional)
         URL openMdxAppClientXmlUrl = VerifyingDeploymentManager.getNestedArchiveUrl(applicationClientURL, OPENMDX_APPLICATION_CLIENT_XML);
-        this.logger.log(
+        SysLog.log(
         	Level.FINEST,
         	"Accessing file '" + OPENMDX_APPLICATION_CLIENT_XML + "'|{0}", 
         	openMdxAppClientXmlUrl
@@ -488,17 +487,17 @@ public class VerifyingDeploymentManager implements Deployment {
             appClientDD.parseOpenMdxXml(openMdxAppClientXmlDocument.getDocumentElement());
         }
         catch (FileNotFoundException ex) {
-            this.logger.log(
+            SysLog.log(
             	Level.FINER,
             	"Optional file '" + OPENMDX_APPLICATION_CLIENT_XML + "' does not exist");
         }
 
         // read and access manifest file to set main class and client class path
         appClientDD.setMainClass(LightweightClassLoader.getManifest(applicationClientURL).getMainAttributes().getValue("Main-Class"));
-        appClientDD.setClientClassPath(LightweightClassLoader.getManifestClassPath(applicationClientURL, this.logger));
+        appClientDD.setClientClassPath(LightweightClassLoader.getManifestClassPath(applicationClientURL));
 
         // read and access manifest file to set application class path (optional)
-        appClientDD.setApplicationClassPath(LightweightClassLoader.getManifestClassPath(applicationClientURL, this.logger));
+        appClientDD.setApplicationClassPath(LightweightClassLoader.getManifestClassPath(applicationClientURL));
 
         return appClientDD;
     }
@@ -539,7 +538,6 @@ public class VerifyingDeploymentManager implements Deployment {
         return new URL(XRI_2Protocols.ZIP_PREFIX + containerURL + XRI_2Protocols.ZIP_SEPARATOR + fileName);
     }
 
-    private final Logger logger = LoggerFactory.getLogger();
     private final ValidatingDocumentBuilder documentBuilder;
     private static final String APPLICATION_XML = "META-INF/application.xml";
     private static final String APPLICATION_CLIENT_XML = "META-INF/application-client.xml";

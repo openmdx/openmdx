@@ -33,11 +33,11 @@ import java.util.Set;
  * Exceptions include <code>BidiMap</code> implementations, as they require unique values.
  *
  * @since Commons Collections 3.1
- * @version $Revision: 1.2 $ $Date: 2010/06/02 13:44:25 $
+ * @version $Revision: 1.3 $ $Date: 2011/04/12 12:19:18 $
  * 
  * @author Stephen Colebourne
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","rawtypes"})
 public final class MapBackedSet implements Set, Serializable {
 
     /** Serialization version */

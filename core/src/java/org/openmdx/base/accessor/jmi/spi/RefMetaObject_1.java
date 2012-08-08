@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefMetaObject_1.java,v 1.5 2010/06/02 13:43:29 hburger Exp $
+ * Name:        $Id: RefMetaObject_1.java,v 1.6 2011/04/12 15:54:38 hburger Exp $
  * Description: RefMetaObject_1 class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:43:29 $
+ * Date:        $Date: 2011/04/12 15:54:38 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,6 +64,7 @@ import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 //---------------------------------------------------------------------------
+@SuppressWarnings({"rawtypes"})
 public class RefMetaObject_1
   implements RefObject {
 
@@ -158,7 +159,7 @@ public class RefMetaObject_1
   }
 
   //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
+  
   public Object refInvokeOperation(
     RefObject requestedOperation,
     List args
@@ -167,7 +168,6 @@ public class RefMetaObject_1
   }
 
   //-------------------------------------------------------------------------
-  @SuppressWarnings("unchecked")
   public Object refInvokeOperation(
     String operationName,
     List args

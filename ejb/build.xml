@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.10 2010/10/27 14:37:44 wfro Exp $
+= Name:        $Id: build.xml,v 1.11 2011/05/20 09:17:12 hburger Exp $
 = Description: ant build for openMDX/EJB
-= Revision:    $Revision: 1.10 $
-= Date:        $Date: 2010/10/27 14:37:44 $
+= Revision:    $Revision: 1.11 $
+= Date:        $Date: 2011/05/20 09:17:12 $
 = Copyright:   (c) 2004-2006 OMEX AG
 =======================================================================
  *
@@ -64,7 +64,6 @@
 	<path id="project.lib.classpath">
 		<path refid="osgi.enterprise.lib"/>
 		<path refid="osgi.extension.lib"/>
-                <path refid="java2.enterprise.lib"/>
 		<path refid="openmdx.core.lib"/>
 		<path refid="openmdx.core.bin"/>
 	</path>

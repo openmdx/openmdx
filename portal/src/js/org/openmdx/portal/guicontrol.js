@@ -1,10 +1,10 @@
 // ====================================================================
 // Project:     openmdx, http://www.openmdx.org/
-// Name:        $Id: guicontrol.js,v 1.10 2009/08/26 11:55:34 cmu Exp $
+// Name:        $Id: guicontrol.js,v 1.12 2011/04/15 14:12:10 cmu Exp $
 // Description: java script helpers
-// Revision:    $Revision: 1.10 $
+// Revision:    $Revision: 1.12 $
 // Owner:       OMEX AG, Switzerland, http://www.omex.ch
-// Date:        $Date: 2009/08/26 11:55:34 $
+// Date:        $Date: 2011/04/15 14:12:10 $
 // ====================================================================
 //
 // This software is published under the BSD license
@@ -1165,7 +1165,21 @@ function yuiPrint() {
     var disp_setting="toolbar=no,location=yes,directories=no,menubar=yes,";
         disp_setting+="scrollbars=yes,width=650, height=600, left=100, top=25,";
         disp_setting+="resizable=yes";
-    var content_value = $('content').innerHTML;
+    var content_value = "";
+    if ($('paneLeft')) {$('paneLeft').style.display='none';}
+    if (content_value == null || content_value.length == 0) {
+		    try {content_value = $('contentHeaderYesLeftYes').innerHTML;} catch(e) {};
+    }
+    if (content_value == null || content_value.length == 0) {
+		    try {content_value = $('contentHeaderNoLeftYes').innerHTML;} catch(e) {};
+    }
+    if (content_value == null || content_value.length == 0) {
+		    try {content_value = $('contentHeaderYesLeftNo').innerHTML;} catch(e) {};
+    }
+    if (content_value == null || content_value.length == 0) {
+		    try {content_value = $('contentHeaderNoLeftNo').innerHTML;} catch(e) {};
+    }
+    if ($('paneLeft')) {$('paneLeft').style.display='block';}
     var docprint=window.open("","",disp_setting);
     docprint.document.open();
     docprint.document.write('<html><head><style>');

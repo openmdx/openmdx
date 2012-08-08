@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ServiceHeader.java,v 1.9 2010/06/02 13:39:35 hburger Exp $
+ * Name:        $Id: ServiceHeader.java,v 1.10 2011/11/26 01:34:59 hburger Exp $
  * Description: Service Header
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:39:35 $
+ * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.jdo.JDOFatalUserException;
-import javax.resource.ResourceException;
 import javax.resource.spi.security.PasswordCredential;
 import javax.security.auth.Subject;
 
@@ -312,19 +311,15 @@ public final class ServiceHeader
     @Override
     public String toString(
     ){
-        try {
-            return Records.getRecordFactory().asMappedRecord(
-                ServiceHeader.class.getName(),
-                null, // short description
-                TO_STRING_CONTENT,
-                new Object[]{
-                    this.principalChain,
-                    this.requestedAt
-                }
-            ).toString();
-        } catch (ResourceException exception) {
-            return super.toString();
-        }
+        return Records.getRecordFactory().asMappedRecord(
+		    ServiceHeader.class.getName(),
+		    null, // short description
+		    TO_STRING_CONTENT,
+		    new Object[]{
+		        this.principalChain,
+		        this.requestedAt
+		    }
+		).toString();
     }
 
 }

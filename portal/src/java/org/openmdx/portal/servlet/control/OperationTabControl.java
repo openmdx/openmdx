@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationTabControl.java,v 1.52 2009/11/05 18:03:15 hburger Exp $
+ * Name:        $Id: OperationTabControl.java,v 1.59 2011/09/16 09:01:41 wfro Exp $
  * Description: OperationTabControl
- * Revision:    $Revision: 1.52 $
+ * Revision:    $Revision: 1.59 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/05 18:03:15 $
+ * Date:        $Date: 2011/09/16 09:01:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,9 +65,10 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.Autocompleter_1_0;
-import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.ObjectReference;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.action.InvokeOperationAction;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.BinaryValue;
@@ -104,12 +105,12 @@ public class OperationTabControl
             localeAsIndex,
             controlFactory,
             tab,
-            paneIndex,        
+            paneIndex,
             tabIndex
         );
         this.operationName = tab == null ? null :((org.openmdx.ui1.jmi1.OperationTab)tab).getOperationName();
     }
-  
+
     //-------------------------------------------------------------------------
     public String getOperationName(
     ) {
@@ -140,17 +141,17 @@ public class OperationTabControl
   
     //-------------------------------------------------------------------------
     public boolean confirmExecution(
-        ApplicationContext application
+        ApplicationContext app
     ) {
         return 
             Ui_1.DELETE_OBJECT_OPERATION_NAME.equals(this.getOperationName()) ||
-            (Ui_1.RELOAD_OBJECT_OPERATION_NAME.equals(this.getOperationName()) && application.getRoleMapper().isRootPrincipal(application.getCurrentUserRole()));
+            (Ui_1.RELOAD_OBJECT_OPERATION_NAME.equals(this.getOperationName()) && app.getPortalExtension().isRootPrincipal(app.getCurrentUserRole()));
     }
     
     //-------------------------------------------------------------------------
     public Action getInvokeOperationAction(
         ShowObjectView view,
-        ApplicationContext application
+        ApplicationContext app
     ) throws ServiceException {
         // built-in operations
         if(Ui_1.EDIT_OBJECT_OPERATION_NAME.equals(this.getOperationName())) {
@@ -165,20 +166,16 @@ public class OperationTabControl
         else if(Ui_1.NAVIGATE_TO_PARENT_OPERATION_NAME.equals(this.getOperationName())) {
             return view.getObjectReference().getSelectParentAction();
         }
-        else {       
+        else {
             return new Action(
-                Action.EVENT_INVOKE_OPERATION,
+                InvokeOperationAction.EVENT_ID,
                 new Action.Parameter[]{
                     new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(this.getPaneIndex())),
                     new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getObjectReference().refMofId()),                
                     new Action.Parameter(Action.PARAMETER_TAB, Integer.toString(this.getTabIndex()))
                 },
                 "OK",
-                application.getPortalExtension().isEnabled(
-                    this.getOperationName(),
-                    view.getObjectReference().getObject(),
-                    application
-                )
+                true
             );
         }
     }
@@ -190,22 +187,34 @@ public class OperationTabControl
         String frame,
         boolean forEditing        
     ) throws ServiceException {
-        ApplicationContext application = p.getApplicationContext();
+        ApplicationContext app = p.getApplicationContext();
         ShowObjectView view = (ShowObjectView)p.getView();
         OperationPane operationPane = view.getOperationPane()[this.getPaneIndex()];
         OperationTab operationTab = operationPane.getOperationTab()[this.getTabIndex()];
-        Texts_1_0 texts = application.getTexts();
+        Texts_1_0 texts = app.getTexts();
 
         // Operation menues
         if(frame == null) {
             String operationId = Integer.toString(this.getTabId());
             Action invokeOperationAction = this.getInvokeOperationAction(
                 view,
-                application
+                app
             );
-            if(invokeOperationAction.isEnabled()) {
+        	boolean isRevokeShow = app.getPortalExtension().hasPermission(
+                this.getOperationName(),
+                view.getObjectReference().getObject(),
+                app,
+                WebKeys.PERMISSION_REVOKE_SHOW
+            );
+        	boolean isRevokeEdit = app.getPortalExtension().hasPermission(
+                this.getOperationName(),
+                view.getObjectReference().getObject(),
+                app,
+                WebKeys.PERMISSION_REVOKE_EDIT
+            );
+            if(!isRevokeEdit && !isRevokeShow) {
                 // No input parameters so don't generate dialog
-                if((this.getFieldGroupControl().length == 0) && !this.confirmExecution(application)) {
+                if((this.getFieldGroupControl().length == 0) && !this.confirmExecution(app)) {
                     if(Ui_1.EDIT_OBJECT_OPERATION_NAME.equals(this.getOperationName())) {
                         p.write("    <li><a href=\"#\" onclick=\"javascript:new Ajax.Updater('aPanel', ", p.getEvalHRef(invokeOperationAction),", {asynchronous:true, evalScripts: true, onComplete: function(){}});return false;\" id=\"opTab", operationId, "\" >", this.getName(), "</a></li>");                        
                     }
@@ -218,8 +227,8 @@ public class OperationTabControl
                     p.write("    <li><a href=\"#\"", " id=\"op", operationId, "Trigger\" onclick=\"javascript:$('op", operationId, "Dialog').style.display='block';if(!op", operationId, "Dialog){op", operationId, "Dialog = new YAHOO.widget.Panel('op", operationId, "Dialog', {zindex:20000, fixedcenter:true, close:true, visible:false, constraintoviewport:true, modal:true}); op", operationId, "Dialog.cfg.queueProperty('keylisteners', new YAHOO.util.KeyListener(document, {keys:27}, {fn:op", operationId, "Dialog.hide, scope:op", operationId, "Dialog, correctScope:true})); op", operationId, "Dialog.render();} op", operationId, "Dialog.show();\">", this.getName(), "...</a></li>");
                 }
             }
-            // operation is disabled. Do not generate onclick or href actions
-            else {
+            // Operation can not be invoked. Do not generate onclick or href actions
+            else if(!isRevokeShow) {
                 // no input parameters
                 if(this.getFieldGroupControl().length == 0) {
                     p.write("    <li><a href=\"#\" id=\"opTab", operationId, "\" ><span>", this.getName(), "</span></a></li>");
@@ -229,12 +238,15 @@ public class OperationTabControl
                     p.write("    <li><a href=\"#\" id=\"opTab", operationId, "\" ><span>", this.getName(), "...</span></a></li>");
                 }
             }
+            // Operation is hidden
+            else {            	
+            }
         }
         // Operation parameters
         else if(FRAME_PARAMETERS.equals(frame)) {
             Action invokeOperationAction = this.getInvokeOperationAction(
                 view, 
-                application
+                app
             );
             int operationIndex = 100*(this.getPaneIndex() + 1) + this.getTabIndex();
             String operationId = Integer.toString(operationIndex);
@@ -243,7 +255,7 @@ public class OperationTabControl
                 // Operations with no arguments
                 if(this.getFieldGroupControl().length == 0) {            
                     // Confirmation prompt
-                    if(this.confirmExecution(application)) {
+                    if(this.confirmExecution(app)) {
                         p.write("<script language=\"javascript\" type=\"text/javascript\">");
                         p.write("  var op", operationId, "Dialog = null;");
                         p.write("</script>");     
@@ -323,9 +335,9 @@ public class OperationTabControl
                                         // single-valued
                                         if(valueHolder.isSingleValued()) {
                                             if(valueHolder instanceof CodeValue) {
-                                                SortedMap longTextsT = application.getCodes().getLongText(
+                                                SortedMap longTextsT = app.getCodes().getLongText(
                                                     fieldName, 
-                                                    application.getCurrentLocaleAsIndex(), 
+                                                    app.getCurrentLocaleAsIndex(), 
                                                     false, 
                                                     false
                                                 );
@@ -453,8 +465,8 @@ public class OperationTabControl
                                                     p.write("<textarea id=\"", id, "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" class=\"string\" name=\"", fieldId, "\" tabindex=\"", Integer.toString(index), "\" style=\"width:100%;\" >", stringifiedValue, "</textarea>");
                                                 }
                                                 else {
-                                                    Autocompleter_1_0 autocompleter = application.getPortalExtension().getAutocompleter(
-                                                        application, 
+                                                    Autocompleter_1_0 autocompleter = app.getPortalExtension().getAutocompleter(
+                                                    	app, 
                                                         view.getLookupObject(), 
                                                         fieldName
                                                     );

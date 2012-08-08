@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: XRI_1Marshaller.java,v 1.4 2010/06/25 17:09:28 hburger Exp $
+ * Name:        $Id: XRI_1Marshaller.java,v 1.6 2011/08/19 22:28:19 hburger Exp $
  * Description: Path/XRI Marshaller 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/25 17:09:28 $
+ * Date:        $Date: 2011/08/19 22:28:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,7 +62,7 @@ import org.openmdx.kernel.url.protocol.XriAuthorities;
 /**
  * Path/XRI Marshaller
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public final class XRI_1Marshaller
 implements Marshaller
 {
@@ -203,28 +203,10 @@ implements Marshaller
             );
             xri.append("**");
         } else {
-            int crossReference = 0;
-            boolean unbalanced = false;
             for(
-                    int i = 0, l = source.length();
-                    i < l;
-                    i++
-            ){
-                char character = source.charAt(i);
-                switch (character) {
-                    case '(':
-                        ++crossReference;
-                        break;
-                    case ')':
-                        unbalanced |= --crossReference < 0;
-                        break;
-                }
-            }
-            unbalanced |= crossReference > 0;
-            for(
-                    int i = 0, l = source.length();
-                    i < l;
-                    i++
+                int i = 0, l = source.length();
+                i < l;
+                i++
             ){
                 char character = source.charAt(i);
                 switch (character) {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BooleanValue.java,v 1.28 2010/09/08 09:41:08 wfro Exp $
+ * Name:        $Id: BooleanValue.java,v 1.31 2011/08/11 15:08:58 wfro Exp $
  * Description: BooleanValue
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/08 09:41:08 $
+ * Date:        $Date: 2011/08/11 15:08:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +64,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
+import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.control.EditObjectControl;
 
 public class BooleanValue
@@ -133,8 +134,8 @@ public class BooleanValue
         }
         else {
             return ((Boolean)v).booleanValue() 
-                ? application.getTexts().getTrueText() 
-                : application.getTexts().getFalseText();
+                ? app.getTexts().getTrueText() 
+                : app.getTexts().getFalseText();
         }
     }
 
@@ -159,7 +160,6 @@ public class BooleanValue
         String widthModifier,
         String rowSpanModifier,
         String readonlyModifier,
-        String disabledModifier,
         String lockedModifier,
         String stringifiedValue,
         boolean forEditing
@@ -167,7 +167,7 @@ public class BooleanValue
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();     
         label = this.getLabel(attribute, p, label);
         String title = this.getTitle(attribute, label);
-        if(forEditing) {
+        if(forEditing && readonlyModifier.isEmpty()) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0)            
                 ? feature + "[" + Integer.toString(tabIndex) + "]"
@@ -179,7 +179,7 @@ public class BooleanValue
                 String checkedModifier = "true".equals(stringifiedValue) ? "checked" : "";
                 p.write("<td ", rowSpanModifier, ">");
                 p.write("  <input id=\"", id, ".false\" name=\"", id, ".false\" type=\"hidden\" class=\"valueL", lockedModifier, "\" value=\"false\">");
-                p.write("  <input id=\"", id, ".true\" name=\"", id, ".true\" type=\"checkbox\" ", checkedModifier, " ", disabledModifier, " tabindex=\"" + tabIndex, "\" value=\"true\"");
+                p.write("  <input id=\"", id, ".true\" name=\"", id, ".true\" type=\"checkbox\" ", checkedModifier, " ", (readonlyModifier.isEmpty() ? "" : "disabled"), " tabindex=\"" + tabIndex, "\" value=\"true\"");
                 p.writeEventHandlers("    ", attribute.getEventHandler());
                 p.write("  >");
                 p.write("</td>");
@@ -191,13 +191,13 @@ public class BooleanValue
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, ">");
                 if(this.isChangeable()) {
-                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("10"), "; popup_", EditObjectControl.EDIT_BOOLEANS, " = ", EditObjectControl.EDIT_BOOLEANS, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_BOOLEANS, ", 'popup_", EditObjectControl.EDIT_BOOLEANS, "', $('", id, "'), new Array());\""));
+                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; popup_", EditObjectControl.EDIT_BOOLEANS, " = ", EditObjectControl.EDIT_BOOLEANS, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_BOOLEANS, ", 'popup_", EditObjectControl.EDIT_BOOLEANS, "', $('", id, "'), new Array());\""));
                 }
                 p.write("</td>");
             }            
         }
         else {
-            if(stringifiedValue.length() == 0) {
+            if(stringifiedValue.isEmpty() || WebKeys.LOCKED_VALUE.equals(stringifiedValue)) {
                 super.paint(
                     attribute,
                     p,
@@ -211,7 +211,6 @@ public class BooleanValue
                     widthModifier,
                     rowSpanModifier,
                     readonlyModifier,
-                    disabledModifier,
                     lockedModifier,
                     stringifiedValue,
                     forEditing

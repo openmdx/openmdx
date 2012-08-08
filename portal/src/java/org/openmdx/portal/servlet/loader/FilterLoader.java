@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FilterLoader.java,v 1.35 2010/06/01 09:12:08 hburger Exp $
+ * Name:        $Id: FilterLoader.java,v 1.36 2011/09/16 09:01:41 wfro Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.36 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 09:12:08 $
+ * Date:        $Date: 2011/09/16 09:01:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -77,7 +77,7 @@ import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.Filters;
-import org.openmdx.portal.servlet.RoleMapper_1_0;
+import org.openmdx.portal.servlet.PortalExtension_1_0;
 import org.openmdx.portal.servlet.UiContext;
 import org.openmdx.portal.servlet.WebKeys;
 import org.w3c.cci2.BinaryLargeObjects;
@@ -88,12 +88,12 @@ public class FilterLoader
     //-------------------------------------------------------------------------
     public FilterLoader(
         ServletContext context,
-        RoleMapper_1_0 roleMapper,
+        PortalExtension_1_0 portalExtension,
         Model_1_0 model
     ) {
         super(
             context,
-            roleMapper
+            portalExtension
         );
         this.model = model;
     }

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: QueryRecord.java,v 1.4 2010/11/23 17:34:52 wfro Exp $
+ * Name:        $Id: QueryRecord.java,v 1.5 2011/01/21 10:08:00 hburger Exp $
  * Description: Query Record 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/23 17:34:52 $
+ * Date:        $Date: 2011/01/21 10:08:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -48,7 +48,6 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.base.rest.spi;
 
 import java.util.Map;
@@ -99,6 +98,7 @@ public class QueryRecord
      * Alphabetically ordered keys
      */
     private static final String[] KEYS = {
+        "features",
         "groups",
         "parameters",
         "path",
@@ -109,12 +109,23 @@ public class QueryRecord
     };
 
     /**
+     * No explicitly requested features
+     */
+    private static final String[] NO_FEATURES = {
+    };
+    
+    /**
      * The default fetch groups
      */
     private static final String[] DEFAULT_GROUPS = {
         FetchPlan.DEFAULT
     };
 
+    /**
+     * The explicitly requested features
+     */
+    private String[] features = NO_FEATURES;
+    
     /**
      * The fetch groups
      */
@@ -150,11 +161,28 @@ public class QueryRecord
      */
     private Long size;    
     
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.cci.QueryRecord#getFeatures()
+     */
+//  @Override
+    public Set<String> getFeatures() {
+        return Sets.asSet(this.features);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.rest.cci.QueryRecord#setFeatures(java.util.Set)
+     */
+//  @Override
+    public void setFeatures(Set<String> features) {
+        this.features = toArray(features);
+    }
+
     /**
      * Retrieve groups.
      *
      * @return Returns the groups.
      */
+//  @Override
     public Set<String> getGroups() {
         return Sets.asSet(this.groups);
     }
@@ -164,6 +192,7 @@ public class QueryRecord
      * 
      * @param groups The groups to set.
      */
+//  @Override
     public void setGroups(Set<String> groups) {
         this.groups = toArray(groups);
     }
@@ -173,6 +202,7 @@ public class QueryRecord
      *
      * @return Returns the path.
      */
+//  @Override
     public Path getPath() {
         return this.path;
     }
@@ -182,6 +212,7 @@ public class QueryRecord
      * 
      * @param path The path to set.
      */
+//  @Override
     public void setPath(Path path) {
         this.path = path;
     }
@@ -191,6 +222,7 @@ public class QueryRecord
      *
      * @return Returns the position.
      */
+//  @Override
     public Long getPosition() {
         return this.position;
     }
@@ -200,6 +232,7 @@ public class QueryRecord
      * 
      * @param position The position to set.
      */
+//  @Override
     public void setPosition(Long position) {
         this.position = position;
     }
@@ -209,6 +242,7 @@ public class QueryRecord
      *
      * @return Returns the query.
      */
+//  @Override
     public String getQuery() {
         return this.query;
     }
@@ -218,6 +252,7 @@ public class QueryRecord
      * 
      * @param query The query to set.
      */
+//  @Override
     public void setQuery(String query) {
         this.query = query;
     }
@@ -227,6 +262,7 @@ public class QueryRecord
      *
      * @return Returns the queryType.
      */
+//  @Override
     public String getQueryType() {
         return this.queryType;
     }
@@ -236,6 +272,7 @@ public class QueryRecord
      * 
      * @param queryType The queryType to set.
      */
+//  @Override
     public void setQueryType(String queryType) {
         this.queryType = queryType;
     }
@@ -245,6 +282,7 @@ public class QueryRecord
      *
      * @return Returns the parameters.
      */
+//  @Override
     public Record getParameters() {
         return this.parameters;
     }
@@ -254,6 +292,7 @@ public class QueryRecord
      * 
      * @param parameters The parameters to set.
      */
+//  @Override
     public void setParameters(Record parameters) {
         this.parameters = parameters;
     }
@@ -263,6 +302,7 @@ public class QueryRecord
      *
      * @return Returns the size.
      */
+//  @Override
     public Long getSize() {
         return this.size;
     }
@@ -272,6 +312,7 @@ public class QueryRecord
      * 
      * @param size The size to set.
      */
+//  @Override
     public void setSize(Long size) {
         this.size = size;
     }
@@ -304,13 +345,14 @@ public class QueryRecord
         int index
     ){
         switch(index) {
-            case 0: return asSet(this.groups);
-            case 1: return this.parameters;
-            case 2: return this.path;
-            case 3: return this.position;
-            case 4: return this.query;
-            case 5: return this.queryType;
-            case 6: return this.size;
+            case 0: return asSet(this.features);
+            case 1: return asSet(this.groups);
+            case 2: return this.parameters;
+            case 3: return this.path;
+            case 4: return this.position;
+            case 5: return this.query;
+            case 6: return this.queryType;
+            case 7: return this.size;
             default: return null;
         }
     }
@@ -330,24 +372,27 @@ public class QueryRecord
     ){
         switch(index) {
             case 0: 
+                this.features = toArray(value);
+                break;
+            case 1: 
                 this.groups = toArray(value);
                 break;
-            case 1:
+            case 2:
                 this.parameters = (Record) value;
                 break;
-            case 2:
+            case 3:
                 this.path = toPath(value);
                 break;
-            case 3:
+            case 4:
                 this.position = toLong(value);
                 break;
-            case 4:
+            case 5:
                 this.query = (String) value;
                 break;
-            case 5:
+            case 6:
                 this.queryType = (String) value;
                 break;
-            case 6: 
+            case 7: 
                 this.size = toLong(value);
                 break;
         }

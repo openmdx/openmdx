@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowObjectView.java,v 1.74 2010/04/23 13:24:20 wfro Exp $
+ * Name:        $Id: ShowObjectView.java,v 1.79 2011/08/19 22:50:47 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.74 $
+ * Revision:    $Revision: 1.79 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/23 13:24:20 $
+ * Date:        $Date: 2011/08/19 22:50:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.jdo.PersistenceManager;
+
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
@@ -71,6 +73,11 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
+import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.action.SelectLocaleAction;
+import org.openmdx.portal.servlet.action.SelectObjectAction;
+import org.openmdx.portal.servlet.action.SelectPerspectiveAction;
+import org.openmdx.portal.servlet.action.SelectViewportAction;
 import org.openmdx.portal.servlet.control.ShowInspectorControl;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
 
@@ -98,7 +105,7 @@ public class ShowObjectView
             lookupType,
             restrictToElements
         );
-        ShowInspectorControl inspectorControl = this.application.createShowInspectorControl(
+        ShowInspectorControl inspectorControl = this.app.createShowInspectorControl(
             id, 
             this.getRefObject().refClass().refMofId()
         );
@@ -135,10 +142,15 @@ public class ShowObjectView
     }
 
     // -------------------------------------------------------------------------
-    public void refresh(
-        boolean refreshData
+    @Override
+    public PersistenceManager refresh(
+        boolean refreshData,
+        boolean closePm
     ) throws ServiceException {
-        super.refresh(refreshData);
+        PersistenceManager oldPm = super.refresh(
+        	refreshData,
+        	closePm
+        );
         try {
             this.attributePane.refresh(
                 refreshData
@@ -147,10 +159,11 @@ public class ShowObjectView
                 this.referencePane[i].refresh(refreshData);
             }
         }
-        catch (ServiceException e) {
+        catch(ServiceException e) {
         	SysLog.detail("can not refresh", e.getMessage());
             new ServiceException(e).log();
         }
+        return oldPm;
     }
 
     // -------------------------------------------------------------------------
@@ -158,33 +171,33 @@ public class ShowObjectView
         BasicException e, 
         String operationName
     ) {
-        BasicException e0 = e.getCause(this.application.getExceptionDomain());
+        BasicException e0 = e.getCause(this.app.getExceptionDomain());
         if (e0 == null) {
-            this.application.addErrorMessage(
-                application.getTexts().getErrorTextCanNotInvokeOperation(), 
+            this.app.addErrorMessage(
+                app.getTexts().getErrorTextCanNotInvokeOperation(), 
                 new String[] { 
                     this.getRefObject().refMofId(),
                     operationName, e.getMessage() 
                 }
            );
         }
-        else if (application.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
+        else if (app.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
             List<String> parameters = new ArrayList<String>();
             int i = 0;
             while (e0.getParameter("param" + i) != null) {
                 parameters.add(e0.getParameter("param" + i));
                 i++;
             }
-            this.application.addErrorMessage(
-                this.application.getTexts().getUserDefinedText(
+            this.app.addErrorMessage(
+                this.app.getTexts().getUserDefinedText(
                     e0.getExceptionCode() + ""), 
                     (String[]) parameters.toArray(new String[parameters.size()]
                 )
             );
         }
         else {
-            this.application.addErrorMessage(
-                this.application.getTexts().getErrorTextCanNotInvokeOperation(), 
+            this.app.addErrorMessage(
+                this.app.getTexts().getErrorTextCanNotInvokeOperation(), 
                 new String[] { 
                     this.getRefObject().refMofId(),
                     operationName, 
@@ -216,7 +229,7 @@ public class ShowObjectView
         historyActions.put(
             this.objectReference.getObject().refGetPath(), 
             new Action(
-                Action.EVENT_SELECT_OBJECT,
+                SelectObjectAction.EVENT_ID,
                 new Action.Parameter[] { 
                     new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.getRefObject().refMofId()),
                     new Action.Parameter(Action.PARAMETER_REQUEST_ID, this.requestId)
@@ -233,28 +246,28 @@ public class ShowObjectView
     public void handleCanNotCommitException(
         BasicException e
     ) {
-      BasicException e0 = e.getCause(this.application.getExceptionDomain());
+      BasicException e0 = e.getCause(this.app.getExceptionDomain());
       if(e0 == null) {
-          this.application.addErrorMessage(
-            application.getTexts().getErrorTextCanNotCreateOrEditObject(),
+          this.app.addErrorMessage(
+            app.getTexts().getErrorTextCanNotCreateOrEditObject(),
             new String[]{e.getMessage()}
           );
       }
-      else if(this.application.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
+      else if(this.app.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
           List<String> parameters = new ArrayList<String>();
           int i = 0;
           while(e0.getParameter("param" + i) != null) {
               parameters.add(e0.getParameter("param" + i));
               i++;
           }
-          this.application.addErrorMessage(
-              application.getTexts().getUserDefinedText(e0.getExceptionCode() + ""),
+          this.app.addErrorMessage(
+              app.getTexts().getUserDefinedText(e0.getExceptionCode() + ""),
               parameters.toArray(new String[parameters.size()])
           );             
       }
       else {
-          this.application.addErrorMessage(
-              application.getTexts().getErrorTextCanNotCreateOrEditObject(),
+          this.app.addErrorMessage(
+              app.getTexts().getErrorTextCanNotCreateOrEditObject(),
               new String[]{e.getMessage()}
           );              
       }
@@ -263,7 +276,7 @@ public class ShowObjectView
     // -------------------------------------------------------------------------
     public Action[] getSelectLocaleAction(
     ) {
-        Texts_1_0[] texts = this.application.getTextsFactory().getTexts();
+        Texts_1_0[] texts = this.app.getTextsFactory().getTexts();
         Map<String,Action> actions = new TreeMap<String,Action>();
         for (int i = 0; i < texts.length; i++) {
             String locale = texts[i].getLocale();
@@ -271,7 +284,7 @@ public class ShowObjectView
                 actions.put(
                     locale, 
                     new Action(
-                        Action.EVENT_SELECT_LOCALE, 
+                        SelectLocaleAction.EVENT_ID, 
                         new Action.Parameter[]{ 
                            new Action.Parameter(Action.PARAMETER_LOCALE, locale) 
                         }, 
@@ -296,14 +309,19 @@ public class ShowObjectView
                 uiSegment = this.getApplicationContext().getUiContext().getUiSegment(ii);
             } 
             catch(Exception e) {}
+            boolean isRevokeShow = this.app.getPortalExtension().hasPermission(
+            	uiSegment, 
+            	this.app,
+            	WebKeys.PERMISSION_REVOKE_SHOW 
+            );
             selectPerspectiveActions.add(
                 new Action(
-                    Action.EVENT_SELECT_PERSPECTIVE,
+                    SelectPerspectiveAction.EVENT_ID,
                     new Action.Parameter[]{
                         new Action.Parameter(Action.PARAMETER_ID, String.valueOf(ii))
                     },
                     uiSegmentPath.getBase(),
-                    this.application.getPortalExtension().isEnabled(uiSegment, this.application)
+                    !isRevokeShow
                 )
             );
             ii++;
@@ -314,11 +332,11 @@ public class ShowObjectView
     //-------------------------------------------------------------------------  
     public Action getToggleViewPortAction(
     ) {
-    	ViewPort.Type newViewPortType = this.application.getCurrentViewPortType() == ViewPort.Type.STANDARD ?
+    	ViewPort.Type newViewPortType = this.app.getCurrentViewPortType() == ViewPort.Type.STANDARD ?
     		ViewPort.Type.MOBILE :
     			ViewPort.Type.STANDARD;        		
         return new Action(
-            Action.EVENT_SELECT_VIEWPORT,
+            SelectViewportAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(
                 	Action.PARAMETER_ID, 

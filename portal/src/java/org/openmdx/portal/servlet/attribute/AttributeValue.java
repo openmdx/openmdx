@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributeValue.java,v 1.97 2010/12/07 12:56:35 wfro Exp $
+ * Name:        $Id: AttributeValue.java,v 1.106 2011/12/03 15:32:38 wfro Exp $
  * Description: AttributeValue
- * Revision:    $Revision: 1.97 $
+ * Revision:    $Revision: 1.106 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/07 12:56:35 $
+ * Date:        $Date: 2011/12/03 15:32:38 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,7 +69,7 @@ import javax.jdo.JDOHelper;
 import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
@@ -80,6 +80,7 @@ import org.openmdx.portal.servlet.DataBinding_1_0;
 import org.openmdx.portal.servlet.DataBinding_2_0;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
+import org.openmdx.portal.servlet.WebKeys;
 
 public abstract class AttributeValue
 implements Serializable {
@@ -90,7 +91,7 @@ implements Serializable {
         String valueClassName,
         Object object,
         FieldDef fieldDef,
-        ApplicationContext application
+        ApplicationContext app
     ) {
         Class valueClass = (Class)AttributeValue.cachedValueClasses.get(valueClassName);
         if(valueClass == null) {
@@ -118,7 +119,7 @@ implements Serializable {
                     new Object[]{
                         object,
                         fieldDef,
-                        application
+                        app
                     }
                 );
             }
@@ -146,7 +147,7 @@ implements Serializable {
     ) {
         this.object = object;
         this.fieldDef = fieldDef;
-        this.application = application;
+        this.app = application;
     }
 
     //-------------------------------------------------------------------------
@@ -169,16 +170,16 @@ implements Serializable {
     ) {
         String multiplicity = this.fieldDef.multiplicity;
         return 
-        Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
-        Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ||
-        Multiplicities.STREAM.equals(multiplicity);
+        	Multiplicity.SINGLE_VALUE.toString().equals(multiplicity) ||
+        	Multiplicity.OPTIONAL.toString().equals(multiplicity) ||
+        	Multiplicity.STREAM.toString().equals(multiplicity);
     }
 
     //-------------------------------------------------------------------------
     public boolean isOptionalValued(
     ) {
         String multiplicity = this.fieldDef.multiplicity;
-        return Multiplicities.OPTIONAL_VALUE.equals(multiplicity);
+        return Multiplicity.OPTIONAL.toString().equals(multiplicity);
     }
 
     //-------------------------------------------------------------------------
@@ -212,15 +213,17 @@ implements Serializable {
     }
 
     //-------------------------------------------------------------------------
-    public boolean isEnabled(
+    public boolean hasPermission(
+    	String action
     ) {
-        return this.object instanceof RefObject_1_0 
-        ? this.application.getPortalExtension().isEnabled(
-            this.getName(),
-            (RefObject_1_0)this.object,
-            this.application
-        )
-        : true;
+    	return this.object instanceof RefObject_1_0  ? 
+    		this.app.getPortalExtension().hasPermission(
+	    		this.getName(),
+	    		(RefObject_1_0)this.object,
+	    		this.app,
+	    		action
+	    	) :
+	    		action == null || action.isEmpty() || action.startsWith(WebKeys.GRANT_PREFIX);
     }
 
     //-------------------------------------------------------------------------
@@ -246,7 +249,7 @@ implements Serializable {
                     value = ((DataBinding_2_0)this.fieldDef.dataBinding).getValue(
                         refObj,
                         feature,
-                        this.application
+                        this.app
                     );                	
                 }
                 Object defaultValue = this.getDefaultValue();
@@ -523,8 +526,8 @@ implements Serializable {
     ) {
         return target == null
         ? null
-            : this.application.getPortalExtension().getAutocompleter(
-                this.application,
+            : this.app.getPortalExtension().getAutocompleter(
+                this.app,
                 target,
                 this.fieldDef.qualifiedFeatureName
             );
@@ -532,20 +535,23 @@ implements Serializable {
 
     //-------------------------------------------------------------------------
     protected String getUpperBound(
-        String defaultValue
+        String defaultMultiplicity
     ) {
-        String upperBound = defaultValue;
-        // Set upperBound=multiplicity if it is an integer
-        if(
-            (this.getMultiplicity().length() > 0) &&
-            Character.isDigit(this.getMultiplicity().charAt(0))
-        ) {
-            try {
-                Integer.parseInt(this.getMultiplicity());
-                upperBound = this.getMultiplicity();
-            } 
-            catch(Exception e) {}                    
+        String upperBound = "10";
+        String multiplicity = this.getMultiplicity();
+        if(multiplicity.indexOf("..") < 0) {
+        	try {
+        		Integer.parseInt(multiplicity);
+        		multiplicity = "1.." + multiplicity;
+        	} catch(Exception e) {
+        		multiplicity = defaultMultiplicity;
+        	}
         }
+    	try {
+    		String upper = multiplicity.substring(multiplicity.indexOf("..") + 2);
+    		Integer.parseInt(upper);
+    		upperBound = upper;
+    	} catch(Exception e) {}        		
         return upperBound;        
     }
 
@@ -592,8 +598,7 @@ implements Serializable {
      * @param styleModifier style tag for generated element. null if forEditing==true
      * @param widthModifier width tag for generated element. null if forEditing==true
      * @param rowSpanModifier row span modifier
-     * @param readonlyModifier readonly modifier. null if forEditing==false
-     * @param disabledModifier disabled modifier. null if forEditing==false
+     * @param readonlyModifier readonly modifier. Set if field is read-only, otherwise "".
      * @param lockedModifier modifier to lock field. null if forEditing==false
      * @param stringifiedValue stringified value of field
      * @param forEditing field is paint in edit mode if true
@@ -613,7 +618,6 @@ implements Serializable {
         String widthModifier,
         String rowSpanModifier,
         String readonlyModifier,
-        String disabledModifier,
         String lockedModifier,
         String stringifiedValue,
         boolean forEditing
@@ -627,11 +631,12 @@ implements Serializable {
             id = (id == null) || (id.length() == 0) ? 
             	feature + "[" + Integer.toString(tabIndex) + "]" : 
             	id;            
-            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
+            p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
+            // Edit single-value
             if(this.isSingleValued()) {
                 p.write("<td ", rowSpanModifier, ">");
                 if(attribute.getSpanRow() > 1) {
-                    if(this.isChangeable() && this.isEnabled()) {
+                    if(readonlyModifier.isEmpty()) {
                         if(attribute.getSpanRow() > 4) {
                         	p.write("  <table style=\"width:100%;\"><tr>");
                             p.write("    <td><div onclick=\"javascript:loadHTMLedit('", id, "', '", p.getResourcePathPrefix(), "');\"", p.getOnMouseOver("javascript: this.style.backgroundColor='#FF9900';this.style.cursor='pointer';"), p.getOnMouseOut("javascript: this.style.backgroundColor='';"), " >", p.getImg("src=\"", p.getResourcePath("images/html"), p.getImgType(), "\" border=\"0\" alt=\"html\" title=\"\""), "</div></td>");
@@ -645,13 +650,14 @@ implements Serializable {
                         p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"", classModifier, "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"30\" style=\"width:100%;\" class=\"string\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
                     }
                     else {
-                        p.write("  <textarea id=\"", id, "\" name=\"", id, "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"30\" class=\"multiStringLocked\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
+                    	// In case of read-only render as input field. However, without id and name attributes
+                        p.write("  <textarea rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"30\" class=\"multiStringLocked\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
                     }
                 }
                 else {
-                    Autocompleter_1_0 autocompleter = this.getAutocompleter(
-                        lookupObject
-                    );
+                    Autocompleter_1_0 autocompleter = readonlyModifier.isEmpty() ? 
+                    	this.getAutocompleter(lookupObject) :
+                    		null;
                     // Predefined, selectable values only allowed for single-valued attributes with spanRow == 1
                     // Show drop-down instead of input field
                     if(autocompleter != null) {
@@ -660,7 +666,7 @@ implements Serializable {
                             id,
                             tabIndex,
                             feature,
-                            null,
+                            this,
                             false,
                             null,
                             null,
@@ -679,9 +685,15 @@ implements Serializable {
                             "" : 
                             "maxlength=\"" + maxLength + "\"";
                         String classModifier = this.isMandatory() ?
-                            "valueL mandatory" :
+                            "mandatory valueL" :
                             "valueL";
-                        p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"", inputType, "\" class=\"", classModifier, "\"", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" ", maxLengthModifier, " value=\"", stringifiedValue, "\"");
+                        if(readonlyModifier.isEmpty()) {
+                        	p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"", inputType, "\" class=\"", classModifier, lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" ", maxLengthModifier, " value=\"", stringifiedValue, "\"");
+                            p.writeEventHandlers("    ", attribute.getEventHandler());
+                        } else {
+                        	// In case of read-only render as input field. However, without id and name attributes                        	
+                        	p.write("  <input type=\"", inputType, "\" class=\"", classModifier, lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" ", maxLengthModifier, " value=\"", stringifiedValue, "\"");                        	
+                        }
                         p.writeEventHandlers("    ", attribute.getEventHandler());
                         p.write("  >");
                     }
@@ -689,20 +701,25 @@ implements Serializable {
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");
             }
+            // Edit multi-value
             else {
-                boolean isChangeable = this.isChangeable() && this.isEnabled();
                 int maxLength = this instanceof TextValue ? 
                     Math.min(Short.MAX_VALUE, ((TextValue)this).getMaxLength()) : 
                     Short.MAX_VALUE;
                 p.write("<td ", rowSpanModifier, ">");
-                p.write("  <textarea id=\"", id, "\" name=\"", id, "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\"", (isChangeable ? "" : "readonly"), " tabindex=\"", Integer.toString(tabIndex), "\" onfocus=\"javascript:checkTextareaLimits(this,", this.getUpperBound("10"), ", ", Integer.toString(maxLength), ");\">", stringifiedValue, "</textarea>");
+                if(readonlyModifier.isEmpty()) {
+                	p.write("  <textarea id=\"", id, "\" name=\"", id, "\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\"", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\" onfocus=\"javascript:checkTextareaLimits(this,", this.getUpperBound("1..10"), ", ", Integer.toString(maxLength), ");\">", stringifiedValue, "</textarea>");
+                } else {
+                	p.write("  <textarea rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\"", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\" onfocus=\"javascript:checkTextareaLimits(this,", this.getUpperBound("1..10"), ", ", Integer.toString(maxLength), ");\">", stringifiedValue, "</textarea>");                	
+                }
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, ">");
                 p.write("</td>");
             }
         }
+        // Show
         else {
-            if(stringifiedValue.length() == 0) {
+            if(stringifiedValue.isEmpty()) {
                 styleModifier += "\"";
                 p.write(gapModifier);
                 if(p.getViewPortType() == ViewPort.Type.MOBILE) {
@@ -716,7 +733,6 @@ implements Serializable {
             }
             else {                                
                 if(this.isSingleValued()) {
-                    p.debug("<!-- single-valued AttributeValue -->");
                     p.write(gapModifier);
                     if(p.getViewPortType() == ViewPort.Type.MOBILE) {
                     	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	                    	
@@ -725,9 +741,9 @@ implements Serializable {
                     	p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");
                     }
                     String feature = this.getName();                    	
-                    id = (id == null) || (id.length() == 0) ? 
+                    id = (id == null) || id.isEmpty() ? 
                         feature + "[" + Integer.toString(tabIndex) + "]" : 
-                        id;  
+                        id;
                     boolean isWikiText = AttributeValue.isWikiText(stringifiedValue);
                     boolean isHtmlText = AttributeValue.isHtmlText(stringifiedValue);
                     if(attribute.getSpanRow() > 1) {
@@ -738,7 +754,7 @@ implements Serializable {
                         	}
                             if(isWikiText) {
 	                            p.write("<div id=\"", id, "Value\" style='display:none'>");
-	                            this.application.getPortalExtension().renderTextValue(
+	                            this.app.getPortalExtension().renderTextValue(
 	                            	p, 
 	                            	stringifiedValue, 
 	                            	true
@@ -755,7 +771,7 @@ implements Serializable {
                             	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};</script>");                            	
                             }
                             else {
-	                            this.application.getPortalExtension().renderTextValue(
+	                            this.app.getPortalExtension().renderTextValue(
 	                            	p, 
 	                            	isHtmlText ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
 	                            	false
@@ -770,7 +786,7 @@ implements Serializable {
                         	}
                             if(isWikiText) {
 	                            p.write("<div id=\"", id, "Value\" style='display:none'>");
-	                            this.application.getPortalExtension().renderTextValue(
+	                            this.app.getPortalExtension().renderTextValue(
 	                            	p, 
 	                            	stringifiedValue, 
 	                            	true
@@ -787,7 +803,7 @@ implements Serializable {
                             	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};</script>");
                             }
                             else {
-	                            this.application.getPortalExtension().renderTextValue(
+	                            this.app.getPortalExtension().renderTextValue(
 	                            	p, 
 	                            	isHtmlText ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
 	                            	false
@@ -807,7 +823,7 @@ implements Serializable {
                         if(attribute.getValue() instanceof TextValue) {
                         	if(isWikiText) {
 		                        p.write("<div id=\"", id, "Value\" style='display:none'>");
-		                        this.application.getPortalExtension().renderTextValue(
+		                        this.app.getPortalExtension().renderTextValue(
 		                        	p, 
 		                        	stringifiedValue, 
 		                        	true
@@ -824,7 +840,7 @@ implements Serializable {
 	                        	p.write("<script language=\"javascript\" type=\"text/javascript\">try{var w=Wiky.toHtml($('", id, "Value').innerHTML);if(w.startsWith('<p>')){w=w.substring(3);};if(w.endsWith('</p>')){w=w.substring(0,w.length-4);};w=w.strip();$('", id, "').update(w);}catch(e){$('", id, "').update($('", id, "Value').innerHTML);};</script>");
 	                        }
 	                        else {
-	                            this.application.getPortalExtension().renderTextValue(
+	                            this.app.getPortalExtension().renderTextValue(
 	                            	p, 
 	                            	stringifiedValue, 
 	                            	false
@@ -839,7 +855,7 @@ implements Serializable {
                         	else {
                         		p.write("<div class=\"field\" id=\"", id, "\">", iconTag);
                         	}
-	                        this.application.getPortalExtension().renderTextValue(
+	                        this.app.getPortalExtension().renderTextValue(
 	                        	p, 
 	                        	isHtmlText ? stringifiedValue : stringifiedValue.replaceAll("\n", "<br />"), 
 	                        	false
@@ -864,7 +880,7 @@ implements Serializable {
 	                    p.write("<td class=\"valueL\" ",  rowSpanModifier, " ",  widthModifier, " ",  styleModifier, ">");
 	                    p.write("  <div class=\"valueMulti\" ",  styleModifier, "> ");
                     }
-                    this.application.getPortalExtension().renderTextValue(
+                    this.app.getPortalExtension().renderTextValue(
                     	p, 
                     	stringifiedValue, 
                     	false
@@ -888,7 +904,7 @@ implements Serializable {
 
     protected final FieldDef fieldDef;
     protected Object object = null;
-    protected ApplicationContext application = null;
+    protected ApplicationContext app = null;
 
 }
 

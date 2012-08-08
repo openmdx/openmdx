@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractFilter.java,v 1.4 2010/06/30 12:45:25 hburger Exp $
+ * Name:        $Id: AbstractFilter.java,v 1.6 2011/11/26 01:34:57 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/30 12:45:25 $
+ * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -57,8 +57,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.jdo.PersistenceManager;
-import javax.resource.ResourceException;
-
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
@@ -207,211 +205,225 @@ public abstract class AbstractFilter implements Selector, Serializable {
     // Implements Selector 
     //------------------------------------------------------------------------
 
+    /**
+     * Tells whether the object meets the condition
+     * 
+     * @param candidate the candidate
+     * @param conditionIndex the condition index
+     * @param condition 
+     * 
+     * @return <code>true</code> if the object meets the condition
+     */
+    protected boolean meetsCondition(Object candidate, int conditionIndex, Condition condition) {
+        Quantifier quantifier = condition.getQuantifier();
+        Iterator<?> iterator;
+        try {
+            iterator = getValuesIterator(candidate, condition.getFeature());
+        } catch (Exception exception) {
+            Throwables.log(exception);
+            return false;
+        }
+        while (iterator.hasNext()){
+            Object raw = iterator.next();
+            switch(condition.getType()){
+
+                case IS_UNLIKE: {
+                    if (!matches(conditionIndex, raw)){
+                        if(quantifier == Quantifier.THERE_EXISTS) return true;
+                    } else {
+                        if(quantifier == Quantifier.FOR_ALL) return false;
+                    }
+                    break;
+                }
+
+                case IS_LIKE: {
+                    if (matches(conditionIndex, raw)){
+                        if(quantifier == Quantifier.THERE_EXISTS) return true;
+                    } else {
+                        if(quantifier == Quantifier.FOR_ALL) return false;
+                    }
+                    break;
+                }
+
+                case IS_OUTSIDE: {
+                    if(
+                        compare(raw,condition.getValue(0)) < 0 ||
+                        compare(raw,condition.getValue(1)) > 0
+                    ){
+                        if(quantifier == Quantifier.THERE_EXISTS) return true;
+                    } else {
+                        if(quantifier == Quantifier.FOR_ALL) return false;
+                    }
+                    break;
+                }
+
+                case IS_BETWEEN: {
+                    if(
+                        compare(raw,condition.getValue(0)) >= 0 &&
+                        compare(raw,condition.getValue(1)) <= 0
+                    ){
+                        if(quantifier == Quantifier.THERE_EXISTS) return true;
+                    } else {
+                        if(quantifier == Quantifier.FOR_ALL) return false;
+                    }
+                    break;
+                }
+
+                case IS_LESS_OR_EQUAL: {                
+                    if(
+                        compare(raw,condition.getValue(0)) <= 0
+                    ){
+                        if(quantifier == Quantifier.THERE_EXISTS) return true;
+                    } else {
+                        if(quantifier == Quantifier.FOR_ALL) return false;
+                    }
+                    break;
+                }
+
+                case IS_GREATER: {
+                    if(
+                        compare(raw,condition.getValue(0)) > 0
+                    ){
+                        if(quantifier == Quantifier.THERE_EXISTS) return true;
+                    } else {
+                        if(quantifier == Quantifier.FOR_ALL) return false;
+                    }
+                    break;
+                }
+
+                case IS_LESS: {
+                    if(
+                        compare(raw,condition.getValue(0)) < 0
+                    ){
+                        if(quantifier == Quantifier.THERE_EXISTS) return true;
+                    } else {
+                        if(quantifier == Quantifier.FOR_ALL) return false;
+                    }
+                    break;
+                }
+
+                case IS_GREATER_OR_EQUAL: {
+                    if(
+                        compare(raw,condition.getValue(0)) >= 0
+                    ){
+                        if(quantifier == Quantifier.THERE_EXISTS) return true;
+                    } else {
+                        if(quantifier == Quantifier.FOR_ALL) return false;
+                    }
+                    break;
+                }
+
+                case IS_NOT_IN: {
+                    boolean test = true;
+                    IsNotIn: for(
+                        int setIndex = 0, setSize = condition.getValue().length;
+                        setIndex < setSize;
+                        setIndex++
+                    ) {
+                        if(equal(raw, condition.getValue(setIndex))) {
+                            test = false;
+                            break IsNotIn;
+                        }
+                    }
+                    if(test){
+                        if(quantifier == Quantifier.THERE_EXISTS) return true;
+                    } else {
+                        if(quantifier == Quantifier.FOR_ALL) return false;
+                    }
+                    break;
+                }
+
+                case IS_IN: {
+                    boolean test = false;
+                    IsIn: for(
+                        int setIndex = 0, setSize = condition.getValue().length;
+                        setIndex < setSize;
+                        setIndex++
+                    ) {
+                        if(equal(raw, condition.getValue(setIndex))) {
+                            test = true;
+                            break IsIn;
+                        }
+                    }
+                    if(test){
+                        if(quantifier == Quantifier.THERE_EXISTS) return true;
+                    } else {
+                        if(quantifier == Quantifier.FOR_ALL) return false;
+                    }
+                    break;
+                }
+
+                case SOUNDS_LIKE: {
+                    boolean test = false;
+                    String encoded = Soundex.getInstance().encode((String)raw);
+                    SoundsLike: for(
+                        int setIndex = 0, setSize = condition.getValue().length;
+                        setIndex < setSize;
+                        setIndex++
+                    ){
+                        if(encoded.equals(Soundex.getInstance().encode((String)condition.getValue(setIndex)))) {
+                            test = true;
+                            break SoundsLike;
+                        }
+                    } 
+                    if(test){
+                        if(quantifier == Quantifier.THERE_EXISTS) return true;
+                    } else {
+                        if(quantifier == Quantifier.FOR_ALL) return false;
+                    }
+                    break;
+                }
+
+                case SOUNDS_UNLIKE: {
+                    boolean test = true;
+                    String encoded = Soundex.getInstance().encode((String)raw);
+                    SoundsUnlike: for(
+                        int setIndex = 0, setSize = condition.getValue().length;
+                        setIndex < setSize;
+                        setIndex++
+                    ) {
+                        if(encoded.equals(Soundex.getInstance().encode((String)condition.getValue(setIndex)))) {
+                            test = false;
+                            break SoundsUnlike;
+                        }
+                    }
+                    if(test){
+                        if(quantifier == Quantifier.THERE_EXISTS) return true;
+                    } else {
+                        if(quantifier == Quantifier.FOR_ALL) return false;
+                    }
+                    break;
+                }
+
+                default: throw BasicException.initHolder( 
+                    new IllegalArgumentException(
+                        "Unsupported operator",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.BAD_PARAMETER,
+                            new BasicException.Parameter("conditionType", condition.getType())
+                        )
+                    )
+                );                
+            }
+        }
+        return quantifier == Quantifier.FOR_ALL;
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.query.Selector#accept(java.lang.Object)
      */
     public boolean accept(
         Object candidate
     ){
-        Properties: for (
+        for (
             int propertyIndex = 0;
             propertyIndex < this.filter.length;
             propertyIndex++
         ){
-            Condition property = this.filter[propertyIndex];
-            Quantifier quantifier = property.getQuantifier();
-            Iterator<?> iterator;
-            try {
-                iterator = getValuesIterator(candidate, property.getFeature());
-            } catch (Exception exception) {
-                Throwables.log(exception);
+            if(!meetsCondition(candidate, propertyIndex, this.filter[propertyIndex])) {
                 return false;
             }
-            while (iterator.hasNext()){
-                Object raw = iterator.next();
-                switch(property.getType()){
-
-                    case IS_UNLIKE: {
-                        if (!matches(propertyIndex, raw)){
-                            if(quantifier == Quantifier.THERE_EXISTS) continue Properties;
-                        } else {
-                            if(quantifier == Quantifier.FOR_ALL) return false;
-                        }
-                        break;
-                    }
-
-                    case IS_LIKE: {
-                        if (matches(propertyIndex, raw)){
-                            if(quantifier == Quantifier.THERE_EXISTS) continue Properties;
-                        } else {
-                            if(quantifier == Quantifier.FOR_ALL) return false;
-                        }
-                        break;
-                    }
-
-                    case IS_OUTSIDE: {
-                        if(
-                            compare(raw,property.getValue(0)) < 0 ||
-                            compare(raw,property.getValue(1)) > 0
-                        ){
-                            if(quantifier == Quantifier.THERE_EXISTS) continue Properties;
-                        } else {
-                            if(quantifier == Quantifier.FOR_ALL) return false;
-                        }
-                        break;
-                    }
-
-                    case IS_BETWEEN: {
-                        if(
-                            compare(raw,property.getValue(0)) >= 0 &&
-                            compare(raw,property.getValue(1)) <= 0
-                        ){
-                            if(quantifier == Quantifier.THERE_EXISTS) continue Properties;
-                        } else {
-                            if(quantifier == Quantifier.FOR_ALL) return false;
-                        }
-                        break;
-                    }
-
-                    case IS_LESS_OR_EQUAL: {                
-                        if(
-                            compare(raw,property.getValue(0)) <= 0
-                        ){
-                            if(quantifier == Quantifier.THERE_EXISTS) continue Properties;
-                        } else {
-                            if(quantifier == Quantifier.FOR_ALL) return false;
-                        }
-                        break;
-                    }
-
-                    case IS_GREATER: {
-                        if(
-                            compare(raw,property.getValue(0)) > 0
-                        ){
-                            if(quantifier == Quantifier.THERE_EXISTS) continue Properties;
-                        } else {
-                            if(quantifier == Quantifier.FOR_ALL) return false;
-                        }
-                        break;
-                    }
-
-                    case IS_LESS: {
-                        if(
-                            compare(raw,property.getValue(0)) < 0
-                        ){
-                            if(quantifier == Quantifier.THERE_EXISTS) continue Properties;
-                        } else {
-                            if(quantifier == Quantifier.FOR_ALL) return false;
-                        }
-                        break;
-                    }
-
-                    case IS_GREATER_OR_EQUAL: {
-                        if(
-                            compare(raw,property.getValue(0)) >= 0
-                        ){
-                            if(quantifier == Quantifier.THERE_EXISTS) continue Properties;
-                        } else {
-                            if(quantifier == Quantifier.FOR_ALL) return false;
-                        }
-                        break;
-                    }
-
-                    case IS_NOT_IN: {
-                        boolean test = true;
-                        IsNotIn: for(
-                            int setIndex = 0, setSize = property.getValue().length;
-                            setIndex < setSize;
-                            setIndex++
-                        ) {
-                            if(equal(raw, property.getValue(setIndex))) {
-                                test = false;
-                                break IsNotIn;
-                            }
-                        }
-                        if(test){
-                            if(quantifier == Quantifier.THERE_EXISTS) continue Properties;
-                        } else {
-                            if(quantifier == Quantifier.FOR_ALL) return false;
-                        }
-                        break;
-                    }
-
-                    case IS_IN: {
-                        boolean test = false;
-                        IsIn: for(
-                            int setIndex = 0, setSize = property.getValue().length;
-                            setIndex < setSize;
-                            setIndex++
-                        ) {
-                            if(equal(raw, property.getValue(setIndex))) {
-                                test = true;
-                                break IsIn;
-                            }
-                        }
-                        if(test){
-                            if(quantifier == Quantifier.THERE_EXISTS) continue Properties;
-                        } else {
-                            if(quantifier == Quantifier.FOR_ALL) return false;
-                        }
-                        break;
-                    }
-
-                    case SOUNDS_LIKE: {
-                        boolean test = false;
-                        String encoded = Soundex.getInstance().encode((String)raw);
-                        SoundsLike: for(
-                            int setIndex = 0, setSize = property.getValue().length;
-                            setIndex < setSize;
-                            setIndex++
-                        ){
-                            if(encoded.equals(Soundex.getInstance().encode((String)property.getValue(setIndex)))) {
-                                test = true;
-                                break SoundsLike;
-                            }
-                        } 
-                        if(test){
-                            if(quantifier == Quantifier.THERE_EXISTS) continue Properties;
-                        } else {
-                            if(quantifier == Quantifier.FOR_ALL) return false;
-                        }
-                        break;
-                    }
-
-                    case SOUNDS_UNLIKE: {
-                        boolean test = true;
-                        String encoded = Soundex.getInstance().encode((String)raw);
-                        SoundsUnlike: for(
-                            int setIndex = 0, setSize = property.getValue().length;
-                            setIndex < setSize;
-                            setIndex++
-                        ) {
-                            if(encoded.equals(Soundex.getInstance().encode((String)property.getValue(setIndex)))) {
-                                test = false;
-                                break SoundsUnlike;
-                            }
-                        }
-                        if(test){
-                            if(quantifier == Quantifier.THERE_EXISTS) continue Properties;
-                        } else {
-                            if(quantifier == Quantifier.FOR_ALL) return false;
-                        }
-                        break;
-                    }
-
-                    default: throw BasicException.initHolder( 
-                        new IllegalArgumentException(
-                            "Unsupported operator",
-                            BasicException.newEmbeddedExceptionStack(
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.BAD_PARAMETER,
-                                new BasicException.Parameter("conditionType", property.getType())
-                            )
-                        )
-                    );                
-                }
-            }
-            if(quantifier == Quantifier.THERE_EXISTS) return false;
         }
         return true;
     }
@@ -421,15 +433,11 @@ public abstract class AbstractFilter implements Selector, Serializable {
      */
     @Override
     public String toString() {
-        try {
-            return Records.getRecordFactory().asIndexedRecord(
-                getClass().getName(), 
-                null, 
-                this.filter
-            ).toString();
-        } catch (ResourceException e) {
-            return getClass().getName() + "//" + e.getMessage();
-        }
+        return Records.getRecordFactory().asIndexedRecord(
+		    getClass().getName(), 
+		    null, 
+		    this.filter
+		).toString();
     }
 
     public int size(){

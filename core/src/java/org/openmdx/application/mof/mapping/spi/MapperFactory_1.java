@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MapperFactory_1.java,v 1.4 2010/04/16 09:48:32 hburger Exp $
+ * Name:        $Id: MapperFactory_1.java,v 1.8 2011/05/29 23:35:42 hburger Exp $
  * Description: MapperFactory_1
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 09:48:32 $
+ * Date:        $Date: 2011/05/29 23:35:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,6 @@ import org.openmdx.kernel.loading.Classes;
 /**
  * MapperFactory_1
  */
-@SuppressWarnings("unchecked")
 public class MapperFactory_1 {
 
     /**
@@ -77,7 +76,6 @@ public class MapperFactory_1 {
      * 
      * @throws ServiceException
      */
-    @SuppressWarnings("deprecation")
     public static Mapper_1_0 create(
         String format
     ) throws ServiceException {
@@ -113,10 +111,9 @@ public class MapperFactory_1 {
                 );
             } else {
                 return Classes.<Mapper_1_0>getApplicationClass(
-                    MappingTypes.XMI1.equals(format) || MappingTypes.XMI_OPENMDX_1.equals(format) ? org.openmdx.application.mof.mapping.xmi.XMIMapper_1.class.getName() :
+                    MappingTypes.XMI1.equals(format) ? org.openmdx.application.mof.mapping.xmi.XMIMapper_1.class.getName() :
                     MappingTypes.UML_OPENMDX_1.equals(format) ? org.openmdx.application.mof.mapping.xmi.Uml1Mapper_1.class.getName() :
                     MappingTypes.UML2_OPENMDX_1.equals(format) ? org.openmdx.application.mof.mapping.xmi.Uml2Mapper_1.class.getName() :
-                    MappingTypes.TOGETHER_OPENMDX_1.equals(format) ? org.openmdx.application.mof.mapping.together.TogetherMapper_1.class.getName() :
                     format
                 ).getConstructor(
                 ).newInstance();
@@ -136,7 +133,7 @@ public class MapperFactory_1 {
         }
     }
   
-    final static private Class[] MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION = new Class[] {
+    final static private Class<?>[] MAPPING_FORMAT__PACKAGE_SUFFFIX__FILE_EXTENSION = new Class[] {
         String.class, // mappingFormat
         String.class, // packageSuffix,
         String.class // fileExtension

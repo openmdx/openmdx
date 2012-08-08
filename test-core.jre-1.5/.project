@@ -26,4 +26,10 @@
 			<locationURI>OPENMDX_HOME/test-core/src</locationURI>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>OPENMDX_HOME</name>
+			<value>$%7BPARENT-1-PROJECT_LOC%7D</value>
+		</variable>
+	</variableList>
 </projectDescription>

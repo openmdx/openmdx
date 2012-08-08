@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMI1ReferenceResolver.java,v 1.3 2010/09/21 16:32:46 hburger Exp $
+ * Name:        $Id: XMI1ReferenceResolver.java,v 1.4 2011/04/12 15:29:23 hburger Exp $
  * Description: XMI1 Reference Resolver
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/21 16:32:46 $
+ * Date:        $Date: 2011/04/12 15:29:23 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,7 +72,7 @@ import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class XMI1ReferenceResolver
   implements ContentHandler, XMIReferenceResolver {
 

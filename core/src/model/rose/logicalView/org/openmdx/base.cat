@@ -107,7 +107,7 @@
 			    name       	"isChangeable"
 			    value      	(value Text "false")))
 		    quid       	"491C2FDD000F"
-		    stereotype 	"set"
+		    stereotype 	"list"
 		    type       	"org::w3c::string"
 		    exportControl 	"Public"
 		    derived    	TRUE))
@@ -133,7 +133,7 @@
 			    name       	"isChangeable"
 			    value      	(value Text "false")))
 		    quid       	"3E8CCA1B0060"
-		    stereotype 	"set"
+		    stereotype 	"list"
 		    type       	"org::w3c::string"
 		    exportControl 	"Public"
 		    derived    	TRUE))
@@ -159,7 +159,7 @@
 			    name       	"isChangeable"
 			    value      	(value Text "false")))
 		    quid       	"3E8CCA5800EA"
-		    stereotype 	"set"
+		    stereotype 	"list"
 		    type       	"org::w3c::string"
 		    exportControl 	"Public"
 		    derived    	TRUE))
@@ -569,23 +569,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"403CAF5A0142"
-		    compartment 	(object Compartment
-			Parent_View 	@13
-			location   	(62, 2010)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	TRUE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	496)
 		    width      	700
 		    height     	237
 		    annotation 	8)
@@ -615,23 +598,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3FC487C80099"
-		    compartment 	(object Compartment
-			Parent_View 	@14
-			location   	(56, 1157)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	TRUE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	615)
 		    width      	706
 		    height     	462
 		    annotation 	8)
@@ -1194,23 +1160,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"3C8B627903C4"
-		    compartment 	(object Compartment
-			Parent_View 	@39
-			location   	(97, 147)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	278)
 		    width      	456
 		    height     	206
 		    annotation 	8
@@ -1250,23 +1199,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"400E4AD203B8"
-		    compartment 	(object Compartment
-			Parent_View 	@40
-			location   	(100, 387)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	334)
 		    width      	450
 		    height     	207
 		    annotation 	8)
@@ -1450,23 +1382,6 @@
 		    line_color 	3342489
 		    fill_color 	13434879
 		    quidu      	"403CAF5A0142"
-		    compartment 	(object Compartment
-			Parent_View 	@45
-			location   	(2109, 176)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	TRUE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			icon_style 	"Icon"
-			fill_color 	16777215
-			anchor     	2
-			nlines     	2
-			max_width  	496)
 		    width      	706
 		    height     	250
 		    annotation 	8)

@@ -20,7 +20,7 @@
               </eAnnotations>
               <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
             </ownedAttribute>
-            <ownedAttribute xmi:id="_3C7B8A60016D7F78BC6D0151" name="description" isReadOnly="true">
+            <ownedAttribute xmi:id="_3C7B8A60016D7F78BC6D0151" name="description">
               <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B62E40010"/>
               <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hVzjN96-EdmkJO73lqONhA" value="1"/>
               <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hVzjNt6-EdmkJO73lqONhA"/>
@@ -75,6 +75,7 @@
             </ownedAttribute>
             <ownedAttribute xmi:id="_3C7B8A60016D414BC40B0013" name="disabled">
               <type xmi:type="uml:PrimitiveType" href="../openMDX%202%20~%20Core%20(EMF)/org.w3c.uml#_3C7B8A60016D3C8B63180083"/>
+              <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_EdmFQOI_EeCPorwds-OtOQ"/>
             </ownedAttribute>
             <ownedAttribute xmi:id="_3C7B8A60016D3FC609B402DF" name="subject" type="_3C7B8A60016D3FC602C4017B" isUnique="false" association="_3C7B8A60016D3FC609B30388">
               <upperValue xmi:type="uml:LiteralUnlimitedNatural" xmi:id="_hWSEYt6-EdmkJO73lqONhA" value="1"/>
@@ -232,7 +233,7 @@
               <lowerValue xmi:type="uml:LiteralInteger" xmi:id="_hWL9y96-EdmkJO73lqONhA"/>
             </ownedAttribute>
           </packagedElement>
-          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417E21D70063" name="Privilege" isAbstract="true">
+          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417E21D70063" name="Privilege">
             <generalization xmi:id="_3C7B8A60016D41816AD80181">
               <general xmi:type="uml:Class" href="../openMDX%202%20~%20Core%20(EMF)/org.openmdx.base.uml#_3C7B8A60016D3FB3D6450214"/>
             </generalization>

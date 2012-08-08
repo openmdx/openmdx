@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: MarshallingList.java,v 1.20 2010/07/01 16:24:13 hburger Exp $
+ * Name:        $Id: MarshallingList.java,v 1.21 2011/04/12 12:19:18 hburger Exp $
  * Description: MarshallingList
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/01 16:24:13 $
+ * Date:        $Date: 2011/04/12 12:19:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,7 +65,7 @@ import org.openmdx.base.marshalling.ReluctantUnmarshalling;
 /**
  * A Marshalling List
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","rawtypes"})
 public class MarshallingList<E> extends AbstractList<E> implements Serializable {
 
     /**

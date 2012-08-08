@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ExportFilter.java,v 1.1 2009/10/14 12:58:07 hburger Exp $
+ * Name:        $Id: ExportFilter.java,v 1.2 2011/05/12 05:15:39 hburger Exp $
  * Description: Export Filter
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/14 12:58:07 $
+ * Date:        $Date: 2011/05/12 05:15:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -77,14 +77,14 @@ public interface ExportFilter {
     );
 
     /**
-     * Tests whether a given object id shall be excluded or not
+     * Tests whether a given XRI shall be excluded or not
      * 
-     * @param objectId
+     * @param xri
      * 
-     * @return <code>true</code> if the object with the given id shall be excluded
+     * @return <code>true</code> if the object or reference with the given id shall be excluded
      */
     boolean exclude(
-        Path objectId
+        Path xri
     );
     
 }

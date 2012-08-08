@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractHomeHandler.java,v 1.5 2010/06/04 22:45:00 hburger Exp $
+ * Name:        $Id: AbstractHomeHandler.java,v 1.6 2011/06/21 22:54:53 hburger Exp $
  * Description: Abstract Enterprise Java Bean Home Invocation Handler
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:45:00 $
+ * Date:        $Date: 2011/06/21 22:54:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,6 @@ package org.openmdx.kernel.application.container.spi.ejb;
 import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
@@ -65,7 +64,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.transaction.TransactionManager;
 
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.uses.org.apache.commons.pool.ObjectPool;
 
 /**
@@ -92,11 +91,6 @@ implements HomeConfiguration
      * The EJB's container transaction evaluator
      */
     private ContainerTransaction containerTransaction = null;
-
-    /**
-     * Instance logger
-     */
-    private Logger logger = LoggerFactory.getLogger();
 
     /**
      * Obtain a Bean instance from the pool.
@@ -133,7 +127,7 @@ implements HomeConfiguration
         try {
             this.instancePool.returnObject(ejbInstance);
         } catch (Exception exception) {
-            this.logger.log(
+            SysLog.log(
             	Level.WARNING,
                 "Enterprise Java Bean release failure: " + this,
                 exception
@@ -152,7 +146,7 @@ implements HomeConfiguration
         try {
             this.instancePool.invalidateObject(ejbInstance);
         } catch (Exception exception) {
-            this.logger.log(
+            SysLog.log(
             	Level.WARNING,
                 "Enterprise Java Bean invalidation failure: " + this,
                 exception

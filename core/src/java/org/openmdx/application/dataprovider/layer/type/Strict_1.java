@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Strict_1.java,v 1.21 2010/06/02 13:41:57 hburger Exp $
+ * Name:        $Id: Strict_1.java,v 1.23 2011/11/26 01:35:00 hburger Exp $
  * Description: Strict_1 class performing type checking of DataproviderRequest/DataproviderReply
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:41:57 $
+ * Date:        $Date: 2011/11/26 01:35:00 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.dataprovider.layer.type;
 
@@ -77,6 +76,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
@@ -122,7 +122,7 @@ public class Strict_1 extends OperationAwareLayer_1 {
             delegation
         );
         // genericTypes
-        this.genericTypes = new ArrayList(
+        this.genericTypes = new ArrayList<Object>(
             configuration.values(
                 LayerConfigurationEntries.GENERIC_TYPE_PATH
             ).values()
@@ -139,7 +139,7 @@ public class Strict_1 extends OperationAwareLayer_1 {
         Path objectPath  
     ) {
         for (
-            Iterator i = this.genericTypes.iterator(); 
+            Iterator<?> i = this.genericTypes.iterator(); 
             i.hasNext(); 
         ) {
             if(objectPath.isLike((Path)i.next())) {
@@ -271,23 +271,23 @@ public class Strict_1 extends OperationAwareLayer_1 {
             
             try {
                 MappedRecord object = request.object();
-                Object_2Facade facade = Object_2Facade.newInstance(request.object());
+                Object_2Facade facade = Facades.asObject(request.object());
                 ModelElement_1_0 objClassDef = Strict_1.this.getObjectClass(object);
                 SysLog.trace("create object", object);
                 SysLog.trace("create objClass", objClassDef.objGetValue("qualifiedName"));
                 // remove all attributes with empty value list
-                Set attributeNames = facade.getValue().keySet();
-                List attributesToBeRemoved = new ArrayList();
+                Set<String> attributeNames = facade.getValue().keySet();
+                List<String> attributesToBeRemoved = new ArrayList<String>();
                 for(
-                    Iterator i = attributeNames.iterator();
+                    Iterator<String> i = attributeNames.iterator();
                     i.hasNext();
                 ) {
-                    String attributeName = (String)i.next();
+                    String attributeName = i.next();
                     Object value = facade.getValue().get(attributeName);
                     if(
                         (value == null) || 
-                        (value instanceof List && ((List)value).isEmpty()) ||
-                        (value instanceof SparseArray && ((SparseArray)value).isEmpty())                        
+                        (value instanceof List && ((List<?>)value).isEmpty()) ||
+                        (value instanceof SparseArray && ((SparseArray<?>)value).isEmpty())                        
                     ) {
                         attributesToBeRemoved.add(attributeName);
                     }
@@ -400,8 +400,8 @@ public class Strict_1 extends OperationAwareLayer_1 {
             //
             // collect all types which could contain operation
             //
-            Collection allTypes = new HashSet();
-            for(Iterator i = targetClassDef.objGetList("allSubtype").iterator(); i.hasNext(); ) {
+            Collection<Object> allTypes = new HashSet<Object>();
+            for(Iterator<?> i = targetClassDef.objGetList("allSubtype").iterator(); i.hasNext(); ) {
                 ModelElement_1_0 subtype = getModel().getElement(i.next());
                 allTypes.addAll(
                     subtype.objGetList("allSupertype")
@@ -411,7 +411,7 @@ public class Strict_1 extends OperationAwareLayer_1 {
             // lookup operation
             //
             for(
-                Iterator i = allTypes.iterator();
+                Iterator<?> i = allTypes.iterator();
                 i.hasNext();
             ) {
                 ModelElement_1_0 classDef = getModel().getDereferencedType(i.next());
@@ -430,7 +430,7 @@ public class Strict_1 extends OperationAwareLayer_1 {
                 ) {
                     // lookup parameters definition
                     for(
-                        Iterator j = operationDef.objGetList("content").iterator();
+                        Iterator<?> j = operationDef.objGetList("content").iterator();
                         j.hasNext();
                     ) {
                         ModelElement_1_0 e = getModel().getElement(j.next());
@@ -464,7 +464,7 @@ public class Strict_1 extends OperationAwareLayer_1 {
     //---------------------------------------------------------------------------
     // Variables
     //---------------------------------------------------------------------------
-    private List genericTypes = null;
+    private List<Object> genericTypes = null;
     private ModelElement_1_0 basicObjectClassDef = null;
 
 }

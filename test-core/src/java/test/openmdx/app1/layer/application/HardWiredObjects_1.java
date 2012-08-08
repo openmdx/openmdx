@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HardWiredObjects_1.java,v 1.12 2010/06/03 15:57:09 hburger Exp $
+ * Name:        $Id: HardWiredObjects_1.java,v 1.13 2011/12/02 10:34:10 hburger Exp $
  * Description: Hard-Wired Objects Layer
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:57:09 $
+ * Date:        $Date: 2011/12/02 10:34:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -75,6 +75,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
@@ -168,13 +169,9 @@ public class HardWiredObjects_1 extends Standard_1 {
             );        
         }
         Object_2Facade facade;
-        try {
-            facade = Object_2Facade.newInstance(objectId);
-            facade.setValue(original);
-            return facade.getDelegate();
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
-        }
+        facade = Facades.newObject(objectId);
+		facade.setValue(original);
+		return facade.getDelegate();
     }
 
     /**

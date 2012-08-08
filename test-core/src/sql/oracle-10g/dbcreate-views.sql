@@ -1,6 +1,9 @@
 DROP VIEW BeforeImage_Address;
 CREATE VIEW BeforeImage_Address AS SELECT
     'audit*' || p$$object_rsx object_rid,
+    'audit' as p$$object_rid$0,
+    p$$object_rsx,
+    p$$object_rsx as p$$object_rid$1,
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
@@ -19,31 +22,39 @@ where p$$object_oid$1 IS NOT NULL;
 
 DROP VIEW Involvement_Address;
 CREATE VIEW Involvement_Address AS SELECT 
-  p$$unit_of_work__rid p$$object_parent__rid,
-  p$$object_oid$1 p$$object_parent__oid,
+  p$$unit_of_work__rid as p$$object_parent__rid,
+  p$$object_oid$1 as p$$object_parent__oid,
   0 as object_rid,
-  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object_oid,
-  'data*' || p$$object_rsx p$$object_oid$0,
-  p$$object_oid$0 p$$object_oid$1,
-  'org:openmdx:audit2:Involvement' object__class,
-  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 before_image,
-  'audit*' || p$$object_rsx p$$before_image__rid,
-  p$$object_oid$0 || '!' || p$$object_oid$1 before_image__oid,
-  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object,  
-  'data*' || p$$object_rsx p$$object__rid,  
-  p$$object_oid$0 p$$object__oid  
+  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') as object_oid,
+  'data' as p$$object_oid$0,
+  p$$object_rsx as p$$object_oid$1,
+  p$$object_oid$0 as p$$object_oid$2,
+  'org:openmdx:audit2:Involvement' as object__class,
+  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 as before_image,
+  'audit*' || p$$object_rsx as p$$before_image__rid,
+  'audit' as p$$before_image__rid$0,
+  p$$object_rsx as p$$before_image__rid$1,
+  p$$object_oid$0 || '!' || p$$object_oid$1 as before_image__oid,
+  p$$object_oid$0 as before_image__oid$0,
+  p$$object_oid$1 as before_image__oid$1,
+  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') as object,  
+  'data*' || p$$object_rsx as p$$object__rid,  
+  'data' as p$$object__rid$0,  
+  p$$object_rsx as p$$object__rid$1,  
+  p$$object_oid$0 as p$$object__oid  
 FROM app1_Address
 WHERE p$$object_oid$1 IS NOT NULL;
 
 DROP VIEW BeforeImage_Address_;
 CREATE VIEW BeforeImage_Address_ AS SELECT
     'audit*' || p$$object_rsx object_rid,
+    'audit' as p$$object_rid$0,
+    p$$object_rsx,
+    p$$object_rsx as p$$object_rid$1,
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
     object_idx,
-    modified_by,
-    created_by,
     address_line
 FROM app1_Address_N 
 where p$$object_oid$1 IS NOT NULL;
@@ -51,6 +62,9 @@ where p$$object_oid$1 IS NOT NULL;
 DROP VIEW BeforeImage_DOC;
 CREATE VIEW BeforeImage_DOC AS SELECT 
     'audit*' || p$$object_rsx object_rid,
+    'audit' as p$$object_rid$0,
+    p$$object_rsx,
+    p$$object_rsx as p$$object_rid$1,
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
@@ -60,8 +74,8 @@ CREATE VIEW BeforeImage_DOC AS SELECT
     object__class,
     created_at,
     modified_at,
-    created_by,
-    modified_by,
+    created_by_0,
+    modified_by_0,
     description,
     content,
     keyword
@@ -73,22 +87,32 @@ CREATE VIEW Involvement_DOC AS SELECT
   p$$unit_of_work__rid p$$object_parent__rid,
   p$$object_oid$1 p$$object_parent__oid,
   0 as object_rid,
-  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object_oid,
-  'data*' || p$$object_rsx p$$object_oid$0,
-  p$$object_oid$0 p$$object_oid$1,
-  'org:openmdx:audit2:Involvement' object__class,
-  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 before_image,
-  'audit*' || p$$object_rsx p$$before_image__rid,
-  p$$object_oid$0 || '!' || p$$object_oid$1 before_image__oid,
+  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') as object_oid,
+  'data' as p$$object_oid$0,
+  p$$object_rsx as p$$object_oid$1,
+  p$$object_oid$0 as p$$object_oid$2,
+  'org:openmdx:audit2:Involvement' as object__class,
+  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 as before_image,
+  'audit*' || p$$object_rsx as p$$before_image__rid,
+  'audit' as p$$before_image__rid$0,
+  p$$object_rsx as p$$before_image__rid$1,
+  p$$object_oid$0 || '!' || p$$object_oid$1 as before_image__oid,
+  p$$object_oid$0 as before_image__oid$0,
+  p$$object_oid$1 as before_image__oid$1,
   'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object,  
-  'data*' || p$$object_rsx p$$object__rid,  
-  p$$object_oid$0 p$$object__oid  
+  'data*' || p$$object_rsx as p$$object__rid,  
+  'data' as p$$object__rid$0,  
+  p$$object_rsx as p$$object__rid$1,  
+  p$$object_oid$0 as p$$object__oid  
 FROM app1_DOC
 WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
 
 DROP VIEW BeforeImage_Invoice;
 CREATE VIEW BeforeImage_Invoice AS SELECT
     'audit*' || p$$object_rsx object_rid,
+    'audit' as p$$object_rid$0,
+    p$$object_rsx,
+    p$$object_rsx as p$$object_rid$1,
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
@@ -100,8 +124,8 @@ CREATE VIEW BeforeImage_Invoice AS SELECT
     product_group_id,
     created_at,
     modified_at,
-    created_by,
-    modified_by
+    created_by_0,
+    modified_by_0
 FROM app1_Invoice 
 where p$$object_oid$1 IS NOT NULL;
 
@@ -110,22 +134,32 @@ CREATE VIEW Involvement_Invoice AS SELECT
   p$$unit_of_work__rid p$$object_parent__rid,
   p$$object_oid$1 p$$object_parent__oid,
   0 as object_rid,
-  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object_oid,
-  'data*' || p$$object_rsx p$$object_oid$0,
-  p$$object_oid$0 p$$object_oid$1,
-  'org:openmdx:audit2:Involvement' object__class,
-  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 before_image,
-  'audit*' || p$$object_rsx p$$before_image__rid,
-  p$$object_oid$0 || '!' || p$$object_oid$1 before_image__oid,
+  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') as object_oid,
+  'data' as p$$object_oid$0,
+  p$$object_rsx as p$$object_oid$1,
+  p$$object_oid$0 as p$$object_oid$2,
+  'org:openmdx:audit2:Involvement' as object__class,
+  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 as before_image,
+  'audit*' || p$$object_rsx as p$$before_image__rid,
+  'audit' as p$$before_image__rid$0,
+  p$$object_rsx as p$$before_image__rid$1,
+  p$$object_oid$0 || '!' || p$$object_oid$1 as before_image__oid,
+  p$$object_oid$0 as before_image__oid$0,
+  p$$object_oid$1 as before_image__oid$1,
   'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object,  
-  'data*' || p$$object_rsx p$$object__rid,  
-  p$$object_oid$0 p$$object__oid  
+  'data*' || p$$object_rsx as p$$object__rid,  
+  'data' as p$$object__rid$0,  
+  p$$object_rsx as p$$object__rid$1,  
+  p$$object_oid$0 as p$$object__oid  
 FROM app1_Invoice
 WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
 
 DROP VIEW BeforeImage_InvoicePosition;
 CREATE VIEW BeforeImage_InvoicePosition AS SELECT
     'audit*' || p$$object_rsx object_rid,
+    'audit' as p$$object_rid$0,
+    p$$object_rsx,
+    p$$object_rsx as p$$object_rid$1,
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
@@ -137,8 +171,8 @@ CREATE VIEW BeforeImage_InvoicePosition AS SELECT
     description,
     created_at,
     modified_at,
-    created_by,
-    modified_by,
+    created_by_0,
+    modified_by_0,
     product_id
 FROM app1_InvoicePosition 
 where p$$object_oid$1 IS NOT NULL;
@@ -148,22 +182,32 @@ CREATE VIEW Involvement_InvoicePosition AS SELECT
   p$$unit_of_work__rid p$$object_parent__rid,
   p$$object_oid$1 p$$object_parent__oid,
   0 as object_rid,
-  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object_oid,
-  'data*' || p$$object_rsx p$$object_oid$0,
-  p$$object_oid$0 p$$object_oid$1,
-  'org:openmdx:audit2:Involvement' object__class,
-  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 before_image,
-  'audit*' || p$$object_rsx p$$before_image__rid,
-  p$$object_oid$0 || '!' || p$$object_oid$1 before_image__oid,
+  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') as object_oid,
+  'data' as p$$object_oid$0,
+  p$$object_rsx as p$$object_oid$1,
+  p$$object_oid$0 as p$$object_oid$2,
+  'org:openmdx:audit2:Involvement' as object__class,
+  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 as before_image,
+  'audit*' || p$$object_rsx as p$$before_image__rid,
+  'audit' as p$$before_image__rid$0,
+  p$$object_rsx as p$$before_image__rid$1,
+  p$$object_oid$0 || '!' || p$$object_oid$1 as before_image__oid,
+  p$$object_oid$0 as before_image__oid$0,
+  p$$object_oid$1 as before_image__oid$1,
   'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object,  
-  'data*' || p$$object_rsx p$$object__rid,  
-  p$$object_oid$0 p$$object__oid  
+  'data*' || p$$object_rsx as p$$object__rid,  
+  'data' as p$$object__rid$0,  
+  p$$object_rsx as p$$object__rid$1,  
+  p$$object_oid$0 as p$$object__oid  
 FROM app1_InvoicePosition
 WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
 
 DROP VIEW BeforeImage_Member;
 CREATE VIEW BeforeImage_Member AS SELECT
     'audit*' || p$$object_rsx object_rid,
+    'audit' as p$$object_rid$0,
+    p$$object_rsx,
+    p$$object_rsx as p$$object_rid$1,
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
@@ -174,8 +218,8 @@ CREATE VIEW BeforeImage_Member AS SELECT
     description,
     created_at,
     modified_at,
-    modified_by,
-    created_by,
+    modified_by_0,
+    created_by_0,
     m1,
     p$$m1__rid,
     p$$m1__oid,
@@ -190,22 +234,32 @@ CREATE VIEW Involvement_Member AS SELECT
   p$$unit_of_work__rid p$$object_parent__rid,
   p$$object_oid$1 p$$object_parent__oid,
   0 as object_rid,
-  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object_oid,
-  'data*' || p$$object_rsx p$$object_oid$0,
-  p$$object_oid$0 p$$object_oid$1,
-  'org:openmdx:audit2:Involvement' object__class,
-  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 before_image,
-  'audit*' || p$$object_rsx p$$before_image__rid,
-  p$$object_oid$0 || '!' || p$$object_oid$1 before_image__oid,
+  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') as object_oid,
+  'data' as p$$object_oid$0,
+  p$$object_rsx as p$$object_oid$1,
+  p$$object_oid$0 as p$$object_oid$2,
+  'org:openmdx:audit2:Involvement' as object__class,
+  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 as before_image,
+  'audit*' || p$$object_rsx as p$$before_image__rid,
+  'audit' as p$$before_image__rid$0,
+  p$$object_rsx as p$$before_image__rid$1,
+  p$$object_oid$0 || '!' || p$$object_oid$1 as before_image__oid,
+  p$$object_oid$0 as before_image__oid$0,
+  p$$object_oid$1 as before_image__oid$1,
   'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object,  
-  'data*' || p$$object_rsx p$$object__rid,  
-  p$$object_oid$0 p$$object__oid  
+  'data*' || p$$object_rsx as p$$object__rid,  
+  'data' as p$$object__rid$0,  
+  p$$object_rsx as p$$object__rid$1,  
+  p$$object_oid$0 as p$$object__oid  
 FROM app1_Member
 WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
 
 DROP VIEW BeforeImage_PersonGroup;
 CREATE VIEW BeforeImage_PersonGroup AS SELECT 
     'audit*' || p$$object_rsx object_rid,
+    'audit' as p$$object_rid$0,
+    p$$object_rsx,
+    p$$object_rsx as p$$object_rid$1,
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
@@ -216,8 +270,8 @@ CREATE VIEW BeforeImage_PersonGroup AS SELECT
     description,
     created_at,
     modified_at,
-    modified_by,
-    created_by,
+    modified_by_0,
+    created_by_0,
     name
 FROM app1_PersonGroup 
 where p$$object_oid$1 IS NOT NULL;
@@ -227,22 +281,32 @@ CREATE VIEW Involvement_PersonGroup AS SELECT
   p$$unit_of_work__rid p$$object_parent__rid,
   p$$object_oid$1 p$$object_parent__oid,
   0 as object_rid,
-  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object_oid,
-  'data*' || p$$object_rsx p$$object_oid$0,
-  p$$object_oid$0 p$$object_oid$1,
-  'org:openmdx:audit2:Involvement' object__class,
-  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 before_image,
-  'audit*' || p$$object_rsx p$$before_image__rid,
-  p$$object_oid$0 || '!' || p$$object_oid$1 before_image__oid,
+  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') as object_oid,
+  'data' as p$$object_oid$0,
+  p$$object_rsx as p$$object_oid$1,
+  p$$object_oid$0 as p$$object_oid$2,
+  'org:openmdx:audit2:Involvement' as object__class,
+  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 as before_image,
+  'audit*' || p$$object_rsx as p$$before_image__rid,
+  'audit' as p$$before_image__rid$0,
+  p$$object_rsx as p$$before_image__rid$1,
+  p$$object_oid$0 || '!' || p$$object_oid$1 as before_image__oid,
+  p$$object_oid$0 as before_image__oid$0,
+  p$$object_oid$1 as before_image__oid$1,
   'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object,  
-  'data*' || p$$object_rsx p$$object__rid,  
-  p$$object_oid$0 p$$object__oid  
+  'data*' || p$$object_rsx as p$$object__rid,  
+  'data' as p$$object__rid$0,  
+  p$$object_rsx as p$$object__rid$1,  
+  p$$object_oid$0 as p$$object__oid  
 FROM app1_PersonGroup
 WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
   
 DROP VIEW BeforeImage_SLICED;
 CREATE VIEW BeforeImage_SLICED AS SELECT 
     'audit*' || p$$object_rsx object_rid,
+    'audit' as p$$object_rid$0,
+    p$$object_rsx,
+    p$$object_rsx as p$$object_rid$1,
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
@@ -252,8 +316,8 @@ CREATE VIEW BeforeImage_SLICED AS SELECT
     object__class,
     created_at,
     modified_at,
-    created_by,
-    modified_by,
+    created_by_0,
+    modified_by_0,
     m1,
     last_name,
     house_number,
@@ -290,22 +354,32 @@ CREATE VIEW Involvement_SLICED AS SELECT
   p$$unit_of_work__rid p$$object_parent__rid,
   p$$object_oid$1 p$$object_parent__oid,
   0 as object_rid,
-  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object_oid,
-  'data*' || p$$object_rsx p$$object_oid$0,
-  p$$object_oid$0 p$$object_oid$1,
-  'org:openmdx:audit2:Involvement' object__class,
-  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 before_image,
-  'audit*' || p$$object_rsx p$$before_image__rid,
-  p$$object_oid$0 || '!' || p$$object_oid$1 before_image__oid,
+  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') as object_oid,
+  'data' as p$$object_oid$0,
+  p$$object_rsx as p$$object_oid$1,
+  p$$object_oid$0 as p$$object_oid$2,
+  'org:openmdx:audit2:Involvement' as object__class,
+  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 as before_image,
+  'audit*' || p$$object_rsx as p$$before_image__rid,
+  'audit' as p$$before_image__rid$0,
+  p$$object_rsx as p$$before_image__rid$1,
+  p$$object_oid$0 || '!' || p$$object_oid$1 as before_image__oid,
+  p$$object_oid$0 as before_image__oid$0,
+  p$$object_oid$1 as before_image__oid$1,
   'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object,  
-  'data*' || p$$object_rsx p$$object__rid,  
-  p$$object_oid$0 p$$object__oid  
+  'data*' || p$$object_rsx as p$$object__rid,  
+  'data' as p$$object__rid$0,  
+  p$$object_rsx as p$$object__rid$1,  
+  p$$object_oid$0 as p$$object__oid  
 FROM app1_SLICED
 WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
   
 DROP VIEW BeforeImage_MessageTemplate;
 CREATE VIEW BeforeImage_MessageTemplate AS SELECT
     'audit*' || p$$object_rsx object_rid,
+    'audit' as p$$object_rid$0,
+    p$$object_rsx,
+    p$$object_rsx as p$$object_rid$1,
     p$$object_oid$0 || '!' || p$$object_oid$1 object_oid,
     p$$object_oid$0,
     p$$object_oid$1,
@@ -317,8 +391,8 @@ CREATE VIEW BeforeImage_MessageTemplate AS SELECT
     description,
     created_at,
     modified_at,
-    created_by,
-    modified_by
+    created_by_0,
+    modified_by_0
 FROM app1_MessageTemplate 
 where p$$object_oid$1 IS NOT NULL;
 
@@ -327,16 +401,23 @@ CREATE VIEW Involvement_MessageTemplate AS SELECT
   p$$unit_of_work__rid p$$object_parent__rid,
   p$$object_oid$1 p$$object_parent__oid,
   0 as object_rid,
-  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object_oid,
-  'data*' || p$$object_rsx p$$object_oid$0,
-  p$$object_oid$0 p$$object_oid$1,
-  'org:openmdx:audit2:Involvement' object__class,
-  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 before_image,
-  'audit*' || p$$object_rsx p$$before_image__rid,
-  p$$object_oid$0 || '!' || p$$object_oid$1 before_image__oid,
+  'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') as object_oid,
+  'data' as p$$object_oid$0,
+  p$$object_rsx as p$$object_oid$1,
+  p$$object_oid$0 as p$$object_oid$2,
+  'org:openmdx:audit2:Involvement' as object__class,
+  'audit*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') || '!' || p$$object_oid$1 as before_image,
+  'audit*' || p$$object_rsx as p$$before_image__rid,
+  'audit' as p$$before_image__rid$0,
+  p$$object_rsx as p$$before_image__rid$1,
+  p$$object_oid$0 || '!' || p$$object_oid$1 as before_image__oid,
+  p$$object_oid$0 as before_image__oid$0,
+  p$$object_oid$1 as before_image__oid$1,
   'data*' || p$$object_rsx || '/' || REPLACE(REPLACE(p$$object_oid$0,':','::'),'/','//') object,  
-  'data*' || p$$object_rsx p$$object__rid,  
-  p$$object_oid$0 p$$object__oid  
+  'data*' || p$$object_rsx as p$$object__rid,  
+  'data' as p$$object__rid$0,  
+  p$$object_rsx as p$$object__rid$1,  
+  p$$object_oid$0 as p$$object__oid  
 FROM app1_MessageTemplate
 WHERE object_idx = 0 AND p$$object_oid$1 IS NOT NULL;
 

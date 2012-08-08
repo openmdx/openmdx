@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ConditionType.java,v 1.3 2010/06/01 09:00:06 hburger Exp $
+ * Name:        $Id: ConditionType.java,v 1.4 2011/10/21 17:21:06 hburger Exp $
  * Description: Condition Type
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 09:00:06 $
+ * Date:        $Date: 2011/10/21 17:21:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -56,6 +56,14 @@ package org.openmdx.base.query;
  */
 public enum ConditionType {
     
+// /**
+//   * The operator WHERE_NOT (&#x27CA) expects one or more conditions as &laquo;right&raquo; operand.
+//   */
+//  WHERE_NOT(
+//      (short)-7,
+//      '\u27CA'
+//  ),
+
     /**
      * The operator SOUNDS_UNLIKE (&#x226D) expects one or more values as &laquo;right&raquo; operand.
      */
@@ -163,9 +171,15 @@ public enum ConditionType {
     SOUNDS_LIKE(
         (short)6,
         '\u224D'
+//  ),
+//
+//  /**
+//   * The operator WHERE (&#x007C) expects one or more conditions as &laquo;right&raquo; operand.
+//   */
+//  WHERE(
+//      (short)7,
+//      '\u007C'
     );
-
-    
 
     /**
      * Constructor 
@@ -250,6 +264,7 @@ public enum ConditionType {
         short code
     ){
         switch(code){
+//          case -7: return WHERE_NOT;
             case -6: return SOUNDS_UNLIKE;
             case -5: return IS_UNLIKE;
             case -4 : return IS_OUTSIDE;
@@ -263,6 +278,7 @@ public enum ConditionType {
             case +4 : return IS_BETWEEN;
             case +5 : return IS_LIKE;
             case +6 : return SOUNDS_LIKE;
+//          case +7 : return WHERE;
             default: throw new IllegalArgumentException(
                 "Invalid condition type code: " + code
             );
@@ -282,6 +298,7 @@ public enum ConditionType {
         char symbol
     ){
         switch(symbol){
+//          case '\u27CA' : return WHERE_NOT;
             case '\u226D' : return SOUNDS_UNLIKE;
             case '\u2241' : return IS_UNLIKE;
             case '\u2276' : return IS_OUTSIDE;
@@ -295,6 +312,7 @@ public enum ConditionType {
             case '\u226C' : return IS_BETWEEN;
             case '\u223C' : return IS_LIKE;
             case '\u224D' : return SOUNDS_LIKE;
+//          case '\u007C' : return WHERE;
             default: throw new IllegalArgumentException(
                 "Invalid condition type symbol: u" + Integer.toHexString(symbol)
             );

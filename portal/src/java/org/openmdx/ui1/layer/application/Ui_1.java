@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Ui_1.java,v 1.88 2010/10/25 08:58:28 wfro Exp $
+ * Name:        $Id: Ui_1.java,v 1.89 2011/11/28 09:25:05 wfro Exp $
  * Description: Ui_1 plugin
- * Revision:    $Revision: 1.88 $
+ * Revision:    $Revision: 1.89 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/25 08:58:28 $
+ * Date:        $Date: 2011/11/28 09:25:05 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -84,12 +84,11 @@ import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.layer.application.Standard_1;
 import org.openmdx.application.dataprovider.spi.Layer_1;
-import org.openmdx.application.dataprovider.spi.ResourceHelper;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
@@ -97,6 +96,7 @@ import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
@@ -1201,7 +1201,7 @@ public class Ui_1 extends Standard_1 {
                     isSortable : 
                     ((Boolean)definitionFacade.attributeValue("sortable")).booleanValue(),
                 definitionFacade.attributeValuesAsList("mandatory").isEmpty() ? 
-                    Multiplicities.SINGLE_VALUE.equals(feature.getMultiplicity()) && feature.isChangeable() : 
+                	Multiplicity.SINGLE_VALUE.toString().equals(feature.getMultiplicity()) && feature.isChangeable() : 
                     ((Boolean)definitionFacade.attributeValue("mandatory")).booleanValue(),
                 feature.getName(),
                 feature.getQualifiedName(),
@@ -2222,7 +2222,7 @@ public class Ui_1 extends Standard_1 {
                 catch (ResourceException e) {
                 	throw new ServiceException(e);
                 }                
-            	Object_2Facade tabFacade = ResourceHelper.getObjectFacade(tab);
+            	Object_2Facade tabFacade = Facades.asObject(tab);
                 tabFacade.attributeValuesAsList("title").addAll(
                     definitionFacade.attributeValuesAsList("label")
                 );
@@ -2704,7 +2704,7 @@ public class Ui_1 extends Standard_1 {
 	                (String)definitionFacade.attributeValue("iconKey"),
 	                (String)definitionFacade.attributeValue("color"),
 	                (String)definitionFacade.attributeValue("backColor"),
-	                Multiplicities.SINGLE_VALUE,
+	                Multiplicity.SINGLE_VALUE.toString(),
 	                new Integer(1),
 	                new Integer(0),
 	                false,
@@ -2894,15 +2894,10 @@ public class Ui_1 extends Standard_1 {
 		                existingElements
 		            );
 		            for(MappedRecord element: elements) {
-		                try {
-		                    existingElements.put(
-		                        Object_2Facade.getPath(element).getBase(),
-		                        Object_2Facade.cloneObject(element)
-		                    );
-	                    }
-	                    catch (ResourceException e) {
-	                    	throw new ServiceException(e);
-	                    }
+	                    existingElements.put(
+	                        Object_2Facade.getPath(element).getBase(),
+	                        Object_2Facade.cloneObject(element)
+	                    );
 		            }
 		        }
 		        // Prefetch all element definitions
@@ -2930,15 +2925,10 @@ public class Ui_1 extends Standard_1 {
 		                existingElementDefinitions
 		            );
 		            for(MappedRecord elementDefinition: elementDefinitions) {
-		                try {
-		                    existingElementDefinitions.put(
-		                        Object_2Facade.getPath(elementDefinition).getBase(),
-		                        Object_2Facade.cloneObject(elementDefinition)
-		                    );
-	                    }
-	                    catch (ResourceException e) {
-	                    	throw new ServiceException(e);
-	                    }
+	                    existingElementDefinitions.put(
+	                        Object_2Facade.getPath(elementDefinition).getBase(),
+	                        Object_2Facade.cloneObject(elementDefinition)
+	                    );
 		            }
 		        }
 		        // Prepare feature definitions

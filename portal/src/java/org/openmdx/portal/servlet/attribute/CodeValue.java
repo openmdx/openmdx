@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodeValue.java,v 1.45 2010/09/08 09:41:08 wfro Exp $
+ * Name:        $Id: CodeValue.java,v 1.49 2011/08/11 15:08:58 wfro Exp $
  * Description: CodeValue
- * Revision:    $Revision: 1.45 $
+ * Revision:    $Revision: 1.49 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/08 09:41:08 $
+ * Date:        $Date: 2011/08/11 15:08:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -69,6 +69,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
+import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.control.EditObjectControl;
 
 public class CodeValue
@@ -125,9 +126,9 @@ public class CodeValue
         boolean codeAsKey,
         boolean includeAll
     ) {
-        return this.application.getCodes().getLongText(
+        return this.app.getCodes().getLongText(
             this.containerName,
-            this.application.getCurrentLocaleAsIndex(),
+            this.app.getCurrentLocaleAsIndex(),
             codeAsKey,
             includeAll
         );
@@ -138,9 +139,9 @@ public class CodeValue
         boolean codeAsKey,
         boolean includeAll
     ) {
-        return this.application.getCodes().getShortText(
+        return this.app.getCodes().getShortText(
             this.containerName,
-            this.application.getCurrentLocaleAsIndex(),
+            this.app.getCurrentLocaleAsIndex(),
             codeAsKey,
             includeAll
         );
@@ -156,7 +157,7 @@ public class CodeValue
         String backColor = null;
         Object value = super.getValue(false);      
         if(value instanceof Short) {
-            backColor = (String)this.application.getCodes().getBackColors(
+            backColor = (String)this.app.getCodes().getBackColors(
                 this.containerName,
                 true
             ).get(value);          
@@ -176,7 +177,7 @@ public class CodeValue
         String color = null;
         Object value = super.getValue(false);      
         if(value instanceof Short) {
-            color = (String)this.application.getCodes().getColors(
+            color = (String)this.app.getCodes().getColors(
                 this.containerName,
                 true
             ).get(value);          
@@ -196,7 +197,7 @@ public class CodeValue
         String iconKey = null;
         Object value = super.getValue(false);      
         if(value instanceof Short) {
-            iconKey = (String)this.application.getCodes().getIconKeys(
+            iconKey = (String)this.app.getCodes().getIconKeys(
                 this.containerName,
                 true
             ).get(value);          
@@ -237,7 +238,7 @@ public class CodeValue
                     ? (String)this.getShortText(true, true).get(codeAsShort)
                     : (String)this.getLongText(true, true).get(codeAsShort);
                 values.add(
-                    this.application.getHtmlEncoder().encode(
+                    this.app.getHtmlEncoder().encode(
                         text == null 
                             ? code.toString() 
                             : text,
@@ -247,7 +248,7 @@ public class CodeValue
             }
             else {
                 values.add(
-                    this.application.getHtmlEncoder().encode(
+                    this.app.getHtmlEncoder().encode(
                         code.toString(),
                         false
                     )
@@ -263,7 +264,7 @@ public class CodeValue
                     ? (String)this.getShortText(true, true).get(codeAsShort)
                     : (String)this.getLongText(true, true).get(codeAsShort);
                 return 
-                    this.application.getHtmlEncoder().encode(
+                    this.app.getHtmlEncoder().encode(
                         text == null 
                             ? value.toString() 
                             : text,
@@ -271,7 +272,7 @@ public class CodeValue
                     );
             }
             else {
-                return this.application.getHtmlEncoder().encode(
+                return this.app.getHtmlEncoder().encode(
                     value.toString(),
                     false
                 );
@@ -301,7 +302,6 @@ public class CodeValue
         String widthModifier,
         String rowSpanModifier,
         String readonlyModifier,
-        String disabledModifier,
         String lockedModifier,
         String stringifiedValue,
         boolean forEditing
@@ -309,6 +309,7 @@ public class CodeValue
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();    
         label = this.getLabel(attribute, p, label);
         String title = this.getTitle(attribute, label);
+        // Edit
         if(forEditing) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0)            
@@ -333,10 +334,17 @@ public class CodeValue
 		        );
             }    
             if(this.isSingleValued()) {               
-                Number featureValue = (Number)super.getValue(false);                      
+                Object value = super.getValue(false);
+                Number featureValue = null;
+                if(value instanceof Collection) {
+                	Collection values = (Collection)value;
+                	featureValue = values.isEmpty() ? null : (Number)values.iterator().next();
+                } else {
+                	featureValue = (Number)value;
+                }
                 p.write("<td ", rowSpanModifier, ">");
-                if(this.isChangeable() && this.isEnabled()) {
-                    p.write("    <select id=\"", id, "\" name=\"", id, "\" class=\"valueL", lockedModifier, "\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\">");
+                if(readonlyModifier.isEmpty()) {
+                    p.write("    <select id=\"", id, "\" name=\"", id, "\" class=\"valueL", lockedModifier, "\"", " tabindex=\"", Integer.toString(tabIndex), "\">");
                     for(Iterator options = longTextsT.entrySet().iterator(); options.hasNext(); ) {
                       Map.Entry option = (Map.Entry)options.next();
                       short optionValue = ((Number)option.getValue()).shortValue();
@@ -352,24 +360,31 @@ public class CodeValue
                     p.write("    </select>");
                 }
                 else {
-                    p.write("    <input id=\"", id, "\" name=\"", id, "\" type=\"text\" class=\"valueL", lockedModifier, "\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\" value=\"", stringifiedValue, "\">");
+                	// In case of read-only render as input field. However, without id and name attributes                        	
+                    p.write("    <input type=\"text\" class=\"valueL", lockedModifier, "\" ", readonlyModifier, " tabindex=\"", Integer.toString(tabIndex), "\" value=\"", stringifiedValue, "\">");
                 }
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, "></td>");
             }
             else {
                 p.write("<td ", rowSpanModifier, ">");
-                p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"multiStringLocked\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
+                if(readonlyModifier.isEmpty()) {
+                	p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"multiStringLocked\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");
+                } else {
+                	// In case of read-only render as input field. However, without id and name attributes                        	
+                	p.write("  <textarea class=\"multiStringLocked\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"", Integer.toString(tabIndex), "\">", stringifiedValue, "</textarea>");                	
+                }
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, ">");
-                if(this.isChangeable()) {
-                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("10"), "; popup_", EditObjectControl.EDIT_CODES, " = ",  EditObjectControl.EDIT_CODES, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_CODES, ", 'popup_", EditObjectControl.EDIT_CODES, "', $('", id, "'), new Array(", longTextsAsJsArray.toString(), "));\""));
+                if(readonlyModifier.isEmpty()) {
+                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; popup_", EditObjectControl.EDIT_CODES, " = ",  EditObjectControl.EDIT_CODES, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_CODES, ", 'popup_", EditObjectControl.EDIT_CODES, "', $('", id, "'), new Array(", longTextsAsJsArray.toString(), "));\""));
                 }
                 p.write("</td>");
             }
         }
+        // Show
         else {
-            if(stringifiedValue.length() == 0) {
+            if(stringifiedValue.isEmpty() || WebKeys.LOCKED_VALUE.equals(stringifiedValue)) {
                 super.paint(
                     attribute,
                     p,
@@ -383,7 +398,6 @@ public class CodeValue
                     widthModifier,
                     rowSpanModifier,
                     readonlyModifier,
-                    disabledModifier,
                     lockedModifier,
                     stringifiedValue,
                     forEditing
@@ -396,7 +410,6 @@ public class CodeValue
                 else {
                     styleModifier += "height:" + (1.2+(attribute.getSpanRow()-1)*1.35) + "em;\"";
                 }
-                p.debug("<!-- multi-valued CodeValue -->");
                 if(p.getViewPortType() == ViewPort.Type.MOBILE) {
                 	p.write("		<label>", htmlEncoder.encode(label, false), "</label>");                	
 	                p.write("       <div class=\"valueL\">");                	
@@ -421,15 +434,15 @@ public class CodeValue
                     Short codeValue = new Short(((Number)i.next()).shortValue());
                     String text = 
                         (String)this.getLongText(true, true).get(codeValue);
-                    String color = (String)this.application.getCodes().getColors(
+                    String color = (String)this.app.getCodes().getColors(
                         this.containerName,
                         true
                     ).get(codeValue);          
-                    String backColor = (String)this.application.getCodes().getBackColors(
+                    String backColor = (String)this.app.getCodes().getBackColors(
                         this.containerName,
                         true
                     ).get(codeValue);
-                    String iconKey = (String)this.application.getCodes().getIconKeys(
+                    String iconKey = (String)this.app.getCodes().getIconKeys(
                         this.containerName,
                         true
                     ).get(codeValue);
@@ -444,7 +457,7 @@ public class CodeValue
                         p.write("<img src=\"", p.getResourcePath("images/"), "spacer.gif\" width=\"5\" height=\"0\" align=\"bottom\" border=\"0\" alt=\"\" />");
                     }
                     if(text != null) {
-                        this.application.getPortalExtension().renderTextValue(p, htmlEncoder.encode(text, false), false);
+                        this.app.getPortalExtension().renderTextValue(p, htmlEncoder.encode(text, false), false);
                     }
                     p.write("</div>");
                 }

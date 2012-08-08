@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExceptionListenerMarshaller.java,v 1.4 2010/06/06 12:55:45 hburger Exp $
+ * Name:        $Id: ExceptionListenerMarshaller.java,v 1.5 2011/06/21 22:30:00 hburger Exp $
  * Description: SPICE Collections: Merging List
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/06 12:55:45 $
+ * Date:        $Date: 2011/06/21 22:30:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,10 +53,9 @@ package org.openmdx.base.marshalling;
 import java.beans.ExceptionListener;
 import java.io.Serializable;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 
 
 /**
@@ -109,11 +108,6 @@ public class ExceptionListenerMarshaller implements Marshaller, Serializable {
     protected final ExceptionListener exceptionListener;
 
     /**
-     * 
-     */
-    private transient Logger logger;
-    
-    /**
      * Marshals an object
      *
      * @param  source    The object to be marshalled
@@ -163,18 +157,6 @@ public class ExceptionListenerMarshaller implements Marshaller, Serializable {
     }
 
     /**
-     * Retrieve the logger
-     * 
-     * @return the logger
-     */
-    private Logger getLogger(){
-        if(this.logger == null) {
-            this.logger = LoggerFactory.getLogger();
-        }
-        return this.logger;
-    }
-    
-    /**
      * Signal a marshal exception
      * 
      * @param exception the exception to be signaled
@@ -183,7 +165,7 @@ public class ExceptionListenerMarshaller implements Marshaller, Serializable {
         Exception exception
     ) {
         if(this.exceptionListener == null){
-            getLogger().log(
+            SysLog.log(
                 Level.WARNING,
                 this.marshaller.getClass().getName(),
                 exception

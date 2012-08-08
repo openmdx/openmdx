@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExtendedRecordFactory.java,v 1.10 2010/03/17 16:30:26 hburger Exp $
+ * Name:        $Id: ExtendedRecordFactory.java,v 1.11 2011/11/26 01:35:00 hburger Exp $
  * Description: Java Connector Architecture: Initialized Record Factory
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/17 16:30:26 $
+ * Date:        $Date: 2011/11/26 01:35:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -96,7 +96,7 @@ public interface ExtendedRecordFactory extends RecordFactory {
     String recordShortDescription,
     Object[] keys,
     Object[] values
-  ) throws ResourceException;
+  );
   	
   /**
    * Creates a MappedRecord with the given name, short description and
@@ -139,20 +139,12 @@ public interface ExtendedRecordFactory extends RecordFactory {
    * @param     values
    *            The values of the indexed record represented by a List or an 
    *            array of objects or primitive types.
-   *
-   * @exception ResourceException
-   *            Failed to create an initialized IndexedRecord.
-   *            Example error cases are:<ul>
-   *            <li>Invalid specification of record name</li>
-   *            <li>Resource adapter internal error</li>
-   *            <li>Failed to access metadata repository</li>
-   *            </ul>
    */
   IndexedRecord asIndexedRecord(
     String recordName,
     String recordShortDescription,
     Object values
-  ) throws ResourceException;
+  );
 
   /**
    * Creates an IndexedRecord with the given name, description and content.  

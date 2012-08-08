@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestPerformance.java,v 1.12 2010/12/14 23:30:36 hburger Exp $
+ * Name:        $Id: TestPerformance.java,v 1.13 2011/12/02 15:07:31 hburger Exp $
  * Description: class TestPerformance
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/14 23:30:36 $
+ * Date:        $Date: 2011/12/02 15:07:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -72,6 +72,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.io.UTF8Writer;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
@@ -281,10 +282,10 @@ public class TestPerformance {
                 by.add("group2Principal");
                 by.add("group3Principal");
                 Date at = new Date();
-                entry.put("createdAt", at);
-                entry.put("createdBy", by);
-                entry.put("modifiedAt", at);
-                entry.put("modififedBy", by);
+                entry.put(SystemAttributes.CREATED_AT, at);
+                entry.put(SystemAttributes.CREATED_BY, by);
+                entry.put(SystemAttributes.MODIFIED_AT, at);
+                entry.put(SystemAttributes.MODIFIED_BY, by);
                 entry.put("id", "address # "+i);
                 IndexedRecord line = Records.getRecordFactory().createIndexedRecord("list");
                 line.add("Address " + i + " line 1");

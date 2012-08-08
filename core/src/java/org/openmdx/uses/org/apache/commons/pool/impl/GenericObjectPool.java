@@ -1,7 +1,7 @@
 /*
  * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/GenericObjectPool.java,v $
- * $Revision: 1.12 $
- * $Date: 2010/06/02 13:46:51 $
+ * $Revision: 1.13 $
+ * $Date: 2011/04/12 15:30:22 $
  *
  * ====================================================================
  *
@@ -164,9 +164,8 @@ import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
  * @see GenericKeyedObjectPool
  * @author Rodney Waldhoff
  * @author Dirk Verbeeck
- * @version $Revision: 1.12 $ $Date: 2010/06/02 13:46:51 $
+ * @version $Revision: 1.13 $ $Date: 2011/04/12 15:30:22 $
  */
-@SuppressWarnings("unchecked")
 public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
 
     //--- public constants -------------------------------------------
@@ -880,7 +879,7 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
     @Override
     public synchronized void clear() {
         assertOpen();
-        for(Iterator it = _pool.iterator(); it.hasNext(); ) {
+        for(Iterator<?> it = _pool.iterator(); it.hasNext(); ) {
             try {
                 _factory.destroyObject(((ObjectTimestampPair)(it.next())).value);
             } catch(Exception e) {
@@ -1078,7 +1077,7 @@ public class GenericObjectPool extends BaseObjectPool implements ObjectPool {
         buf.append("Active: ").append(getNumActive()).append("\n");
         buf.append("Idle: ").append(getNumIdle()).append("\n");
         buf.append("Idle Objects:\n");
-        Iterator it = _pool.iterator();
+        Iterator<?> it = _pool.iterator();
         long time = System.currentTimeMillis();
         while(it.hasNext()) {
             ObjectTimestampPair pair = (ObjectTimestampPair)(it.next());

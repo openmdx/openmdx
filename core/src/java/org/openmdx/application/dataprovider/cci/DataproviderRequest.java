@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataproviderRequest.java,v 1.27 2010/06/02 13:39:35 hburger Exp $
+ * Name:        $Id: DataproviderRequest.java,v 1.31 2011/11/26 01:34:58 hburger Exp $
  * Description: DataproviderRequest
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:39:35 $
+ * Date:        $Date: 2011/11/26 01:34:58 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,13 +45,13 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.dataprovider.cci;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -60,19 +59,16 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.jdo.FetchPlan;
-import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
-import org.openmdx.base.collection.Sets;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.AnyTypeCondition;
 import org.openmdx.base.query.Condition;
+import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.OrderSpecifier;
-import org.openmdx.base.query.ConditionType;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.InteractionSpecs;
@@ -82,6 +78,7 @@ import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.QueryRecord;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.text.conversion.JavaBeans;
@@ -149,92 +146,89 @@ public class DataproviderRequest {
         short attributeSelector,
         AttributeSpecifier[] attributeSpecifier
     ) throws ServiceException {
-        try {
-            // interaction
-            switch(operation) {
-                case DataproviderOperations.ITERATION_START:
-                    this.interactionSpec = interactionSpecs.GET;
-                    break;
-                case DataproviderOperations.OBJECT_RETRIEVAL:
-                    this.interactionSpec = interactionSpecs.GET;
-                    break;
-                case DataproviderOperations.OBJECT_REMOVAL:
-                    this.interactionSpec = interactionSpecs.DELETE;
-                    break;
-                case DataproviderOperations.OBJECT_OPERATION:
-                    this.interactionSpec = interactionSpecs.INVOKE;
-                    break;
-                case DataproviderOperations.OBJECT_CREATION:
-                    this.interactionSpec = interactionSpecs.CREATE;
-                    break;
-                case DataproviderOperations.OBJECT_REPLACEMENT:
-                    this.interactionSpec = interactionSpecs.PUT;
-                    break;
-                default:
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ASSERTION_FAILURE,
-                        "Unsupported Operation",
-                        new BasicException.Parameter("operation", DataproviderOperations.toString(operation))
-                    );
-            }
-            MappedRecord input;
-            String kind = object.getRecordName();
-            if(ObjectRecord.NAME.equals(kind) || MessageRecord.NAME.equals(kind)) {
-                input = object;
-            } else if (QueryRecord.NAME.equals(kind)) {
-                Query_2Facade queryFacade = Query_2Facade.newInstance(object);
-                // filter
-                this.setFilter(
-                    queryFacade,
-                    new Filter(
-                        FilterProperty.toCondition(filter),
-                        AttributeSpecifier.toOrderSpecifier(attributeSpecifier),
-                        null // extension
-                    )            
-                );
-                // direction
-                switch(SortOrder.valueOf(direction)) {
-                    case ASCENDING:
-                        queryFacade.setPosition(position);
-                        break;
-                    case DESCENDING:
-                        queryFacade.setPosition(-(1 + position));
-                        break;
-                }
-                // size
-                queryFacade.setSize(size);
-                // fetch groups
-                this.setGroups(
-                    queryFacade, 
-                    attributeSelector
-                );
-                input = queryFacade.getDelegate();
-            } else {
-                SysLog.warning("Unsupported request", kind);
-                input = null;
-            }
-            
-            this.object = input;
-        }
-        catch(ResourceException e) {
-            throw new ServiceException(e);
-        }
+        // interaction
+		switch(operation) {
+		    case DataproviderOperations.ITERATION_START:
+		        this.interactionSpec = interactionSpecs.GET;
+		        break;
+		    case DataproviderOperations.OBJECT_RETRIEVAL:
+		        this.interactionSpec = interactionSpecs.GET;
+		        break;
+		    case DataproviderOperations.OBJECT_REMOVAL:
+		        this.interactionSpec = interactionSpecs.DELETE;
+		        break;
+		    case DataproviderOperations.OBJECT_OPERATION:
+		        this.interactionSpec = interactionSpecs.INVOKE;
+		        break;
+		    case DataproviderOperations.OBJECT_CREATION:
+		        this.interactionSpec = interactionSpecs.CREATE;
+		        break;
+		    case DataproviderOperations.OBJECT_REPLACEMENT:
+		        this.interactionSpec = interactionSpecs.PUT;
+		        break;
+		    default:
+		        throw new ServiceException(
+		            BasicException.Code.DEFAULT_DOMAIN,
+		            BasicException.Code.ASSERTION_FAILURE,
+		            "Unsupported Operation",
+		            new BasicException.Parameter("operation", DataproviderOperations.toString(operation))
+		        );
+		}
+		MappedRecord input;
+		String kind = object.getRecordName();
+		if(ObjectRecord.NAME.equals(kind) || MessageRecord.NAME.equals(kind)) {
+		    input = object;
+		} else if (QueryRecord.NAME.equals(kind)) {
+		    Query_2Facade queryFacade = Facades.asQuery(object);
+		    // filter
+		    this.setFilter(
+		        queryFacade,
+		        new Filter(
+		            FilterProperty.toCondition(filter),
+		            AttributeSpecifier.toOrderSpecifier(attributeSpecifier),
+		            null // extension
+		        )            
+		    );
+		    // direction
+		    switch(SortOrder.valueOf(direction)) {
+		        case ASCENDING:
+		            queryFacade.setPosition(position);
+		            break;
+		        case DESCENDING:
+		            queryFacade.setPosition(-(1 + position));
+		            break;
+		    }
+		    // size
+		    queryFacade.setSize(size);
+		    // fetch groups
+		    this.setGroups(
+		        queryFacade, 
+		        attributeSelector
+		    );
+		    input = queryFacade.getDelegate();
+		} else {
+		    SysLog.warning("Unsupported request", kind);
+		    input = null;
+		}
+		
+		this.object = input;
     }
 
     //-----------------------------------------------------------------------
     private void setGroups(
         Query_2Facade queryFacade,        
         short attributeSelector
-    ) throws ResourceException {        
+    ){        
         switch(attributeSelector) {
             case AttributeSelectors.ALL_ATTRIBUTES:
-                queryFacade.setGroups(Sets.asSet(Arrays.asList(FetchPlan.ALL)));
+                queryFacade.setGroups(Collections.singleton(FetchPlan.ALL));
                 break;
             case AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES:
+                queryFacade.setGroups(Collections.singleton(FetchPlan.DEFAULT));
+                break;
             case AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES:
             case AttributeSelectors.NO_ATTRIBUTES:
-                queryFacade.setGroups(Sets.asSet(Arrays.asList(FetchPlan.DEFAULT)));
+                queryFacade.setGroups(Collections.singleton(AttributeSelectors.toString(attributeSelector)));
                 break;
         }                    
     }
@@ -243,14 +237,10 @@ public class DataproviderRequest {
     public void setAttributeSelector(
         short attributeSelector
     ) throws ServiceException {
-        try {
-            this.setGroups(
-                Query_2Facade.newInstance(this.object), 
-                attributeSelector
-            );
-        } catch(ResourceException e) {
-            throw new ServiceException(e);
-        }
+        this.setGroups(
+			Facades.asQuery(this.object), 
+		    attributeSelector
+		);
     }
     
     //-----------------------------------------------------------------------
@@ -261,36 +251,18 @@ public class DataproviderRequest {
      */
     public Path path(
     ) throws ServiceException {
-        try {
-            if(Query_2Facade.isDelegate(this.object)) {
-                return Query_2Facade.newInstance(this.object).getPath();
-            }
-            else if(Object_2Facade.isDelegate(this.object)) {
-                return Object_2Facade.newInstance(this.object).getPath();
-            }
-            else {
-                return (Path)this.object.keySet().iterator().next();
-            }
-        }
-        catch(Exception e) {
-            throw new ServiceException(e);
-        }
+    	return 
+			Query_2Facade.isDelegate(this.object) ? Facades.asQuery(this.object).getPath() :
+			Object_2Facade.isDelegate(this.object) ? Facades.asObject(this.object).getPath() :
+			(Path)this.object.keySet().iterator().next();
     }
 
     //-----------------------------------------------------------------------
     public String objectClass(
     ) throws ServiceException {
-        try {
-            if(Object_2Facade.isDelegate(this.object)) {
-                return Object_2Facade.newInstance(this.object).getObjectClass();
-            }
-            else {
-                return ((MappedRecord)this.object.values().iterator().next()).getRecordName();
-            }
-        }
-        catch(Exception e) {
-            throw new ServiceException(e);
-        }        
+    	return Object_2Facade.isDelegate(this.object) ?
+            Facades.asObject(this.object).getObjectClass() :
+            ((MappedRecord)this.object.values().iterator().next()).getRecordName();
     }
 
     //-----------------------------------------------------------------------
@@ -311,6 +283,25 @@ public class DataproviderRequest {
     }
 
     //-----------------------------------------------------------------------
+    
+    /**
+     * The model is not available on bootstrapping.
+     * In this case fall back to heuristic decision
+     * 
+     * @param type
+     * 
+     * @return <code>true</code> if in case of a struct
+     * 
+     * @throws ServiceException
+     */
+    private boolean isOperation(
+    	String type
+    ) throws ServiceException{
+    	return Model_1Factory.isLoaded() ? 
+			Model_1Factory.getModel().isStructureType(type) :
+			"org:openmdx:base:Void".equals(type) || "org:omg:model1:PackageExternalizeParams".equals(type);
+    }
+    
     /**
      * Get the operation
      *
@@ -321,28 +312,17 @@ public class DataproviderRequest {
         RestFunction function = this.interactionSpec.getFunction();
         switch(function) {
             case GET:
-                Path path = this.path();
-                return path.size() % 2 == 0 ?
+            	return this.path().size() % 2 == 0 ?
                     DataproviderOperations.ITERATION_START :
-                        DataproviderOperations.OBJECT_RETRIEVAL;
+                    DataproviderOperations.OBJECT_RETRIEVAL;
             case DELETE:
                 return DataproviderOperations.OBJECT_REMOVAL;
             case PUT:
                 return DataproviderOperations.OBJECT_REPLACEMENT;
             case POST:
-                // Model is not available on bootstrapping.
-                // In this case fall back to heuristic decision
-                String objectClass = this.objectClass();
-                if(!Model_1Factory.isLoaded()) {
-                    return "org:openmdx:base:Void".equals(objectClass) || "org:omg:model1:PackageExternalizeParams".equals(objectClass) ?
-                        DataproviderOperations.OBJECT_OPERATION : 
-                            DataproviderOperations.OBJECT_CREATION;                    
-                }
-                else {
-                    return Model_1Factory.getModel().isStructureType(objectClass) ? 
-                        DataproviderOperations.OBJECT_OPERATION : 
-                            DataproviderOperations.OBJECT_CREATION;
-                }
+            	return isOperation(this.objectClass()) ? 
+            		DataproviderOperations.OBJECT_OPERATION :
+            		DataproviderOperations.OBJECT_CREATION;
             default:
                 throw new ServiceException(
                     BasicException.Code.DEFAULT_DOMAIN,
@@ -378,13 +358,13 @@ public class DataproviderRequest {
 
     //-----------------------------------------------------------------------
     private void prepareSpecifiers(
-    ) throws ServiceException, ResourceException {
+    ) throws ServiceException {
         if(this.attributeFilter == null || this.attributeSpecifier == null) {
             this.attributeFilter = NO_FILTER_PROPERTIES;                    
             this.attributeSpecifier = NO_ATTRIBUTE_SPECIFIERS;
             if(Query_2Facade.isDelegate(this.object)) {
                 Filter filter = this.getFilter(
-                    Query_2Facade.newInstance(this.object)
+                		Facades.asQuery(this.object)
                 );
                 if(filter != null) {        
                     // cachedAttributeFilter
@@ -419,13 +399,8 @@ public class DataproviderRequest {
      */
     public FilterProperty[] attributeFilter(
     ) throws ServiceException {
-        try {
-            this.prepareSpecifiers();
-            return this.attributeFilter;
-        }
-        catch(ResourceException e) {
-            throw new ServiceException(e);
-        }
+        this.prepareSpecifiers();
+		return this.attributeFilter;
     }
 
     //-----------------------------------------------------------------------
@@ -437,35 +412,30 @@ public class DataproviderRequest {
     public void addAttributeFilterProperty(
         FilterProperty filterProperty
     ) throws ServiceException {
-        try {
-            Query_2Facade facade = Query_2Facade.newInstance(this.object); 
-            Filter filter = this.getFilter(facade);
-            if(filter == null) {
-                filter = new Filter();
-            }
-            filter.getCondition().add(
-                new AnyTypeCondition(
-                    Quantifier.valueOf(filterProperty.quantor()),
-                    filterProperty.name(),
-                    ConditionType.valueOf(filterProperty.operator()),
-                    filterProperty.getValues()
-                )
-            );
-            this.setFilter(
-                facade,
-                filter
-            );
-            // Add filter property to attribute filter
-            if(this.attributeFilter != null) {
-                FilterProperty[] newAttributeFilter = new FilterProperty[this.attributeFilter.length+1];
-                System.arraycopy(this.attributeFilter, 0, newAttributeFilter, 0, this.attributeFilter.length);
-                newAttributeFilter[newAttributeFilter.length-1] = filterProperty;
-                this.attributeFilter = newAttributeFilter;
-            }
-        }
-        catch(ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Query_2Facade facade = Facades.asQuery(this.object); 
+		Filter filter = this.getFilter(facade);
+		if(filter == null) {
+		    filter = new Filter();
+		}
+		filter.getCondition().add(
+		    new AnyTypeCondition(
+		        Quantifier.valueOf(filterProperty.quantor()),
+		        filterProperty.name(),
+		        ConditionType.valueOf(filterProperty.operator()),
+		        filterProperty.getValues()
+		    )
+		);
+		this.setFilter(
+		    facade,
+		    filter
+		);
+		// Add filter property to attribute filter
+		if(this.attributeFilter != null) {
+		    FilterProperty[] newAttributeFilter = new FilterProperty[this.attributeFilter.length+1];
+		    System.arraycopy(this.attributeFilter, 0, newAttributeFilter, 0, this.attributeFilter.length);
+		    newAttributeFilter[newAttributeFilter.length-1] = filterProperty;
+		    this.attributeFilter = newAttributeFilter;
+		}
     }
 
     //-----------------------------------------------------------------------
@@ -477,24 +447,20 @@ public class DataproviderRequest {
     public void removeAttributeFilterProperty(
         String feature
     ) throws ServiceException {
-        try {
-            this.attributeFilter = null;
-            Query_2Facade facade = Query_2Facade.newInstance(this.object); 
-            Filter filter = this.getFilter(facade);
-            if(filter != null) {
-                for(Iterator<Condition> i = filter.getCondition().iterator(); i.hasNext(); ) {
-                    if(i.next().getFeature().equals(feature)) {
-                        i.remove();
-                    }
-                }
-                this.setFilter(
-                    facade,
-                    filter
-                );
-            }
-        } catch(ResourceException e) {
-            throw new ServiceException(e);
-        }
+        this.attributeFilter = null;
+		Query_2Facade facade = Facades.asQuery(this.object); 
+		Filter filter = this.getFilter(facade);
+		if(filter != null) {
+		    for(Iterator<Condition> i = filter.getCondition().iterator(); i.hasNext(); ) {
+		        if(i.next().getFeature().equals(feature)) {
+		            i.remove();
+		        }
+		    }
+		    this.setFilter(
+		        facade,
+		        filter
+		    );
+		}
     }
 
     //-----------------------------------------------------------------------
@@ -505,21 +471,16 @@ public class DataproviderRequest {
      */
     public int position(
     ) throws ServiceException {
-        try {
-            Number position = Query_2Facade.newInstance(this.object).getPosition();
-            if(position == null) {
-                return 0;
-            } 
-            else if(position.intValue() >= 0) {
-                return position.intValue();
-            } 
-            else {
-                return -(position.intValue() + 1);
-            }            
-        }
-        catch(ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Number position = Facades.asQuery(this.object).getPosition();
+		if(position == null) {
+		    return 0;
+		} 
+		else if(position.intValue() >= 0) {
+		    return position.intValue();
+		} 
+		else {
+		    return -(position.intValue() + 1);
+		}
     }
 
     //-----------------------------------------------------------------------
@@ -527,15 +488,11 @@ public class DataproviderRequest {
      * Get the maximum size of the extraction
      *
      * @return      an int value;
+     * @throws ServiceException 
      */
     public int size(
-    ) {
-        try {
-            return Query_2Facade.newInstance(this.object).getSize().intValue();
-        }
-        catch(ResourceException e) {
-            throw new RuntimeServiceException(e);
-        }
+    ) throws ServiceException {
+        return Facades.asQuery(this.object).getSize().intValue();
     }
 
     //-----------------------------------------------------------------------
@@ -546,14 +503,10 @@ public class DataproviderRequest {
      */
     public short direction(
     ) throws ServiceException {
-        try {
-            Number position = Query_2Facade.newInstance(this.object).getPosition();
-            return (
-                position == null || position.intValue() >= 0 ? SortOrder.ASCENDING : SortOrder.DESCENDING
-            ).code();
-        } catch(ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Number position = Facades.asQuery(this.object).getPosition();
+		return (
+		    position == null || position.intValue() >= 0 ? SortOrder.ASCENDING : SortOrder.DESCENDING
+		).code();
     }
 
     //-----------------------------------------------------------------------
@@ -564,22 +517,27 @@ public class DataproviderRequest {
      */
     public short attributeSelector(
     ) throws ServiceException {
-        try {
-            if(Query_2Facade.isDelegate(this.object)) {
-                Set<?> fetchGroups = Query_2Facade.newInstance(this.object).getGroups();
-                return 
-                    fetchGroups == null ? AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES :
-                    fetchGroups.contains(FetchPlan.ALL) ? AttributeSelectors.ALL_ATTRIBUTES :
-                    fetchGroups.contains(FetchPlan.DEFAULT) ? AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES :
-                    AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES;
-            }
-            else {
-                return AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES;
-            }
-        }
-        catch(ResourceException e) {
-            throw new ServiceException(e);
-        }
+        if(Query_2Facade.isDelegate(this.object)) {
+		    Set<?> fetchGroups = Facades.asQuery(this.object).getGroups();
+		    if(fetchGroups == null || fetchGroups.contains(FetchPlan.DEFAULT)) {
+		        return AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES;
+		    } else if (fetchGroups.contains(FetchPlan.ALL)) {
+		        return AttributeSelectors.ALL_ATTRIBUTES;
+		    } else {
+		        for(
+		            short attributeSelector = (short) AttributeSelectors.min();
+		            attributeSelector <= AttributeSelectors.max();
+		            attributeSelector++
+		        ){
+		            if(fetchGroups.contains(AttributeSelectors.toString(attributeSelector))){
+		                return attributeSelector;
+		            }
+		        }
+		    }
+		    return AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES;
+		} else {
+		    return AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES;
+		}
     }
 
     //-----------------------------------------------------------------------
@@ -590,13 +548,8 @@ public class DataproviderRequest {
      */
     public AttributeSpecifier[] attributeSpecifier(
     ) throws ServiceException {
-        try {
-            this.prepareSpecifiers();
-            return this.attributeSpecifier;
-        }
-        catch(ResourceException e) {
-            throw new ServiceException(e);
-        }
+        this.prepareSpecifiers();
+		return this.attributeSpecifier;
     }
 
     //-----------------------------------------------------------------------
@@ -634,26 +587,16 @@ public class DataproviderRequest {
     @Override
     public String toString(
     ) {
-        try {
-            return Records.getRecordFactory().asMappedRecord(
-                DataproviderRequest.class.getName(),
-                null,
-                TO_STRING_CONTENT,
-                new Object[]{
-                    this.interactionSpec,
-                    this.object,
-                }
-            ).toString();
-        } 
-        catch (ResourceException exception) {
-            return super.toString();
-        }
+        return Records.getRecordFactory().asMappedRecord(
+		    DataproviderRequest.class.getName(),
+		    null,
+		    TO_STRING_CONTENT,
+		    new Object[]{
+		        this.interactionSpec,
+		        this.object,
+		    }
+		).toString();
     }
-
-    //------------------------------------------------------------------------
-    // Variables
-    //------------------------------------------------------------------------
-    private static final long serialVersionUID = 3688790250033920310L;
 
     final static private FilterProperty[] NO_FILTER_PROPERTIES = {};
     final static private AttributeSpecifier[] NO_ATTRIBUTE_SPECIFIERS = {};

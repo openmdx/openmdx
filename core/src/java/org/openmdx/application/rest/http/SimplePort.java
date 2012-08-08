@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SimplePort.java,v 1.29 2010/11/18 08:16:05 hburger Exp $
+ * Name:        $Id: SimplePort.java,v 1.31 2011/04/27 21:32:04 hburger Exp $
  * Description: Simple Port 
- * Revision:    $Revision: 1.29 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/18 08:16:05 $
+ * Date:        $Date: 2011/04/27 21:32:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,6 +62,7 @@ import java.util.Map;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
+import javax.resource.cci.Interaction;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.net.CookieManager;
@@ -166,6 +167,18 @@ public class SimplePort extends HttpPort {
         this.authorization = null; // setting the password invalidates the authorization property
     }
 
+    
+    @Override
+    public Interaction getInteraction(
+        Connection connection
+    ) throws ResourceException {
+        return new SimpleInteraction(
+            connection, 
+            this.getConnectionURL(), 
+            this.newCookieHandler()
+        );
+    }
+
     /**
      * Retrieve the BASIC authorization value
      * 
@@ -190,10 +203,11 @@ public class SimplePort extends HttpPort {
         return new CookieManager();
     }
     
+    
     //------------------------------------------------------------------------
     // Class SimpleInteraction
     //------------------------------------------------------------------------
-    
+
     /**
      * Simple Interaction does BASIC authentication cookie handling
      */
@@ -230,6 +244,23 @@ public class SimplePort extends HttpPort {
          * The cookie handler
          */
         protected final CookieHandler cookieHandler;
+
+        
+        /* (non-Javadoc)
+         * @see org.openmdx.application.rest.http.HttpPort.PlainVanillaInteraction#getResponseCode(java.net.HttpURLConnection)
+         */
+        @Override
+        protected int getStatus(
+            HttpURLConnection urlConnection
+        ) throws IOException {
+            int status = super.getStatus(urlConnection);
+            this.cookieHandler.put(
+                SimpleInteraction.this.cookieURI,
+                urlConnection.getHeaderFields()
+            );
+            return status;
+        }
+
 
         /**
          * Create connection for the given URL

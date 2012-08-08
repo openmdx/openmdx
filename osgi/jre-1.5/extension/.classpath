@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 5.0"/>
+	<classpathentry exported="true" kind="lib" path="lib/jdo2-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/junit.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/netscape-ldap.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/mailapi.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openjpa.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ejb.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jcache.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/resource.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/concurrent.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

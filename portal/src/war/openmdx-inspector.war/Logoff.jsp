@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Logoff.jsp,v 1.8 2009/09/10 15:53:28 wfro Exp $
+ * Name:        $Id: Logoff.jsp,v 1.9 2011/05/11 14:04:47 cmu Exp $
  * Description: LoginFailed.jsp
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/10 15:53:28 $
+ * Date:        $Date: 2011/05/11 14:04:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -55,7 +55,8 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html;CHARSET=utf-8">
-  <title>Login Failed</title>
+  <title>Logoff</title>
+	<link href="<%=request.getContextPath()%>/_style/n2default.css" rel="stylesheet" type="text/css">
 </head>
 
 <%@ page import="
@@ -68,9 +69,21 @@ javax.servlet.*
 request.setCharacterEncoding("UTF-8");
 %>
 
-<body>
+<body class="yui-skin-sam" style="border:0px solid white;">
 <%
+	String localeStr = null;
+	try {
+			localeStr = (String)session.getAttribute("locale");
+	} catch (Exception e) {}
+	if(localeStr != null && localeStr.length() > 5) {
+		localeStr = localeStr.substring(0, 5);
+	}
+	String defaultLocale = "en_US";
+	List activeLocales = new ArrayList();
+	boolean wasAuthenticated = false;
+
   if(request.getSession().getAttribute("ObjectInspectorServlet.ApplicationContext") != null) {
+  		wasAuthenticated = true;
       System.out.println(new Date() + ": Logoff: removing application context");
       request.getSession().removeAttribute("ObjectInspectorServlet.ApplicationContext");
   }
@@ -88,13 +101,40 @@ request.setCharacterEncoding("UTF-8");
   }
   System.out.println(new Date() + ": Logoff: invalidate session. locale=" + locale + "; timezone=" + timezone);  
   session.invalidate();
-  // NO session management beyond this point.
-  // Otherwise WebSphere 5 fails
-  response.sendRedirect(
-	"Login.jsp?locale=" + locale + 
-	(timezone == null ? "" : "&timezone=" + URLEncoder.encode(timezone)) +
-    ("&loginFailed=false")	
-  );  
+  
+  if (wasAuthenticated) {
+			// NO session management beyond this point.
+			// Otherwise WebSphere 5 fails
+			response.sendRedirect(
+			"Login.jsp?locale=" + locale + 
+			(timezone == null ? "" : "&timezone=" + URLEncoder.encode(timezone)) +
+				("&loginFailed=false")	
+			);  
+  }
 %>
+<%@ include file="login-locales.jsp" %>
+	<div id="header" style="height:90px;">
+    <div id="logoTable" style="padding-left:10px;">
+      <table dir="ltr" id="headerlayout" style="position:relative;">
+        <tr id="headRow">
+          <td id="head" colspan="2">
+            <table id="info">
+              <tr>
+                <td id="headerCellLeft"><img id="logoLeft" style="cursor:default;" src="<%=request.getContextPath()%>/images/logoLeft.gif" alt="openCRX - limitless relationship management" title="openCRX - limitless relationship management" /></td>
+                <td id="headerCellMiddle"></td>
+                <td id="headerCellRight"><img id="logoRight" src="<%=request.getContextPath()%>/images/logoRight.gif" alt="" title="" /></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div id="login" style="position:relative;text-align:center;margin-left:auto;margin-right:auto;padding-top:10em;">
+  <%@ include file="login-header.html" %>
+</div>
+
+	&nbsp;&nbsp;<input class="submit" type="submit" name="button" value="<%= textsLogin.get(localeStr) == null ? "Login" :  textsLogin.get(localeStr) %>" onclick="javascript:window.location.href='Login.jsp';" >
+
 </body>
 </html>

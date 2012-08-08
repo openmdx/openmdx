@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: LateBindingDataSource.jt,v 1.2 2010/09/13 16:46:29 hburger Exp $
+ * Name:        $Id: LateBindingDataSource.jt,v 1.4 2011/11/02 14:21:45 wfro Exp $
  * Description: Late Binding Data Source
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/13 16:46:29 $
+ * Date:        $Date: 2011/11/02 14:21:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -61,121 +61,122 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.log.SysLog;
 
+#if defined(SINCE17)
+import java.util.logging.Logger;
+import java.sql.SQLFeatureNotSupportedException;
+#endif
+
 /**
  * Late Binding <code>DataSource</code>
  */
 class LateBindingDataSource implements DataSource {
 
     /**
-     * Creates a new connection manager. 
-     * Using a pool of connections to the database.
+     * Constructor
      *
-     * @param jndiName JDBC Connection Pool name
+     * @param jndiName the <code>DataSource</code>'s JNDI name
      */
     LateBindingDataSource(
         String jndiName
     ){
-        this.pool = null; 
         this.jndiName = jndiName;
     }
 
     /**
      * The <code>DataSource</code> is retrieved lazily
      */
-    private DataSource pool;
+    private DataSource delegate;
     
     /**
      * The JNDI name refers usually to an entry in the <code>java:comp/env/jdbc</code> context 
      */
     private final String jndiName;
     
-    //-----------------------------------------------------------------------
     /**
-     * Get a database connection pool
+     * Look up the <code>DataSource</code>
      * 
      * @return the DataSource corresponding to the JNDI name
      * 
      * @throws ServiceException
      */
-    private synchronized DataSource getPool(
+    private synchronized DataSource getDelegate(
     ) throws SQLException {
-        if (this.pool == null) try {
-            SysLog.detail(
-                "Acquire Connection Pool",
-                this.jndiName
-            );
-            this.pool = (DataSource)new InitialContext().lookup(this.jndiName);
-        } catch(Exception exception) {
-            throw Throwables.initCause(
-                new SQLException("Could not lookup connection pool"),
-                exception,
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.MEDIA_ACCESS_FAILURE,
-                new BasicException.Parameter("jndiName", this.jndiName)
-            );
+        if (this.delegate == null) synchronized(this) { 
+        	try {
+	            SysLog.detail(
+	                "Acquire Connection Pool",
+	                this.jndiName
+	            );
+	            this.delegate = (DataSource)new InitialContext().lookup(this.jndiName);
+	        } catch(Exception exception) {
+	            throw Throwables.initCause(
+	                new SQLException("Could not lookup data source"),
+	                exception,
+	                BasicException.Code.DEFAULT_DOMAIN,
+	                BasicException.Code.MEDIA_ACCESS_FAILURE,
+	                new BasicException.Parameter("jndiName", this.jndiName)
+	            );
+	        }
         }
-        return this.pool;	    
+        return this.delegate;
     }
 
-    //-----------------------------------------------------------------------
     /**
      * Returns a connection. 
      * <p>
-     * The connection must be closed when it is not needed any more, so it is 
-     * available again. Otherwise the connection pool runs out of available 
-     * connections!
+     * <em>The connection must be closed when it is not needed any more.</em>
      */
     public java.sql.Connection getConnection(
     ) throws SQLException {	
         try {
-            Connection conn = this.getPool().getConnection();    
-            if(conn != null) {
-            	return conn;
-            }
+            return this.getDelegate().getConnection();    
         } catch(Exception ex) {
+            // Mix-in the JNDI name even in case of SQL exceptions
             throw Throwables.initCause(
             	new SQLException("Connection acquisition failed"),
             	ex,
                 BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.GENERIC,
+                BasicException.Code.MEDIA_ACCESS_FAILURE,
                 new BasicException.Parameter("jndiName", this.jndiName)
             ); 
         }    
-        throw new SQLException("No connection available from '" + this.jndiName + "'");
     }
 
-    //-----------------------------------------------------------------------
     public Connection getConnection(
         String username, 
         String password
     ) throws SQLException {
-        return this.getPool().getConnection(username, password);
+        return this.getDelegate().getConnection(username, password);
     }
     
-    //-----------------------------------------------------------------------
     public int getLoginTimeout(
     ) throws SQLException {
-        return this.getPool().getLoginTimeout();
+        return this.getDelegate().getLoginTimeout();
     }
     
-    //-----------------------------------------------------------------------
     public PrintWriter getLogWriter(
     ) throws SQLException {
-        return this.getPool().getLogWriter();
+        return this.getDelegate().getLogWriter();
     }
     
-    //-----------------------------------------------------------------------
     public void setLoginTimeout(
         int seconds
     ) throws SQLException {
-        this.getPool().setLoginTimeout(seconds);
+        this.getDelegate().setLoginTimeout(seconds);
     }
     
-    //-----------------------------------------------------------------------
     public void setLogWriter(
         PrintWriter out
     ) throws SQLException {
-        this.getPool().setLogWriter(out);
+        this.getDelegate().setLogWriter(out);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return getClass().getName() + ": " + this.jndiName;
     }
 
 #if defined(SINCE16)
@@ -185,7 +186,7 @@ class LateBindingDataSource implements DataSource {
      */
     public boolean isWrapperFor(Class<?> iface)
         throws SQLException {
-        return this.getPool().isWrapperFor(iface);
+        return this.getDelegate().isWrapperFor(iface);
     }
 
     /* (non-Javadoc)
@@ -193,9 +194,22 @@ class LateBindingDataSource implements DataSource {
      */
     public <T> T unwrap(Class<T> arg0)
         throws SQLException {
-        return this.getPool().unwrap(arg0);
+        return this.getDelegate().unwrap(arg0);
     }
 
+#endif
+
+#if defined(SINCE17)
+
+    //-----------------------------------------------------------------------
+    // Since JRE 7
+    //-----------------------------------------------------------------------
+    
+	public Logger getParentLogger(
+	) throws SQLFeatureNotSupportedException {
+		throw new SQLFeatureNotSupportedException();
+	}
+	
 #endif
 
 }

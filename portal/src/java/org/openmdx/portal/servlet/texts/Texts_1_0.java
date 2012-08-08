@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Texts_1_0.java,v 1.16 2010/09/21 15:17:30 wfro Exp $
+ * Name:        $Id: Texts_1_0.java,v 1.19 2011/08/26 11:57:59 wfro Exp $
  * Description: Texts_1_0
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/21 15:17:30 $
+ * Date:        $Date: 2011/08/26 11:57:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -117,6 +117,8 @@ public interface Texts_1_0 {
     public String getCloseText();
     public String getAddObjectTitle();
     public String getRemoveObjectTitle();
+    public String getMoveUpObjectTitle();
+    public String getMoveDownObjectTitle();
     public String getAddFilterTitle();
     public String getClassFilterTitle();
     public String getCloneTitle();
@@ -128,6 +130,9 @@ public interface Texts_1_0 {
     public String getShowHeaderTitle();
     public String getHideHeaderTitle();
     public String getShowTitle();
+    public String getWorkspacesTitle();
+    public String getActionsTitle();
+    
 }
 
 //--- End of File -----------------------------------------------------------

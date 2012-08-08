@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: HttpPort.java,v 1.2 2010/11/19 09:59:43 hburger Exp $
+ * Name:        $Id: HttpPort.java,v 1.4 2011/04/27 21:32:04 hburger Exp $
  * Description: Simple Port 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/19 09:59:43 $
+ * Date:        $Date: 2011/04/27 21:32:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -253,6 +253,21 @@ public class HttpPort implements Port {
         ) throws ResourceException {
             super(connection, contextURL);
         }
+        
+        /**
+         * Retrieve the response code
+         * 
+         * @param urlConnection the URL connection
+         * 
+         * @return the response code
+         * 
+         * @throws ServiceException
+         */
+        protected int getStatus(
+            HttpURLConnection urlConnection
+        ) throws IOException{
+            return urlConnection.getResponseCode();
+        }
 
         /* (non-Javadoc)
          * @see org.openmdx.application.rest.http.AbstractHttpInteraction#newMessage(org.openmdx.base.resource.spi.RestInteractionSpec, org.openmdx.base.naming.Path)
@@ -281,13 +296,34 @@ public class HttpPort implements Port {
                 new HttpMessage(
                     CONNECT_SPEC, 
                     CONNECT_XRI,
-                    userName == null ? null : newQueryArgument("UserName", userName)
+                    toQuery(userName)
                 ).execute();
             } catch (ServiceException exception) {
                 throw new ResourceException(exception);
             }
         }
 
+        /**
+         * Create the query part
+         * 
+         * @param userName
+         * 
+         * @return the query part
+         * 
+         * @throws ResourceException
+         */
+        private String toQuery(
+            String userName
+        ) throws ResourceException {
+            StringBuilder query = new StringBuilder(
+                "RefInitializeOnCreate=false"
+            );
+            if(userName != null) {
+                query.append('&').append(newQueryArgument("UserName", userName));
+            }
+            return query.toString();
+        }
+        
         /**
          * Create connection for the given URL
          * 
@@ -442,23 +478,11 @@ public class HttpPort implements Port {
                         exception,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.PROCESSING_FAILURE,
-                        "Could not process REST request"
+                        "Could not submit REST request"
                     );
                 }
-                return this.getResponseCode();
-            }
-
-            /**
-             * Retrieve the response code
-             * 
-             * @return the response code
-             * 
-             * @throws ServiceException
-             */
-            protected int getResponseCode(
-            ) throws ServiceException{
                 try {
-                    return this.urlConnection.getResponseCode();
+                    return getStatus(this.urlConnection);
                 } catch (IOException exception) {
                     throw new ServiceException (
                         exception,

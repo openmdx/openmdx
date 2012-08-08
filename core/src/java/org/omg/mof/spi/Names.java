@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Names.java,v 1.5 2010/09/13 16:46:29 hburger Exp $
+ * Name:        $Id: Names.java,v 1.6 2011/04/18 09:15:03 hburger Exp $
  * Description: Names 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/13 16:46:29 $
+ * Date:        $Date: 2011/04/18 09:15:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -136,6 +136,19 @@ public class Names extends AbstractNames {
             );
         }
         return nameBuilder.append(bindingPackageSuffix).toString();
+    }
+    
+    /**
+     * Replace "::" by ":"
+     * 
+     * @param name the name which is either "::" or ":" separated
+     * 
+     * @return the qualified name used in the internal MOF repository
+     */
+    public static String toQualifiedName(
+        String name
+    ){
+        return name.indexOf("::") >= 0 ? name.replace("::", ":") : name;
     }
         
     /**

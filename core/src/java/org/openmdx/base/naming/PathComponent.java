@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PathComponent.java,v 1.5 2010/06/02 13:44:54 hburger Exp $
+ * Name:        $Id: PathComponent.java,v 1.6 2011/04/04 15:15:34 hburger Exp $
  * Description: A Path COmponent 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:44:54 $
+ * Date:        $Date: 2011/04/04 15:15:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,7 @@ package org.openmdx.base.naming;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
@@ -77,15 +78,9 @@ import org.openmdx.kernel.id.UUIDs;
  * concurrent multithreaded access if that access is not
  * read-only.
  */
-@SuppressWarnings("unchecked")
 public final class PathComponent
-implements Comparable, Cloneable, Serializable
+	implements Comparable<PathComponent>, Cloneable, Serializable
 {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3257008748089325624L;
 
     /**
      * Creates a new path component given by multiple fields.
@@ -131,6 +126,7 @@ implements Comparable, Cloneable, Serializable
         this.fields = component.fields;
     }
 
+    
     //------------------------------------------------------------------------
     // Verification
     //------------------------------------------------------------------------
@@ -312,8 +308,7 @@ implements Comparable, Cloneable, Serializable
      * @exception   ClassCastException
      *              if obj is not an instance of PathComponent
      */
-    public int compareTo(Object obj) {
-        PathComponent that = (PathComponent) obj;
+    public int compareTo(PathComponent that) {
         int limit = this.size() < that.size() ? this.size() : that.size();
         for (
                 int cursor = 0;
@@ -679,7 +674,7 @@ implements Comparable, Cloneable, Serializable
     private static String[] parse(
         String source
     ){
-        ArrayList target = new ArrayList();
+        List<String> target = new ArrayList<String>();
         for (
                 int begin = 0, end = -1;
                 begin <= source.length();
@@ -689,7 +684,7 @@ implements Comparable, Cloneable, Serializable
             target.add(source.substring(begin, end));
 
         }
-        return (String[]) target.toArray(new String[target.size()]);
+        return target.toArray(new String[target.size()]);
     }
 
     /**
@@ -861,5 +856,10 @@ implements Comparable, Cloneable, Serializable
      * XRI cross reference start.
      */
     final static public char CROSS_REFERENCE_END = ')';
+
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 3257008748089325624L;
 
 }

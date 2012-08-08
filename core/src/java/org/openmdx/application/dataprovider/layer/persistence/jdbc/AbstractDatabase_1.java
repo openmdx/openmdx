@@ -1,15 +1,15 @@
 /*
  * ====================================================================
- * Name:        $Id: AbstractDatabase_1.java,v 1.103 2010/12/23 15:52:18 hburger Exp $
+ * Name:        $Id: AbstractDatabase_1.java,v 1.145 2012/01/07 01:37:43 hburger Exp $
  * Description: AbstractDatabase_1 plugin
- * Revision:    $Revision: 1.103 $
+ * Revision:    $Revision: 1.145 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/23 15:52:18 $
+ * Date:        $Date: 2012/01/07 01:37:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -56,7 +56,6 @@ import static org.openmdx.base.naming.SpecialResourceIdentifiers.EXTENT_REFERENC
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -82,12 +81,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -115,16 +114,16 @@ import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 import org.openmdx.application.dataprovider.layer.persistence.common.AbstractPersistence_1;
 import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.dataprovider.spi.OperationAwareLayer_1;
-import org.openmdx.application.dataprovider.spi.ResourceHelper;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.spi.URIMarshaller;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
+import org.openmdx.base.mof.cci.Persistency;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
-import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.URI_1;
 import org.openmdx.base.query.ConditionType;
@@ -132,6 +131,7 @@ import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.text.conversion.SQLWildcards;
@@ -158,14 +158,9 @@ import org.w3c.spi.DatatypeFactories;
  * Insert the following line at the location in your code where you want to
  * start logging JDBC calls: DriverManager.setLogStream(System.out);
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implements DataTypes {
     
-    //---------------------------------------------------------------------------
-    public AbstractDatabase_1(
-    ) {
-    }
-
     // --------------------------------------------------------------------------
     @Override
     public Interaction getInteraction(
@@ -211,7 +206,6 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
      * positioning if lastRowCount != -1 and lastPosition != -1 and the driver/
      * database support absolute positioning. The object at lastPosition starts
      * at row lastRowCount. 
-     * @param absolutePositioningDisabled TODO
      */
     abstract FastResultSet setPosition(
         ResultSet rs,
@@ -239,7 +233,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
 
         SysLog.detail(
             "activating", 
-            "$Id: AbstractDatabase_1.java,v 1.103 2010/12/23 15:52:18 hburger Exp $"
+            "$Id: AbstractDatabase_1.java,v 1.145 2012/01/07 01:37:43 hburger Exp $"
         );
 
         super.activate( 
@@ -325,7 +319,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         // privateAttributesPrefix
         this.privateAttributesPrefix = getConfigurationValue(
             LayerConfigurationEntries.PRIVATE_ATTRIBUTES_PREFIX,
-            "p$$"
+            DEFAULT_PRIVATE_ATTRIBUTE_PREFIX
         ).toLowerCase();
 
         OBJECT_OID = this.toOid("object");
@@ -339,7 +333,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         // Result set type
         this.resultSetType = ResultSet.TYPE_FORWARD_ONLY;
         if(!configuration.values(LayerConfigurationEntries.RESULT_SET_TYPE).isEmpty()) {
-            String type = (String)configuration.values(LayerConfigurationEntries.RESULT_SET_TYPE).get(0);
+            String type = configuration.getFirstValue(LayerConfigurationEntries.RESULT_SET_TYPE);
             if(LayerConfigurationEntries.RESULT_SET_TYPE_FORWARD_ONLY.equals(type)) {
                 this.resultSetType = ResultSet.TYPE_FORWARD_ONLY;
             }
@@ -371,10 +365,9 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         // Embedded features
         this.embeddedFeatures = new TreeMap();
         if(!configuration.values(LayerConfigurationEntries.EMBEDDED_FEATURE).isEmpty()) {
-            for(Iterator i = configuration.values(LayerConfigurationEntries.EMBEDDED_FEATURE).iterator(); i.hasNext(); ) {
-                String embeddedFeature = (String)i.next();
-                int p;
-                if((p = embeddedFeature.indexOf("[")) > 0) {
+            for(String embeddedFeature : configuration.<String>values(LayerConfigurationEntries.EMBEDDED_FEATURE)) {
+                int p = embeddedFeature.indexOf("[");
+                if(p > 0) {
                     // Store as (feature name, upper bound)
                     this.embeddedFeatures.put(
                         embeddedFeature.substring(0, p),
@@ -385,9 +378,9 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         }
 
         // Non-persistent features
-        this.nonPersistentFeatures = new HashSet<String>(
-            configuration.<String>values(LayerConfigurationEntries.NON_PERSISTENT_FEATURE).values()
-        );
+        for(String nonPersistentFeature : configuration.<String>values(LayerConfigurationEntries.NON_PERSISTENT_FEATURE).values()) {
+        	this.nonPersistentFeatures.add(nonPersistentFeature);
+        }
 
         // nullAsCharacter
         this.nullAsCharacter = getConfigurationValue(
@@ -419,51 +412,39 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         // useNormalizedReferences
         this.setSizeColumns = configuration.isOn(LayerConfigurationEntries.SET_SIZE_COLUMNS);
 
-        /**
-         * Old configuration format for TypeConfigurationEntry with
-         * OPTIMIZED_TYPE and OPTIMIZED_TABLE
-         */
-        if(!configuration.values(LayerConfigurationEntries.OPTIMIZED_TYPE).isEmpty()) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION, 
-                "the configuration options '" + LayerConfigurationEntries.OPTIMIZED_TYPE + "' and '" + LayerConfigurationEntries.OPTIMIZED_TABLE + "' are not supported anymore. Use '" + LayerConfigurationEntries.TYPE + "' and '" + LayerConfigurationEntries.DB_OBJECT_FORMAT + "' instead."
-            ); 
-        }
-
-        // deprecated options COLUMN_NAME_SHORT, COLUMN_NAME_LONG
-        if(!configuration.values("columnNameLong").isEmpty()) {
-            throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.INVALID_CONFIGURATION, 
-                "the configuration option '" + "columnNameLong" + "' is not supported anymore. Use '" + LayerConfigurationEntries.COLUMN_NAME_FROM + "' instead."
-            );
-        }
-
         // PATH_MACRO_NAME, PATH_MACRO_VALUE
         this.pathMacros = new HashMap<String,String>();
-        for(int i = 0; i < configuration.values(LayerConfigurationEntries.PATH_MACRO_NAME).size(); i++) {
+        for(
+            ListIterator<String> pathMacroNameIterator = configuration.<String>values(LayerConfigurationEntries.PATH_MACRO_NAME).populationIterator();
+            pathMacroNameIterator.hasNext();
+        ){
+            int i = pathMacroNameIterator.nextIndex();
+            String pathMacroName = pathMacroNameIterator.next();
             this.pathMacros.put(
-                (String)configuration.values(LayerConfigurationEntries.PATH_MACRO_NAME).get(i),
+                pathMacroName,
                 (String)configuration.values(LayerConfigurationEntries.PATH_MACRO_VALUE).get(i)
             );
         }
 
         // STRING_MACRO_COLUMN, STRING_MACRO_NAME, STRING_MACRO_VALUE
         this.stringMacros = new HashMap<String,List<String[]>>();
-        for(int i = 0; i < configuration.values(LayerConfigurationEntries.STRING_MACRO_COLUMN).size(); i++) {
-            this.stringMacros.put(
-                (String)configuration.values(LayerConfigurationEntries.STRING_MACRO_COLUMN).get(i),
-                new ArrayList<String[]>()
-            );
-        }
-        for(int i = 0; i < configuration.values(LayerConfigurationEntries.STRING_MACRO_COLUMN).size(); i++) {
-            ((List)this.stringMacros.get(
-                configuration.values(LayerConfigurationEntries.STRING_MACRO_COLUMN).get(i)
-            )).add(
+        for(
+            ListIterator<String> stringMacroColumnIterator = configuration.<String>values(LayerConfigurationEntries.STRING_MACRO_COLUMN).populationIterator();
+            stringMacroColumnIterator.hasNext();
+        ){
+            int i = stringMacroColumnIterator.nextIndex();
+            String stringMacroColumn = stringMacroColumnIterator.next(); 
+            List<String[]> entries = this.stringMacros.get(stringMacroColumn); 
+            if(entries == null) {
+                this.stringMacros.put(
+                    stringMacroColumn,
+                    entries = new ArrayList<String[]>()
+                );
+            }
+            entries.add(
                 new String[]{
-                    (String)configuration.values(LayerConfigurationEntries.STRING_MACRO_NAME).get(i),
-                    (String)configuration.values(LayerConfigurationEntries.STRING_MACRO_VALUE).get(i)
+                    configuration.<String>values(LayerConfigurationEntries.STRING_MACRO_NAME).get(i),
+                    configuration.<String>values(LayerConfigurationEntries.STRING_MACRO_VALUE).get(i)
                 }       
             );
         }
@@ -510,13 +491,14 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         this.configuration = new DatabaseConfiguration(
             this.namespaceId,
             this.referenceIdFormat,
-            this.useNormalizedReferences,
+            this.useNormalizedReferences(),
             configuration.isOn(LayerConfigurationEntries.USE_NORMALIZED_OBJECT_IDS),
             configuration.isNotDisabled(LayerConfigurationEntries.USE_VIEWS_FOR_REDUNDANT_COLUMNS),
             configuration.isNotDisabled(LayerConfigurationEntries.USE_PREFERENCES_TABLE), 
             configuration.isNotDisabled(LayerConfigurationEntries.CASCADE_DELETES), 
             // The database configuration is always retrieved from the first configured connection manager
-            this.dataSources.isEmpty() ? null : this.dataSources.get(0), configuration
+            this.dataSources.isEmpty() ? null : this.dataSources.get(0), 
+            configuration
         );
     }
 
@@ -541,14 +523,21 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     }
 
     //---------------------------------------------------------------------------
-    String toRid(
+    protected String toRid(
         String name
     ) {
         return name + this.referenceIdAttributesSuffix;
     }
 
     //---------------------------------------------------------------------------
-    String toOid(
+    protected String toRsx(
+        String name
+    ){
+        return name + this.referenceIdSuffixAttributesSuffix;
+    }
+    
+    //---------------------------------------------------------------------------
+    protected String toOid(
         String name
     ) {
         return name + this.objectIdAttributesSuffix;
@@ -574,6 +563,15 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         return this.referenceIdFormat;
     }
 
+    /**
+     * Tells whether reference tables shall be used
+     * 
+     * @return <code>true</code> if reference tables are used
+     */
+    protected boolean useReferenceTables(){
+        return LayerConfigurationEntries.REFERENCE_ID_FORMAT_REF_TABLE.equals(this.getReferenceIdFormat());
+    }
+    
     //---------------------------------------------------------------------------
     public boolean useNormalizedReferences(
     ) {
@@ -587,12 +585,17 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     }
 
     //---------------------------------------------------------------------------
+    public String getPrivateAttributesPrefix() {
+        return this.privateAttributesPrefix;
+    }
+
+    //---------------------------------------------------------------------------
     public Object externalizeStringValue(
         String _columnName,
         Object value
     ) {
         String columnName = _columnName;
-        if(value instanceof String) {
+        if(value instanceof String || value instanceof URI) {
             // column name could be qualified, e.g. vm.<column name>
             int pos = columnName.indexOf(".");
             if(pos >= 0) {
@@ -600,12 +603,13 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             }
             List<String[]> stringReplacements = this.stringMacros.get(columnName);
             if(stringReplacements != null) {
-                for(int i = 0; i < stringReplacements.size(); i++) {
-                    String macroName = stringReplacements.get(i)[0];
-                    String macroValue = stringReplacements.get(i)[1];
+                for(String[] stringReplacement : stringReplacements) {
+                    String macroName = stringReplacement[0];
+                    String macroValue = stringReplacement[1];
                     // replace matching macro value with macro name
-                    if(((String)value).startsWith(macroValue)) {
-                        return macroName + ((String)value).substring(macroValue.length());
+                    String stringValue = value.toString();
+                    if(stringValue.startsWith(macroValue)) {
+                        return macroName + stringValue.substring(macroValue.length());
                     }
                 }
             }
@@ -626,9 +630,9 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         }
         List<String[]> stringReplacements = this.stringMacros.get(columnName);
         if(stringReplacements != null) {
-            for(int i = 0; i < stringReplacements.size(); i++) {
-                String macroName = stringReplacements.get(i)[0];
-                String macroValue = stringReplacements.get(i)[1];
+            for(String[] stringReplacement : stringReplacements){ 
+                String macroName = stringReplacement[0];
+                String macroValue = stringReplacement[1];
                 // replace matching macro name with macro value
                 if(value.startsWith(macroName)) {
                     return macroValue + value.substring(macroName.length());
@@ -649,7 +653,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         Connection conn,
         Path source
     ) throws ServiceException {
-        if(this.useNormalizedReferences) {
+        if(this.useNormalizedReferences()) {
             return this.configuration.normalizeObjectIds() ? this.configuration.buildObjectId(
                 source
             ) : this.getReferenceId(
@@ -792,8 +796,8 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             }
         }
         boolean containsWildcard = false;
-        for(int i = 0; i < dbObject.getReferencedType().size(); i++) {
-            if(":*".equals(dbObject.getReferencedType().get(i))) {
+        for(String referencedType : dbObject.getReferencedType()) {
+            if(":*".equals(referencedType)) {
                 containsWildcard = true;
                 break;
             }
@@ -912,9 +916,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             );        
         }
 
-        boolean isComplex = 
-            dbObjectForQuery1.startsWith("SELECT") 
-            || dbObjectForQuery1.startsWith("select");
+        boolean isComplex = dbObjectForQuery1.startsWith("SELECT") || dbObjectForQuery1.startsWith("select");
 
         // Join primary with slice 0 of secondary and add mixin attributes 
         // as private p$$ attributes
@@ -952,8 +954,8 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         ((Number)this.embeddedFeatures.get(mixin)).intValue() : 
                         1;
                     for(int j = 0; j < upperBound; j++) {
-                        String columnName = this.getColumnName(conn, mixin, j, upperBound > 1, false);
-                        String prefixedColumnName = this.getColumnName(conn, this.privateAttributesPrefix + mixin, j, upperBound > 1, false);
+                        String columnName = this.getColumnName(conn, mixin, j, upperBound > 1, false, false);
+                        String prefixedColumnName = this.getColumnName(conn, mixin, j, upperBound > 1, false, true);
                         view += ", " + (dbObject.getIndexColumn() == null ? "v." : "vm.") + columnName + " AS " + prefixedColumnName;
                     }
                 }              
@@ -974,15 +976,13 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     }
                     int k = 0;
                     // Compare rid selectors of v, vm
-                    for(int i = 0; i < dbObject.getReferenceColumn().size(); i++) {
-                        String selector = (String)dbObject.getReferenceColumn().get(i);
+                    for(String selector : dbObject.getReferenceColumn()) {
                         view += k == 0 ? "" : " AND ";
                         view += "(v." + selector + " = " + "vm." + selector + ")";
                         k++;
                     }
                     // Compare oid selectors of v, vm
-                    for(int i = 0; i < dbObject.getObjectIdColumn().size(); i++) {
-                        String objectIdColumn = (String)dbObject.getObjectIdColumn().get(i);
+                    for(Object objectIdColumn :  dbObject.getObjectIdColumn()) {
                         view += k == 0 ? "" : " AND ";
                         view += "(v." + objectIdColumn + " = " + "vm." + objectIdColumn + ")";
                         k++;
@@ -1101,7 +1101,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         List<Object> statementParameters
     ) throws ServiceException {
         Path referencePattern = pattern.size() % 2 == 1 ? pattern.getParent() : pattern;
-        if(LayerConfigurationEntries.REFERENCE_ID_FORMAT_REF_TABLE.equals(this.getReferenceIdFormat())) {
+        if(useReferenceTables()) {
             return
             "IN (" + 
             this.getSelectReferenceIdsFormatRefTableClause(
@@ -1180,9 +1180,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 i < this.maxReferenceComponents;
                 i++
         ) {
-            String c = i < pathPattern.size() 
-            ? pathPattern.get(i)
-                : "#";
+            String c = i < pathPattern.size() ? pathPattern.get(i) : "#";
             if("%".equals(c) && (i == pathPattern.size() - 1)) {
                 matchExact = false;
                 break;
@@ -1193,10 +1191,10 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 }
                 isFirst = false;
                 if(statementParameters == null) {
-                    currentClause += "(" + this.getColumnName(conn, "c", i, true, true) + " = '" + c + "')";
+                    currentClause += "(" + this.getColumnName(conn, "c", i, true, true, false) + " = '" + c + "')";
                 }
                 else {
-                    currentClause += "(" + this.getColumnName(conn, "c", i, true, true) + " = ?)";
+                    currentClause += "(" + this.getColumnName(conn, "c", i, true, true, false) + " = ?)";
                     statementParameters.add(c);
                 }
             }
@@ -1297,10 +1295,8 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         Path referencePattern,
         boolean forceCreate
     ) throws ServiceException {  
-        Path reference = referencePattern.size() % 2 == 0 ? 
-            referencePattern : 
-            referencePattern.getParent(); 
-        return reference.isEmpty() ? null : LayerConfigurationEntries.REFERENCE_ID_FORMAT_REF_TABLE.equals(this.getReferenceIdFormat()) ? (Object) this.getReferenceIdFormatRefTable(
+        Path reference = referencePattern.size() % 2 == 0 ? referencePattern : referencePattern.getParent(); 
+        return reference.isEmpty() ? null : useReferenceTables() ? (Object) this.getReferenceIdFormatRefTable(
             conn,
             reference,
             forceCreate
@@ -1417,36 +1413,25 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         String sequenceName,
         String asFormat
     ) throws ServiceException, SQLException {
-
         DatabaseMetaData dbm = conn.getMetaData();
-        String autonumFormat = this.jdbcDriverSqlProperties.getProperty(dbm.getDatabaseProductName() + ".AUTOINC");          
-        SysLog.detail("autonum format ", autonumFormat);
-
-        if(AUTOINC_FORMAT_NEXTVAL.equals(autonumFormat)) {
-            return "NEXTVAL('" + sequenceName + "_SEQ')";
-        }
-        else if(AUTOINC_FORMAT_NEXTVAL_FOR.equals(autonumFormat)) {          
-            return asFormat != null
-            ? "CAST(NEXTVAL FOR " + sequenceName + "_SEQ " + asFormat + ")"
-                : "NEXTVAL FOR " + sequenceName + "_SEQ";
-        }
-        else if(AUTOINC_FORMAT_NEXT_VALUE_FOR.equals(autonumFormat)) {          
-            return "NEXT VALUE FOR " + sequenceName + "_SEQ";
-        }
-        else if(AUTOINC_FORMAT_AUTO.equals(autonumFormat)) {
+        String autonumFormat = asFormat != null && asFormat.indexOf("AS CHAR") > 0 ?
+            this.jdbcDriverSqlProperties.getProperty(dbm.getDatabaseProductName() + ".AUTOINC.CHAR") :
+                this.jdbcDriverSqlProperties.getProperty(dbm.getDatabaseProductName() + ".AUTOINC.NUMERIC");
+        if("AUTO".equals(autonumFormat)) {
             return null;
-        }
-        else if(AUTOINC_FORMAT_SEQUENCE.equals(autonumFormat)) {
-            return sequenceName + "_SEQ.NEXTVAL";
+        } else if(autonumFormat != null) {
+            autonumFormat = autonumFormat.replace("${SEQUENCE_NAME}", sequenceName);
+            autonumFormat = autonumFormat.replace("${AS_FORMAT}", asFormat == null ? "" : asFormat);
+            return autonumFormat;
         }
         else {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE , 
-                "AUTONUM format not supported. Use [NEXTVAL|NEXTVALFOR|NEXTVALUEFOR|AUTO|SEQUENCE]",
-                new BasicException.Parameter("sequenceName", sequenceName)
+                "AUTONUM format undefined for database. It must be configured in in jdbc-driver-sql.properties.",
+                new BasicException.Parameter("databaseName", dbm.getDatabaseProductName())
             );
-        }      
+        }
     }
 
     //---------------------------------------------------------------------------
@@ -1479,7 +1464,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     // path component names
                     String columnNamesPathComponents = "";
                     for(int i = 0; i < this.maxReferenceComponents; i++) {
-                        columnNamesPathComponents += ", " + this.getColumnName(conn, "c", i, true, true);
+                        columnNamesPathComponents += ", " + this.getColumnName(conn, "c", i, true, true, false);
                     }        
                     // SQL sequences
                     String dbObjectRef = this.namespaceId + "_" + T_REF;
@@ -1603,7 +1588,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         Connection conn,
         Object referenceId
     ) throws ServiceException {
-        return LayerConfigurationEntries.REFERENCE_ID_FORMAT_REF_TABLE.equals(this.getReferenceIdFormat()) ? this.getReferenceFormatRefTable(
+        return useReferenceTables() ? this.getReferenceFormatRefTable(
             conn,
             (Number)referenceId
         ) : this.configuration.normalizeObjectIds() ? this.configuration.buildResourceIdentifier(
@@ -1625,7 +1610,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         while(t.hasMoreTokens()) {
             components.add(t.nextToken());          
         }
-        if(components.size() == 0) {
+        if(components.isEmpty()) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
@@ -1691,15 +1676,14 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 statementParameters
             );
             if(rs.next()) {
-                int n = rs.getInt(this.getColumnName(conn, "n", 0, false, false));
-                reference = new Path("");
+                int n = rs.getInt(this.getColumnName(conn, "n", 0, false, false, false));
+                String[] components = new String[n];
                 for(int i = 0; i < n; i++) {
-                    reference = reference.add(
-                        rs.getString(
-                            this.getColumnName(conn, "c", i, true, false)
-                        )
+                    components[i] = rs.getString(
+                        this.getColumnName(conn, "c", i, true, false, false)
                     );
                 }
+                reference = new Path(components);
             }
             else {
                 throw new ServiceException(
@@ -1786,11 +1770,13 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         String attributeName,
         int index,
         boolean indexSuffixIfZero,
-        boolean ignoreReservedWords
+        boolean ignoreReservedWords, 
+        boolean markAsPrivate
     ) throws ServiceException {
-        String columnName = this.columnNames.get(attributeName);
+        ConcurrentMap<String, String> columnNames = markAsPrivate ? this.privateColumnNames : this.publicColumnNames;
+        String columnName = columnNames.get(attributeName);
         if(columnName == null) {
-            String name = "";
+            StringBuilder name = new StringBuilder();
             for(
                 int i = 0; 
                 i < attributeName.length(); 
@@ -1798,52 +1784,58 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             ) {
                 char c = attributeName.charAt(i);
                 if(Character.isUpperCase(c)) {
-                    name += "_" + Character.toLowerCase(c);
+                    name.append('_').append(Character.toLowerCase(c));
                 }
                 else if(c == '_') {
                     if(i < attributeName.length()-1) {
                         // do not escape _<digit>
                         if(Character.isDigit(attributeName.charAt(i+1))) {
-                            name += "_";
+                            name.append('_');
                         }
                         // escape _<alpha> as __<uppercase alpha>
                         else {
-                            name += "__";
+                            name.append("__");
                         }
                     }
                     else {
-                        name += "_";
+                        name.append('_');
                     }
                 }
                 else {
-                    name += c;
+                    name.append(c);
                 }
             }
             // from->to mapping
             columnName = name.toString();
-            boolean isSizeColumn = columnName.endsWith("_");
-            columnName = isSizeColumn ? 
-                columnName.substring(0, columnName.length()-1) : 
-                    columnName;
-            if(this.configuration.getFromToColumnNameMapping().containsKey(columnName)) {
-                columnName = (String)this.configuration.getFromToColumnNameMapping().get(columnName);
+            boolean isSizeColumn = columnName.endsWith(SIZE_SUFFIX);
+            String lookupName = isSizeColumn ? columnName.substring(0, columnName.length()-1) : columnName;
+            String mappedName;
+            String privateAttributesPrefix = this.getPrivateAttributesPrefix();
+            if(markAsPrivate ) {
+                mappedName = this.configuration.getFromToColumnNameMapping().get(privateAttributesPrefix + lookupName);
+                if(mappedName == null) {
+                    mappedName = this.configuration.getFromToColumnNameMapping().get(lookupName);
+                    if(mappedName != null){
+                        mappedName = privateAttributesPrefix + mappedName;
+                    }
+                }
+            } else {
+                mappedName = this.configuration.getFromToColumnNameMapping().get(lookupName);
             }
-            columnName = isSizeColumn ? 
-                columnName + "_" : 
-                    columnName;
-            this.columnNames.putIfAbsent(
+            if(mappedName != null) {
+                columnName = isSizeColumn ? mappedName + SIZE_SUFFIX : mappedName;
+            } else if (markAsPrivate) {
+                columnName = privateAttributesPrefix + columnName;
+            }
+            columnNames.putIfAbsent(
                 attributeName,
                 columnName
             );
         }    
         // append index
-        if(indexSuffixIfZero || (index > 0)) {
-            if(this.embeddedFeatures.containsKey(attributeName)) {
-                columnName = columnName + "_" + String.valueOf(index);              
-            }
-            else {
-                columnName = columnName + "$" + String.valueOf(index);
-            }
+        if(indexSuffixIfZero || index > 0) {
+            columnName += this.embeddedFeatures.containsKey(attributeName) ? '_' : '$';
+            columnName += String.valueOf(index);
         }
         columnName = this.getDatabaseSpecificColumnName(
             conn, 
@@ -1859,9 +1851,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     ) {
         String mappedColumnName = columnName;
         // Indexed column?
-        int nameLength = mappedColumnName.lastIndexOf('$') > mappedColumnName.lastIndexOf('_') ? 
-            mappedColumnName.lastIndexOf('$') : 
-                mappedColumnName.lastIndexOf('_');
+        int nameLength = Math.max(mappedColumnName.lastIndexOf('$'), mappedColumnName.lastIndexOf('_'));
         // Non-indexed column
         if(
             (nameLength < 0) || 
@@ -1884,7 +1874,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
 
         // to->from mapping
         if(this.configuration.getToFromColumnNameMapping().containsKey(mappedColumnName)) {
-            mappedColumnName = (String)this.configuration.getToFromColumnNameMapping().get(mappedColumnName);
+            mappedColumnName = this.configuration.getToFromColumnNameMapping().get(mappedColumnName);
         }
         String featureName = this.featureNames.get(mappedColumnName);
         if(featureName == null) {        
@@ -2185,8 +2175,43 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     }
 
     //---------------------------------------------------------------------------
+    
     /**
-     * Touch object feature (set empty value). The feature must be a modeled 
+     * Tells whether the given feature is persistent
+     * 
+     * @param featureDef the features meta-data
+     * 
+     * @return <code>true</code> if the given feature is persistent
+     */
+    protected boolean isPersistent(
+		ModelElement_1_0 featureDef
+    ) throws ServiceException{
+        return 
+            !this.nonPersistentFeatures.contains(featureDef.objGetValue("qualifiedName")) &&
+            Persistency.getInstance().isPersistentAttribute(featureDef);
+    }
+    
+    /**
+     * Lookup a feature's meta-data
+     * 
+     * @param objectClass
+     * 
+     * @param featureName
+     * @return the feature's meta-data
+     */
+    private ModelElement_1_0 getFeatureDef(
+    	String objectClass,
+    	String featureName
+    ){
+        try {
+            return (ModelElement_1_0)((Map)getModel().getElement(objectClass).objGetValue("allFeature")).get(featureName);
+        } catch(Exception e){
+            return null;
+        }
+    }
+    
+    /**
+     * Touch object feature (set empty value). The feature must be a modelled 
      * feature which are either non-derived or system attributes (otherwise 
      * the feature is not touched).
      */
@@ -2194,32 +2219,10 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         MappedRecord object,
         String featureName
     ) throws ServiceException {
-        Object_2Facade facade = ResourceHelper.getObjectFacade(object);
-        if(facade.getObjectClass() != null) {
-            ModelElement_1_0 classDef = null;
-            try {
-                classDef = getModel().getElement(
-                    facade.getObjectClass()
-                );
-            } 
-            catch(Exception e){
-                // ignore
-            }
-            if(classDef != null) {
-                ModelElement_1_0 featureDef = (ModelElement_1_0)((Map)classDef.objGetValue("allFeature")).get(featureName);
-                if(
-                    featureDef != null && (
-                        ((this.getModel().isAttributeType(featureDef) && (
-                             !((Boolean)featureDef.objGetValue("isDerived")).booleanValue() ||
-                             QUALIFIED_SYSTEM_ATTRIBUTES.contains(featureDef.objGetValue("qualifiedName"))
-                         )) || 
-                        (this.getModel().isReferenceType(featureDef) && getModel().referenceIsStoredAsAttribute(featureDef) && !getModel().referenceIsDerived(featureDef)))
-                    )
-                ) {
-                    String feature = (String) featureDef.objGetValue("name");
-                    facade.attributeValues(feature);
-                }
-            }
+        Object_2Facade facade = Facades.asObject(object);
+        ModelElement_1_0 featureDef = getFeatureDef(facade.getObjectClass(), featureName);
+        if(featureDef != null && isPersistent(featureDef)) {
+            facade.attributeValues((String) featureDef.objGetValue("name"));
         }
     }
 
@@ -2293,19 +2296,18 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             // try to get attribute definitions
             if(idx == 0) {
                 // Get OBJECT_CLASS if not supplied
-                objectClass = primaryObjectClass == null ? 
-                    dbObject.getObjectClass(frs) : 
-                    primaryObjectClass;
+                objectClass = primaryObjectClass == null ? dbObject.getObjectClass(frs) : primaryObjectClass;
                 featureDefs = null;
-                if(objectClass != null) {      
-                    try {
-                        featureDefs = (Map)getModel().getElement(objectClass).objGetValue("allFeatureWithSubtype");
-                    }
-                    // if class not found in model fall back to non model-driven mode
-                    catch(Exception e) {
-                        featureDefs = null;
-                    }
-                }
+            } else {
+                objectClass = primaryObjectClass;
+            }
+            if(featureDefs == null && objectClass != null) try {
+                 featureDefs = (Map)getModel().getElement(objectClass).objGetValue("allFeatureWithSubtype");
+            } catch(Exception e) {
+                SysLog.trace(
+                    "class not found in model fall back to non model-driven mode",
+                    objectClass
+                );
             }
             // skip to next object? If yes, create new one and add it to list
             if(
@@ -2326,45 +2328,43 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 if(candidates.size() >= maxObjectsToReturn) {
                     return hasMore;
                 }
-                try {
-                    current = Object_2Facade.newInstance(
-                        objectPath,
-                        objectClass
-                    ).getDelegate();
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
+                current = Facades.newObject(
+				    objectPath,
+				    objectClass
+				).getDelegate();
                 objects.add(current);
                 candidates.put(objectPath, null);
                 previousObjectId = objectId;
             }
             // Duplicate indices are allowed. However, they are skipped
             if(!processedIdxs.contains(Integer.valueOf(idx))) {
-                Object_2Facade currentFacade = ResourceHelper.getObjectFacade(current);
+                Object_2Facade currentFacade = Facades.asObject(current);                
                 // Iterate through object attributes and add values
-                for(
-                    Iterator<String> i = frs.getColumnNames().iterator();
-                    i.hasNext();
-                ) { 
-                    String columnName = i.next();
+                for(String columnName: frs.getColumnNames()) {
                     String featureName = this.getFeatureName(columnName);  
-                    boolean isReferenceFeature =        
-                        this.useNormalizedReferences &&
-                        (frs.getColumnNames().contains(this.getColumnName(conn, this.privateAttributesPrefix + featureName + this.referenceIdAttributesSuffix, 0, false, false)) ||
-                                frs.getColumnNames().contains(this.getColumnName(conn, this.privateAttributesPrefix + featureName + "Parent", 0, false, false))
-                        );
-                    ModelElement_1_0 featureDef = featureDefs == null ? 
-                        null : 
-                        (ModelElement_1_0)featureDefs.get(featureName);
+                    ModelElement_1_0 featureDef = featureDefs == null ? null : (ModelElement_1_0)featureDefs.get(featureName);
                     // Always include reference columns. Otherwise dbObject decides
                     if(dbObject.includeColumn(columnName)) {
-                        // check whether attribute must be added
+                        // Check whether attribute must be added
                         boolean addValue = SystemAttributes.OBJECT_CLASS.equals(featureName);
                         switch(attributeSelector) {
                             case AttributeSelectors.NO_ATTRIBUTES:
                                 break;
                             case AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES:
+                                if(featureDef == null) {
+                                    // Return in case the type is unknown
+                                    addValue = true;
+                                } else if(SYSTEM_ATTRIBUTES.contains(featureName)) {
+                                    // Return system features
+                                    addValue = true;
+                                } else if(ModelHelper.getMultiplicity(featureDef).isMultiValued()) {
+                                    // Return multi-valued features if we have at least one attribute specifier
+                                    addValue = !attributeSpecifiers.isEmpty();
+                                } else {
+                                    // Return single-valued features
+                                    addValue = true;
+                                }
+                                break;
                             case AttributeSelectors.ALL_ATTRIBUTES:
                                 addValue = true;
                                 break;
@@ -2372,18 +2372,14 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                 // check for system attributes
                                 if(SYSTEM_ATTRIBUTES.contains(featureName)) {
                                     addValue = true;
-                                }
-                                else {
+                                } else {
                                     // check for specified attributes
                                     AttributeSpecifier specifier = (AttributeSpecifier)attributeSpecifiers.get(featureName);
-                                    if(specifier != null) {
-                                        addValue = (idx >= specifier.position()) && (idx < specifier.position() + specifier.size());
-                                    }
+                                    addValue = specifier != null;
                                 }
                                 break;
                         }
-
-                        // add value
+                        // Add value
                         if(addValue) {
                             String featureType;
                             if(featureDef == null) {
@@ -2399,9 +2395,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                     new BasicException.Parameter("feature", featureDef.jdoGetObjectId())
                                 );
                             }
-                            String multiplicity = featureDef == null ?
-                                null :
-                                    ModelUtils.getMultiplicity(featureDef);
+                            Multiplicity multiplicity = featureDef == null ? null : ModelHelper.getMultiplicity(featureDef);
                             Object val = frs.getObject(columnName);
                             // Embedded attribute? If yes derive idx from column name suffix (instead of slice index)
                             int valueIdx = idx;
@@ -2412,6 +2406,10 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                             }
                             // String, Clob
                             if(this.isClobColumnValue(val)) {
+                                boolean isReferenceFeature = this.useNormalizedReferences() && (
+                                    frs.getColumnNames().contains(this.getColumnName(conn, toRid(featureName), 0, false, false, true)) ||
+                                    frs.getColumnNames().contains(this.getColumnName(conn, featureName + "Parent", 0, false, false, true))
+                                );                                
                                 val = this.getClobColumnValue(val, featureName, featureDef);
                                 if(val instanceof Reader) {
                                     Object values = currentFacade.attributeValues(
@@ -2432,30 +2430,36 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                     ((featureType == null) && ((String)val).startsWith("xri:")) ||
                                     ((featureType != null) && (PrimitiveTypes.OBJECT_ID.equals(featureType) || getModel().isClassType(featureType)))
                                 ) {
-                                    if(this.useNormalizedReferences) {
+                                    if(this.useNormalizedReferences()) {
                                         //
                                         // Get path from normalized form (p$$<feature>_rid, p$$<feature>_oid
                                         //
-                                        String referenceColumn = this.privateAttributesPrefix + featureName + this.referenceIdAttributesSuffix;
-                                        String objectIdColumn = this.privateAttributesPrefix + featureName + this.objectIdAttributesSuffix;
-                                        // Reference is stored in format p$$<feature>__rid, p$$<feature>__oid
+                                        String referenceColumn = this.getColumnName(
+                                            conn, 
+                                            toRid(featureName), 
+                                            0,
+                                            false, 
+                                            false, 
+                                            true // markAsPrivate
+                                        );
+                                        String objectIdColumn = this.getColumnName(
+                                            conn, 
+                                            toOid(featureName), 
+                                            0, 
+                                            false,
+                                            false,
+                                            true // markAsPrivate
+                                        );
                                         if(
                                             (frs.getColumnNames().contains(referenceColumn)) &&
                                             (frs.getColumnNames().contains(objectIdColumn))
                                         ) {
-                                            Object rid = frs.getObject(
-                                                this.getColumnName(
-                                                    conn, 
-                                                    referenceColumn, 0, false, false
-                                                )
-                                            );
-                                            String oid = (String)frs.getObject(
-                                                this.getColumnName(
-                                                    conn, 
-                                                    objectIdColumn, 0, false, false
-                                                )
-                                            );
+                                            //
+                                            // Reference is stored in format p$$<feature>__rid, p$$<feature>__oid
+                                            //
+                                            Object rid = frs.getObject(referenceColumn);
                                             if(rid != null) {
+                                                String oid = (String)frs.getObject(objectIdColumn);
                                                 Object values = currentFacade.attributeValues(
                                                     featureName, 
                                                     multiplicity
@@ -2473,8 +2477,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                                     isEmbedded
                                                 );
                                             }
-                                        } 
-                                        else {
+                                        } else {
                                             //
                                             // Reference is stored in compressed form in column
                                             //
@@ -2484,7 +2487,8 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                                     featureName, 
                                                     0, 
                                                     false, 
-                                                    true
+                                                    true, 
+                                                    false // markAsPrivate
                                                 )
                                             );
                                             Path resourceIdentifier;
@@ -2545,13 +2549,13 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                     if(val != null) {
                                         if(SystemAttributes.OBJECT_CLASS.equals(featureName)) {
                                             currentFacade.getValue().setRecordName(
-                                                (String)val
+                                                ((String)val).trim()
                                             );
                                             // Store object class as attribute
                                             if(objectClassAsAttribute) {
                                                 Object target = currentFacade.attributeValues(
                                                     featureName,
-                                                    Multiplicities.LIST
+                                                    Multiplicity.LIST
                                                 );
                                                 this.setValue(
                                                     conn,
@@ -2934,7 +2938,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         boolean negate,
         List<Object> statementParameters
     ) throws ServiceException {
-        String clause = "";
+        StringBuilder clause = new StringBuilder();
         List<Object> clauseValues = new ArrayList<Object>();    
         boolean hasProperties = false;
         String operator = "";
@@ -2960,7 +2964,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 int upperBound = this.embeddedFeatures.containsKey(filterProperty.name()) ? 
                     ((Number)this.embeddedFeatures.get(filterProperty.name())).intValue() : 
                         1;
-                clause += operator + "(";
+                clause.append(operator).append("(");
                 for(
                     int idx = 0; 
                     idx < upperBound; 
@@ -2971,32 +2975,40 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         filterProperty.name(), 
                         idx, 
                         upperBound > 1, 
-                        true
+                        true, 
+                        false // markAsPrivate
                     );
                     columnName = 
                         viewIsPrimary && viewIsIndexed ? 
                             viewAliasName + "m." + columnName : // get from mixin view 'vm'
                                 viewAliasName + "." + columnName; // get from main view 'v'
                     if(idx > 0) {
-                        clause += " OR ";
+                        clause.append(" OR ");
                     }
-                    clause += "(";
-                    clause += this.filterPropertyToSqlClause(
-                        conn,
-                        dbObject.getReference(),
-                        viewAliasName,
-                        filterProperty,
-                        filterPropertyDef,
-                        negate && !viewIsPrimary,
-                        columnName, 
-                        clauseValues
+                    clause.append("(");
+                    clause.append(
+                        this.filterPropertyToSqlClause(
+                            conn,
+                            dbObject,
+                            dbObject.getReference(),
+                            viewAliasName,
+                            filterProperty,
+                            filterPropertyDef,
+                            negate && !viewIsPrimary, 
+                            columnName, 
+                            clauseValues
+                        )
                     );
-                    if(viewIsPrimary && (filterProperty.quantor() == Quantifier.FOR_ALL.code())) {
-                        clause += " OR (" + columnName + " IS NULL)";
+                    if(
+                        viewIsPrimary && 
+                        (filterProperty.quantor() == Quantifier.FOR_ALL.code()) &&
+                        (filterProperty.getValues().length == 0 || !(filterProperty.getValue(0) instanceof Filter))
+                    ) {
+                        clause.append(" OR (").append(columnName).append(" IS NULL)");
                     }
-                    clause += ")";
+                    clause.append(")");
                 }     
-                clause += ")";
+                clause.append(")");
                 hasProperties = true;
             }
             if(hasProperties) {
@@ -3006,7 +3018,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         if(hasProperties) {
             if(viewIsPrimary) {
                 statementParameters.addAll(clauseValues);
-                return clause;
+                return clause.toString();
             }
             else {
                 // View is the secondary db object containing the multi-valued columns
@@ -3037,7 +3049,177 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         }
     }
 
-    //---------------------------------------------------------------------------
+    /**
+     * Add an IS_IN clause
+     * 
+     * @param connection 
+     * @param dbObject 
+     * @param columnName
+     * @param filterPropertyDef
+     * @param clause
+     * @param clauseValues
+     * @param values
+     */
+    protected void isInToSqlClause(
+        Connection connection,
+        DbObject dbObject,
+        String columnName,
+        ModelElement_1_0 filterPropertyDef,
+        StringBuilder clause, 
+        List<Object> clauseValues, 
+        Object[] values
+    ) throws ServiceException {
+        clause.append(columnName).append(" IN (");
+        String separator = "";
+        for(Object value : values){
+            clause.append(
+            	separator
+            ).append(
+            	getPlaceHolder(connection, value)
+            );
+            clauseValues.add(
+                this.externalizeStringValue(columnName, value)
+            );
+            separator = ", ";
+        }
+        clause.append(")");
+    }
+
+    /**
+     * Fill IS_LIKE or IS_UNLIKE clause
+     * 
+     * @param connection 
+     * @param dbObject 
+     * @param like 
+     * @param filterPropertyDef
+     * @param clause
+     * @param clauseValues
+     * @param value 
+     * @param parent 
+     * @param matchingPatterns
+     */
+    protected void isLikeToSqlClause(
+        Connection connection,
+        DbObject dbObject,
+        String columnName,
+        boolean like,
+        ModelElement_1_0 filterPropertyDef, 
+        StringBuilder clause,
+        Collection<Object> clauseValues, 
+        Path value
+    ) throws ServiceException {
+        Set<Path> matchingPatterns = new HashSet<Path>();
+        boolean includeSubTree = "%".equals(value.getBase());
+        // If path ends with % get the set of matching types
+        Path path = value;
+        if(includeSubTree) {
+            path = value.getParent();
+            for(
+                Iterator<DbObjectConfiguration> k = this.configuration.getDbObjectConfigurations().iterator(); 
+                k.hasNext(); 
+            ) {
+                DbObjectConfiguration dbObjectConfiguration = k.next();
+                if(
+                    (dbObjectConfiguration.getType().size() >= path.size()) &&
+                    path.isLike(dbObjectConfiguration.getType().getPrefix(path.size()))
+                ) {
+                    // Replace type pattern by filter value pattern
+                    Path type = dbObjectConfiguration.getType();
+                    String[] pattern = new String[type.size()]; 
+                    int i = 0;
+                    for(String c : type){
+                    	pattern[i++] = ":*".equals(c) ? "%" : c;
+                    }
+                    matchingPatterns.add(new Path(pattern));
+                }
+            }
+        } else {
+            matchingPatterns.add(value);           
+        }
+        this.isLikeToSqlClause(
+            connection, 
+            dbObject, 
+            columnName, 
+            like, 
+            filterPropertyDef, 
+            clause, 
+            clauseValues, 
+            path, 
+            value,
+            matchingPatterns
+        );
+    }
+    
+    /**
+     * Fill IS_LIKE or IS_UNLIKE clause
+     * 
+     * @param connection 
+     * @param dbObject 
+     * @param like 
+     * @param filterPropertyDef
+     * @param clause
+     * @param clauseValues
+     * @param path 
+     * @param value 
+     * @param matchingPatterns
+     */
+    protected void isLikeToSqlClause(
+        Connection connection,
+        DbObject dbObject,
+        String columnName,
+        boolean like,
+        ModelElement_1_0 filterPropertyDef, 
+        StringBuilder clause, 
+        Collection<Object> clauseValues, 
+        Path path, 
+        Path value, 
+        Set<Path> matchingPatterns
+    ) throws ServiceException {
+        String operator = "";
+        for(Path pattern : matchingPatterns) {
+            String externalized = this.externalizePathValue(
+                connection, 
+                path.getDescendant(pattern.getSuffix(path.size()))
+            );
+            clause.append(operator).append(like ? "(" : "(NOT (").append(columnName).append(" LIKE ? ").append(getEscapeClause(connection)).append(like ? ")" : "))");              
+            int pos = externalized.indexOf("%");
+            if(pos >= 0) {
+                externalized = externalized.substring(0, pos+1);
+            }
+            if(externalized.startsWith("xri:")) {
+                if(externalized.endsWith("***")) {
+                    externalized = externalized.substring(0, externalized.length()-3) + "%";
+                }
+                pos = externalized.indexOf("**");
+                if(pos >= 0) {
+                    if(path != value && pos == externalized.length() - 2) {
+                        externalized = externalized.substring(0, pos) + "%";
+                    } else throw new ServiceException(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.NOT_SUPPORTED, 
+                        "only (***|%) wildcards at the end supported",
+                        new BasicException.Parameter("value", value),
+                        new BasicException.Parameter("path", externalized),
+                        new BasicException.Parameter("position", pos)                          
+                    );
+                }
+            } else if(externalized.startsWith("spice:")) {
+                for(String c : value) {
+                    if(c.startsWith(":") && c.endsWith("*")) {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED, 
+                            "path component pattern ':<pattern>*' not supported",
+                            new BasicException.Parameter("path", externalized)                   
+                        );
+                    }
+                }
+            }
+            clauseValues.add(externalized);
+            operator = like ? " OR " : " AND ";
+        }        
+    }
+
     /**
      * Appends an SQL clause to 'clause' according to filter property 'p'.
      * if 'negate' is true, then the operation is negated. The clause is
@@ -3046,19 +3228,19 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
      * values are added to filterValues. The generated clause is of the
      * form (columnName operator literal). ANY or EACH are not handled
      * by this method.
-     *
      */
     private String filterPropertyToSqlClause(
         Connection conn,
+        DbObject dbObject,
         Path reference,
         String viewAliasName,
         FilterProperty filterProperty,
         ModelElement_1_0 filterPropertyDef,
         boolean negate,
-        String columnName,
-        Collection<Object> clauseValues
+        String columnName, 
+        List<Object> clauseValues
     ) throws ServiceException {
-        String clause = "";
+        StringBuilder clause = new StringBuilder();
         short operator = filterProperty.operator();
         int quantor = filterProperty.quantor();
         if(negate) {
@@ -3076,38 +3258,38 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 // Q = {}
                 if(filterProperty.getValues().length == 0) {
                     if(quantor == Quantifier.FOR_ALL.code()) {
-                        clause += "(1=1)";
+                        clause.append("(1=1)");
                     }
                     else {
-                        clause += "(" + columnName + " IS NOT NULL)";
+                        clause.append("(").append(columnName).append(" IS NOT NULL)");
                     }
                 }
 
                 // Q <> {}
                 else {
-                    clause += "(" + columnName + " NOT IN (" + getPlaceHolder(conn, filterProperty.getValue(0));
+                    clause.append("(").append(columnName).append(" NOT IN (").append(getPlaceHolder(conn, filterProperty.getValue(0)));
                     clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                     for(
                         int j = 1; 
                         j < filterProperty.getValues().length; 
                         j++
                     ) {
-                        clause += ", " + getPlaceHolder(conn, filterProperty.getValue(j));
+                        clause.append(", ").append(getPlaceHolder(conn, filterProperty.getValue(j)));
                         clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(j)));
                     }
-                    clause += "))";
+                    clause.append("))");
                 }
                 break;
 
             // IS_LESS
             case IS_LESS:
-                clause += "(" + columnName + " < " + getPlaceHolder(conn, filterProperty.getValue(0)) + ")";
+                clause.append("(").append(columnName).append(" < ").append(getPlaceHolder(conn, filterProperty.getValue(0))).append(")");
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 break;
 
             // IS_LESS_OR_EQUAL
             case IS_LESS_OR_EQUAL:
-                clause += "(" + columnName + " <= " + getPlaceHolder(conn, filterProperty.getValue(0)) + ")";
+                clause.append("(").append(columnName).append(" <= ").append(getPlaceHolder(conn, filterProperty.getValue(0))).append(")");
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 break;
 
@@ -3120,10 +3302,10 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 // Q = {}
                 if(filterProperty.getValues().length == 0) {
                     if(quantor == Quantifier.THERE_EXISTS.code()) {
-                        clause += "(1=0)";
+                        clause.append("(1=0)");
                     }
                     else {
-                        clause += "(" + columnName + " IS NULL)";
+                        clause.append("(").append(columnName).append(" IS NULL)");
                     }
                 } 
 
@@ -3148,32 +3330,97 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                     new BasicException.Parameter("filterProperty", filterPropertyDef.jdoGetObjectId())
                                 );
                             }
+                            String joinClauseBegin = null;
+                            String joinClauseEnd = null;
                             String joinColumn = null;
-                            DbObject dbObject = null;
+                            DbObject joinObject = null;
+                            // Reference
                             if(model.referenceIsStoredAsAttribute(filterPropertyDef)) {
-                                dbObject = this.getDbObject(
+                                joinObject = this.getDbObject(
                                     conn, 
                                     model.getIdentityPattern(referencedType), 
                                     null, 
                                     true
                                 );
-                                joinColumn = (String)dbObject.getObjectIdColumn().get(0);
+                                joinClauseBegin = columnName;
+                                joinClauseEnd = "";
+                                joinColumn = (String)joinObject.getObjectIdColumn().get(0);
                             }
-                            else {
-                                dbObject = this.getDbObject(
+                            // Composite parent
+                            else if(ModelHelper.isCompositeEnd(filterPropertyDef, true)) {
+                                joinObject = this.getDbObject(
+                                    conn, 
+                                    model.getIdentityPattern(referencedType), 
+                                    null, 
+                                    true
+                                );
+                                joinClauseBegin = viewAliasName + "." + this.getColumnName(
+                                    conn, 
+                                    "parent", 
+                                    0, 
+                                    false, // indexSuffixIfZero, 
+                                    false, // ignoreReservedWords
+                                    true // markAsPrivate
+                                );
+                                joinClauseEnd = "";
+                                joinColumn = (String)joinObject.getObjectIdColumn().get(0);
+                            }
+                            // Composite
+                            else if(ModelHelper.isCompositeEnd(filterPropertyDef, false)) {
+                                joinObject = this.getDbObject(
                                     conn, 
                                     reference.getDescendant(":*", filterProperty.name()), 
                                     null, 
                                     true
                                 );
+                                joinClauseBegin = viewAliasName + "." + (String)dbObject.getObjectIdColumn().get(0);
+                                joinClauseEnd = "";
                                 joinColumn = this.getColumnName(
                                     conn, 
-                                    this.privateAttributesPrefix + "parent", 
+                                    "parent", 
                                     0, 
                                     false, // indexSuffixIfZero, 
-                                    false // ignoreReservedWords
+                                    false, // ignoreReservedWords
+                                    true // markAsPrivate
+                                );                                
+                            }
+                            // Shared
+                            else if(ModelHelper.isSharedEnd(filterPropertyDef, false)) {
+                                joinObject = this.getDbObject(
+                                    conn, 
+                                    reference.getDescendant(":*", filterProperty.name()), 
+                                    null, 
+                                    true
                                 );
-                                columnName = viewAliasName + "." + dbObject.getObjectIdColumn().get(0);
+                                if(joinObject.getJoinCriteria() != null && joinObject.getJoinCriteria().length == 3) {                                    
+                                    String[] joinCriteria = joinObject.getJoinCriteria();
+                                    joinClauseBegin =
+                                        viewAliasName + "." + (String)dbObject.getObjectIdColumn().get(0) +
+                                        " IN (SELECT " + joinCriteria[1] + " FROM " + joinCriteria[0] + " WHERE " +  joinCriteria[2];
+                                    joinClauseEnd = ")";
+                                    joinColumn = (String)joinObject.getObjectIdColumn().get(0);
+                                }
+                                else {
+                                    joinClauseBegin = viewAliasName + "." + (String)dbObject.getObjectIdColumn().get(0);
+                                    joinClauseEnd = "";
+                                    joinColumn = this.getColumnName(
+                                        conn, 
+                                        "parent", 
+                                        0, 
+                                        false, // indexSuffixIfZero, 
+                                        false, // ignoreReservedWords
+                                        true // markAsPrivate
+                                    );                                
+                                }
+                            }
+                            else {
+                                throw new ServiceException(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.NOT_SUPPORTED,
+                                    "Unsupported aggregation",
+                                    new BasicException.Parameter("filter.property", filterProperty),
+                                    new BasicException.Parameter("filter.definition", filterPropertyDef)                                
+                                );
                             }
                             Filter filter = (Filter)filterProperty.getValue(0);
                             List<FilterProperty> allFilterProperties = FilterProperty.getFilterProperties(filter);
@@ -3201,14 +3448,14 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                 referencedType, 
                                 allFilterProperties
                             );
-                            String view1 = dbObject.getConfiguration().getDbObjectForQuery1() == null ? 
-                                dbObject.getConfiguration().getDbObjectForUpdate1() : 
-                                    dbObject.getConfiguration().getDbObjectForQuery1();
-                            String view2 = dbObject.getConfiguration().getDbObjectForQuery2() == null ? 
-                                dbObject.getConfiguration().getDbObjectForUpdate2() == null ?
+                            String view1 = joinObject.getConfiguration().getDbObjectForQuery1() == null ? 
+                                joinObject.getConfiguration().getDbObjectForUpdate1() : 
+                                    joinObject.getConfiguration().getDbObjectForQuery1();
+                            String view2 = joinObject.getConfiguration().getDbObjectForQuery2() == null ? 
+                                joinObject.getConfiguration().getDbObjectForUpdate2() == null ?
                                     view1 :
-                                        dbObject.getConfiguration().getDbObjectForUpdate2() :
-                                            dbObject.getConfiguration().getDbObjectForQuery1();
+                                        joinObject.getConfiguration().getDbObjectForUpdate2() :
+                                            joinObject.getConfiguration().getDbObjectForQuery1();
                             // Positive clauses
                             List<String> includingFilterClauses = new ArrayList<String>();
                             List<List<Object>> includingFilterValues = new ArrayList<List<Object>>();
@@ -3216,7 +3463,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                             List<List<Object>> excludingFilterValues = new ArrayList<List<Object>>();   
                             this.filterToSqlClause(
                                 conn, 
-                                dbObject,
+                                joinObject,
                                 viewAliasName + "v",
                                 view1, 
                                 view2, 
@@ -3229,16 +3476,23 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                 excludingFilterClauses, 
                                 excludingFilterValues
                             );
-                            clause += "(" + columnName + " IN (SELECT " + joinColumn + " FROM " + view1 + " " + viewAliasName + "v WHERE (1=1)";
+                            boolean isForAll = filterProperty.quantor() == Quantifier.FOR_ALL.code();
+                            clause.append(
+                                "(" + joinClauseBegin + (isForAll ? " NOT" : "") + " IN (SELECT " + joinColumn + " FROM " + view1 + " " + viewAliasName + "v WHERE " + (isForAll ? "(1=0)" : "(1=1)")
+                            );
                             for(int i = 0; i < includingFilterClauses.size(); i++) {
                                 if(includingFilterClauses.get(i).length() > 0) {
-                                    clause += " AND ";
-                                    clause += includingFilterClauses.get(i);
+                                    clause
+                                        .append(isForAll ? " OR NOT " : " AND ")
+                                        .append(includingFilterClauses.get(i));
                                     clauseValues.addAll(
                                         includingFilterValues.get(i)
                                     );
                                 }
-                            }                            
+                            }
+                            clause
+                                .append("))")
+                                .append(joinClauseEnd);
                             // Negative clauses
                             includingFilterClauses.clear();
                             includingFilterValues.clear();
@@ -3246,7 +3500,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                             excludingFilterValues.clear();   
                             this.filterToSqlClause(
                                 conn, 
-                                dbObject,
+                                joinObject,
                                 viewAliasName + "v",
                                 view1, 
                                 view2, 
@@ -3259,19 +3513,14 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                 excludingFilterClauses, 
                                 excludingFilterValues
                             );
-                            clause += "))";
                             if(!excludingFilterClauses.isEmpty()) {
-                                clause += " AND (" + columnName + " NOT IN (SELECT " + joinColumn + " FROM " + view1 + " " + viewAliasName + "v WHERE (1=0)";
-                                for(int i = 0; i < excludingFilterClauses.size(); i++) {
-                                    if(excludingFilterClauses.get(i).length() > 0) {
-                                        clause += " OR v" + columnName + " IN ";
-                                        clause += excludingFilterClauses.get(i);
-                                        clauseValues.addAll(
-                                            excludingFilterValues.get(i)
-                                        );
-                                    }
-                                }
-                                clause += "))";
+                                throw new ServiceException(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.ASSERTION_FAILURE,
+                                    "Nested queries not supported for sliced tables",
+                                    new BasicException.Parameter("filter.property", filterProperty),
+                                    new BasicException.Parameter("filter.definition", filterPropertyDef)                                
+                                );
                             }
                         }
                         else {
@@ -3283,225 +3532,78 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                 new BasicException.Parameter("filter.definition", filterPropertyDef)                                
                             );
                         }
-                    }
-                    else if (
-                        filterPropertyDef != null && // TODO should the switch be generalized?
-                        "org:openmdx:audit2:Involvement:object".equals(filterPropertyDef.objGetValue("qualifiedName"))
-                    ) { 
-                        //
-                        // Use RID and OID for query
-                        //
-                        int pos = columnName.indexOf('.') + 1;
-                        String ridColumn = columnName.substring(0, pos) + this.toRid(this.privateAttributesPrefix + columnName.substring(pos) + "_");
-                        String oidColumn = columnName.substring(0, pos) + this.toOid(this.privateAttributesPrefix + columnName.substring(pos) + "_");
-                        String separator = "(";
-                        String entry = "(" + ridColumn + " = ? AND " + oidColumn + " = ?)";
-                        for(Object value : filterProperty.getValues()) {
-                            clause += separator + entry;
-                            separator = " OR ";
-                            Path uri = new Path(this.externalizePathValue(conn,(Path)value));
-                            clauseValues.add(uri.getParent().toString());
-                            clauseValues.add(uri.getBase());
-                        }
-                        clause += ")";
                     } else {
+                        clause.append("(");
                         //
                         // Scalar filter value
                         //
-                        clause += "(" + columnName + " IN (?";
-                        clauseValues.add(
-                            this.externalizeStringValue(
-                                columnName, 
-                                filterProperty.getValue(0)
-                            )
+                        this.isInToSqlClause(
+                            conn,
+                            dbObject,
+                            columnName,
+                            filterPropertyDef,
+                            clause, 
+                            clauseValues, 
+                            filterProperty.getValues()
                         );
-                        for(
-                            int j = 1; 
-                            j < filterProperty.getValues().length; 
-                            j++
-                        ) {
-                            clause += ", ?";
-                            clauseValues.add(
-                                this.externalizeStringValue(columnName, filterProperty.getValue(j))
-                            );
-                        }
-                        clause += "))";
+                        clause.append(")");
+                        
                     }
                 }
                 break;
 
             // IS_GREATER_OR_EQUAL
             case IS_GREATER_OR_EQUAL:
-                clause += "(" + columnName + " >= " + getPlaceHolder(conn, filterProperty.getValue(0)) + ")";
+                clause.append("(").append(columnName).append(" >= ").append(getPlaceHolder(conn, filterProperty.getValue(0))).append(")");
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 break;
 
             // IS_GREATER
             case IS_GREATER:
-                clause += "(" + columnName + " > " + getPlaceHolder(conn, filterProperty.getValue(0)) + ")";
+                clause.append("(").append(columnName).append(" > ").append(getPlaceHolder(conn, filterProperty.getValue(0))).append(")");
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 break;
 
             // IS_BETWEEN
             case IS_BETWEEN:
-                clause += "((" + columnName + " >= " + getPlaceHolder(conn, filterProperty.getValue(0)) + ") AND (" + columnName + " <= " + getPlaceHolder(conn, filterProperty.getValue(1)) + "))";
+                clause.append("((").append(columnName).append(" >= ").append(getPlaceHolder(conn, filterProperty.getValue(0))).append(") AND (").append(columnName).append(" <= ").append(getPlaceHolder(conn, filterProperty.getValue(1))).append("))");
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(1)));
                 break;
 
             // IS_OUTSIDE
             case IS_OUTSIDE:
-                clause += "((" + columnName + " < " + getPlaceHolder(conn, filterProperty.getValue(0)) + ") OR (" + columnName + " > " + getPlaceHolder(conn, filterProperty.getValue(1)) + "))";
+                clause.append("((").append(columnName).append(" < ").append(getPlaceHolder(conn, filterProperty.getValue(0))).append(") OR (").append(columnName).append(" > ").append(getPlaceHolder(conn, filterProperty.getValue(1))).append("))");
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(1)));
                 break;
 
             // IS_LIKE
             case IS_LIKE:
-                clause += "(";
+                clause.append("(");
                 for(
                     int j = 0; 
                     j < filterProperty.getValues().length; 
                     j++
                 ) {
                     if(j > 0) {
-                        clause += " OR ";
+                        clause.append(" OR ");
                     }
                     Object v = filterProperty.getValue(j);
-                    if(v instanceof Path) {            
-                        Path vp = (Path)v;
-                        Set<Path> matchingPatterns = new HashSet<Path>();
-                        boolean includeSubTree = "%".equals(vp.getBase());
-                        // If path ends with % get the set of matching types
-                        if(includeSubTree) {
-                            vp = vp.getParent();
-                            for(
-                                Iterator<DbObjectConfiguration> k = this.configuration.getDbObjectConfigurations().iterator(); 
-                                k.hasNext(); 
-                            ) {
-                                DbObjectConfiguration dbObjectConfiguration = k.next();
-                                if(
-                                    (dbObjectConfiguration.getType().size() >= vp.size()) &&
-                                    vp.isLike(dbObjectConfiguration.getType().getPrefix(vp.size()))
-                                ) {
-                                    // Replace type pattern by filter value pattern
-                                    Path type = dbObjectConfiguration.getType();
-                                    Path pattern = new Path("");
-                                    for(int l = 0; l < type.size(); l++) {
-                                        if(type.get(l).equals(":*")) {
-                                            pattern.add("%");
-                                        }
-                                        else {
-                                            pattern.add(type.get(l));
-                                        }
-                                    }
-                                    matchingPatterns.add(pattern);
-                                }
-                            }
-                        }
-                        else {
-                            matchingPatterns.add(vp);           
-                        }
-                        // LIKE clause for each path pattern
-                        boolean useRidAndOidForQuery = "org:openmdx:audit2:Involvement:object".equals(
-                            filterPropertyDef.objGetValue("qualifiedName")
-                        ); // TODO should this mode be generalized?
-                        int ii = 0;
-                        for(
-                            Iterator<Path> i = matchingPatterns.iterator();
-                            i.hasNext();
-                            ii++
-                        ) {
-                            Path pattern = i.next();
-                            if(ii > 0) {
-                                clause += " OR ";
-                            } 
-                            String externalized = this.externalizePathValue(
-                                conn, 
-                                vp.getDescendant(pattern.getSuffix(vp.size()))
-                            );
-                            if(useRidAndOidForQuery) {
-                                int cPos = columnName.indexOf('.') + 1;
-                                String ridColumn = columnName.substring(0, cPos) + this.toRid(this.privateAttributesPrefix + columnName.substring(cPos) + "_");
-                                String escapeClause = getEscapeClause(conn) ;
-                                Path uri = new Path(externalized);
-                                String oidValue = uri.getBase();
-                                String ridValue = uri.getParent().toString();
-                                int rPos = ridValue.indexOf('%');
-                                if("%".equals(oidValue)) {
-                                    if(rPos < 0) {
-                                        clause += "(" + ridColumn + " = ?)";              
-                                        clauseValues.add(ridValue);
-                                    } else {
-                                        clause += "(" + ridColumn + " LIKE ? " + escapeClause + ")";              
-                                        clauseValues.add(ridValue.substring(0, rPos + 1));
-                                    }
-                                } else {
-                                    String oidColumn = columnName.substring(0, cPos) + this.toOid(this.privateAttributesPrefix + columnName.substring(cPos) + "_");
-                                    int oPos = oidValue.indexOf('%');
-                                    clause += "((";
-                                    if(rPos < 0) {
-                                        clause += ridColumn + " = ?";              
-                                        clauseValues.add(ridValue);
-                                    } else {
-                                        clause += ridColumn + " LIKE ? " + escapeClause;              
-                                        clauseValues.add(ridValue.substring(0, rPos + 1));
-                                    }
-                                    clause += ") AND (";
-                                    if(oPos < 0) {
-                                        clause += oidColumn + " = ?";              
-                                        clauseValues.add(oidValue);
-                                    } else {
-                                        clause += oidColumn + " LIKE ? " + escapeClause;              
-                                        clauseValues.add(oidValue.substring(0, oPos + 1));
-                                    }
-                                    clause += "))";
-                                }
-                            } else {
-                                clause += "(" + columnName + " LIKE ? " + getEscapeClause(conn) + ")";              
-                                int pos = externalized.indexOf("%");
-                                if(pos >= 0) {
-                                    externalized = externalized.substring(0, pos+1);
-                                }
-                                if(externalized.startsWith("xri:")) {
-                                    if(externalized.endsWith("***")) {
-                                        externalized = externalized.substring(0, externalized.length()-3) + "%";
-                                    }
-                                    pos = externalized.indexOf("**");
-                                    if(pos >= 0) {
-                                        if(includeSubTree && pos == externalized.length() - 2) {
-                                            externalized = externalized.substring(0, pos) + "%";
-                                        } else throw new ServiceException(
-                                            BasicException.Code.DEFAULT_DOMAIN,
-                                            BasicException.Code.NOT_SUPPORTED, 
-                                            "only (***|%) wildcards at the end supported",
-                                            new BasicException.Parameter("value", v),
-                                            new BasicException.Parameter("path", externalized),
-                                            new BasicException.Parameter("position", pos)                          
-                                        );
-                                    }
-                                }
-                                else if(externalized.startsWith("spice:")) {
-                                    for(int k = 0; k < ((Path)v).size(); k++) {
-                                        String c = ((Path)v).get(k);
-                                        if(c.startsWith(":") && c.endsWith("*")) {
-                                            throw new ServiceException(
-                                                BasicException.Code.DEFAULT_DOMAIN,
-                                                BasicException.Code.NOT_SUPPORTED, 
-                                                "path component pattern ':<pattern>*' not supported",
-                                                new BasicException.Parameter("path", externalized),
-                                                new BasicException.Parameter("position", i)                          
-                                            );
-                                        }
-                                    }
-                                }
-                                clauseValues.add(externalized);
-                            }
-                        }
-                    }
-                    else {
+                    if(v instanceof Path) {
+                        this.isLikeToSqlClause(
+                            conn, 
+                            dbObject, 
+                            columnName, 
+                            true, 
+                            filterPropertyDef, 
+                            clause, 
+                            clauseValues, 
+                            (Path) v
+                        );
+                    } else {
                         String externalized = (String)this.externalizeStringValue(columnName, v);
-                        externalized = this.sqlWildacrds.fromJDO(externalized);
+                        externalized = this.sqlWildcards.fromJDO(externalized);
                         if(externalized.startsWith(JDO_CASE_INSENSITIVE_FLAG)) {
                             String databaseProductName = "N/A";
                             try {
@@ -3512,7 +3614,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                 // ignore
                             }
                             if(databaseProductName.startsWith("DB2")) {
-                                clause += "(UPPER(" + columnName + ") LIKE ? " + getEscapeClause(conn) + " OR LOWER(" + columnName + ") LIKE ? " + getEscapeClause(conn) + ")";                                
+                                clause.append("(UPPER(").append(columnName).append(") LIKE ? ").append(getEscapeClause(conn)).append(" OR LOWER(").append(columnName).append(") LIKE ? ").append(getEscapeClause(conn)).append(")");                                
                                 clauseValues.add(
                                     externalized.substring(JDO_CASE_INSENSITIVE_FLAG.length()).toUpperCase()
                                 );
@@ -3521,7 +3623,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                 );
                             }
                             else {
-                                clause += "(UPPER(" + columnName + ") LIKE UPPER(?) " + getEscapeClause(conn) + " OR LOWER(" + columnName + ") LIKE ? " + getEscapeClause(conn) + " OR UPPER(" + columnName + ") LIKE ? " + getEscapeClause(conn) + ")";
+                                clause.append("(UPPER(").append(columnName).append(") LIKE UPPER(?) ").append(getEscapeClause(conn)).append(" OR LOWER(").append(columnName).append(") LIKE ? ").append(getEscapeClause(conn)).append(" OR UPPER(").append(columnName).append(") LIKE ? ").append(getEscapeClause(conn)).append(")");
                                 clauseValues.add(
                                     externalized.substring(JDO_CASE_INSENSITIVE_FLAG.length())
                                 );
@@ -3534,24 +3636,24 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                             }
                         }
                         else {
-                            clause += "(" + columnName + " LIKE ? " + getEscapeClause(conn) + ")";
+                            clause.append("(").append(columnName).append(" LIKE ? ").append(getEscapeClause(conn)).append(")");
                             clauseValues.add(externalized);                  
                         }
                     }
                 }
-                clause += ")";
+                clause.append(")");
                 break;
 
             // IS_UNLIKE
             case IS_UNLIKE:
-                clause += "(";
+                clause.append("(");
                 for(
                     int j = 0; 
                     j < filterProperty.getValues().length; 
                     j++
                 ) {
                     if(j > 0) {
-                        clause += " AND ";
+                        clause.append(" AND ");
                     }
                     Object v = filterProperty.getValue(j);
                     if(v instanceof Path) {
@@ -3561,18 +3663,14 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         boolean includeSubTree = "%".equals(vp.getBase());
                         // If path ends with % get the set of matching types
                         if(includeSubTree) {
-                            vp.remove(vp.size()-1);
-                            for(
-                                Iterator<DbObjectConfiguration> i = this.configuration.getDbObjectConfigurations().iterator(); 
-                                i.hasNext(); 
-                            ) {
-                                DbObjectConfiguration dbObject = i.next();
+                            vp = vp.getPrefix(vp.size()-1);
+                            for(DbObjectConfiguration dbObjectConfiguration : this.configuration.getDbObjectConfigurations()) {
                                 if(
-                                    (dbObject.getType().size() > vp.size()) &&
-                                    vp.isLike(dbObject.getType().getPrefix(vp.size()))
+                                    (dbObjectConfiguration.getType().size() > vp.size()) &&
+                                    vp.isLike(dbObjectConfiguration.getType().getPrefix(vp.size()))
                                 ) {
                                     matchingTypes.add(
-                                        dbObject.getType()
+                                        dbObjectConfiguration.getType()
                                     );
                                 }
                             }
@@ -3586,12 +3684,12 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         ) {
                             Path type = (Path)i.next();
                             if(ii > 0) {
-                                clause += " AND ";
+                                clause.append(" AND ");
                             }
-                            clause += "(NOT (" + columnName + " LIKE ? " + getEscapeClause(conn) + "))";
+                            clause.append("(NOT (").append(columnName).append(" LIKE ? ").append(getEscapeClause(conn)).append("))");
                             String externalized = this.externalizePathValue(
-                                conn, 
-                                new Path(vp).addAll(type.getSuffix(vp.size()))
+                                conn,
+                                vp.getDescendant(type.getSuffix(vp.size()))
                             );
                             int pos = externalized.indexOf("%");
                             if(pos >= 0) {
@@ -3616,8 +3714,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                                 }
                             }
                             else if(externalized.startsWith("spice:")) {
-                                for(int k = 0; k < ((Path)v).size(); k++) {
-                                    String c = ((Path)v).get(k);
+                                for(String c : (Path)v){
                                     if(c.startsWith(":") && c.endsWith("*")) {
                                         throw new ServiceException(
                                             BasicException.Code.DEFAULT_DOMAIN,
@@ -3634,50 +3731,50 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     }
                     else {
                         String externalized = (String)this.externalizeStringValue(columnName, v);
-                        externalized = this.sqlWildacrds.fromJDO(externalized);
+                        externalized = this.sqlWildcards.fromJDO(externalized);
                         if(externalized.startsWith(JDO_CASE_INSENSITIVE_FLAG)) {
-                            clause += "(NOT (UPPER(" + columnName + ") LIKE ? " + getEscapeClause(conn) + "))";
+                            clause.append("(NOT (UPPER(").append(columnName).append(") LIKE ? ").append(getEscapeClause(conn)).append("))");
                             clauseValues.add(
                                 externalized.substring(JDO_CASE_INSENSITIVE_FLAG.length()).toUpperCase()
                             );
                         }
                         else {
-                            clause += "(NOT (" + columnName + " LIKE ? " + getEscapeClause(conn) + "))";
+                            clause.append("(NOT (").append(columnName).append(" LIKE ? ").append(getEscapeClause(conn)).append("))");
                             clauseValues.add(externalized);                  
                         }
                     }
                 }
-                clause += ")";
+                clause.append(")");
                 break;
 
             // SOUNDS_LIKE
             case SOUNDS_LIKE:
-                clause += "(SOUNDEX(" + columnName + ") IN (SOUNDEX(?)";
+                clause.append("(SOUNDEX(").append(columnName).append(") IN (SOUNDEX(?)");
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 for(
                     int j = 1; 
                     j < filterProperty.getValues().length; 
                     j++
                 ) {
-                    clause += ", SOUNDEX(?)";
+                    clause.append(", SOUNDEX(?)");
                     clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(j)));
                 }
-                clause += "))";
+                clause.append("))");
                 break;
 
             // SOUNDS_UNLIKE
             case SOUNDS_UNLIKE:
-                clause += "(SOUNDEX(" + columnName + ") NOT IN (SOUNDEX(?)";
+                clause.append("(SOUNDEX(").append(columnName).append(") NOT IN (SOUNDEX(?)");
                 clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(0)));
                 for(
                     int j = 1; 
                     j < filterProperty.getValues().length; 
                     j++
                 ) {
-                    clause += ", SOUNDEX(?)";
+                    clause.append(", SOUNDEX(?)");
                     clauseValues.add(this.externalizeStringValue(columnName, filterProperty.getValue(j)));
                 }
-                clause += "))";
+                clause.append("))");
                 break;
 
             // unsupported
@@ -3689,7 +3786,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     new BasicException.Parameter("operator", ConditionType.valueOf(operator))
                 );
         }
-        return clause;
+        return clause.toString();
     }
 
     //------------------------------------------------------------------------
@@ -3768,25 +3865,19 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         for(int i = 0; i < filterProperties.size(); i++) {
             FilterProperty filterProperty = filterProperties.get(i);
             ModelElement_1_0 filterPropertyDef = filterPropertyDefs.get(i);
-            if(
-                (filterPropertyDef != null) &&
+            final boolean primaryFilterProprty;
+            if(filterPropertyDef == null) {
+                primaryFilterProprty = this.singleValueAttributes.contains(filterProperty.name());
+            } else if(
                 filterPropertyDef.isReferenceType() && 
                 !this.getModel().referenceIsStoredAsAttribute(filterPropertyDef)
             ) {
-                primaryFilterProperties.add(filterProperty);
+            	primaryFilterProprty = true;
+        	} else {
+            	primaryFilterProprty = ModelHelper.getMultiplicity(filterPropertyDef).isSingleValued();
             }
-            else {
-                String filterPropertyMultiplicity = filterPropertyDef == null ?
-                    this.singleValueAttributes.contains(filterProperty.name()) ? 
-                        Multiplicities.SINGLE_VALUE : 
-                            Multiplicities.MULTI_VALUE :
-                                ModelUtils.getMultiplicity(filterPropertyDef);
-                if(
-                    Multiplicities.OPTIONAL_VALUE.equals(filterPropertyMultiplicity) || 
-                    Multiplicities.SINGLE_VALUE.equals(filterPropertyMultiplicity)
-                ) {
-                    primaryFilterProperties.add(filterProperty);
-                }
+            if(primaryFilterProprty) {
+                primaryFilterProperties.add(filterProperty);
             }
         }
         return primaryFilterProperties;
@@ -3811,7 +3902,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         boolean removeNonPersistent, 
         boolean removeSize
     ) throws ServiceException {
-        Object_2Facade facade = ResourceHelper.getObjectFacade(object);
+        Object_2Facade facade = Facades.asObject(object);
         MappedRecord value = facade.getValue();
         ModelElement_1_0 classifierDef = null;
         classifierDef = this.getModel().findElement(value.getRecordName());
@@ -3823,26 +3914,29 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 new BasicException.Parameter("object", value)
             );
         }
-        Features: for(
+        for(
             Iterator<String> i = facade.getValue().keySet().iterator();
             i.hasNext();
         ) {
             String attributeName = i.next();
-            // Private attributes
-            if(attributeName.startsWith(this.privateAttributesPrefix)) {
+            if(attributeName.startsWith(getPrivateAttributesPrefix())) {
+                //
+                // Private attributes
+                //
                 if(removePrivate) {
                     i.remove();
                 }
-            }   
-            // Size attributes
-            else if(attributeName.endsWith(SIZE_SUFFIX)) {
+            } else if(attributeName.endsWith(SIZE_SUFFIX)) {
+                //
+                // Size attributes
+                //
                 if(removeSize) {
                     i.remove();
                 }               
-            }
-            // Application attributes
-            else {
-                if(SystemAttributes.OBJECT_CLASS.equals(attributeName)) continue Features;
+            } else if(!SystemAttributes.OBJECT_CLASS.equals(attributeName)){
+                //
+                // Application attributes
+                //
                 ModelElement_1_0 featureDef;
                 if(classifierDef == null){
                     featureDef = null;
@@ -3856,17 +3950,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         SysLog.log(Level.FINE, "Sys|No feature definition found|{0}#{1}", value.getRecordName(), attributeName);
                     }
                 }
-                String featureName;
-                if(featureDef == null) {
-                    featureName = null;
-                    if(SYSTEM_ATTRIBUTES.contains(attributeName)) continue Features;
-                } else {
-                    featureName = (String) featureDef.objGetValue("qualifiedName"); 
-                }
-                if(
-                    (removeNonPersistent && this.nonPersistentFeatures.contains(featureName)) ||
-                    (featureDef == null)
-                ){
+                if(featureDef == null ? !SYSTEM_ATTRIBUTES.contains(attributeName) : (removeNonPersistent && !this.isPersistent(featureDef))) {
                     i.remove();
                 }
             }
@@ -3877,7 +3961,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     protected void normalizeDateTimeValues(
         MappedRecord object
     ) throws ServiceException {
-        Object_2Facade facade = ResourceHelper.getObjectFacade(object);
+        Object_2Facade facade = Facades.asObject(object);
         // replace values if necessary
         for(
             Iterator<String> i = facade.getValue().keySet().iterator();
@@ -3920,10 +4004,13 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     private void setLockAssertion(
         MappedRecord object
     ) throws ServiceException{
-        Object_2Facade facade = ResourceHelper.getObjectFacade(object);
+        Object_2Facade facade = Facades.asObject(object);
         String objectClass = facade.getObjectClass();
         Model_1_0 model = getModel();
-        if(model.isSubtypeOf(objectClass, "org:openmdx:base:Removable")) {
+        if(
+        	model.isSubtypeOf(objectClass, "org:openmdx:base:Removable") &&
+        	!this.nonPersistentFeatures.contains("org:openmdx:base:Removable:removedAt")
+        ) {
             setLockAssertion(facade, "removedAt");
         } else if(model.isSubtypeOf(objectClass, "org:openmdx:base:Modifiable")) {
             setLockAssertion(facade, "modifiedAt");
@@ -3943,33 +4030,9 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     protected void completeReply(
         DataproviderReply reply
     ) throws ServiceException {
-        for(int i = 0; i < reply.getObjects().length; i++) {
-            this.completeObject(
-                reply.getObjects()[i]
-            );
+        for(MappedRecord object : reply.getObjects()) {
+            this.completeObject(object);
         }
-    }
-
-    //---------------------------------------------------------------------------
-    protected MappedRecord addBeforeImage(
-        MappedRecord obj,
-        MappedRecord beforeImage
-    ) throws ServiceException {
-        Object_2Facade objFacade = ResourceHelper.getObjectFacade(obj);
-        Object_2Facade beforeImageFacade = ResourceHelper.getObjectFacade(beforeImage);
-        for(
-            Iterator<String> i = beforeImageFacade.getValue().keySet().iterator();
-            i.hasNext();
-        ) {
-            String attributeName = i.next();
-            if(attributeName.indexOf(':')<0) {
-                objFacade.getValue().put(
-                    SystemAttributes.CONTEXT_PREFIX + "BeforeImage:" + attributeName,
-                    beforeImageFacade.attributeValues(attributeName)
-                );
-            }
-        }
-        return obj;
     }
 
     //---------------------------------------------------------------------------
@@ -4076,8 +4139,28 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 isQuery
             );
         }
+        else if(LayerConfigurationEntries.DB_OBJECT_FORMAT_SLICED2.equals(configuration.getDbObjectFormat())) {
+            return new SlicedDbObject2(
+                this,
+                conn,
+                configuration,
+                adjustedAccessPath,
+                isExtent,
+                isQuery
+            );
+        }
         else if(LayerConfigurationEntries.DB_OBJECT_FORMAT_SLICED_NON_INDEXED.equals(configuration.getDbObjectFormat())) {
             return new SlicedDbObjectNonIndexed(
+                this,
+                conn,
+                configuration,
+                adjustedAccessPath,
+                isExtent,
+                isQuery
+            );
+        }
+        else if(LayerConfigurationEntries.DB_OBJECT_FORMAT_SLICED2_NON_INDEXED.equals(configuration.getDbObjectFormat())) {
+            return new SlicedDbObject2NonIndexed(
                 this,
                 conn,
                 configuration,
@@ -4096,8 +4179,28 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 isQuery
             );
         }
+        else if(LayerConfigurationEntries.DB_OBJECT_FORMAT_SLICED2_PARENT_RID_ONLY.equals(configuration.getDbObjectFormat())) {
+            return new SlicedDbObject2ParentRidOnly(
+                this,
+                conn,
+                configuration,
+                adjustedAccessPath,
+                isExtent,
+                isQuery
+            );
+        }
         else if(LayerConfigurationEntries.DB_OBJECT_FORMAT_SLICED_NON_INDEXED_PARENT_RID_ONLY.equals(configuration.getDbObjectFormat())) {
             return new SlicedDbObjectNonIndexedParentRidOnly(
+                this,
+                conn,
+                configuration,
+                adjustedAccessPath,
+                isExtent,
+                isQuery
+            );
+        }
+        else if(LayerConfigurationEntries.DB_OBJECT_FORMAT_SLICED2_NON_INDEXED_PARENT_RID_ONLY.equals(configuration.getDbObjectFormat())) {
+            return new SlicedDbObject2NonIndexedParentRidOnly(
                 this,
                 conn,
                 configuration,
@@ -4127,18 +4230,17 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             );
         }
         else {
-            DbObject dbObject = null;
             try {
-                Class<DbObject> dbObjectClass = Classes.<DbObject>getApplicationClass(configuration.getDbObjectFormat());
-                Constructor<DbObject> constructor = dbObjectClass.getConstructor(
+                return Classes.<DbObject>getApplicationClass(
+                    configuration.getDbObjectFormat()
+                ).getConstructor(
                     AbstractDatabase_1.class,
                     Connection.class,
                     DbObjectConfiguration.class,
                     Path.class,
                     boolean.class,
                     boolean.class
-                );
-                dbObject = constructor.newInstance(
+                ).newInstance(
                     this,
                     conn,
                     configuration,
@@ -4146,8 +4248,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     Boolean.valueOf(isExtent),
                     Boolean.valueOf(isQuery)
                 );
-            }
-            catch(Exception e) {
+            } catch(Exception e) {
                 throw new ServiceException(
                     e,
                     BasicException.Code.DEFAULT_DOMAIN,
@@ -4157,7 +4258,6 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     new BasicException.Parameter("type", configuration.getDbObjectFormat())
                 );
             }
-            return dbObject;
         }
     }
 
@@ -4309,23 +4409,23 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             if(useReferenceClause) {
                 List<Object> referenceValues = dbObject.getReferenceValues();
                 statementParameters.addAll(referenceValues);
-                for(int i = 0; i < referenceValues.size(); i++) {
+                for(Object referenceValue : referenceValues){
                     AbstractDatabase_1.this.setPreparedStatementValue(
                         conn, 
                         ps, 
                         pos++, 
-                        referenceValues.get(i)
+                        referenceValue
                     );
                 }
             }
             List<Object> objectIdValues = dbObject.getObjectIdValues();
             statementParameters.addAll(objectIdValues);
-            for(int i = 0; i < objectIdValues.size(); i++) {
+            for(Object objectIdValue : objectIdValues) {
                 AbstractDatabase_1.this.setPreparedStatementValue(
                     conn,
                     ps, 
                     pos++, 
-                    objectIdValues.get(i)
+                    objectIdValue
                 );
             }      
             rs = AbstractDatabase_1.this.executeQuery(
@@ -4561,7 +4661,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         } catch(NullPointerException exception) {
             exception.printStackTrace();
             throw new ServiceException(exception);
-        } catch(Exception exception) {
+        } catch(RuntimeException exception) {
             throw new ServiceException(
                 exception, 
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -4629,9 +4729,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     request.attributeSelector(),
                     // Attribute specifiers are ignored by Database_1 except in case of attributeSelector==SPECIFIED_AND_SYSTEM_ATTRIBUTES.
                     // Save the possibly expensive call to attributeSpecifierAsMap
-                    request.attributeSelector() == AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES ?
-                        request.attributeSpecifierAsMap() :
-                            Collections.emptyMap(),
+                    request.attributeSelector() == AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES || request.attributeSelector() == AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES ? request.attributeSpecifierAsMap() : Collections.emptyMap(),
                     false, // objectClassAsAttribute
                     reply
                 );
@@ -4766,26 +4864,38 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         if((queryFilterContext + Database_1_Attributes.QUERY_FILTER_CLAUSE).equals(p.name())) {
                             queryFilterClause = (String)p.getValue(0);
                             countResultSet = queryFilterClause.indexOf(Database_1_Attributes.HINT_COUNT) >= 0;
-                            // !COLUMNS
-                            int posColumnSelector = queryFilterClause.indexOf(Database_1_Attributes.HINT_COLUMN_SELECTOR);
-                            if(posColumnSelector >= 0) {
-                                columnSelector = queryFilterClause.substring(
-                                    posColumnSelector + Database_1_Attributes.HINT_COLUMN_SELECTOR.length(),
-                                    queryFilterClause.indexOf("*/", posColumnSelector)
-                                );
+                            {
+                                // !COLUMNS
+                                int start = queryFilterClause.indexOf(Database_1_Attributes.HINT_COLUMN_SELECTOR);
+                                if(start >= 0) {
+                                    int end = queryFilterClause.indexOf("*/", start);
+                                    columnSelector = queryFilterClause.substring(
+                                        start + Database_1_Attributes.HINT_COLUMN_SELECTOR.length(),
+                                        end
+                                    );
+                                    queryFilterClause =
+                                        queryFilterClause.substring(0, start) + 
+                                        queryFilterClause.substring(end + 2);                                
+                                }
                             }
                             // !ORDER BY
-                            int posOrderBy = queryFilterClause.indexOf(Database_1_Attributes.HINT_ORDER_BY);
-                            if(posOrderBy >= 0) {
-                                String orderByClause = queryFilterClause.substring(
-                                    posOrderBy + Database_1_Attributes.HINT_ORDER_BY.length(),
-                                    queryFilterClause.indexOf("*/", posOrderBy)
-                                );
-                                StringTokenizer tokenizer = new StringTokenizer(orderByClause, ",", false);
-                                while(tokenizer.hasMoreTokens()) {
-                                    orderBy.add(tokenizer.nextToken());
+                            {
+                                int start = queryFilterClause.indexOf(Database_1_Attributes.HINT_ORDER_BY);
+                                if(start >= 0) {
+                                    int end = queryFilterClause.indexOf("*/", start);
+                                    String orderByClause = queryFilterClause.substring(
+                                        start + Database_1_Attributes.HINT_ORDER_BY.length(),
+                                        end
+                                    );
+                                    StringTokenizer tokenizer = new StringTokenizer(orderByClause, ",", false);
+                                    while(tokenizer.hasMoreTokens()) {
+                                        orderBy.add(tokenizer.nextToken());
+                                    }
+                                    queryFilterClause =
+                                        queryFilterClause.substring(0, start) + 
+                                        queryFilterClause.substring(end + 2);                                
                                 }
-                            }                         
+                            }
                         }
                         // Parameters
                         else {
@@ -4801,19 +4911,9 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                             (p.operator() == ConditionType.IS_IN.code()) &&
                             (p.quantor()  == Quantifier.THERE_EXISTS.code())
                         ) {
-                            List<ModelElement_1_0> classDefs = new ArrayList<ModelElement_1_0>(); 
-                            for(Object qualifiedClassName: p.getValues()) {
-                                ModelElement_1_0 classDef =  this.getModel().getDereferencedType(qualifiedClassName);
-                                if(
-                                    !"org:openmdx:base:ExtentCapable".equals(qualifiedClassName) &&
-                                    (classDef != null)
-                                ) {                                 
-                                    classDefs.add(classDef);                                   
-                                }      
-                            }
                             FilterProperty mappedFilterProperty = AbstractDatabase_1.this.mapInstanceOfFilterProperty(
                                 request,
-                                classDefs.toArray(new ModelElement_1_0[classDefs.size()])
+                                (Collection<String>) ((Collection<?>) Arrays.asList(p.getValues()))
                             );
                             if(mappedFilterProperty != null) {
                                 filterProperties.add(mappedFilterProperty);
@@ -4845,7 +4945,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     i < request.attributeSpecifier().length; 
                     i++
                 ) {
-                    // only add to orderBy set if unspecified order
+                    // Add to orderBy set unless the order is UNSORTED
                     if(request.attributeSpecifier()[i].order() != SortOrder.UNSORTED.code()) {
                         String attributeName = request.attributeSpecifier()[i].name();
                         orderBy.add(attributeName);
@@ -4964,7 +5064,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         int index = Integer.valueOf(queryFilterClause.substring(pos+2, pos+3)).intValue();
                         if(queryFilterClause.startsWith("?s", pos)) {
                             statementParameters.add(
-                                AbstractDatabase_1.this.sqlWildacrds.fromJDO(((String)queryFilterParameters.get("stringParam").get(index)))
+                                AbstractDatabase_1.this.sqlWildcards.fromJDO(((String)queryFilterParameters.get("stringParam").get(index)))
                             );
                         }
                         else if(queryFilterClause.startsWith("?i", pos)) {
@@ -4983,6 +5083,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                             );
                         }
                         else if(queryFilterClause.startsWith("?d", pos)) {
+                        	// TODO CR20019719 verify whether replacement is done
                             statementParameters.add(
                                 queryFilterParameters.get("dateParam").get(index)
                             );
@@ -5019,28 +5120,23 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     }
                 }
                 // Negative attribute filter
-                boolean hasExcludingClauses = false;
-                for(
-                    int i = 0; 
-                    i < exludingClauses.size(); 
-                    i++
-                ) {
-                    hasExcludingClauses = hasExcludingClauses || (exludingClauses.get(i).length() > 0);
-                }
-                if(hasExcludingClauses) {
-                    for(
-                        int i = 0; 
-                        i < exludingClauses.size(); 
-                        i++
-                    ) {
-                        String filterClause = exludingClauses.get(i);
-                        if(filterClause.length() > 0) { 
-                            statement += " AND ";
-                            statement += filterClause;
-                            statementParameters.addAll(
-                                excludingClausesValues.get(i)
-                            );
+                ExcludingClauses: for(String exludingClause : exludingClauses){
+                    if(exludingClause.length() > 0) {
+                        for(
+                            int i = 0; 
+                            i < exludingClauses.size(); 
+                            i++
+                        ) {
+                            String filterClause = exludingClauses.get(i);
+                            if(filterClause.length() > 0) { 
+                                statement += " AND ";
+                                statement += filterClause;
+                                statementParameters.addAll(
+                                    excludingClausesValues.get(i)
+                                );
+                            }
                         }
+                        break ExcludingClauses;
                     }
                 }
                 // ORDER BY
@@ -5057,7 +5153,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         boolean viewIsIndexed = dbObject.getIndexColumn() != null;              
                         statement += hasOrderBy ? ", " : " ";
                         // order on mixin view (vm.) in case of indexed slices, otherwise on primary view (v.)
-                        statement += (viewIsIndexed ? "vm." : "v.") + getColumnName(conn, specifier.name(), 0, false, true) + (specifier.order() == SortOrder.DESCENDING.code() ? " DESC" : " ASC");
+                        statement += (viewIsIndexed ? "vm." : "v.") + getColumnName(conn, specifier.name(), 0, false, true, false) + (specifier.order() == SortOrder.DESCENDING.code() ? " DESC" : " ASC");
                         hasOrderBy = true;
                     }
                 }
@@ -5065,15 +5161,15 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 if(dbObject.getIndexColumn() != null) {
                     if(!hasOrderBy) statement += " ORDER BY"; 
                     // rid
-                    for(int i = 0; i < dbObject.getReferenceColumn().size(); i++) {
+                    for(String referenceColumn : dbObject.getReferenceColumn()){
                         statement += hasOrderBy ? ", " : " ";
-                        statement += "v." + dbObject.getReferenceColumn().get(i);
+                        statement += "v." + referenceColumn;
                         hasOrderBy = true;
                     }
                     // oid
-                    for(int i = 0; i < dbObject.getObjectIdColumn().size(); i++) {
+                    for(Object objectIdColumn : dbObject.getObjectIdColumn()) {
                         statement += hasOrderBy ? ", " : " ";
-                        statement += "v." + dbObject.getObjectIdColumn().get(i);         
+                        statement += "v." + objectIdColumn;         
                         hasOrderBy = true;
                     }
                     // idx
@@ -5141,7 +5237,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 );
                 // Complete requested attributes
                 if(!objects.isEmpty()) {
-                    Object_2Facade facade2 = ResourceHelper.getObjectFacade(objects.get(0));
+                    Object_2Facade facade2 = Facades.asObject(objects.get(0));
                     boolean fetchAll = false;          
                     if(request.attributeSelector() == AttributeSelectors.ALL_ATTRIBUTES) {
                         fetchAll = true;
@@ -5170,23 +5266,27 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         String statement2 =
                             "SELECT v.* FROM " + (dbObject2.getConfiguration().getDbObjectForQuery2() == null ? dbObject2.getConfiguration().getDbObjectForUpdate2() : dbObject.getConfiguration().getDbObjectForQuery2()) + " v" +
                             " WHERE (";
-                        for(int i = 0; i < objects.size(); i++) {
+                        String separator = "";
+                        for(MappedRecord object : objects){
                             dbObject2 = AbstractDatabase_1.this.createDbObject(
                                 conn, 
-                                Object_2Facade.getPath(objects.get(i)), 
+                                Object_2Facade.getPath(object), 
                                 true
-                            );      
-                            if(i > 0) statement2 += " OR ";
+                            );
+                            
+                            statement2 += separator;
                             statement2 += dbObject2.getObjectIdClause();
                             statementParameters2.addAll(
                                 dbObject2.getObjectIdValues()
                             );
+                            separator = " OR ";
                         }
                         statement2 += ") ORDER BY ";
-                        for(int i = 0; i < dbObject2.getObjectIdColumn().size(); i++) {
-                            if(i > 0) statement2 += ",";
-                            Object objectIdColumn = dbObject2.getObjectIdColumn().get(i);
+                        separator = "";
+                        for(Object objectIdColumn : dbObject2.getObjectIdColumn()) {
+                            statement2 += separator;
                             statement2 += "v." + objectIdColumn; 
+                            separator = ",";
                         }
                         statement2 += ", v." + AbstractDatabase_1.this.OBJECT_IDX;
                         PreparedStatement ps2 = AbstractDatabase_1.this.prepareStatement(
@@ -5248,7 +5348,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 lastRowCount = AbstractDatabase_1.this.resultSetGetRow(rs);
                 rs.close(); rs = null;
                 ps.close(); ps = null;
-                SysLog.detail("*** hasMore", hasMore + "; objects.size()="  + objects.size());
+                SysLog.log(Level.FINE, "Sys|*** hasMore={0}|objects.size()={1}", hasMore, objects.size());
     
                 // reply 
                 reply.getResult().addAll(objects);
@@ -5261,7 +5361,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                 // Calculate context.TOTAL only at iteration start
                 if(request.operation() == DataproviderOperations.ITERATION_START) {      
                     // if !hasMore context.TOTAL = request.position() + objects.size()
-                    if(!hasMore && ((request.position() == 0) || objects.size() > 0)) {
+                    if(!hasMore && ((request.position() == 0) || !objects.isEmpty())) {
                         reply.setTotal(
                             Integer.valueOf(request.position() + objects.size())
                         );
@@ -5415,19 +5515,14 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     this.newDataproviderReply()
                 ).getObject();
                 // Remove object ...
-                DbObject dbObject = AbstractDatabase_1.this.createDbObject(
+                AbstractDatabase_1.this.createDbObject(
                     conn,
                     request.path(),
                     true
-                );
-                dbObject.remove();
+                ).remove();
                 // ... and its composites
                 Map<Path,DbObjectConfiguration> processedDbObjectConfigurations = new HashMap<Path,DbObjectConfiguration>();
-                for(
-                    Iterator<DbObjectConfiguration> i = AbstractDatabase_1.this.configuration.getDbObjectConfigurations().iterator();
-                    i.hasNext();
-                ) {
-                    DbObjectConfiguration dbObjectConfiguration = i.next();
+                for(DbObjectConfiguration dbObjectConfiguration : AbstractDatabase_1.this.configuration.getDbObjectConfigurations()) {
                     if(
                         (dbObjectConfiguration.getType().size() > accessPath.size()) &&
                         accessPath.isLike(dbObjectConfiguration.getType().getPrefix(accessPath.size())) &&
@@ -5459,13 +5554,12 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                         }
                         // Remove if not processed
                         if(!processed) {
-                            dbObject = AbstractDatabase_1.this.createDbObject(
+                            AbstractDatabase_1.this.createDbObject(
                                 conn,
                                 dbObjectConfiguration,
                                 request.path(),
                                 true
-                            );
-                            dbObject.remove();
+                            ).remove();
                             processedDbObjectConfigurations.put(
                                 dbObjectConfiguration.getType(),
                                 dbObjectConfiguration
@@ -5474,7 +5568,7 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     }
                 }
                 // Clean up REF table
-                if(!AbstractDatabase_1.this.useNormalizedReferences) {
+                if(!AbstractDatabase_1.this.useNormalizedReferences()) {
                     statementParameters = new ArrayList<Object>();
                     PreparedStatement ps = AbstractDatabase_1.this.prepareStatement(
                         conn,
@@ -5524,7 +5618,6 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         }
     
         //---------------------------------------------------------------------------
-        @SuppressWarnings("deprecation")
         @Override
         public boolean put(
             RestInteractionSpec ispec,
@@ -5533,8 +5626,6 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         ) throws ServiceException {
             ServiceHeader header = this.getServiceHeader();
             DataproviderRequest request = this.newDataproviderRequest(ispec, input);
-            DataproviderReply reply = this.newDataproviderReply(output);
-
             SysLog.detail("> replace", request.object());
             AbstractDatabase_1.this.configuration.load();
             
@@ -5550,154 +5641,132 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
                     Object_2Facade.getPath(object),
                     true
                 );
-                // Extent supports object replacement
-                if(dbObject.supportsObjectReplacement()) {
-                    MappedRecord newValue = Object_2Facade.getValue(object);
-                    byte[] expectedVersion = getVersion(object);
-                    // Get current object with ALL_ATTRIBUTES. objectClassAsAttribute=true
-                    // asserts that empty rows (all columns with null values) are not truncated
-                    MappedRecord obj = AbstractDatabase_1.this.get(
-                        conn,
-                        header,
-                        request.path(),
-                        AttributeSelectors.ALL_ATTRIBUTES,
-                        Collections.EMPTY_MAP,
-                        true, // objectClassAsAttribute
-                        this.newDataproviderReply()
-                    ).getObject();
-                    MappedRecord oldValue = Object_2Facade.getValue(obj);
-                    MappedRecord beforeImage = Object_2Facade.cloneObject(obj);
-                    if(!newValue.isEmpty()) {
-                        MappedRecord[] oldSlices = dbObject.sliceAndNormalizeObject(obj, false);
-                        // Replace attribute values
-                        oldValue.putAll(newValue);
-                        AbstractDatabase_1.this.removeAttributes(
-                            obj, 
-                            true, // removePrivate
-                            true, // removeNonPersistent
-                            true // removeSize
-                        );
-                        MappedRecord[] newSlices = dbObject.sliceAndNormalizeObject(obj, true);
-                        // Replace existing slices
-                        for(
-                            int i = 0; 
-                            i < java.lang.Math.min(oldSlices.length, newSlices.length);
-                            i++
-                        ) {
-                            if(!newSlices[i].equals(oldSlices[i])) {
-                                dbObject.replaceObjectSlice(
-                                    i,
-                                    newSlices[i],
-                                    oldSlices[i], 
-                                    i == 0 ? getLockAssertion(expectedVersion) : null
-                                );
-                            }
-                        }
-                        // Remove extra old slices
-                        if(oldSlices.length > newSlices.length) {
-                            boolean isIndexed;
-                            if(dbObject.getConfiguration().getDbObjectForUpdate2() != null) {
-                                isIndexed = true;
-                                ps = AbstractDatabase_1.this.prepareStatement(
-                                    conn,
-                                    currentStatement = 
-                                        "DELETE FROM " + dbObject.getConfiguration().getDbObjectForUpdate2() + 
-                                        " WHERE " + 
-                                        AbstractDatabase_1.this.removeViewPrefix(
-                                            dbObject.getReferenceClause() + 
-                                            " AND " + dbObject.getObjectIdClause() + 
-                                            " AND (" + OBJECT_IDX + " >= ?)"
-                                        )
-                                );            
-                            }
-                            else {
-                                isIndexed = dbObject.getIndexColumn() != null;
-                                ps = AbstractDatabase_1.this.prepareStatement(
-                                    conn,
-                                    currentStatement = 
-                                        "DELETE FROM " + dbObject.getConfiguration().getDbObjectForUpdate1() + 
-                                        " WHERE " + 
-                                        AbstractDatabase_1.this.removeViewPrefix(
-                                            dbObject.getReferenceClause() + 
-                                            " AND " + dbObject.getObjectIdClause() + 
-                                            (isIndexed ? " AND (" + dbObject.getIndexColumn() + " >= ?)" : "")
-                                        )
-                                );
-                            }
-                            int pos = 1;
-                            List<Object> referenceValues = dbObject.getReferenceValues();
-                            for(int i = 0; i < referenceValues.size(); i++) {
-                                AbstractDatabase_1.this.setPreparedStatementValue(
-                                    conn,
-                                    ps, 
-                                    pos++, 
-                                    referenceValues.get(i)
-                                );
-                            }
-                            objectIdValues = dbObject.getObjectIdValues();
-                            for(int i = 0; i < objectIdValues.size(); i++) {
-                                AbstractDatabase_1.this.setPreparedStatementValue(
-                                    conn,
-                                    ps, 
-                                    pos++, 
-                                    objectIdValues.get(i)
-                                );
-                            }
-                            if(isIndexed) {
-                                ps.setInt(pos++, newSlices.length);
-                            }
-                            executeUpdate(ps, currentStatement, objectIdValues);
-                        }
-                        // Create extra new slices
-                        if(newSlices.length > oldSlices.length) {
-                            String objectClass = Object_2Facade.getObjectClass(object);
-                            for(
-                                int i = oldSlices.length;
-                                i < newSlices.length;
-                                i++
-                            ) {
-                                dbObject.createObjectSlice(
-                                    i,
-                                    objectClass,
-                                    newSlices[i]
-                                );
-                            }
-                        }
-                    } else if(expectedVersion != null){
-                        byte[] actualVersion = getVersion(obj);
-                        if(Arrays.equals(expectedVersion, actualVersion)) {
-                            removePrivateAttributes(obj);
-                        } else {
-                            throw new ServiceException(
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-                                "The object has been modified in the meanwhile",
-                                new BasicException.Parameter("path", Object_2Facade.getPath(object)),
-                                new BasicException.Parameter("expected", expectedVersion),
-                                new BasicException.Parameter("actual", actualVersion)
+                MappedRecord newValue = Object_2Facade.getValue(object);
+                byte[] expectedVersion = getVersion(object);
+                // Get current object with ALL_ATTRIBUTES. objectClassAsAttribute=true
+                // asserts that empty rows (all columns with null values) are not truncated
+                MappedRecord obj = AbstractDatabase_1.this.get(
+                    conn,
+                    header,
+                    request.path(),
+                    AttributeSelectors.ALL_ATTRIBUTES,
+                    Collections.EMPTY_MAP,
+                    true, // objectClassAsAttribute
+                    this.newDataproviderReply()
+                ).getObject();
+                MappedRecord oldValue = Object_2Facade.getValue(obj);
+                if(!newValue.isEmpty()) {
+                    MappedRecord[] oldSlices = dbObject.sliceAndNormalizeObject(obj, false);
+                    // Replace attribute values
+                    oldValue.putAll(newValue);
+                    AbstractDatabase_1.this.removeAttributes(
+                        obj, 
+                        true, // removePrivate
+                        true, // removeNonPersistent
+                        true // removeSize
+                    );
+                    MappedRecord[] newSlices = dbObject.sliceAndNormalizeObject(obj, true);
+                    // Replace existing slices
+                    for(
+                        int i = 0; 
+                        i < java.lang.Math.min(oldSlices.length, newSlices.length);
+                        i++
+                    ) {
+                        if(!newSlices[i].equals(oldSlices[i])) {
+                            dbObject.replaceObjectSlice(
+                                i,
+                                newSlices[i],
+                                oldSlices[i], 
+                                i == 0 ? getLockAssertion(expectedVersion) : null
                             );
                         }
                     }
-                    if(reply.getResult() != null) {
-                        reply.getResult().add(
-                            AbstractDatabase_1.this.addBeforeImage(
-                                obj,
-                                beforeImage
-                            )
-                        );
-                        AbstractDatabase_1.this.completeReply(reply);
+                    // Remove extra old slices
+                    if(oldSlices.length > newSlices.length) {
+                        boolean isIndexed;
+                        if(dbObject.getConfiguration().getDbObjectForUpdate2() != null) {
+                            isIndexed = true;
+                            ps = AbstractDatabase_1.this.prepareStatement(
+                                conn,
+                                currentStatement = 
+                                    "DELETE FROM " + dbObject.getConfiguration().getDbObjectForUpdate2() + 
+                                    " WHERE " + 
+                                    AbstractDatabase_1.this.removeViewPrefix(
+                                        dbObject.getReferenceClause() + 
+                                        " AND " + dbObject.getObjectIdClause() + 
+                                        " AND (" + OBJECT_IDX + " >= ?)"
+                                    )
+                            );            
+                        }
+                        else {
+                            isIndexed = dbObject.getIndexColumn() != null;
+                            ps = AbstractDatabase_1.this.prepareStatement(
+                                conn,
+                                currentStatement = 
+                                    "DELETE FROM " + dbObject.getConfiguration().getDbObjectForUpdate1() + 
+                                    " WHERE " + 
+                                    AbstractDatabase_1.this.removeViewPrefix(
+                                        dbObject.getReferenceClause() + 
+                                        " AND " + dbObject.getObjectIdClause() + 
+                                        (isIndexed ? " AND (" + dbObject.getIndexColumn() + " >= ?)" : "")
+                                    )
+                            );
+                        }
+                        int pos = 1;
+                        List<Object> referenceValues = dbObject.getReferenceValues();
+                        for(Object referenceValue : referenceValues) {
+                            AbstractDatabase_1.this.setPreparedStatementValue(
+                                conn,
+                                ps, 
+                                pos++, 
+                                referenceValue
+                            );
+                        }
+                        objectIdValues = dbObject.getObjectIdValues();
+                        for(Object objectIdValue : objectIdValues) {
+                            AbstractDatabase_1.this.setPreparedStatementValue(
+                                conn,
+                                ps, 
+                                pos++, 
+                                objectIdValue
+                            );
+                        }
+                        if(isIndexed) {
+                            ps.setInt(pos++, newSlices.length);
+                        }
+                        executeUpdate(ps, currentStatement, objectIdValues);
                     }
-                    return true;
+                    // Create extra new slices
+                    if(newSlices.length > oldSlices.length) {
+                        String objectClass = Object_2Facade.getObjectClass(object);
+                        for(
+                            int i = oldSlices.length;
+                            i < newSlices.length;
+                            i++
+                        ) {
+                            dbObject.createObjectSlice(
+                                i,
+                                objectClass,
+                                newSlices[i]
+                            );
+                        }
+                    }
+                } else if(expectedVersion != null){
+                    byte[] actualVersion = getVersion(obj);
+                    if(Arrays.equals(expectedVersion, actualVersion)) {
+                        removePrivateAttributes(obj);
+                    } else {
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+                            "The object has been modified in the meanwhile",
+                            new BasicException.Parameter("path", Object_2Facade.getPath(object)),
+                            new BasicException.Parameter("expected", expectedVersion),
+                            new BasicException.Parameter("actual", actualVersion)
+                        );
+                    }
                 }
-                // Implement replacement by remove/create
-                else { 
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.NOT_SUPPORTED, 
-                        "DbObject must support object replacement",
-                        new BasicException.Parameter("dbObject.type", dbObject.getConfiguration().getType())
-                    );
-                }
+                return true;
             }
             catch(SQLException ex) {
                 throw new ServiceException(
@@ -5948,60 +6017,50 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
         );
     }
 
+    /**
+     * Tells whether the class denotes a base class not to be checked in the select
+     * clause as they shall never be put into the same table with other classes not
+     * matching this criteria.
+     *  
+     * @param qualifiedClassName
+     * 
+     * @return <code>true</code> if the class shall not be checked
+     */
+    protected boolean isBaseClass(
+        String qualifiedClassName
+    ){
+        return BASE_CLASSES.contains(qualifiedClassName);
+    }
+
+
     //---------------------------------------------------------------------------
     protected FilterProperty mapInstanceOfFilterProperty(
         DataproviderRequest request,
-        ModelElement_1_0... classDefs
+        Collection<String> qualifiedClassNames
     ) throws ServiceException {
         Set<String> subClasses = new HashSet<String>();
-        for(ModelElement_1_0 classDef: classDefs) {
-            String qualifiedName = (String)classDef.objGetValue("qualifiedName");
-            // State queries
-            if(
-                this.enableStateFilterSubstitution && (
-                    "org:openmdx:state2:DateState".equals(qualifiedName) || 
-                    "org:openmdx:state2:DateTimeState".equals(qualifiedName)
-                )
-            ) {
-                if(classDefs.length > 1) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ASSERTION_FAILURE,
-                        "Property " + SystemAttributes.OBJECT_INSTANCE_OF + " must have at most one argument for state queries",
-                        new BasicException.Parameter("request", request)
-                    );
-                }
-                for(FilterProperty filterProperty : request.attributeFilter()) {
-                    if("core".equals(filterProperty.name())) {
-                        // Skipping 'object_instanceof' predicate because a 'core' predicate is supplied as well
-                        return null;
-                    } 
-                }
-                return new FilterProperty(
-                    Quantifier.THERE_EXISTS.code(),
-                    "core",  
-                    ConditionType.IS_NOT_IN.code()
-                );
-            } 
-            // Adding the filter property OBJECT_CLASS for BasicObject typically results
-            // in a long list of subclasses which is expensive to process for database 
-            // systems. Eliminating the BasicObject filter could result in returning objects
-            // which are not instance of BasicObject. However this should never happen because
-            // BasicObject's and non-BasicObject's must never be mixed in the same database table.
-            else if(!"org:openmdx:base:BasicObject".equals(qualifiedName)) {
-                for(Object path : classDef.objGetList("allSubtype")) {
-                    subClasses.add(((Path)path).getBase());
-                }
+        for(String qualifiedClassName : qualifiedClassNames) {
+            if(this.isBaseClass(qualifiedClassName)) {
+                // Adding the filter property OBJECT_CLASS for base objects typically results
+                // in a long list of subclasses which is expensive to process for database 
+                // systems. Eliminating the base object filter could result in returning objects
+                // which are not instance of the requested object class. However this should 
+                // never happen because matching and non-matching objects must never be mixed in 
+                // the same database table.
+                return null;
+            }
+            subClasses.add(qualifiedClassName);
+            for(Object path : this.getModel().getElement(qualifiedClassName).objGetList("allSubtype")) {
+                subClasses.add(((Path)path).getBase());
             }
         }
-        return subClasses.isEmpty() ? null :
-            new FilterProperty(
-                Quantifier.THERE_EXISTS.code() ,
-                OBJECT_CLASS,  
-                ConditionType.IS_IN.code(),
-                subClasses.toArray()
-            );
-    };
+        return new FilterProperty(
+            Quantifier.THERE_EXISTS.code(),
+            OBJECT_CLASS,  
+            ConditionType.IS_IN.code(),
+            subClasses.toArray()
+        );
+    }
 
     //---------------------------------------------------------------------------
     // Variables
@@ -6021,13 +6080,6 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
 
     protected static final int ROUND_UP_TO_MAX_SCALE = 15;
 
-    // AUTOINC_FORMAT
-    protected static final String AUTOINC_FORMAT_NEXTVAL = "NEXTVAL";
-    protected static final String AUTOINC_FORMAT_NEXTVAL_FOR = "NEXTVALFOR";
-    protected static final String AUTOINC_FORMAT_NEXT_VALUE_FOR = "NEXTVALUEFOR";
-    protected static final String AUTOINC_FORMAT_AUTO = "AUTO";
-    protected static final String AUTOINC_FORMAT_SEQUENCE = "SEQUENCE";
-
     // VIEW_MODE
     protected static final short VIEW_MODE_ADD_MIXIN_COLUMNS_TO_PRIMARY = 0;
     protected static final short VIEW_MODE_SECONDARY_COLUMNS = 1;
@@ -6037,35 +6089,24 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
             SystemAttributes.OBJECT_CLASS, 
             SystemAttributes.CREATED_AT,
             SystemAttributes.CREATED_BY, 
-            SystemAttributes.MODIFIED_BY, 
             SystemAttributes.MODIFIED_AT,
+            SystemAttributes.MODIFIED_BY, 
             SystemAttributes.REMOVED_AT,
             SystemAttributes.REMOVED_BY,
             "stateVersion"
         )
     );
 
-    protected static final Set<String> QUALIFIED_SYSTEM_ATTRIBUTES = new HashSet<String>(
-        Arrays.asList(
-            "org:openmdx:base:Creatable:" + SystemAttributes.CREATED_AT,
-            "org:openmdx:base:Creatable:" + SystemAttributes.CREATED_BY,
-            "org:openmdx:base:Modifiable:" + SystemAttributes.MODIFIED_AT,
-            "org:openmdx:base:Modifiable:" + SystemAttributes.MODIFIED_BY,
-            "org:openmdx:base:Removable:" + SystemAttributes.REMOVED_AT,
-            "org:openmdx:base:Removable:" + SystemAttributes.REMOVED_BY,
-            "org:openmdx:state2:StateCapable:stateVersion"
-        )
-    );
-    
-    protected static final int DEFAULT_BATCH_SIZE = 50;
     protected static final String DEFAULT_OID_SUFFIX = "_objectid";
     protected static final String DEFAULT_RID_SUFFIX = "_referenceid";
     protected static final String DEFAULT_RSX_SUFFIX = "_referenceIdSuffix";
     protected static final String DEFAULT_COLUMN_SELECTOR = "v.*";
-    protected String privateAttributesPrefix;
-    protected String objectIdAttributesSuffix;
-    protected String referenceIdAttributesSuffix;
-    protected String referenceIdSuffixAttributesSuffix;
+    protected static final String DEFAULT_PRIVATE_ATTRIBUTE_PREFIX = "p$$";
+    
+    private String privateAttributesPrefix;
+    private String objectIdAttributesSuffix;
+    private String referenceIdAttributesSuffix;
+    private String referenceIdSuffixAttributesSuffix;
 
     // Reserved words
     protected static final Set<String> RESERVED_WORDS_HSQLDB = new HashSet<String>(
@@ -6140,11 +6181,6 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     protected Map embeddedFeatures;
 
     /**
-     * Fully qualified model names of non-persistent features.
-     */
-    protected Set<String> nonPersistentFeatures;
-
-    /**
      * macros
      */
     // key=column name, value=List of [macro name, macro value]
@@ -6154,11 +6190,11 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     protected Map<String,String> pathMacros;
 
     // referenceId format
-    protected String referenceIdFormat;
+    private String referenceIdFormat;
 
     // useNormalizedReferences. If true, all DB operations are performed on the 
     // normalized values of object references, i.e. rid, oid.
-    protected boolean useNormalizedReferences;
+    private boolean useNormalizedReferences;
 
     // maximum reference components in REF table
     protected int maxReferenceComponents;
@@ -6167,15 +6203,17 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
      * If set to true the size of multi-valued attributes stored in column C
      * is stored in column C_.
      */
-    protected boolean setSizeColumns;
+    private boolean setSizeColumns;
 
     /**
      * <columnName,attributeName> mapping. Calculating attribute names
      * from column names and vice versa is expensive. Therefore it
      * is cached.
      */
-    protected ConcurrentMap<String,String> featureNames = new ConcurrentHashMap<String,String>();
-    protected ConcurrentMap<String,String> columnNames = new ConcurrentHashMap<String,String>();
+    protected final ConcurrentMap<String,String> featureNames = new ConcurrentHashMap<String,String>();
+    protected final ConcurrentMap<String,String> publicColumnNames = new ConcurrentHashMap<String,String>();
+    protected final ConcurrentMap<String,String> privateColumnNames = new ConcurrentHashMap<String,String>();
+    private final Set<String> nonPersistentFeatures = new HashSet<String>();
     
     /**
      * nullAsCharacter defines the string used to produce a type-safe
@@ -6202,13 +6240,21 @@ abstract public class AbstractDatabase_1 extends AbstractPersistence_1 implement
     public String OBJECT_RID;
     public String OBJECT_ID;
 
-    protected Properties jdbcDriverSqlProperties = null;
+    protected Properties jdbcDriverSqlProperties;
     protected static final String JDBC_DRIVER_SQL_PROPERTIES = "org/openmdx/kernel/application/deploy/jdbc-driver-sql.properties";  
 
     protected final Collection temporaryFiles = new ArrayList();
 
-    protected final SQLWildcards sqlWildacrds = new SQLWildcards('\\');
+    protected final SQLWildcards sqlWildcards = new SQLWildcards('\\');
     
+    /**
+     * It's usually unwise the use these classes in  select statement
+     */
+    private static final Collection<String> BASE_CLASSES = Arrays.asList(
+        "org:openmdx:base:BasicObject",
+        "org:openmdx:base:ExtentCapable"
+    );
+
 }
 
 //---End of File -------------------------------------------------------------

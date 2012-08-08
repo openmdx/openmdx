@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: JoinMetaData.java,v 1.1 2009/01/13 02:10:28 wfro Exp $
+ * Name:        $Id: JoinMetaData.java,v 1.2 2011/11/01 13:26:41 wfro Exp $
  * Description: Join Meta Data
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:28 $
+ * Date:        $Date: 2011/11/01 13:26:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007, OMEX AG, Switzerland
+ * Copyright (c) 2007-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or

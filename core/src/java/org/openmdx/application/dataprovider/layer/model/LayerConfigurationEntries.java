@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LayerConfigurationEntries.java,v 1.6 2010/06/04 19:31:30 hburger Exp $
- * Description: Generated constants for LayerConfigurationEntries
- * Revision:    $Revision: 1.6 $
+ * Name:        $Id: LayerConfigurationEntries.java,v 1.8 2011/09/09 17:33:44 hburger Exp $
+ * Description: Model Layer Configuration
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 19:31:30 $
+ * Date:        $Date: 2011/09/09 17:33:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -18,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -50,29 +50,31 @@
  */
 package org.openmdx.application.dataprovider.layer.model;
 
+import org.openmdx.application.dataprovider.cci.SharedConfigurationEntries;
 
 /**
- * The <code>ModelLayerConfigurationEntries</code> class contains
- * constants identifying the dataprovider configuration entries.
+ * The <code>LayerConfigurationEntries</code> class contains constants
+ * identifying the configuration entries of the model layer.
  */
+public class LayerConfigurationEntries extends SharedConfigurationEntries {
 
+	/**
+	 * Constructor
+	 */
+	protected LayerConfigurationEntries() {
+		// Avoid instantiation
+	}
 
+	/**
+	 * Tells whether the transaction time is unique for object hosted by this
+	 * provider.
+	 */
+	static public final String TRANSACTION_TIME_UNIQUE = "transactionTimeUnique";
 
+	/**
+	 * Tells whether the valid time is unique for object hosted by this
+	 * provider.
+	 */
+	static public final String VALID_TIME_UNIQUE = "transactionTimeUnique";
 
-public class LayerConfigurationEntries extends org.openmdx.application.dataprovider.cci.SharedConfigurationEntries {
-
-  
-  protected LayerConfigurationEntries() {
-   // Avoid instantiation
-  }
-
-  /**
-   * Posssible entry values are<ul>
-   * <li><code>false</code> disables optimistic locking
-   * <li><code>whenModified</code> enables optimistic locking for modified objects
-   * <li><code>true</code> enables optimistic locking even for unmodified objects
-   * </ul>
-   */
-  static public final String OPTIMISTIC_LOCKING = "optimisticLocking";
-  
 }

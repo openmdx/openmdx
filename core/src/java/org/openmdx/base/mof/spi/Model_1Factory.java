@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Model_1Factory.java,v 1.15 2010/09/22 17:02:49 hburger Exp $
+ * Name:        $Id: Model_1Factory.java,v 1.16 2011/06/21 22:30:37 hburger Exp $
  * Description: Model_1Factory
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/22 17:02:49 $
+ * Date:        $Date: 2011/06/21 22:30:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,7 +62,7 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 
 /**
  * Model_1Factory
@@ -116,7 +116,7 @@ public class Model_1Factory {
                     model.addModels(modelPackages);
                     Model_1Factory.model = model;
                 }  catch(Exception exception) {
-                    LoggerFactory.getLogger().log(
+                    SysLog.log(
                         Level.SEVERE,
                         "Model acquisition failure",
                         exception

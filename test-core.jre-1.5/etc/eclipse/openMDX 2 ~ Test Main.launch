@@ -11,6 +11,7 @@
 <stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
 <stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit4"/>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="test.openmdx.app1.TestMain"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="${openmdx-test.core.datasource}"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="openMDX 2 ~ Test Core (jre-1.5)"/>
-<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Djava.protocol.handler.pkgs=org.openmdx.kernel.url.protocol&#10;-Duser.timezone=${openmdx-test.core.timezone}&#13;-Dorg.openmdx.comp.env.jdbc.DataSource=${openmdx-test.core.datasource}&#10;-Dtest.javax.xml.datatype.DatatypeFactory=org.apache.xerces.jaxp.datatype.DatatypeFactoryImpl${build_files}"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Djava.protocol.handler.pkgs=org.openmdx.kernel.url.protocol&#10;-Duser.timezone=${openmdx-test.core.timezone}&#13;-Dorg.openmdx.comp.env.jdbc.DataSource=${openmdx-test.core.datasource}&#10;-Dtest.javax.xml.datatype.DatatypeFactory=org.apache.xerces.jaxp.datatype.DatatypeFactoryImpl"/>
 </launchConfiguration>

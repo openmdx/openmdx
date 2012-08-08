@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UUIDFormatter.java,v 1.9 2010/06/02 13:45:39 hburger Exp $
+ * Name:        $Id: UUIDFormatter.java,v 1.10 2011/11/26 01:34:59 hburger Exp $
  * Description: UUID Formatter
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:45:39 $
+ * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,14 +45,12 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.text.format;
 
 import java.util.UUID;
-
-import javax.resource.ResourceException;
 
 import org.openmdx.base.resource.Records;
 
@@ -112,25 +109,21 @@ public class UUIDFormatter {
             return null;
         }
         boolean timeBased = this.uuid.version() == 1;
-        try {
-            return Records.getRecordFactory().asMappedRecord(
-                this.uuid.getClass().getName(), // recordName, 
-                this.uuid.toString(), // recordShortDescription, 
-                timeBased ? TIME_BASED_FIELDS : COMMON_FIELDS, 
-                timeBased ? new Object[]{
-                    Integer.valueOf(this.uuid.variant()),
-                    Integer.valueOf(this.uuid.version()),
-                    Long.valueOf(this.uuid.node()),
-                    Integer.valueOf(this.uuid.clockSequence()),
-                    Long.valueOf(this.uuid.timestamp())
-                 } : new Object[]{
-                        Integer.valueOf(this.uuid.variant()),
-                        Integer.valueOf(this.uuid.version()),
-                 }
-            ).toString();
-        } catch (ResourceException exception) {
-            return this.uuid.toString();
-        }
+        return Records.getRecordFactory().asMappedRecord(
+		    this.uuid.getClass().getName(), // recordName, 
+		    this.uuid.toString(), // recordShortDescription, 
+		    timeBased ? TIME_BASED_FIELDS : COMMON_FIELDS, 
+		    timeBased ? new Object[]{
+		        Integer.valueOf(this.uuid.variant()),
+		        Integer.valueOf(this.uuid.version()),
+		        Long.valueOf(this.uuid.node()),
+		        Integer.valueOf(this.uuid.clockSequence()),
+		        Long.valueOf(this.uuid.timestamp())
+		     } : new Object[]{
+		            Integer.valueOf(this.uuid.variant()),
+		            Integer.valueOf(this.uuid.version()),
+		     }
+		).toString();
     }
 
 }

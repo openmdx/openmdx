@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefPackage_1.java,v 1.103 2010/07/07 21:19:36 hburger Exp $
+ * Name:        $Id: RefPackage_1.java,v 1.106 2011/07/01 16:16:41 hburger Exp $
  * Description: RefPackage_1 class
- * Revision:    $Revision: 1.103 $
+ * Revision:    $Revision: 1.106 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/07 21:19:36 $
+ * Date:        $Date: 2011/07/01 16:16:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,7 +81,7 @@ import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Filter;
@@ -96,6 +96,7 @@ import org.w3c.cci2.SparseArray;
  * This implementation supports lightweight serialization. It contains only
  * members to the immediate and outermost package. Other members are static.
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
 
     /**
@@ -196,7 +197,16 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
         return this.outermostPackage.refPersistenceManager();
     }
 
-    //-------------------------------------------------------------------------
+    
+    /* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.jmi.spi.Jmi1Package_1_0#unmarshalUnchecked(java.lang.Object)
+	 */
+//  @Override
+	public Object unmarshalUnchecked(Object source) {
+        return this.outermostPackage.unmarshalUnchecked(source);
+	}
+
+	//-------------------------------------------------------------------------
 //  @Override
     public final Model_1_0 refModel(
     ) {
@@ -212,8 +222,6 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
-//  @Override
     public RefStruct refCreateStruct(
         String structName,
         List arg
@@ -237,24 +245,23 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     private static Object toStructValue(
         Object source
     ) throws ResourceException{
         if(source instanceof List<?>) {
-            IndexedRecord target = Records.getRecordFactory().createIndexedRecord(Multiplicities.LIST);
+            IndexedRecord target = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.toString());
             for(Object value : (List<?>)source){
                 target.add(toStructValue(value));
             }
             return target;
         } else if (source instanceof Set<?>) {
-            IndexedRecord target = Records.getRecordFactory().createIndexedRecord(Multiplicities.SET);
+            IndexedRecord target = Records.getRecordFactory().createIndexedRecord(Multiplicity.SET.toString());
             for(Object value : (Set<?>)source){
                 target.add(toStructValue(value));
             }
             return target;
         } else if (source instanceof SparseArray<?>) {
-            MappedRecord target = Records.getRecordFactory().createMappedRecord(Multiplicities.SPARSEARRAY);
+            MappedRecord target = Records.getRecordFactory().createMappedRecord(Multiplicity.SPARSEARRAY.toString());
             for(Object e : target.entrySet()) {
                 Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
                 target.put(
@@ -430,8 +437,6 @@ public class RefPackage_1 implements Jmi1Package_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
-//  @Override
     public RefStruct refCreateStruct(
         RefObject structType,
         List args

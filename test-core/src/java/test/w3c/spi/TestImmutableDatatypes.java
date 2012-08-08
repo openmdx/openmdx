@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestImmutableDatatypes.java,v 1.6 2010/01/03 15:15:27 wfro Exp $
+ * Name:        $Id: TestImmutableDatatypes.java,v 1.7 2011/04/05 18:06:28 hburger Exp $
  * Description: TestImmutableDatatypes 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 15:15:27 $
+ * Date:        $Date: 2011/04/05 18:06:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -114,7 +114,8 @@ public class TestImmutableDatatypes {
         mutableDateTime03 = DateTimeFormat.BASIC_UTC_FORMAT.parse("20000301T120000.000Z");
     }
     
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void dateValues(){
         assertEquals("immutableDate02.equals(mutableDate02)", immutableDate02, mutableDate02);
         assertEquals("mutableDate02.equals(immutableDate02)", mutableDate02, immutableDate02.clone());
@@ -151,7 +152,11 @@ public class TestImmutableDatatypes {
         assertEquals("Normalize year/month duration", "P1Y6M", immutableDatatypeFactory().toNormalizedDuration(oneAndHalfAYear).toString());
         assertEquals("Normalize day/time duration", "PT1H0M0S", immutableDatatypeFactory().toNormalizedDuration(oneHour).toString());
         Duration d = oneAndHalfAYear.add(oneHour);
-        assertEquals("Non-normalized duration", "P18MT3600S", d.toString());
+        if("1.5".equals(System.getProperty("java.specification.version"))){
+            assertEquals("Standard duration is non-normalized", "P18MT3600S", d.toString());
+        } else {
+            assertEquals("Standard duration is normalized", "P1Y6MT1H0M0S", d.toString());
+        }
         assertEquals("Normalized duration", "P1Y6MT1H0M0S", immutableDatatypeFactory().toNormalizedDuration(d).toString());
     }
     

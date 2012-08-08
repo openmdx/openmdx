@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: EnvironmentTestCase.java,v 1.1 2009/04/03 15:08:16 hburger Exp $
+ * Name:        $Id: EnvironmentTestCase.java,v 1.2 2011/08/20 20:20:08 hburger Exp $
  * Description: 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/04/03 15:08:16 $
+ * Date:        $Date: 2011/08/20 20:20:08 $
  * ====================================================================
  *
  * This software is published under the GNU Lesser General Public
@@ -65,6 +65,8 @@ public class EnvironmentTestCase extends TestCase
     {
 
         Context ctx = new InitialContext();
+        
+        @SuppressWarnings("rawtypes")
         Hashtable env = null;
         int       size1, size2;
 

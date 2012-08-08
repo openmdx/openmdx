@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: LoggerFactory.java,v 1.4 2009/06/06 12:48:58 wfro Exp $
+ * Name:        $Id: LoggerFactory.java,v 1.5 2011/06/21 22:51:56 hburger Exp $
  * Description: openMDX Logger Factory
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/06 12:48:58 $
+ * Date:        $Date: 2011/06/21 22:51:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,6 +54,7 @@ package org.openmdx.kernel.log;
 import java.util.Collection;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -72,6 +73,11 @@ public class LoggerFactory {
     private static final Map<ClassLoader,Logger> loggers = new WeakHashMap<ClassLoader,Logger>();
     
     /**
+     * The version information is logged lazily
+     */
+    private static volatile boolean logVersion = true;
+    
+    /**
      * Retrieve the openMDX logger
      * 
      * @return the openMDX logger
@@ -87,6 +93,18 @@ public class LoggerFactory {
                     logger = Logger.getLogger(STANDARD_LOGGER_NAME)
                 );
             }
+            if(logVersion) { 
+                // No synchronization necessary as Logging the version twice wouldn't hurt
+                logVersion = false;
+                logger.log(
+                    Level.INFO, 
+                    "Sys|openMDX Version|openmdx-system: {0}, openmdx-base: {1}", 
+                    new Object[]{
+                        org.openmdx.system.Version.getImplementationVersion(), 
+                        org.openmdx.base.Version.getImplementationVersion()
+                    }
+                );
+            }
         }
         return logger;
     }    
@@ -95,4 +113,5 @@ public class LoggerFactory {
     ) {
         return loggers.values();
     }
+    
 }

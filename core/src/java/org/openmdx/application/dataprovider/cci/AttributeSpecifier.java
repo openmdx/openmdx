@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AttributeSpecifier.java,v 1.7 2010/06/02 13:39:35 hburger Exp $
+ * Name:        $Id: AttributeSpecifier.java,v 1.9 2011/11/26 01:34:57 hburger Exp $
  * Description: openMDX Compatibility Mode: Attribute specifier
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:39:35 $
+ * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -18,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -56,8 +56,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.resource.ResourceException;
-
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.Records;
@@ -67,7 +65,6 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Specifies an attribute to be retrieved
  */
-@SuppressWarnings("unchecked")
 public final class AttributeSpecifier
 implements Serializable
 {
@@ -96,7 +93,7 @@ implements Serializable
         short direction,
         short order
     ){
-        Set invalid = new HashSet();
+        Set<String> invalid = new HashSet<String>();
 
         if(
                 name == null
@@ -326,22 +323,18 @@ implements Serializable
      */
     @Override
     public String toString() {
-        try {
-            return Records.getRecordFactory().asMappedRecord(
-                getClass().getName(), 
-                name + '[' + position + ']',
-                TO_STRING_FIELDS, 
-                new Object[]{
-                    name,
-                    Integer.valueOf(position), 
-                    Integer.valueOf(size), 
-                    SortOrder.valueOf(direction), 
-                    SortOrder.valueOf(order)
-                }
-            ).toString();
-        } catch (ResourceException exception) {
-            return super.toString();
-        }
+        return Records.getRecordFactory().asMappedRecord(
+		    getClass().getName(), 
+		    name + '[' + position + ']',
+		    TO_STRING_FIELDS, 
+		    new Object[]{
+		        name,
+		        Integer.valueOf(position), 
+		        Integer.valueOf(size), 
+		        SortOrder.valueOf(direction), 
+		        SortOrder.valueOf(order)
+		    }
+		).toString();
     }
 
     /* (non-Javadoc)

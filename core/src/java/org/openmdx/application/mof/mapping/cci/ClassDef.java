@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ClassDef.java,v 1.5 2010/06/21 09:49:15 hburger Exp $
+ * Name:        $Id: ClassDef.java,v 1.6 2011/04/12 15:29:18 hburger Exp $
  * Description: VelocityClassDef class
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 09:49:15 $
+ * Date:        $Date: 2011/04/12 15:29:18 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,7 +64,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public class ClassDef
   extends ClassifierDef {
   
@@ -94,7 +94,8 @@ public class ClassDef
       );
     }
   
-  private ClassDef(
+  @SuppressWarnings("unchecked")
+private ClassDef(
       ModelElement_1_0 classDef,
       Model_1_0 model,
       boolean lazySuperTypes, 
@@ -131,7 +132,8 @@ public class ClassDef
   }
 
   //-------------------------------------------------------------------------
-  private static List getSuperTypes(
+  @SuppressWarnings("unchecked")
+private static List getSuperTypes(
     ModelElement_1_0 classDef,
     Model_1_0 model, 
     MetaData_1_0 metaData

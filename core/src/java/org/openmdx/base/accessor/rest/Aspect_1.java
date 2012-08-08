@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Aspect_1.java,v 1.1 2009/08/06 10:46:24 hburger Exp $
+ * Name:        $Id: Aspect_1.java,v 1.2 2011/04/12 15:51:24 hburger Exp $
  * Description: Aspect Query
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/08/06 10:46:24 $
+ * Date:        $Date: 2011/04/12 15:51:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -144,7 +144,7 @@ class Aspect_1 implements Query {
     /* (non-Javadoc)
      * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String, java.lang.String, java.util.Map)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public void addSubquery(
         Query sub,
         String variableDeclaration,
@@ -233,7 +233,7 @@ class Aspect_1 implements Query {
     /* (non-Javadoc)
      * @see javax.jdo.Query#deletePersistentAll(java.util.Map)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public long deletePersistentAll(Map parameters) {
         throw new UnsupportedOperationException(
             "Method not supported by aspect query"
@@ -293,7 +293,7 @@ class Aspect_1 implements Query {
     /* (non-Javadoc)
      * @see javax.jdo.Query#executeWithMap(java.util.Map)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public Object executeWithMap(Map parameters) {
         throw new UnsupportedOperationException(
             "An aspect query's execute method requires the aspect class and the core object as arguments"
@@ -334,7 +334,7 @@ class Aspect_1 implements Query {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setCandidates(javax.jdo.Extent)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public void setCandidates(Extent pcs) {
         throw new UnsupportedOperationException(
             "Method not supported by aspect query"
@@ -344,7 +344,7 @@ class Aspect_1 implements Query {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setCandidates(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public void setCandidates(Collection pcs) {
         throw new UnsupportedOperationException(
             "Method not supported by aspect query"
@@ -354,7 +354,7 @@ class Aspect_1 implements Query {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setClass(java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public void setClass(Class cls) {
         throw new UnsupportedOperationException(
             "Method not supported by aspect query"
@@ -364,7 +364,7 @@ class Aspect_1 implements Query {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setExtensions(java.util.Map)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public void setExtensions(Map extensions) {
         throw new UnsupportedOperationException(
             "Method not supported by aspect query"
@@ -437,7 +437,7 @@ class Aspect_1 implements Query {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setResultClass(java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public void setResultClass(Class cls) {
         throw new UnsupportedOperationException(
             "Method not supported by aspect query"

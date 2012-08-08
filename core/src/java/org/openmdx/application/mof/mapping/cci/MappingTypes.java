@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: MappingTypes.java,v 1.2 2010/06/21 09:49:15 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: MappingTypes.java,v 1.3 2011/05/27 16:54:56 hburger Exp $
  * Description: MappingTypes 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 09:49:15 $
+ * Date:        $Date: 2011/05/27 16:54:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2006, OMEX AG, Switzerland
+ * Copyright (c) 2005-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -48,7 +48,6 @@
  * This product includes or is based on software developed by other 
  * organizations as listed in the NOTICE file.
  */
-
 package org.openmdx.application.mof.mapping.cci;
 
 public class MappingTypes {
@@ -62,13 +61,7 @@ public class MappingTypes {
     //------------------------------------------------------------------------
     public static final String UML_OPENMDX_1 = "uml.openmdx-1";
     public static final String UML2_OPENMDX_1 = "uml2.openmdx-1";
-    public static final String TOGETHER_OPENMDX_1 = "together.openmdx-1";
 
-    /**
-     * @deprecated use {@link MappingTypes#XMI1}
-     */
-    @Deprecated
-    public static final String XMI_OPENMDX_1 = "xmi.openmdx-1";
     
     //------------------------------------------------------------------------
     // openMDX 2 formats

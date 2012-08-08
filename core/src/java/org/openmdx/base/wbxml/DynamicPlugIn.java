@@ -1,8 +1,8 @@
 /*
  * ==================================================================== Project:
- * openMDX/Core, http://www.openmdx.org/ Name: $Id: DynamicPlugIn.java,v 1.6 2010/04/08 11:30:16 hburger Exp $ Description: Dynamic
- * Plug-In Revision: $Revision: 1.6 $ Owner: OMEX AG, Switzerland,
- * http://www.omex.ch Date: $Date: 2010/04/08 11:30:16 $
+ * openMDX/Core, http://www.openmdx.org/ Name: $Id: DynamicPlugIn.java,v 1.8 2011/07/01 11:15:51 hburger Exp $ Description: Dynamic
+ * Plug-In Revision: $Revision: 1.8 $ Owner: OMEX AG, Switzerland,
+ * http://www.omex.ch Date: $Date: 2011/07/01 11:15:51 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -216,7 +216,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
         ){
             Page lazilyAllocatedPage = this.pages[page-1];
             if(lazilyAllocatedPage == null) {
-                lazilyAllocatedPage = this.pages[page-1] = new Page();
+                lazilyAllocatedPage = this.pages[page-1] = newPage();
             }
             String[] sector = lazilyAllocatedPage.get(codeSpace);
             String entry = sector[index];
@@ -260,11 +260,14 @@ public class DynamicPlugIn extends AbstractPlugIn {
         int bestIndex = -1; // index of best match
         int bestLength = -1; // length of best match
         int page = 0;
-        Pages: for (Page currentPage = this.page0; currentPage != null; currentPage =
-            pages[page++]) {
+        Pages: for (
+            Page currentPage = this.page0; 
+            page < pages.length; 
+            currentPage = pages[page++]
+        ) {
             if (currentPage == null) {
                 if (!set) return null;
-                currentPage = pages[page - 1] = new Page(); // create a new page
+                currentPage = pages[page - 1] = newPage(); // create a new page
                                                             // on demand
             }
             String[] sector = currentPage.get(codeSpace);
@@ -451,7 +454,7 @@ public class DynamicPlugIn extends AbstractPlugIn {
         int pageIndex = token.getPage() - 1;
         Page target = pages[pageIndex];
         if (target == null) {
-            target = pages[pageIndex] = new Page();
+            target = pages[pageIndex] = newPage();
         }
         //
         // Provide the sector

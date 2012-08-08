@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RequestCallbackHandler.java,v 1.2 2010/11/18 08:16:04 hburger Exp $
+ * Name:        $Id: RequestCallbackHandler.java,v 1.3 2011/04/27 06:20:07 hburger Exp $
  * Description: HTTP Request Callback Handler
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/18 08:16:04 $
+ * Date:        $Date: 2011/04/27 06:20:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -111,8 +111,7 @@ public class RequestCallbackHandler implements CallbackHandler {
 				principalCallback.setPrincipal(this.request.getUserPrincipal());
 				return true;
 			}
-		}
-		if (callback instanceof NameCallback) {
+		} else if (callback instanceof NameCallback) {
 			NameCallback nameCallback = (NameCallback) callback;
 			String prompt = nameCallback.getPrompt();
 			if (CallbackPrompts.REMOTE_USER.equals(prompt)) {
@@ -123,8 +122,7 @@ public class RequestCallbackHandler implements CallbackHandler {
 				nameCallback.setName(this.request.getParameter("UserName"));
 				return true;
 			}
-		}
-		if (callback instanceof PasswordCallback) {
+		} else if (callback instanceof PasswordCallback) {
 			PasswordCallback passwordCallback = (PasswordCallback) callback;
 			String prompt = passwordCallback.getPrompt();
 			if (CallbackPrompts.CONNECTION_PASSWORD.equals(prompt)) {
@@ -138,7 +136,15 @@ public class RequestCallbackHandler implements CallbackHandler {
 				passwordCallback.setPassword(sessionId == null ? null : sessionId.toCharArray());
 				return true;
 			}
-		}
+		} else if (callback instanceof BooleanCallback) {
+            BooleanCallback booleanCallback = (BooleanCallback) callback;
+            String prompt = booleanCallback.getPrompt();
+            if (CallbackPrompts.REF_INITIALIZE_ON_CREATE.equals(prompt)) {
+                String refInitializeOnCreate = this.request.getParameter("RefInitializeOnCreate");
+                booleanCallback.setValue(refInitializeOnCreate == null ? null : Boolean.valueOf(refInitializeOnCreate));
+                return true;
+            }
+        }
 		return false;
 	}
 

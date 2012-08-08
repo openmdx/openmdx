@@ -1,0 +1,85 @@
+<project 
+	name="openmdx-sdk-postinstaller" 
+	xmlns:antcontrib="antlib:net.sf.antcontrib"
+>
+	<property name="install.path" value="$INSTALL_PATH" />
+	<available file="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-core.jre-1.6.tar.gz" property="tar.gz.present" />		
+	<available file="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-core.jre-1.6.zip" property="zip.present" />			
+	<target name="expand-tar" if="tar.gz.present">
+		<gunzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-ant.jre-1.6.tar.gz" dest="${install.path}/repository/distribution"/>
+		<untar src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-ant.jre-1.6.tar" dest="${install.path}" overwrite="false"/>
+		<gunzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-core.jre-1.6.tar.gz" dest="${install.path}/repository/distribution"/>
+		<untar src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-core.jre-1.6.tar" dest="${install.path}" overwrite="false"/>
+		<gunzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-portal.jre-1.6.tar.gz" dest="${install.path}/repository/distribution"/>
+		<untar src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-portal.jre-1.6.tar" dest="${install.path}" overwrite="false"/>
+		<gunzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-security.jre-1.6.tar.gz" dest="${install.path}/repository/distribution"/>
+		<untar src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-security.jre-1.6.tar" dest="${install.path}" overwrite="false"/>
+		<gunzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-test-core.jre-1.6.tar.gz" dest="${install.path}/repository/distribution"/>
+		<untar src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-test-core.jre-1.6.tar" dest="${install.path}" overwrite="false"/>
+		<gunzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-tomcat.jre-1.6.tar.gz" dest="${install.path}/repository/distribution"/>
+		<untar src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-tomcat.jre-1.6.tar" dest="${install.path}" overwrite="false"/>
+		<gunzip src="${install.path}/repository/distribution/openmdx-example-${PROJECT_VERSION}-helloworld.jre-1.6.tar.gz" dest="${install.path}/repository/distribution"/>
+		<untar src="${install.path}/repository/distribution/openmdx-example-${PROJECT_VERSION}-helloworld.jre-1.6.tar" dest="${install.path}" overwrite="false"/>
+		<gunzip src="${install.path}/repository/distribution/openmdx-example-${PROJECT_VERSION}-workshop.jre-1.6.tar.gz" dest="${install.path}/repository/distribution"/>
+		<untar src="${install.path}/repository/distribution/openmdx-example-${PROJECT_VERSION}-workshop.jre-1.6.tar" dest="${install.path}" overwrite="false"/>
+
+		<mkdir dir="${install.path}/openmdx-example-$PROJECT_VERSION/opt"/>
+
+		<gunzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-core.jre-1.6.tar.gz" dest="${install.path}/repository/distribution"/>
+		<untar src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-core.jre-1.6.tar" dest="${install.path}/openmdx-example-$PROJECT_VERSION/opt"/>
+		<gunzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-portal.jre-1.6.tar.gz" dest="${install.path}/repository/distribution"/>
+		<untar src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-portal.jre-1.6.tar" dest="${install.path}/openmdx-example-$PROJECT_VERSION/opt"/>
+		<gunzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-security.jre-1.6.tar.gz" dest="${install.path}/repository/distribution"/>
+		<untar src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-security.jre-1.6.tar" dest="${install.path}/openmdx-example-$PROJECT_VERSION/opt"/>
+		<gunzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-tomcat.jre-1.6.tar.gz" dest="${install.path}/repository/distribution"/>
+		<untar src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-tomcat.jre-1.6.tar" dest="${install.path}/openmdx-example-$PROJECT_VERSION/opt"/>
+	</target>
+	<target name="expand-zip" if="zip.present">
+		<unzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-ant.jre-1.6.zip" dest="${install.path}"/>
+		<unzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-core.jre-1.6.zip" dest="${install.path}"/>
+		<unzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-portal.jre-1.6.zip" dest="${install.path}"/>
+		<unzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-security.jre-1.6.zip" dest="${install.path}"/>
+		<unzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-test-core.jre-1.6.zip" dest="${install.path}"/>
+		<unzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-tomcat.jre-1.6.zip" dest="${install.path}"/>
+		<unzip src="${install.path}/repository/distribution/openmdx-example-${PROJECT_VERSION}-helloworld.jre-1.6.zip" dest="${install.path}"/>
+		<unzip src="${install.path}/repository/distribution/openmdx-example-${PROJECT_VERSION}-workshop.jre-1.6.zip" dest="${install.path}"/>
+
+		<mkdir dir="${install.path}/openmdx-example-$PROJECT_VERSION/opt"/>
+
+		<unzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-core.jre-1.6.zip" dest="${install.path}/openmdx-example-$PROJECT_VERSION/opt"/>
+		<unzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-portal.jre-1.6.zip" dest="${install.path}/openmdx-example-$PROJECT_VERSION/opt"/>
+		<unzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-security.jre-1.6.zip" dest="${install.path}/openmdx-example-$PROJECT_VERSION/opt"/>
+		<unzip src="${install.path}/repository/distribution/openmdx-${PROJECT_VERSION}-tomcat.jre-1.6.zip" dest="${install.path}/openmdx-example-$PROJECT_VERSION/opt"/>
+	</target>
+	<target name="postinstall" depends="expand-tar, expand-zip">
+		<delete>
+			<fileset dir="${install.path}/openmdx-example-$PROJECT_VERSION/opt" includes="**/CVS"/>
+		</delete>
+		<!-- openMDX/Ant -->
+		<ant inheritAll="false" dir="${install.path}/openmdx-$PROJECT_VERSION/ant" target="install-src"/>
+		<ant inheritAll="false" dir="${install.path}/openmdx-$PROJECT_VERSION/ant" target="all"/>
+		<!-- openMDX/Core -->
+		<ant inheritAll="false" dir="${install.path}/openmdx-$PROJECT_VERSION/core" target="install-src"/>
+		<ant inheritAll="false" dir="${install.path}/openmdx-$PROJECT_VERSION/core" target="deliverables"/>
+		<!-- openMDX/Security -->
+		<ant inheritAll="false" dir="${install.path}/openmdx-$PROJECT_VERSION/security" target="install-src"/>
+		<ant inheritAll="false" dir="${install.path}/openmdx-$PROJECT_VERSION/security" target="deliverables"/>
+		<!-- openMDX/Portal -->
+		<ant inheritAll="false" dir="${install.path}/openmdx-$PROJECT_VERSION/portal" target="install-src"/>
+		<ant inheritAll="false" dir="${install.path}/openmdx-$PROJECT_VERSION/portal" target="deliverables"/>
+		<!-- openMDX/Test Core -->
+		<ant inheritAll="false" dir="${install.path}/openmdx-$PROJECT_VERSION/test-core" target="install-src"/>
+		<ant inheritAll="false" dir="${install.path}/openmdx-$PROJECT_VERSION/test-core" target="deliverables"/>
+		<!-- openMDX/Tomcat -->
+		<ant inheritAll="false" dir="${install.path}/openmdx-$PROJECT_VERSION/tomcat" target="install-src"/>
+		<ant inheritAll="false" dir="${install.path}/openmdx-$PROJECT_VERSION/tomcat" target="deliverables"/>
+		<!-- openMDX/Hellworld -->
+		<ant inheritAll="false" dir="${install.path}/openmdx-example-$PROJECT_VERSION/helloworld" target="install-src"/>
+		<ant inheritAll="false" dir="${install.path}/openmdx-example-$PROJECT_VERSION/helloworld" target="deliverables"/>
+		<ant inheritAll="false" dir="${install.path}\openmdx-example-$PROJECT_VERSION/helloworld" target="assemble"/>
+		<!-- openMDX/Workshop -->
+		<ant inheritAll="false" dir="${install.path}/openmdx-example-$PROJECT_VERSION/workshop" target="install-src"/>
+		<ant inheritAll="false" dir="${install.path}/openmdx-example-$PROJECT_VERSION/workshop" target="deliverables"/>
+		<ant inheritAll="false" dir="${install.path}/openmdx-example-$PROJECT_VERSION/workshop" target="assemble"/>
+	</target>
+</project>

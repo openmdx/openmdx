@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SharedObjects.java,v 1.9 2010/09/27 11:46:45 hburger Exp $
+ * Name:        $Id: SharedObjects.java,v 1.10 2011/11/25 14:14:57 hburger Exp $
  * Description: Shared Objects
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/27 11:46:45 $
+ * Date:        $Date: 2011/11/25 14:14:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -81,15 +81,15 @@ public class SharedObjects {
      * Retrieve a data manager plug-in provided user object
      * 
      * @param persistenceManager
-     * @param key the user object's key
+     * @param type the plug-in object's type
      * 
-     * @return the plug-in provided user object
+     * @return a plug-in object of the given type
      */
     public static <T> T getPlugInObject(
         PersistenceManager persistenceManager,
-        Class<T> key
+        Class<T> type
     ){
-        return key.cast(sharedObjects(persistenceManager).getPlugInObject(key));
+        return sharedObjects(persistenceManager).getPlugInObject(type);
     }
     
     /**
@@ -238,14 +238,15 @@ public class SharedObjects {
         );
         
         /**
-         * Retrieve a data manager plug-in provided user object
+         * Retrieve a data manager plug-in provided object
          * 
-         * @param key the user object's key
+         * @param type the plug-in object's type
          * 
-         * @return the plug-in provided user object
+         * @return the plug-in provided object, or <code>null</code> if no 
+         * plug-in provides an object of the given type
          */
-        Object getPlugInObject(
-            Object key
+        <T> T getPlugInObject(
+            Class<T> type
         );
      
         /**

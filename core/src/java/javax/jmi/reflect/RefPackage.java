@@ -2,7 +2,7 @@ package javax.jmi.reflect;
 
 import java.util.*;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public interface RefPackage extends RefBaseObject {
     public RefClass refClass(RefObject type);
     public RefClass refClass(String typeName);

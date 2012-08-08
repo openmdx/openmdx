@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiLoader.java,v 1.81 2010/12/22 00:26:00 hburger Exp $
+ * Name:        $Id: UiLoader.java,v 1.83 2011/10/30 17:32:28 wfro Exp $
  * Description: UiLoader
- * Revision:    $Revision: 1.81 $
+ * Revision:    $Revision: 1.83 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/22 00:26:00 $
+ * Date:        $Date: 2011/10/30 17:32:28 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,10 +64,10 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
@@ -95,7 +95,7 @@ import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.transaction.TransactionAttributeType;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.portal.servlet.RoleMapper_1_0;
+import org.openmdx.portal.servlet.PortalExtension_1_0;
 
 public class UiLoader
     extends Loader {
@@ -103,13 +103,13 @@ public class UiLoader
     //-------------------------------------------------------------------------
     public UiLoader(
         ServletContext context,
-        RoleMapper_1_0 roleMapper,
+        PortalExtension_1_0 portalExtension,
         Model_1_0 model,
         Path providerPath
     ) throws ServiceException {
         super(
             context,
-            roleMapper
+            portalExtension
         );
         this.providerPath = providerPath;
         this.uiRepository = UiLoader.createUiRepository(model);      
@@ -138,7 +138,6 @@ public class UiLoader
         public Dataprovider(
             List delegates
         ) throws Exception {
-            this.delegates = delegates;
             super.activate(
                 (short)5, 
                 new Configuration(), 
@@ -146,15 +145,6 @@ public class UiLoader
             );
         }
 
-        @Override
-        public void deactivate(
-        ) throws Exception {
-            for(Iterator i = this.delegates.iterator(); i.hasNext(); ) {
-                ((Layer_1)i.next()).deactivate();
-            }          
-        }
-    
-        private final List delegates;
     }
       
     //-------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: NonManagedInitialContext.java,v 1.3 2009/11/11 18:38:26 hburger Exp $
+ * Name:        $Id: NonManagedInitialContext.java,v 1.4 2011/06/29 06:20:03 hburger Exp $
  * Description: NonManagedInitialContext 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/11 18:38:26 $
+ * Date:        $Date: 2011/06/29 06:20:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -52,20 +52,16 @@
 package org.openmdx.kernel.lightweight.naming;
 
 import java.util.Map;
-import java.util.NoSuchElementException;
 
-import javax.naming.Binding;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.spi.NamingManager;
 
-import org.openmdx.kernel.lightweight.naming.spi.NameBasedContext;
+import org.openmdx.kernel.lightweight.naming.spi.HashMapContext;
 
 /**
  * NonManagedInitialContext
  */
-class NonManagedInitialContext extends NameBasedContext {
+class NonManagedInitialContext extends HashMapContext {
 
     /**
      * Constructor 
@@ -75,43 +71,9 @@ class NonManagedInitialContext extends NameBasedContext {
     NonManagedInitialContext(
         Map<?, ?> environment
     ) {
-        super(environment);
+        super(environment, null, "");
     }
-    
-    /* (non-Javadoc)
-     * @see org.openmdx.kernel.lightweight.naming.NameBasedContext#listBindings()
-     */
-    @Override
-    protected NamingEnumeration<Binding> listBindings(
-    ) throws NamingException {
-        return new NamingEnumeration<Binding>(){
-
-            public void close(
-            ) throws NamingException {
-            }
-
-            public boolean hasMore(
-            ) throws NamingException {
-                return false;
-            }
-
-            public Binding next(
-            ) throws NamingException {
-                throw new NoSuchElementException();
-            }
-
-            public boolean hasMoreElements(
-            ) {
-                return false;
-            }
-
-            public Binding nextElement() {
-                throw new NoSuchElementException();
-            }
-            
-        };
-    }
-
+        
     /* (non-Javadoc)
      * @see org.openmdx.kernel.lightweight.naming.NameBasedContext#resolveLink(java.lang.String)
      */
@@ -124,19 +86,8 @@ class NonManagedInitialContext extends NameBasedContext {
             String scheme = nameComponent.substring(0, colon);
             return NamingManager.getURLContext(scheme, environment).lookup(nameComponent);
         } else {
-            throw new NameNotFoundException(
-                "There are only URL contexts in a non-managed environment"
-            );
+        	return super.resolveLink(nameComponent);
         }
     }
-
-    /* (non-Javadoc)
-     * @see javax.naming.Context#getNameInNamespace()
-     */
-    public String getNameInNamespace(
-    ) throws NamingException {
-        return "";
-    }
-
 
 }

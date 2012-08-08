@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Datums.java,v 1.3 2010/04/16 09:47:54 hburger Exp $
+ * Name:        $Id: Datums.java,v 1.4 2011/03/18 15:25:53 hburger Exp $
  * Description: Oracle SQL Datum Conversions
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/16 09:47:54 $
+ * Date:        $Date: 2011/03/18 15:25:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,6 +52,7 @@ package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -61,6 +62,7 @@ import java.util.TimeZone;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.loading.Classes;
+import org.w3c.spi.DatatypeFactories;
 
 /**
  * Oracle SQL Datum Conversions
@@ -88,10 +90,7 @@ public class Datums {
         String nativeClass = datum.getClass().getName();
         if(nativeClass.startsWith("oracle.sql.")) try {
             if(nativeClass.equals("oracle.sql.TIMESTAMPTZ")) {
-                if(oracleToBytes == null) oracleToBytes = datum.getClass().getMethod(
-                    "toBytes",
-                    (Class[])null
-                );
+                if(timstampToBytes == null) timstampToBytes = datum.getClass().getMethod("toBytes");
                 try {
 //                  [0] - 100 => century
 //                  [1] - 100 => year in century
@@ -102,7 +101,7 @@ public class Datums {
 //                  [6] - 1   => second
 //                  [7]..[10] => nanoseconds
 //                  [11]/[12] => time zone
-                    byte[] timestampWithTimezone =  (byte[]) oracleToBytes.invoke(
+                    byte[] timestampWithTimezone =  (byte[]) timstampToBytes.invoke(
                         datum, 
                         (Object[])null
                     );
@@ -125,6 +124,79 @@ public class Datums {
                         new BigInteger(nanos).intValue()
                     );    
                     return timestamp;
+                } catch (InvocationTargetException exception) {
+                    throw exception.getTargetException() instanceof Exception ?
+                        (Exception) exception.getTargetException() :
+                            exception;
+                }
+            } else if (nativeClass.equals("oracle.sql.INTERVALDS")) {
+                if(intervalToBytes == null) intervalToBytes = datum.getClass().getMethod("toBytes");
+                try {
+//                  [0]..[3] - 0x80000000 => days
+//                  [4] - 60  => hours
+//                  [5] - 60  => minutes
+//                  [6] - 60  => seconds
+//                  [7]..[10] - 0x80000000 => nanoseconds
+                    byte[] intervalDaysSeconds =  (byte[]) intervalToBytes.invoke(
+                        datum, 
+                        (Object[])null
+                    );
+                	StringBuilder value = new StringBuilder();
+                    int days = toInt(intervalDaysSeconds, 0) - 0x80000000;
+                    int hours = toInt(intervalDaysSeconds[4]) - 60;
+                    int minutes = toInt(intervalDaysSeconds[5]) - 60;
+                    int seconds = toInt(intervalDaysSeconds[6]) - 60;
+                    int nanoseconds = toInt(intervalDaysSeconds, 7) - 0x80000000;
+                    if(days < 0) {
+	                	value.append(
+	                		"-P"
+	                	).append(
+	                		-days
+	                	).append(
+	                		"DT"
+	                	).append(
+	                		-hours
+	                	).append(
+	                		"H"
+	                	).append(
+	                		-minutes
+	                	).append(
+	                		"M"
+	                	).append(
+	                		BigDecimal.valueOf(
+	                			-seconds
+	                		).add(
+			                	BigDecimal.valueOf(-nanoseconds, 9)
+			                )
+		            	).append(
+		            		"S"
+		            	);
+                    } else {
+	                	value.append(
+	                		"P"
+	                	).append(
+	                		days
+	                	).append(
+	                		"DT"
+	                	).append(
+	                		hours
+	                	).append(
+	                		"H"
+	                	).append(
+	                		minutes
+	                	).append(
+	                		"M"
+	                	).append(
+	                		BigDecimal.valueOf(
+	                			seconds
+	                		).add(
+			                	BigDecimal.valueOf(nanoseconds, 9)
+			                )
+		            	).append(
+		            		"S"
+		            	);
+                    }
+                    return DatatypeFactories.xmlDatatypeFactory().newDurationDayTime(value.toString());
                 } catch (InvocationTargetException exception) {
                     throw exception.getTargetException() instanceof Exception ?
                         (Exception) exception.getTargetException() :
@@ -173,6 +245,22 @@ public class Datums {
     }
 
     /**
+     * Convert four bytes to an integer
+     * 
+     * @param source
+     * 
+     * @return
+     */
+    private static int toInt(
+    	byte[] source,
+    	int offset
+    ){
+    	byte[] value = new byte[4];
+    	System.arraycopy(source, offset, value, 0, 4);
+    	return new BigInteger(value).intValue();
+    }
+    
+    /**
      * oracle.sql.Datum.toJdbc()
      */
     private static Method oracleToJdbc;
@@ -180,8 +268,13 @@ public class Datums {
     /**
      * oracle.sql.TIMESTAMPTZ.toBytes()
      */
-    private static Method oracleToBytes;
+    private static Method timstampToBytes;
 
+    /**
+     * oracle.sql.INTERVALDS.toBytes()
+     */
+    private static Method intervalToBytes;
+    
     /**
      * UTC time zone instance
      */

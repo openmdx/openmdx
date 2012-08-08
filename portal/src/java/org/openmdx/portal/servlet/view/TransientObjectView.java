@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TransientObjectView.java,v 1.4 2010/04/27 12:21:06 wfro Exp $
+ * Name:        $Id: TransientObjectView.java,v 1.7 2011/11/28 23:18:02 wfro Exp $
  * Description: FormView 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 12:21:06 $
+ * Date:        $Date: 2011/11/28 23:18:02 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -190,7 +190,7 @@ public class TransientObjectView
         String forClass,
         String featureName
     ) throws ServiceException {
-        org.openmdx.ui1.jmi1.Inspector inspector = this.application.getInspector(forClass);
+        org.openmdx.ui1.jmi1.Inspector inspector = this.app.getInspector(forClass);
         for(Iterator i = inspector.getMember().iterator(); i.hasNext(); ) {
             Object pane = i.next();
             if (pane instanceof org.openmdx.ui1.jmi1.AttributePane) {
@@ -222,13 +222,32 @@ public class TransientObjectView
             forClass, 
             featureName
         );
-        return field == null
-            ? null
-            : locale < field.getLabel().size()
-                ? field.getLabel().get(locale)
-                : field.getLabel().get(0);
+        return field == null ? 
+        	null : 
+        		locale < field.getLabel().size() ? 
+        			field.getLabel().get(locale) : 
+        				field.getLabel().get(0);
     }
         
+    //-------------------------------------------------------------------------
+    public String getShortLabel(
+        String forClass,
+        String featureName,
+        short locale
+    ) throws ServiceException {
+        org.openmdx.ui1.jmi1.LabelledField field = this.findField(
+            forClass, 
+            featureName
+        );
+        return field == null ? 
+        	null :
+        		field.getShortLabel().isEmpty() ?
+        			this.getFieldLabel(forClass, featureName, locale) :
+		        		locale < field.getShortLabel().size() ? 
+		        			field.getShortLabel().get(locale) : 
+		        				field.getShortLabel().get(0);
+    }
+
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------

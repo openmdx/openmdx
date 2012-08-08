@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DelegatingIndexedRecord.java,v 1.8 2010/06/02 13:45:10 hburger Exp $
+ * Name:        $Id: DelegatingIndexedRecord.java,v 1.9 2011/04/12 15:44:02 hburger Exp $
  * Description: Delegating Indexed Record
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:45:10 $
+ * Date:        $Date: 2011/04/12 15:44:02 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,7 +64,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
 /**
  * Delegating Indexed Record
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class DelegatingIndexedRecord 
 	implements IndexedRecord, MultiLineStringRepresentation
 {

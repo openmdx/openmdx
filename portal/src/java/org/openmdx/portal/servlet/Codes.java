@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Codes.java,v 1.20 2010/12/13 15:20:08 wfro Exp $
+ * Name:        $Id: Codes.java,v 1.22 2011/11/18 13:36:43 wfro Exp $
  * Description: Codes
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/13 15:20:08 $
+ * Date:        $Date: 2011/11/18 13:36:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -56,9 +56,11 @@
 package org.openmdx.portal.servlet;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,65 +69,151 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.jdo.JDOHelper;
-import javax.jmi.reflect.RefObject;
+import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
-import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.kernel.log.SysLog;
 
-public final class Codes
-implements Serializable {
+public final class Codes implements Serializable {
 
+	static class CodeEntry {
+		
+		public CodeEntry(
+			Path id,
+			List<String> shortText,
+			List<String> longText,
+			String iconKey,
+			String color,
+			String backColor,
+			Date validFrom,
+			Date validTo
+		) {
+			this.id = id;
+			this.shortText = shortText;
+			this.longText = longText;
+			this.iconKey = iconKey;
+			this.color = color;
+			this.backColor = backColor;
+			this.validFrom = validFrom;
+			this.validTo = validTo;
+		}
+		
+		public Path getId() {
+			return this.id;
+		}
+		
+		public List<String> getShortText(
+		) {
+			return this.shortText;
+        }
+        
+		public List<String> getLongText() {
+			return this.longText;
+		}
+        
+		public String getIconKey() {
+			return this.iconKey;
+        }        
+
+		public String getColor() {
+	        return this.color;
+		}	        
+
+		public String getBackColor() {
+	        return this.backColor;
+		}	        
+
+		public Date getValidFrom() {
+	        return this.validFrom;
+		}
+
+		public Date getValidTo() {
+	        return this.validTo;
+		}
+		
+		private final Path id;
+		private final List<String> shortText;
+		private final List<String> longText;
+		private final String iconKey;
+		private final String color;
+		private final String backColor;
+		private final Date validFrom;
+		private final Date validTo;
+	}
+	
     //-------------------------------------------------------------------------
     public Codes(
         RefObject_1_0 codeSegment
     ) {
-        this.codeSegment = codeSegment;
-        this.valueContainerMap = new ConcurrentHashMap<String,RefObject>();
-        this.shortTextMap = new ConcurrentHashMap<String,SortedMap<Object,Object>>();
-        this.longTextMap = new ConcurrentHashMap<String,SortedMap<Object,Object>>();
-        this.iconKeyMap = new ConcurrentHashMap<String,SortedMap<Short,String>>();
-        this.colorMap = new ConcurrentHashMap<String,SortedMap<Short,String>>();
-        this.backColorMap = new ConcurrentHashMap<String,SortedMap<Short,String>>();      
-        this.refresh();
+    	if(System.currentTimeMillis() > refreshedAt + TTL) {
+    		PersistenceManager pm = JDOHelper.getPersistenceManager(codeSegment);
+    		codeSegmentIdentity = codeSegment.refGetPath();
+    		refresh(pm);
+    	}
     }
 
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
-    public void refresh(
+    public static void refresh(
+    	PersistenceManager pm
     ) {
-        this.valueContainerMap.clear();
-        JDOHelper.getPersistenceManager(this.codeSegment).refresh(this.codeSegment);        
-        Collection valueContainers = (Collection)codeSegment.refGetValue("valueContainer");
-        for(
-            Iterator i = valueContainers.iterator();
-            i.hasNext();
-        ) {
-            RefObject valueContainer = (RefObject)i.next();
-            SysLog.detail("preparing code value container", valueContainer.refMofId());
-            Set<String> names = (Set<String>)valueContainer.refGetValue("name");
-            for(String name: names) {
-                this.valueContainerMap.put(
-                    name,
-                    valueContainer
-                );
-            } 
-        }
-        this.shortTextMap.clear();
-        this.longTextMap.clear();
-        this.iconKeyMap.clear();
-        this.colorMap.clear();
-        this.backColorMap.clear();      
+    	if(codeSegmentIdentity != null) {
+    		RefObject_1_0 codeSegment = (RefObject_1_0)pm.getObjectById(codeSegmentIdentity);
+	    	Map<String,SortedMap<Short,CodeEntry>> codeEntryContainers = new ConcurrentHashMap<String,SortedMap<Short,CodeEntry>>();    	
+	        Collection<RefObject_1_0> valueContainers = (Collection)codeSegment.refGetValue("valueContainer");
+	        for(RefObject_1_0 valueContainer: valueContainers) {
+	        	Set<String> containerNames = new HashSet<String>( 
+	        		(Set<String>)valueContainer.refGetValue("name")
+	        	);
+	        	containerNames.add(
+	        		valueContainer.refGetPath().getBase()
+	        	);
+	        	for(String containerName: containerNames) {
+	        		SortedMap<Short,CodeEntry> codeEntries = new TreeMap<Short,CodeEntry>();
+	        		Collection<RefObject_1_0> entries = (Collection)valueContainer.refGetValue("entry");
+	        		for(RefObject_1_0 entry: entries) {
+	                    Short code = 0;
+	                    try {
+	                        code = new Short(entry.refGetPath().getBase());
+	                    } catch(Exception e) {}        			
+	        			codeEntries.put(
+	        				code,
+	        				new CodeEntry(
+	        					entry.refGetPath(),
+	        					new ArrayList<String>((List<String>)entry.refGetValue("shortText")),
+	        					new ArrayList<String>((List<String>)entry.refGetValue("longText")),
+	        					(String)entry.refGetValue("iconKey"),
+	        					(String)entry.refGetValue("color"),
+	        					(String)entry.refGetValue("backColor"),        					
+	        			        (Date)entry.refGetValue("validFrom"),
+	        			        (Date)entry.refGetValue("validTo")
+	        			    )
+	        			);
+	        		}
+	        		codeEntryContainers.put(
+	        			containerName,
+	        			codeEntries
+	        		);
+	        	}
+	        }
+	        cachedCodeEntryContainer = codeEntryContainers;
+	        cachedShortTexts.clear();
+	        cachedLongTexts.clear();
+	        cachedIconKeys.clear();
+	        cachedColors.clear();
+	        cachedBackColors.clear();
+    		refreshedAt = System.currentTimeMillis();
+    	}
     }
 
     //-------------------------------------------------------------------------
-    private boolean entryIsValid(
-        RefObject entry
+    private static boolean entryIsValid(
+        CodeEntry codeEntry
     ) {
-        Date validFrom = (Date)entry.refGetValue("validFrom");
-        Date validTo = (Date)entry.refGetValue("validTo");
+        Date validFrom = codeEntry.getValidFrom();
+        Date validTo = codeEntry.getValidTo();
         Date current = new Date();
         return 
 	        ((validFrom == null) || validFrom.before(current)) &&
@@ -137,29 +225,22 @@ implements Serializable {
      * @return Returns true if at least one short text is locale-specific. Returns false
      *         if all short texts are fallback texts (taken from locale 0).  
      */
-    private boolean prepareShortText(
-        String valueContainerName,
+    private static boolean prepareShortText(
+        String name,
         short locale,
         boolean codeAsKey,
         String key,
         boolean includeAll
     ) {
-        RefObject valueContainer = (RefObject)this.valueContainerMap.get(valueContainerName);
-        if(valueContainer == null) {
+    	SortedMap<Short,CodeEntry> codeEntryContainer = cachedCodeEntryContainer.get(name);
+        if(codeEntryContainer == null) {
             return false;
         }
         boolean hasLocaleSpecificTexts = false;
         SortedMap<Object,Object> shortTexts = new TreeMap<Object,Object>();
-        Collection entries = (Collection)valueContainer.refGetValue("entry");
-        for(Iterator i = entries.iterator(); i.hasNext(); ) {
-            RefObject entry = (RefObject)i.next();
-            if(includeAll || this.entryIsValid(entry)) {
-                Short code = new Short((short)0);
-                try {
-                    code = new Short(new Path(entry.refMofId()).getBase());
-                } 
-                catch(Exception e) {}
-                List texts = (List)entry.refGetValue("shortText");
+        for(Map.Entry<Short,CodeEntry> entry: codeEntryContainer.entrySet()) {
+            if(includeAll || entryIsValid(entry.getValue())) {
+                List texts = entry.getValue().getShortText();
                 Object text;
                 if(texts.size() > locale) {
                 	text = texts.get(locale);
@@ -168,13 +249,13 @@ implements Serializable {
                 	text = texts.isEmpty() ? "" : texts.get(0);
                 }
                 if(codeAsKey) {
-                    shortTexts.put(code, text);
+                    shortTexts.put(entry.getKey(), text);
                 } else {
-                    shortTexts.put(text, code);
+                    shortTexts.put(text, entry.getKey());
                 }
             }
         }
-        this.shortTextMap.put(
+        cachedShortTexts.put(
             key,
             shortTexts
         );
@@ -186,29 +267,22 @@ implements Serializable {
      * @return Returns true if at least one long text is locale-specific. Returns false
      *         if all long texts are fallback texts (taken from locale 0).  
      */
-    private boolean prepareLongText(
-        String valueContainerName,
+    private static boolean prepareLongText(
+        String name,
         short locale,
         boolean codeAsKey,
         String key,
         boolean includeAll
     ) {
-        RefObject valueContainer = (RefObject)this.valueContainerMap.get(valueContainerName);
-        if(valueContainer == null) {
+    	SortedMap<Short,CodeEntry> codeEntryContainer = cachedCodeEntryContainer.get(name);
+        if(codeEntryContainer == null) {
             return false;
         }
         boolean hasLocaleSpecificTexts = false;
         SortedMap<Object,Object> longTexts = new TreeMap<Object,Object>();
-        Collection entries = (Collection)valueContainer.refGetValue("entry");
-        for(Iterator i = entries.iterator(); i.hasNext(); ) {
-            RefObject entry = (RefObject)i.next();
-            if(includeAll || this.entryIsValid(entry)) {
-                Short code = new Short((short)0);
-                try {
-                    code = new Short(new Path(entry.refMofId()).getBase());
-                } 
-                catch(Exception e) {}
-                List texts = (List)entry.refGetValue("longText");
+        for(Map.Entry<Short,CodeEntry> entry: codeEntryContainer.entrySet()) {
+            if(includeAll || entryIsValid(entry.getValue())) {
+                List texts = entry.getValue().getLongText();
                 Object text;
                 if(texts.size() > locale) {
                 	text = texts.get(locale);
@@ -217,25 +291,27 @@ implements Serializable {
                 	text = texts.isEmpty() ? "" : texts.get(0);
                 }
                 if(codeAsKey) {
-                    longTexts.put(code, text);
+                    longTexts.put(entry.getKey(), text);
                 } else {
                     if(text == null) {
-                        throw new RuntimeServiceException(
+                    	ServiceException e = new ServiceException(
                             BasicException.Code.DEFAULT_DOMAIN,
                             BasicException.Code.INVALID_CONFIGURATION, 
                             "text of code value entry can not be null",
-                            new BasicException.Parameter("container name", valueContainerName),
+                            new BasicException.Parameter("container.name", name),
                             new BasicException.Parameter("locale", locale),
-                            new BasicException.Parameter("lookup id", key),
-                            new BasicException.Parameter("entry", entry.refMofId()),                            
+                            new BasicException.Parameter("lookup.key", key),
+                            new BasicException.Parameter("entry.id", entry.getValue().getId()),                            
                             new BasicException.Parameter("texts", texts)
                         );
+                    	e.log();
+                    	text = "N/A";
                     }
-                    longTexts.put(text, code);
+                    longTexts.put(text, entry.getKey());
                 }
             }
         }
-        this.longTextMap.put(
+        cachedLongTexts.put(
             key,
             longTexts
         );
@@ -261,15 +337,15 @@ implements Serializable {
     ) {
         SortedMap<Object,Object> longTexts = null;
         String key = this.getKey(name, locale, codeAsKey, includeAll);
-        if((longTexts = this.longTextMap.get(key)) == null) {
-            this.prepareLongText(
+        if((longTexts = cachedLongTexts.get(key)) == null) {
+            prepareLongText(
                 name,
                 locale,
                 codeAsKey,
                 key,
                 includeAll
             );
-            longTexts = this.longTextMap.get(key);
+            longTexts = cachedLongTexts.get(key);
         }
         return longTexts;
     }
@@ -283,15 +359,15 @@ implements Serializable {
     ) {
         SortedMap<Object,Object> shortTexts = null;
         String key = this.getKey(name, locale, codeAsKey, includeAll);
-        if((shortTexts = this.shortTextMap.get(key)) == null) {
-            this.prepareShortText(
+        if((shortTexts = cachedShortTexts.get(key)) == null) {
+            prepareShortText(
                 name,
                 locale,
                 codeAsKey,
                 key,
                 includeAll
             );
-            shortTexts = this.shortTextMap.get(key);
+            shortTexts = cachedShortTexts.get(key);
         }
         return shortTexts;      
     }
@@ -302,29 +378,23 @@ implements Serializable {
         boolean includeAll
     ) {
         SortedMap<Short,String> iconKeys = null;
-        if((iconKeys = this.iconKeyMap.get(name + ":" + includeAll)) == null) {
-            RefObject valueContainer = (RefObject)this.valueContainerMap.get(name);
-            if(valueContainer == null) {
+        String key = name + ":" + includeAll;
+        if((iconKeys = cachedIconKeys.get(key)) == null) {
+        	SortedMap<Short,CodeEntry> codeEntryContainer = cachedCodeEntryContainer.get(name);
+            if(codeEntryContainer == null) {
                 return null;
             }
             iconKeys = new TreeMap<Short,String>();
-            Collection entries = (Collection)valueContainer.refGetValue("entry");
-            for(Iterator i = entries.iterator(); i.hasNext(); ) {
-                RefObject entry = (RefObject)i.next();
-                if(includeAll || this.entryIsValid(entry)) {
-                    Short code = new Short((short)0);
-                    try {
-                        code = new Short(new Path(entry.refMofId()).getBase());
-                    } 
-                    catch(Exception e) {}
+            for(Map.Entry<Short,CodeEntry> entry: codeEntryContainer.entrySet()) {
+                if(includeAll || entryIsValid(entry.getValue())) {
                     iconKeys.put(
-                        code, 
-                        (String)entry.refGetValue("iconKey")
+                        entry.getKey(), 
+                        entry.getValue().getIconKey()
                     );
                 }
             }
-            this.iconKeyMap.put(
-                name + ":" + includeAll,
+            cachedIconKeys.put(
+                key,
                 iconKeys
             );
         }
@@ -337,29 +407,23 @@ implements Serializable {
         boolean includeAll
     ) {
         SortedMap<Short,String> colors = null;
-        if((colors = this.colorMap.get(name + ":" + includeAll)) == null) {
-            RefObject valueContainer = (RefObject)this.valueContainerMap.get(name);
-            if(valueContainer == null) {
+        String key = name + ":" + includeAll;
+        if((colors = cachedColors.get(key)) == null) {
+        	SortedMap<Short,CodeEntry> codeEntryContainer = cachedCodeEntryContainer.get(name);
+            if(codeEntryContainer == null) {
                 return null;
             }
             colors = new TreeMap<Short,String>();
-            Collection entries = (Collection)valueContainer.refGetValue("entry");
-            for(Iterator i = entries.iterator(); i.hasNext(); ) {
-                RefObject entry = (RefObject)i.next();
-                if(includeAll || this.entryIsValid(entry)) {
-                    Short code = new Short((short)0);
-                    try {
-                        code = new Short(new Path(entry.refMofId()).getBase());
-                    } 
-                    catch(Exception e) {}
+            for(Map.Entry<Short,CodeEntry> entry: codeEntryContainer.entrySet()) {
+                if(includeAll || entryIsValid(entry.getValue())) {
                     colors.put(
-                        code, 
-                        (String)entry.refGetValue("color")
+                        entry.getKey(), 
+                        entry.getValue().getColor()
                     );
                 }
             }
-            this.colorMap.put(
-                name + ":" + includeAll,
+            cachedColors.put(
+                key,
                 colors
             );
         }
@@ -372,29 +436,23 @@ implements Serializable {
         boolean includeAll
     ) {
         SortedMap<Short,String> backColors = null;
-        if((backColors = this.backColorMap.get(name + ":" + includeAll)) == null) {
-            RefObject valueContainer = (RefObject)this.valueContainerMap.get(name);
-            if(valueContainer == null) {
+        String key = name + ":" + includeAll;
+        if((backColors = cachedBackColors.get(key)) == null) {
+        	SortedMap<Short,CodeEntry> codeEntryContainer = cachedCodeEntryContainer.get(name);
+            if(codeEntryContainer == null) {
                 return null;
             }
             backColors = new TreeMap<Short,String>();
-            Collection entries = (Collection)valueContainer.refGetValue("entry");
-            for(Iterator i = entries.iterator(); i.hasNext(); ) {
-                RefObject entry = (RefObject)i.next();
-                if(includeAll || this.entryIsValid(entry)) {
-                    Short code = new Short((short)0);
-                    try {
-                        code = new Short(new Path(entry.refMofId()).getBase());
-                    } 
-                    catch(Exception e) {}
+            for(Map.Entry<Short,CodeEntry> entry: codeEntryContainer.entrySet()) {
+                if(includeAll || entryIsValid(entry.getValue())) {
                     backColors.put(
-                        code, 
-                        (String)entry.refGetValue("backColor")
+                        entry.getKey(), 
+                        entry.getValue().getBackColor()
                     );
                 }
             }
-            this.backColorMap.put(
-                name + ":" + includeAll,
+            cachedBackColors.put(
+                key,
                 backColors
             );
         }
@@ -407,12 +465,12 @@ implements Serializable {
         String feature
     ) {
         short code = 0;
-        if((value != null) && (value.length() > 0)) {
+        if((value != null) && !value.isEmpty()) {
             value = value.toUpperCase();
             for(short locale = 0; locale < 255; locale++) {
             	String key = this.getKey(feature, locale, true, false);
-            	if(this.longTextMap.get(key) == null) {            		
-                    if(!this.prepareLongText(feature, locale, true, key, false)) {
+            	if(cachedLongTexts.get(key) == null) {            		
+                    if(!prepareLongText(feature, locale, true, key, false)) {
                     	return code;
                     }
             	}
@@ -433,13 +491,18 @@ implements Serializable {
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 8069002786499927870L;
     
-    private final RefObject_1_0 codeSegment;
-    private final Map<String,RefObject> valueContainerMap;
-    private final Map<String,SortedMap<Object,Object>> shortTextMap;
-    private final Map<String,SortedMap<Object,Object>> longTextMap;
-    private final Map<String,SortedMap<Short,String>> iconKeyMap;
-    private final Map<String,SortedMap<Short,String>> colorMap;
-    private final Map<String,SortedMap<Short,String>> backColorMap;
+    // Time to live of cached elements is TTL unless refresh is explicitly called.
+    private static final long TTL = 86400000L;
+    
+    private static long refreshedAt = 0L;
+    private static Path codeSegmentIdentity = null;
+    private static Map<String,SortedMap<Short,CodeEntry>> cachedCodeEntryContainer = new HashMap<String,SortedMap<Short,CodeEntry>>();    
+    private static final Map<String,SortedMap<Object,Object>> cachedShortTexts = new ConcurrentHashMap<String,SortedMap<Object,Object>>();
+    private static final Map<String,SortedMap<Object,Object>> cachedLongTexts = new ConcurrentHashMap<String,SortedMap<Object,Object>>();
+    private static final Map<String,SortedMap<Short,String>> cachedIconKeys = new ConcurrentHashMap<String,SortedMap<Short,String>>();
+    private static final Map<String,SortedMap<Short,String>> cachedColors = new ConcurrentHashMap<String,SortedMap<Short,String>>();
+    private static final Map<String,SortedMap<Short,String>> cachedBackColors = new ConcurrentHashMap<String,SortedMap<Short,String>>();
+
 }
 
 //--- End of File -----------------------------------------------------------

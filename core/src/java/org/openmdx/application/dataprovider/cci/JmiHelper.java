@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: JmiHelper.java,v 1.16 2010/11/10 16:35:54 hburger Exp $
+ * Name:        $Id: JmiHelper.java,v 1.22 2011/11/26 01:34:58 hburger Exp $
  * Description: JmiHelper class
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/10 16:35:54 $
+ * Date:        $Date: 2011/11/26 01:34:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -18,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -45,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes or is based on software developed by other 
- * organizations as listed in the NOTICE file.
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.dataprovider.cci;
 
@@ -75,15 +75,15 @@ import org.openmdx.base.collection.MarshallingSparseArray;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
-import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.LenientPathComparator;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
-import org.openmdx.state2.spi.Parameters;
 import org.w3c.cci2.SparseArray;
 import org.w3c.spi2.Datatypes;
 
@@ -183,11 +183,13 @@ public class JmiHelper {
     }
 
     //---------------------------------------------------------------------------
+    @SuppressWarnings("rawtypes")
     private static void setRefObjectValues(
         Object sourceValues,
         Marshaller marshaller,
         Object targetValues,
-        ModelElement_1_0 featureDef, boolean compareWithBeforeImage
+        ModelElement_1_0 featureDef, 
+        boolean compareWithBeforeImage
     ) throws ServiceException {
         if(targetValues instanceof List) {
             if(!compareWithBeforeImage || !areEqual(targetValues, new MarshallingList(marshaller, (List)sourceValues))) {
@@ -253,20 +255,14 @@ public class JmiHelper {
         MappedRecord source,
         RefObject target,
         Map<Path,RefObject> objectCache,
-        Collection<String> ignorableFeatures
+        Collection<String> ignorableFeatures, 
+        boolean compareWithBeforeImage
     ) throws ServiceException {
         PersistenceManager pm = JDOHelper.getPersistenceManager(target);
         String typeName = Object_2Facade.getObjectClass(source);
-        Object_2Facade facade = null;
-        try {
-            facade = Object_2Facade.newInstance(source);
-        }
-        catch(Exception e) {
-            throw new ServiceException(e);
-        }
+        Object_2Facade facade = Facades.asObject(source);
         Model_1_0 model = ((RefPackage_1_0)target.refImmediatePackage()).refModel();
         ModelElement_1_0 classDef = model.getElement(typeName);
-        boolean compareWithBeforeImage = !Parameters.STRICT_QUERY || !model.isSubtypeOf(classDef, "org:openmdx:state2:BasicState");
         if(ignorableFeatures == null) {
             ignorableFeatures = DEFAULT_SET_OF_IGNORABLE_FEATURES;
         }
@@ -300,74 +296,56 @@ public class JmiHelper {
                 model,
                 (String)featureType.objGetValue("qualifiedName")
             );
-            String multiplicity = ModelUtils.getMultiplicity(featureDef);
-            /**
-             * Store the attribute value to target according to the attribute's
-             * multiplicity
-             */     
-            // OPTIONAL_VALUE
-            if(Multiplicities.OPTIONAL_VALUE.equals(multiplicity)) {
-                Object sourceValue = facade.attributeValue(featureName);                
-                if(compareWithBeforeImage){
-                    Object targetValue = target.refGetValue(featureName);
-                    if(!areEqual(targetValue, sourceValue)) {
-                        target.refSetValue(
-                            featureName,
-                            marshaller.marshal(sourceValue)
-                        );
-                    }
-                } else {
-                    target.refSetValue(
-                        featureName,
-                        marshaller.marshal(sourceValue)
-                    );
-                }
-            }
-            // SINGLE_VALUE
-            else if(Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
-                Object sourceValue = facade.attributeValue(featureName);                
-                //
-                // before image should not be retrieved in case of primitive types!
-                //
-                target.refSetValue(
-                    featureName,
-                    marshaller.marshal(sourceValue)
-                );
-            }
-            // STREAM
-            else if(Multiplicities.STREAM.equals(multiplicity)) {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED, 
-                    "Stream value not supported.",
-                    new BasicException.Parameter("multiplicity", multiplicity),
-                    new BasicException.Parameter("attribute name", featureName)
-                );        
-            }
-            // multi-valued
-            else if(
-                Multiplicities.MULTI_VALUE.equals(multiplicity) || 
-                Multiplicities.LIST.equals(multiplicity) ||
-                Multiplicities.SET.equals(multiplicity) ||
-                Multiplicities.SPARSEARRAY.equals(multiplicity)
-            ) {
-                Object sourceValues = facade.attributeValues(featureName);                
-                setRefObjectValues(
-                    sourceValues,
-                    marshaller,
-                    target.refGetValue(featureName),
-                    featureDef, 
-                    compareWithBeforeImage
-                );
-            }
-            else {
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED, 
-                    "Unsupported multiplicity. Supported are [0..1|1..1|0..n|list|set|sparsearray]",
-                    new BasicException.Parameter("multiplicity", multiplicity),
-                    new BasicException.Parameter("attribute name", featureName)
-                );        
+            //
+            // Store the attribute value to target according to the attribute's multiplicity
+            // 
+            Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
+			switch(multiplicity){
+	            case OPTIONAL: {
+	                Object sourceValue = facade.attributeValue(featureName);                
+	                if(compareWithBeforeImage){
+	                    Object targetValue = target.refGetValue(featureName);
+	                    if(!areEqual(targetValue, sourceValue)) {
+	                        target.refSetValue(
+	                            featureName,
+	                            marshaller.marshal(sourceValue)
+	                        );
+	                    }
+	                } else {
+	                    target.refSetValue(
+	                        featureName,
+	                        marshaller.marshal(sourceValue)
+	                    );
+	                }
+	            } break;
+	            case SINGLE_VALUE: {
+	                Object sourceValue = facade.attributeValue(featureName);                
+	                //
+	                // before image should not be retrieved in case of primitive types!
+	                //
+	                target.refSetValue(
+	                    featureName,
+	                    marshaller.marshal(sourceValue)
+	                );
+	            } break;
+	            case LIST: case SET: case SPARSEARRAY: {
+	                Object sourceValues = facade.attributeValues(featureName);                
+	                setRefObjectValues(
+	                    sourceValues,
+	                    marshaller,
+	                    target.refGetValue(featureName),
+	                    featureDef, 
+	                    compareWithBeforeImage
+	                );
+	            } break;
+				default:
+	                throw new ServiceException(
+	                    BasicException.Code.DEFAULT_DOMAIN,
+	                    BasicException.Code.NOT_SUPPORTED, 
+	                    "Unsupported multiplicity. Supported are 0..1, 1..1, list, set, sparsearray and in case of references 0..n",
+	                    new BasicException.Parameter("multiplicity", multiplicity),
+	                    new BasicException.Parameter("attribute name", featureName)
+	                );        
             }
         }
     }

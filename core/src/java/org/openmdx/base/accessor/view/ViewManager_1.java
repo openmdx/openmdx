@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ViewManager_1.java,v 1.46 2010/12/13 17:21:45 hburger Exp $
+ * Name:        $Id: ViewManager_1.java,v 1.54 2011/11/25 14:51:58 hburger Exp $
  * Description: View Manager
- * Revision:    $Revision: 1.46 $
+ * Revision:    $Revision: 1.54 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/13 17:21:45 $
+ * Date:        $Date: 2011/11/25 14:51:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,6 +51,7 @@
 package org.openmdx.base.accessor.view;
 
 import java.io.Serializable;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -63,6 +64,7 @@ import java.util.concurrent.ConcurrentMap;
 import javax.jdo.Extent;
 import javax.jdo.FetchGroup;
 import javax.jdo.FetchPlan;
+import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalUserException;
 import javax.jdo.JDOHelper;
@@ -97,9 +99,11 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.MarshallingInstanceLifecycleListener;
+import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.cci.StateContext;
+import org.openmdx.state2.cci.ViewKind;
 
 /**
  * View Manager
@@ -107,6 +111,7 @@ import org.openmdx.state2.cci.StateContext;
  * The manager returns the same object for a given object id as long as it is not 
  * garbage collected.
  */
+@SuppressWarnings("rawtypes")
 public class ViewManager_1  
     implements Marshaller, Serializable, DataObjectManager_1_0  
 {
@@ -312,6 +317,19 @@ public class ViewManager_1
         ) : objectFactory;
     }
 
+    
+    //------------------------------------------------------------------------
+    // Implements PersistenceManager_1_0
+    //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#lock(java.security.PrivilegedExceptionAction)
+     */
+//  @Override
+    public <T> T lock(PrivilegedExceptionAction<T> action) {
+        throw new UnsupportedOperationException();
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getFeatureReplacingObjectById(java.lang.Object, java.lang.String)
      */
@@ -424,11 +442,25 @@ public class ViewManager_1
            );
         }
     }
-
     
-    //------------------------------------------------------------------------
-    // Implements PersistenceManager_1_0
-    //------------------------------------------------------------------------
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#isLoaded(java.util.UUID, java.lang.String)
+     */
+//  @Override
+    public boolean isLoaded(
+        UUID transientObjectId, 
+        String fieldName
+    ) {
+        ObjectView_1_0 source = (ObjectView_1_0) getObjectById(transientObjectId);
+        try {
+            return source.objDefaultFetchGroup().contains(fieldName);
+        } catch (ServiceException exception) {
+            throw new JDODataStoreException(
+                "Unable the determine a field's state",
+                exception.getCause()
+            );
+        }
+    }
 
     /**
      * Close the basic accessor.
@@ -549,8 +581,6 @@ public class ViewManager_1
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
 
-    @SuppressWarnings("unchecked")
-//  @Override
     public void addInstanceLifecycleListener(
         InstanceLifecycleListener listener,
         Class... classes
@@ -610,8 +640,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#deletePersistentAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public void deletePersistentAll(Collection pcs) {
         for(Object pc : pcs){
             deletePersistent(pc);
@@ -661,8 +689,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#evictAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public void evictAll(Collection pcs) {
         getConnection().evictAll(toDataObjects(pcs));
     }
@@ -678,8 +704,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#evictAll(boolean, java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public void evictAll(boolean subclasses, Class pcClass) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -695,8 +719,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getFetchGroup(java.lang.Class, java.lang.String)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public FetchGroup getFetchGroup(Class type, String name) {
         return getConnection().getFetchGroup(type, name);
     }
@@ -712,8 +734,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Set<?> getManagedObjects(EnumSet<ObjectState> states) {
         if(this.interactionSpec == null) {
             return new MarshallingSet(
@@ -728,8 +748,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getManagedObjects(java.lang.Class[])
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Set getManagedObjects(Class... classes) {
         throw new UnsupportedOperationException("Unsupported because all objects are instances of the ViewObject_1_0");
     }
@@ -737,8 +755,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet, java.lang.Class[])
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Set getManagedObjects(EnumSet<ObjectState> states, Class... classes) {
         throw new UnsupportedOperationException("Unsupported because all objects are instances of the ViewObject_1_0");
     }
@@ -855,8 +871,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectIdClass(java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Class getObjectIdClass(Class cls) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -864,8 +878,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Collection getObjectsById(Collection oids) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -881,8 +893,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(java.util.Collection, boolean)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Collection getObjectsById(Collection oids, boolean validate) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -962,8 +972,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeNontransactionalAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public void makeNontransactionalAll(Collection pcs) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1011,8 +1019,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransactionalAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public void makeTransactionalAll(Collection pcs) {
         getConnection().makeTransactionalAll(toDataObjects(pcs));
     }
@@ -1044,8 +1050,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public void makeTransientAll(Collection pcs) {
         getConnection().makeTransientAll(toDataObjects(pcs));
     }
@@ -1061,8 +1065,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.util.Collection, boolean)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public void makeTransientAll(Collection pcs, boolean useFetchPlan) {
         getConnection().makeTransientAll(toDataObjects(pcs), useFetchPlan);
     }
@@ -1078,8 +1080,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newNamedQuery(java.lang.Class, java.lang.String)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Query newNamedQuery(Class cls, String queryName) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1087,8 +1087,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newObjectIdInstance(java.lang.Class, java.lang.Object)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Object newObjectIdInstance(Class pcClass, Object key) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1120,8 +1118,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Query newQuery(Class cls) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1129,8 +1125,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(javax.jdo.Extent)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Query newQuery(Extent cln) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1146,8 +1140,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Query newQuery(Class cls, Collection cln) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1155,8 +1147,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.lang.String)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Query newQuery(Class cls, String filter) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1164,8 +1154,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(javax.jdo.Extent, java.lang.String)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Query newQuery(Extent cln, String filter) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1173,8 +1161,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.util.Collection, java.lang.String)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Query newQuery(Class cls, Collection cln, String filter) {
         throw new UnsupportedOperationException("Unsupported operation by manager");
     }
@@ -1227,8 +1213,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#refreshAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public void refreshAll(Collection pcs) {
         getConnection().refreshAll(toDataObjects(pcs));
     }
@@ -1278,8 +1262,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public void retrieveAll(Collection pcs) {
         retrieveAll(pcs, false);
     }
@@ -1295,8 +1277,6 @@ public class ViewManager_1
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(java.util.Collection, boolean)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public void retrieveAll(Collection pcs, boolean useFetchPlan) {
         getConnection().retrieveAll(toDataObjects(pcs), useFetchPlan);
     }
@@ -1380,11 +1360,34 @@ public class ViewManager_1
         this.connection.evictAll();
     }
 
+    /* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getLastXRISegment(java.lang.Object)
+	 */
+//  @Override
+	public String getLastXRISegment(
+		Object pc
+	) {
+		return pc instanceof ObjectView_1 ? 
+			this.connection.getLastXRISegment(((ObjectView_1)pc).objGetDelegate()) : 
+		    null;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getTransientIdOfTheObjectsContainer(java.lang.Object)
+	 */
+//  @Override
+	public TransientContainerId getContainerId(Object pc) {
+		return pc instanceof ObjectView_1 ? 
+			this.connection.getContainerId(((ObjectView_1)pc).objGetDelegate()) : 
+		    null;
+	}
+
+
     //------------------------------------------------------------------------
     // Extends CachingMarshaller
     //------------------------------------------------------------------------
 
-    /**
+	/**
      * Marshals an object
      *
      * @param  source    The object to be marshalled
@@ -1403,24 +1406,43 @@ public class ViewManager_1
             return source;
         } else if (source instanceof DataObject_1_0) {
             DataObject_1_0 dataObject = (DataObject_1_0) source;
+            boolean filterStates;
+            Date existsAt = null;
+            ViewKind viewKind;
             if(this.getInteractionSpec() instanceof StateContext<?>) {
+            	StateContext<?> context = ((StateContext<?>)this.getInteractionSpec()); 
                 Model_1_0 model = Model_1Factory.getModel();
-                if(model.isInstanceof(dataObject, "org:openmdx:state2:BasicState")) {
-                    DataObject_1_0 core = (DataObject_1_0) dataObject.objGetValue("core");
-                    if(core != null) {
-                        dataObject = core;
-                    }
+                filterStates = model.isInstanceof(dataObject, "org:openmdx:state2:StateCapable"); 
+                if(filterStates) {
+                	viewKind = context.getViewKind();
+                	if(viewKind == ViewKind.TIME_POINT_VIEW){
+                		existsAt = context.getExistsAt();
+                		if(existsAt != null && dataObject.jdoIsNew()) {
+                			return null;
+                		}
+                	}
+	                if(model.isInstanceof(dataObject, "org:openmdx:state2:BasicState")) {
+	                    DataObject_1_0 core = (DataObject_1_0) dataObject.objGetValue("core");
+	                    if(core != null) {
+	                        dataObject = core;
+	                    }
+	                }
                 }
+            } else {
+            	viewKind = null;
+                filterStates = false;
             }
             ObjectView_1 target = this.registry.get(dataObject);
             if(target == null) {
-                ObjectView_1 concurrent = this.registry.putUnlessPresent(
+            	target = this.registry.putUnlessPresent(
                     dataObject, 
                     target = new ObjectView_1(this, dataObject)
                 );
-                return concurrent == null ? target : concurrent;
+            }
+            if (filterStates && existsAt == null && !target.isHollow() && target.jdoIsDeleted()) {
+                return null;
             } else {
-                return this.interactionSpec != null && !target.isHollow() && target.jdoIsDeleted() ? null : target;
+                return target;
             }
         } else {
             return source;

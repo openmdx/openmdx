@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SegmentReferencesForeignPersonImpl.java,v 1.3 2010/09/22 09:04:52 hburger Exp $
+ * Name:        $Id: SegmentReferencesForeignPersonImpl.java,v 1.7 2011/04/05 14:34:03 hburger Exp $
  * Description: SegmentReferencesForgeignPerson 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/22 09:04:52 $
+ * Date:        $Date: 2011/04/05 14:34:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -51,18 +51,20 @@
 package test.openmdx.app1.aop2;
 
 import java.util.AbstractCollection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.jmi.reflect.WrongSizeException;
 
+import org.openmdx.base.aop2.PlugInContexts;
+import org.w3c.cci2.AnyTypePredicate;
+
 import test.openmdx.app1.cci2.PersonQuery;
-import test.openmdx.app1.cci2.SegmentHasPerson;
 import test.openmdx.app1.cci2.SegmentReferencesForgeignPerson;
 import test.openmdx.app1.jmi1.App1Package;
 import test.openmdx.app1.jmi1.Person;
 import test.openmdx.app1.jmi1.Segment;
-import org.w3c.cci2.AnyTypePredicate;
 
 /**
  * Association Implementation <code>SegmentReferencesForgeignPerson</code> 
@@ -104,10 +106,20 @@ public class SegmentReferencesForeignPersonImpl
         } else {
             Iterator<Person> i = result.iterator();
             Person person = i.next();
-            if(i.hasNext()) throw new WrongSizeException(
-                segment,
-                "The segment has more than one person with the foreign id '" + foreignId + "'"
-             );
+            if(i.hasNext()) {
+                throw new WrongSizeException(
+                    segment,
+                    "The segment has more than one person with the foreign id '" + foreignId + "'"
+                 );
+            } else {
+            	//
+            	// CR20019630
+            	//
+                Date date = PlugInContexts.uncheckedGetPlugInContext(person, PersonImpl.class);
+                System.out.println(
+                    "The context of the person with the foreign id '" + foreignId + "' has been established at " + date
+                );
+            }
             return person;
         }
     }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ObjectRecord.java,v 1.4 2010/06/02 13:45:10 hburger Exp $
+ * Name:        $Id: ObjectRecord.java,v 1.6 2011/11/11 01:32:21 hburger Exp $
  * Description: ObjectRecord 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:45:10 $
+ * Date:        $Date: 2011/11/11 01:32:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -223,5 +223,25 @@ public class ObjectRecord
                 break;
         }
     }
+
+    @Override
+    public boolean equals(
+        Object obj
+    ) {
+        if(obj instanceof ObjectRecord) {
+            ObjectRecord that = (ObjectRecord)obj;
+            return 
+                this.path.equals(that.path) && 
+                this.value.equals(that.value) && 
+                (this.version == null ? that.version == null : this.version.equals(that.version));
+        } else {
+            return false;
+        }
+    }
+
+	@Override
+	public int hashCode() {
+		return this.path == null ? 0 : this.path.hashCode(); 
+	}
     
 }

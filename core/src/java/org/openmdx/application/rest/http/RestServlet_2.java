@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestServlet_2.java,v 1.83 2010/12/13 15:48:23 hburger Exp $
+ * Name:        $Id: RestServlet_2.java,v 1.89 2011/11/26 01:35:00 hburger Exp $
  * Description: REST Servlet 
- * Revision:    $Revision: 1.83 $
+ * Revision:    $Revision: 1.89 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/13 15:48:23 $
+ * Date:        $Date: 2011/11/26 01:35:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2010, OMEX AG, Switzerland
+ * Copyright (c) 2008-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -77,19 +77,23 @@ import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 import javax.resource.cci.RecordFactory;
+import javax.resource.cci.ResourceWarning;
+import javax.resource.spi.CommException;
+import javax.resource.spi.LocalTransactionException;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.AppConfigurationEntry;
+import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.transaction.Status;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -99,7 +103,7 @@ import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.HttpHeaderFieldContent;
 import org.openmdx.base.io.HttpHeaderFieldValue;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
@@ -110,6 +114,7 @@ import org.openmdx.base.resource.cci.RestFunction;
 import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.rest.spi.RestFormat;
@@ -416,15 +421,11 @@ public class RestServlet_2 extends HttpServlet {
             Map<Object,Object> overrides = new HashMap<Object,Object>();
             overrides.put(
                 ConfigurableProperty.Multithreaded.qualifiedName(),
-                false
+                Boolean.FALSE.toString()
             );
-            boolean refInitializeOnCreate = Boolean.parseBoolean(
-                config.getInitParameter(ConfigurableProperty.RefInitializeOnCreate.name())
-            );
-            overrides.put(
-                ConfigurableProperty.RefInitializeOnCreate.qualifiedName(),
-                Boolean.valueOf(refInitializeOnCreate).toString()
-            );
+            if(config.getInitParameter("RefInitializeOnCreate") != null) {
+                log("The init parameter 'RefInitializeOnCreate' is no longer supported");
+            }
             this.connectionFactory = InboundConnectionFactory_2.newInstance(
                 entityManagerFactoryName == null ? "jdo:EntityManagerFactory" : 
                 entityManagerFactoryName.indexOf(':') < 0 ? "jdo:" + entityManagerFactoryName :
@@ -447,7 +448,7 @@ public class RestServlet_2 extends HttpServlet {
      * @throws ResourceException
      */
     @SuppressWarnings(
-        {"unchecked", "cast"}
+        {"unchecked", "cast", "rawtypes"}
     )
     private void reFetch(
         Interaction interaction,
@@ -466,13 +467,13 @@ public class RestServlet_2 extends HttpServlet {
                     IndexedRecord newRequest;
                     if(factory instanceof ExtendedRecordFactory) {
                         newRequest = ((ExtendedRecordFactory)factory).singletonIndexedRecord(
-                            Multiplicities.LIST,
+                            Multiplicity.LIST.toString(),
                             null,
                             xri
                         );
                     } else {
                         newRequest = factory.createIndexedRecord(
-                            Multiplicities.LIST
+                            Multiplicity.LIST.toString()
                         );
                         newRequest.add(xri);
                     }
@@ -515,19 +516,68 @@ public class RestServlet_2 extends HttpServlet {
         if(autoCommit) {
             LocalTransaction transaction = interaction.getConnection().getLocalTransaction(); 
             transaction.begin();
+            int status = Status.STATUS_ACTIVE;
             try {
                 Record reply = interaction.execute(
                     interactionSpec, 
                     input
-                );                
+                );
+                status = Status.STATUS_COMMITTING;
                 transaction.commit();
+                status = Status.STATUS_COMMITTED;
                 if(reFetchAfterAutoCommit && reply instanceof IndexedRecord) {
                     reFetch(interaction, (IndexedRecord)reply);
                 }
                 return reply; 
             } catch (ResourceException exception) {
-                transaction.rollback();
-                throw exception;
+                switch(status) {
+                    case Status.STATUS_ACTIVE:
+                        try {
+                            transaction.rollback();
+                        } catch(Exception rollbackException) {
+                            BasicException exceptionChain = BasicException.newEmbeddedExceptionStack(
+                                rollbackException,
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.HEURISTIC
+                            );
+                            exceptionChain.getCause(
+                                null
+                            ).initCause(
+                                exception
+                            );
+                            throw ResourceExceptions.initHolder(
+                                new LocalTransactionException(
+                                    "Rollback triggered by execution failure failed itself",
+                                    exceptionChain
+                                )
+                            );
+                        }
+                        throw ResourceExceptions.initHolder(
+                            new LocalTransactionException(
+                                "Transaction rolled back due to execution failure",
+                                BasicException.newEmbeddedExceptionStack(
+                                    exception,
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.ROLLBACK
+                                )
+                            )
+                        );
+                    case Status.STATUS_COMMITTING:
+                        throw exception;
+                    case Status.STATUS_COMMITTED:
+                        throw ResourceExceptions.initHolder(
+                            new ResourceWarning(
+                                "Re-fetch after auto-commit failed",
+                                BasicException.newEmbeddedExceptionStack(
+                                    exception,
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.TRANSFORMATION_FAILURE
+                                )
+                            )
+                        );
+                    default:
+                        throw exception;
+                }
             }
         } else {
             return interaction.execute(
@@ -689,13 +739,13 @@ public class RestServlet_2 extends HttpServlet {
                     RecordFactory factory = this.connectionFactory.getRecordFactory();
                     if(factory instanceof ExtendedRecordFactory) {
                         input = ((ExtendedRecordFactory)factory).singletonIndexedRecord(
-                            Multiplicities.LIST,
+                            Multiplicity.LIST.toString(),
                             null,
                             xri
                         );
                     } else {
                         input = factory.createIndexedRecord(
-                            Multiplicities.LIST
+                    		Multiplicity.LIST.toString()
                         );
                         input.add(xri);
                     }
@@ -710,7 +760,7 @@ public class RestServlet_2 extends HttpServlet {
                     } else {
                         response.setStatus(HttpServletResponse.SC_OK);                    
                         ServletTarget target = new ServletTarget(request, response); 
-                        RestFormat.format(target, Object_2Facade.newInstance((MappedRecord)output.get(0)));
+                        RestFormat.format(target, Facades.asObject((MappedRecord)output.get(0)));
                         target.close();
                     }
                 }
@@ -720,10 +770,9 @@ public class RestServlet_2 extends HttpServlet {
                 //
                 MappedRecord input;
                 if(request.getHeader("interaction-verb") == null) {
-                    Query_2Facade inputFacade = Query_2Facade.newInstance();
+                    Query_2Facade inputFacade = Facades.newQuery(xri);
                     String queryType = request.getParameter("queryType");
                     String query = request.getParameter("query"); 
-                    inputFacade.setPath(xri);
                     inputFacade.setQueryType(
                         queryType == null ? (String)Model_1Factory.getModel().getTypes(xri.getChild(":*"))[2].objGetValue("qualifiedName") : queryType
                     );
@@ -869,13 +918,13 @@ public class RestServlet_2 extends HttpServlet {
                         RecordFactory factory = this.connectionFactory.getRecordFactory();
                         if(factory instanceof ExtendedRecordFactory) {
                             input = ((ExtendedRecordFactory)factory).singletonMappedRecord(
-                                Multiplicities.MAP,
+                                Multiplicity.MAP.toString(),
                                 null,
                                 xri,
                                 value
                             );
                         } else {
-                            input = factory.createMappedRecord(Multiplicities.MAP);
+                            input = factory.createMappedRecord(Multiplicity.MAP.toString());
                             input.put(xri, value);
                         }
                     }
@@ -894,7 +943,7 @@ public class RestServlet_2 extends HttpServlet {
                         for(Object record : output){
                             RestFormat.format(
                                 target, 
-                                Object_2Facade.newInstance((MappedRecord) record)
+                                Facades.asObject((MappedRecord) record)
                             );
                         }
                         target.close();
@@ -922,7 +971,7 @@ public class RestServlet_2 extends HttpServlet {
                     } else{
                        response.setStatus(HttpServletResponse.SC_OK);
                        ServletTarget target = new ServletTarget(request, response);
-                       RestFormat.format(target, Object_2Facade.newInstance((MappedRecord) output.get(0)));
+                       RestFormat.format(target, Facades.asObject((MappedRecord) output.get(0)));
                        target.close();
                     }
                 } else {
@@ -1002,15 +1051,32 @@ public class RestServlet_2 extends HttpServlet {
         prolog(request, response);
         Interaction interaction = getInteraction(request);
         try {
+            MappedRecord input;
+            Path xri = this.getXri(request);
+            try {
+                input = RestFormat.parseRequest(
+                    RestServlet_2.getSource(request, response),
+                    xri
+                );
+            } catch (ServiceException exception) {
+                throw ResourceExceptions.initHolder(
+                    new CommException(
+                        "Request could not be parsed properly",
+                        BasicException.newEmbeddedExceptionStack(
+                            exception,
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.TRANSFORMATION_FAILURE,
+                            new BasicException.Parameter("xri", xri.toXRI())
+                        )
+                    )
+                );
+            }
             IndexedRecord output = (IndexedRecord) execute(  
                 interaction,
                 isAutoCommitting(request), 
                 true, 
                 this.getInteractionSpec(request, RestFunction.PUT), 
-                RestFormat.parseRequest(
-                    RestServlet_2.getSource(request, response),
-                    this.getXri(request)
-                )
+                input
             );
             if(output == null || output.isEmpty()) {
                 response.setStatus(HttpServletResponse.SC_NO_CONTENT);
@@ -1020,7 +1086,7 @@ public class RestServlet_2 extends HttpServlet {
                 for(Object record : output) {
                     RestFormat.format(
                         target, 
-                        Object_2Facade.newInstance((MappedRecord) record)
+                        Facades.asObject((MappedRecord) record)
                     );
                 }
                 target.close();

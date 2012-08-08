@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestState.java,v 1.15 2010/10/26 11:24:45 hburger Exp $
+ * Name:        $Id: TestState.java,v 1.16 2011/11/18 16:46:02 hburger Exp $
  * Description: TestState 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/26 11:24:45 $
+ * Date:        $Date: 2011/11/18 16:46:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -186,7 +186,7 @@ public class TestState {
         assertEquals("a0!0#stringValue", "State A", stateA0_0.getStringValue());
         assertNull("a0!1#stringValue", stateA0_1.getStringValue());
         @SuppressWarnings("unused")
-        Object o = DateStateViews.getViewForTimeRange(
+        Object o = DateStateViews.<CoreA,CoreA>getViewForTimeRange(
             coreA, 
             DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-03-20"), 
             DatatypeFactories.xmlDatatypeFactory().newXMLGregorianCalendar("2000-04-10")

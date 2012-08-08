@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.7 2010/06/02 13:43:00 hburger Exp $
+ * Name:        $Id: Model_1.java,v 1.8 2012/01/05 23:20:21 hburger Exp $
  * Description: model1 type plugin
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:43:00 $
+ * Date:        $Date: 2012/01/05 23:20:21 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -59,9 +59,12 @@ import org.openmdx.application.dataprovider.spi.Layer_1;
 
 public class Model_1 extends Layer_1 {
 
-    //---------------------------------------------------------------------------
+    /**
+     * Constructor 
+     */
     public Model_1(
     ) {
+        super();
     }
 
     //---------------------------------------------------------------------------
@@ -75,7 +78,13 @@ public class Model_1 extends Layer_1 {
     // --------------------------------------------------------------------------
     public class LayerInteraction extends Layer_1.LayerInteraction {
         
-        public LayerInteraction(
+        /**
+         * Constructor 
+         *
+         * @param connection
+         * @throws ResourceException
+         */
+        protected LayerInteraction(
             Connection connection
         ) throws ResourceException {
             super(connection);

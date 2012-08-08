@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WizardTabControl.java,v 1.14 2009/10/21 17:16:46 wfro Exp $
+ * Name:        $Id: WizardTabControl.java,v 1.20 2011/08/23 21:57:41 wfro Exp $
  * Description: WizardTabControl
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.20 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/21 17:16:46 $
+ * Date:        $Date: 2011/08/23 21:57:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.ViewPort;
+import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.view.ShowObjectView;
 import org.openmdx.portal.servlet.wizards.WizardDefinition;
 
@@ -133,6 +134,12 @@ public class WizardTabControl
     }
     
     //-----------------------------------------------------------------------
+    public WizardDefinition getWizardDefinition(
+    ) {
+    	return this.wizardDefinition;
+    }
+    
+    //-----------------------------------------------------------------------
     @Override
     public void paint(
         ViewPort p, 
@@ -149,7 +156,19 @@ public class WizardTabControl
                 encodedObjectXri = URLEncoder.encode(objectXri, "UTF-8");
             }
             catch(UnsupportedEncodingException e) {}
-            if(app.getPortalExtension().isEnabled(this.getName(), view.getRefObject(), app)) {
+            boolean isRevokeShow = app.getPortalExtension().hasPermission(
+            	this.getQualifiedOperationName(), 
+            	view.getRefObject(),
+            	app,
+            	WebKeys.PERMISSION_REVOKE_SHOW
+            ); 
+            boolean isRevokeEdit = app.getPortalExtension().hasPermission(
+            	this.getQualifiedOperationName(), 
+            	view.getRefObject(),
+            	app,
+            	WebKeys.PERMISSION_REVOKE_EDIT
+            ); 
+            if(!isRevokeShow && !isRevokeEdit) {
                 if(this.wizardDefinition.getOpenParameter().length() > 0) {
                     p.write("    <li><a href=\"#\" onclick=\"javascript:window.open('.", this.getName(), "?", Action.PARAMETER_OBJECTXRI, "=", encodedObjectXri, "&", Action.PARAMETER_REQUEST_ID, "=", view.getRequestId(), "', '", this.getOperationName(), "', '", this.wizardDefinition.getOpenParameter(), "');\" id=\"op", Integer.toString(tabId), "Trigger\">", this.getOperationName(), "...</a></li>");                    
                 }
@@ -167,8 +186,8 @@ public class WizardTabControl
                     }
                 }
             }
-            else {
-                p.write("    <li><a href=\"#\" id=\"op", Integer.toString(tabId), "Trigger\"><span>", this.getName(), "</span></a></li>");                
+            else if(!isRevokeShow) {
+                p.write("    <li><a href=\"#\" id=\"op", Integer.toString(tabId), "Trigger\"><span>", this.getOperationName(), "</span></a></li>");                
             }
         }
     }

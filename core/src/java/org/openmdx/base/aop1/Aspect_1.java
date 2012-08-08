@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: Aspect_1.java,v 1.22 2010/06/02 13:44:09 hburger Exp $
+ * Name:        $Id: Aspect_1.java,v 1.24 2011/09/07 11:44:45 hburger Exp $
  * Description: org::openmdx::base::Aspect plug-in
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:44:09 $
+ * Date:        $Date: 2011/09/07 11:44:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -88,11 +88,6 @@ public class Aspect_1 extends Interceptor_1 {
     }
 
     /**
-     * Implements <code>Serializable</code>
-     */
-    private static final long serialVersionUID = -1129453356997731102L;
-
-    /**
      * 
      */
     private transient DataObject_1_0 core = null;
@@ -119,9 +114,7 @@ public class Aspect_1 extends Interceptor_1 {
                 getCore(true).objGetClass()
             ).objGetValue("allFeature");
         }
-        return this.coreFeatures != null && this.coreFeatures.containsKey(feature) ? 
-            getCore(true) : 
-            getDelegate();
+        return this.coreFeatures != null && this.coreFeatures.containsKey(feature) ? getCore(true) : getDelegate();
     }
     
     /**
@@ -141,11 +134,26 @@ public class Aspect_1 extends Interceptor_1 {
                 BasicException.Code.ILLEGAL_STATE,
                 "This invocation is only allowed after the aspect's core is defined"
             );
-        } else {
-            return this.core;
         }
+        return this.core;
     }
-    
+
+    /**
+     * Assign the core object.
+     * <p>
+     * This methods links the aspect to its core.
+     * 
+     * @param core the aspect's core object
+     * 
+     * @throws ServiceException
+     */
+    private void setCore(
+        DataObject_1_0 core
+    ) throws ServiceException {
+        validateCore(core);
+        super.objSetValue("core", this.core = core);
+    }
+
     /**
      * @param feature
      * @return
@@ -167,7 +175,11 @@ public class Aspect_1 extends Interceptor_1 {
     public Object objGetValue(
         String feature
     ) throws ServiceException {
-        return getDelegate(feature).objGetValue(feature);
+        if("core".equals(feature)) {
+            return getCore(false);
+        } else {
+            return getDelegate(feature).objGetValue(feature);
+        }
     }
 
     /**
@@ -280,9 +292,12 @@ public class Aspect_1 extends Interceptor_1 {
     }
     
     /**
-     * @param feature
-     * @param to
+     * @param feature the feature to be modified
+     * 
+     * @param to the value to be assigned
+     * 
      * @throws ServiceException
+     * 
      * @see org.openmdx.base.accessor.generic.cci.Featured_1_0#objSetValue(java.lang.String, java.lang.Object)
      */
     @Override
@@ -291,9 +306,7 @@ public class Aspect_1 extends Interceptor_1 {
         Object to
     ) throws ServiceException {
         if("core".equals(feature)) {
-            DataObject_1_0 core = (DataObject_1_0) to;
-            validateCore(core);
-            super.objSetValue("core", this.core = core);
+            setCore((DataObject_1_0) to);
         } else {
             getDelegate(feature).objSetValue(feature, to);
         }

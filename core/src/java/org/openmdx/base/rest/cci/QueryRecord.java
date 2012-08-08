@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: QueryRecord.java,v 1.2 2010/11/23 17:34:52 wfro Exp $
+ * Name:        $Id: QueryRecord.java,v 1.3 2011/01/21 10:07:19 hburger Exp $
  * Description: Query Record
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/23 17:34:52 $
+ * Date:        $Date: 2011/01/21 10:07:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -75,11 +75,25 @@ public interface QueryRecord extends MappedRecord {
     Set<String> getGroups();
     
     /**
-     * Set groups.
+     * Set the fetch group names
      * 
-     * @param groups The groups to set.
+     * @param groups The fetch group names
      */
     void setGroups(Set<String> groups);
+    
+    /**
+     * Retrieve the explicitly requested features
+     *
+     * @return Returns the set of explicitly requested features
+     */
+    Set<String> getFeatures();
+    
+    /**
+     * Set the explicitly requested features
+     * 
+     * @param features The explicitly requested features
+     */
+    void setFeatures(Set<String> features);
     
     /**
      * Retrieve path.

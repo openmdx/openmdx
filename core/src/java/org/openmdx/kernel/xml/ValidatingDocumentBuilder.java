@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ValidatingDocumentBuilder.java,v 1.7 2009/10/23 11:36:22 hburger Exp $
+ * Name:        $Id: ValidatingDocumentBuilder.java,v 1.8 2011/06/21 22:52:45 hburger Exp $
  * Description: Validating Document Builder 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/23 11:36:22 $
+ * Date:        $Date: 2011/06/21 22:52:45 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,7 +57,6 @@ import java.io.Reader;
 import java.net.URL;
 import java.nio.CharBuffer;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -65,7 +64,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 import org.w3c.dom.Document;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -196,7 +195,7 @@ public class ValidatingDocumentBuilder {
                 }
             }
         } else {
-            logger.log(
+            SysLog.log(
                 Level.WARNING, 
                 "Don't know how to validate the document at URL {0}", 
                 url
@@ -205,11 +204,6 @@ public class ValidatingDocumentBuilder {
         return null;
     }
     
-    /**
-     * The logger 
-     */
-    static final Logger logger = LoggerFactory.getLogger();
-
     /**
      * Schema Document Builder Factory 
      */
@@ -273,7 +267,7 @@ public class ValidatingDocumentBuilder {
             SAXParseException exception
         ) throws SAXException {
             String message = newMessage(exception, "error");
-            logger.log(Level.SEVERE, message);
+            SysLog.log(Level.SEVERE, message);
             System.err.println(message);
         }
 
@@ -284,7 +278,7 @@ public class ValidatingDocumentBuilder {
             SAXParseException exception
         ) throws SAXException {
             String message = newMessage(exception, "fatal error");
-            logger.log(Level.SEVERE, message);
+            SysLog.log(Level.SEVERE, message);
             System.err.println(message);
         }
         
@@ -295,7 +289,7 @@ public class ValidatingDocumentBuilder {
             SAXParseException exception
         ) throws SAXException {
             String message = newMessage(exception, "warning");
-            logger.log(Level.WARNING,message);
+            SysLog.log(Level.WARNING,message);
             System.err.println(message);
         }
 

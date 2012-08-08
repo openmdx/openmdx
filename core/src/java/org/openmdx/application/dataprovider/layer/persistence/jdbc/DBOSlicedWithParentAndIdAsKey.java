@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DBOSlicedWithParentAndIdAsKey.java,v 1.2 2010/03/31 23:14:59 wfro Exp $
+ * Name:        $Id: DBOSlicedWithParentAndIdAsKey.java,v 1.5 2011/09/06 12:27:13 hburger Exp $
  * Description: DBOSlicedWithParentAndIdAsKey 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/31 23:14:59 $
+ * Date:        $Date: 2011/09/06 12:27:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -104,8 +104,8 @@ public class DBOSlicedWithParentAndIdAsKey extends DBOSlicedWithIdAsKey
         this.objectIdClause = "(v." + database.OBJECT_ID + " = ?)";
         this.objectIdColumn.clear();
         this.objectIdColumn.add(database.OBJECT_ID);
-        this.referenceValues.clear();
-        this.referenceValues.add(
+        this.getReferenceValues().clear();
+        this.getReferenceValues().add(
             this.database.getObjectId(
                 conn,
                 this.getReference().getParent()
@@ -116,16 +116,17 @@ public class DBOSlicedWithParentAndIdAsKey extends DBOSlicedWithIdAsKey
                 "(v." + 
                 this.database.getColumnName(
                     conn, 
-                    database.privateAttributesPrefix + "parent", 
+                    "parent", 
                     0, 
                     false, // indexSuffixIfZero
-                    false // ignoreReservedWords
+                    false, // ignoreReservedWords
+                    true // markAsPrivate
                 ) + 
                 " = ?)";            
         } else {
             this.referenceClause = "(vj." + this.getJoinCriteria()[1] + " = ?)";            
         }
-        this.referenceColumn.clear();
+        this.getReferenceColumn().clear();
         // non index column for non-indexed sliced DB objects
         this.indexColumn = null;
         this.excludeAttributes.add("objectIdx");        
@@ -136,7 +137,7 @@ public class DBOSlicedWithParentAndIdAsKey extends DBOSlicedWithIdAsKey
     public Path getObjectReference(
         FastResultSet frs
     ) throws SQLException, ServiceException {
-        String parentId = (String)frs.getObject(this.database.privateAttributesPrefix + "parent");
+        String parentId = (String)frs.getObject(this.database.getPrivateAttributesPrefix() + "parent");
         if(parentId == null) {
             throw new SQLException(
                 "column p$$parent in result set not found"

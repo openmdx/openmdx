@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: FastResultSet.java,v 1.1 2009/05/26 14:31:21 wfro Exp $
+ * Name:        $Id: FastResultSet.java,v 1.3 2011/10/28 17:19:41 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/26 14:31:21 $
+ * Date:        $Date: 2011/10/28 17:19:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,7 +67,6 @@ import java.util.Map;
  * JdbcOdbc driver in .NET) a) rs.getObject() is very slow and b) may be
  * called at most once.
  */
-@SuppressWarnings("unchecked")
 public class FastResultSet {
 
     //-----------------------------------------------------------------------
@@ -86,7 +85,7 @@ public class FastResultSet {
     public FastResultSet(
         AbstractDatabase_1 database,
         ResultSet rs,
-        List columnNames
+        List<String> columnNames
     ) throws SQLException {
         this.database = database;
         this.rs = rs;
@@ -94,10 +93,10 @@ public class FastResultSet {
     }
 
     //-----------------------------------------------------------------------
-    static public List getColumnNames(
+    static public List<String> getColumnNames(
         ResultSetMetaData rsmd
     ) throws SQLException {
-        List columnNames = new ArrayList();
+        List<String> columnNames = new ArrayList<String>();
         for(int i = 0; i < rsmd.getColumnCount(); i++) {
             columnNames.add(
                 rsmd.getColumnName(i+1).toLowerCase()
@@ -170,7 +169,7 @@ public class FastResultSet {
     }
 
     //-----------------------------------------------------------------------
-    public List getColumnNames(
+    public List<String> getColumnNames(
     ) {
         return this.columnNames;
     }
@@ -192,7 +191,7 @@ public class FastResultSet {
     private final ResultSet rs;
     private final AbstractDatabase_1 database;
     private int currentColumnIndex = -1;
-    private final Map columnValues = new HashMap();
-    private final List columnNames;
+    private final Map<String,Object> columnValues = new HashMap<String,Object>();
+    private final List<String> columnNames;
 
 }

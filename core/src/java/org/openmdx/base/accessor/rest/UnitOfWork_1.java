@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UnitOfWork_1.java,v 1.38 2010/12/23 17:42:52 hburger Exp $
+ * Name:        $Id: UnitOfWork_1.java,v 1.47 2011/11/26 01:34:55 hburger Exp $
  * Description: Unit Of Work
- * Revision:    $Revision: 1.38 $
+ * Revision:    $Revision: 1.47 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/23 17:42:52 $
+ * Date:        $Date: 2011/11/26 01:34:55 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -85,7 +85,9 @@ import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.cci.UnitOfWork;
 import org.openmdx.base.persistence.cci.UserObjects;
+import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
 import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.base.resource.spi.LocalTransactions;
 import org.openmdx.base.resource.spi.UserTransactions;
@@ -100,7 +102,7 @@ import org.openmdx.kernel.naming.ComponentEnvironment;
 /**
  * Unit Of Work
  */
-public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_2_0 {
+public class UnitOfWork_1 implements Serializable, Transaction, UnitOfWork, Synchronization_2_0 {
 
     /**
      * Constructor 
@@ -120,13 +122,16 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
         this.connection = connection;
         this.aspectSpecificContexts = aspectSpecificContexts;
         this.optimistic = persistenceManager.getPersistenceManagerFactory().getOptimistic();
-        if(this.optimistic) try {
+        try {
             String transactionType = persistenceManager.getPersistenceManagerFactory().getTransactionType();
             if(Constants.RESOURCE_LOCAL.equals(transactionType)) {
                 this.userTransaction = null;
                 this.localTransaction = LocalTransactions.getLocalTransaction( 
                     this.dataObjectManager.connection.getLocalTransaction()
                 ); 
+            } else if (this.isContainerManaged()) {
+                this.userTransaction = null;
+                this.localTransaction = null; 
             } else {
                 this.userTransaction = UserTransactions.getUserTransaction();
                 this.localTransaction = LocalTransactions.getLocalTransaction(this.userTransaction); 
@@ -140,9 +145,6 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
                     BasicException.Code.TRANSACTION_FAILURE
                 )
             );
-        } else {
-            this.userTransaction = null;
-            this.localTransaction = null;
         }
     }
 
@@ -178,10 +180,20 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
     private Interaction interaction = null;
     
     /**
-     * 
+     * Rollback-only covers the whole transaction
      */
     private boolean rollbackOnly = false;
 
+    /**
+     * Forget-only is restricted to the unit of work
+     */
+    private boolean forgetOnly = false;
+
+    /**
+     * 
+     */
+    private boolean forgettable = false;
+    
     /**
      * 
      */
@@ -199,7 +211,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
     private Date transactionTime = null;
 
     /**
-     * A unit-of-work id is assigned when the unit of work is activated.
+     * A unit-of-work id is assigned when the unit of work is activated. 
      */
     private String unitOfWorkId = null;
 
@@ -207,6 +219,11 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
      * A task id is assigned when the unit of work is activated.
      */
     private String taskId = null;
+    
+    /**
+     * A flag to disable the before image comparison
+     */
+    private boolean updateAvoidanceDisabled = false;
     
     /**
      * 
@@ -259,7 +276,15 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
     synchronized void flush(
         boolean beforeCompletion
     ) throws ServiceException {
+        if(this.forgetOnly) {
+            throw new ServiceException(
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ILLEGAL_STATE,
+                "The unit of work has been marked for rollback only"
+           );
+       }
        if(this.isActive() && !this.flushing) try {
+           this.forgettable = false;
            this.flushing = true;
            if(!this.enlisted) {
                this.enlist(true);
@@ -392,17 +417,21 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
     }
 
     /**
-     * Tests whether any member is out-of-sync
+     * Flush if any member is out-of-sync
      * 
-     * @return <code>true</code> if any member is out-of-sync
+     * @throws ServiceException 
      */
-    boolean isOutOfSync(){
-        for(DataObject_1 member : this.members) {
-            if(member.isOutOfSync()) {
-                return true;
+    boolean synchronize() throws ServiceException{
+    	boolean outOfSync = false;
+        Members: for(DataObject_1 member : this.members) {
+            if(outOfSync |= member.isOutOfSync()) {
+                break Members;
             }
         }
-        return false;
+    	if(outOfSync) {
+        	this.flush(false);
+    	}
+    	return outOfSync;
     }
 
     /**
@@ -491,7 +520,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
             this.rollbackOnly = true;
         } else {
             throw new JDODataStoreException(
-                "There is no active transaction to be set inot rollback-only mode",
+                "There is no active transaction to be set into rollback-only mode",
                 BasicException.newEmbeddedExceptionStack(
                     BasicException.Code.DEFAULT_DOMAIN,
                     BasicException.Code.ILLEGAL_STATE
@@ -528,6 +557,8 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
     private void start(
     ){
         this.rollbackOnly = false;
+        this.forgetOnly = false;
+        this.forgettable = this.optimistic;
         this.members.clear();
         this.unitOfWorkId = UUIDConversion.toUID(UUIDs.newUUID());
         this.taskId = this.systemObjects.newTaskIdentifier();
@@ -545,7 +576,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
     
     //------------------------------------------------------------------------
     // Implements Transaction
-    //------------------------------------------------------------------------
+    //------------------------------------------------------------------------his.
 
     /** 
      * Begin a unit of work.  The type of unit of work is determined by the
@@ -630,7 +661,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
                 );
             }  else {
                 BasicException commitException = null;
-                if(commitException == null) { 
+                if(!this.forgetOnly) { 
                     try {
                         this.flush(true);
                     } catch (ServiceException exception) {
@@ -899,6 +930,18 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
         return this.optimistic;
     }
 
+    /**
+     * Container managed unit's of work don't handle commit or rollback
+     *
+     * @return the value of the ContainerManaged property.
+     */
+    private final boolean isContainerManaged(
+    ){
+        return AbstractPersistenceManagerFactory.isTransactionContainerManaged(
+            this.dataObjectManager.getPersistenceManagerFactory()
+        );
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.base.transaction.UnitOfWork_1_0#getSynchronization()
      */
@@ -931,6 +974,53 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
 
     
     //------------------------------------------------------------------------
+    // Implements UnitOfWork    
+    //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+	 * @see org.openmdx.base.persistence.cci.UnitOfWork#setForgetOnly()
+	 */
+//  @Override
+	public void setForgetOnly() {
+	    if(!this.optimistic) {
+            throw new JDODataStoreException(
+                "Only an optimistic unit of work may be set into forget-only mode",
+                BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED
+                )
+            );
+	    }
+        if(!this.isActive()){
+            throw new JDODataStoreException(
+                "There is no active unit of work to be set into forget-only mode",
+                BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ILLEGAL_STATE
+                )
+            );
+        }
+        if(!this.forgettable){
+            throw new JDODataStoreException(
+                "An optimistic unit of work becomes non-optimistic after flushing",
+                BasicException.newEmbeddedExceptionStack(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ILLEGAL_STATE
+                )
+            );
+        }
+	    this.forgetOnly = true;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.persistence.cci.UnitOfWork#isForgetOnly()
+	 */
+	public boolean isForgetOnly() {
+	    return this.forgetOnly;
+	}
+	
+    
+    //------------------------------------------------------------------------
     // Implements Synchronization    
     //------------------------------------------------------------------------
 
@@ -941,9 +1031,24 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
 //  @Override
     public void beforeCompletion(
     ) {
-        SysLog.detail("Unit Of Work","flushing");
         try {
-            this.flush(true);
+        	if(this.rollbackOnly) {
+	            SysLog.detail(
+	                "Unit of work is set to rollback only, no flushing takes place", 
+	                this.unitOfWorkId
+	            );
+        	} else if(this.forgetOnly) {
+                SysLog.detail(
+                    "Unit of work is set to forget only, no flushing takes place", 
+                    this.unitOfWorkId
+                );
+        	} else {
+	            SysLog.detail(
+	                "Unit of work flushing", 
+	                this.unitOfWorkId
+	            );
+	            this.flush(true);
+        	}
         } catch (ServiceException exception) {
             this.setRollbackOnly();
             throw BasicException.initHolder(
@@ -967,6 +1072,7 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
         int status
     ) {
         try {
+        	this.updateAvoidanceDisabled = false; // reset the flag
             this.unitOfWorkId = null;
             this.notifyAll();
             while(!this.members.isEmpty()) {
@@ -1001,12 +1107,26 @@ public class UnitOfWork_1 implements Serializable, Transaction, Synchronization_
         }
     }
 
-    
+    /**
+     * Disables the update avoidance for the current unit of work
+     */
+	public void disableUpdateAvoidance() {
+		this.updateAvoidanceDisabled = true;
+	}
+	
+	/**
+	 * @return the updateAvoidanceDisabled
+	 */
+	public boolean isUpdateAvoidanceEnabled() {
+		return !this.updateAvoidanceDisabled;
+	}
+
+	
     //------------------------------------------------------------------------
     // Class SystemObjects
     //------------------------------------------------------------------------
 
-    /**
+	/**
      * System Objects
      */
     class SystemObjects extends SharedObjects {

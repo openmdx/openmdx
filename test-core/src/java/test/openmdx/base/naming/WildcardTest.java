@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: WildcardTest.java,v 1.4 2010/06/03 15:58:00 hburger Exp $
+ * Name:        $Id: WildcardTest.java,v 1.5 2011/01/24 12:28:16 hburger Exp $
  * Description: class TestPath 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:58:00 $
+ * Date:        $Date: 2011/01/24 12:28:16 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -248,4 +248,11 @@ public class WildcardTest extends TestCase {
         }
     }
     
+    public void testCR10009801(){
+        Path xri = new Path("org::opencrx::kernel::account1/provider/MASOFT/segment/Lifestock/account/9FB63C9LRID40YKEJXYZQKG92");
+        assertTrue(xri.isLike(new Path("org::opencrx::kernel::account1/provider/::*/segment/::*/account/::*/::*/%")));
+        assertFalse(xri.isLike(new Path("org::opencrx::kernel::account1/provider/::*/segment/::*/account/::*/::*")));
+        assertTrue(xri.isLike(new Path("org::opencrx::kernel::account1/provider/::*/segment/::*/account/::*")));
+    }
+
 }

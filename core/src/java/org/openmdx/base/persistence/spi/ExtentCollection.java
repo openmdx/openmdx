@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ExtentCollection.java,v 1.3 2010/06/30 13:11:07 hburger Exp $
+ * Name:        $Id: ExtentCollection.java,v 1.4 2011/10/21 12:56:28 hburger Exp $
  * Description: ExtentCollection 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/30 13:11:07 $
+ * Date:        $Date: 2011/10/21 12:56:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -89,7 +89,7 @@ public final class ExtentCollection<E> extends AbstractCollection<E> {
     private final Path pattern;
     
     /**
-     * Retriebe the delegate lazily
+     * Retrieve the delegate lazily
      */
     private transient Collection<E> delegate;
     

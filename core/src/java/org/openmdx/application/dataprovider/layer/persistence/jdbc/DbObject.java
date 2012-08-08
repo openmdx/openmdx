@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DbObject.java,v 1.7 2010/10/12 16:53:00 hburger Exp $
+ * Name:        $Id: DbObject.java,v 1.16 2011/11/16 17:21:54 wfro Exp $
  * Description: 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/12 16:53:00 $
+ * Date:        $Date: 2011/11/16 17:21:54 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -54,6 +54,7 @@ package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -108,9 +109,7 @@ import org.openmdx.base.naming.Path;
  * </org.openmdx.deployment1.DataproviderTypeStringProperty>
  * </pre>
  */
-@SuppressWarnings({
-    "unchecked", "serial"
-})
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class DbObject
   implements Serializable {
 
@@ -120,7 +119,8 @@ public abstract class DbObject
     Connection conn,
     DbObjectConfiguration typeConfigurationEntry,
     Path accessPath,
-    boolean isExtent
+    boolean extent, 
+    boolean query
   ) throws ServiceException {
 
     this.conn = conn;
@@ -144,6 +144,10 @@ public abstract class DbObject
             this.getReferencedType()
         );
     }
+    this.extent = extent;
+    this.query = query;
+    this.referenceColumn = new ArrayList<String>();
+    this.referenceValues = new ArrayList<Object>();
   }
 
   //---------------------------------------------------------------------------
@@ -160,6 +164,10 @@ public abstract class DbObject
     this.objectIdValues = null;
     this.reference = null;
     this.excludeAttributes = new HashSet();    
+    this.extent = false;
+    this.query = false;
+    this.referenceColumn = null;
+    this.referenceValues = null;
   }
   
   //---------------------------------------------------------------------------  
@@ -203,7 +211,7 @@ public abstract class DbObject
   }
 
   //---------------------------------------------------------------------------  
-  public List getReferenceColumn(
+  public List<String> getReferenceColumn(
   ) {
     return this.referenceColumn;
   }
@@ -221,10 +229,8 @@ public abstract class DbObject
   public String getObjectClass(
       FastResultSet frs
   ) throws ServiceException, SQLException {
-      String columnName = this.database.getColumnName(conn, SystemAttributes.OBJECT_CLASS, 0, false, false);
-      return frs.getColumnNames().contains(columnName)
-          ? frs.getObject(columnName).toString()
-          : null;
+      String columnName = this.database.getColumnName(conn, SystemAttributes.OBJECT_CLASS, 0, false, false, false);
+      return frs.getColumnNames().contains(columnName) ? frs.getObject(columnName).toString().trim() : null;
   }
   
   /**
@@ -244,7 +250,7 @@ public abstract class DbObject
    * Returns an SQL clause which selects the objects of the primary db object
    * by their reference.
    * <p>
-   * Example: StandardDbObject returns '(OBJECT_RID IN <rid>)'
+   * Example: StandardDbObject returns '(OBJECT_RID IN &lt;rid&gt;)'
    */
   public abstract String getReferenceClause(
   ) throws ServiceException;
@@ -252,8 +258,10 @@ public abstract class DbObject
   /**
    * Returns the values for reference clause 1 which correspond to the ? placeholders 
    */
-  public abstract List getReferenceValues(
-  ) throws ServiceException;
+  public List<Object> getReferenceValues(
+  ) throws ServiceException {
+      return this.referenceValues;
+  }
   
   /**
    * Retrieve the version clause
@@ -274,7 +282,8 @@ public abstract class DbObject
           columnName, 
           0, // index
           false, // indexSuffixIfZero
-          true // forPreparedStatement
+          true, // forPreparedStatement
+          false // markAsPrivate
       ) + (
           value == null ? " IS NULL " : (" = " + this.database.getPlaceHolder(conn,value))
       )  + ")";
@@ -407,28 +416,6 @@ public abstract class DbObject
   ) throws ServiceException;
 
   /**
-   * Create multi-valued object.
-   * 
-   * @deprecated not supported/required anymore by database plugin.
-   */
-  @Deprecated
-  public abstract void createMultiValuedObject(
-      MappedRecord object
-  ) throws ServiceException;
-
-  /**
-   * If false, AbstractDatabase implements an object replacement by removing
-   * the existing object and creating the modified. In many cases this is
-   * inefficient. If a type supports optimized object replacement this method
-   * must return true and implement the methd replaceObjectSlice.
-   * 
-   * @deprecated supportsObjectReplacement not supported by Database plugin
-   *             anymore. A DbObject must support object replacement.
-   */
-  @Deprecated
-  public abstract boolean supportsObjectReplacement();
-
-  /**
    * Replaces the oldObject slice with the newObject slice.
    * <p>
    * Example: StandardDbObject implements object replacement with UPDATE
@@ -490,14 +477,37 @@ public abstract class DbObject
   abstract public FilterProperty mapToIdentityFilterProperty(
       FilterProperty p
   ) throws ServiceException;
+ 
+  /**
+   * Retrieve extent.
+   *
+   * @return Returns the extent.
+   */
+  protected boolean isExtent() {
+    return this.extent;
+  }
+
+  /**
+   * Retrieve query.
+   *
+   * @return Returns the query.
+   */
+  protected boolean isQuery() {
+    return this.query;
+  }
+
+  /**
+   * Implements <code>Serializable</code>
+   */
+  private static final long serialVersionUID = 5312916031308914829L;
   
   //---------------------------------------------------------------------------  
   // Variables
   //---------------------------------------------------------------------------  
   private Path referencedType;
 
-  protected List<String> referenceColumn = null;
-  protected List<Object> referenceValues = null;
+  private final List<String> referenceColumn;
+  private final List<Object> referenceValues;
   protected String indexColumn = null;
   protected List<String> objectIdColumn = null;
   protected String objectIdClause = null;
@@ -512,6 +522,8 @@ public abstract class DbObject
   private final String objectId;
   private final Path reference;
   private final Path resourceIdentifier;
+  private final boolean extent;
+  private final boolean query;
 
 }
 

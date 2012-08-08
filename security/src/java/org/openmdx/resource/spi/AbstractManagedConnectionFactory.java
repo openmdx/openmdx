@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: AbstractManagedConnectionFactory.java,v 1.5 2010/09/01 15:07:58 hburger Exp $
+ * Name:        $Id: AbstractManagedConnectionFactory.java,v 1.6 2011/08/20 19:55:06 hburger Exp $
  * Description: Abstract Managed URL Connection Factory
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/01 15:07:58 $
+ * Date:        $Date: 2011/08/20 19:55:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -132,9 +132,10 @@ public abstract class AbstractManagedConnectionFactory implements ManagedConnect
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnectionFactory#matchManagedConnections(java.util.Set, javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
      */
-    @SuppressWarnings("unchecked")
+    
 //  @Override
-	public final ManagedConnection matchManagedConnections(
+	@SuppressWarnings("rawtypes")
+    public final ManagedConnection matchManagedConnections(
         Set managedConnections,
         Subject subject,
         ConnectionRequestInfo connectionRequestInfo

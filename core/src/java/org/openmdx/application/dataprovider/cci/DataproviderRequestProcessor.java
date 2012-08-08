@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataproviderRequestProcessor.java,v 1.8 2010/06/02 13:39:35 hburger Exp $
+ * Name:        $Id: DataproviderRequestProcessor.java,v 1.11 2011/11/26 01:34:58 hburger Exp $
  * Description: RequestCollection class
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:39:35 $
+ * Date:        $Date: 2011/11/26 01:34:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -62,7 +62,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.rest.cci.MessageRecord;
-import org.openmdx.base.rest.spi.Query_2Facade;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 
@@ -243,21 +243,15 @@ public final class DataproviderRequestProcessor
         AttributeSpecifier[] attributeSpecifier,
         DataproviderReplyListener listener
     ) throws ServiceException {
-        try {
-            Query_2Facade object = Query_2Facade.newInstance(path);
-            this.dispatch(
-                new DataproviderRequest(
-                    object.getDelegate(),
-                    DataproviderOperations.OBJECT_RETRIEVAL,
-                    attributeSelector,
-                    attributeSpecifier
-                ),
-                listener
-            );
-        }
-        catch(Exception e) {
-            throw new ServiceException(e);
-        }
+        this.dispatch(
+            new DataproviderRequest(
+                Facades.newQuery(path).getDelegate(),
+                DataproviderOperations.OBJECT_RETRIEVAL,
+                attributeSelector,
+                attributeSpecifier
+            ),
+            listener
+        );
     }
 
     //------------------------------------------------------------------------
@@ -540,21 +534,15 @@ public final class DataproviderRequestProcessor
         AttributeSpecifier[] attributeSpecifier,
         DataproviderReplyListener listener
     ) throws ServiceException {
-        try {
-            Query_2Facade object = Query_2Facade.newInstance(path);
-            this.dispatch(
-                new DataproviderRequest(
-                    object.getDelegate(),
-                    DataproviderOperations.OBJECT_REMOVAL,
-                    attributeSelector,
-                    attributeSpecifier
-                ),
-                listener
-            );
-        }
-        catch(Exception e) {
-            throw new ServiceException(e);
-        }
+        this.dispatch(
+            new DataproviderRequest(
+                Facades.newQuery(path).getDelegate(),
+                DataproviderOperations.OBJECT_REMOVAL,
+                attributeSelector,
+                attributeSpecifier
+            ),
+            listener
+        );
     }
 
     //------------------------------------------------------------------------
@@ -578,7 +566,7 @@ public final class DataproviderRequestProcessor
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public List addFindRequest(
         Path referenceFilter,
         FilterProperty[] attributeFilter
@@ -623,7 +611,7 @@ public final class DataproviderRequestProcessor
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public List addFindRequest(
         Path referenceFilter,
         FilterProperty[] attributeFilter,
@@ -675,7 +663,7 @@ public final class DataproviderRequestProcessor
      * @exception   ServiceException
      *              if no valid request can be added
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public List addFindRequest(
         Path referenceFilter,
         FilterProperty[] attributeFilter,
@@ -748,26 +736,19 @@ public final class DataproviderRequestProcessor
         short direction,
         DataproviderReplyListener listener
     ) throws ServiceException {
-        try {
-            Query_2Facade object = Query_2Facade.newInstance();
-            object.setPath(referenceFilter);
-            this.dispatch(
-                new DataproviderRequest(
-                    object.getDelegate(),
-                    DataproviderOperations.ITERATION_START,
-                    attributeFilter,
-                    position,
-                    size,
-                    direction,
-                    attributeSelector,
-                    attributeSpecifier
-                ),
-                listener
-            );
-        }
-        catch(Exception e) {
-            throw new ServiceException(e);
-        }
+        this.dispatch(
+            new DataproviderRequest(
+                Facades.newQuery(referenceFilter).getDelegate(),
+                DataproviderOperations.ITERATION_START,
+                attributeFilter,
+                position,
+                size,
+                direction,
+                attributeSelector,
+                attributeSpecifier
+            ),
+            listener
+        );
     }
 
     //------------------------------------------------------------------------
@@ -814,7 +795,7 @@ public final class DataproviderRequestProcessor
     ) throws ServiceException {
         try {
             if(request.getMessageId() == null) {
-                request.getPath().add(uuidAsString());
+            	request.setPath(request.getPath().getChild(uuidAsString()));
             }
             this.dispatch(
                 new DataproviderRequest(

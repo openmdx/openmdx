@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: BinaryValue.java,v 1.52 2010/10/15 13:46:41 wfro Exp $
+ * Name:        $Id: BinaryValue.java,v 1.54 2011/08/11 15:08:58 wfro Exp $
  * Description: BinaryValue
- * Revision:    $Revision: 1.52 $
+ * Revision:    $Revision: 1.54 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/15 13:46:41 $
+ * Date:        $Date: 2011/08/11 15:08:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -81,6 +81,7 @@ import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
+import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.w3c.cci2.BinaryLargeObject;
 
@@ -224,7 +225,7 @@ public class BinaryValue
                             new Action.Parameter(Action.PARAMETER_NAME, encodedName),
                             new Action.Parameter(Action.PARAMETER_MIME_TYPE, this.mimeType)
                         },
-                        this.application.getTexts().getClickToDownloadText() + " " + this.name,
+                        this.app.getTexts().getClickToDownloadText() + " " + this.name,
                         true
                     );
             }        
@@ -272,7 +273,7 @@ public class BinaryValue
                             new Action.Parameter(Action.PARAMETER_NAME, this.name),
                             new Action.Parameter(Action.PARAMETER_MIME_TYPE, this.mimeType)
                         },
-                        this.application.getTexts().getClickToDownloadText() + " " + this.name,
+                        this.app.getTexts().getClickToDownloadText() + " " + this.name,
                         true
                     );
             }        
@@ -456,69 +457,89 @@ public class BinaryValue
         String widthModifier,
         String rowSpanModifier,
         String readonlyModifier,
-        String disabledModifier,
         String lockedModifier,
         String stringifiedValue,
         boolean forEditing
     ) throws ServiceException { 
-        Texts_1_0 texts = this.application.getTexts();
+        Texts_1_0 texts = this.app.getTexts();
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();   
         label = this.getLabel(attribute, p, label);
         String title = this.getTitle(attribute, label);
-        if(forEditing) {
+        if(forEditing && readonlyModifier.isEmpty()) {
             String idTag = id == null ? 
                 "" : 
                 "id=\"" + id + "\"";                                                                        
             p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", htmlEncoder.encode(label, false), "</span></td>");            
             String feature = this.getName();
             p.write("<td ", rowSpanModifier, ">");
-            p.write("  <input ", idTag, " type=\"file\" class=\"valueL", lockedModifier, "\" name=\"", feature, "[", Integer.toString(tabIndex), "]\" ", readonlyModifier, " ", disabledModifier, " tabindex=\"", Integer.toString(tabIndex), "\" title=\"", texts.getEnterNullToDeleteText(), "\">");
+            p.write("  <input ", idTag, " type=\"file\" class=\"valueL", lockedModifier, "\" name=\"", feature, "[", Integer.toString(tabIndex), "]\" ", readonlyModifier, " ", (readonlyModifier.isEmpty() ? "" : "disabled"), " tabindex=\"", Integer.toString(tabIndex), "\" title=\"", texts.getEnterNullToDeleteText(), "\">");
             p.write("</td>");
             p.write("<td class=\"addon\" ", rowSpanModifier, ">");            
         }
         else {
-            HttpServletRequest request = p.getHttpServletRequest();          
-            styleModifier = "style=\"height: " + (1.2+(attribute.getSpanRow()-1)*1.5) + "em\"";
-            Action binaryValueAction = (Action)this.getValue(false);
-            Set acceptedMimeTypes = this.getAcceptedMimeTypes(request);
-            // mimeType                                     
-            boolean isAcceptedMimeType = false;
-            for(Iterator i = acceptedMimeTypes.iterator(); i.hasNext(); ) {
-                if(this.getMimeType().startsWith((String)i.next())) {
-                    isAcceptedMimeType = true;
-                    break;
-                }
-            }          
-            // In place
-            if(
-                this.isInPlace() && 
-                (binaryValueAction != null) && 
-                isAcceptedMimeType
-            ) {
-                this.paintInPlace(
-                    p, 
-                    binaryValueAction, 
-                    label, 
-                    gapModifier, 
-                    rowSpanModifier, 
-                    widthModifier, 
-                    styleModifier
-                );
-            }
-            // Single-valued BinaryValue as link -->
-            else {
-            	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-                	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
-	                p.write("       <div class=\"valueL\">", attribute.getStringifiedValue(p, false, false), "</div>");
-            	}
-            	else {
-	                p.write(gapModifier);
-	                p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", label, "</span></td>");
-	                p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, ">");
-	                p.write("<div class=\"field\">", attribute.getStringifiedValue(p, false, false), "</div>");
-	                p.write("</td>");
-            	}
-            }
+        	if(WebKeys.LOCKED_VALUE.equals(stringifiedValue)) {
+        		super.paint(
+        			attribute, 
+        			p, 
+        			id, 
+        			label, 
+        			lookupObject, 
+        			nCols, 
+        			tabIndex, 
+        			gapModifier, 
+        			styleModifier, 
+        			widthModifier, 
+        			rowSpanModifier, 
+        			readonlyModifier, 
+        			lockedModifier, 
+        			stringifiedValue, 
+        			forEditing
+        		);
+        	} 
+        	else {        	
+	            HttpServletRequest request = p.getHttpServletRequest();          
+	            styleModifier = "style=\"height: " + (1.2+(attribute.getSpanRow()-1)*1.5) + "em\"";
+	            Action binaryValueAction = (Action)this.getValue(false);
+	            Set acceptedMimeTypes = this.getAcceptedMimeTypes(request);
+	            // mimeType                                     
+	            boolean isAcceptedMimeType = false;
+	            for(Iterator i = acceptedMimeTypes.iterator(); i.hasNext(); ) {
+	                if(this.getMimeType().startsWith((String)i.next())) {
+	                    isAcceptedMimeType = true;
+	                    break;
+	                }
+	            }          
+	            // In place
+	            if(
+	                this.isInPlace() && 
+	                (binaryValueAction != null) && 
+	                isAcceptedMimeType
+	            ) {
+	                this.paintInPlace(
+	                    p, 
+	                    binaryValueAction, 
+	                    label, 
+	                    gapModifier, 
+	                    rowSpanModifier, 
+	                    widthModifier, 
+	                    styleModifier
+	                );
+	            }
+	            // Single-valued BinaryValue as link -->
+	            else {
+	            	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+	                	p.write("		<label>",  htmlEncoder.encode(label, false), "</label>");                	
+		                p.write("       <div class=\"valueL\">", attribute.getStringifiedValue(p, false, false), "</div>");
+	            	}
+	            	else {
+		                p.write(gapModifier);
+		                p.write("<td class=\"label\" title=\"", (title == null ? "" : htmlEncoder.encode(title, false)), "\"><span class=\"nw\">", label, "</span></td>");
+		                p.write("<td ", rowSpanModifier, " class=\"valueL\" ", widthModifier, ">");
+		                p.write("<div class=\"field\">", attribute.getStringifiedValue(p, false, false), "</div>");
+		                p.write("</td>");
+	            	}
+	            }
+	        }
         }
     }
 

@@ -1,5 +1,5 @@
-Release Name: openMDX/Portal 2.8.0
-Release Date: 2010-12-27
+Release Name: openMDX/Portal 2.8.20
+Release Date: 2011-05-04
 
 ---------------------------------------------------------------------
 Notes:
@@ -7,7 +7,7 @@ Notes:
   This software is published under the BSD license
   as listed below.
   
-  Copyright (c) 2006-2010, OMEX AG, Switzerland
+  Copyright (c) 2006-2011, OMEX AG, Switzerland
   All rights reserved.
   
   Redistribution and use in source and binary forms, with or without 
@@ -49,12 +49,49 @@ Notes:
 Changes:
 
 0.    SUMMARY
-      * Root objects per perspective
-      * Customizable grid coloring
-      * Show-always option for search forms
+      * Workspaces
       * Clean up
+      * Fefactoring
       * Bug fixes
-                                          
+
+==============================================================================
+Version 2.8.20                                                      2011-05-04
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR10009791
+      Workspaces. Left-pane added which hosts workspace-level dashboard. The
+      workspace-level dashboard works like the (horizontal) object-level dashboard:
+      * dashlets can be added removed by admin or user
+      * dashlets can be shared by admin by prefixing the label with a *
+      Workspaces can be managed by the segment admin only.
+       
+                                    
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019725
+      Portal: refactoring event handlers. Event handlers are object-oriented. 
+            
+2.1.  FIXED BUGS
+      
+      C10009805	 
+      Portal: Main Menu Error.
+      More info see http://sourceforge.net/projects/opencrx/forums/forum/329844/topic/4064101
+      
+      CR20019583
+      Fix pm handling for INVOKE_OPERATION. INVOKE_OPERATION closes pm 
+      sometimes to early.
+      
+      
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
 ==============================================================================
 Version 2.8.0                                                       2010-12-27
 ==============================================================================

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VariableSizeIndexedRecord.java,v 1.14 2010/06/02 13:45:10 hburger Exp $
+ * Name:        $Id: VariableSizeIndexedRecord.java,v 1.15 2011/04/12 15:44:02 hburger Exp $
  * Description: JCA: variable-size IndexedRecord implementation
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:45:10 $
+ * Date:        $Date: 2011/04/12 15:44:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,7 +64,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
  * Java Connector Architecture:
  * A variable-size IndxedRecord implementation.
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class VariableSizeIndexedRecord 
     extends ArrayList
     implements IndexedRecord, MultiLineStringRepresentation

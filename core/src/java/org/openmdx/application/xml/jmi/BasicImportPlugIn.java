@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: BasicImportPlugIn.java,v 1.7 2010/06/22 07:05:47 hburger Exp $
+ * Name:        $Id: BasicImportPlugIn.java,v 1.8 2011/05/27 16:19:20 hburger Exp $
  * Description: Basic Import Plug-In
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/22 07:05:47 $
+ * Date:        $Date: 2011/05/27 16:19:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -205,7 +205,8 @@ public class BasicImportPlugIn implements ImportPlugIn {
             objectHolder, // source
             refObject, // target
             cache, // maps externalIds to refObjects
-            null // ignorable features
+            null, // ignorable features
+            true // compareWithBeforeImage
         );
     }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelUtils.java,v 1.5 2009/12/30 19:09:51 wfro Exp $
+ * Name:        $Id: ModelUtils.java,v 1.6 2011/04/12 15:29:26 hburger Exp $
  * Description: model1 model elements
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/30 19:09:51 $
+ * Date:        $Date: 2011/04/12 15:29:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class ModelUtils {
 
     //-------------------------------------------------------------------------

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: FeatureMapper.java,v 1.17 2010/08/06 12:23:42 hburger Exp $
+ * Name:        $Id: FeatureMapper.java,v 1.22 2012/01/03 17:07:20 hburger Exp $
  * Description: FeatureMapper
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:23:42 $
+ * Date:        $Date: 2012/01/03 17:07:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -65,8 +65,9 @@ import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -84,8 +85,13 @@ public class FeatureMapper implements Serializable {
     enum Type {
         TEMRINAL, NON_TERMINAL, QUERY
     }
-    
-    //------------------------------------------------------------------------
+
+    /**
+     * Constructor 
+     *
+     * @param classDef
+     * @param targetIntf
+     */
     FeatureMapper(
         ModelElement_1_0 classDef,
         Class<?> targetIntf
@@ -94,6 +100,18 @@ public class FeatureMapper implements Serializable {
         this.targetIntf = targetIntf;
     }
 
+    /**
+     * Convert qualified model names to simple model names
+     * 
+     * @param modelName a simple or qualified model name
+     * 
+     * @return the simple model name
+     */
+    private String getSimpleName(String modelName) {
+        int i = modelName.lastIndexOf(":");
+        return i < 0 ? modelName : modelName.substring(i + 1);
+    }
+    
     //------------------------------------------------------------------------
     Method getCollection(
         String mutatorName
@@ -154,16 +172,11 @@ public class FeatureMapper implements Serializable {
                         );
                     }
                 }                    
-                String multiplicity = (String)featureDef.objGetValue("multiplicity");
-                boolean isBoolean =
-                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).objGetValue("qualifiedName"));
-                boolean isSingleValued = 
-                    (Multiplicities.SINGLE_VALUE.equals(multiplicity) || Multiplicities.OPTIONAL_VALUE.equals(multiplicity)); 
                 String beanGetterName = AbstractNames.openmdx2AccessorName(
                     featureName,
                     true, // forQuery
-                    isBoolean,
-                    isSingleValued
+                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).objGetValue("qualifiedName")), // isBoolean
+                    ModelHelper.getMultiplicity(featureDef).isSingleValued()
                 );
                 String accessorName = Identifier.OPERATION_NAME.toIdentifier(beanGetterName);
                 try {
@@ -191,12 +204,10 @@ public class FeatureMapper implements Serializable {
         Object feature
     ) throws ServiceException {
         String featureName;
-        ModelElement_1_0 featureDef = null;
+        ModelElement_1_0 featureDef;
         if(feature instanceof String) {
-            featureName = (String) feature;
-            if(featureName.indexOf(":") > 0) {
-                featureName = featureName.substring(featureName.lastIndexOf(":") + 1);
-            }                
+            featureDef = null;
+            featureName = getSimpleName((String) feature);
         } else {
             featureDef = ((RefMetaObject_1) feature).getElementDef();
             featureName = (String) featureDef.objGetValue("name");
@@ -212,16 +223,11 @@ public class FeatureMapper implements Serializable {
                         false
                     );
                 }                                    
-                String multiplicity = (String)featureDef.objGetValue("multiplicity");
-                boolean isBoolean =
-                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).objGetValue("qualifiedName"));
-                boolean isSingleValued = 
-                    (Multiplicities.SINGLE_VALUE.equals(multiplicity) || Multiplicities.OPTIONAL_VALUE.equals(multiplicity));                
                 String beanSetterName = AbstractNames.openmdx2AccessorName(
                     featureName,
                     false, // forQuery
-                    isBoolean,
-                    isSingleValued
+                    PrimitiveTypes.BOOLEAN.equals(featureDef.getModel().getElementType(featureDef).objGetValue("qualifiedName")), // isBooleam
+                    ModelHelper.getMultiplicity(featureDef).isSingleValued()
                 );
                 String mutatorName = Identifier.OPERATION_NAME.toIdentifier(beanSetterName);
                 for(Method method : targetIntf.getMethods()) {
@@ -322,7 +328,6 @@ public class FeatureMapper implements Serializable {
     }
 
     //-----------------------------------------------------------------------        
-    @SuppressWarnings("unchecked")
     ModelElement_1_0 getFeature(
         String methodName,
         MethodSignature mode
@@ -348,7 +353,7 @@ public class FeatureMapper implements Serializable {
             Model_1_0 model = this.classDef.getModel();
             ModelElement_1_0 classDef = model.getElement(className);
             List<ModelElement_1_0> operations = new ArrayList<ModelElement_1_0>();
-            for(Iterator i = ((Map)classDef.objGetValue("allFeature")).values().iterator(); i.hasNext(); ) {
+            for(Iterator<?> i = ((Map<?,?>)classDef.objGetValue("allFeature")).values().iterator(); i.hasNext(); ) {
                 feature = (ModelElement_1_0)i.next();
                 // Operation
                 if(model.isOperationType(feature)) {
@@ -465,6 +470,27 @@ public class FeatureMapper implements Serializable {
         return feature;
     }
 
+    //-----------------------------------------------------------------------        
+    Multiplicity getMultiplicity(
+        Object feature
+    ) throws ServiceException {
+        ModelElement_1_0 featureDef = feature instanceof String ? this.classDef.getModel().getFeatureDef(
+            this.classDef,
+            getSimpleName((String)feature),
+            false
+        ) : ((RefMetaObject_1) feature).getElementDef();
+        if(featureDef == null) {
+            throw new ServiceException (
+                BasicException.Code.DEFAULT_DOMAIN, 
+                BasicException.Code.NOT_FOUND, 
+                "feature not found in class",
+                new BasicException.Parameter("feature.name", feature),
+                new BasicException.Parameter("class.name", this.classDef)
+            );                
+        }
+        return ModelHelper.getMultiplicity(featureDef);
+    }
+    
     //------------------------------------------------------------------------
     // Members
     //------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ShowInspectorControl.java,v 1.15 2009/09/25 12:02:37 wfro Exp $
+ * Name:        $Id: ShowInspectorControl.java,v 1.16 2011/08/11 15:10:14 wfro Exp $
  * Description: ShowObjectView 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/25 12:02:37 $
+ * Date:        $Date: 2011/08/11 15:10:14 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -117,7 +117,7 @@ public class ShowInspectorControl
             org.openmdx.ui1.jmi1.OperationPane pane = this.paneOp[i];
             operationPaneControls.add(
                 controlFactory.createOperationPaneControl(
-                    null, 
+                    pane.refGetPath().getBase(), 
                     locale,
                     localeAsIndex,
                     pane, 
@@ -135,7 +135,7 @@ public class ShowInspectorControl
         this.referencePaneControl = new ReferencePaneControl[this.paneRef.length];
         for(int i = 0; i < this.referencePaneControl.length; i++) {
             this.referencePaneControl[i] = controlFactory.createReferencePaneControl(
-                null, 
+            	this.paneRef[i].refGetPath().getBase(), 
                 perspective,
                 locale, 
                 localeAsIndex,

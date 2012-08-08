@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ImmutableDateTime.java,v 1.1 2010/01/03 14:59:09 wfro Exp $
+ * Name:        $Id: ImmutableDateTime.java,v 1.2 2011/10/11 17:30:05 hburger Exp $
  * Description: Unmodifiable Date-Time 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 14:59:09 $
+ * Date:        $Date: 2011/10/11 17:30:05 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,6 +50,7 @@
  */
 package org.w3c.cci2;
 
+import java.io.ObjectStreamException;
 import java.util.Date;
 
 import org.w3c.format.DateTimeFormat;
@@ -153,7 +154,32 @@ public final class ImmutableDateTime
         throw new UnsupportedOperationException(READONLY);
     }
 
+	/**
+	 * Create a mutable counterpart
+	 * 
+	 * @return the mutable counterpart
+	 */
+	private Date toMutableDateTime() {
+		return new Date(this.getTime());
+	}
 
+	
+    //------------------------------------------------------------------------
+    // Implements Serializable
+    //------------------------------------------------------------------------
+    
+    /**
+     * There is no need for the deserialized object to be immutable
+     * 
+     * @return a mutable counterpart of this object
+     * 
+     * @throws ObjectStreamException
+     */
+    private Object writeReplace() throws ObjectStreamException {
+        return toMutableDateTime();
+    }
+
+    
     //------------------------------------------------------------------------
     // Implements Cloneable
     //------------------------------------------------------------------------
@@ -164,7 +190,7 @@ public final class ImmutableDateTime
     @Override
     public Date clone(
     ) {
-        return new Date(this.getTime());
+        return toMutableDateTime();
     }
 
 

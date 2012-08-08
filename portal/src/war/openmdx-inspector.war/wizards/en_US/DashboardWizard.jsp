@@ -2,17 +2,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DashboardWizard.jsp,v 1.7 2010/04/27 12:21:28 wfro Exp $
+ * Name:        $Id: DashboardWizard.jsp,v 1.8 2011/03/18 17:45:26 wfro Exp $
  * Description: DashboardWizard.jsp
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 12:21:28 $
+ * Date:        $Date: 2011/03/18 17:45:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -293,8 +293,8 @@ org.openmdx.base.naming.*
 	}
 %>
 <!--
-	<meta name="label" content="Dashboard">
-	<meta name="toolTip" content="Dashboard">
+	<meta name="label" content="Manage Dashboard">
+	<meta name="toolTip" content="Manage Dashboard">
 	<meta name="targetType" content="_inplace">
 	<meta name="forClass" content="org:openmdx:base:ContextCapable">
 	<meta name="order" content="8888">

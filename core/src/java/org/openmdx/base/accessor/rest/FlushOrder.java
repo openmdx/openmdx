@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: FlushOrder.java,v 1.1 2010/11/11 10:36:34 hburger Exp $
+ * Name:        $Id: FlushOrder.java,v 1.3 2011/01/21 10:05:24 hburger Exp $
  * Description: Flush Order 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/11 10:36:34 $
+ * Date:        $Date: 2011/01/21 10:05:24 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -120,15 +120,27 @@ public class FlushOrder implements Comparator<DataObject_1_0> {
         boolean rightIsDirty = right.jdoIsDirty();
         if(leftIsDirty | rightIsDirty) {
             if(leftIsDirty & rightIsDirty) {
-                return 0;
+                return +leftId.compareTo(rightId);
             } else {
                 return leftIsDirty ? +1 : -1;
             }
         }
         //
-        // Clean
+        // Persistent
         //
-        return 0;
+        boolean leftIsPersistent = left.jdoIsPersistent();
+        boolean rightIsPersistent = right.jdoIsPersistent();
+        if(leftIsPersistent | rightIsPersistent) {
+            if(leftIsPersistent & rightIsPersistent){
+                return +leftId.compareTo(rightId);
+            } else {
+                return leftIsPersistent ? +1 : -1;
+            }
+        }
+        //
+        // Transient
+        //
+        return left.jdoGetTransactionalObjectId().compareTo(right.jdoGetTransactionalObjectId());
     }
     
 }

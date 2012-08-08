@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Qualifiers.java,v 1.7 2010/10/19 21:56:30 hburger Exp $
+ * Name:        $Id: Qualifiers.java,v 1.8 2011/11/19 19:55:23 hburger Exp $
  * Description: Qualifiers 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/19 21:56:30 $
+ * Date:        $Date: 2011/11/19 19:55:23 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -50,7 +50,9 @@
  */
 package org.openmdx.audit2.spi;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.openmdx.base.exception.ServiceException;
@@ -137,7 +139,10 @@ public class Qualifiers {
     ) throws ServiceException{
         for (Map.Entry<Path, Path> entry : configuration.getMapping().entrySet()) {
             if (objectId.startsWith(entry.getKey())) {
-                Path imageId = new Path(entry.getValue());
+            	List<String> imageId = new ArrayList<String>();
+            	for(String c : entry.getValue()) {
+            		imageId.add(c);
+            	}
                 int iLimit = objectId.size() - 1;
                 for (
                     int i = entry.getKey().size(); 
@@ -146,12 +151,13 @@ public class Qualifiers {
                 ) {
                     String segment = objectId.get(i);
                     imageId.add(segment);
-                    if(segment.endsWith("%")) return imageId;
+                    if(segment.endsWith("%")) return new Path(imageId.toArray(new String[imageId.size()]));
                 }
                 String segment = objectId.get(iLimit);
-                return imageId.add(
+                imageId.add(
                     segment.endsWith("%") ? segment : toAudit2BeforeImageQualifier(segment, unitOfWorkId)
                 ); 
+                return new Path(imageId.toArray(new String[imageId.size()]));
             }
         }
         throw new ServiceException(
@@ -181,7 +187,10 @@ public class Qualifiers {
     ) throws ServiceException{
         for (Map.Entry<Path, Path> entry : configuration.getMapping().entrySet()) {
             if (objectId.startsWith(entry.getKey())) {
-                Path imageId = new Path(entry.getValue());
+                List<String> imageId = new ArrayList<String>(); 
+                for(String c : entry.getValue()){
+                	imageId.add(c);
+                }
                 int iLimit = objectId.size() - 1;
                 for (
                     int i = entry.getKey().size(); 
@@ -190,12 +199,13 @@ public class Qualifiers {
                 ) {
                     String segment = objectId.get(i);
                     imageId.add(segment);
-                    if(segment.endsWith("%")) return imageId;
+                    if(segment.endsWith("%")) return new Path(imageId.toArray(new String[imageId.size()]));
                 }
                 String segment = objectId.get(iLimit);
-                return imageId.add(
+                imageId.add(
                     segment.endsWith("%") ? segment : toAudit2AfterImageQualifier(segment, modifiedAt)
-                ); 
+                );
+                return new Path(imageId.toArray(new String[imageId.size()]));
             }
         }
         throw new ServiceException(

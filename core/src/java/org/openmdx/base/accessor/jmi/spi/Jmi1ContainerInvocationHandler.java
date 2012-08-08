@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.22 2010/10/29 12:41:46 hburger Exp $
+ * Name:        $Id: Jmi1ContainerInvocationHandler.java,v 1.25 2011/06/21 22:29:20 hburger Exp $
  * Description: ContainerInvocationHandler 
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/29 12:41:46 $
+ * Date:        $Date: 2011/06/21 22:29:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2010, OMEX AG, Switzerland
+ * Copyright (c) 2008-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -59,6 +59,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 
+import javax.jdo.JDOHelper;
+import javax.jdo.spi.PersistenceCapable;
 import javax.jmi.reflect.InvalidCallException;
 import javax.jmi.reflect.RefBaseObject;
 
@@ -69,10 +71,9 @@ import org.openmdx.base.collection.Maps;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.naming.Path;
-import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 import org.w3c.cci2.AnyTypePredicate;
 import org.w3c.cci2.Container;
 
@@ -139,7 +140,26 @@ public class Jmi1ContainerInvocationHandler
         String methodName = method.getName();
         Class<?> declaringClass = method.getDeclaringClass();
         try {
-            if(this.cciDelegate == null) {
+            if(declaringClass == Object.class) {
+                if("hashCode".equals(methodName)) {
+                    return JDOHelper.getTransactionalObjectId(proxy).hashCode();
+                } else if ("equals".equals(methodName)) {
+                    return
+                        JDOHelper.getPersistenceManager(proxy).equals(JDOHelper.getPersistenceManager(args[0])) &&
+                        JDOHelper.getTransactionalObjectId(proxy).equals(JDOHelper.getTransactionalObjectId(args[0]));
+                } else if ("toString".equals(methodName)) {
+                    return proxy.getClass().getInterfaces()[0].getName() + ": " + (
+                        JDOHelper.isPersistent(proxy) ? ((Path)JDOHelper.getObjectId(proxy)).toXRI() : JDOHelper.getTransactionalObjectId(proxy)
+                    );
+                } else throw new JmiServiceException(
+                    null,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE,
+                    "Unexpected method dispatching",
+                    new BasicException.Parameter("method-class", declaringClass.getName()),
+                    new BasicException.Parameter("method-name", methodName)
+                );
+            } else if(this.cciDelegate == null) {
                 if(declaringClass == proxy.getClass().getInterfaces()[0]) {
                     // 
                     // This typed association end interface has been prepended 
@@ -220,8 +240,8 @@ public class Jmi1ContainerInvocationHandler
                         if(this.cciDelegate instanceof RefBaseObject) {
                             return ((RefBaseObject)this.cciDelegate).refMofId();
                         } else {
-                            Path xri = PersistenceHelper.getContainerId(this.cciDelegate);
-                            return xri == null ? null : xri.toXRI();
+                            Object xri = JDOHelper.getObjectId(this.cciDelegate);
+                            return xri instanceof Path ? ((Path)xri).toXRI() : null;
                         }
                     } else throw new UnsupportedOperationException(
                         declaringClass + ": " + methodName
@@ -306,7 +326,18 @@ public class Jmi1ContainerInvocationHandler
                         }
                         return target;
                     }
-                }
+                } else if(declaringClass == PersistenceCapable.class) {
+                    if("jdoGetPersistenceManager".equals(methodName)) {
+                        if(this.marshaller instanceof StandardMarshaller) {
+                            return ((StandardMarshaller)this.marshaller).getOutermostPackage().refPersistenceManager();
+                        } else {
+                            throw new UnsupportedOperationException(
+                                "Don't know how to retrieve the PersistenceManager from the given marshaller: " +
+                                this.marshaller.getClass().getName()
+                            );
+                        }
+                    } 
+                } 
                 return this.marshaller.marshal(
                     method.invoke(
                         this.cciDelegate, 
@@ -334,7 +365,7 @@ public class Jmi1ContainerInvocationHandler
      * 
      * @return the container's add() arguments
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     public static Class<?>[] getAddArguments(
         Class<? extends RefContainer> containerClass
     ){
@@ -417,7 +448,7 @@ public class Jmi1ContainerInvocationHandler
             try {
                 return Container.class.getMethod(methodName, AnyTypePredicate.class);
             } catch (NoSuchMethodException exception) {
-                LoggerFactory.getLogger().log(
+                SysLog.log(
                     Level.SEVERE,
                     "Expected getAll() and removeAll() being a member of " + Container.class.getName(),
                     exception

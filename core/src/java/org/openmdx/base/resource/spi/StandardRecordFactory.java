@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StandardRecordFactory.java,v 1.12 2010/09/13 16:46:29 hburger Exp $
+ * Name:        $Id: StandardRecordFactory.java,v 1.13 2011/11/26 01:34:59 hburger Exp $
  * Description: Java Connector Architecture: Extended Record Factory Implementation
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/13 16:46:29 $
+ * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -176,13 +176,6 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      * @param     values
      *            The values of the mapped record sorted according to the keys
      *
-     * @exception ResourceException
-     *            Failed to create an initialized MappedRecord.
-     *            Example error cases are:<ul>
-     *            <li>Invalid specification of record name</li>
-     *            <li>Resource adapter internal error</li>
-     *            <li>Failed to access metadata repository</li>
-     *            </ul>
      * @exception NotSupportedException
      *            Operation not supported
      * @exception	NullPointerException
@@ -194,7 +187,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
         String recordShortDescription,
         Object[] keys,
         Object[] values
-    ) throws ResourceException {
+    ) {
         return new FixedSizeMappedRecord(
             recordName,
             recordShortDescription,
@@ -236,24 +229,20 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
      *            The values of the indexed record represented by a List or an 
      *            array of objects or primitive types.
      *
-     * @exception ResourceException
-     *            Failed to create an initialized IndexedRecord.
-     *            Example error cases are:<ul>
-     *            <li>Invalid specification of record name</li>
-     *            <li>Resource adapter internal error</li>
-     *            <li>Failed to access metadata repository</li>
-     *            </ul>
      * @exception NotSupportedException
      *            Operation not supported
-     * @exception	NullPointerException
-     *						if <code>values</code> is null.
+     * @exception NullPointerException
+     *			  if <code>values</code> is null
+     * @exception IllegalArgumentException
+     *			  if <code>values</code> is neither an array not a list.
+     * 
      */
 //  @Override
     public IndexedRecord asIndexedRecord(
         String recordName,
         String recordShortDescription,
         Object values
-    ) throws ResourceException {
+    ) {
         if(values instanceof List<?>) {
             return new DelegatingIndexedRecord(
                 recordName,
@@ -273,7 +262,7 @@ public class StandardRecordFactory implements ExtendedRecordFactory {
                 values
             );
         } else {
-            throw new ResourceException(
+            throw new IllegalArgumentException(
                 "The argument 'values' is neither an array nor a List: " + values.getClass().getName() 
             );
         }

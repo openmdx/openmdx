@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ModelElement_1.java,v 1.26 2010/12/07 23:13:47 hburger Exp $
+ * Name:        $Id: ModelElement_1.java,v 1.31 2011/11/26 01:34:59 hburger Exp $
  * Description: ModelElement_1 class
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/07 23:13:47 $
+ * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -74,41 +74,29 @@ import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 
 //---------------------------------------------------------------------------
+@SuppressWarnings({"rawtypes","unchecked"})
 public class ModelElement_1 implements ModelElement_1_0 {
-
-    private static final long serialVersionUID = 3257002159609753654L;
 
     //-------------------------------------------------------------------------
     public ModelElement_1(
         MappedRecord data,
         Model_1 model
     ) throws ServiceException {
-        try {
-            this.data = Object_2Facade.newInstance(data);
+            this.data = Facades.asObject(data);
             this.model = model;
-        }
-        catch(Exception e) {
-            throw new ServiceException(e);
-        }
     }
 
     //-------------------------------------------------------------------------
     public ModelElement_1(
         ModelElement_1_0 element
     ) throws ServiceException {
-        try {
-            this.data = Object_2Facade.newInstance(
-                Object_2Facade.cloneObject(((ModelElement_1)element).data.getDelegate())
-            );
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+    	this.data = ((ModelElement_1)element).data.cloneObject();
         this.model = (Model_1)element.getModel();
     }
 
@@ -389,7 +377,6 @@ public class ModelElement_1 implements ModelElement_1_0 {
     }
     
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public boolean isReferenceStoredAsAttribute(
         Map elements
     ) throws ServiceException {
@@ -428,14 +415,13 @@ public class ModelElement_1 implements ModelElement_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.mof.cci.ModelElement_1_0#getValues(java.lang.String)
      */
-    @SuppressWarnings("unchecked")
     public List<Object> objGetList(
         String featureName
     ) {
         try {
             return (List<Object>)this.data.attributeValues(
                 featureName,
-                Multiplicities.LIST
+                Multiplicity.LIST
             );
         }
         catch(Exception e) {
@@ -526,9 +512,9 @@ public class ModelElement_1 implements ModelElement_1_0 {
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.cci.DataObject_1_0#objDefaultFetchGroup()
      */
-    public Set<String> objDefaultFetchGroup()
-        throws ServiceException {
-        throw new UnsupportedOperationException("Operation not supported by ModelElement_1");
+    public Set<String> objDefaultFetchGroup(
+    ) throws ServiceException {
+        return this.data.getValue().keySet();
     }
 
     /* (non-Javadoc)

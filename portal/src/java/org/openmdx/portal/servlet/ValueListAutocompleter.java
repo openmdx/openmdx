@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ValueListAutocompleter.java,v 1.17 2009/09/25 12:02:38 wfro Exp $
+ * Name:        $Id: ValueListAutocompleter.java,v 1.18 2011/12/03 15:32:04 wfro Exp $
  * Description: ListAutocompleteControl 
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/25 12:02:38 $
+ * Date:        $Date: 2011/12/03 15:32:04 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,7 +58,6 @@ package org.openmdx.portal.servlet;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.openmdx.base.exception.ServiceException;
@@ -97,9 +96,7 @@ public class ValueListAutocompleter
             ? fieldName + "[" + tabIndex + "]"
             : id;
         p.write("<select id=\"", id, "\" ", (inputFieldClass == null ? "" : inputFieldClass), " name=\"", id, "\" tabindex=\"", Integer.toString(tabIndex), "\">");
-        int ii = 0;
-        for(Iterator i = this.options.iterator(); i.hasNext(); ii++) {
-            Object option = i.next();
+        for(Object option: this.options) {
             String selectedModifier = "";
             if(currentValue != null) {
                 if(numericCompare) {

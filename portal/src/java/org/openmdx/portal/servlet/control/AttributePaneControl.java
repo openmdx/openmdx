@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: AttributePaneControl.java,v 1.38 2009/09/30 13:25:45 wfro Exp $
+ * Name:        $Id: AttributePaneControl.java,v 1.42 2011/08/19 22:50:46 wfro Exp $
  * Description: TabControl
  * Revision:    $AttributePaneRenderer: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/30 13:25:45 $
+ * Date:        $Date: 2011/08/19 22:50:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +64,7 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ViewPort;
+import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.view.EditObjectView;
 import org.openmdx.portal.servlet.view.ObjectView;
 
@@ -94,7 +95,7 @@ public class AttributePaneControl
             org.openmdx.ui1.jmi1.Tab tab = (org.openmdx.ui1.jmi1.Tab) pane.getMember().get(i);
             attributeTab.add(
                 controlFactory.createAttributeTabControl(
-                    null, 
+                    tab.refGetPath().getBase(), 
                     locale, 
                     localeAsIndex,
                     tab, 
@@ -137,23 +138,27 @@ public class AttributePaneControl
 	                i++
 	            ) {
 	                AttributeTabControl tab = this.attributeTabControl[i];
-	                if(app.getPortalExtension().isEnabled(tab, view.getRefObject(), app)) {
+	                boolean isRevokeShow = app.getPortalExtension().hasPermission(
+                		tab, 
+                		view.getRefObject(), 
+                		app,
+                		WebKeys.PERMISSION_REVOKE_SHOW
+                	);
+	                if(!isRevokeShow) {
 	                    String tabId = view.getContainerElementId() == null ? 
 	                        Integer.toString(index) : 
-	                        view.getContainerElementId() + "-" + Integer.toString(index);                                            
-	                    if(app.getPortalExtension().isEnabled(tab, view.getRefObject(), app)) {	                    
-	                        p.write("    <ul id=\"t", tabId, "\" selected=\"true\" style=\"position:relative;top:auto;min-height:0px;\" onclick=\"javascript:var e=document.getElementById('p", tabId, "');if(e.style.display=='block'){e.style.display='none';}else{e.style.display='block';};\">");
-	                        p.write("      <li class=\"group\" style=\"height:40px;\"><div style=\"padding-top:10px;\">", htmlEncoder.encode(tab.getName(), false), "</div></li>");
-	                        p.write("    </ul>");
-	                        p.write("    <div id=\"p", tabId, "\" class=\"panel\" selected=\"true\" style=\"display:", (i == 0 ? "block" : "none"), ";position:relative;top:auto;min-height:0px;\">");
-	                        tab.paint(
-	                            p,
-	                            frame,
-	                            forEditing
-	                        );
-	                    	p.write("    </div>");
-	                        index++;
-	                    }
+	                        	view.getContainerElementId() + "-" + Integer.toString(index);                                            
+                        p.write("    <ul id=\"t", tabId, "\" selected=\"true\" style=\"position:relative;top:auto;min-height:0px;\" onclick=\"javascript:var e=document.getElementById('p", tabId, "');if(e.style.display=='block'){e.style.display='none';}else{e.style.display='block';};\">");
+                        p.write("      <li class=\"group\" style=\"height:40px;\"><div style=\"padding-top:10px;\">", htmlEncoder.encode(tab.getName(), false), "</div></li>");
+                        p.write("    </ul>");
+                        p.write("    <div id=\"p", tabId, "\" class=\"panel\" selected=\"true\" style=\"display:", (i == 0 ? "block" : "none"), ";position:relative;top:auto;min-height:0px;\">");
+                        tab.paint(
+                            p,
+                            frame,
+                            forEditing
+                        );
+                    	p.write("    </div>");
+                        index++;
 	                }
 	            }        		
         	}
@@ -169,7 +174,13 @@ public class AttributePaneControl
 	                i++
 	            ) {
 	                AttributeTabControl tab = this.getAttributeTabControl()[i];
-	                if(app.getPortalExtension().isEnabled(tab, view.getRefObject(), app)) {
+	                boolean isRevokeShow = app.getPortalExtension().hasPermission(
+	                	tab, 
+	                	view.getRefObject(), 
+	                	app,
+	                	WebKeys.PERMISSION_REVOKE_SHOW
+	                );
+	                if(!isRevokeShow) {
 	                    String inspPanelId = view.getContainerElementId() == null ? 
 	                        Integer.toString(index) : 
 	                        view.getContainerElementId() + "-" + Integer.toString(index);                            
@@ -187,20 +198,24 @@ public class AttributePaneControl
 	                i++
 	            ) {
 	                AttributeTabControl tab = this.attributeTabControl[i];
-	                if(app.getPortalExtension().isEnabled(tab, view.getRefObject(), app)) {
+	                boolean isRevokeShow = app.getPortalExtension().hasPermission(
+	                	tab, 
+	                	view.getRefObject(), 
+	                	app,
+	                	WebKeys.PERMISSION_REVOKE_SHOW
+	                );
+	                if(!isRevokeShow) {
 	                    String inspPanelId = view.getContainerElementId() == null ? 
 	                        Integer.toString(index) : 
 	                        view.getContainerElementId() + "-" + Integer.toString(index);                                            
-	                    if(app.getPortalExtension().isEnabled(tab, view.getRefObject(), app)) {
-	                        p.write("    <div id=\"inspPanel", inspPanelId, "\" class=\"", (index == 0 ? "selected" : "hidden"), "\" style=\"padding-top:10px;\">");
-	                        tab.paint(
-	                            p,
-	                            frame,
-	                            forEditing
-	                        );
-	                        p.write("    </div>");
-	                        index++;
-	                    }
+                        p.write("    <div id=\"inspPanel", inspPanelId, "\" class=\"", (index == 0 ? "selected" : "hidden"), "\" style=\"padding-top:10px;\">");
+                        tab.paint(
+                            p,
+                            frame,
+                            forEditing
+                        );
+                        p.write("    </div>");
+                        index++;
 	                }
 	            }
 	            p.write("  </div>");

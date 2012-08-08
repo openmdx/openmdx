@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Jmi1Package_1_0.java,v 1.15 2010/09/13 16:46:29 hburger Exp $
+ * Name:        $Id: Jmi1Package_1_0.java,v 1.16 2011/05/18 23:16:30 hburger Exp $
  * Description: JMI 1 Package Interface
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/13 16:46:29 $
+ * Date:        $Date: 2011/05/18 23:16:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -98,6 +98,17 @@ public interface Jmi1Package_1_0 extends RefPackage_1_0 {
      */
     RefObject refObject(
       Path objectId
+    );
+
+    /**
+     * Avoid outermost RefPackage validation
+     * 
+     * @param source
+     * 
+     * @return the unmarshaled object
+     */
+    Object unmarshalUnchecked(
+    	Object source
     );
 
 }

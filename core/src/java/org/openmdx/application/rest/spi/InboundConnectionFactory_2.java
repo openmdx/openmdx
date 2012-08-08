@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: InboundConnectionFactory_2.java,v 1.25 2010/10/26 16:52:54 hburger Exp $
+ * Name:        $Id: InboundConnectionFactory_2.java,v 1.26 2011/04/27 06:12:40 hburger Exp $
  * Description: Inbound REST Connection Factory
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/26 16:52:54 $
+ * Date:        $Date: 2011/04/27 06:12:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -127,17 +127,6 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
      * The persistence manager factory
      */
     private transient PersistenceManagerFactory persistenceManagerFactory;
-    
-    /**
-     * Tests whether the "RefInitialize" option is active
-     * 
-     * @return <code>true</code> if refInitialize should be active
-     */
-    public boolean isRefinitializeOnCreate(){
-        return Boolean.parseBoolean(
-            (String)this.overrides.get(ConfigurableProperty.RefInitializeOnCreate.qualifiedName())
-        );
-    }
     
     /**
      * The resource adapter's metadata
@@ -293,8 +282,7 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
     ) throws ResourceException {
         return new InboundConnection_2(
             null, // REST ConnectionSpec
-            this.getPersistenceManagerFactory().getPersistenceManager(), 
-            this.isRefinitializeOnCreate()
+            this.getPersistenceManagerFactory().getPersistenceManager()
         );
     }
 
@@ -319,8 +307,7 @@ public class InboundConnectionFactory_2 implements ConnectionFactory {
             }
             return new InboundConnection_2(
                 connectionSpec, 
-                persistenceManager, 
-                this.isRefinitializeOnCreate()
+                persistenceManager
             );
         } else {
             throw ResourceExceptions.initHolder(

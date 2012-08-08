@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestFormat.java,v 1.23 2010/12/22 09:34:52 hburger Exp $
+ * Name:        $Id: RestFormat.java,v 1.26 2011/11/26 01:34:57 hburger Exp $
  * Description: REST Format
- * Revision:    $Revision: 1.23 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/22 09:34:52 $
+ * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -88,10 +88,10 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.io.ObjectInputStream;
 import org.openmdx.base.io.ObjectOutputStream;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
-import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
@@ -462,7 +462,7 @@ public class RestFormat {
                 }
             }
             for (Object record : source) {
-                Object_2Facade object = Object_2Facade.newInstance((MappedRecord) record);
+                Object_2Facade object = Facades.asObject((MappedRecord) record);
                 RestFormat.printRecord(
                     target, 
                     1, 
@@ -474,8 +474,6 @@ public class RestFormat {
             }
             writer.writeEndElement(); // "org.openmdx.kernel.ResultSet"
             writer.writeEndDocument();
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
         } catch (XMLStreamException exception) {
             throw new ServiceException(exception);
         }
@@ -1193,7 +1191,7 @@ public class RestFormat {
 
         private Record value = null;
 
-        private String multiplicity = null;
+        private Multiplicity multiplicity = null;
 
         private String featureType = null;
 
@@ -1227,26 +1225,22 @@ public class RestFormat {
 
         /**
          * Retrieve the interaction's object record
-         * @param xri TODO
+         * 
+         * @param xri 
          * 
          * @return the interaction's object record
          */
         Object_2Facade getObject(
             Path xri
         ) throws ServiceException {
-            try {
-                Object_2Facade object = Object_2Facade.newInstance();
-                object.setValue(this.values);
-                object.setPath(
-                    xri == null ? this.source.getXRI(this.href) : xri
-                );
-                if (this.version != null) {
-                    object.setVersion(Base64.decode(this.version));
-                }
-                return object;
-            } catch (ResourceException exception) {
-                throw new ServiceException(exception);
-            }
+            Object_2Facade object = Facades.newObject(
+			    xri == null ? this.source.getXRI(this.href) : xri
+			);
+			object.setValue(this.values);
+			if (this.version != null) {
+			    object.setVersion(Base64.decode(this.version));
+			}
+			return object;
         }
         
         /**
@@ -1311,38 +1305,39 @@ public class RestFormat {
                                 PrimitiveTypes.BINARY.equals(featureType) ? Base64.decode(text.trim()) : 
                                 featureType != null && model.isClassType(featureType) ? new Path(text.trim()) : text;
                         }
-                        if (
-                            Multiplicities.SINGLE_VALUE.equals(this.multiplicity) || 
-                            Multiplicities.OPTIONAL_VALUE.equals(this.multiplicity)
-                        ) {
-                            this.values.put(this.featureName, data);
-                        } else if (data == null) {
+                        if(data == null && this.multiplicity != Multiplicity.SINGLE_VALUE && this.multiplicity != Multiplicity.OPTIONAL) {
                             SysLog.warning(
                                 "Null feature for the given multiplicity ignored",
                                 multiplicity
                             );
-                        } else if (
-                            Multiplicities.LIST.equals(multiplicity) || 
-                            Multiplicities.SET.equals(multiplicity)
-                        ) {
-                            ((IndexedRecord) this.value).add(data);
-                        } else if (Multiplicities.SPARSEARRAY.equals(multiplicity)) {
-                            ((MappedRecord) this.value).put(
-                                Integer.valueOf(this.index), 
-                                data
-                            );
-                        } else if (Multiplicities.STREAM.equals(multiplicity)) {
-                            this.values.put(
-                                this.featureName,
-                                PrimitiveTypes.BINARY.equals(featureType) ? BinaryLargeObjects.valueOf((byte[]) data) : 
-                                PrimitiveTypes.STRING.equals(featureType) ? CharacterLargeObjects.valueOf((String) data) : 
-                                data
-                            );
                         } else {
-                            SysLog.warning(
-                                "Unsupported multiplicity, feature ignored",
-                                multiplicity
-                            );
+	                        switch(this.multiplicity) {
+		                        case SINGLE_VALUE: case OPTIONAL:
+		                            this.values.put(this.featureName, data);
+		                            break;
+		                        case LIST: case SET:  
+		                            ((IndexedRecord) this.value).add(data);
+		                            break;
+		                        case SPARSEARRAY:
+		                            ((MappedRecord) this.value).put(
+	                                    Integer.valueOf(this.index), 
+	                                    data
+	                                );
+		                            break;
+		                        case STREAM:
+		                            this.values.put(
+	                                    this.featureName,
+	                                    PrimitiveTypes.BINARY.equals(featureType) ? BinaryLargeObjects.valueOf((byte[]) data) : 
+	                                    PrimitiveTypes.STRING.equals(featureType) ? CharacterLargeObjects.valueOf((String) data) : 
+	                                    data
+	                                );
+		                            break;
+		                        default:
+		                            SysLog.warning(
+	                                    "Unsupported multiplicity, feature ignored",
+	                                    multiplicity
+	                                );
+	                        }
                         }
                     }
                 }
@@ -1396,23 +1391,24 @@ public class RestFormat {
                     );
                     this.featureType = getFeatureType(featureDef);
                     this.multiplicity = getMultiplicity(featureDef);
-                    if (
-                        Multiplicities.LIST.equals(this.multiplicity) || 
-                        Multiplicities.SET.equals(this.multiplicity)
-                    ) {
-                        this.values.put(
-                            this.featureName, 
-                            this.value = recordFactory.createIndexedRecord(this.multiplicity)
-                        );
-                    } else if (Multiplicities.SPARSEARRAY.equals(this.multiplicity)) {
-                        this.values.put(
-                            this.featureName, 
-                            this.value = recordFactory.createMappedRecord(this.multiplicity)
-                        );
-                    } else if (Multiplicities.OPTIONAL_VALUE.equals(this.multiplicity)) {
-                        this.values.put(this.featureName, this.value = null);
-                    } else {
-                        this.value = null;
+                    switch(this.multiplicity) {
+	                    case LIST: case SET: 
+	                        this.values.put(
+                                this.featureName, 
+                                this.value = recordFactory.createIndexedRecord(this.multiplicity.toString())
+                            );
+	                        break;
+	                    case SPARSEARRAY:
+	                        this.values.put(
+                                this.featureName, 
+                                this.value = recordFactory.createMappedRecord(this.multiplicity.toString())
+                            );
+	                        break;
+	                    case OPTIONAL:
+	                        this.values.put(this.featureName, this.value = null);
+	                        break;
+	                    default:
+	                        this.value = null;
                     }
                 }
             } catch (ServiceException exception) {
@@ -1470,12 +1466,10 @@ public class RestFormat {
          * 
          * @throws ServiceException
          */
-        protected String getMultiplicity(
+        protected Multiplicity getMultiplicity(
             ModelElement_1_0 featureDef
         ) throws ServiceException {
-            return 
-                featureDef == null ? Multiplicities.OPTIONAL_VALUE :
-                ModelUtils.getMultiplicity(featureDef);
+            return featureDef == null ? Multiplicity.OPTIONAL : ModelHelper.getMultiplicity(featureDef);
         }
 
         /**

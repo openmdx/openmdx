@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ExceptionMapper.java,v 1.3 2010/06/03 15:21:18 hburger Exp $
+ * Name:        $Id: ExceptionMapper.java,v 1.6 2011/07/01 16:16:42 hburger Exp $
  * Description: Exception Template 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:21:18 $
+ * Date:        $Date: 2011/07/01 16:16:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2010, OMEX AG, Switzerland
+ * Copyright (c) 2005-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -60,6 +60,7 @@ import org.openmdx.application.mof.mapping.cci.MetaData_1_0;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
 
 public class ExceptionMapper
@@ -84,7 +85,6 @@ public class ExceptionMapper
     }
     
     //-----------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     public void mapException(
     ) throws ServiceException {
         //
@@ -92,7 +92,7 @@ public class ExceptionMapper
         //
         this.trace("Exception/Exception");
         this.fileHeader();
-        List namespacePrefix = MapperUtils.getNameComponents(MapperUtils.getPackageName(this.exceptionDef.getQualifiedName(), 2));
+        List<String> namespacePrefix = MapperUtils.getNameComponents(MapperUtils.getPackageName(this.exceptionDef.getQualifiedName(), 2));
         List<AttributeDef> attributes = this.exceptionDef.getParameters();
         this.pw.println("package " + this.getNamespace(namespacePrefix) + ";");
         this.pw.println();
@@ -219,22 +219,32 @@ public class ExceptionMapper
                 this.pw.println("      , domain");
                 this.pw.println("      , errorCode");
                 this.pw.println("      , new org.openmdx.kernel.exception.BasicException.Parameter[]{");
-                this.pw.println("          new org.openmdx.kernel.exception.BasicException.Parameter(\"typeName\",\"" + exceptionDef.getQualifiedName() + "\")");
+                this.pw.println("          new org.openmdx.kernel.exception.BasicException.Parameter(\"class\",\"" + exceptionDef.getQualifiedName() + "\")");
                 for (AttributeDef attributeDef : attributes) {
                     this.pw.println("        , new org.openmdx.kernel.exception.BasicException.Parameter(\"" + attributeDef.getName() + "\"," + getFeatureName(attributeDef) + ")");
                 }
                 this.pw.println("        }");
-                this.pw.println("      , description");
+                this.pw.println("      , description == null ? \"" +  exceptionDef.getQualifiedName() + "\" : description");
                 this.pw.println("      , this");
                 this.pw.println("      )");
                 this.pw.println("    );");
                 this.pw.println("  }");
                 this.pw.println();
+                this.pw.println("  /**");
+                this.pw.println("   * Note:<br>");
+                this.pw.println("   * <em>This method must be called with contract compliant arguments only!</em>");
+                this.pw.println("   *");
+                this.pw.println("   * @param contractCompliantServiceException with a cause providing at least<ul>");
+                this.pw.println("   *   <li>a <em>non-null</em> description");
+                this.pw.println("   *   <li>a \"class\" parameter with the qualified exception name");
+                this.pw.println("   *   <li>one parameter for each modelled exception feature");
+                this.pw.println("   * </ul>");
+                this.pw.println("   */");
                 this.pw.println("  public " + this.exceptionDef.getName() + "(");
-                this.pw.println("    org.openmdx.base.exception.ServiceException e");
+                this.pw.println("    org.openmdx.base.exception.ServiceException contractCompliantServiceException");
                 this.pw.println("  ) {");
                 this.pw.println("    this(");
-                this.pw.println("      (org.openmdx.kernel.exception.BasicException)e.getCause()");
+                this.pw.println("      (org.openmdx.kernel.exception.BasicException)contractCompliantServiceException.getCause()");
                 this.pw.println("    );");
                 this.pw.println("  }");
                 this.pw.println();
@@ -255,7 +265,7 @@ public class ExceptionMapper
                 this.pw.println();
                 this.pw.println("  private " + this.exceptionDef.getName() + "(");
                 this.pw.println("      org.openmdx.kernel.exception.BasicException e");
-                this.pw.println("    , java.lang.String... a");
+                this.pw.println("    , java.lang.String... arguments");
                 this.pw.println("  ) {");
                 this.pw.println("    super(");
                 separator = "      ";
@@ -264,8 +274,8 @@ public class ExceptionMapper
                     this.pw.println(
                         separator + this.getParseExpression(
                             attributeDef.getQualifiedTypeName(),
-                            attributeDef.getMultiplicity(),
-                            "a[" + i++ + "]"
+                            ModelHelper.toMultiplicity(attributeDef.getMultiplicity()),
+                            "arguments[" + i++ + "]"
                         )
                     );
                     separator = "    , ";
@@ -276,12 +286,34 @@ public class ExceptionMapper
                 this.pw.println();
                 this.pw.println("  @Override");
                 this.pw.println("  public java.lang.String getMessage(){");
-                this.pw.println("    return getCause() == null ? super.getMessage() : getCause().getMessage() + \": \" + ((org.openmdx.kernel.exception.BasicException)getCause()).getDescription();");
+                this.pw.println("    org.openmdx.kernel.exception.BasicException cause = (org.openmdx.kernel.exception.BasicException) getCause();");
+                this.pw.println("    return cause == null ? null : (cause.getMessage() + \": \" + cause.getDescription());");
                 this.pw.println("  }");
                 this.pw.println();
                 this.pw.println("  @Override");
                 this.pw.println("  public java.lang.String toString(){");
-                this.pw.println("    return super.toString() + '\\n' + getCause();");
+                this.pw.println("    java.lang.Throwable cause = getCause();");
+                this.pw.println("    return cause == null ?  super.toString() : cause.toString();");
+                this.pw.println("  }");
+                this.pw.println();
+                this.pw.println("  @Override");
+                this.pw.println("  public void printStackTrace(java.io.PrintStream s) {");
+                this.pw.println("    java.lang.Throwable cause = getCause();");
+                this.pw.println("    if(cause == null){");
+                this.pw.println("      super.printStackTrace(s);");
+                this.pw.println("    } else {");
+                this.pw.println("      cause.printStackTrace(s);");
+                this.pw.println("    }");
+                this.pw.println("  }");
+                this.pw.println();
+                this.pw.println("  @Override");
+                this.pw.println("  public void printStackTrace(java.io.PrintWriter s) {");
+                this.pw.println("    java.lang.Throwable cause = getCause();");
+                this.pw.println("    if(cause == null){");
+                this.pw.println("      super.printStackTrace(s);");
+                this.pw.println("    } else {");
+                this.pw.println("      cause.printStackTrace(s);");
+                this.pw.println("    }");
                 this.pw.println("  }");
                 break;
         }

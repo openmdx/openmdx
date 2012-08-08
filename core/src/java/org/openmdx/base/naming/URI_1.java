@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: URI_1.java,v 1.2 2009/10/23 14:40:14 hburger Exp $
+ * Name:        $Id: URI_1.java,v 1.3 2011/04/12 15:45:29 hburger Exp $
  * Description: Legacy URI Marshaller 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/23 14:40:14 $
+ * Date:        $Date: 2011/04/12 15:45:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -61,7 +61,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Handles SPICE URIs
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public final class URI_1 implements Marshaller {
 
     private URI_1(

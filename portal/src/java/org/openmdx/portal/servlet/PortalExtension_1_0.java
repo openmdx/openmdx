@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PortalExtension_1_0.java,v 1.42 2010/11/01 13:41:49 wfro Exp $
+ * Name:        $Id: PortalExtension_1_0.java,v 1.56 2011/12/23 15:49:51 wfro Exp $
  * Description: Evaluator_1_0
- * Revision:    $Revision: 1.42 $
+ * Revision:    $Revision: 1.56 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/01 13:41:49 $
+ * Date:        $Date: 2011/12/23 15:49:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,16 +58,20 @@ package org.openmdx.portal.servlet;
 import java.util.List;
 import java.util.Map;
 
+import javax.jdo.PersistenceManager;
 import javax.jmi.reflect.RefStruct;
 
 import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.Condition;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.control.Control;
 import org.openmdx.portal.servlet.control.GridControl;
+import org.openmdx.portal.servlet.view.Grid;
 import org.openmdx.portal.servlet.view.ObjectView;
+import org.openmdx.ui1.jmi1.ValuedField;
 
 public interface PortalExtension_1_0 {
 
@@ -78,59 +82,77 @@ public interface PortalExtension_1_0 {
      * @param locale locale index. Can be used to lookup code texts
      * @param localeAsString the locale name
      * @param asShortTitle true for object title in short form
-     * @param application application context
+     * @param app application context
      * @return evaluated object title
      */
-    public String getTitle(
+    String getTitle(
         RefObject_1_0 refObj,
         short locale,
         String localeAsString,
         boolean asShortTitle,
-        ApplicationContext application
+        ApplicationContext app
     );
 
     /**
-     * Determines whether the ui element is enabled for the specified object. The result
-     * is used in the rendering process to determine whether an ui element should
-     * be rendered as enabled or disabled.
+     * Evaluates the title for a given action and locale.
+     * 
+     * @param action action id
+     * @param name name parameter
+     * @param app application context
+     */
+    String getTitle(
+    	int action,
+    	String name,
+    	ApplicationContext app
+    );
+    
+    /**
+     * Returns true if user has permission for specified elementName and actions
+     * in the context of object.
      * 
      * @param elementName name of element to be tested (normally qualified ui element name)
-     * @param refObj enable / disable element when rendering this object
-     * @param applicationContext application context
-     * @return true when the element is enabled
+     * @param object 
+     * @param app application context
+     * @param action permission is tested for actions
+     * @return true if user has permission for all actions
      */
-    public boolean isEnabled(
+    boolean hasPermission(
         String elementName,
-        RefObject_1_0 refObj,
-        ApplicationContext applicationContext
+        RefObject_1_0 object,
+        ApplicationContext app,
+        String action
     );
   
     /**
-     * Determines whether the control is enabled for the specified object. The result
-     * is used in the rendering process to determine whether the control should rendered.
+     * Returns true if user has permission for specified control and actions
+     * in the context of object.
      * 
      * @param control to be tested
-     * @param refObj enable / disable element when rendering this object
-     * @param applicationContext application context
-     * @return true when the element is enabled
+     * @param object context
+     * @param action permission is tested for action
+     * @param app application context
+     * @return returns true if user has permission for all actions
      */
-    public boolean isEnabled(
+    boolean hasPermission(
         Control control,
-        RefObject_1_0 refObj,
-        ApplicationContext applicationContext
+        RefObject_1_0 object,
+        ApplicationContext app,
+        String action
     );
   
     /**
-     * Determines whether the specified object is enabled. The object can be a root object,
-     * UI segment, etc.
-     * 
-     * @param refObj enable / disable element when rendering this object
-     * @param applicationContext application context
+     * Returns true if user has permission for specified actions
+     * in the context of object.
+     *  
+     * @param object context
+     * @param actions permission is tested for actions
+     * @param app application context
      * @return true when the element is enabled
      */
-    public boolean isEnabled(
-        RefObject_1_0 refObj,
-        ApplicationContext applicationContext
+    boolean hasPermission(
+        RefObject_1_0 object,
+        ApplicationContext app,
+        String action        
     );
   
     /**
@@ -140,18 +162,18 @@ public interface PortalExtension_1_0 {
      * @param field return the query for field
      * @param filterValue field is queried for this value.
      * @param queryFilterStringParamCount use this count for string parameters for query filters
-     * @param application the application context
+     * @param app the application context
      *
      * @return a filter
      */
-    public org.openmdx.base.query.Filter getQuery(        
+    org.openmdx.base.query.Filter getQuery(        
     	org.openmdx.ui1.jmi1.ValuedField field,
         String filterValue,
         int queryFilterStringParamCount,
-        ApplicationContext application
+        ApplicationContext app
     );
     
-    public int getGridPageSize(
+    int getGridPageSize(
         String referencedTypeName
     );
     
@@ -160,7 +182,7 @@ public interface PortalExtension_1_0 {
      * object is rendered in a grid.
      * @return foreground (at index 0) and background color (at index 1) or null. 
      */
-    public String[] getGridRowColors(
+    String[] getGridRowColors(
         RefObject_1_0 obj
     );
 
@@ -168,16 +190,16 @@ public interface PortalExtension_1_0 {
      * Returns true if the grid content should be loaded and showed the first time
      * the grid is displayed.  
      */
-    public boolean showGridContentOnInit(
+    boolean showGridContentOnInit(
         GridControl gridControl,
-        ApplicationContext application
+        ApplicationContext app
     );
 
     /**
      * The default implementation shows the search form according to the
      * user settings. The default value is false if no user setting is found.
      */
-    public boolean showSearchForm(
+    boolean showSearchForm(
         GridControl gridControl,
         ApplicationContext app
     );
@@ -187,7 +209,7 @@ public interface PortalExtension_1_0 {
      * 
      * @return null if no autocompleter is available.
      */
-    public Autocompleter_1_0 getAutocompleter(
+    Autocompleter_1_0 getAutocompleter(
         ApplicationContext application,
         RefObject_1_0 context,
         String qualifiedFeatureName
@@ -197,7 +219,7 @@ public interface PortalExtension_1_0 {
      * Returns true if the specified type is not a valid lookup type. 
      * Autocompleter must exclude non lookup types in their lookup options.
      */
-    public boolean isLookupType(
+    boolean isLookupType(
         ModelElement_1_0 classDef
     ) throws ServiceException;
     
@@ -207,8 +229,8 @@ public interface PortalExtension_1_0 {
      * be returned by the find objects reply a filter of the form active=true can
      * be returned.
      */
-    public List<Condition> getFindObjectsBaseFilter(
-        ApplicationContext application,
+    List<Condition> getFindObjectsBaseFilter(
+        ApplicationContext app,
         RefObject_1_0 context,
         String qualifiedFeatureName
     );
@@ -224,40 +246,40 @@ public interface PortalExtension_1_0 {
      * @param fieldMap Map containing the fields received by the form post request.
      *        Entries are of the form (key='feature[index][.false | .true]', value).
      */
-    public void updateObject(
+    void updateObject(
         Object target,
-        Map<String,Object[]> parameterMap,
+        Map<String,String[]> parameterMap,
         Map<String,Attribute> fieldMap,
-        ApplicationContext application
+        ApplicationContext app
     );
     
     /**
      * Get object which allows to lookup objects of referenced type
      */
-    public RefObject_1_0 getLookupObject(
+    RefObject_1_0 getLookupObject(
         ModelElement_1_0 lookupType,
         RefObject_1_0 startFrom,
-        ApplicationContext application
+        ApplicationContext app
     ) throws ServiceException;
 
     /**
      * Get view which allows to lookup objects of referenced types
      */
-    public ObjectView getLookupView(
+    ObjectView getLookupView(
         String id,
         ModelElement_1_0 lookupType,
         RefObject_1_0 startFrom,
         String filterValues,
-        ApplicationContext application
+        ApplicationContext app
     ) throws ServiceException;
     
     /**
      * Returns true if the qualifier for the specified inspector is user-defineable.
      * User-defineable qualifiers can be entered by the user when creating a new object.
      */
-    public boolean hasUserDefineableQualifier(
+    boolean hasUserDefineableQualifier(
         org.openmdx.ui1.jmi1.Inspector inspector,
-        ApplicationContext application
+        ApplicationContext app
     );
     
     /**
@@ -267,7 +289,7 @@ public interface PortalExtension_1_0 {
      *  
      * @return preprocessed text
      */
-    public void renderTextValue(
+    void renderTextValue(
         ViewPort p,
         String value,
         boolean asWiki
@@ -277,24 +299,24 @@ public interface PortalExtension_1_0 {
      * Get date style for given feature
      * @param qualifiedFeatureName null or qualified name of feature for which date style is returned. 
      */
-    public int getDateStyle(
+    int getDateStyle(
        String qualifiedFeatureName,
-       ApplicationContext application
+       ApplicationContext app
     );
 
     /**
      * Get time style for given feature 
      * @param qualifiedFeatureName null or qualified name of feature for which date style is returned.
      */
-    public int getTimeStyle(
+    int getTimeStyle(
        String qualifiedFeatureName,
-       ApplicationContext application
+       ApplicationContext app
     );
 
     /**
      * Get data binding with given name 
      */
-    public DataBinding getDataBinding(
+    DataBinding getDataBinding(
         String dataBindingName
     );
     
@@ -308,13 +330,119 @@ public interface PortalExtension_1_0 {
      * @return object to be shown after operation invocation. null if user should not
      *         be directed to a new view.
      */
-    public RefObject_1_0 handleOperationResult(
+    RefObject_1_0 handleOperationResult(
         RefObject_1_0 target,
         String operationName,
         RefStruct params,
         RefStruct result
     ) throws ServiceException;
     
+    /**
+     * Return the new user role based on the current content and request object.
+     * By default the current role is returned.
+     */
+    String getNewUserRole(
+    	ApplicationContext app,
+    	Path requestedObject
+    );
+
+    /**
+     * Get actions for specified grid. The actions are added to the grid's action menu.
+     * @return list of actions or null.
+     */
+    List<Action> getGridActions(
+    	ObjectView view,
+    	Grid grid
+    ) throws ServiceException;
+
+    /**
+     * Get action-factory.
+     * @return action factory.
+     */
+    ActionFactory_1_0 getActionFactory();
+
+    /*
+     * Get admin principal name for given realm.
+     */
+    String getAdminPrincipal(
+        String realmName
+    );
+
+    /**
+     * Get principal name for root.
+     */
+    public boolean isRootPrincipal(
+        String principalName
+    );
+    
+    /**
+     * Get all roles of principal.
+     * @param principalName principal name or principal chain {p0, ..., pn}
+     */
+    List<String> getUserRoles(
+        Path realmIdentity,
+        String principalName,
+        PersistenceManager pm
+    ) throws ServiceException;
+
+    /**
+     * Check whether principal is defined and valid for given realm.
+     * @param principalName principal name or principal chain {p0, ..., pn}
+     */
+    boolean checkPrincipal(
+        Path realmIdentity,
+        String principalName,
+        PersistenceManager pm
+    ) throws ServiceException;
+    
+    /**
+     * Set last login at for given principal.
+     * @param principalName principal name or principal chain {p0, ..., pn}
+     */
+    void setLastLoginAt(
+    	Path realmIdentity,
+    	String segmentName,    	
+    	String principalName,
+    	PersistenceManager pm
+    ) throws ServiceException;
+ 
+    /**
+     * Get autostart URL. This method is invoked after immediately after session
+     * and app creation. If not null, the user is forwarded immediately to 
+     * the specified URL. This option allows to launch a different app than
+     * the ObjectInspectorServlet. 
+     * 
+     * @return autostart URL or null
+     */
+    String getAutostartUrl(
+    	ApplicationContext app
+    );
+ 
+    /**
+     * 
+     */
+    
+    public interface ConditionParser {
+    	
+    	Condition parse(
+    		String token
+    	);
+    	
+    	int getOffset();
+    	
+    }
+    
+    /**
+     * Return condition parser for specified field.
+     * @param field
+     * @param defaultCondition
+     * @return
+     */
+    ConditionParser getConditionParser(
+    	ValuedField field,
+    	Condition defaultCondition
+    );
+
 }
 
 //--- End of File -----------------------------------------------------------

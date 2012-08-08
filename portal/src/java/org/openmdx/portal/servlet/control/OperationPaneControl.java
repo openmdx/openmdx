@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: OperationPaneControl.java,v 1.82 2009/09/25 12:02:37 wfro Exp $
+ * Name:        $Id: OperationPaneControl.java,v 1.83 2011/08/11 11:55:34 wfro Exp $
  * Description: UiBasedOperationPaneControl class
- * Revision:    $Revision: 1.82 $
+ * Revision:    $Revision: 1.83 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/25 12:02:37 $
+ * Date:        $Date: 2011/08/11 11:55:34 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -258,10 +258,9 @@ public class OperationPaneControl
                                     : stringifiedValue;
                                 String widthModifier = "";                                    
                                 String readonlyModifier = valueHolder.isChangeable() ? "" : "readonly";
-                                String disabledModifier = valueHolder.isChangeable() ? "" : "disabled";                        
                                 String lockedModifier = valueHolder.isChangeable() ? "" : "Locked";
                                 String styleModifier = "style=\"";
-                                // ObjectReference                          
+                                // ObjectReference
                                 if(value instanceof ObjectReference) {
                                     Action selectAction = ((ObjectReference)value).getSelectObjectAction();
                                     Action selectAndEditAction = ((ObjectReference)value).getSelectAndEditObjectAction();
@@ -283,7 +282,6 @@ public class OperationPaneControl
                                         widthModifier,
                                         "",
                                         readonlyModifier,
-                                        disabledModifier,
                                         lockedModifier,
                                         stringifiedValue,
                                         forEditing

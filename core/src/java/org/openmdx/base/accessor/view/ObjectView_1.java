@@ -1,9 +1,9 @@
 /*
  * ====================================================================
  * Description: Abstract Object_1
- * Revision:    $Revision: 1.52 $
+ * Revision:    $Revision: 1.56 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/09 06:24:55 $
+ * Date:        $Date: 2011/07/08 13:20:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -72,9 +72,9 @@ import org.openmdx.base.collection.Unmarshalling;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
-import org.openmdx.base.mof.spi.ModelUtils;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
@@ -146,44 +146,44 @@ class ObjectView_1
 	public Object getFeatureReplaceingObjectById(
 		ModelElement_1_0 featureDef
 	) throws ServiceException {
-        String multiplicity = ModelUtils.getMultiplicity(featureDef);
         String feature = (String) featureDef.objGetValue("name");
-        if(
-            Multiplicities.SINGLE_VALUE.equals(multiplicity) || 
-            Multiplicities.OPTIONAL_VALUE.equals(multiplicity) 
-        ){
-            Object pc = getDelegate().objGetValue(feature); 
-            return JDOHelper.isPersistent(pc) ?
-                JDOHelper.getObjectId(pc) :
-                JDOHelper.getTransactionalObjectId(pc);
-        } else if (Multiplicities.LIST.equals(multiplicity)) { 
-            return new MarshallingList<Object>(
-                ObjectIdMarshaller.INSTANCE,
-                this.getDelegate().objGetList(feature),
-                Unmarshalling.RELUCTANT
-            );
-        } else if (Multiplicities.SET.equals(multiplicity)) { 
-            return new MarshallingSet<Object>(
-                ObjectIdMarshaller.INSTANCE,
-                this.getDelegate().objGetSet(feature),
-                Unmarshalling.RELUCTANT
-            );
-        } else if (Multiplicities.SPARSEARRAY.equals(multiplicity)) { 
-            return new MarshallingSparseArray(
-                ObjectIdMarshaller.INSTANCE,
-                SortedMaps.asSparseArray(this.getDelegate().objGetSparseArray(feature)),
-                Unmarshalling.RELUCTANT
-            );
-        } else throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_SUPPORTED,
-            "Unsupported multiplicity",
-            ExceptionHelper.newObjectIdParameter("id", this),
-            new BasicException.Parameter("feature", feature),
-            new BasicException.Parameter("multiplicity", multiplicity)
-         );
+        Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
+        switch(multiplicity) {
+	        case SINGLE_VALUE: case OPTIONAL: {
+	            Object pc = getDelegate().objGetValue(feature); 
+	            return JDOHelper.isPersistent(pc) ?
+	                JDOHelper.getObjectId(pc) :
+	                JDOHelper.getTransactionalObjectId(pc);
+	        }
+	        case LIST:
+	            return new MarshallingList<Object>(
+                    ObjectIdMarshaller.INSTANCE,
+                    this.getDelegate().objGetList(feature),
+                    Unmarshalling.RELUCTANT
+                );
+	        case SET:
+	            return new MarshallingSet<Object>(
+                    ObjectIdMarshaller.INSTANCE,
+                    this.getDelegate().objGetSet(feature),
+                    Unmarshalling.RELUCTANT
+                );
+	        case SPARSEARRAY:
+	            return new MarshallingSparseArray(
+                    ObjectIdMarshaller.INSTANCE,
+                    SortedMaps.asSparseArray(this.getDelegate().objGetSparseArray(feature)),
+                    Unmarshalling.RELUCTANT
+                );
+	        default:
+	        	throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    "Unsupported multiplicity",
+                    ExceptionHelper.newObjectIdParameter("id", this),
+                    new BasicException.Parameter("feature", feature),
+                    new BasicException.Parameter("multiplicity", multiplicity)
+                 );
+        }
 	}
-
 
 	//--------------------------------------------------------------------------
     // Extends Object
@@ -393,11 +393,44 @@ class ObjectView_1
         return this.dataObject.jdoGetTransactionalObjectId();
     }
 
+    /**
+     * Tells whether the value has to be set onto the uninitialized view
+     *  
+     * @param feature
+     * @param to
+     * 
+     * @return <code>true</code> if the value has to be set onto the uninitialized view
+     * 
+     * @throws ServiceException  
+     */
+    protected boolean propagateToDataObject(
+        String feature, 
+        Object to
+    ) throws ServiceException {
+        return 
+            ("validTimeUnique".equals(feature) || "transactionTimeUnique".equals(feature)) && 
+            Boolean.TRUE.equals(to) &&
+            this.getModel().isInstanceof(this.dataObject, "org:openmdx:state2:StateCapable");
+    }
+        
+    /* (non-Javadoc)
+	 * @see org.openmdx.base.accessor.spi.MarshallingObject_1#objSetValue(java.lang.String, java.lang.Object)
+	 */
+	@Override
+	public void objSetValue(String feature, Object to) throws ServiceException {
+		if(this.hollow && propagateToDataObject(feature, to)) {
+			this.dataObject.objSetValue(feature, to);
+		} else {
+    		super.objSetValue(feature, to);
+		}
+	}
+
+
     //--------------------------------------------------------------------------
     // Extends DynamicallyDelegatingObject_1
     //--------------------------------------------------------------------------
 
-    /**
+	/**
      * Hollow -> Persistent-Clean Transition
      */
     protected synchronized void initialize(

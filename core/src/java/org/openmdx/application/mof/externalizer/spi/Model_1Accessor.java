@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1Accessor.java,v 1.13 2010/06/21 09:48:54 hburger Exp $
+ * Name:        $Id: Model_1Accessor.java,v 1.16 2012/01/05 23:20:20 hburger Exp $
  * Description: Wrapper for a org::omg::model1 compliant in-process dataprovider.
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 09:48:54 $
+ * Date:        $Date: 2012/01/05 23:20:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -72,14 +72,14 @@ import org.openmdx.application.dataprovider.kernel.Dataprovider_1;
 import org.openmdx.application.mof.externalizer.cci.ModelImporter_1_0;
 import org.openmdx.application.mof.repository.layer.application.LayerConfigurationEntries;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.kernel.log.SysLog;
 
 //---------------------------------------------------------------------------  
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class Model_1Accessor {
 
      /**
@@ -166,12 +166,6 @@ public class Model_1Accessor {
           configuration.values(SharedConfigurationEntries.NAMESPACE_ID).put(
               0,
               "org::omg::model1"
-          );
-  
-          // exposed paths
-          configuration.values(SharedConfigurationEntries.EXPOSED_PATH).put(
-              0,
-              "org::omg::model1/provider"
           );
   
           // layers
@@ -280,7 +274,7 @@ public class Model_1Accessor {
         request.setPath(modelPackagePath.getChild("externalizePackage"));
         MappedRecord params = Records.getRecordFactory().createMappedRecord("org:omg:model1:PackageExternalizeParams"); 
         request.setBody(params);
-        List values = Records.getRecordFactory().createIndexedRecord(Multiplicities.LIST);
+        List values = Records.getRecordFactory().createIndexedRecord(Multiplicity.LIST.toString());
         params.put("format", values);
         values.addAll(formats);
         MessageRecord result = requests.addOperationRequest(request);

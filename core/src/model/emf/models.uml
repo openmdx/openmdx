@@ -30,9 +30,6 @@
   <eAnnotations xmi:id="_aATnMEcDEd-o1OTPw_6HJg" source="org.openmdx.base">
     <references xmi:type="uml:Package" href="org.openmdx.base.uml#_3C7B8A60016D40A89A0D0015"/>
   </eAnnotations>
-  <eAnnotations xmi:id="_dkHFIEcDEd-o1OTPw_6HJg" source="org.openmdx.compatibility.audit1">
-    <references xmi:type="uml:Package" href="org.openmdx.compatibility.audit1.uml#_3C7B8A60016D3EC4B01F0206"/>
-  </eAnnotations>
   <eAnnotations xmi:id="_rmL4wEcDEd-o1OTPw_6HJg" source="org.openmdx.generic1">
     <references xmi:type="uml:Package" href="org.openmdx.generic1.uml#_3C7B8A60016D3FF13E0E02A5"/>
   </eAnnotations>

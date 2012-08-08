@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StructureMapper.java,v 1.3 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: StructureMapper.java,v 1.4 2011/05/27 16:54:56 hburger Exp $
  * Description: Structure Template 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2011/05/27 16:54:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2008, OMEX AG, Switzerland
+ * Copyright (c) 2005-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -90,8 +90,7 @@ public class StructureMapper
         );
         this.structDef = new StructDef(
             structDef, 
-            model, 
-            false // openmdx1
+            model
         );
         this.structName = Identifier.CLASS_PROXY_NAME.toIdentifier(
             this.structDef.getName()

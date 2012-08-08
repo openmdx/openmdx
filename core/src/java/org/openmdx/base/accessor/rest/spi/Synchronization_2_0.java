@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Synchronization_2_0.java,v 1.2 2010/11/29 12:34:59 hburger Exp $
+ * Name:        $Id: Synchronization_2_0.java,v 1.4 2011/03/08 17:21:41 hburger Exp $
  * Description: Synchronization interface 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/29 12:34:59 $
+ * Date:        $Date: 2011/03/08 17:21:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -66,7 +66,7 @@ public interface Synchronization_2_0 extends Synchronization {
     void afterBegin();
 
     /**
-     * Clearing avoids flushing during finalization
+     * Clearing discards the write operations made in the current unit of work.
      */
     void clear();
     

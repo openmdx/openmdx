@@ -20,30 +20,21 @@
             <ownedComment xmi:id="_hXI_8t6-EdmkJO73lqONhA" annotatedElement="_3C7B8A60016D417F99C001F6">
               <body>The privilege's name corresponds to a fully qualifed model element name.</body>
             </ownedComment>
-            <generalization xmi:id="_3C7B8A60016D4181774D0155" general="_3C7B8A60016D41817704013C"/>
           </packagedElement>
           <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417F9A3F01B3" name="ModelClassPrivilege">
             <ownedComment xmi:id="_hXI_996-EdmkJO73lqONhA" annotatedElement="_3C7B8A60016D417F9A3F01B3">
               <body>The privilege's name corresponds to a fully qualifed model class name.</body>
             </ownedComment>
-            <generalization xmi:id="_3C7B8A60016D4180F608035F" general="_3C7B8A60016D417F99C001F6"/>
           </packagedElement>
           <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D417F9A5701F3" name="ModelReferencePrivilege">
             <ownedComment xmi:id="_hXI__N6-EdmkJO73lqONhA" annotatedElement="_3C7B8A60016D417F9A5701F3">
               <body>The privilege's name corresponds to a fully qualifed model reference name.</body>
             </ownedComment>
-            <generalization xmi:id="_3C7B8A60016D4180F60F01CF" general="_3C7B8A60016D417F99C001F6"/>
           </packagedElement>
           <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D4180F81602ED" name="ResourcePrivilege">
             <ownedComment xmi:id="_hXPGld6-EdmkJO73lqONhA" annotatedElement="_3C7B8A60016D4180F81602ED">
               <body>The privilege's name corresponds usually to the resource's URI.</body>
             </ownedComment>
-            <generalization xmi:id="_3C7B8A60016D4181771703A6" general="_3C7B8A60016D41817704013C"/>
-          </packagedElement>
-          <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D41817704013C" name="Privilege">
-            <generalization xmi:id="_3C7B8A60016D4181772C00D5">
-              <general xmi:type="uml:Class" href="org.openmdx.security.realm1.uml#_3C7B8A60016D417E21D70063"/>
-            </generalization>
           </packagedElement>
           <packagedElement xmi:type="uml:Class" xmi:id="_3C7B8A60016D4183BAA70268" name="Policy">
             <generalization xmi:id="_3C7B8A60016D417E3A3903BC">

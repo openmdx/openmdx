@@ -82,7 +82,11 @@
 		(object Inheritance_Relationship
 		    quid       	"491C39030213"
 		    supplier   	"Logical View::org::openmdx::base::Modifiable"
-		    quidu      	"491C2F5802BF"))
+		    quidu      	"491C2F5802BF")
+		(object Inheritance_Relationship
+		    quid       	"4ED8FA310021"
+		    supplier   	"Logical View::org::openmdx::base::ContextCapable"
+		    quidu      	"403F48350281"))
 	    class_attributes 	(list class_attribute_list
 		(object ClassAttribute "transactionTimeUnique"
 		    attributes 	(list Attribute_Set
@@ -197,7 +201,7 @@
 	    zoom       	100
 	    max_height 	28350
 	    max_width  	21600
-	    origin_x   	2425
+	    origin_x   	2038
 	    origin_y   	0
 	    items      	(list diagram_item_list
 		(object ClassView "Class" "Logical View::org::openmdx::base::Removable" @2
@@ -510,7 +514,7 @@
 		    ShowCompartmentStereotypes 	TRUE
 		    IncludeAttribute 	TRUE
 		    IncludeOperation 	TRUE
-		    location   	(3447, 656)
+		    location   	(3638, 656)
 		    font       	(object Font
 			size       	8
 			face       	"Arial"
@@ -525,7 +529,7 @@
 			location   	(2603, 532)
 			fill_color 	13434879
 			nlines     	1
-			max_width  	1689
+			max_width  	2070
 			justify    	0
 			label      	"StateCapable")
 		    stereotype 	(object ItemLabel
@@ -534,7 +538,7 @@
 			fill_color 	13434879
 			anchor     	10
 			nlines     	1
-			max_width  	1689
+			max_width  	2070
 			justify    	0
 			label      	"<<root>>")
 		    icon_style 	"Icon"
@@ -558,7 +562,7 @@
 			anchor     	2
 			nlines     	4
 			max_width  	709)
-		    width      	1707
+		    width      	2088
 		    height     	350
 		    annotation 	8)
 		(object ClassView "Class" "Logical View::org::openmdx::base::Aspect" @12
@@ -960,4 +964,54 @@
 			(3373, 381))
 		    line_style 	3
 		    origin_attachment 	(3373, 481)
-		    terminal_attachment 	(3373, 381))))))
+		    terminal_attachment 	(3373, 381))
+		(object ClassView "Class" "Logical View::org::openmdx::base::ContextCapable" @28
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(4513, 243)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@28
+			location   	(4341, 154)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	345
+			justify    	0
+			label      	"ContextCapable")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@28
+			location   	(4341, 113)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	345
+			justify    	0
+			label      	"<<root>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	8421631
+		    quidu      	"403F48350281"
+		    width      	363
+		    height     	281
+		    annotation 	8)
+		(object InheritView "" @29
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"4ED8FA310021"
+		    client     	@11
+		    supplier   	@28
+		    vertices   	(list Points
+			(4507, 480)
+			(4507, 382))
+		    line_style 	3
+		    origin_attachment 	(4507, 480)
+		    terminal_attachment 	(4507, 382))))))

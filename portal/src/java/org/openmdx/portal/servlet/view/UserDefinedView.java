@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UserDefinedView.java,v 1.15 2009/11/05 18:05:58 hburger Exp $
+ * Name:        $Id: UserDefinedView.java,v 1.17 2011/11/28 13:53:13 wfro Exp $
  * Description: UserDefinedView 
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/05 18:05:58 $
+ * Date:        $Date: 2011/11/28 13:53:13 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -98,12 +98,12 @@ public class UserDefinedView
         org.openmdx.ui1.jmi1.ValuedField customizedField,
         Object object
     ) throws ServiceException {
-        AttributeValue attributeValue = this.application.createAttributeValue(
+        AttributeValue attributeValue = this.app.createAttributeValue(
             customizedField,
             object
         );
         Attribute attribute = new Attribute(
-            this.application.getCurrentLocaleAsIndex(), 
+            this.app.getCurrentLocaleAsIndex(), 
             customizedField, 
             attributeValue
         );
@@ -119,7 +119,7 @@ public class UserDefinedView
         String forClass,
         String featureName
     ) throws ServiceException {
-        org.openmdx.ui1.jmi1.Inspector inspector = this.application.getInspector(forClass);
+        org.openmdx.ui1.jmi1.Inspector inspector = this.app.getInspector(forClass);
         for(Iterator i = inspector.getMember().iterator(); i.hasNext(); ) {
             Object pane = i.next();
             if (pane instanceof org.openmdx.ui1.jmi1.AttributePane) {
@@ -169,10 +169,12 @@ public class UserDefinedView
             featureName
         );
         return field == null ? 
-        	null : 
-        	locale < field.getShortLabel().size() ? 
-        		field.getShortLabel().get(locale) : 
-        		field.getShortLabel().get(0);
+        	null :
+        		field.getShortLabel().isEmpty() ?
+        			this.getFieldLabel(forClass, featureName, locale) :
+        				locale < field.getShortLabel().size() ? 
+        					field.getShortLabel().get(locale) : 
+        						field.getShortLabel().get(0);
     }
     
     //-------------------------------------------------------------------------
@@ -182,7 +184,7 @@ public class UserDefinedView
         Object object
     ) throws ServiceException {
         org.openmdx.ui1.jmi1.ValuedField customizedField = 
-            (org.openmdx.ui1.jmi1.ValuedField)this.application.getUiElement(
+            (org.openmdx.ui1.jmi1.ValuedField)this.app.getUiElement(
                 uiElementId
             );
         return this.addAttribute(

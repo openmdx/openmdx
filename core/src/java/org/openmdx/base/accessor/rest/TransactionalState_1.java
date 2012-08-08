@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TransactionalState_1.java,v 1.6 2010/01/18 18:02:24 hburger Exp $
+ * Name:        $Id: TransactionalState_1.java,v 1.8 2011/07/01 16:16:42 hburger Exp $
  * Description: Transactional State Implementation 1 
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/18 18:02:24 $
+ * Date:        $Date: 2011/07/01 16:16:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2009, OMEX AG, Switzerland
+ * Copyright (c) 2008-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -104,11 +104,6 @@ public final class TransactionalState_1 {
      * Transactional Aspects
      */
     private Map<String,DataObject_1_0> transactionalAspects = null;
-
-    /**
-     * Transient Aspects
-     */
-    private Map<String,TransientAspects> transientAspects = null;
 
     /**
      * Aspect Specific Contexts
@@ -247,10 +242,13 @@ public final class TransactionalState_1 {
     public final Set<String> dirtyFeatures(
         boolean readOnly
     ){
-        return 
-            this.dirtyFeatures != null ? this.dirtyFeatures :
-            readOnly ? Collections.<String>emptySet() :
-            (this.dirtyFeatures = new HashSet<String>());
+        if(this.dirtyFeatures != null) {
+        	return this.dirtyFeatures ;
+        } else if (readOnly) {
+        	return Collections.<String>emptySet();
+        } else {
+        	return this.dirtyFeatures = new HashSet<String>();
+        }
     }
 
     /**
@@ -333,46 +331,7 @@ public final class TransactionalState_1 {
             this.contexts.remove(key);
         } 
     }        
-    
-    /**
-     * Retrieve the aspects to to be made persistent together with this object
-     * 
-     * @param aspectClass 
-     * 
-     * @return the aspect map, never <code>null</code>
-     */
-    final TransientAspects transientAspects(
-        String aspectClass
-    ){
-        TransientAspects transientAspects;
-        if(this.transientAspects == null){
-            this.transientAspects = new HashMap<String,TransientAspects>();
-            transientAspects = null;
-        } else {
-            transientAspects = this.transientAspects.get(aspectClass);
-        }
-        if(transientAspects == null) {
-            this.transientAspects.put(
-                aspectClass,
-                transientAspects = new TransientAspects()
-            );
-        }
-        return transientAspects;
-    }
 
-    /**
-     * Retrieve the aspects to to be made persistent together with this object
-     * 
-     * @param readOnly 
-     * 
-     * @return the aspect map, never <code>null</code>
-     */
-    final Map<String,DataObject_1_0> transientAspects(
-        String aspectClass,
-        Map<String, DataObject_1_0> initialValues
-    ){
-        return transientAspects(aspectClass).setDelegate(initialValues);
-    }
 
     /**
      * Clear
@@ -390,76 +349,6 @@ public final class TransactionalState_1 {
         }
     }
 
-    
-    //------------------------------------------------------------------------
-    // Class TransientAspects
-    //------------------------------------------------------------------------
-
-    /**
-     * Transient Aspects
-     */
-    class TransientAspects extends HashMap<String, DataObject_1_0> {
-        
-        /**
-         * 
-         */
-        private Map<String, DataObject_1_0> delegate = null;
-        
-        /**
-         * Implements <code>Serializable</code>
-         */
-        private static final long serialVersionUID = -5681098308827197696L;
-        
-        /**
-         * Retrieve the transactional or persistent aspects to delegate to
-         * 
-         * @param readOnly
-         * 
-         * @return the aspects to delegate to
-         */
-        private Map<String, DataObject_1_0> getDelegate(
-            boolean readOnly
-        ){
-            return this.delegate == null ? transactionalAspects(readOnly) : delegate;
-        }
-        
-        /**
-         * Set the delegate and cache it's values
-         * 
-         * @param delegate
-         */
-        TransientAspects setDelegate(
-            Map<String, DataObject_1_0> delegate
-        ){
-            this.delegate = delegate;
-            super.clear();
-            for(Map.Entry<String, DataObject_1_0> e : getDelegate(true).entrySet()) {
-                super.put(e.getKey(), e.getValue());
-            }
-            return this;
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.HashMap#clear()
-         */
-        @Override
-        public void clear() {
-            getDelegate(false).clear();
-            super.clear();
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.HashMap#put(java.lang.Object, java.lang.Object)
-         */
-        @Override
-        public DataObject_1_0 put(String key, DataObject_1_0 value) {
-            DataObject_1_0 reply = getDelegate(false).put(key, value);
-            super.put(key, value);
-            return reply;
-        }
-
-    }
-    
     
     //------------------------------------------------------------------------
     // Class EmptyQueue

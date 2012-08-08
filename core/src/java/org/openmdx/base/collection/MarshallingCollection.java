@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingCollection.java,v 1.16 2010/07/01 16:24:13 hburger Exp $
+ * Name:        $Id: MarshallingCollection.java,v 1.17 2011/04/12 12:19:18 hburger Exp $
  * Description: Marshalling Collection
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/01 16:24:13 $
+ * Date:        $Date: 2011/04/12 12:19:18 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -131,6 +131,7 @@ public class MarshallingCollection<E>
      * 
      * @return the delegate
      */
+    @SuppressWarnings("rawtypes")
     protected Collection getDelegate(){
         return this.delegate;
     }
@@ -140,6 +141,7 @@ public class MarshallingCollection<E>
      * 
      * @param the new delegate
      */
+    @SuppressWarnings("rawtypes")
     protected void setDelegate(
         Collection delegate
     ){

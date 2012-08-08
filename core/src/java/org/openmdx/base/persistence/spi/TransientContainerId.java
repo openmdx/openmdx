@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: TransientContainerId.java,v 1.1 2010/01/26 15:42:54 hburger Exp $
+ * Name:        $Id: TransientContainerId.java,v 1.2 2011/11/19 19:57:06 hburger Exp $
  * Description: TransientContainerId 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:42:54 $
+ * Date:        $Date: 2011/11/19 19:57:06 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -118,7 +118,7 @@ public final class TransientContainerId {
     public Path toPath(
     ){  
         if(this.xri == null) {
-            this.xri = new Path(this.parent).add(this.feature);
+            this.xri = new Path(this.parent).getChild(this.feature);
         }
         return this.xri;
     }

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.241 2010/12/20 13:18:46 wfro Exp $
+= Name:        $Id: build.xml,v 1.254 2011/12/09 15:33:43 wfro Exp $
 = Description: openMDX/Core Build File
-= Revision:    $Revision: 1.241 $
-= Date:        $Date: 2010/12/20 13:18:46 $
-= Copyright:   (c) 2003-2010 OMEX AG
+= Revision:    $Revision: 1.254 $
+= Date:        $Date: 2011/12/09 15:33:43 $
+= Copyright:   (c) 2003-2011 OMEX AG
 =======================================================================
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2004-2010, OMEX AG, Switzerland
+= Copyright (c) 2004-2011, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -90,12 +90,10 @@
 		<include name="org/openmdx/compatibility/kernel/url/protocol/**"/>
 		<include name="org/openmdx/kernel/url/protocol/**"/>
 		<include name="org/openmdx/kernel/logging/**"/>
+		<include name="org/openmdx/system/**"/>
 	</patternset>
-	<patternset id="tomcat-juli.content">
-		<include name="org/apache/juli/*"/>
-		<include name="org/apache/juli/logging/*"/>
-	</patternset>
-	<patternset id="openmdx-base.jre-1.6">
+	<!-- jre-1.7 -->
+	<patternset id="openmdx-base.jre-1.7">
 		<patternset refid="jcache.content"/>
 		<patternset refid="jdo-api.content"/>
 		<include name="javax/jmi/**"/>
@@ -126,7 +124,12 @@
 		<include name="org/xmi/*"/>
 		<include name="META-INF/orm.xml"/>
 		<include name="META-INF/openmdx*.properties"/>
-	</patternset>		
+	</patternset>
+	<!-- jre-1.6 -->
+	<patternset id="openmdx-base.jre-1.6">
+		<patternset refid="openmdx-base.jre-1.7"/>
+	</patternset>
+	<!-- jre-1.5 -->
 	<patternset id="openmdx-base.jre-1.5">
 		<patternset refid="openmdx-base.jre-1.6"/>
 		<include name="org/openmdx/uses/java/util/**"/>
@@ -144,9 +147,14 @@
 		description="Generate version and jt dependend files" 
 	>
 		<antcall target="-preprocess-version-files-">
-			<param name="version-file.packages" value="org.openmdx.kernel,org.openmdx.base,org.openmdx.application"/>
+			<param name="version-file.packages" value="org.openmdx.system,org.openmdx.base,org.openmdx.application"/>
 			<param name="version-file.property-file" location="${openmdx.home}/openmdx.version.properties"/>
 			<param name="version-file.template-file" location="${basedir}/etc/ant/Version.java.template"/>
+		</antcall>
+		<antcall target="-preprocess-version-files-">
+			<param name="version-file.packages" value="org.openmdx.kernel"/>
+			<param name="version-file.property-file" location="${openmdx.home}/openmdx.version.properties"/>
+			<param name="version-file.template-file" location="${basedir}/etc/ant/Version.java-deprecated.template"/>
 		</antcall>
 		<antcall target="-preprocess-jt-files-">
 			<param name="preprocess-jt.target" value="java"/>
@@ -176,10 +184,7 @@
 					<include name="org/openmdx/compatibility/kernel/**/*.java"/>
 					<include name="org/openmdx/application/mof/**/*.java"/>
 					<include name="org/openmdx/application/xml/spi/*.java"/>
-					<exclude name="org/openmdx/base/accessor/jmi/**/*.java"/>
-					<exclude name="org/openmdx/base/accessor/jmi1/**/*.java"/>
-					<exclude name="org/openmdx/base/accessor/rest/**/*.java"/>
-					<exclude name="org/openmdx/base/accessor/view/**/*.java"/>
+					<exclude name="org/openmdx/base/accessor/**/*.java"/>
 					<exclude name="org/openmdx/base/persistence/**/*.java"/>
 					<exclude name="org/openmdx/base/rest/**/*.java"/>
 					<exclude name="org/openmdx/base/aop2/*.java"/>
@@ -208,10 +213,7 @@
 						<include name="org/openmdx/compatibility/kernel/**/*.java"/>
 						<include name="org/openmdx/application/mof/**/*.java"/>
 						<include name="org/openmdx/application/xml/spi/*.java"/>
-						<exclude name="org/openmdx/base/accessor/jmi/**/*.java"/>
-						<exclude name="org/openmdx/base/accessor/jmi1/**/*.java"/>
-						<exclude name="org/openmdx/base/accessor/rest/**/*.java"/>
-						<exclude name="org/openmdx/base/accessor/view/**/*.java"/>
+						<exclude name="org/openmdx/base/accessor/**/*.java"/>
 						<exclude name="org/openmdx/base/persistence/**/*.java"/>
 						<exclude name="org/openmdx/base/rest/**/*.java"/>
 						<exclude name="org/openmdx/base/aop2/*.java"/>
@@ -297,8 +299,8 @@
 		>
 			<openmdx:archivemanifest refid="project.manifest"/>
 			<openmdx:archivemanifest>
-				<attribute name="Specification-Title" value="${project.specification.title} Library System"/>
-				<attribute name="Implementation-Title" value="tomcat-system for ${build.target.platform}"/>
+				<attribute name="Specification-Title" value="${project.specification.title} System Library"/>
+				<attribute name="Implementation-Title" value="openmdx-system for ${build.target.platform}"/>
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
 				<patternset refid="openmdx-system.content"/>
@@ -333,22 +335,6 @@
 				<patternset refid="jcache.content"/>
 			</openmdx:archivefileset>
 		</openmdx:archive>
-    <openmdx:archive
-			destfile="${deliver.dir}/lib/tomcat-juli.jar"
-			format="jar"
-		>
-			<openmdx:archivemanifest refid="project.manifest"/>
-			<openmdx:archivemanifest>
-				<attribute name="Specification-Title" value="${project.specification.title} Tomcat System Library"/>
-				<attribute name="Implementation-Title" value="tomcat-juli for ${build.target.platform}"/>
-			</openmdx:archivemanifest>
-			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx-system.content"/>
-			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${openmdx.home}/apache/${build.java.platform}/tomcat/lib/tomcat-juli.jar">
-				<patternset refid="tomcat-juli.content"/>
-			</openmdx:archivefileset>
-		</openmdx:archive>		
 	</target>
 	
 	<!-- ******************************************************************* -->
@@ -441,9 +427,7 @@
 				<include name="apache/jre-1.2/contribution/lib/*"/>
 				<include name="osgi/${build.target.platform}/**"/>
 				<exclude name="osgi/${build.target.platform}/**/.settings/*"/>
-				<include name="apache/${build.target.platform}/ant/**"/>
-				<include name="apache/${build.target.platform}/tomcat/**"/>
-				<include name="apache/${build.target.platform}/openejb/**"/>
+				<include name="apache/${build.target.platform}/**"/>
 				<include name="eclipse/${build.target.platform}/${base.dir.name}/**"/>				
 			</openmdx:archivefileset>
 			<openmdx:archivefileset 
@@ -528,7 +512,6 @@
 				<package name="org.openmdx.audit2.*"/>
 				<package name="org.openmdx.base"/>
 				<package name="org.openmdx.base.*"/>
-				<package name="org.openmdx.compatibility.audit1.*"/>
 				<package name="org.openmdx.compatibility.jmi1"/>
 				<package name="org.openmdx.generic1.*"/>
 				<package name="org.openmdx.jmi1"/>

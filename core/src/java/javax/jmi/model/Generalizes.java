@@ -2,7 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public interface Generalizes extends RefAssociation {
     public boolean exists(GeneralizableElement supertype, GeneralizableElement subtype);
     public java.util.List getSupertype(GeneralizableElement subtype);

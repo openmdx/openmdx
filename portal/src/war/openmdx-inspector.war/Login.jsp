@@ -2,11 +2,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Login.jsp,v 1.71 2010/11/17 13:11:07 wfro Exp $
+ * Name:        $Id: Login.jsp,v 1.73 2011/09/22 08:03:42 cmu Exp $
  * Description: Login.jsp
- * Revision:    $Revision: 1.71 $
+ * Revision:    $Revision: 1.73 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/17 13:11:07 $
+ * Date:        $Date: 2011/09/22 08:03:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -196,7 +196,7 @@ org.openmdx.portal.servlet.*
 <script language="javascript" type="text/javascript">
  	checkRedirect();
 </script>
-<div id="header" style="height:90px;">
+	<div id="header" style="height:90px;">
     <div id="logoTable" style="padding-left:10px;">
       <table dir="ltr" id="headerlayout" style="position:relative;">
         <tr id="headRow">
@@ -204,7 +204,7 @@ org.openmdx.portal.servlet.*
             <table id="info">
               <tr>
                 <td id="headerCellLeft"><img id="logoLeft" style="cursor:default;" src="<%=request.getContextPath()%>/images/logoLeft.gif" alt="openCRX - limitless relationship management" title="openCRX - limitless relationship management" /></td>
-                <td id="headerCellMiddle"></td>
+                <td id="headerCellMiddle" style="background-image:url('./images/logoMiddle.gif');background-repeat:repeat-x;width:100%;">&nbsp;</td>
                 <td id="headerCellRight"><img id="logoRight" src="<%=request.getContextPath()%>/images/logoRight.gif" alt="" title="" /></td>
               </tr>
             </table>

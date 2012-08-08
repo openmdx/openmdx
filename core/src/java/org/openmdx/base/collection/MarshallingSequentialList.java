@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSequentialList.java,v 1.30 2010/10/27 14:06:19 hburger Exp $
+ * Name:        $Id: MarshallingSequentialList.java,v 1.31 2011/04/12 15:47:21 hburger Exp $
  * Description: Marshalling Sequential List
- * Revision:    $Revision: 1.30 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/27 14:06:19 $
+ * Date:        $Date: 2011/04/12 15:47:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -58,15 +58,16 @@ import java.util.List;
 import java.util.ListIterator;
 
 import javax.jdo.FetchPlan;
+import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
+import javax.jdo.spi.PersistenceCapable;
+import javax.jdo.spi.StateManager;
 
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.ExceptionListenerMarshaller;
 import org.openmdx.base.marshalling.Marshaller;
-import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
-import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
@@ -342,17 +343,223 @@ public class MarshallingSequentialList<E>
 
     
     //------------------------------------------------------------------------
-    // Implements PersistenceCapableCollection
+    // Implements PersistenceCapable
     //------------------------------------------------------------------------
 
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableContainer#openmdxjdoGetPersistenceManager()
      */
 //  @Override
-    public PersistenceManager openmdxjdoGetPersistenceManager(){
-    	throw new UnsupportedOperationException("This method is not yet supported");
+    public PersistenceManager jdoGetPersistenceManager(
+    ){
+        throw new UnsupportedOperationException("This method is not yet supported");
     }
     
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetContainerId()
+     */
+//  @Override
+    public Object jdoGetObjectId(
+    ) {
+        return JDOHelper.getObjectId(this.list);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetTransientContainerId()
+     */
+//  @Override
+    public Object jdoGetTransactionalObjectId(
+    ) {
+        return JDOHelper.getTransactionalObjectId(this.list);
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoIsPersistent()
+     */
+//  @Override
+    public boolean jdoIsPersistent(
+    ) {
+        return JDOHelper.isPersistent(this.list);
+    }
+    
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoReplaceStateManager(javax.jdo.spi.StateManager)
+     */
+//  @Override
+    public void jdoReplaceStateManager(
+        StateManager sm
+    ) throws SecurityException {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoProvideField(int)
+     */
+//  @Override
+    public void jdoProvideField(int fieldNumber) {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoProvideFields(int[])
+     */
+//  @Override
+    public void jdoProvideFields(int[] fieldNumbers) {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoReplaceField(int)
+     */
+//  @Override
+    public void jdoReplaceField(int fieldNumber) {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFields(int[])
+     */
+//  @Override
+    public void jdoReplaceFields(int[] fieldNumbers) {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoReplaceFlags()
+     */
+//  @Override
+    public void jdoReplaceFlags() {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoCopyFields(java.lang.Object, int[])
+     */
+//  @Override
+    public void jdoCopyFields(Object other, int[] fieldNumbers) {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoMakeDirty(java.lang.String)
+     */
+//  @Override
+    public void jdoMakeDirty(String fieldName) {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoGetVersion()
+     */
+//  @Override
+    public Object jdoGetVersion() {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoIsDirty()
+     */
+//  @Override
+    public boolean jdoIsDirty() {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoIsTransactional()
+     */
+//  @Override
+    public boolean jdoIsTransactional() {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoIsNew()
+     */
+//  @Override
+    public boolean jdoIsNew() {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoIsDeleted()
+     */
+//  @Override
+    public boolean jdoIsDeleted() {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoIsDetached()
+     */
+//  @Override
+    public boolean jdoIsDetached() {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager)
+     */
+//  @Override
+    public PersistenceCapable jdoNewInstance(StateManager sm) {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoNewInstance(javax.jdo.spi.StateManager, java.lang.Object)
+     */
+//  @Override
+    public PersistenceCapable jdoNewInstance(StateManager sm, Object oid) {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance()
+     */
+//  @Override
+    public Object jdoNewObjectIdInstance() {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoNewObjectIdInstance(java.lang.Object)
+     */
+//  @Override
+    public Object jdoNewObjectIdInstance(Object o) {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(java.lang.Object)
+     */
+//  @Override
+    public void jdoCopyKeyFieldsToObjectId(Object oid) {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsToObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldSupplier, java.lang.Object)
+     */
+//  @Override
+    public void jdoCopyKeyFieldsToObjectId(ObjectIdFieldSupplier fm, Object oid) {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    /* (non-Javadoc)
+     * @see javax.jdo.spi.PersistenceCapable#jdoCopyKeyFieldsFromObjectId(javax.jdo.spi.PersistenceCapable.ObjectIdFieldConsumer, java.lang.Object)
+     */
+//  @Override
+    public void jdoCopyKeyFieldsFromObjectId(
+        ObjectIdFieldConsumer fm,
+        Object oid
+    ) {
+        throw new UnsupportedOperationException("Not supported by persistence capable collections");
+    }
+
+    
+    //------------------------------------------------------------------------
+    // Implements PersistenceCapableCollection
+    //------------------------------------------------------------------------
+
     /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoEvict(boolean)
      */
@@ -369,48 +576,12 @@ public class MarshallingSequentialList<E>
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetContainerId()
-     */
-//  @Override
-    public Path openmdxjdoGetContainerId() {
-        if(this.list instanceof PersistenceCapableCollection){
-            return ((PersistenceCapableCollection)this.list).openmdxjdoGetContainerId();
-        } else {
-            throw new UnsupportedOperationException("The delegate is not a PersistenceCapableCollection");
-        }
-    }
-
-    /* (non-Javadoc)
      * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetPersistenceManager()
      */
 //  @Override
     public PersistenceManager openmdxjdoGetDataObjectManager() {
         if(this.list instanceof PersistenceCapableCollection){
             return ((PersistenceCapableCollection)this.list).openmdxjdoGetDataObjectManager();
-        } else {
-            throw new UnsupportedOperationException("The delegate is not a PersistenceCapableCollection");
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoGetTransientContainerId()
-     */
-//  @Override
-    public TransientContainerId openmdxjdoGetTransientContainerId() {
-        if(this.list instanceof PersistenceCapableCollection){
-            return ((PersistenceCapableCollection)this.list).openmdxjdoGetTransientContainerId();
-        } else {
-            throw new UnsupportedOperationException("The delegate is not a PersistenceCapableCollection");
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.persistence.spi.PersistenceCapableCollection#openmdxjdoIsPersistent()
-     */
-//  @Override
-    public boolean openmdxjdoIsPersistent() {
-        if(this.list instanceof PersistenceCapableCollection){
-            return ((PersistenceCapableCollection)this.list).openmdxjdoIsPersistent();
         } else {
             throw new UnsupportedOperationException("The delegate is not a PersistenceCapableCollection");
         }

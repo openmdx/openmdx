@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSortedMap.java,v 1.14 2009/01/11 21:19:33 wfro Exp $
+ * Name:        $Id: MarshallingSortedMap.java,v 1.15 2011/04/12 12:20:43 hburger Exp $
  * Description: Marshalling Sorted Map
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/11 21:19:33 $
+ * Date:        $Date: 2011/04/12 12:20:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -170,8 +170,7 @@ public class MarshallingSortedMap
     /**
      * 
      */
-    @SuppressWarnings("unchecked")
-    public Comparator comparator(
+    public Comparator<? super Integer> comparator(
     ) {
         return getDelegate().comparator();    
     }

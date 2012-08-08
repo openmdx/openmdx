@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Object_2Facade.java,v 1.13 2010/06/02 13:45:10 hburger Exp $
+ * Name:        $Id: Object_2Facade.java,v 1.16 2011/11/26 01:34:57 hburger Exp $
  * Description: Object Facade
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:45:10 $
+ * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -62,6 +62,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
@@ -69,7 +70,7 @@ import javax.resource.cci.Record;
 
 import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.ServiceException;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.ObjectRecord;
@@ -79,6 +80,7 @@ import org.w3c.cci2.SparseArray;
 /**
  * Object Facade
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class Object_2Facade {
 
     /**
@@ -105,8 +107,6 @@ public class Object_2Facade {
 
     /**
      * Constructor 
-     *
-     * @param objectClass the fully qualified MOF id of the object's class
      */
     private Object_2Facade(
     ) throws ResourceException {
@@ -141,7 +141,10 @@ public class Object_2Facade {
      * @return the object facade
      * 
      * @throws ResourceException
+     * 
+     * @deprecated use {@link Object_2Facade#newInstance(Path)} 
      */
+    @Deprecated
     public static Object_2Facade newInstance(
     ) throws ResourceException {
         return new Object_2Facade();
@@ -159,7 +162,24 @@ public class Object_2Facade {
     public static Object_2Facade newInstance(
         Path objectId
     ) throws ResourceException {
-        return newInstance(objectId, null);
+    	Object_2Facade facade = new Object_2Facade();
+    	facade.setPath(objectId);
+        return facade;
+    }
+
+    /**
+     * Create a facade with the given object identifier
+     * 
+     * @param transactionalObjectId the object identifier
+     * 
+     * @return the object facade
+     * 
+     * @throws ResourceException
+     */
+    public static Object_2Facade newInstance(
+        UUID transactionalObjectId
+    ) throws ResourceException {
+        return newInstance(new Path(transactionalObjectId));
     }
     
     /**
@@ -175,11 +195,9 @@ public class Object_2Facade {
         Path objectId,
         String objectClass
     ) throws ResourceException {
-        Object_2Facade object = newInstance();
-        object.setPath(objectId);
-        if(objectClass != null) {
-            MappedRecord value = Records.getRecordFactory().createMappedRecord(objectClass);
-            object.setValue(value);
+        Object_2Facade object = newInstance(objectId);
+        if(objectClass != null){
+        	object.setValue(Records.getRecordFactory().createMappedRecord(objectClass));
         }
         return object;
     }
@@ -262,7 +280,6 @@ public class Object_2Facade {
             (MappedRecord)delegate.get("value");
     }
     
-    @SuppressWarnings("unchecked")
     public Object getAttributeValues(
         String attributeName
     ) throws ServiceException {
@@ -279,24 +296,22 @@ public class Object_2Facade {
     ) throws ServiceException {
         return this.attributeValues(
             attributeName,
-            Multiplicities.LIST
+            Multiplicity.LIST
         );
     }
 
-    @SuppressWarnings("unchecked")
     public List<Object> attributeValuesAsList(
         String attributeName
     ) throws ServiceException {
         return (List<Object>)this.attributeValues(
             attributeName,
-            Multiplicities.LIST
+            Multiplicity.LIST
         );
     }
 
-    @SuppressWarnings("unchecked")
     public Object attributeValues(
         String attributeName,
-        String multiplicity
+        Multiplicity multiplicity
     ) throws ServiceException {
         Object value = this.getAttributeValues(attributeName);
         if(value == null) {
@@ -305,23 +320,17 @@ public class Object_2Facade {
                 attributeName,
                 null
             );
-            if(Multiplicities.SPARSEARRAY.equals(multiplicity)) {
-                value = new SparseArrayFacade(
-                    record,
-                    attributeName
-                );
-            }
-            else {
-                value = new ListFacade(
-                    record,
-                    attributeName
-                );
-            }
+            value = Multiplicity.SPARSEARRAY == multiplicity ? new SparseArrayFacade(
+                record,
+                attributeName
+            ) : new ListFacade(
+                record,
+                attributeName
+            );
         }
         return value;        
     }
 
-    @SuppressWarnings("unchecked")
     public Object attributeValue(
         String attributeName
     ) throws ServiceException {
@@ -379,22 +388,32 @@ public class Object_2Facade {
         this.delegate.setVersion(version);
     }
 
-    @SuppressWarnings("unchecked")
-    public static MappedRecord cloneObject(
-        MappedRecord object
-    ) throws ResourceException, ServiceException {
-        Object_2Facade facade = Object_2Facade.newInstance(object);
-        Object_2Facade copy = Object_2Facade.newInstance(
-            facade.getPath(),
-            facade.getObjectClass()
-        );
-        copy.setVersion(facade.getVersion());
-        for(String key: (Set<String>)facade.getValue().keySet()) {
-            Object source = facade.attributeValues(key);
+    /**
+     * Clone the wrapped object 
+     * 
+     * @return a facade of the clone
+     * @throws ResourceException 
+     * 
+     * @throws ServiceException
+     */
+    public Object_2Facade cloneObject(
+    ) throws ServiceException{
+        Object_2Facade copy;
+		try {
+			copy = newInstance(
+			    this.getPath(),
+			    this.getObjectClass()
+			);
+		} catch (ResourceException exception) {
+			throw new ServiceException(exception);
+		}
+        copy.setVersion(this.getVersion());
+        for(String key: (Set<String>)this.getValue().keySet()) {
+            Object source = this.attributeValues(key);
             if(source instanceof SparseArray) {
                 ((SparseArray)copy.attributeValues(
                     key, 
-                    Multiplicities.SPARSEARRAY
+                    Multiplicity.SPARSEARRAY
                 )).putAll(
                     (SparseArray)source
                 );
@@ -402,14 +421,33 @@ public class Object_2Facade {
             else {
                 ((List)copy.attributeValues(
                     key,
-                    Multiplicities.LIST
+                    Multiplicity.LIST
                 )).addAll(
                     (List)source
                 );                
             }
         }
-        return copy.getDelegate();
+        return copy;
     }
+    
+    /**
+     * Clone an object 
+     * 
+     * @param object
+     * @return a clone of the object
+     * 
+     * @throws ServiceException
+     */
+    public static MappedRecord cloneObject(
+        MappedRecord object
+    ) throws ServiceException {
+		try {
+			return newInstance(object).cloneObject().getDelegate();
+		} catch (ResourceException e) {
+			throw new ServiceException(e);
+		}
+    }
+    
     
     //-----------------------------------------------------------------------
     // SparseListFacade
@@ -437,7 +475,6 @@ public class Object_2Facade {
         // Implements SparseList
         //------------------------------------------------------------------------
         
-        @SuppressWarnings("unchecked")
         private List<E> nonDelegate(
         ){
             E value = (E)this.record.get(this.key);
@@ -446,7 +483,6 @@ public class Object_2Facade {
                 Collections.singletonList(value);        
         }
         
-        @SuppressWarnings("unchecked")
         private synchronized List<E> attributeValues(
         ){
             Object value = this.record.get(this.key);
@@ -465,7 +501,6 @@ public class Object_2Facade {
             }
         }
         
-        @SuppressWarnings("unchecked")
         private List<E> getList(
         ) {
             Object values = this.record.get(this.key);
@@ -475,7 +510,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#add(int, java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public void add(
             int index, 
             E element
@@ -500,7 +534,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#add(java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public boolean add(
             E element
         ) {
@@ -528,7 +561,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#addAll(java.util.Collection)
          */
-        @SuppressWarnings("unchecked")
         public boolean addAll(
             Collection<? extends E> c
         ) {
@@ -557,7 +589,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#addAll(int, java.util.Collection)
          */
-        @SuppressWarnings("unchecked")
         public boolean addAll(
             int index, 
             Collection<? extends E> c
@@ -595,7 +626,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#contains(java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public boolean contains(
             Object o
         ) {
@@ -611,7 +641,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#containsAll(java.util.Collection)
          */
-        @SuppressWarnings("unchecked")
         public boolean containsAll(
             Collection<?> c
         ) {
@@ -635,8 +664,7 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#equals(java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
-    @Override
+        @Override
         public boolean equals(
             Object o
         ) {
@@ -666,7 +694,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#get(int)
          */
-        @SuppressWarnings("unchecked")
         public E get(
             int index
         ) {
@@ -694,7 +721,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#indexOf(java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public int indexOf(
             Object o
         ) {
@@ -715,7 +741,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#isEmpty()
          */
-        @SuppressWarnings("unchecked")
         public boolean isEmpty(
         ) {
             Object values = this.record.get(this.key);
@@ -730,7 +755,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#iterator()
          */
-        @SuppressWarnings("unchecked")
         public Iterator<E> iterator(
         ) {
             Object values = this.record.get(this.key);
@@ -745,7 +769,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#lastIndexOf(java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public int lastIndexOf(
             Object o
         ) {
@@ -766,7 +789,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#listIterator()
          */
-        @SuppressWarnings("unchecked")
         public ListIterator<E> listIterator(
         ) {
             Object values = this.record.get(this.key);
@@ -781,7 +803,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#listIterator(int)
          */
-        @SuppressWarnings("unchecked")
         public ListIterator<E> listIterator(
             int index
         ) {
@@ -797,7 +818,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#remove(int)
          */
-        @SuppressWarnings("unchecked")
         public E remove(
             int index
         ) {
@@ -821,7 +841,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#remove(java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public boolean remove(
             Object o
         ) {
@@ -841,7 +860,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#removeAll(java.util.Collection)
          */
-        @SuppressWarnings("unchecked")
         public boolean removeAll(
             Collection<?> c
         ) {
@@ -868,7 +886,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#retainAll(java.util.Collection)
          */
-        @SuppressWarnings("unchecked")
         public boolean retainAll(
             Collection<?> c
         ) {
@@ -893,7 +910,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#set(int, java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public E set(
             int index, 
             E element
@@ -921,7 +937,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#size()
          */
-        @SuppressWarnings("unchecked")
         public int size(
         ) {
             Object values = this.record.get(this.key);
@@ -936,7 +951,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#subList(int, int)
          */
-        @SuppressWarnings("unchecked")
         public List<E> subList(
             int fromIndex, 
             int toIndex
@@ -961,7 +975,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#toArray()
          */
-        @SuppressWarnings("unchecked")
         public Object[] toArray(
         ) {
             Object values = this.record.get(this.key);
@@ -976,7 +989,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#toArray(java.lang.Object[])
          */
-        @SuppressWarnings("unchecked")
         public <T> T[] toArray(
             T[] _a
         ) {
@@ -1166,7 +1178,6 @@ public class Object_2Facade {
         // Implements SparseArray
         //------------------------------------------------------------------------
         
-        @SuppressWarnings("unchecked")
         private synchronized SparseArray<E> attributeValues(
         ){
             Object value = this.record.get(this.key);
@@ -1186,7 +1197,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#addAll(java.util.Collection)
          */
-        @SuppressWarnings("unchecked")
         public void putAll(
             Map<? extends Integer, ? extends E> m
         ) {
@@ -1213,8 +1223,7 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#equals(java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
-    @Override
+        @Override
         public boolean equals(
             Object o
         ) {
@@ -1244,7 +1253,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#get(int)
          */
-        @SuppressWarnings("unchecked")
         public E get(
             Object key
         ) {
@@ -1272,7 +1280,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#isEmpty()
          */
-        @SuppressWarnings("unchecked")
         public boolean isEmpty(
         ) {
             Object values = this.record.get(this.key);
@@ -1287,7 +1294,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#iterator()
          */
-        @SuppressWarnings("unchecked")
         public Iterator<E> iterator(
         ) {
             Object values = this.record.get(this.key);
@@ -1302,7 +1308,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#lastIndexOf(java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public Integer lastKey(
         ) {
             Object values = this.record.get(this.key);
@@ -1317,7 +1322,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#lastIndexOf(java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public Integer firstKey(
         ) {
             Object values = this.record.get(this.key);
@@ -1332,7 +1336,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#listIterator()
          */
-        @SuppressWarnings("unchecked")
         public ListIterator<E> populationIterator(
         ) {
             Object values = this.record.get(this.key);
@@ -1347,7 +1350,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#remove(int)
          */
-        @SuppressWarnings("unchecked")
         public E remove(
             Object key
         ) {
@@ -1363,7 +1365,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#set(int, java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public E put(
             Integer key, 
             E element
@@ -1380,7 +1381,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#size()
          */
-        @SuppressWarnings("unchecked")
         public int size(
         ) {
             Object values = this.record.get(this.key);
@@ -1395,7 +1395,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.List#subList(int, int)
          */
-        @SuppressWarnings("unchecked")
         public SparseArray<E> subMap(
             Integer fromKey, 
             Integer toKey
@@ -1415,7 +1414,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see org.w3c.cci2.SparseArray#asList()
          */
-        @SuppressWarnings("unchecked")
         public List<E> asList(
         ) {
             Object values = this.record.get(this.key);
@@ -1430,7 +1428,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see org.w3c.cci2.SparseArray#headMap(java.lang.Integer)
          */
-        @SuppressWarnings("unchecked")
         public SparseArray<E> headMap(
             Integer toKey
         ) {
@@ -1446,7 +1443,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see org.w3c.cci2.SparseArray#tailMap(java.lang.Integer)
          */
-        @SuppressWarnings("unchecked")
         public SparseArray<E> tailMap(
             Integer fromKey
         ) {
@@ -1462,7 +1458,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.SortedMap#comparator()
          */
-        @SuppressWarnings("unchecked")
         public Comparator<? super Integer> comparator(
         ) {
             Object values = this.record.get(this.key);
@@ -1477,7 +1472,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.Map#containsKey(java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public boolean containsKey(
             Object key
         ) {
@@ -1493,7 +1487,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.Map#containsValue(java.lang.Object)
          */
-        @SuppressWarnings("unchecked")
         public boolean containsValue(
             Object value
         ) {
@@ -1509,7 +1502,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.Map#entrySet()
          */
-        @SuppressWarnings("unchecked")
         public Set<java.util.Map.Entry<Integer, E>> entrySet(
         ) {
             Object values = this.record.get(this.key);
@@ -1524,7 +1516,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.Map#keySet()
          */
-        @SuppressWarnings("unchecked")
         public Set<Integer> keySet(
         ) {
             Object values = this.record.get(this.key);
@@ -1539,7 +1530,6 @@ public class Object_2Facade {
         /* (non-Javadoc)
          * @see java.util.Map#values()
          */
-        @SuppressWarnings("unchecked")
         public Collection<E> values(
         ) {
             Object values = this.record.get(this.key);

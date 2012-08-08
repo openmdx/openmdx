@@ -2,7 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
-@SuppressWarnings({"unused","unchecked"})
+@SuppressWarnings({"unused","rawtypes"})
 public interface Namespace extends ModelElement {
     public ModelElement lookupElement(String name) throws NameNotFoundException;
     public ModelElement resolveQualifiedName(java.util.List qualifiedName) throws NameNotResolvedException;

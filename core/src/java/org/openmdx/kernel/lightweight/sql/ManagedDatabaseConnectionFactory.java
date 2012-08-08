@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ManagedDatabaseConnectionFactory.java,v 1.2 2009/09/23 13:27:36 hburger Exp $
+ * Name:        $Id: ManagedDatabaseConnectionFactory.java,v 1.3 2011/03/30 07:13:06 hburger Exp $
  * Description: Managed Database Connection Factory
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/23 13:27:36 $
+ * Date:        $Date: 2011/03/30 07:13:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -70,7 +70,6 @@ import javax.sql.XADataSource;
 /**
  * Managed Database Connection Factory
  */
-@SuppressWarnings("unchecked")
 public class ManagedDatabaseConnectionFactory implements ManagedConnectionFactory {
 
     public ManagedDatabaseConnectionFactory(
@@ -152,11 +151,11 @@ public class ManagedDatabaseConnectionFactory implements ManagedConnectionFactor
         }
         try { 
             XAConnection xaConnection;
-            Set credentials = subject.getPrivateCredentials(PasswordCredential.class);
+            Set<PasswordCredential> credentials = subject.getPrivateCredentials(PasswordCredential.class);
             if(credentials.isEmpty()) {
                 xaConnection = this.xaDataSource.getXAConnection();
             } else {
-                PasswordCredential credential = (PasswordCredential) credentials.iterator().next();
+                PasswordCredential credential = credentials.iterator().next();
                 xaConnection = this.xaDataSource.getXAConnection(
                     credential.getUserName(),
                     new String(credential.getPassword())
@@ -193,7 +192,8 @@ public class ManagedDatabaseConnectionFactory implements ManagedConnectionFactor
     /* (non-Javadoc)
      * @see javax.resource.spi.ManagedConnectionFactory#matchManagedConnections(java.util.Set, javax.security.auth.Subject, javax.resource.spi.ConnectionRequestInfo)
      */
-    public ManagedConnection matchManagedConnections(
+    @SuppressWarnings("rawtypes")
+	public ManagedConnection matchManagedConnections(
         Set connectionSet, 
         Subject subject, 
         ConnectionRequestInfo connectionRequestInfo

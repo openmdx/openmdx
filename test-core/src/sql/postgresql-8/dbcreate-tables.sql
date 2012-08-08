@@ -58,6 +58,8 @@ CREATE SEQUENCE test_ref_seq
     description VARCHAR (200) NULL ,
     created_at TIMESTAMP (3) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
+    modified_by_0 VARCHAR (50) NULL ,
+    created_by_0 VARCHAR (50) NULL ,    
     postal_code VARCHAR (100) NULL ,
     street VARCHAR (100) NULL ,
     country VARCHAR (100) NULL ,
@@ -74,12 +76,6 @@ CREATE SEQUENCE test_ref_seq
     p$$object_oid$0 VARCHAR (100)  NULL ,
     p$$object_oid$1 VARCHAR (100)  NULL ,
     object_idx INTEGER NOT NULL ,
-    p$$object_parent__rid VARCHAR (100)  NULL ,
-    p$$object_parent__oid VARCHAR (100)  NULL ,
-    object__class VARCHAR (200) NULL ,
-    p$$unit_of_work__rid VARCHAR (100)  NULL,
-    modified_by VARCHAR (50) NULL ,
-    created_by VARCHAR (50) NULL ,
     address_line VARCHAR (100) NULL
   );
   
@@ -97,8 +93,8 @@ CREATE SEQUENCE test_ref_seq
     p$$unit_of_work__rid VARCHAR (100)  NULL,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR (200) NULL ,
-    modified_by VARCHAR (200) NULL ,
+    created_by_0 VARCHAR (200) NULL ,
+    modified_by_0 VARCHAR (200) NULL ,
     description VARCHAR (100) NULL ,
     content bytea NULL ,
     keyword VARCHAR (32) NULL
@@ -120,8 +116,9 @@ CREATE SEQUENCE test_ref_seq
     product_group_id VARCHAR (100) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR (100) NULL ,
-    modified_by VARCHAR (100) NULL
+    created_by_0 VARCHAR (100) NULL ,
+    modified_by_0 VARCHAR (100) NULL,
+    internationalproductgroupid VARCHAR (100) NULL
   );
   
   DROP TABLE app1_InvoicePosition;
@@ -139,8 +136,8 @@ CREATE SEQUENCE test_ref_seq
     description VARCHAR (200) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR (100) NULL ,
-    modified_by VARCHAR (100) NULL ,
+    created_by_0 VARCHAR (100) NULL ,
+    modified_by_0 VARCHAR (100) NULL ,
     product_id VARCHAR (50) NULL
   );
   
@@ -159,8 +156,8 @@ CREATE SEQUENCE test_ref_seq
     description VARCHAR (200) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    modified_by VARCHAR (50) NULL ,
-    created_by VARCHAR (50) NULL ,
+    modified_by_0 VARCHAR (50) NULL ,
+    created_by_0 VARCHAR (50) NULL ,
     m1 VARCHAR (200) NULL ,
     p$$m1__rid VARCHAR (200) NULL ,
     p$$m1__oid VARCHAR (200) NULL ,
@@ -184,8 +181,8 @@ CREATE SEQUENCE test_ref_seq
     description VARCHAR (200) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    modified_by VARCHAR (50) NULL ,
-    created_by VARCHAR (50) NULL ,
+    modified_by_0 VARCHAR (50) NULL ,
+    created_by_0 VARCHAR (50) NULL ,
     name VARCHAR (100) NULL
   );
   
@@ -203,8 +200,8 @@ CREATE SEQUENCE test_ref_seq
     p$$unit_of_work__rid VARCHAR (100)  NULL,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR (200) NULL ,
-    modified_by VARCHAR (200) NULL ,
+    created_by_0 VARCHAR (200) NULL ,
+    modified_by_0 VARCHAR (200) NULL ,
     m1 VARCHAR (200) NULL ,
     last_name VARCHAR (200) NULL ,
     house_number VARCHAR (200) NULL ,
@@ -262,8 +259,8 @@ CREATE SEQUENCE test_ref_seq
     description VARCHAR (200) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR (100) NULL ,
-    modified_by VARCHAR (100) NULL
+    created_by_0 VARCHAR (100) NULL ,
+    modified_by_0 VARCHAR (100) NULL
   );
   
   DROP TABLE audit2_UnitOfWork;
@@ -273,6 +270,7 @@ CREATE SEQUENCE test_ref_seq
     p$$object_parent__rid VARCHAR (200)  NULL ,
     p$$object_parent__oid VARCHAR (200)  NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    created_by_0 VARCHAR (200) NULL ,
     object__class VARCHAR (60) NULL ,
     task_id VARCHAR (200) NULL
   );
@@ -282,7 +280,6 @@ CREATE SEQUENCE test_ref_seq
     object_rid VARCHAR (200) NOT NULL ,
     object_oid VARCHAR (200) NOT NULL ,
     object_idx INTEGER NOT NULL ,
-    created_by VARCHAR (200) NULL ,
     involved VARCHAR (200) NULL ,
     p$$involved__rid VARCHAR (200) NULL ,
     p$$involved__oid VARCHAR (200) NULL
@@ -320,8 +317,8 @@ CREATE SEQUENCE test_ref_seq
     object_idx INTEGER NOT NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR (200) NULL ,
-    modified_by VARCHAR (200) NULL ,
+    created_by_0 VARCHAR (200) NULL ,
+    modified_by_0 VARCHAR (200) NULL ,
     object__class VARCHAR (60) NULL ,
     cb_type VARCHAR (10) NULL ,
     advice_text VARCHAR (200) NULL ,
@@ -335,8 +332,8 @@ CREATE SEQUENCE test_ref_seq
     object_idx INTEGER NOT NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR (200) NULL ,
-    modified_by VARCHAR (200) NULL ,
+    created_by_0 VARCHAR (200) NULL ,
+    modified_by_0 VARCHAR (200) NULL ,
     object__class VARCHAR (60) NULL ,
     slb_type VARCHAR (10) NULL ,
     pos VARCHAR (512) NULL ,
@@ -367,7 +364,7 @@ CREATE SEQUENCE test_ref_seq
     OBJECT_RID varchar(200) NOT NULL, 
 	  OBJECT_OID varchar(200) NOT NULL, 
 	  OBJECT_IDX integer NOT NULL, 
-    P$$OBJECT_parent__oid varchar(200), 
+      P$$OBJECT_parent__oid varchar(200), 
 	  P$$OBJECT_parent__rid varchar(200) ,
 	  OBJECT__VALID_FROM CHAR(20), 
 	  OBJECT__VALID_TO CHAR(20), 
@@ -376,6 +373,8 @@ CREATE SEQUENCE test_ref_seq
 	  OBJECT__STATE_NUMBER decimal(10,0), 
 	  OBJECT__STATE_ID varchar(100), 
 	  SEGMENT varchar(200), 
+	  P$$SEGMENT__rid VARCHAR(200), 
+	  P$$SEGMENT__oid VARCHAR(200), 
 	  VALUE1 CHAR(9), 
 	  VALUE2 decimal, 
 	  VALUE3 decimal, 
@@ -385,8 +384,6 @@ CREATE SEQUENCE test_ref_seq
 	  VALUE10 bytea, 
 	  VALUE11A varchar(20), 
 	  VALUE11B varchar(20), 
-	  P$$SEGMENT_parent__rid varchar(200), 
-	  P$$SEGMENT_parent__oid varchar(200), 
 	  VALUE6 varchar(200), 
 	  VALUE7 CHAR(20), 
 	  VALUE8 varchar(8)
@@ -408,8 +405,8 @@ CREATE SEQUENCE test_ref_seq
 	  STATE_VALID_FROM DATE, 
 	  STATE_VALID_TO DATE, 
 	  SEGMENT varchar(200), 
-	  P$$SEGMENT_parent__rid varchar(200), 
-	  P$$SEGMENT_parent__oid varchar(200),
+	  P$$SEGMENT__rid VARCHAR(200), 
+	  P$$SEGMENT__oid VARCHAR(200), 
 	  VALUE1 boolean, 
 	  VALUE2 decimal,
 	  VALUE3 decimal, 
@@ -438,6 +435,8 @@ CREATE SEQUENCE test_ref_seq
 	  OBJECT__STATE_NUMBER decimal(10,0), 
 	  OBJECT__STATE_ID varchar(100), 
 	  SEGMENT varchar(200), 
+	  P$$SEGMENT__rid VARCHAR(200), 
+	  P$$SEGMENT__oid VARCHAR(200), 
 	  VALUE1 decimal(1,0), 
 	  VALUE2 decimal, 
 	  VALUE3 decimal,
@@ -447,8 +446,6 @@ CREATE SEQUENCE test_ref_seq
 	  VALUE10 bytea, 
 	  VALUE11A integer,
 	  VALUE11B decimal(12,3),
-	  P$$SEGMENT_parent__rid varchar(200),
-	  P$$SEGMENT_parent__oid varchar(200),
 	  VALUE6 varchar(200),
 	  VALUE7 decimal(19,3),
 	  VALUE8 varchar(8)
@@ -479,9 +476,9 @@ CREATE SEQUENCE test_ref_seq
     object__class VARCHAR (100) NULL ,
     core VARCHAR (100) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL ,
-    created_by_ DECIMAL(10, 0) NULL ,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL ,
-    modified_by_ DECIMAL(10, 0) NULL ,
+    created_by_0 VARCHAR (200) NULL ,
+    modified_by_0 VARCHAR (200) NULL ,
     string VARCHAR (200) NULL ,
     prime_ DECIMAL(10, 0) NULL ,
     url VARCHAR (200) NULL
@@ -492,8 +489,6 @@ CREATE SEQUENCE test_ref_seq
     object_id VARCHAR (100) NOT NULL ,
     object_idx INTEGER NOT NULL ,
     object__class VARCHAR (100) NULL ,
-    created_by VARCHAR (200) NULL ,
-    modified_by VARCHAR (200) NULL ,
     prime DECIMAL(10, 0) NULL
   );
 
@@ -506,6 +501,8 @@ CREATE SEQUENCE test_ref_seq
   	OBJECT__CLASS varchar(200) NOT NULL,
     created_at TIMESTAMP (3) WITH TIME ZONE NULL,
     removed_at TIMESTAMP (3) WITH TIME ZONE NULL,
+	created_by_0 varchar(50) NULL,
+	removed_by_0 varchar(50) NULL,
     openmdxjdo_version decimal(5, 0) NULL,
     core varchar(200) NULL,
     state_valid_from DATE NULL,
@@ -532,9 +529,6 @@ CREATE SEQUENCE test_ref_seq
   CREATE TABLE datestate_NATIVE_ (
 	OBJECT_ID varchar(200) NOT NULL, 
 	OBJECT_IDX decimal(5,0) NOT NULL,
-  	OBJECT__CLASS varchar(200) NOT NULL,
-	created_by varchar(50) NULL,
-	removed_at varchar(50) NULL,
 	string_list varchar(100) NULL,
 	long_array decimal(20, 0) NULL,
 	c_reference varchar (200) NULL,
@@ -550,6 +544,9 @@ CREATE SEQUENCE test_ref_seq
 	created_at TIMESTAMP (3) WITH TIME ZONE NULL ,
 	removed_at TIMESTAMP (3) WITH TIME ZONE NULL ,
 	modified_at TIMESTAMP (3) WITH TIME ZONE NULL ,
+	created_by_0 varchar (60) NULL ,
+	removed_by_0 varchar (60) NULL ,
+	modified_by_0 varchar (60) NULL ,
 	state_valid_from DATE,
 	state_valid_to DATE,
 	state_a varchar (256) NULL ,
@@ -572,10 +569,6 @@ CREATE SEQUENCE test_ref_seq
   CREATE TABLE state2_NATIVE_ (
 	object_id varchar (100) NOT NULL ,
 	object_idx INTEGER NOT NULL ,
-	object__class varchar (100) NULL ,
-	created_by varchar (60) NULL ,
-	removed_by varchar (60) NULL ,
-	modified_by varchar (60) NULL ,
 	string_list varchar (60) NULL ,
 	long_array INTEGER NULL ,
 	state_c varchar (256) NULL
@@ -593,7 +586,9 @@ CREATE SEQUENCE test_ref_seq
     object__class VARCHAR(200) NULL ,
     description VARCHAR(200) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    modified_at TIMESTAMP (6) WITH TIME ZONE NULL
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+	modified_by_0 varchar(50) NULL ,
+	created_by_0 varchar(50) NULL
   );
 
   DROP TABLE generic1_Property_N ;
@@ -601,8 +596,6 @@ CREATE SEQUENCE test_ref_seq
 	object_rid varchar(100) NOT NULL,
 	object_oid varchar(200) NOT NULL,
 	object_idx INTEGER NOT NULL ,
-	modified_by varchar(50) NULL ,
-	created_by varchar(50) NULL,
 	boolean_value varchar(10) NULL ,
 	uri_value varchar(200) NULL ,
 	decimal_value decimal(18, 6) NULL ,

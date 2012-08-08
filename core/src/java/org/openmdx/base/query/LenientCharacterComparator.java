@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: LenientCharacterComparator.java,v 1.12 2010/01/26 15:43:30 hburger Exp $
+ * Name:        $Id: LenientCharacterComparator.java,v 1.13 2011/04/12 15:44:03 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:43:30 $
+ * Date:        $Date: 2011/04/12 15:44:03 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -80,7 +80,9 @@ public class LenientCharacterComparator implements Comparator<Object> {
     /* (non-Javadoc)
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+        "unchecked", "rawtypes"
+    })
     public int compare(
         Object first,
         Object second

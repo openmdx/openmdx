@@ -2,7 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
-@SuppressWarnings({"unchecked","unused"})
+@SuppressWarnings({"rawtypes","unused"})
 public interface Constraint extends ModelElement {
     public String getExpression();
     public void setExpression(String newValue);

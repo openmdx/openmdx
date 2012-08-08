@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: QuickAccessor.java,v 1.10 2009/08/25 11:58:00 wfro Exp $
+ * Name:        $Id: QuickAccessor.java,v 1.11 2011/07/07 22:35:36 wfro Exp $
  * Description: QuickAccess 
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/08/25 11:58:00 $
+ * Date:        $Date: 2011/07/07 22:35:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,6 +58,7 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.action.MacroAction;
 
 public class QuickAccessor {
     
@@ -106,7 +107,7 @@ public class QuickAccessor {
         String actionName = this.actionName.replace("$XRI", targetIdentity.toXri());
         try {
           Action action = new Action(
-              Action.EVENT_MACRO,
+              MacroAction.EVENT_ID,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetIdentity.toXri()),
                   new Action.Parameter(Action.PARAMETER_NAME, Base64.encode(actionName.getBytes())),

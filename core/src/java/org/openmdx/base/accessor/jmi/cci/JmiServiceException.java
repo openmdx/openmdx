@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: JmiServiceException.java,v 1.24 2010/06/02 13:43:21 hburger Exp $
+ * Name:        $Id: JmiServiceException.java,v 1.25 2011/04/11 08:56:28 hburger Exp $
  * Description: JmiServiceException class
- * Revision:    $Revision: 1.24 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:43:21 $
+ * Date:        $Date: 2011/04/11 08:56:28 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,6 +57,7 @@ import javax.jmi.reflect.JmiException;
 import javax.jmi.reflect.RefObject;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 
 
 /**
@@ -200,6 +201,14 @@ public class JmiServiceException extends JmiException
     @Override
     public void printStackTrace(PrintWriter s) {
         getCause().printStackTrace(s);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Throwable#getMessage()
+     */
+    @Override
+    public String getMessage() {
+        return Throwables.getMessage(this);
     }
 
 }

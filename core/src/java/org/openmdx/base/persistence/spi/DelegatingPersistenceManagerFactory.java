@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DelegatingPersistenceManagerFactory.java,v 1.2 2010/11/18 17:36:42 hburger Exp $
+ * Name:        $Id: DelegatingPersistenceManagerFactory.java,v 1.3 2011/04/12 15:44:01 hburger Exp $
  * Description: Delegating Persistence Manager Factory 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/18 17:36:42 $
+ * Date:        $Date: 2011/04/12 15:44:01 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -65,7 +65,7 @@ import org.openmdx.base.accessor.view.ViewManagerFactory_1;
 /**
  * Delegating Persistence Manager Factory
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({"rawtypes"})
 public abstract class DelegatingPersistenceManagerFactory
     implements PersistenceManagerFactory
 {
@@ -78,6 +78,11 @@ public abstract class DelegatingPersistenceManagerFactory
         super();
     }
 
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 8157804936933793541L;
+
     protected abstract PersistenceManagerFactory delegate();
 
     /**
@@ -85,7 +90,6 @@ public abstract class DelegatingPersistenceManagerFactory
      * @param classes
      * @see javax.jdo.PersistenceManagerFactory#addInstanceLifecycleListener(javax.jdo.listener.InstanceLifecycleListener, java.lang.Class[])
      */
-    @SuppressWarnings("unchecked")
     public void addInstanceLifecycleListener(
         InstanceLifecycleListener listener,
         Class[] classes
@@ -445,7 +449,6 @@ public abstract class DelegatingPersistenceManagerFactory
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManagerFactory#getFetchGroup(java.lang.Class, java.lang.String)
      */
-    @SuppressWarnings("unchecked")
     public FetchGroup getFetchGroup(Class cls, String name) {
         return delegate().getFetchGroup(cls, name);
     }
@@ -453,7 +456,6 @@ public abstract class DelegatingPersistenceManagerFactory
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManagerFactory#getFetchGroups()
      */
-    @SuppressWarnings("unchecked")
     public Set getFetchGroups() {
         return delegate().getFetchGroups();
     }

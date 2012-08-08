@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightTransaction.java,v 1.3 2010/06/02 13:46:07 hburger Exp $
+ * Name:        $Id: LightweightTransaction.java,v 1.9 2011/09/16 08:53:39 hburger Exp $
  * Description: Lightweight Transaction
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:46:07 $
+ * Date:        $Date: 2011/09/16 08:53:39 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2008, OMEX AG, Switzerland
+ * Copyright (c) 2005-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -52,11 +52,14 @@ package org.openmdx.kernel.lightweight.transaction;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -71,7 +74,7 @@ import javax.transaction.xa.Xid;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 
 /**
  * JTA Transaction implementation.
@@ -81,6 +84,85 @@ final class LightweightTransaction implements Transaction {
     
     // -------------------------------------------------------------- Constants
     
+    /**
+     * The string representation of the status values
+     */
+    private static final String[] STATI = {
+        //
+        // A transaction is associated with the target object and it is in the
+        // active state. An implementation returns this status after a
+        // transaction has been started and prior to a Coordinator issuing
+        // any prepares, unless the transaction has been marked for rollback.
+        //  
+        "STATUS_ACTIVE",
+        //
+        // A transaction is associated with the target object and it has been
+        // marked for rollback, perhaps as a result of a setRollbackOnly operation.
+        //
+        "STATUS_MARKED_ROLLBACK",
+        //
+        // A transaction is associated with the target object and it has been
+        // prepared. That is, all subordinates have agreed to commit. The
+        // target object may be waiting for instructions from a superior as to how
+        // to proceed.
+        //  
+        "STATUS_PREPARED",
+        //
+        // A transaction is associated with the target object and it has been
+        // committed. It is likely that heuristics exist; otherwise, the
+        // transaction would have been destroyed and NoTransaction returned.
+        //  
+        "STATUS_COMMITTED",
+        //
+        // A transaction is associated with the target object and the outcome
+        // has been determined to be rollback. It is likely that heuristics exist;
+        // otherwise, the transaction would have been destroyed and NoTransaction
+        // returned.
+        //  
+        "STATUS_ROLLEDBACK",
+        //
+        // A transaction is associated with the target object but its
+        // current status cannot be determined. This is a transient condition
+        // and a subsequent invocation will ultimately return a different status.
+        //
+        "STATUS_UNKNOWN",
+        //
+        // No transaction is currently associated with the target object. This
+        // will occur after a transaction has completed.
+        //
+        "STATUS_NO_TRANSACTION",
+        //
+        // A transaction is associated with the target object and it is in the
+        // process of preparing. An implementation returns this status if it
+        // has started preparing, but has not yet completed the process. The
+        // likely reason for this is that the implementation is probably
+        // waiting for responses to prepare from one or more
+        // Resources.
+        // 
+        "STATUS_PREPARING",
+        //
+        // A transaction is associated with the target object and it is in the
+        // process of committing. An implementation returns this status if it
+        // has decided to commit but has not yet completed the committing process. 
+        // This occurs because the implementation is probably waiting for 
+        // responses from one or more Resources.
+        //  
+        "STATUS_COMMITTING",
+        //
+        // A transaction is associated with the target object and it is in the
+        // process of rolling back. An implementation returns this status if
+        // it has decided to rollback but has not yet completed the process.
+        // The implementation is probably waiting for responses from one or more
+        // Resources.
+        //  
+        "STATUS_ROLLING_BACK"
+    };
+    
+    /**
+     * The default transaction timeout in seconds
+     */
+    public static final int DEFAULT_TRANSACTION_TIMEOUT = 60;
+
     // ------------------------------------------------------------ Constructor
     
     
@@ -96,73 +178,57 @@ final class LightweightTransaction implements Transaction {
     // ----------------------------------------------------- Instance Variables
     
     /**
-     * The logger instance
-     */
-    private final Logger logger = LoggerFactory.getLogger();
-    
-    
-    /**
      * Transaction Id factory
      */
-    private final TransactionIdFactory xidFactory;
-   
+    private final TransactionIdFactory xidFactory;   
     
     /**
      * Global transaction id.
      */
     final Xid xid;
     
-    
     /**
      * Branches.
      * Keyed : branch xid -> resource manager.
      */
-    private final Hashtable<Xid,XAResource> branches = new Hashtable<Xid,XAResource>();
-    
+    private final Map<Xid,XAResource> branches = new HashMap<Xid,XAResource>();
     
     /**
      * Active branches.
      * Keyed : resource manager -> branches xid.
      */
-    private final Hashtable<XAResource,Xid> activeBranches = new Hashtable<XAResource,Xid>();
-    
+    private final Map<XAResource,Xid> activeBranches = new HashMap<XAResource,Xid>();
     
     /**
      * Enlisted resources.
      */
-    private final Vector<XAResource> enlistedResources = new Vector<XAResource>();
-    
+    private final List<XAResource> enlistedResources = new ArrayList<XAResource>();
     
     /**
      * Suspended resources.
      * Keyed : resource manager -> branches xid.
      */
-    private Hashtable<XAResource,Xid> suspendedResources = new Hashtable<XAResource,Xid>();
-    
+    private Map<XAResource,Xid> suspendedResources = new HashMap<XAResource,Xid>();
     
     /**
      * Transaction status.
      */
     int status = Status.STATUS_ACTIVE;
     
-    
     /**
      * Synchronization objects.
      */
-    private final Vector<Synchronization> synchronizationObjects = new Vector<Synchronization>();
-    
+    private final List<Synchronization> synchronizationObjects = new ArrayList<Synchronization>();
     
     /**
      * Branch counter.
      */
     private int branchCounter = 1;
     
-    
     /**
      * Map of resources being managed for the transaction 
      */
-    final Hashtable<Object,Object> managedResources = new Hashtable<Object,Object>();
-    
+    final Map<Object,Object> managedResources = new HashMap<Object,Object>();
     
     /**
      * A Synchronization instance with special ordering semantics. Its beforeCompletion will 
@@ -176,9 +242,132 @@ final class LightweightTransaction implements Transaction {
     
     // ------------------------------------------------------------- Properties
     
+    /**
+     * The default transaction timeout in seconds
+     */
+    @SuppressWarnings("unused")
+    private int timeout = DEFAULT_TRANSACTION_TIMEOUT;
+
+    /**
+     * Modify the value of the timeout value that is associated with the
+     * transactions started by the current thread with the begin method.
+     * <p>
+     * If an application has not called this method, the transaction service
+     * uses some default value for the transaction timeout.
+     *
+     * @param timeout The value of the timeout in seconds. If the value is
+     * zero, the transaction service restores the default value.
+     */
+    void setTimeout(
+        int timeout
+    ){
+        this.timeout = timeout <= 0 ? DEFAULT_TRANSACTION_TIMEOUT : timeout;        
+    }
     
     // ---------------------------------------------------- Transaction Methods
     
+    /**
+     * Call synchronized objects beforeCompletion
+     * 
+     * @return the exceptions raised during beforeCompletion()
+     * 
+     * @throws SystemException 
+     * @throws IllegalStateException 
+     */
+    private List<Throwable> beforeCompletion(
+    ) throws IllegalStateException, SystemException{
+        List<Throwable> warnings = null;
+        if(this.interposedSynchronization != null) try {
+            this.interposedSynchronization.beforeCompletion();
+        } catch (RuntimeException exception) {
+            if(warnings == null) {
+                warnings = new ArrayList<Throwable>();
+            }
+            warnings.add(
+                Throwables.log(BasicException.newStandAloneExceptionStack(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ROLLBACK,
+                    "Transaction.beforeCompletionFail",
+                    new BasicException.Parameter("xid", this.xid),
+                    new BasicException.Parameter("status", getStatusAsString())
+                ))
+            );
+            this.setRollbackOnly();
+        }
+        for(Synchronization synchronization : synchronizationObjects) try {
+            synchronization.beforeCompletion();
+        } catch (RuntimeException exception) {
+            if(warnings == null) {
+                warnings = new ArrayList<Throwable>();
+            }
+            warnings.add(
+                Throwables.log(BasicException.newStandAloneExceptionStack(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ROLLBACK,
+                    "Transaction.beforeCompletionFail",
+                    new BasicException.Parameter("xid", this.xid),
+                    new BasicException.Parameter("status", getStatusAsString())
+                ))
+            );
+            this.setRollbackOnly();
+        }
+        return warnings == null ? Collections.<Throwable>emptyList(): warnings;
+    }
+
+    /**
+     * Call synchronized objects afterCompletion
+     * 
+     * @return the warnings raised during afterCompletion()
+     * 
+     * @param status the completion status
+     * @param exceptions the exception sink
+     */
+    private List<Throwable> afterCompletion(
+        int status
+    ){
+        List<Throwable> warnings = null;
+        if(this.interposedSynchronization != null) try {
+            this.interposedSynchronization.afterCompletion(status);
+        } catch (RuntimeException exception) {
+            if(warnings == null) {
+                warnings = new ArrayList<Throwable>();
+            }
+            warnings.add(
+                Throwables.log(BasicException.newStandAloneExceptionStack(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.GENERIC,
+                    "Transaction.afterCompletionFail",
+                    new BasicException.Parameter("xid", this.xid),
+                    new BasicException.Parameter("status", getStatusAsString())
+                ))
+            );
+        }
+        for(Synchronization synchronization : synchronizationObjects) try {
+            synchronization.afterCompletion(status);
+        } catch (RuntimeException exception) {
+            if(warnings == null) {
+                warnings = new ArrayList<Throwable>();
+            }
+            warnings.add(
+                Throwables.log(BasicException.newStandAloneExceptionStack(
+                    exception,
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.GENERIC,
+                    "Transaction.afterCompletionFail",
+                    new BasicException.Parameter("xid", this.xid),
+                    new BasicException.Parameter("status", getStatusAsString())
+                ))
+            );
+        }
+        if(warnings == null) {
+            return Collections.emptyList();
+        } else {
+            return warnings;
+        }
+    }
     
     /**
      * Complete the transaction represented by this Transaction object.
@@ -198,41 +387,32 @@ final class LightweightTransaction implements Transaction {
      * @exception SystemException Thrown if the transaction manager encounters
      * an unexpected error condition.
      */
-	public void commit()
-        throws RollbackException, HeuristicMixedException,
-        HeuristicRollbackException, SecurityException, IllegalStateException,
-        SystemException {
+	public void commit(
+	) throws RollbackException, HeuristicMixedException, HeuristicRollbackException, 
+    SecurityException, IllegalStateException, SystemException {
+        Vector<Throwable> exceptions = new Vector<Throwable>();
+        // Check status ACTIVE
+        if (status != Status.STATUS_ACTIVE)
+            throw new IllegalStateException();
         
-//        SysLog.detail("COMMIT", Arrays.asList("tx=", this));
+        exceptions.addAll(beforeCompletion());
         
         if (status == Status.STATUS_MARKED_ROLLBACK) {
             rollback();
             return;
         }
-        
-        // Check status ACTIVE
-        if (status != Status.STATUS_ACTIVE)
-            throw new IllegalStateException();
-        
-        // Call synchronized objects beforeCompletion
-        Enumeration<Synchronization> syncList = synchronizationObjects.elements();
-        while (syncList.hasMoreElements()) {
-            Synchronization sync = syncList.nextElement();
-            sync.beforeCompletion();
-        }
-        
-        Vector<Throwable> exceptions = new Vector<Throwable>();
+
         boolean fail = false;
         
-        Enumeration<Xid> enumeration = branches.keys();
+        Set<Xid> keys = branches.keySet();
         
         switch (enlistedResources.size()) {
-            case 0: 
+            case 0: // Trivial commit 
+                status = Status.STATUS_COMMITTED;
                 break;
             case 1: // One phase commit
                 status = Status.STATUS_COMMITTING;
-                while (enumeration.hasMoreElements()) {
-                    Object key = enumeration.nextElement();
+                for(Object key : keys) {
                     XAResource resourceManager = branches.get(key);
                     try {
                         if (!fail)
@@ -249,7 +429,8 @@ final class LightweightTransaction implements Transaction {
                                 "Transaction.commitFail",
                                 new BasicException.Parameter("resourceManager", resourceManager),
                                 new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
-                                new BasicException.Parameter("transaction", toString())                        
+                                new BasicException.Parameter("xid", this.xid),
+                                new BasicException.Parameter("status", getStatusAsString())
                             )
                         );
                         fail = true;
@@ -262,8 +443,7 @@ final class LightweightTransaction implements Transaction {
             default:         
                 // Prepare each enlisted resource
                 status = Status.STATUS_PREPARING;
-                while ((!fail) && (enumeration.hasMoreElements())) {
-                    Object key = enumeration.nextElement();
+                Branches: for(Object key : keys) {
                     XAResource resourceManager = branches.get(key);
                     try {
                         // Preparing the resource manager using its branch xid
@@ -278,42 +458,39 @@ final class LightweightTransaction implements Transaction {
                                 "Transaction.prepareFail",
                                 new BasicException.Parameter("resourceManager", resourceManager),
                                 new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
-                                new BasicException.Parameter("transaction", toString())
+                                new BasicException.Parameter("xid", this.xid),
+                                new BasicException.Parameter("status", getStatusAsString())
                             )
                         );
                         fail = true;
-                        status = Status.STATUS_MARKED_ROLLBACK;
+                        break Branches;
                     }
                 }
-                
-	            if (!fail)
-	                status = Status.STATUS_PREPARED;
+                status = fail ? Status.STATUS_MARKED_ROLLBACK : Status.STATUS_PREPARED;
 
                 // If fail, rollback
                 if (fail) {
                     status = Status.STATUS_ROLLING_BACK;
                     fail = false;
                     // Rolling back all the prepared (and unprepared) branches
-                    enumeration = branches.keys();
-                    while (enumeration.hasMoreElements()) {
-                        Object key = enumeration.nextElement();
+                    keys = branches.keySet();
+                    for(Object key : keys) {
                         XAResource resourceManager = branches.get(key);
                         try {
                             resourceManager.rollback((Xid) key);
                         } catch(Throwable e) {
                             // Adding the exception to the error code list
                             exceptions.addElement(
-                                log(
-                            		BasicException.newStandAloneExceptionStack(
-                                    	e,
-                                        BasicException.Code.DEFAULT_DOMAIN,
-                                        BasicException.Code.GENERIC,
-                                        "Transaction.rollbackFail",
-                                        new BasicException.Parameter("resourceManager", resourceManager),
-                                        new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
-                                        new BasicException.Parameter("xid", this.xid)
-                                    )
-                                )
+                                Throwables.log(BasicException.newStandAloneExceptionStack(
+                                	e,
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.GENERIC,
+                                    "Transaction.rollbackFail",
+                                    new BasicException.Parameter("resourceManager", resourceManager),
+                                    new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
+                                    new BasicException.Parameter("xid", this.xid),
+                                    new BasicException.Parameter("status", getStatusAsString())
+                                ))
                             ); 
                             fail = true;
                         }
@@ -322,26 +499,24 @@ final class LightweightTransaction implements Transaction {
                 } else {
                     status = Status.STATUS_COMMITTING;
                     // Commit each enlisted resource
-                    enumeration = branches.keys();
-                    while (enumeration.hasMoreElements()) {
-                        Object key = enumeration.nextElement();
+                    keys = branches.keySet();
+                    for(Object key : keys) {
                         XAResource resourceManager = branches.get(key);
                         try {
                             resourceManager.commit((Xid) key, false);
                         } catch(Throwable e) {
                             // Adding the exception to the error code list
                             exceptions.addElement(
-                                log(
-                            		BasicException.newStandAloneExceptionStack(
-                                    	e,
-                                        BasicException.Code.DEFAULT_DOMAIN,
-                                        BasicException.Code.GENERIC,
-                                        "Transaction.commitFail",
-                                        new BasicException.Parameter("resourceManager", resourceManager),
-                                        new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
-                                        new BasicException.Parameter("transaction", toString())
-                                    )
-                                )
+                                Throwables.log(BasicException.newStandAloneExceptionStack(
+                                	e,
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.GENERIC,
+                                    "Transaction.commitFail",
+                                    new BasicException.Parameter("resourceManager", resourceManager),
+                                    new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
+                                    new BasicException.Parameter("xid", this.xid),
+                                    new BasicException.Parameter("status", getStatusAsString())
+                                ))
                             );
                             fail = true;
                         }
@@ -351,11 +526,7 @@ final class LightweightTransaction implements Transaction {
         }
         
         // Call synchronized objects afterCompletion
-        syncList = synchronizationObjects.elements();
-        while (syncList.hasMoreElements()) {
-            Synchronization sync = syncList.nextElement();
-            sync.afterCompletion(status);
-        }
+        exceptions.addAll(afterCompletion(status));
         
         // Parsing exception and throwing an appropriate exception
         if(!exceptions.isEmpty()) switch (status) {
@@ -393,9 +564,6 @@ final class LightweightTransaction implements Transaction {
      */
 	public boolean delistResource(XAResource xaRes, int flag)
         throws IllegalStateException, SystemException {
-        
-//        SysLog.detail("DELIST", Arrays.asList("tx=", this, "xaRes=", xaRes));
-        
         // Check status ACTIVE
         if (status != Status.STATUS_ACTIVE)
             throw new IllegalStateException();
@@ -407,37 +575,31 @@ final class LightweightTransaction implements Transaction {
         
         activeBranches.remove(xaRes);
         
-        this.logger.log(Level.FINEST,
+        SysLog.log(
+            Level.FINEST,
             "Delist xaResource {0} from transaction {1} ({2})",
-            new Object[]{
-                xaRes,
-                getXAFlag(flag),
-                this.xid
-            }
+            xaRes, getXAFlag(flag), this.xid
         );
         
         try {
             xaRes.end(xid, flag);
         } catch (XAException e) {
-            log(
-        		BasicException.newStandAloneExceptionStack(
-                    e,
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.GENERIC,
-                    "Transaction.delistFail",
-                    new BasicException.Parameter("xaResource", xaRes),
-                    new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
-                    new BasicException.Parameter("transaction", toString())
-                )
-            );
+            Throwables.log(BasicException.newStandAloneExceptionStack(
+                e,
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.GENERIC,
+                "Transaction.delistFail",
+                new BasicException.Parameter("xaResource", xaRes),
+                new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
+                new BasicException.Parameter("xid", this.xid),
+                new BasicException.Parameter("status", getStatusAsString())
+            ));
             return false;
         }
 
         if (flag == XAResource.TMSUSPEND)
             suspendedResources.put(xaRes, xid);
-        
-//        SysLog.detail("Delisted ok", Arrays.asList("tx=", this, "xaRes=", xaRes, "xid=", xid));
-        
+
         return true;
         
     }
@@ -458,9 +620,7 @@ final class LightweightTransaction implements Transaction {
      */
     public boolean enlistResource(XAResource xaRes)
         throws RollbackException, IllegalStateException, SystemException {
-        
-//        SysLog.detail("ENLIST", Arrays.asList("tx=", this, "xaRes=", xaRes));
-        
+
         if (status == Status.STATUS_MARKED_ROLLBACK)
             throw new RollbackException();
         
@@ -480,41 +640,31 @@ final class LightweightTransaction implements Transaction {
         Xid branchXid = suspendedResources.get(xaRes);
         
         if (branchXid == null) {
-            Enumeration<XAResource> enumeration = enlistedResources.elements();
-            while ((!alreadyEnlisted) && (enumeration.hasMoreElements())) {
-                XAResource resourceManager = enumeration.nextElement();
+            Resources: for(XAResource resourceManager : enlistedResources){
                 try {
                     if (resourceManager.isSameRM(xaRes)) {
                         flag = XAResource.TMJOIN;
                         alreadyEnlisted = true;
+                        break Resources;
                     }
                 } catch (XAException e) {
                     // ignore
                 }
             }
             branchXid = this.xidFactory.createTransactionBranchId(this.xid, branchCounter++);
-            
-//            SysLog.detail("Creating new branch", Arrays.asList("tx=", this, "xaRes=", xaRes));
-            
         } else {
             alreadyEnlisted = true;
             flag = XAResource.TMRESUME;
             suspendedResources.remove(xaRes);
         }
         
-        this.logger.log(
+        SysLog.log(
         	Level.FINEST,
             "Enlist xaResource {0} with transaction {1} ({2})",
-            new Object[]{
-                xaRes,
-                getXAFlag(flag),
-                this.xid
-            }
+            xaRes, getXAFlag(flag), this.xid
         );
         
         try {
-//            SysLog.detail("STARTING", Arrays.asList("tx=", this, "xaRes=", xaRes, "branch=", branchXid, "flag=", flag));
-            
             xaRes.start(branchXid, flag);
         } catch (XAException xaException) {
             throw Throwables.initCause(
@@ -526,14 +676,15 @@ final class LightweightTransaction implements Transaction {
                 BasicException.Code.GENERIC,
                 new BasicException.Parameter("xaResource", xaRes),
                 new BasicException.Parameter("xaErrorCode", getXAErrorCode(xaException)),
-                new BasicException.Parameter("transaction", toString()),
+                new BasicException.Parameter("xid", this.xid),
                 new BasicException.Parameter("branch", branchXid),
+                new BasicException.Parameter("status", getStatusAsString()),
                 new BasicException.Parameter("flag", getXAFlag(flag))
             );
         }
         
         if (!alreadyEnlisted) {
-            enlistedResources.addElement(xaRes);
+            enlistedResources.add(xaRes);
         }
         
         branches.put(branchXid, xaRes);
@@ -558,47 +709,41 @@ final class LightweightTransaction implements Transaction {
      */
 	public void rollback()
         throws SecurityException, IllegalStateException, SystemException {
-        
-//        SysLog.detail("ROLLBACK", Arrays.asList("tx=", this));
-        
         // Check status ACTIVE
         if (status != Status.STATUS_ACTIVE && status != Status.STATUS_MARKED_ROLLBACK)
             throw new IllegalStateException();
         
         Vector<Throwable> exceptions = new Vector<Throwable>();
         
-        Enumeration<Xid> enumeration = branches.keys();
-        
         status = Status.STATUS_ROLLING_BACK;
-        while (enumeration.hasMoreElements()) {
-            Xid xid = enumeration.nextElement();
+        for(Xid xid : branches.keySet()) {
             XAResource resourceManager = branches.get(xid);
             try {
                 resourceManager.rollback(xid);
             } catch (Throwable e) {
                 // Adding the exception to the error code list
                 exceptions.addElement(
-                    log(
-                		BasicException.newStandAloneExceptionStack(
-                        	e,
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.GENERIC,
-                            "Transaction.rollbackFail",
-                            new BasicException.Parameter("resourceManager", resourceManager),
-                            new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
-                            new BasicException.Parameter("transaction", toString())
-                        )
-                    )
+                    Throwables.log(BasicException.newStandAloneExceptionStack(
+                    	e,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.GENERIC,
+                        "Transaction.rollbackFail",
+                        new BasicException.Parameter("resourceManager", resourceManager),
+                        new BasicException.Parameter("xaErrorCode", getXAErrorCode(e)),
+                        new BasicException.Parameter("xid", this.xid),
+                        new BasicException.Parameter("status", getStatusAsString())
+                    ))
                 );
             }
         }
         status = Status.STATUS_ROLLEDBACK;
 		
         // Call synchronized objects afterCompletion
-        Enumeration<Synchronization> syncList = synchronizationObjects.elements();
-        while (syncList.hasMoreElements()) {
-            Synchronization sync = syncList.nextElement();
-            sync.afterCompletion(status);
+        if(this.interposedSynchronization != null) {
+            this.interposedSynchronization.afterCompletion(status);
+        }
+        for(Synchronization synchronization : synchronizationObjects) {
+            synchronization.afterCompletion(status);
         }
         
     }
@@ -650,17 +795,16 @@ final class LightweightTransaction implements Transaction {
      * @exception SystemException Thrown if the transaction manager encounters
      * an unexpected error condition.
      */
-    public void registerSynchronization(Synchronization sync)
-        throws RollbackException, IllegalStateException, SystemException {
-        
-        if (status == Status.STATUS_MARKED_ROLLBACK)
-            throw new RollbackException();
-        
-        if (status != Status.STATUS_ACTIVE)
-            throw new IllegalStateException();
-        
-        synchronizationObjects.addElement(sync);
-        
+    public void registerSynchronization(
+    	Synchronization sync
+    ) throws RollbackException, IllegalStateException, SystemException {
+        if (status == Status.STATUS_MARKED_ROLLBACK) throw new RollbackException(
+        	"Invalid transaction status " + getStatusAsString()
+        );
+        if (status != Status.STATUS_ACTIVE) throw new IllegalStateException(
+        	"Invalid transaction status " + getStatusAsString()
+        );
+        synchronizationObjects.add(sync);
     }
     
     
@@ -767,29 +911,24 @@ final class LightweightTransaction implements Transaction {
             default:
                 return "UNKNOWN";
         }
-    }
-    
+    }    
     
     /**
      * Print the Transaction object in a debugger friendly manner
      */
     @Override
-    public String toString() {
-        return "Transaction " + xid;
+    public String toString(
+    ) {
+        return getClass().getName() + ": " + xid + " (" + getStatusAsString() + ")";
     }
         
     /**
-     * Log an exception 
+     * Provide the <code>String</code> representation of the transaction state
      * 
-     * @param exception
+     * @return the <code>String</code> representation of the transaction state
      */
-    private Throwable log(
-        Throwable exception
-    ){
-        this.logger.log(Level.WARNING,exception.getMessage(), exception);
-        return exception;
+    private String getStatusAsString(){
+        return  status >= 0 && status < STATI.length ? STATI[status] : Integer.toString(status); 
     }
-
+    
 }
-
-

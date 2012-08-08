@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Grid.java,v 1.94 2010/09/21 15:17:46 wfro Exp $
+ * Name:        $Id: Grid.java,v 1.107 2011/12/23 15:53:15 wfro Exp $
  * Description: GridControl
- * Revision:    $Revision: 1.94 $
+ * Revision:    $Revision: 1.107 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/21 15:17:46 $
+ * Date:        $Date: 2011/12/23 15:53:15 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -82,18 +82,15 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.Extension;
 import org.openmdx.base.query.IsBetweenCondition;
-import org.openmdx.base.query.IsGreaterCondition;
-import org.openmdx.base.query.IsGreaterOrEqualCondition;
 import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.OrderSpecifier;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.SortOrder;
-import org.openmdx.base.query.SoundsLikeCondition;
 import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.base.text.conversion.JavaBeans;
 import org.openmdx.kernel.log.SysLog;
@@ -103,8 +100,31 @@ import org.openmdx.portal.servlet.DataBinding;
 import org.openmdx.portal.servlet.Filter;
 import org.openmdx.portal.servlet.Filters;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
+import org.openmdx.portal.servlet.PortalExtension_1_0.ConditionParser;
 import org.openmdx.portal.servlet.UserSettings;
+import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.action.GridAddObjectAction;
+import org.openmdx.portal.servlet.action.GridAddOrderAnyAction;
+import org.openmdx.portal.servlet.action.GridAddOrderAscendingAction;
+import org.openmdx.portal.servlet.action.GridAddOrderDescendingAction;
+import org.openmdx.portal.servlet.action.GridMoveDownObjectAction;
+import org.openmdx.portal.servlet.action.GridMoveUpObjectAction;
+import org.openmdx.portal.servlet.action.GridPageNextAction;
+import org.openmdx.portal.servlet.action.GridPagePreviousAction;
+import org.openmdx.portal.servlet.action.GridSelectFilterAction;
+import org.openmdx.portal.servlet.action.GridSetAlignmentNarrowAction;
+import org.openmdx.portal.servlet.action.GridSetAlignmentWideAction;
+import org.openmdx.portal.servlet.action.GridSetCurrentFilterAsDefaultAction;
+import org.openmdx.portal.servlet.action.GridSetHideRowsOnInitAction;
+import org.openmdx.portal.servlet.action.GridSetOrderAnyAction;
+import org.openmdx.portal.servlet.action.GridSetOrderAscendingAction;
+import org.openmdx.portal.servlet.action.GridSetOrderDescendingAction;
+import org.openmdx.portal.servlet.action.GridSetPageAction;
+import org.openmdx.portal.servlet.action.GridSetShowRowsOnInitAction;
+import org.openmdx.portal.servlet.action.MultiDeleteAction;
+import org.openmdx.portal.servlet.action.NewObjectAction;
+import org.openmdx.portal.servlet.action.SaveGridAction;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.FieldDef;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
@@ -117,6 +137,48 @@ public abstract class Grid
     implements Serializable {
   
     //-------------------------------------------------------------------------
+	static class LockedTextValue extends AttributeValue {
+
+        public LockedTextValue(
+            Object object,
+            String featureName,
+            String qualifiedFeatureName,
+            ApplicationContext app
+       ) {
+	        super(
+	        	object, 
+	        	new FieldDef(
+	        		featureName,
+	        		qualifiedFeatureName,
+                    Multiplicity.SINGLE_VALUE.toString(),
+                    false, // isChangeable
+                    true, // isMandatory
+                    null, null, null, null,
+                    app.getPortalExtension().getDataBinding(null)
+                ),
+	        	app
+	        );
+        }
+
+        @Override
+        public Object getDefaultValue(
+        ) {
+        	return WebKeys.LOCKED_VALUE;
+        }
+
+		@Override
+        public String getStringifiedValue(
+            ViewPort p,
+            boolean multiLine,
+            boolean forEditing,
+            boolean shortFormat
+        ) {
+			return WebKeys.LOCKED_VALUE;
+        }
+		
+	}
+	
+    //-------------------------------------------------------------------------
     public Grid(
         GridControl control,
         ObjectView view,
@@ -126,13 +188,13 @@ public abstract class Grid
             control,
             view
         );
-        ApplicationContext application = this.view.getApplicationContext();
-        Texts_1_0 texts = application.getTexts();
+        ApplicationContext app = this.view.getApplicationContext();
+        Texts_1_0 texts = app.getTexts();
         
         this.columnSortOrders = new HashMap(control.getInitialColumnSortOrders());
         this.lookupType = lookupType;
         this.showRows = this.showGridContentOnInit();
-        this.dataBinding = application.getPortalExtension().getDataBinding(
+        this.dataBinding = app.getPortalExtension().getDataBinding(
             control.getObjectContainer().getDataBindingName() 
         );
         
@@ -143,7 +205,7 @@ public abstract class Grid
         else {
             String containerId = control.getContainerId();
             String baseFilterId = containerId.substring(containerId.indexOf("Ref:") + 4);
-            Filters filters = application.getFilters(
+            Filters filters = app.getFilters(
                 control.getQualifiedReferenceName()
             );
             // Default filter
@@ -153,7 +215,7 @@ public abstract class Grid
             );
             // Fallback to old-style property name for default filter
             if(
-                (application.getSettings().getProperty(defaultFilterPropertyName) == null) &&
+                (app.getSettings().getProperty(defaultFilterPropertyName) == null) &&
                 (baseFilterId.indexOf(":") < 0) 
             ) {
                 defaultFilterPropertyName = control.getPropertyName(
@@ -164,11 +226,11 @@ public abstract class Grid
             // Override DEFAULT filter, if at least ALL and DEFAULT filter are defined
             // and settings contains a default filter declaration
             Filter defaultFilter = null;
-            if(application.getSettings().getProperty(defaultFilterPropertyName) != null) {
+            if(app.getSettings().getProperty(defaultFilterPropertyName) != null) {
                 try {
                     defaultFilter = (Filter)JavaBeans.fromXML(
                     	new String(
-                    		Base64.decode(application.getSettings().getProperty(defaultFilterPropertyName))
+                    		Base64.decode(app.getSettings().getProperty(defaultFilterPropertyName))
                     	)
                     );
                     defaultFilter.setName(Filters.DEFAULT_FILTER_NAME);
@@ -187,7 +249,7 @@ public abstract class Grid
         }
         
         // Creators and template rows
-        Model_1_0 model = application.getModel();
+        Model_1_0 model = app.getModel();
         org.openmdx.ui1.jmi1.ObjectContainer objectContainer = control.getObjectContainer();
         this.isComposite = !objectContainer.isReferenceIsStoredAsAttribute();
         this.isChangeable = objectContainer.isChangeable();
@@ -198,79 +260,105 @@ public abstract class Grid
             objectCreators = null;
             this.addObjectAction = null;
             this.removeObjectAction = null;
+            this.moveUpObjectAction = null;
+            this.moveDownObjectAction = null;
         }
         else if(!this.isComposite) {
           Action addObjectAction = null;
           Action removeObjectAction = null;
+          Action moveUpObjectAction = null;
+          Action moveDownObjectAction = null;
           objectCreators = null;
           try {
-            // objectContainer.getReferenceName() contains the unqualified
-            // name of the reference. Lookup the reference in model.
-            ModelElement_1_0 reference = model.getFeatureDef(
-              model.getElement(control.getContainerClass()), 
-              objectContainer.getReferenceName(), 
-              false
-            );
-            addObjectAction = new Action(
-                Action.EVENT_ADD_OBJECT,
-                new Action.Parameter[]{
-                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
-                    new Action.Parameter(Action.PARAMETER_NAME, "+"),
-                    new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
-                    new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.objGetValue("qualifiedName"))
-                },
-                "add object",
-                true
-            );
-            removeObjectAction = new Action(
-                Action.EVENT_ADD_OBJECT,
-                new Action.Parameter[]{
-                    new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
-                    new Action.Parameter(Action.PARAMETER_NAME, "-"),
-                    new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
-                    new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.objGetValue("qualifiedName"))
-                },
-                "remove object",
-                true
-            );
+        	  // objectContainer.getReferenceName() contains the unqualified
+        	  // name of the reference. Lookup the reference in model.
+        	  ModelElement_1_0 reference = model.getFeatureDef(
+	              model.getElement(control.getContainerClass()), 
+	              objectContainer.getReferenceName(), 
+	              false
+        	  );
+        	  addObjectAction = new Action(
+        		  GridAddObjectAction.EVENT_ID,
+        		  new Action.Parameter[]{
+        			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+        			  new Action.Parameter(Action.PARAMETER_NAME, "+"),
+        			  new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
+        			  new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.objGetValue("qualifiedName"))
+        		  },
+        		  "add object",
+        		  true
+        	  );
+        	  removeObjectAction = new Action(
+        		  GridAddObjectAction.EVENT_ID,
+        		  new Action.Parameter[]{
+        			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+        			  new Action.Parameter(Action.PARAMETER_NAME, "-"),
+        			  new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
+        			  new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.objGetValue("qualifiedName"))
+        		  },
+        		  "remove object",
+        		  true
+        	  );
+        	  moveUpObjectAction = new Action(
+        		  GridMoveUpObjectAction.EVENT_ID,
+        		  new Action.Parameter[]{
+        			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+        			  new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
+        			  new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.objGetValue("qualifiedName"))
+        		  },
+        		  "move up object",
+        		  true
+        	  );
+        	  moveDownObjectAction = new Action(
+        		  GridMoveDownObjectAction.EVENT_ID,
+        		  new Action.Parameter[]{
+        			  new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
+        			  new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
+        			  new Action.Parameter(Action.PARAMETER_REFERENCE, (String)reference.objGetValue("qualifiedName"))
+        		  },
+        		  "move down object",
+        		  true
+        	  );
           }
           catch(ServiceException e) {
         	  SysLog.warning(e.getMessage(), e.getCause());
           }
           this.addObjectAction = addObjectAction;
           this.removeObjectAction = removeObjectAction;
+          this.moveUpObjectAction = moveUpObjectAction;
+          this.moveDownObjectAction = moveDownObjectAction;
         }
         else {
             this.addObjectAction = null;
             this.removeObjectAction = null;
+            this.moveUpObjectAction = null;
+            this.moveDownObjectAction = null;
             objectCreators = new TreeMap(); // sorted map of creators. key is inspector label
             templateRows = new ArrayList();
             try {
                 ModelElement_1_0 referencedType = model.getElement(objectContainer.getReferencedTypeName());
-                int ii = 0;
                 for(
                     Iterator i = referencedType.objGetList("allSubtype").iterator(); 
                     i.hasNext();
-                    ii++
                 ) {
                     ModelElement_1_0 subtype = model.getElement(i.next());
                     if(!((Boolean)subtype.objGetValue("isAbstract")).booleanValue()) {
                         String forClass = (String)subtype.objGetValue("qualifiedName");
-                        org.openmdx.ui1.jmi1.AssertableInspector assertableInspector = application.getAssertableInspector(forClass);
+                        org.openmdx.ui1.jmi1.AssertableInspector assertableInspector = app.getAssertableInspector(forClass);
                         if(assertableInspector.isChangeable()) {
                             
                             // Object creator
                             objectCreators.put(
                                 ApplicationContext.getOrderAsString(assertableInspector.getOrder()) + ":" + forClass,
                                 new Action(
-                                    Action.EVENT_NEW_OBJECT,
+                                    NewObjectAction.EVENT_ID,
                                     new Action.Parameter[]{
                                         new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
                                         new Action.Parameter(Action.PARAMETER_FOR_REFERENCE, objectContainer.getReferenceName()),
                                         new Action.Parameter(Action.PARAMETER_FOR_CLASS, forClass)
                                     },
-                                    application.getLabel(forClass),
-                                    application.getIconKey(forClass),
+                                    app.getLabel(forClass),
+                                    app.getIconKey(forClass),
                                     true
                                 )
                             );
@@ -292,14 +380,14 @@ public abstract class Grid
                                 new FieldDef(
                                     "identity",
                                     "org:openmdx:base:ExtentCapable:identity",
-                                    Multiplicities.SINGLE_VALUE,
+                                    Multiplicity.SINGLE_VALUE.toString(),
                                     false,
                                     true,
-                                    application.getIconKey(forClass),
+                                    app.getIconKey(forClass),
                                     null, null, null,
-                                    application.getPortalExtension().getDataBinding(null)
+                                    app.getPortalExtension().getDataBinding(null)
                                 ),
-                                application
+                                app
                             );
                             templateRow[0] = objRef;
                             for(int j = 0; j < nCols; j++) {
@@ -311,17 +399,17 @@ public abstract class Grid
                                         new FieldDef(
                                             "identity",
                                             "org:openmdx:base:ExtentCapable:identity",
-                                            Multiplicities.SINGLE_VALUE,
+                                            Multiplicity.SINGLE_VALUE.toString(),
                                             false,
                                             true,
                                             null, null, null, null,
-                                            application.getPortalExtension().getDataBinding(null)
+                                            app.getPortalExtension().getDataBinding(null)
                                         ),
-                                        application
+                                        app
                                     );
                                 }
                                 else {
-                                    templateRow[j+1] = application.createAttributeValue(
+                                    templateRow[j+1] = app.createAttributeValue(
                                         fieldDef,
                                         templateRowObject
                                     );
@@ -347,16 +435,16 @@ public abstract class Grid
         this.multiDeleteAction = (this.getObjectCreator() == null) || (this.getAddObjectAction() != null) ? 
             null : 
             new Action(
-                Action.EVENT_MULTI_DELETE, 
+                MultiDeleteAction.EVENT_ID, 
                 new Action.Parameter[]{
                     new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                                                  
                 },
-                application.getTexts().getDeleteTitle(), 
+                app.getTexts().getDeleteTitle(), 
                 WebKeys.ICON_DELETE,
                 true
               );
         this.saveAction = new Action(
-            Action.EVENT_SAVE_GRID,
+            SaveGridAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),
@@ -367,7 +455,7 @@ public abstract class Grid
             true
         );
         this.setCurrentFilterAsDefaultAction = new Action(
-            Action.EVENT_SET_CURRENT_FILTER_AS_DEFAULT,
+            GridSetCurrentFilterAsDefaultAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(control.getPaneIndex())),                      
@@ -383,9 +471,9 @@ public abstract class Grid
             control.getQualifiedReferenceName(),
             UserSettings.SHOW_ROWS_ON_INIT
         );
-        if(application.getSettings().getProperty(showRowsOnInitPropertyName) != null) {
+        if(app.getSettings().getProperty(showRowsOnInitPropertyName) != null) {
             this.setShowGridContentOnInit(
-                Boolean.valueOf(application.getSettings().getProperty(showRowsOnInitPropertyName)).booleanValue()
+                Boolean.valueOf(app.getSettings().getProperty(showRowsOnInitPropertyName)).booleanValue()
             );
         }
         // Rows
@@ -423,6 +511,18 @@ public abstract class Grid
         return this.removeObjectAction;
     }
 
+    //-----------------------------------------------------------------------
+    public Action getMoveUpObjectAction(
+    ) {
+    	return this.moveUpObjectAction;
+    }
+    
+    //-----------------------------------------------------------------------
+    public Action getMoveDownObjectAction(
+    ) {
+    	return this.moveDownObjectAction;
+    }
+    
     //-----------------------------------------------------------------------
     public boolean isComposite(
     ) {
@@ -473,7 +573,7 @@ public abstract class Grid
         boolean isEnabled
     ) {
         return new Action(
-            Action.EVENT_PAGE_NEXT,
+            GridPageNextAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(this.getGridControl().getPaneIndex())),         
@@ -490,7 +590,7 @@ public abstract class Grid
         boolean isEnabled
     ) {
         return new Action(
-            Action.EVENT_PAGE_PREVIOUS,
+            GridPagePreviousAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_OBJECTXRI, view.getRefObject().refMofId()),                        
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(this.getGridControl().getPaneIndex())),
@@ -510,7 +610,7 @@ public abstract class Grid
         int paneIndex = gridControl.getPaneIndex();
         int next10 = java.lang.Math.min(this.getLastPage(), this.getCurrentPage() + 10);
         return new Action(
-            Action.EVENT_SET_PAGE,
+            GridSetPageAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getRefObject().refMofId()),
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(paneIndex)), 
@@ -531,7 +631,7 @@ public abstract class Grid
         int paneIndex = gridControl.getPaneIndex();
         int back10 = java.lang.Math.max(0, this.getCurrentPage() - 10);
         return new Action(
-            Action.EVENT_SET_PAGE,
+            GridSetPageAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getRefObject().refMofId()),
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(paneIndex)), 
@@ -739,7 +839,7 @@ public abstract class Grid
 	                  new FieldDef(
 	                      "identity",
 	                      "org:openmdx:base:ExtentCapable:identity",
-	                      Multiplicities.SINGLE_VALUE,
+	                      Multiplicity.SINGLE_VALUE.toString(),
 	                      false,
 	                      true,
 	                      null, null, null, null,
@@ -757,7 +857,7 @@ public abstract class Grid
 	                          new FieldDef(
 	                              "identity",
 	                              "org:openmdx:base:ExtentCapable:identity",
-	                              Multiplicities.SINGLE_VALUE,
+	                              Multiplicity.SINGLE_VALUE.toString(),
 	                              false,
 	                              true,
 	                              null, null, null, null,
@@ -768,10 +868,19 @@ public abstract class Grid
 	                  }
 	                  else {
 	                      try {
-	                          row[j] = app.createAttributeValue(
-	                              fieldDef, 
-	                              rowObject
-	                          );
+	                    	  if(!app.getPortalExtension().hasPermission(fieldDef.getQualifiedFeatureName(), rowObject, app, WebKeys.PERMISSION_REVOKE_SHOW)) {
+		                          row[j] = app.createAttributeValue(
+		                              fieldDef, 
+		                              rowObject
+		                          );
+	                    	  } else {
+	                    		 row[j] = new LockedTextValue(
+	                    			 rowObject,
+	                    			 fieldDef.getFeatureName(),
+	                    			 fieldDef.getQualifiedFeatureName(), 
+	                    			 app 
+	                    		 );
+	                    	  }
 	                      }
 	                      catch(Exception e) {
 	                          row[j] = null;
@@ -840,13 +949,13 @@ public abstract class Grid
   }
   
     //-------------------------------------------------------------------------
-    abstract protected List<RefObject_1_0> getFilteredObjects(
+    abstract public List<RefObject_1_0> getFilteredObjects(
     	PersistenceManager pm,
         Filter filter
     );
 
     //-------------------------------------------------------------------------
-    abstract protected Collection<RefObject_1_0> getAllObjects(
+    abstract public Collection<RefObject_1_0> getAllObjects(
     	PersistenceManager pm
     );
     
@@ -862,10 +971,8 @@ public abstract class Grid
     		this.columnSortOrders.putAll(
     			gridControl.getInitialColumnSortOrders()
     		);
-    		this.filterValues.put(
-    			filterName,
-    			this.currentFilterValue = (filterValues == null ? "" : filterValues)
-    		);
+    		this.filterValues.clear();
+    		this.currentFilterValue = null;
     		// can apply filter only to containers
     		Filter filter = this.getFilter(filterName);
     		if(filter == null) {
@@ -943,480 +1050,323 @@ public abstract class Grid
     	}
     }
 
-  //-------------------------------------------------------------------------
-  private static class ConditionParser {
-   
-    public ConditionParser(
-      String token,
-      String feature
+    //-------------------------------------------------------------------------
+    public void setColumnFilter(
+    	String filterName,
+    	String filterValues,
+    	boolean add,
+    	int newPageSize
     ) {
-      if(token.startsWith(">=")) {
-        this.condition = 
-          new IsGreaterOrEqualCondition(
-        	  Quantifier.THERE_EXISTS,
-            feature,
-            true,
-            (Object[])null
-          );
-        offset = 2;                      
-      }
-      else if(token.startsWith("<=")) {
-        this.condition =
-          new IsGreaterCondition(
-        	  Quantifier.THERE_EXISTS,
-            feature,
-            false,
-            (Object[])null
-          );
-        offset = 2;
-      }
-      else if(token.startsWith("<>")) {
-        this.condition =
-          new IsInCondition(
-        	  Quantifier.THERE_EXISTS,
-            feature,
-            false,
-            (Object[])null
-          );
-        offset = 2;
-      }
-      else if(token.startsWith("<")) {
-        this.condition =
-          new IsGreaterOrEqualCondition(
-        	  Quantifier.THERE_EXISTS,
-            feature,
-            false,
-            (Object[])null
-          );
-        offset = 1;
-      }
-      else if(token.startsWith(">")) {
-        this.condition =
-          new IsGreaterCondition(
-        	  Quantifier.THERE_EXISTS,
-            feature,
-            true,
-            (Object[])null
-          );
-        offset = 1;
-      }
-      else if(token.startsWith("*")) {
-        this.condition =
-          new SoundsLikeCondition(
-        	  Quantifier.THERE_EXISTS,
-            feature,
-            true,
-            (Object[])null
-          );
-        offset = 1;
-      }
-      else if(token.startsWith("!*")) {
-          this.condition =
-            new SoundsLikeCondition(
-            	Quantifier.THERE_EXISTS,
-              feature,
-              false,
-              (Object[])null
-            );
-          offset = 2;
-      }
-      else if(token.startsWith("%")) {
-        this.condition =
-          new IsLikeCondition(
-        	  Quantifier.THERE_EXISTS,
-            feature,
-            true,
-            (Object[])null
-          );
-        offset = 1;
-      }
-      else if(token.startsWith("!%")) {
-          this.condition =
-            new IsLikeCondition(
-            	Quantifier.THERE_EXISTS,
-              feature,
-              false,
-              (Object[])null
-            );
-          offset = 2;
-      }
-      else if(token.startsWith("=")) {
-        this.condition =
-          new IsInCondition(
-        	  Quantifier.THERE_EXISTS,
-            feature,
-            true,
-            (Object[])null
-          );
-        offset = 1;
-      }
-      else if(token.startsWith("!=")) {
-        this.condition =
-          new IsInCondition(
-        	  Quantifier.THERE_EXISTS,
-            feature,
-            false,
-            (Object[])null
-          );
-        offset = 2;
-      }
-      else {
-        condition = null;
-        offset = 0;
-      }
+    	ApplicationContext app = this.view.getApplicationContext();
+    	GridControl gridControl = this.getGridControl();      
+    	this.filterValues.put(
+    		filterName, 
+    		this.currentFilterValue = (filterValues == null ? "" : filterValues)
+    	);
+    	// clear column sort indicators if new filter is set
+    	if(!add) {
+    		this.columnSortOrders.clear();
+    		this.columnSortOrders.putAll(
+    			gridControl.getInitialColumnSortOrders()
+    		);
+    	}    
+    	// find column with given column title
+    	for(
+    		int i = 0; 
+    		(i < gridControl.getObjectContainer().getMember().size()) && (i < MAX_COLUMNS); 
+    		i++
+    	) {
+    		org.openmdx.ui1.jmi1.ValuedField column = (org.openmdx.ui1.jmi1.ValuedField)gridControl.getObjectContainer().getMember().get(i);
+    		if(filterName.equals(column.getFeatureName())) {
+    			Filter baseFilter = add ? this.currentFilter : this.getFilter("All");
+    			List<Condition> conditions = new ArrayList<Condition>(
+    				baseFilter.getCondition()  
+    			);
+    			Extension extension = baseFilter.getExtension();
+    			if(extension != null) {
+    				extension = extension.clone();
+    			}
+    			// Number
+    			if(column instanceof org.openmdx.ui1.jmi1.NumberField) {
+    				// Code
+    				if(
+    					(app.getCodes() != null) &&
+    					(app.getCodes().getShortText(column.getQualifiedFeatureName(), (short)0, true, true) != null)
+    				) {
+    					SysLog.detail("Code filter values", filterValues);
+    					Map shortTexts = app.getCodes().getShortText(
+    						column.getQualifiedFeatureName(),
+    						app.getCurrentLocaleAsIndex(),
+    						false,
+    						true
+    					);
+    					StringTokenizer andExpr = new StringTokenizer(filterValues, "&");
+    					while(andExpr.hasMoreTokens()) {
+    						ConditionParser parser = app.getPortalExtension().getConditionParser(
+    							column, 
+    							new IsInCondition(
+    								Quantifier.THERE_EXISTS,
+    								column.getFeatureName(),
+    								true,
+    								(Object[])null
+    							)
+    						);
+    						List<Object> values = new ArrayList();
+    						StringTokenizer orExpr = new StringTokenizer(andExpr.nextToken().trim(), ";");
+    						Condition condition = null;
+    						while(orExpr.hasMoreTokens()) {
+    							String token = orExpr.nextToken().trim();
+    							condition = parser.parse(token);
+    							try {
+    								String trimmedToken = token.substring(
+    									parser.getOffset()
+    								).trim();
+    								Short code = (Short)shortTexts.get(trimmedToken);
+    								if(code == null) {
+    									try {
+    										code = new Short(trimmedToken);
+    									} catch(Exception e) {}
+    								}
+    								if(code == null) {
+    									SysLog.detail("can not map token " + trimmedToken + " to code");
+    									values.add((short)-1);
+    								}
+    								else {
+    									values.add(code);
+    								}
+    							} catch(NumberFormatException e) {}
+    						}
+    						if(!values.isEmpty()) {
+    							condition.setValue(values.toArray());
+    							conditions.add(condition);
+    						}
+    					}
+    				}
+    				// Number
+    				else {
+    					SysLog.detail("Number filter values", filterValues);
+    					StringTokenizer andExpr = new StringTokenizer(filterValues, "&");
+    					while(andExpr.hasMoreTokens()) {
+    						ConditionParser parser = app.getPortalExtension().getConditionParser(
+    							column, 
+    							new IsInCondition(
+    								Quantifier.THERE_EXISTS,
+    								column.getFeatureName(),
+    								true,
+    								(Object[])null
+    							)
+    						);
+    						List<Object> values = new ArrayList();
+    						Condition condition = null;
+    						StringTokenizer orExpr = new StringTokenizer(andExpr.nextToken().trim(), ";");
+    						while(orExpr.hasMoreTokens()) {
+    							String token = orExpr.nextToken().trim();
+    							condition = parser.parse(token);
+    							BigDecimal num = app.parseNumber(
+    								token.substring(parser.getOffset()).trim()
+    							);
+    							if(num != null) {        
+    								// Only integers as filter values. BigDecimal
+    								// should not be used because serializing of
+    								// filters with XMLEncoder does not work
+    								values.add(
+    									new Long(num.longValue())
+    								);
+    							}
+    						}
+    						if(!values.isEmpty()) {
+    							condition.setValue(
+    								values.toArray(new Object[values.size()])
+    							);
+    							conditions.add(
+    								condition
+    							);
+    						}
+    					}
+    				}
+    			}
+    			// Date
+    			else if(column instanceof org.openmdx.ui1.jmi1.DateField) {
+    				SysLog.detail("Date filter values", filterValues);
+    				SimpleDateFormat dateParser = (SimpleDateFormat)SimpleDateFormat.getDateInstance(
+    					java.text.DateFormat.SHORT,
+    					this.getCurrentLocale()
+    				);            
+    				StringTokenizer andExpr = new StringTokenizer(filterValues, "&");
+    				while(andExpr.hasMoreTokens()) {
+    					ConditionParser parser = app.getPortalExtension().getConditionParser(
+    						column, 
+    						new IsBetweenCondition(
+    							Quantifier.THERE_EXISTS,
+    							column.getFeatureName(),
+    							true,
+    							null, 
+    							null
+    						)
+    					);
+    					Condition condition = null;
+    					List<Object> values = new ArrayList();
+    					StringTokenizer orExpr = new StringTokenizer(andExpr.nextToken().trim(), ";");
+    					while(orExpr.hasMoreTokens()) {
+    						String token = orExpr.nextToken().trim();
+    						condition = parser.parse(token);
+    						try {
+    							values.add(
+    								dateParser.parse(token.substring(parser.getOffset()).trim())
+   								);
+    						} catch(ParseException e) {}
+    					}
+    					if(
+    						(condition instanceof IsBetweenCondition) &&
+    						(values.size() < 2)
+    					) {
+    						Date day;
+    						if(values.isEmpty()) {
+    							day = new Date();
+    						} else try {
+    							day = (Date)values.get(0);
+    						} catch(IllegalArgumentException e) {
+    							day = new Date();
+    						}
+    						Calendar nextDay = new GregorianCalendar();
+    						nextDay.setTime(day);
+    						nextDay.add(Calendar.DAY_OF_MONTH, 1);
+    						values.clear();
+    						values.add(day);
+    						values.add(nextDay.getTime());
+    					}
+    					if(!values.isEmpty()) {
+    						condition.setValue(
+    							values.toArray(new Object[values.size()])
+    						);
+    						conditions.add(
+    							condition
+    						);
+    					}
+    				}
+    			}
+    			// Boolean
+    			else if(column instanceof org.openmdx.ui1.jmi1.CheckBox) {
+    				SysLog.detail("Boolean filter values", filterValues);
+    				List values = new ArrayList();
+    				StringTokenizer tokenizer = new StringTokenizer(filterValues, ";");
+    				while(tokenizer.hasMoreTokens()) {
+    					String token = tokenizer.nextToken();
+    					if(app.getTexts().getTrueText().equals(token)) {
+    						values.add(
+    							Boolean.TRUE
+    						);
+    					}
+    					else {
+    						values.add(
+    							Boolean.FALSE
+    						);
+    					}
+    				}
+    				if(!values.isEmpty()) {
+    					conditions.add(
+    						new IsInCondition(
+    							Quantifier.THERE_EXISTS,
+    							column.getFeatureName(),
+    							true,
+    							values.toArray(new Object[values.size()])
+    						)
+    					);
+    				}
+    			}
+    			// String
+    			else {
+    				SysLog.detail("String filter values", filterValues);
+    				Pattern pattern = Pattern.compile("[\\s\\&]*(?:(?:\"([^\"]*)\")|([^\\s\"\\&]+))");
+    				Matcher matcher = pattern.matcher(filterValues);
+    				while(matcher.find()) {
+    					for(int j = 1; j <= matcher.groupCount(); j++) {
+    						String andExpr = matcher.group(j);
+    						if(andExpr != null) {
+    							// if getQuery() returns a query extension it must be merged with 
+    							// the base query which might also contain a query extension
+    							org.openmdx.base.query.Filter query = app.getPortalExtension().getQuery(
+    								column,
+    								andExpr,
+    								extension == null ? 0 : extension.getStringParam().size(),
+    								app
+    							);
+    							if(query != null) {
+    								conditions.addAll(query.getCondition());
+    								Extension queryExtension = query.getExtension();
+    								if(queryExtension != null) {
+    									//
+    									// Merge base query with returned query
+    									//
+    									if(extension == null) {
+    										extension = queryExtension.clone();
+    									} 
+    									else {
+    										// Merged clause
+    										extension.setClause(
+    											extension.getClause() + " AND " + queryExtension.getClause()
+    										);
+    										// Merged string parameter
+    										extension.getStringParam().addAll(
+    											queryExtension.getStringParam()
+    										);
+    									}
+    								}
+    							} 
+    							else {
+    								ConditionParser conditionParser = app.getPortalExtension().getConditionParser(
+    									column, 
+    									new IsLikeCondition(
+        									Quantifier.THERE_EXISTS,
+        									column.getFeatureName(),
+        									true,
+        									(Object[])null
+        								)
+    								);
+    								Condition condition = null;
+    								List<Object> values = new ArrayList();
+    								StringTokenizer orExpr = new StringTokenizer(andExpr.trim(), ";");
+    								while(orExpr.hasMoreTokens()) {
+    									String token = orExpr.nextToken().trim();
+    									condition = conditionParser.parse(token);
+    									String trimmedToken = token.substring(conditionParser.getOffset()).trim();
+    									if(condition instanceof IsLikeCondition) {
+    										trimmedToken = app.getWildcardFilterValue(trimmedToken);
+    									}
+    									values.add(trimmedToken);
+    								}
+    								if(!values.isEmpty()) {
+    									condition.setValue(values.toArray());
+    									conditions.add(condition);
+    								}
+    							}
+    						}
+    					}
+    				}
+    			}          
+    			this.currentFilter = new Filter(
+    				column.getFeatureName(),
+    				null,
+    				"",
+    				WebKeys.ICON_DEFAULT,
+    				null,
+    				conditions,
+    				null, // order
+    				extension,
+    				this.getGridControl().getContainerId(), 
+    				this.view.getApplicationContext().getCurrentUserRole(), 
+    				this.view.getObjectReference().refMofId()               
+    			);
+    			break;
+    		}
+    	}
+    	SysLog.detail("selected filter", this.currentFilter);
+    	this.numberOfPages = Integer.MAX_VALUE;
+    	this.setPage(
+    		0,
+    		newPageSize
+    	);
     }
-    
-    public int getOffset(
-    ) {
-      return this.offset;
-    }
-    
-    public Condition getCondition(
-    ) {
-      return this.condition;
-    }
-    
-    private final int offset;
-    private final Condition condition;
-  }
-
-  //-------------------------------------------------------------------------
-  public void setColumnFilter(
-      String filterName,
-      String filterValues,
-      boolean add,
-      int newPageSize
-  ) {
-      ApplicationContext application = this.view.getApplicationContext();
-      GridControl gridControl = this.getGridControl();      
-      this.filterValues.put(
-    	  filterName, 
-    	  this.currentFilterValue = (filterValues == null ? "" : filterValues)
-      );    
-      // clear column sort indicators if new filter is set
-      if(!add) {
-          this.columnSortOrders.clear();
-          this.columnSortOrders.putAll(
-              gridControl.getInitialColumnSortOrders()
-          );   
-      }    
-    // find column with given column title
-    for(
-        int i = 0; 
-        (i < gridControl.getObjectContainer().getMember().size()) && (i < MAX_COLUMNS); 
-        i++
-    ) {
-
-        org.openmdx.ui1.jmi1.ValuedField column = (org.openmdx.ui1.jmi1.ValuedField)gridControl.getObjectContainer().getMember().get(i);
-        if(filterName.equals(column.getFeatureName())) {
-
-          Filter baseFilter = add ? this.currentFilter : this.getFilter("All");
-          List<Condition> conditions = new ArrayList<Condition>(
-        	  baseFilter.getCondition()  
-          );
-          Extension extension = baseFilter.getExtension();
-          if(extension != null) {
-        	  extension = extension.clone();
-          }
-          
-          // Number
-          if(column instanceof org.openmdx.ui1.jmi1.NumberField) {
-
-            // Code
-            if(
-                (application.getCodes() != null) &&
-                (application.getCodes().getShortText(column.getQualifiedFeatureName(), (short)0, true, true) != null)
-            ) {
-              SysLog.detail("Code filter values", filterValues);
-              Map shortTexts = application.getCodes().getShortText(
-                column.getQualifiedFeatureName(),
-                application.getCurrentLocaleAsIndex(),
-                false,
-                true
-              );
-              StringTokenizer andExpr = new StringTokenizer(filterValues, "&");
-              while(andExpr.hasMoreTokens()) {
-                Condition condition = 
-                  new IsInCondition(
-                	  Quantifier.THERE_EXISTS,
-                    column.getFeatureName(),
-                    true,
-                    (Object[])null
-                  );
-                List values = new ArrayList();
-                StringTokenizer orExpr = new StringTokenizer(andExpr.nextToken().trim(), ";");
-                while(orExpr.hasMoreTokens()) {
-                  String token = orExpr.nextToken().trim();
-                  ConditionParser conditionParser = new ConditionParser(
-                    token,
-                    column.getFeatureName()
-                  );
-                  if(conditionParser.getCondition() != null) {
-                    condition = conditionParser.getCondition();
-                  }
-                  try {
-                    String trimmedToken = token.substring(
-                      conditionParser.getOffset()
-                    ).trim();
-                    Short code = (Short)shortTexts.get(trimmedToken);
-                    if(code == null) {
-                      try {
-                        code = new Short(trimmedToken);
-                      } 
-                      catch(Exception e) {}
-                    }
-                    if(code == null) {
-                    	SysLog.detail("can not map token " + trimmedToken + " to code");
-                    	values.add((short)-1);
-                    }
-                    else {
-                      values.add(code);
-                    }
-                  }
-                  catch(NumberFormatException e) {}
-                }
-                if(values.size() > 0) {
-                    condition.setValue(values.toArray());
-                    conditions.add(condition);
-                }
-              }
-            }
-            
-            // Number
-            else {
-              SysLog.detail("Number filter values", filterValues);
-              StringTokenizer andExpr = new StringTokenizer(filterValues, "&");
-              while(andExpr.hasMoreTokens()) {
-                Condition condition = 
-                  new IsInCondition(
-                	  Quantifier.THERE_EXISTS,
-                    column.getFeatureName(),
-                    true,
-                    (Object[])null
-                  );
-                List values = new ArrayList();
-                StringTokenizer orExpr = new StringTokenizer(andExpr.nextToken().trim(), ";");
-                while(orExpr.hasMoreTokens()) {
-                  String token = orExpr.nextToken().trim();
-                  ConditionParser conditionParser = new ConditionParser(
-                    token,
-                    column.getFeatureName()
-                  );
-                  if(conditionParser.getCondition() != null) {
-                      condition = conditionParser.getCondition();
-                  }
-                  BigDecimal num = application.parseNumber(
-                      token.substring(conditionParser.getOffset()).trim()
-                  );
-                  if(num != null) {        
-                      // Only integers as filter values. BigDecimal
-                      // should not be used because serializing of
-                      // filters with XMLEncoder does not work
-                      values.add(
-                          new Long(num.longValue())
-                      );
-                  }
-                }
-                if(values.size() > 0) {
-                    condition.setValue(
-                      values.toArray(new Object[values.size()])
-                    );
-                    conditions.add(
-                      condition
-                    );
-                }
-              }
-            }
-          }
-          
-          // Date
-          else if(column instanceof org.openmdx.ui1.jmi1.DateField) {
-        	SysLog.detail("Date filter values", filterValues);
-            SimpleDateFormat dateParser = (SimpleDateFormat)SimpleDateFormat.getDateInstance(
-                java.text.DateFormat.SHORT,
-                this.getCurrentLocale()
-            );            
-            StringTokenizer andExpr = new StringTokenizer(filterValues, "&");
-            while(andExpr.hasMoreTokens()) {
-              Condition condition = 
-                new IsBetweenCondition(
-                	Quantifier.THERE_EXISTS,
-                  column.getFeatureName(),
-                  true,
-                  null, 
-                  null
-                );
-              List values = new ArrayList();
-              StringTokenizer orExpr = new StringTokenizer(andExpr.nextToken().trim(), ";");
-              while(orExpr.hasMoreTokens()) {
-                String token = orExpr.nextToken().trim();
-                ConditionParser conditionParser = new ConditionParser(
-                  token,
-                  column.getFeatureName()
-                );
-                if(conditionParser.getCondition() != null) {
-                  condition = conditionParser.getCondition();
-                }
-                try {
-                  values.add(
-                      dateParser.parse(token.substring(conditionParser.getOffset()).trim())
-                  );
-                }
-                catch(ParseException e) {}
-              }
-              if(
-                  (condition instanceof IsBetweenCondition) &&
-                  (values.size() < 2)
-              ) {
-                  Date day;
-                  if(values.isEmpty()) {
-                	  day = new Date();
-                  } else try {
-                      day = (Date)values.get(0);
-                  } catch(IllegalArgumentException e) {
-                	  day = new Date();
-                  }
-                  Calendar nextDay = new GregorianCalendar();
-                  nextDay.setTime(day);
-                  nextDay.add(Calendar.DAY_OF_MONTH, 1);
-                  values.clear();
-                  values.add(day);
-                  values.add(nextDay.getTime());
-              }
-              if(!values.isEmpty()) {
-                  condition.setValue(
-                    values.toArray(new Object[values.size()])
-                  );
-                  conditions.add(
-                    condition
-                  );
-              }
-            }
-          }
-
-          // Boolean
-          else if(column instanceof org.openmdx.ui1.jmi1.CheckBox) {
-        	SysLog.detail("Boolean filter values", filterValues);
-            List values = new ArrayList();
-            StringTokenizer tokenizer = new StringTokenizer(filterValues, ";");
-            while(tokenizer.hasMoreTokens()) {
-              String token = tokenizer.nextToken();
-              if(application.getTexts().getTrueText().equals(token)) {
-                values.add(
-                  Boolean.TRUE
-                );
-              }
-              else {
-                values.add(
-                  Boolean.FALSE
-                );
-              }
-            }
-            if(values.size() > 0) {
-                conditions.add(
-                  new IsInCondition(
-                	  Quantifier.THERE_EXISTS,
-                    column.getFeatureName(),
-                    true,
-                    values.toArray(new Object[values.size()])
-                  )
-                );
-            }
-          }
-
-          // String
-          else {
-        	  SysLog.detail("String filter values", filterValues);
-              Pattern pattern = Pattern.compile("[\\s\\&]*(?:(?:\"([^\"]*)\")|([^\\s\"\\&]+))");
-              Matcher matcher = pattern.matcher(filterValues);
-              while(matcher.find()) {
-                  for(int j = 1; j <= matcher.groupCount(); j++) {
-                      String andExpr = matcher.group(j);
-                      if(andExpr != null) {
-                    	  // if getQuery() returns a query filter it must be merged with 
-                    	  // the base query which might also contain a query filter
-                    	  org.openmdx.base.query.Filter query = application.getPortalExtension().getQuery(
-                              column,
-                              andExpr,
-                              extension == null ? 0 : extension.getStringParam().size(),
-                              application
-                          );
-                    	  if(query != null) {
-                			  conditions.addAll(query.getCondition());
-                			  Extension queryExtension = query.getExtension();
-                			  if(queryExtension != null) {
-                    			  //
-	                    		  // Merge base query with returned query
-                    			  //
-                				  if(extension == null) {
-                					  extension = queryExtension.clone();
-                				  } else {
-                					  // Merged clause
-                					  extension.setClause(
-                						  extension.getClause() + " AND " + queryExtension.getClause()
-                					  );
-                					  // Merged string parameter
-                					  extension.getStringParam().addAll(
-                						  queryExtension.getStringParam()
-                					  );
-                				  }
-                			  }
-                    	  } else {
-                              Condition condition = new IsLikeCondition(
-                            	  Quantifier.THERE_EXISTS,
-                                  column.getFeatureName(),
-                                  true,
-                                  (Object[])null
-                              );
-                              List values = new ArrayList();
-                              StringTokenizer orExpr = new StringTokenizer(andExpr.trim(), ";");
-                              while(orExpr.hasMoreTokens()) {
-                                  String token = orExpr.nextToken().trim();
-                                  ConditionParser conditionParser = new ConditionParser(
-                                      token,
-                                      column.getFeatureName()
-                                  );
-                                  if(conditionParser.getCondition() != null) {
-                                      condition = conditionParser.getCondition();
-                                  }
-                                  String trimmedToken = token.substring(conditionParser.getOffset()).trim();
-                                  if(condition instanceof IsLikeCondition) {
-                                      trimmedToken = application.getWildcardFilterValue(trimmedToken);
-                                  }
-                                  values.add(trimmedToken);
-                              }
-                              if(!values.isEmpty()) {
-                                  condition.setValue(values.toArray());
-                                  conditions.add(condition);
-                              }
-                          }
-                      }
-                  }
-              }
-          }          
-          this.currentFilter = new Filter(
-              column.getFeatureName(),
-              null,
-              "",
-              WebKeys.ICON_DEFAULT,
-              null,
-              conditions,
-              null, // order
-              extension,
-              this.getGridControl().getContainerId(), 
-              this.view.getApplicationContext().getCurrentUserRole(), 
-              this.view.getObjectReference().refMofId()               
-          );
-          break;
-        }
-    }
-    SysLog.detail("selected filter", this.currentFilter);
-    this.numberOfPages = Integer.MAX_VALUE;
-    this.setPage(
-        0,
-        newPageSize
-    );
-  }
   
   //-------------------------------------------------------------------------
   public void setOrder(
@@ -1513,6 +1463,17 @@ public abstract class Grid
     }
   
     //-------------------------------------------------------------------------
+    public boolean hasFilterValues(
+    ) {
+    	for(String filterValue: this.filterValues.values()) {
+    		if(filterValue != null && filterValue.length() != 0) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
+    //-------------------------------------------------------------------------
     public String getFilterValue(
 	    String filterName
     ) {
@@ -1533,7 +1494,7 @@ public abstract class Grid
         GridControl gridControl = this.getGridControl();
         int paneIndex = gridControl.getPaneIndex();
         return new Action(
-            Action.EVENT_SET_PAGE,
+            GridSetPageAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getRefObject().refMofId()),
                 new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(paneIndex)), 
@@ -1555,7 +1516,7 @@ public abstract class Grid
         HtmlEncoder_1_0 encoder = application.getHtmlEncoder();
         return
             new Action(
-                Action.EVENT_SELECT_FILTER,
+                GridSelectFilterAction.EVENT_ID,
                 new Action.Parameter[]{
                     new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.view.getRefObject().refMofId()),
                     new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(gridControl.getPaneIndex())),
@@ -1602,7 +1563,7 @@ public abstract class Grid
     }
     
     //-------------------------------------------------------------------------
-    public Action getColumnOrderSetAction(
+    public Action getTogglingColumnOrderAction(
         String forFeature
     ) {
       ApplicationContext application = this.view.getApplicationContext();  
@@ -1616,7 +1577,7 @@ public abstract class Grid
         switch(SortOrder.valueOf(order)) {
           case UNSORTED:
             return new Action(
-              Action.EVENT_SET_ORDER_ASC,
+              GridSetOrderAscendingAction.EVENT_ID,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
                   new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),       
@@ -1629,7 +1590,7 @@ public abstract class Grid
             );
           case ASCENDING:
             return new Action(
-              Action.EVENT_SET_ORDER_DESC,
+              GridSetOrderDescendingAction.EVENT_ID,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
                   new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),       
@@ -1642,7 +1603,7 @@ public abstract class Grid
             );
           case DESCENDING:
             return new Action(
-              Action.EVENT_SET_ORDER_ANY,
+              GridSetOrderAnyAction.EVENT_ID,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
                   new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),       
@@ -1683,7 +1644,7 @@ public abstract class Grid
         switch(SortOrder.valueOf(order)) {
           case UNSORTED:
             return new Action(
-              Action.EVENT_ADD_ORDER_ASC,
+              GridAddOrderAscendingAction.EVENT_ID,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
                   new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),       
@@ -1695,7 +1656,7 @@ public abstract class Grid
             );
           case ASCENDING:
             return new Action(
-              Action.EVENT_ADD_ORDER_DESC,
+              GridAddOrderDescendingAction.EVENT_ID,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
                   new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),       
@@ -1707,7 +1668,7 @@ public abstract class Grid
             );
           case DESCENDING:
             return new Action(
-              Action.EVENT_ADD_ORDER_ANY,
+              GridAddOrderAnyAction.EVENT_ID,
               new Action.Parameter[]{
                   new Action.Parameter(Action.PARAMETER_PANE, "" + paneIndex), 
                   new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),       
@@ -1776,9 +1737,13 @@ public abstract class Grid
             UserSettings.PAGE_ALIGNMENT
         );
         if(application.getSettings().getProperty(gridAlignmentPropertyName) != null) {
-            return Short.parseShort(application.getSettings().getProperty(gridAlignmentPropertyName));
+            return Short.valueOf(application.getSettings().getProperty(gridAlignmentPropertyName));
         }
-        else {
+        else if(application.getSettings().getProperty(UserSettings.GRID_DEFAULT_ALIGNMENT_IS_WIDE) != null) {
+        	return Boolean.valueOf(application.getSettings().getProperty(UserSettings.GRID_DEFAULT_ALIGNMENT_IS_WIDE)) ?
+        		ALIGNMENT_WIDE : 
+        			ALIGNMENT_NARROW;
+        } else {        
             return ALIGNMENT_NARROW;
         }
     }
@@ -1821,8 +1786,8 @@ public abstract class Grid
       short alignment = this.getAlignment();
       return new Action(
           alignment == ALIGNMENT_NARROW
-              ? Action.EVENT_SET_GRID_ALIGNMENT_WIDE
-              : Action.EVENT_SET_GRID_ALIGNMENT_NARROW,
+              ? GridSetAlignmentWideAction.EVENT_ID
+              : GridSetAlignmentNarrowAction.EVENT_ID,
           new Action.Parameter[]{
               new Action.Parameter(Action.PARAMETER_PANE, "" + gridControl.getPaneIndex()),                      
               new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),       
@@ -1846,8 +1811,8 @@ public abstract class Grid
         boolean showRowsOnInit = this.showGridContentOnInit();
         return new Action(
           showRowsOnInit
-              ? Action.EVENT_SET_HIDE_ROWS_ON_INIT
-              : Action.EVENT_SET_SHOW_ROWS_ON_INIT,
+              ? GridSetHideRowsOnInitAction.EVENT_ID
+              : GridSetShowRowsOnInitAction.EVENT_ID,
           new Action.Parameter[]{
               new Action.Parameter(Action.PARAMETER_PANE, "" + gridControl.getPaneIndex()),                      
               new Action.Parameter(Action.PARAMETER_REFERENCE, gridControl.getId()),       
@@ -1911,6 +1876,8 @@ public abstract class Grid
     private final Action[] objectCreators;
     private final Action addObjectAction;
     private final Action removeObjectAction;
+    private final Action moveUpObjectAction;
+    private final Action moveDownObjectAction;
     private final Action multiDeleteAction;
     private final Action saveAction;
     private final Action setCurrentFilterAsDefaultAction;

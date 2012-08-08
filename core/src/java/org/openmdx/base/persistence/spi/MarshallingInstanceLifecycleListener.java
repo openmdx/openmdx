@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: MarshallingInstanceLifecycleListener.java,v 1.4 2010/04/19 11:27:09 hburger Exp $
+ * Name:        $Id: MarshallingInstanceLifecycleListener.java,v 1.5 2011/04/12 15:44:02 hburger Exp $
  * Description: Dispatching Instance Life-Cycle Listener
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/19 11:27:09 $
+ * Date:        $Date: 2011/04/12 15:44:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -71,6 +71,7 @@ import org.openmdx.kernel.log.SysLog;
  * <li>to the marshalled persistent instances
  * </ol>
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class MarshallingInstanceLifecycleListener extends InstanceLifecycleListenerRegistry {
 
     /**
@@ -118,7 +119,6 @@ public class MarshallingInstanceLifecycleListener extends InstanceLifecycleListe
      * 
      * @return the persistence capable object to which the event belongs
      */
-    @SuppressWarnings("unchecked")
     private Object getPersistenceCapable(
         InstanceLifecycleEvent event, 
         boolean reluctant

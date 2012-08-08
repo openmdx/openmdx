@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: PackageMapper.java,v 1.2 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: PackageMapper.java,v 1.3 2011/04/12 15:29:26 hburger Exp $
  * Description: JMI Package Template 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2011/04/12 15:29:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -69,7 +69,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 /**
  * JMI Package template
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class PackageMapper
     extends AbstractMapper {
 
@@ -201,7 +201,7 @@ public class PackageMapper
         );
         this.pw.println("  public " + this.getType(structDef.getQualifiedName()) + " " + methodName + "(");
         int ii = 0;
-        for (Iterator i = structDef.getFields().iterator(); i.hasNext(); ii++) {
+        for (Iterator<?> i = structDef.getFields().iterator(); i.hasNext(); ii++) {
             StructuralFeatureDef fieldDef = (StructuralFeatureDef) i.next();
             String separator = ii == 0
                 ? "      "

@@ -2,7 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public interface Constrains extends RefAssociation {
     public boolean exists(Constraint constraint, ModelElement constrainedElement);
     public java.util.Collection getConstraint(ModelElement constrainedElement);

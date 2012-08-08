@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StandardMarshaller.java,v 1.1 2010/10/28 06:50:47 hburger Exp $
+ * Name:        $Id: StandardMarshaller.java,v 1.2 2011/04/12 16:07:31 hburger Exp $
  * Description: Standard Marshaller 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/28 06:50:47 $
+ * Date:        $Date: 2011/04/12 16:07:31 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -79,7 +79,7 @@ import org.w3c.cci2.SparseArray;
 /**
  * Class StandardMarshaller
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class StandardMarshaller implements Marshaller {
 
 	/**
@@ -132,8 +132,12 @@ public class StandardMarshaller implements Marshaller {
         try {
             return source instanceof Object[] ? marshal(
                 (Object[])source
-            ) : source instanceof PersistenceCapable ? this.outermostPackage.marshal(
-                source
+            ) : source instanceof Container ? Classes.newProxyInstance(
+                new Jmi1ContainerInvocationHandler(this, (Container)source),
+                source.getClass().getInterfaces()[0], 
+                RefContainer.class, 
+                PersistenceCapableCollection.class,
+                Serializable.class 
             ) : source instanceof List ? marshal(
                 (List)source
             ) : source instanceof Set ? new MarshallingSet(
@@ -143,14 +147,10 @@ public class StandardMarshaller implements Marshaller {
                 new MarshallingSortedMap(this, (SparseArray)source)
             ) : source instanceof Iterator ? new MarshallingIterator(
                 (Iterator)source
-            ) : source instanceof Container ? Classes.newProxyInstance(
-                new Jmi1ContainerInvocationHandler(this, (Container)source),
-                source.getClass().getInterfaces()[0], 
-                RefContainer.class, 
-                PersistenceCapableCollection.class,
-                Serializable.class 
             ) : source instanceof Record ? this.outermostPackage.refCreateStruct(
                 (Record)source
+            ) : source instanceof PersistenceCapable ? this.outermostPackage.marshal(
+                source
             ) : source;
         }  catch (ServiceException exception) {
             throw new RuntimeServiceException(exception);

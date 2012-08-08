@@ -2,8 +2,8 @@
  * ==================================================================== Project:
  * openmdx, http://www.openmdx.org/ Name: $Id: LayerConfigurationEntries.java,v
  * 1.37 2006/11/17 16:55:57 hburger Exp $ Description: Generated constants for
- * LayerConfigurationEntries Revision: $Revision: 1.11 $ Owner: OMEX AG,
- * Switzerland, http://www.omex.ch Date: $Date: 2010/11/18 15:44:34 $
+ * LayerConfigurationEntries Revision: $Revision: 1.18 $ Owner: OMEX AG,
+ * Switzerland, http://www.omex.ch Date: $Date: 2012/01/07 01:37:44 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -42,6 +42,7 @@ package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 
 
 
+
 /**
  * The <code>PersistenceLayerConfigurationEntries</code> class contains
  * constants identifying the configuration entries of the dataprovider's
@@ -49,9 +50,12 @@ package org.openmdx.application.dataprovider.layer.persistence.jdbc;
  */
 public class LayerConfigurationEntries extends org.openmdx.application.dataprovider.layer.persistence.common.CommonConfigurationEntries {
 
-  
+
+  /**
+   * Avoid instantiation
+   */
   protected LayerConfigurationEntries() {
-   // Avoid instantiation
+      super();
   }
 
   /**
@@ -65,19 +69,6 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
    */
   static public final String DATE_TIME_PRECISION = "dateTimePrecision";
   
-  /**
-     * OPTIMIZED_TYPE list of optimized types. Objects with matching paths are
-     * stored in optimized tables (attributes in separate rows).
-     */
-  static public final String OPTIMIZED_TYPE = "optimizedType";
-
-  /**
-     * OPTIMIZED_TABLE list of optimized tables. For each optimizedType there
-     * must be a corresponding optimized table. An optimized table can be any
-     * string which is a valid SQL table name.
-     */
-  static public final String OPTIMIZED_TABLE = "optimizedTable";
-
   /**
      * COLUMN_NAME_FROM defines the corresponding 'from' column name for a
      * (from-column-name,to-column-name) mapping.
@@ -184,12 +175,24 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
   static public final String DB_OBJECT_FORMAT_SLICED = "sliced";
   
   /**
+   * Optimizes slicing with separate multi-value tables.
+   * Empty slices are unnecessary,
+   */
+  static public final String DB_OBJECT_FORMAT_SLICED2 = "sliced2";
+
+  /**
      * The 'slicedNonIndexed' format of a DB_OBJECT contains one object in one
      * row. The schema of a DB_OBJECT with format 'slicedNonIndexed' is:
      * object_objectId, object_referenceId, \u00aba0\u00bb, ..., \u00aban\u00bb$
      */
   static public final String DB_OBJECT_FORMAT_SLICED_NON_INDEXED = "slicedNonIndexed";
 
+  /**
+   * The 'slicedNonIndexed' format of a DB_OBJECT contains one object in one
+   * row. The schema of a DB_OBJECT with format 'slicedNonIndexed' is:
+   * object_objectId, object_referenceId, \u00aba0\u00bb, ..., \u00aban\u00bb$
+   */
+ static public final String DB_OBJECT_FORMAT_SLICED2_NON_INDEXED = "sliced2NonIndexed";
 
   /**
      * The 'slicedParentRidOnly' format of a DB_OBJECT contains an index-slice
@@ -201,6 +204,7 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
      * rid|oid.
      */
   static public final String DB_OBJECT_FORMAT_SLICED_PARENT_RID_ONLY = "slicedParentRidOnly";
+  static public final String DB_OBJECT_FORMAT_SLICED2_PARENT_RID_ONLY = "sliced2ParentRidOnly";
 
   /**
      * The 'slicedNonIndexedParentRidOnly' format of a DB_OBJECT contains an
@@ -217,6 +221,7 @@ public class LayerConfigurationEntries extends org.openmdx.application.dataprovi
      * \u00aba0\u00bb, ..., \u00aban\u00bb$
      */
   static public final String DB_OBJECT_FORMAT_SLICED_NON_INDEXED_PARENT_RID_ONLY = "slicedNonIndexedParentRidOnly";
+  static public final String DB_OBJECT_FORMAT_SLICED2_NON_INDEXED_PARENT_RID_ONLY = "sliced2NonIndexedParentRidOnly";
   
   /**
      * The format 'slicedWithIdAsKey' contains object slices. The schema is:
@@ -361,6 +366,17 @@ static public final String REFERENCE_ID_SUFFIX_ATTRIBUTES_SUFFIX = "referenceIdS
      */
   static public final String OBJECT_ID_PATTERN = "objectIdPattern";
 
+  /**
+   * Reference id pattern
+   * <p>
+   * Format: a white space separated list of 
+   * <code>&lt;feature-name&gt;=&lt;reference-id-pattern&gt;</code> entries, 
+   * e.g.<ul>
+   * <li><code>beforeImage=^([^.]+)[.](.+)$ object=^([^.]+)[.](.+)$</code>
+   * </ul>
+   */
+  static public final String REFERENCE_ID_PATTERN = "referenceIdPattern";
+  
   /**
      * NULL_AS_CHARACTER defines the CAST expression which is used to produce a
      * NULL string, e.g. CAST(NULL AS CHARACTER). Default value is 'NULL'.

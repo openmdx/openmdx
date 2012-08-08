@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingSet.java,v 1.17 2010/06/02 13:44:25 hburger Exp $
+ * Name:        $Id: MarshallingSet.java,v 1.18 2011/04/12 12:20:43 hburger Exp $
  * Description: Marshalling Set
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:44:25 $
+ * Date:        $Date: 2011/04/12 12:20:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,7 +59,6 @@ import org.openmdx.base.marshalling.Marshaller;
 /**
  * A Marshalling Set
  */
-@SuppressWarnings("unchecked")
 public class MarshallingSet<E>
     extends MarshallingCollection<E>
     implements Set<E>, Serializable
@@ -87,6 +86,7 @@ public class MarshallingSet<E>
      * @param marshaller
      * @param set
      */   
+    @SuppressWarnings("rawtypes")
     public MarshallingSet(
         Marshaller marshaller,
         Set set
@@ -102,6 +102,7 @@ public class MarshallingSet<E>
      * @param set
      *        A collection behaving like a set
      */
+    @SuppressWarnings("rawtypes")
     public MarshallingSet(
         Marshaller marshaller,
         Collection set
@@ -118,6 +119,7 @@ public class MarshallingSet<E>
      *        A collection behaving like a set
      * @param unmarshalling 
      */
+    @SuppressWarnings("rawtypes")
     public MarshallingSet(
         Marshaller marshaller,
         Collection set, 

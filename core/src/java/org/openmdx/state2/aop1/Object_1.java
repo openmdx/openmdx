@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Object_1.java,v 1.3 2010/06/30 13:12:21 hburger Exp $
+ * Name:        $Id: Object_1.java,v 1.5 2011/04/04 14:42:42 hburger Exp $
  * Description: Stated Object Interceptor
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/30 13:12:21 $
+ * Date:        $Date: 2011/04/04 14:42:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -56,8 +56,8 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.openmdx.base.accessor.cci.Container_1_0;
 import org.openmdx.base.accessor.cci.DataObject_1_0;
-import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.accessor.view.Interceptor_1;
+import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
@@ -114,9 +114,14 @@ public class Object_1 extends Interceptor_1 {
                 );
             }
             String type = ((Path)reference.objGetValue("type")).getBase();
+            //
+            // A state capable container is required even if there is no state context  
+            // in order to avoid the returning of states not requested explicitly.
+            //
             container = reference.getModel().isSubtypeOf(type, "org:openmdx:state2:StateCapable") ? new StateCapableContainer_1(
                 this.self,
-                dataObject.objGetContainer(feature)
+                dataObject.objGetContainer(feature), 
+                type
             ) : super.objGetContainer(
                 feature
             );

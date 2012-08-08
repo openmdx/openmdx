@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DateValue.java,v 1.54 2010/09/08 09:41:08 wfro Exp $
+ * Name:        $Id: DateValue.java,v 1.58 2011/08/11 15:08:58 wfro Exp $
  * Description: DateValue 
- * Revision:    $Revision: 1.54 $
+ * Revision:    $Revision: 1.58 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/08 09:41:08 $
+ * Date:        $Date: 2011/08/11 15:08:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -137,7 +137,7 @@ public class DateValue
         return DateValue.getLocalizedDateFormatter(
             this.fieldDef.qualifiedFeatureName,
             true,
-            this.application
+            this.app
         );
     }
 
@@ -148,7 +148,7 @@ public class DateValue
         return DateValue.getLocalizedDateFormatter(
             this.fieldDef.qualifiedFeatureName,
             useEditStyle,
-            this.application
+            this.app
         );
     }
 
@@ -184,7 +184,7 @@ public class DateValue
         return DateValue.getLocalizedDateTimeFormatter(
             this.fieldDef.qualifiedFeatureName,
             true,
-            this.application
+            this.app
         );
     }
   
@@ -195,7 +195,7 @@ public class DateValue
         return DateValue.getLocalizedDateTimeFormatter(
             this.fieldDef.qualifiedFeatureName,
             useEditStyle,
-            this.application
+            this.app
         );
     }
   
@@ -237,16 +237,17 @@ public class DateValue
             return this.isDate()
                 ? dateFormatter.format(value)
                 : dateTimeFormatter.format(value);
-        }
-        else {
+        } else if(value instanceof XMLGregorianCalendar) {
             GregorianCalendar calendar = ((XMLGregorianCalendar)value).toGregorianCalendar(
-                TimeZone.getTimeZone(application.getCurrentTimeZone()),
-                this.application.getCurrentLocale(),
+                TimeZone.getTimeZone(app.getCurrentTimeZone()),
+                this.app.getCurrentLocale(),
                 null
             );
             return this.isDate()
                 ? dateFormatter.format(calendar.getTime())
                 : dateTimeFormatter.format(calendar.getTime());
+        } else {
+        	return value == null ? null : value.toString();
         }
     }
 
@@ -259,7 +260,7 @@ public class DateValue
         boolean shortFormat
     ) {
         String s = this.formatLocalized(v, forEditing).trim();
-        return this.application.getHtmlEncoder().encode(s, false);
+        return this.app.getHtmlEncoder().encode(s, false);
     }
 
     //-------------------------------------------------------------------------
@@ -340,7 +341,6 @@ public class DateValue
         String widthModifier,
         String rowSpanModifier,
         String readonlyModifier,
-        String disabledModifier,
         String lockedModifier,
         String stringifiedValue,
         boolean forEditing
@@ -348,7 +348,8 @@ public class DateValue
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();         
         label = this.getLabel(attribute, p, label);
         String title = this.getTitle(attribute, label);
-        if(forEditing) {
+        // Edit
+        if(forEditing && readonlyModifier.isEmpty()) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0) ? 
                 feature + "[" + Integer.toString(tabIndex) + "]" : 
@@ -359,12 +360,12 @@ public class DateValue
                     "valueR mandatory" :
                     "valueR";                
                 p.write("<td ", rowSpanModifier, ">");
-                p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"text\" class=\"", classModifier, "\"", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", stringifiedValue, "\"");
+                p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"text\" class=\"", classModifier, lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", stringifiedValue, "\"");
                 p.writeEventHandlers("    ", attribute.getEventHandler());
                 p.write("  >");
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, ">");
-                if(this.isChangeable() && this.isEnabled()) {
+                if(readonlyModifier.isEmpty()) {
                     if(this.isDate()) {
                         SimpleDateFormat dateFormatter = this.getLocalizedDateFormatter();
                         String calendarFormat = DateValue.getCalendarFormat(dateFormatter);
@@ -407,12 +408,12 @@ public class DateValue
                 p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"multiStringLocked\" rows=\"", Integer.toString(attribute.getSpanRow()), "\" cols=\"20\" readonly tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
                 p.write("</td>");
                 p. write("<td class=\"addon\" ", rowSpanModifier, ">");
-                if(this.isChangeable()) {
+                if(readonlyModifier.isEmpty()) {
                     if(this.isDate()) {
-                        p.write("        ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("10"), "; popup_", EditObjectControl.EDIT_DATES, " = ", EditObjectControl.EDIT_DATES, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_DATES, ", 'popup_", EditObjectControl.EDIT_DATES, "', $('", id, "'), new Array());\""));
+                        p.write("        ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; popup_", EditObjectControl.EDIT_DATES, " = ", EditObjectControl.EDIT_DATES, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_DATES, ", 'popup_", EditObjectControl.EDIT_DATES, "', $('", id, "'), new Array());\""));
                     }
                     else {
-                        p.write("        ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("10"), "; popup_", EditObjectControl.EDIT_DATETIMES, " = ", EditObjectControl.EDIT_DATETIMES, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_DATETIMES, ", 'popup_", EditObjectControl.EDIT_DATETIMES, "', $('", id, "'), new Array());\""));
+                        p.write("        ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; popup_", EditObjectControl.EDIT_DATETIMES, " = ", EditObjectControl.EDIT_DATETIMES, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_DATETIMES, ", 'popup_", EditObjectControl.EDIT_DATETIMES, "', $('", id, "'), new Array());\""));
                     }
                 }
                 p.write("</td>");
@@ -432,14 +433,13 @@ public class DateValue
                 widthModifier,
                 rowSpanModifier,
                 readonlyModifier,
-                disabledModifier,
                 lockedModifier,
                 stringifiedValue,
                 forEditing
             );
         }
     }
-        
+
     //-------------------------------------------------------------------------
     // Members
     //-------------------------------------------------------------------------

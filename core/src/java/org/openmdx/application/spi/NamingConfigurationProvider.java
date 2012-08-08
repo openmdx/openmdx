@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: NamingConfigurationProvider.java,v 1.3 2009/09/01 14:11:11 hburger Exp $
+ * Name:        $Id: NamingConfigurationProvider.java,v 1.5 2012/01/05 23:20:21 hburger Exp $
  * Description: Naming Configuration Provider
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/01 14:11:11 $
+ * Date:        $Date: 2012/01/05 23:20:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -70,6 +70,7 @@ import org.openmdx.kernel.exception.BasicException;
 /**
  * Naming Configuration Provider
  */
+@SuppressWarnings({"rawtypes"})
 public class NamingConfigurationProvider implements ConfigurationProvider_1_0 {
 
     /**
@@ -134,8 +135,7 @@ public class NamingConfigurationProvider implements ConfigurationProvider_1_0 {
     ) throws ServiceException {
         return new EnvironmentConfiguration(
             this.configurationContext,
-            section,
-            specification
+            section
         );   
     }
 
@@ -151,19 +151,14 @@ public class NamingConfigurationProvider implements ConfigurationProvider_1_0 {
 
         /**
          * Constructor
-         *
-         * @param       source
-         *              the ejb context
          * @param       section
          *              the section to be parsed, my be null
-         * @param       specification
-         *              the configurations specification, may be null
+         * @param       source
+         *              the ejb context
          */
-        @SuppressWarnings("unchecked")
         EnvironmentConfiguration(
             Context context,
-            String[] section,
-            Map specification
+            String[] section
         ) throws ServiceException {
             super();
             if(context != null) {

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Involvement_1.java,v 1.8 2010/10/25 09:35:21 hburger Exp $
+ * Name:        $Id: Involvement_1.java,v 1.12 2011/08/24 07:12:59 hburger Exp $
  * Description: Involvement_1 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/25 09:35:21 $
+ * Date:        $Date: 2011/08/24 07:12:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -67,8 +67,7 @@ import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
-import org.openmdx.base.mof.spi.ModelUtils;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.spi.ExtentCollection;
 import org.openmdx.base.persistence.spi.SharedObjects;
@@ -77,7 +76,6 @@ import org.openmdx.base.query.IsInCondition;
 import org.openmdx.base.query.IsInstanceOfCondition;
 import org.openmdx.base.query.IsLikeCondition;
 import org.openmdx.base.query.Quantifier;
-
 
 /**
  * Involvement_1
@@ -145,40 +143,31 @@ public class Involvement_1 extends Interceptor_1 {
         return modifiedFeatures;
     }
     
+    private static boolean areEqual(
+    	Object left,
+    	Object right
+    ){
+    	return left == null ? right == null : left.equals(right); 
+    }
+    
     private static boolean isFeatureModified(
         ModelElement_1_0 feature,
         ObjectView_1_0 beforeImage,
         ObjectView_1_0 afterImage
     ) throws ServiceException {
-        String multiplicity = ModelUtils.getMultiplicity(feature);
         String featureName = (String) feature.objGetValue("name");
-        Object left;
-        Object right;
-        if(
-            Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
-            Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
-        ) {
-            left = beforeImage.objGetValue(featureName);
-            right = afterImage.objGetValue(featureName);
-        } else if (
-            Multiplicities.LIST.equals(multiplicity)
-        ){
-            left = beforeImage.objGetList(featureName);
-            right = afterImage.objGetList(featureName);
-        } else if (
-            Multiplicities.SET.equals(multiplicity)
-        ){
-            left = beforeImage.objGetSet(featureName);
-            right = afterImage.objGetSet(featureName);
-        } else if (
-            Multiplicities.SPARSEARRAY.equals(multiplicity)
-        ){
-            left = beforeImage.objGetSparseArray(featureName);
-            right = afterImage.objGetSparseArray(featureName);
-        } else {
-            return false; // as we don't know...
+        switch(ModelHelper.getMultiplicity(feature)){
+	        case OPTIONAL: case SINGLE_VALUE: 
+	            return !areEqual(beforeImage.objGetValue(featureName), afterImage.objGetValue(featureName));
+	        case LIST:
+	        	return !beforeImage.objGetList(featureName).equals(afterImage.objGetList(featureName));
+	        case SET:
+	        	return !beforeImage.objGetSet(featureName).equals(afterImage.objGetSet(featureName));
+	        case SPARSEARRAY:
+	        	return !beforeImage.objGetSparseArray(featureName).equals(afterImage.objGetSparseArray(featureName));
+	        default:
+	            return false; // as we don't know...
         }
-        return left == null ? right != null : !left.equals(right);
     }
 
     

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Uml2ModelMapper.java,v 1.4 2009/11/05 17:46:23 hburger Exp $
+ * Name:        $Id: Uml2ModelMapper.java,v 1.7 2011/07/08 13:20:51 wfro Exp $
  * Description: Uml2ModelMapper
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/05 17:46:23 $
+ * Date:        $Date: 2011/07/08 13:20:51 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,13 +60,14 @@ import java.util.Map;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.ModelHelper;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.text.conversion.HtmlEncoder;
 import org.openmdx.base.text.conversion.UUIDConversion;
 import org.openmdx.kernel.id.UUIDs;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class Uml2ModelMapper {
 
     //---------------------------------------------------------------------------
@@ -309,7 +310,7 @@ public class Uml2ModelMapper {
         String multiplicity
     ) {
         // Multiplicity
-        if(Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
+        if(Multiplicity.SINGLE_VALUE.toString().equals(multiplicity)) {
             // Upper value
             pw.write(indent, 0, nTabs);
             pw.print("\t<upperValue");
@@ -326,7 +327,7 @@ public class Uml2ModelMapper {
             this.printAttribute("value", "1");
             pw.println("/>");                        
         }
-        else if(Multiplicities.OPTIONAL_VALUE.equals(multiplicity)) {
+        else if(Multiplicity.OPTIONAL.toString().equals(multiplicity)) {
             // Upper value
             pw.write(indent, 0, nTabs);
             pw.print("\t<upperValue");
@@ -342,7 +343,7 @@ public class Uml2ModelMapper {
             this.printAttribute("xmi:type", "uml:LiteralInteger");
             pw.println("/>");                        
         }
-        else if(Multiplicities.MULTI_VALUE.equals(multiplicity)) {
+        else if(ModelHelper.UNBOUNDED.equals(multiplicity)) {
             // Upper value
             pw.write(indent, 0, nTabs);
             pw.print("\t<upperValue");

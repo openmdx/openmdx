@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1_0.java,v 1.7 2010/11/30 14:11:43 hburger Exp $
+ * Name:        $Id: PlugIn_1_0.java,v 1.9 2011/12/29 03:06:35 hburger Exp $
  * Description: PlugIn_1_0 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/30 14:11:43 $
+ * Date:        $Date: 2011/12/29 03:06:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,7 @@ package org.openmdx.base.aop0;
 import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.rest.UnitOfWork_1;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 
 
 /**
@@ -104,15 +105,15 @@ public interface PlugIn_1_0 {
     );
     
     /**
-     * A plug-in may optionally provide user objects
+     * A plug-in may optionally provide objects
      * 
-     * @param key 
+     * @param type 
      * 
-     * @return the user object for the given key, or <code>null</code> if no 
+     * @return an object of the given type, or <code>null</code> if no 
      * such user object is provided by this plug-in
      */
-    Object getUserObject(
-        Object key
+    <T> T getPlugInObject(
+        Class<T> type
     );    
  
     /**
@@ -128,6 +129,24 @@ public interface PlugIn_1_0 {
      */
     boolean requiresCallbackOnCascadedDelete(
         DataObject_1 object
+    ) throws ServiceException;
+
+    /**
+     * This method is invoked by the data object validator
+     * in order to determine whether the given feature is 
+     * exempt from the standard validation.
+     * 
+     * @param object the object to be validated
+     * @param feature the feature's meta-data
+     * 
+     * @return <code>true</code> if the plug-in exempts the feature
+     * from the standard validation.
+     * 
+     * @throws ServiceException 
+     */
+    boolean isExemptFromValidation(
+        DataObject_1 object, 
+        ModelElement_1_0 feature
     ) throws ServiceException;
 
 }

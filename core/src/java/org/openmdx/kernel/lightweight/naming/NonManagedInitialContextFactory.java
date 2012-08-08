@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: NonManagedInitialContextFactory.java,v 1.2 2009/09/11 13:16:23 hburger Exp $
+ * Name:        $Id: NonManagedInitialContextFactory.java,v 1.3 2011/06/10 12:45:58 hburger Exp $
  * Description: Non-Managed Context Factory
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/11 13:16:23 $
+ * Date:        $Date: 2011/06/10 12:45:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -101,22 +101,17 @@ public class NonManagedInitialContextFactory implements InitialContextFactory {
             // Component Context Set-Up
             //
             Map<String,Object> transactionEnvironment = new HashMap<String,Object>();
-            LightweightTransactionManager transactionManager = new LightweightTransactionManager();
             transactionEnvironment.put(
                 "org.openmdx.comp.TransactionManager",
-                transactionManager
-            );
-            LightweightTransactionSynchronizationRegistry transactionSynchronizationRegistry = new LightweightTransactionSynchronizationRegistry(
-                transactionManager
+                LightweightTransactionManager.getInstance()
             );
             transactionEnvironment.put(
                 "org.openmdx.comp.TransactionSynchronizationRegistry",
-                transactionSynchronizationRegistry
+                LightweightTransactionSynchronizationRegistry.getInstance()
             );
-            LightweightUserTransaction userTransaction = new LightweightUserTransaction(transactionManager);                
             transactionEnvironment.put(
                 "org.openmdx.comp.UserTransaction",
-                userTransaction
+                LightweightUserTransaction.getInstance()
             );
             javaURLContextFactory.populate(transactionEnvironment);
             javaURLContextFactory.populate(System.getProperties());

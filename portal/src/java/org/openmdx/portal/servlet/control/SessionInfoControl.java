@@ -1,10 +1,10 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: SessionInfoControl.java,v 1.45 2009/09/30 16:08:51 wfro Exp $
+ * Name:        $Id: SessionInfoControl.java,v 1.48 2011/11/28 13:34:04 wfro Exp $
  * Description: SessionInfoControl
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/30 16:08:51 $
+ * Date:        $Date: 2011/11/28 13:34:04 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -91,7 +91,7 @@ public class SessionInfoControl
     ) {
         try {
             ApplicationContext app = p.getApplicationContext();
-            p.write("<span>", app.getLoginPrincipalId(), "</span>");
+            p.write("<span>", app.getLoginPrincipal(), "</span>");
         }
         catch(Exception e) {
             new ServiceException(e).log();
@@ -139,7 +139,7 @@ public class SessionInfoControl
             ApplicationContext app = p.getApplicationContext();            
             Action logoffAction = view.getLogoffAction();        
             if(!forEditing) {
-                p.write("<a class=\"", buttonClass, "\" href=\"#\" onclick=\"javascript:", p.getButtonEffectPulsate(), "window.location.href=", p.getEvalHRef(logoffAction), ";\">", logoffAction.getTitle(), "&nbsp;", app.getLoginPrincipalId(), "</a>");            
+                p.write("<a class=\"", buttonClass, "\" href=\"#\" onclick=\"javascript:", p.getButtonEffectPulsate(), "window.location.href=", p.getEvalHRef(logoffAction), ";\">", logoffAction.getTitle(), "&nbsp;", app.getLoginPrincipal(), "</a>");            
             }
         }
         catch(Exception e) {
@@ -157,15 +157,20 @@ public class SessionInfoControl
             HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
             View view = p.getView();        
             Action[] setRoleAction = view.getSetRoleActions();
+            String currentRoleTitle = app.getPortalExtension().getTitle(
+            	Action.EVENT_SET_ROLE,
+            	app.getCurrentUserRole(),
+            	app
+            );
             if(p.getViewPortType() == ViewPort.Type.MOBILE) {
             	String groupId = "selectRole";
                 p.write("    <ul id=\"t", groupId, "\" selected=\"true\" style=\"position:relative;top:auto;min-height:0px;\" onclick=\"javascript:var e=document.getElementById('p", groupId, "');if(e.style.display=='block'){e.style.display='none';}else{e.style.display='block';};\">");
-                p.write("      <li class=\"group\" style=\"height:40px;\"><div style=\"padding-top:10px;\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", WebKeys.ICON_ROLE, "\""), "&nbsp;&nbsp;&nbsp;", htmlEncoder.encode(app.getCurrentUserRole(), false), "</div></li>");
+                p.write("      <li class=\"group\" style=\"height:40px;\"><div style=\"padding-top:10px;\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", WebKeys.ICON_ROLE, "\""), "&nbsp;&nbsp;&nbsp;", htmlEncoder.encode(currentRoleTitle, false), "</div></li>");
                 p.write("    </ul>");
                 p.write("    <ul id=\"p", groupId, "\" selected=\"true\" style=\"display:none;position:relative;top:auto;min-height:0px;\">");
                 for(int i = 0; i < setRoleAction.length; i++) {
                     Action action = setRoleAction[i];
-                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", WebKeys.ICON_ROLE, "\""), "&nbsp;&nbsp;&nbsp;", action.getParameter(Action.PARAMETER_NAME), "</a></li>");
+                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", action.getIconKey(), "\""), "&nbsp;&nbsp;&nbsp;", action.getTitle(), "</a></li>");
                 }
                 p.write("    </ul>");
             }
@@ -174,11 +179,11 @@ public class SessionInfoControl
             }
             else {
                 p.write("<ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
-                p.write("  <li><a href=\"#\" onclick=\"javascript:return false;\">", app.getCurrentUserRole(), "&nbsp;<img src=\"", p.getResourcePath("images/"), WebKeys.ICON_PANEL_DOWN, "\" alt=\"\" /></a>");
+                p.write("  <li><a href=\"#\" onclick=\"javascript:return false;\">", htmlEncoder.encode(currentRoleTitle, false), "&nbsp;<img src=\"", p.getResourcePath("images/"), WebKeys.ICON_PANEL_DOWN, "\" alt=\"\" /></a>");
                 p.write("    <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
                 for(int i = 0; i < setRoleAction.length; i++) {
                     Action action = setRoleAction[i];
-                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", action.getParameter(Action.PARAMETER_NAME), "</a></li>");
+                    p.write("      <li><a href=\"#\" onclick=\"javascript:window.location.href=", p.getEvalHRef(action), ";\">", action.getTitle(), "</a></li>");
                 }
                 p.write("    </ul>");
                 p.write("  </li>");

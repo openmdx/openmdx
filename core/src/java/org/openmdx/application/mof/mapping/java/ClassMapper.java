@@ -1,10 +1,10 @@
 /*
  * ==================================================================== 
  * Project: openmdx, http://www.openmdx.org
- * Name: $Id: ClassMapper.java,v 1.3 2009/06/09 12:45:18 hburger Exp $ 
- * Description: JMIClassLevelTemplate Revision: $Revision: 1.3 $ 
+ * Name: $Id: ClassMapper.java,v 1.4 2011/04/12 15:29:26 hburger Exp $ 
+ * Description: JMIClassLevelTemplate Revision: $Revision: 1.4 $ 
  * Owner: OMEX AG, Switzerland, http://www.omex.ch 
- * Date: $Date: 2009/06/09 12:45:18 $
+ * Date: $Date: 2011/04/12 15:29:26 $
  * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,7 @@ import org.openmdx.base.mof.cci.Model_1_0;
 /**
  * ClassMapper
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes"})
 public class ClassMapper extends AbstractClassMapper {
 
     //-----------------------------------------------------------------------

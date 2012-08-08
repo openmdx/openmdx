@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: TokenException.java,v 1.2 2010/06/04 22:38:00 hburger Exp $
+ * Name:        $Id: TokenException.java,v 1.3 2011/04/23 22:42:59 hburger Exp $
  * Description: Extended IO Exception 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:38:00 $
+ * Date:        $Date: 2011/04/23 22:42:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -56,6 +56,7 @@ import java.io.PrintWriter;
 import java.security.GeneralSecurityException;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 
 
 /**
@@ -178,5 +179,13 @@ public class TokenException
 	public TokenException log() {
 		return BasicException.log(this);
 	}
+
+    /* (non-Javadoc)
+     * @see java.lang.Throwable#getMessage()
+     */
+    @Override 
+    public String getMessage() {
+        return Throwables.getMessage(this);
+    }
 
 }

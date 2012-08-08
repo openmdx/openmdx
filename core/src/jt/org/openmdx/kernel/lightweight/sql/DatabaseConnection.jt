@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DatabaseConnection.jt,v 1.6 2010/06/02 17:07:53 hburger Exp $
+ * Name:        $Id: DatabaseConnection.jt,v 1.8 2011/11/02 14:21:11 wfro Exp $
  * Description: DatabaseConnection
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 17:07:53 $
+ * Date:        $Date: 2011/11/02 14:21:11 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -69,6 +69,9 @@ import java.sql.SQLClientInfoException;
 import java.sql.SQLXML;
 import java.sql.Struct;
 import java.util.Properties;
+#endif
+#if defined(SINCE17)
+import java.util.concurrent.Executor;
 #endif
 
 import org.openmdx.kernel.resource.spi.CloseCallback;
@@ -251,6 +254,7 @@ public class DatabaseConnection implements Connection {
      * @return
      * @throws java.sql.SQLException
      */
+    @SuppressWarnings("rawtypes")
     public Map getTypeMap() throws SQLException {
         return this.connection.getTypeMap();
     }
@@ -808,4 +812,41 @@ public class DatabaseConnection implements Connection {
         return this.connection.unwrap(iface);
     }
 #endif
+
+#if defined(SINCE17)
+    //-----------------------------------------------------------------------
+    // Since JRE 7
+    //-----------------------------------------------------------------------
+
+	public int getNetworkTimeout()
+		throws SQLException {
+		return this.connection.getNetworkTimeout();
+	}
+	       
+	public void setNetworkTimeout(
+		Executor executor,
+		int milliseconds
+	) throws SQLException {
+		this.connection.setNetworkTimeout(executor, milliseconds);
+	}
+		
+	public void abort(
+		Executor executor
+	) throws SQLException {
+		this.connection.abort(executor);
+	}
+	
+	public String getSchema(
+	) throws SQLException {
+		return this.connection.getSchema();
+	}
+			     
+	public void setSchema(
+		String schema
+	) throws SQLException {
+		this.connection.setSchema(schema);
+	}
+	  
+#endif
+
 }

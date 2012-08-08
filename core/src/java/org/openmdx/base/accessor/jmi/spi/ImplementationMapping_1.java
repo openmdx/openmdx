@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ImplementationMapping_1.java,v 1.11 2010/06/03 17:04:12 hburger Exp $
+ * Name:        $Id: ImplementationMapping_1.java,v 1.12 2011/11/26 01:34:56 hburger Exp $
  * Description: Implementation Mapper 
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 17:04:12 $
+ * Date:        $Date: 2011/11/26 01:34:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -69,7 +69,6 @@ import javax.jmi.reflect.RefException;
 import javax.jmi.reflect.RefObject;
 import javax.jmi.reflect.RefPackage;
 import javax.jmi.reflect.RefStruct;
-import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
@@ -166,16 +165,12 @@ class ImplementationMapping_1 implements Mapping_1_0 {
         String[] keys,
         IndexedRecord values
     ) throws ServiceException{
-        try {
-            return Records.getRecordFactory().asMappedRecord(
-                values.getRecordName(),
-                null,
-                keys,
-                values.toArray(new Object[keys.length])
-            );
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
-        }
+        return Records.getRecordFactory().asMappedRecord(
+		    values.getRecordName(),
+		    null,
+		    keys,
+		    values.toArray(new Object[keys.length])
+		);
     }
     
     /* (non-Javadoc)

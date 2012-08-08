@@ -3,7 +3,7 @@ package javax.jmi.reflect;
 import java.io.Serializable;
 import java.util.List;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public interface RefEnum extends Serializable {
     public String toString();
     public List refTypeName();

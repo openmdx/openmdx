@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build-library.xml,v 1.171 2010/12/20 13:48:32 wfro Exp $
+= Name:        $Id: build-library.xml,v 1.176 2011/12/29 11:49:40 hburger Exp $
 = Description: openMDX Build Library
-= Revision:    $Revision: 1.171 $
-= Date:        $Date: 2010/12/20 13:48:32 $
-= Copyright:   (c) 2003-2008 OMEX AG
+= Revision:    $Revision: 1.176 $
+= Date:        $Date: 2011/12/29 11:49:40 $
+= Copyright:   (c) 2003-2011 OMEX AG
 =======================================================================
 =
 = This software is published under the BSD license as listed below.
 = 
-= Copyright (c) 2004-2010, OMEX AG, Switzerland
+= Copyright (c) 2004-2011, OMEX AG, Switzerland
 = All rights reserved.
 = 
 = Redistribution and use in source and binary forms, with or without 
@@ -174,6 +174,13 @@
 		</condition>
 		<available file="${env.JRE_16}" type="dir" value="[+] ${env.JRE_16}" property="JRE_16.info"/>
 		<property name="JRE_16.info" value="[-] ${env.JRE_16}"/>
+		<condition property="JRE_17.info" value="[-]">
+			<not>
+				<isset property="env.JRE_17"/>
+			</not>
+		</condition>
+		<available file="${env.JRE_17}" type="dir" value="[+] ${env.JRE_17}" property="JRE_17.info"/>
+		<property name="JRE_17.info" value="[-] ${env.JRE_17}"/>
 		<condition property="unix.distribution.is-set">
 			<isset property="unix.distribution"/>
 		</condition>
@@ -200,6 +207,7 @@
 		<echo message="JRE_14                         = ${JRE_14.info}"/>
 		<echo message="JRE_15                         = ${JRE_15.info}"/>
 		<echo message="JRE_16                         = ${JRE_16.info}"/>
+		<echo message="JRE_17                         = ${JRE_17.info}"/>
 		<echo/>
 		<echo message="ant.version                    = ${ant.version}"/>
 		<echo message="ant.java.version               = ${ant.java.version}"/>
@@ -305,9 +313,6 @@
 		<condition property="deliver.poseidon.source">
 			<equals arg1="${model.transformation.source}" arg2="poseidon"/>
 		</condition>
-		<condition property="deliver.together.source">
-			<equals arg1="${model.transformation.source}" arg2="together"/>
-		</condition>
 		<condition property="deliver.magicdraw.source">
 			<equals arg1="${model.transformation.source}" arg2="magicdraw"/>
 		</condition>
@@ -342,6 +347,7 @@
 				<equals arg1="${ant.java.version}" arg2="1.4"/>
 				<equals arg1="${ant.java.version}" arg2="1.5"/>
 				<equals arg1="${ant.java.version}" arg2="1.6"/>
+				<equals arg1="${ant.java.version}" arg2="1.7"/>
 			</or>
 		</condition>
 		<fail 
@@ -360,6 +366,7 @@
 				<equals arg1="${ant.java.version}" arg2="1.4"/>
 				<equals arg1="${ant.java.version}" arg2="1.5"/>
 				<equals arg1="${ant.java.version}" arg2="1.6"/>
+				<equals arg1="${ant.java.version}" arg2="1.7"/>
 			</or>
 		</condition>
 		<fail 
@@ -377,6 +384,7 @@
 			<or>
 				<equals arg1="${ant.java.version}" arg2="1.5"/>
 				<equals arg1="${ant.java.version}" arg2="1.6"/>
+				<equals arg1="${ant.java.version}" arg2="1.7"/>
 			</or>
 		</condition>
 		<fail 
@@ -391,12 +399,29 @@
 			</or>
 		</condition>
 		<condition property="build.supports.jre16">
-			<equals arg1="${ant.java.version}" arg2="1.6"/>
+			<or>
+				<equals arg1="${ant.java.version}" arg2="1.6"/>
+				<equals arg1="${ant.java.version}" arg2="1.7"/>
+			</or>
 		</condition>
 		<fail 
 			message="Building for source version ${build.source.version} and target version ${build.target.version} requires Ant running under JRE 6 or later" 
-			if="build.requires.jre15" 
-			unless="build.supports.jre15"
+			if="build.requires.jre16" 
+			unless="build.supports.jre16"
+		/>
+		<condition property="build.requires.jre17">
+			<or>
+				<equals arg1="${build.source.version}" arg2="1.7"/>
+				<equals arg1="${build.target.version}" arg2="1.7"/>
+			</or>
+		</condition>
+		<condition property="build.supports.jre17">
+			<equals arg1="${ant.java.version}" arg2="1.7"/>
+		</condition>
+		<fail 
+			message="Building for source version ${build.source.version} and target version ${build.target.version} requires Ant running under JRE 7 or later" 
+			if="build.requires.jre17" 
+			unless="build.supports.jre17"
 		/>
 		<condition property="build.requires.rmi.compiler">
 			<or>
@@ -505,6 +530,17 @@
 						<property name="preprocess-jt.tag5" value="OPENMDX2"/>
 					</antcontrib:then>
 				</antcontrib:if>
+				<antcontrib:if>
+					<equals arg1="${build.source.version}" arg2="1.7"/>
+					<antcontrib:then>
+						<property name="preprocess-jt.tag1" value="SINCE13"/>
+						<property name="preprocess-jt.tag2" value="SINCE14"/>
+						<property name="preprocess-jt.tag3" value="SINCE15"/>
+						<property name="preprocess-jt.tag4" value="SINCE16"/>
+						<property name="preprocess-jt.tag5" value="SINCE17"/>
+						<property name="preprocess-jt.tag6" value="OPENMDX2"/>
+					</antcontrib:then>
+				</antcontrib:if>
 			</antcontrib:then>
 			<antcontrib:else>
 				<antcontrib:if>
@@ -534,7 +570,7 @@
 	<!--*******************************************************************
 	* Preprocess Model Files
 	********************************************************************-->
-	<target name="-preprocess-model-files-" depends="-preprocess-model-init,-preprocess-rose-models,-preprocess-poseidon-models,-preprocess-magicdraw-models,-preprocess-together-models,-preprocess-rsm-models,-preprocess-emf-models" unless="model-files.are.up-to-date">
+	<target name="-preprocess-model-files-" depends="-preprocess-model-init,-preprocess-rose-models,-preprocess-poseidon-models,-preprocess-magicdraw-models,-preprocess-rsm-models,-preprocess-emf-models" unless="model-files.are.up-to-date">
 		<!-- Distributing the ZIP content -->
 		<unzip dest="${build.dir}/src/java" src="${build.dir}/model/models.zip">
 			<patternset>
@@ -546,14 +582,9 @@
 				<include name="**/*.jdo"/>
 				<include name="**/*.orm"/>
 				<include name="**/orm.xml"/>
+				<include name="**/openmdxorm.properties"/>
 			</patternset>
 		</unzip>
-		<openmdx:archive destfile="${build.dir}/model/${ant.project.name}.together-model.zip">
-			<openmdx:archivefileset src="${build.dir}/model/models.zip" includes="**/*.h"/>
-			<openmdx:archivefilterchain>
-				<mapper type="regexp" from="^(.*).model.together.(.*)$$" to="\1/\2"/>
-			</openmdx:archivefilterchain>
-		</openmdx:archive>
 		<openmdx:archive destfile="${build.dir}/model/${ant.project.name}.poseidon-xmi.zip">
 			<openmdx:archivefileset src="${build.dir}/model/models.zip" includes="poseidon.xmi" fullpath="models.xmi"/>
 		</openmdx:archive>
@@ -566,9 +597,6 @@
 		<openmdx:archive destfile="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
 			<openmdx:archivefileset src="${build.dir}/model/models.zip" includes="**/*.xsd,**/*.xml"/>
 		</openmdx:archive>
-	</target>
-	<target name="-preprocess-together-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-together">
-		<fail message="Please use the Together-Plugin to transform together models ${basedir}/src/model/together to ${build.dir}/model/models.zip"/>
 	</target>
 	<target name="-preprocess-poseidon-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-poseidon">
 		<echo>Transforming Poseidon models ${basedir}/src/model/poseidon/models.xmi to ${build.dir}/model/models.zip...</echo>
@@ -649,7 +677,7 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 		</java>
 	</target>
 	<target name="-preprocess-rose-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-rose">
-		<echo>Transforming Rose models ${basedir}/src/model/rose/models.mdl to ${build.dir}/model/models.zip...</echo>
+		<echo>Transforming Rose models ${model.transformation.rose.file} to ${build.dir}/model/models.zip...</echo>
 		<echo/>
 		<echo>Externalizing Rose models to ${build.dir}/model/models.zip ...</echo>
 		<java 
@@ -752,9 +780,6 @@ java.util.logging.ConsoleHandler.formatter = org.openmdx.kernel.log.ClassicForma
 		</condition>
 		<condition property="model.transformation.source.is-rose">
 			<equals arg1="${model.transformation.source}" arg2="rose"/>
-		</condition>
-		<condition property="model.transformation.source.is-together">
-			<equals arg1="${model.transformation.source}" arg2="together"/>
 		</condition>
 		<condition property="model.transformation.source.is-rsm">
 			<equals arg1="${model.transformation.source}" arg2="rsm"/>
@@ -1324,11 +1349,6 @@ java.util.logging.FileHandler.formatter = org.openmdx.kernel.log.ClassicFormatte
 						<include name="${ant.project.name}.magicdraw-xmi.zip" unless="deliver.magicdraw.source"/>
 					</fileset>
 					<mapper type="glob" from="*-xmi.zip" to="*-model.zip"/>
-				</copy>
-				<copy todir="${src.archive.dir}">
-					<fileset dir="${build.dir}/model">
-						<include name="${ant.project.name}.together-model.zip" unless="deliver.together.source"/>
-					</fileset>
 				</copy>
 			</antcontrib:then>
 		</antcontrib:if>

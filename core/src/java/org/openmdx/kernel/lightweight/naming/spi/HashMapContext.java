@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: HashMapContext.java,v 1.2 2010/06/02 13:45:39 hburger Exp $
+ * Name:        $Id: HashMapContext.java,v 1.3 2011/06/29 06:20:03 hburger Exp $
  * Description: Hashtable Based Context
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:45:39 $
+ * Date:        $Date: 2011/06/29 06:20:03 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -299,7 +299,7 @@ public class HashMapContext extends NameBasedContext {
      * <p>
      * Convert each Map.Entry to a Binding
      */
-    private static final class Bindings implements NamingEnumeration<Binding> {
+    private final class Bindings implements NamingEnumeration<Binding> {
 
         Iterator<Map.Entry<String,Object>> iterator;
 
@@ -313,7 +313,13 @@ public class HashMapContext extends NameBasedContext {
          * @see javax.naming.NamingEnumeration#next()
          */
         public Binding next() throws NamingException {
-            return nextElement();
+            Map.Entry<String,Object> entry = this.iterator.next();
+            String name = entry.getKey();
+			Binding binding = new Binding(name, entry.getValue());
+			binding.setNameInNamespace(
+	            getNameInNamespace() + "/" + name
+	        );
+			return binding;
         }
 
         /* (non-Javadoc)
@@ -341,8 +347,11 @@ public class HashMapContext extends NameBasedContext {
          * @see java.util.Enumeration#nextElement()
          */
         public Binding nextElement() {
-            Map.Entry<String,Object> entry = this.iterator.next();
-            return new Binding(entry.getKey(), entry.getValue());
+        	try {
+				return next();
+			} catch (NamingException e) {
+				throw new RuntimeException(e);
+			}
         }
         
     }

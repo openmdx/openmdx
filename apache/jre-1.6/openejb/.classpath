@@ -24,10 +24,8 @@
 	<classpathentry exported="true" kind="lib" path="lib/xml-resolver.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/XmlSchema.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jaxb-impl.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/activeio-core-incubator.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/activemq-core.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/activemq-ra.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/backport-util-concurrent.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-cli.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-dbcp-all.jar"/>
@@ -51,7 +49,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/wstx-asl.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/bcprov-jdk15.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/openejb-api.jar" sourcepath="src/openejb-api.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/opensaml.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/quartz.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/wss4j.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xbean-asm-shaded.jar"/>
@@ -61,5 +58,6 @@
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.12.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/serializer.jar"/>
+	<classpathentry kind="lib" path="lib/activeio-core.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

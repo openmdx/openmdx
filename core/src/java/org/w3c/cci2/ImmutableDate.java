@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ImmutableDate.java,v 1.2 2010/01/03 14:59:09 wfro Exp $
+ * Name:        $Id: ImmutableDate.java,v 1.4 2011/10/11 16:20:57 hburger Exp $
  * Description: Date 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 14:59:09 $
+ * Date:        $Date: 2011/10/11 16:20:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,12 +54,14 @@ import static javax.xml.datatype.DatatypeConstants.DATE;
 import static javax.xml.datatype.DatatypeConstants.FIELD_UNDEFINED;
 import static javax.xml.datatype.DatatypeConstants.INDETERMINATE;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.TimeZone;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -108,24 +110,37 @@ public final class ImmutableDate
         throw new UnsupportedOperationException(READONLY);
     }
 
-    /* (non-Javadoc)
-     * @see javax.xml.datatype.XMLGregorianCalendar#clone()
+    /**
+     * Retrieve the mutable data type factory
+     * 
+     * @return the mutable data type factory
      */
-    @Override
-    public XMLGregorianCalendar clone(
-    ) {
-        DatatypeFactory mutableDatatypeFactory;
+    private DatatypeFactory getMutableDatatypeFactory(){
         try {
-            mutableDatatypeFactory = DatatypeFactory.newInstance();
-        } catch (DatatypeConfigurationException e) {
-            throw new NullPointerException("Unable to get an instance of " + DatatypeFactory.class.getName() + ". Reason is " + e.getMessage()); 
+            return DatatypeFactory.newInstance();
+        } catch (DatatypeConfigurationException cause) {
+            throw (MissingResourceException) new MissingResourceException(
+                "Unable to get the datatype factory instance",
+                DatatypeFactory.class.getName(),
+                DatatypeFactory.DATATYPEFACTORY_PROPERTY
+            ).initCause(
+                cause
+            );
         } 
-        return getEon() == BigInteger.ZERO ?  mutableDatatypeFactory.newXMLGregorianCalendarDate(
+    }
+    
+    /**
+     * Retrieve the mutable equivalent
+     * 
+     * @return the mutable equivalent
+     */
+    private XMLGregorianCalendar toMutableDate(){
+        return getEon().signum() == 0 ?  getMutableDatatypeFactory().newXMLGregorianCalendarDate(
             getYear(),
             getMonth(),
             getDay(),
             FIELD_UNDEFINED
-        ) : mutableDatatypeFactory.newXMLGregorianCalendar(
+        ) : getMutableDatatypeFactory().newXMLGregorianCalendar(
                 getEonAndYear(), 
                 getMonth(),
                 getDay(),
@@ -136,6 +151,15 @@ public final class ImmutableDate
                 FIELD_UNDEFINED // time-zone
         );
     }
+    
+    /* (non-Javadoc)
+     * @see javax.xml.datatype.XMLGregorianCalendar#clone()
+     */
+    @Override
+    public XMLGregorianCalendar clone(
+    ) {
+        return toMutableDate();
+    }
 
     /* (non-Javadoc)
      * @see javax.xml.datatype.XMLGregorianCalendar#compare(javax.xml.datatype.XMLGregorianCalendar)
@@ -144,7 +168,7 @@ public final class ImmutableDate
     public int compare(XMLGregorianCalendar that) {
         return that instanceof ImmutableDate ?
             compareTo((ImmutableDate)that) :
-            clone().compare(that);
+            toMutableDate().compare(that);
     }
 
     
@@ -422,7 +446,7 @@ public final class ImmutableDate
         result.clear();
         result.setGregorianChange(PURE_GREGORIAN_CHANGE);
         result.set(Calendar.ERA, GregorianCalendar.AD);
-        result.set(getYear(), getMonth(), getDay());
+        result.set(getYear(), getMonth() - 1, getDay());
         return result;
     }
 
@@ -501,7 +525,7 @@ public final class ImmutableDate
         if(that instanceof ImmutableDate) {
             return compareTo((ImmutableDate)that);
         } else {
-            int result = clone().compare(that);
+            int result = toMutableDate().compare(that);
             if(result == INDETERMINATE) {
                 throw new IllegalArgumentException(
                     "Value not comparable to org::w3c::date: " + that.toXMLFormat()
@@ -540,6 +564,18 @@ public final class ImmutableDate
         return this.basicValue;
     }
 
+    /**
+     * There is no need for the deserialized object to be immutable
+     * 
+     * @return a mutable counterpart of this object
+     * 
+     * @throws ObjectStreamException
+     */
+    private Object writeReplace() throws ObjectStreamException {
+        return toMutableDate();
+    }
+    
+    
     //------------------------------------------------------------------------
     // Members
     //------------------------------------------------------------------------
@@ -549,7 +585,7 @@ public final class ImmutableDate
     private static final long serialVersionUID = -6028198343774949922L;
 
     /**
-     * ISO8601:2000 Basic Format
+     * @serial ISO8601:2000 Basic Format
      */
     private final String basicValue;
 

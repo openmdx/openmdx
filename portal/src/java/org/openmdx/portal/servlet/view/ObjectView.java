@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectView.java,v 1.28 2010/09/28 09:39:01 wfro Exp $
+ * Name:        $Id: ObjectView.java,v 1.31 2011/08/11 11:59:10 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/28 09:39:01 $
+ * Date:        $Date: 2011/08/11 11:59:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -146,7 +146,7 @@ public abstract class ObjectView
             if(this.object != null) {
                 String forClass = this.objectReference.getObject().refClass().refMofId();
                 try {
-                    this.inspector = this.application.getInspector(forClass);
+                    this.inspector = this.app.getInspector(forClass);
                 }
                 catch(ServiceException e) {
                 	SysLog.warning(e.getMessage(), e.getCause());              
@@ -191,19 +191,22 @@ public abstract class ObjectView
     public void structToMap(
     	RefStruct from,
     	Map to,
-    	ModelElement_1_0 structDef
+    	ModelElement_1_0 structDef,
+    	boolean mapObjects
     ) throws ServiceException {
     	PersistenceManager pm = JDOHelper.getPersistenceManager(this.getObjectReference().getObject());
     	for(Iterator i = ((Map)structDef.objGetValue("field")).values().iterator(); i.hasNext(); ) {
     		ModelElement_1_0 field = (ModelElement_1_0)i.next();
     		String fieldName = (String)field.objGetValue("qualifiedName");
     		try {
-    			Object value = from.refGetValue(fieldName);
+    			Object value = from.refGetValue(fieldName);    			
     			if(value instanceof RefObject_1_0) {
-    				to.put(
-    					fieldName,
-    					pm.getObjectById(((RefObject_1_0)value).refGetPath())
-    				);
+    				if(mapObjects) {
+	    				to.put(
+	    					fieldName,
+	    					pm.getObjectById(((RefObject_1_0)value).refGetPath())
+	    				);
+    				}
     			} else {
     				to.put(
     					fieldName,
@@ -231,7 +234,7 @@ public abstract class ObjectView
                 try {
                     ObjectReference reference = new ObjectReference(
                         (RefObject_1_0)pm.getObjectById(p.getPrefix(i)),
-                        this.application
+                        this.app
                     );
                     if(parentReference != null) {
                         selectParentActions.add(
@@ -295,12 +298,10 @@ public abstract class ObjectView
     }
   
     //-------------------------------------------------------------------------
-    /**
-     * Refresh view. refreshData ==> do refresh data. Do not refresh 
-     * rendering information.
-     */
-    public void refresh(
-        boolean refreshData
+    @Override
+    public PersistenceManager refresh(
+        boolean refreshData,
+        boolean closePm
     ) throws ServiceException {
         if(refreshData) {
         	if(this.getRefObject() != null) {
@@ -308,17 +309,21 @@ public abstract class ObjectView
         		RefObject_1_0 object = this.getRefObject();
         		Path identity = object.refGetPath();
         		PersistenceManager pm = JDOHelper.getPersistenceManager(object);
-        		pm.close();
+        		if(closePm) {
+        			pm.close();
+        		}
         		// Get new pm
-        		pm = this.application.getNewPmData();
-        		object = (RefObject_1_0)pm.getObjectById(identity);
+        		PersistenceManager newPm = this.app.getNewPmData();
+        		object = (RefObject_1_0)newPm.getObjectById(identity);
         		this.object = object;
                 this.objectReference = new ObjectReference(
                     object,
-                    this.application
+                    this.app
                 );
+                return pm;
         	}
         }
+        return null;
     }
 
     //-------------------------------------------------------------------------
@@ -353,7 +358,7 @@ public abstract class ObjectView
                           this.id,
                           this.containerElementId,
                           previousObjectIdentity,
-                          this.application,
+                          this.app,
                           historyActions,
                           null,
                           null
@@ -367,8 +372,8 @@ public abstract class ObjectView
           return new ShowObjectView(
               this.id,
               this.containerElementId,
-              this.application.getRootObject()[0].refGetPath(),
-              this.application,
+              this.app.getRootObject()[0].refGetPath(),
+              this.app,
               new LinkedHashMap<Path,Action>(),
               null,
               null
@@ -383,7 +388,7 @@ public abstract class ObjectView
     public String getLayout(
         boolean forEditing
     ) {
-        return this.application.getLayout(
+        return this.app.getLayout(
            this.getObjectReference().getObject().refClass().refMofId(),
            forEditing
         );

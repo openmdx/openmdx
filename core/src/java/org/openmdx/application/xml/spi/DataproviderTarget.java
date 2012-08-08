@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataproviderTarget.java,v 1.9 2009/12/17 14:40:30 wfro Exp $
+ * Name:        $Id: DataproviderTarget.java,v 1.10 2011/11/26 01:35:00 hburger Exp $
  * Description: XML Importer
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/17 14:40:30 $
+ * Date:        $Date: 2011/11/26 01:35:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,12 +50,12 @@
  */
 package org.openmdx.application.xml.spi;
 
-import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
 import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -82,24 +82,6 @@ public class DataproviderTarget implements ImportTarget {
     private final DataproviderRequestProcessor target;
     private final DataproviderRequestProcessor target2; // for retrieval
 
-    /**
-     * Wrap the object holder into its facade
-     * 
-     * @param objectHolder
-     * 
-     * @return the object holder's facade
-     * 
-     * @throws ServiceException
-     */
-    protected static Object_2Facade toFacade(MappedRecord objectHolder)
-        throws ServiceException {
-        try {
-            return Object_2Facade.newInstance(objectHolder);
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
-        }
-    }
-
     /*
      * (non-Javadoc)
      * 
@@ -113,7 +95,7 @@ public class DataproviderTarget implements ImportTarget {
     ) throws ServiceException {
         switch (mode) {
             case UPDATE:
-                toFacade(objectHolder).setVersion(
+                Facades.asObject(objectHolder).setVersion(
                     Object_2Facade.getVersion(
                         this.target.addGetRequest(
                             Object_2Facade.getPath(objectHolder)

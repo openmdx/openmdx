@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Path.java,v 1.28 2010/10/20 11:33:48 hburger Exp $
+ * Name:        $Id: Path.java,v 1.29 2011/11/19 19:57:06 hburger Exp $
  * Description: Profile Path 
- * Revision:    $Revision: 1.28 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/20 11:33:48 $
+ * Date:        $Date: 2011/11/19 19:57:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -563,23 +563,6 @@ public final class Path
     }
 
     /**
-     * Generates an escaped XRI 2 String representation of this path to be used with
-     * <code>like</code> queries.
-     * <p> 
-     * The string can be passed to the Path constructor to create a new equivalent path
-     * after replacing all escaped dots by plain dots.
-     *
-     * @return an escaped XRI 2 String representation of this path.
-     * 
-     * @deprecated will be removed as soon as the identity.isLike() pattern is no longer necessary
-     */
-    @Deprecated
-    public String toResourcePattern(
-    ){
-        return toXri().replace(".", "\\."); 
-    }
-    
-    /**
      * Generates the XRI 2 based IRI representation of this path.
      * <ol>
      * <li>Percent-encode all percent "%" characters as "%25" across the entire XRI reference.
@@ -914,7 +897,10 @@ public final class Path
      *              if suffix is not a valid name, or if the
      *              addition of the components would violate the
      *              syntax rules of this path
+     *              
+     * @deprecated Path modifications should be avoided in openMDX 2             
      */
+    @Deprecated
     public Path addAll(
         String... suffix
     ){
@@ -938,7 +924,10 @@ public final class Path
      *              if position is outside the specified range
      * @exception   RuntimeServiceException
      *              if components contains invalid path components
+     *              
+     * @deprecated Path modifications should be avoided in openMDX 2             
      */
+    @Deprecated
     public Path addAll (
         int position,
         String... components
@@ -982,7 +971,10 @@ public final class Path
      * @exception   RuntimeServiceException
      *              if adding component would violate the syntax
      *              rules of this path
+     *              
+     * @deprecated Path modifications should be avoided in openMDX 2             
      */
+    @Deprecated
     public Path add(
         String component
     ){
@@ -1002,7 +994,10 @@ public final class Path
      *
      * @exception   RuntimeServiceException
      *              if the component is null or empty
+     *              
+     * @deprecated Path modifications should be avoided in openMDX 2             
      */
+    @Deprecated
     public Path add(
         PathComponent component
     ){
@@ -1019,7 +1014,10 @@ public final class Path
      *
      * @exception   RuntimeServiceException
      *              if the component is null or empty
+     *              
+     * @deprecated Path modifications should be avoided in openMDX 2             
      */
+    @Deprecated
     public Path add(
         Path crossReference
     ){
@@ -1044,7 +1042,10 @@ public final class Path
      * @exception   RuntimeServiceException
      *              if adding component would violate the syntax
      *              rules of this path
+     *              
+     * @deprecated Path modifications should be avoided in openMDX 2             
      */
+    @Deprecated
     public Path add(
         int position,
         String component
@@ -1073,7 +1074,10 @@ public final class Path
      *              if position is outside the specified range
      * @exception   RuntimeServiceException
      *              if the component is null or empty
+     *              
+     * @deprecated Path modifications should be avoided in openMDX 2             
      */
+    @Deprecated
     public Path add(
         int position,
         PathComponent component
@@ -1102,7 +1106,10 @@ public final class Path
      *              if position is outside the specified range
      * @exception   RuntimeServiceException
      *              if the component is null or empty
+     *              
+     * @deprecated Path modifications should be avoided in openMDX 2             
      */
+    @Deprecated
     public Path add(
         int position,
         Path crossReference
@@ -1131,7 +1138,10 @@ public final class Path
      * @exception   RuntimeServiceException
      *              if deleting the component would violate the
      *              syntax rules of the path
+     *              
+     * @deprecated Path modifications should be avoided in openMDX 2             
      */
+    @Deprecated
     public String remove(
         int position
     ){
@@ -1172,7 +1182,10 @@ public final class Path
      * @exception   RuntimeServiceException
      *              if deleting the component would violate the
      *              syntax rules of the path
+     *              
+     * @deprecated Path modifications should be avoided in openMDX 2             
      */     
+    @Deprecated
     public void setTo(
         Path source
     ) {
@@ -1451,7 +1464,10 @@ public final class Path
 
         /* (non-Javadoc)
          * @see java.util.Iterator#remove()
+         * 
+         * @deprecated Path modifications should be avoided in openMDX 2             
          */
+        @Deprecated
         public void remove() {
             if(this.currentIndex < 0) {
                 throw new IllegalStateException("No current component");

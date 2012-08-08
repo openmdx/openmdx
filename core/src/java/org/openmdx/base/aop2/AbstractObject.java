@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractObject.java,v 1.10 2010/01/21 17:31:39 hburger Exp $
+ * Name:        $Id: AbstractObject.java,v 1.13 2011/12/29 15:15:41 hburger Exp $
  * Description: Abstract Object
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/21 17:31:39 $
+ * Date:        $Date: 2011/12/29 15:15:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -119,6 +119,34 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
         return this.next;
     }
 
+    /**
+     * Marshal a next layer object
+     * 
+     * @param next a next layer object
+     * 
+     * @return the corresponding same layer object
+     */
+    @SuppressWarnings("unchecked")
+	protected final <T extends RefObject> T toSame(
+    	RefObject next 
+    ){
+    	return next == null ? null : (T) sameManager().getObjectById(JDOHelper.getTransactionalObjectId(next));
+    }
+
+    /**
+     * Unmarshal a same layer object
+     * 
+     * @param same a same layer object
+     * 
+     * @return the corresponding next layer object
+     */
+    @SuppressWarnings("unchecked")
+	protected final <T extends RefObject> T toNext(
+    	RefObject same 
+    ){
+    	return same == null ? null : (T) nextManager().getObjectById(JDOHelper.getTransactionalObjectId(same));
+    }
+    
     
     //------------------------------------------------------------------------
     // Packages
@@ -216,173 +244,52 @@ public abstract class AbstractObject<S extends RefObject, N, C> {
 
     
     //------------------------------------------------------------------------
-    // Callback Delegation
+    // Callback Termination
     //------------------------------------------------------------------------
     
     /**
-     * Delegate <code>ClearCallback</code> method to the mix-in super-classes 
-     * of the same layer and to the next layer.
+     * A sub-class implementing <code>ClearCallback</code> should invoke 
+     * <code>super.jdoPreClear()</code>.
      */
     protected void jdoPreClear(
-    ) {
-        //
-        // Mix-In Classes Of Same Layer
-        //
-        jdoPreClear(
-            (Class<? super N>[])null // any order
-        );
-        //
-        // Next Layer
-        //
-        if(this.next instanceof ClearCallback) {
-            ((ClearCallback)this.next).jdoPreClear();
-        }
-    }
-
-    /**
-     * Delegate <code>StoreCallback</code> method to the mix-in super-classes 
-     * of the same layer and to the next layer.
-     */
-    protected void jdoPreStore(
-    ) {
-        //
-        // Mix-In Classes Of Same Layer
-        //
-        jdoPreStore(
-            (Class<? super N>[])null // any order
-        );
-    }
-
-    /**
-     * Delegate <code>LoadCallback</code> method to the mix-in super-classes 
-     * of the same layer and to the next layer.
-     */
-    protected void jdoPostLoad(
-    ) {
-        //
-        // Mix-In Classes Of Same Layer
-        //
-        jdoPostLoad(
-            (Class<? super N>[])null // any order
-        );
-    }
-
-    /**
-     * Delegate <code>DeleteCallback</code> method to the mix-in super-classes 
-     * of the same layer and to the next layer.
-     */
-    protected void jdoPreDelete(
-    ) {
-        //
-        // Mix-In Classes Of Same Layer
-        //
-        jdoPreDelete(
-            (Class<? super N>[])null // any order
-        );
-    }
-
-    /**
-     * Delegate <code>ConstructCallback</code> method to the mix-in super-classes 
-     * of the same layer and to the next layer.
-     */
-    protected void openmdxjdoPostConstruct(
-    ) {
-        //
-        // Mix-In Classes Of Same Layer
-        //
-        openmdxjdoPostConstruct(
-            (Class<? super N>[])null // any order
-        );
-    }
-
-    
-    //------------------------------------------------------------------------
-    // Callback Delegation To Mix-In Classes Of The Same Layer
-    //------------------------------------------------------------------------
-    
-    /**
-     * Delegate <code>ClearCallback</code> method to the mix-in super-classes  
-     * of the same layer.
-     * 
-     * @param selection the selection and order of mix-in super-classes to dispatch to
-     */
-    protected void jdoPreClear(
-        Class<? super N>... selection
-    ) {
-        for(ClearCallback target : mixedInTargets(ClearCallback.class, selection)) {
-            target.jdoPreClear();
-        }
-    }
-
-    /**
-     * Delegate <code>StoreCallback</code> method to the mix-in super-classes  
-     * of the same layer.
-     * 
-     * @param selection the selection and order of mix-in super-classes to dispatch to
-     */
-    protected void jdoPreStore(
-        Class<? super N>... selection
-    ) {
-        for(StoreCallback c : mixedInTargets(StoreCallback.class, selection)) {
-            c.jdoPreStore();
-        }
-    }
-
-    /**
-     * Delegate <code>LoadCallback</code> method to the mix-in super-classes  
-     * of the same layer.
-     * 
-     * @param selection the selection and order of mix-in super-classes to dispatch to
-     */
-    protected void jdoPostLoad(
-        Class<? super N>... selection
-    ) {
-        for(LoadCallback c : mixedInTargets(LoadCallback.class, selection)) {
-            c.jdoPostLoad();
-        }
-    }
-
-    /**
-     * Delegate <code>DeleteCallback</code> method to the mix-in super-classes  
-     * of the same layer.
-     * 
-     * @param selection the selection and order of mix-in super-classes to dispatch to
-     */
-    protected void jdoPreDelete(
-        Class<? super N>... selection
-    ) {
-        for(DeleteCallback c : mixedInTargets(DeleteCallback.class, selection)) {
-            c.jdoPreDelete();
-        }
-    }
-
-    /**
-     * Delegate <code>ConstructCallback</code> method to the mix-in super-classes  
-     * of the same layer.
-     * 
-     * @param selection the selection and order of mix-in super-classes to dispatch to
-     */
-    protected void openmdxjdoPostConstruct(
-        Class<? super N>... selection
-    ) {
-        for(ConstructCallback c : mixedInTargets(ConstructCallback.class, selection)) {
-            c.openmdxjdoPostConstruct();
-        }
-    }
-
-    /**
-     * Provide the targets for mixed-in interfaces 
-     * 
-     * @param targetClass the target interface
-     * @param selection the selection and order of mix-in super-classes to dispatch to
-     * 
-     * @return the targets for mixed-in interfaces 
-     */
-    protected final <I> Iterable<I> mixedInTargets(
-        Class<I> targetClass,
-        Class<? super N>... selection
     ){
-        return Collections.emptyList(); // TODO provide targets
+    	// terminate callback
     }
 
+    /**
+     * A sub-class implementing <code>StoreCallback</code> should invoke 
+     * <code>super.jdoPreStore()</code>.
+     */
+    protected void jdoPreStore(
+    ){
+    	// terminate callback
+    }
+
+    /**
+     * A sub-class implementing <code>LoadCallback</code> should invoke 
+     * <code>super.jdoPostLoad()</code>.
+     */
+    protected void jdoPostLoad(
+    ) {
+    	// terminate callback
+    }
+
+    /**
+     * A sub-class implementing <code>DeleteCallback</code> should invoke 
+     * <code>super.jdoPreDelete()</code>.
+     */
+    protected void jdoPreDelete(
+    ) {
+    	// terminate callback
+    }
+
+    /**
+     * A sub-class implementing <code>ConstructCallback</code> should invoke 
+     * <code>super.openmdxjdoPostConstruct()</code>.
+     */
+    protected void openmdxjdoPostConstruct(
+    ) {
+    	// terminate callback
+    }
+    
 }

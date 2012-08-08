@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: InspectorControl.java,v 1.14 2009/06/16 17:08:26 wfro Exp $
+ * Name:        $Id: InspectorControl.java,v 1.15 2011/07/07 22:35:42 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/16 17:08:26 $
+ * Date:        $Date: 2011/07/07 22:35:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,6 +70,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
+import org.openmdx.portal.servlet.action.SetPanelStateAction;
 
 //---------------------------------------------------------------------------
 public abstract class InspectorControl
@@ -125,7 +126,7 @@ public abstract class InspectorControl
         int panelState
     ) {
         return new Action(
-            Action.EVENT_SET_PANEL_STATE,
+            SetPanelStateAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_NAME, panelName),
                 new Action.Parameter(Action.PARAMETER_STATE, "" + panelState)

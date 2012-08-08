@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIMapper_1.java,v 1.10 2009/06/09 12:45:18 hburger Exp $
+ * Name:        $Id: XMIMapper_1.java,v 1.11 2011/04/12 15:29:19 hburger Exp $
  * Description: XMIExternalizer_1
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/09 12:45:18 $
+ * Date:        $Date: 2011/04/12 15:29:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,7 +71,7 @@ import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
 //---------------------------------------------------------------------------
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class XMIMapper_1
 extends AbstractMapper_1 {
 

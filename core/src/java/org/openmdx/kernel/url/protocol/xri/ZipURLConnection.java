@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: ZipURLConnection.java,v 1.8 2010/06/02 13:46:30 hburger Exp $
+ * Name:        $Id: ZipURLConnection.java,v 1.9 2011/04/12 15:43:08 hburger Exp $
  * Description: Resource URL Connection
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:46:30 $
+ * Date:        $Date: 2011/04/12 15:43:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -378,7 +378,7 @@ public class ZipURLConnection extends JarURLConnection {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     @Override
     public Object getContent(Class[] classes) throws IOException {
         try {

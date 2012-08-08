@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FieldGroupControl.java,v 1.49 2009/09/29 13:43:42 wfro Exp $
+ * Name:        $Id: FieldGroupControl.java,v 1.53 2011/08/19 22:50:46 wfro Exp $
  * Description: FieldGroupControl
- * Revision:    $Revision: 1.49 $
+ * Revision:    $Revision: 1.53 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/29 13:43:42 $
+ * Date:        $Date: 2011/08/19 22:50:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,8 +65,9 @@ import javax.jdo.JDOHelper;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.HtmlEncoder_1_0;
-import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.UiContext;
+import org.openmdx.portal.servlet.ViewPort;
+import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.BinaryValue;
@@ -328,15 +329,15 @@ public class FieldGroupControl
         String frame,
         boolean forEditing        
     ) throws ServiceException {
-        ApplicationContext application = p.getApplicationContext();
-        HtmlEncoder_1_0 htmlEncoder = application.getHtmlEncoder();
+        ApplicationContext app = p.getApplicationContext();
+        HtmlEncoder_1_0 htmlEncoder = app.getHtmlEncoder();
         View view = p.getView();
         ViewMode viewMode = view instanceof EditObjectView ? 
             ((EditObjectView)view).getMode() : 
             ViewMode.STANDARD;
         Attribute[][] attributes = this.getAttribute(
             view.getObject(), 
-            application
+            app
         );
         int nCols = attributes.length;
         int nRows = nCols > 0 ? attributes[0].length : 0;
@@ -364,15 +365,21 @@ public class FieldGroupControl
 	                       forEditing, 
 	                       false
 	                    );
-	                    stringifiedValue = valueHolder instanceof TextValue ? 
-	                        ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue : 
-	                        stringifiedValue;	
+	                    boolean isRevokeShow = valueHolder.hasPermission(WebKeys.PERMISSION_REVOKE_SHOW);
+	                    boolean isRevokeEdit = valueHolder.hasPermission(WebKeys.PERMISSION_REVOKE_EDIT);
+	                    stringifiedValue = isRevokeShow ? 
+	                    	WebKeys.LOCKED_VALUE :
+	                    		valueHolder instanceof TextValue ? 
+	                    			((TextValue)valueHolder).isPassword() ? 
+	                    				"*****" : 
+	                    					stringifiedValue : 
+	                    						stringifiedValue;	                    
 	                    boolean isModifiable = 
-	                        valueHolder.isEnabled() && 
+	                        !isRevokeShow &&
+	                        !isRevokeEdit &&
 	                        valueHolder.isChangeable() && 
 	                        (viewMode != ViewMode.EMBEDDED || !(valueHolder instanceof BinaryValue));
 	                    String readonlyModifier = isModifiable ? "" : "readonly";
-	                    String disabledModifier = isModifiable ? "" : "disabled";                    
 	                    String lockedModifier = isModifiable ? "" : "Locked";
 	                    StringBuilder styleModifier = new StringBuilder("style=\"");
 	                    p.write("      <div class=\"row\">");	                    
@@ -393,7 +400,6 @@ public class FieldGroupControl
 	                        "",
 	                        "",
 	                        readonlyModifier,
-	                        disabledModifier,
 	                        lockedModifier,
 	                        stringifiedValue,
 	                        forEditing
@@ -465,21 +471,26 @@ public class FieldGroupControl
 	                       forEditing, 
 	                       false
 	                    );
-	                    stringifiedValue = valueHolder instanceof TextValue ? 
-	                        ((TextValue)valueHolder).isPassword() ? "*****" : stringifiedValue : 
-	                        stringifiedValue;
-	
+	                    boolean isRevokeShow = valueHolder.hasPermission(WebKeys.PERMISSION_REVOKE_SHOW);
+	                    boolean isRevokeEdit = valueHolder.hasPermission(WebKeys.PERMISSION_REVOKE_EDIT);
+	                    stringifiedValue = isRevokeShow ? 
+	                    	WebKeys.LOCKED_VALUE :
+	                    		valueHolder instanceof TextValue ? 
+	                    			((TextValue)valueHolder).isPassword() ? 
+	                    				"*****" : 
+	                    					stringifiedValue : 
+	                    						stringifiedValue;	                    
 	                    // styles
 	                    String color = valueHolder.getColor();
 	                    String backColor = valueHolder.getBackColor();
 	                    // A field is modifiable if it is enabled and changeable. BinaryValues are
 	                    // not modifiable if the view is embedded.
 	                    boolean isModifiable = 
-	                        valueHolder.isEnabled() && 
+	                        !isRevokeShow &&
+	                        !isRevokeEdit &&
 	                        valueHolder.isChangeable() && 
 	                        (viewMode != ViewMode.EMBEDDED || !(valueHolder instanceof BinaryValue));
 	                    String readonlyModifier = isModifiable ? "" : "readonly";
-	                    String disabledModifier = isModifiable ? "" : "disabled";                    
 	                    String lockedModifier = isModifiable ? "" : "Locked";
 	                    StringBuilder styleModifier = new StringBuilder("style=\"");
 	                    if(color != null) {
@@ -517,7 +528,6 @@ public class FieldGroupControl
 	                        widthModifier.toString(),
 	                        rowSpanModifier.toString(),
 	                        readonlyModifier,
-	                        disabledModifier,
 	                        lockedModifier,
 	                        stringifiedValue,
 	                        forEditing

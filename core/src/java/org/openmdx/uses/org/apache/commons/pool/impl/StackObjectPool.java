@@ -1,7 +1,7 @@
 /*
  * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/StackObjectPool.java,v $
- * $Revision: 1.6 $
- * $Date: 2010/06/02 13:46:51 $
+ * $Revision: 1.7 $
+ * $Date: 2011/04/12 15:30:22 $
  *
  * ====================================================================
  *
@@ -83,9 +83,9 @@ import org.openmdx.uses.org.apache.commons.pool.PoolableObjectFactory;
  * artificial limits.
  *
  * @author Rodney Waldhoff
- * @version $Revision: 1.6 $ $Date: 2010/06/02 13:46:51 $
+ * @version $Revision: 1.7 $ $Date: 2011/04/12 15:30:22 $
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class StackObjectPool extends BaseObjectPool implements ObjectPool {
     /**
      * Create a new pool using

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openMDXx, http://www.openmdx.org/
- * Name:        $Id: RuntimeServiceException.java,v 1.19 2010/06/02 13:44:33 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: RuntimeServiceException.java,v 1.21 2011/04/11 08:56:27 hburger Exp $
  * Description: Exception Framework 
- * Revision:    $Revision: 1.19 $
+ * Revision:    $Revision: 1.21 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:44:33 $
+ * Date:        $Date: 2011/04/11 08:56:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,13 +54,13 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 import org.openmdx.kernel.exception.BasicException.Parameter;
 
 /**
- * This class wrappes a ServiceException for cases where only RuntimeExceptions
- * but no ServiceExceptions are allowed.
- *
- * @author   H. Burger
+ * A <code>ServiceException</code> is used where an exception chain shall be 
+ * thrown as an unchecked <code>Exception</code>, i.e. as a 
+ * <code>RuntimeException</code>.
  */
 public final class RuntimeServiceException 
     extends RuntimeException 
@@ -216,6 +216,14 @@ public final class RuntimeServiceException
     @Override
     public void printStackTrace(PrintWriter s) {
         getCause().printStackTrace(s);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Throwable#getMessage()
+     */
+    @Override 
+    public String getMessage() {
+        return Throwables.getMessage(this);
     }
 
 }

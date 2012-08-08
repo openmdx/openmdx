@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: RoseImporter_1.java,v 1.11 2010/09/21 16:31:04 hburger Exp $
+ * Name:        $Id: RoseImporter_1.java,v 1.13 2011/11/26 01:34:59 hburger Exp $
  * Description: model.importer.RoseImporter
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/21 16:31:04 $
+ * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,12 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
- */
-
-/**
- * @author wfro
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.mof.externalizer.rose;
 
@@ -69,7 +64,6 @@ import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
-import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.omg.mof.cci.DirectionKind;
@@ -83,6 +77,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
@@ -93,9 +88,8 @@ import org.openmdx.kernel.log.SysLog;
  * and associations.
  *
  */
-@SuppressWarnings("unchecked")
-public class RoseImporter_1
-extends ModelImporter_1 {
+@SuppressWarnings({"unchecked","rawtypes"})
+public class RoseImporter_1 extends ModelImporter_1 {
 
     //------------------------------------------------------------------------
 
@@ -103,7 +97,7 @@ extends ModelImporter_1 {
      * Constructs a rose importer.
      *
      * @param header dataprovider service header.
-     *
+     *,
      * @param target dataprovider used to store objects. The created model1 objects
      *        are stored using the addSetRequest() operation.
      *
@@ -491,18 +485,13 @@ extends ModelImporter_1 {
             multiplicity
         );
         Object_2Facade parameterDefFacade;
-        try {
-            parameterDefFacade = Object_2Facade.newInstance(
-                newFeaturePath(
-                    Object_2Facade.getPath(parameterType),
-                    parameterName
-                ),
-                ModelAttributes.STRUCTURE_FIELD
-            );
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        parameterDefFacade = Facades.newObject(
+		    newFeaturePath(
+		        Object_2Facade.getPath(parameterType),
+		        parameterName
+		    ),
+		    ModelAttributes.STRUCTURE_FIELD
+		);
         // container
         parameterDefFacade.attributeValuesAsList("container").add(
             Object_2Facade.getPath(parameterType)
@@ -558,18 +547,13 @@ extends ModelImporter_1 {
         String operationName = lexer.getToken();
 
         Object_2Facade operationDefFacade;
-        try {
-            operationDefFacade = Object_2Facade.newInstance(
-                newFeaturePath(
-                    Object_2Facade.getPath(classDef),
-                    operationName
-                ),
-                ModelAttributes.OPERATION
-            );
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        operationDefFacade = Facades.newObject(
+		    newFeaturePath(
+		        Object_2Facade.getPath(classDef),
+		        operationName
+		    ),
+		    ModelAttributes.OPERATION
+		);
         // container
         operationDefFacade.attributeValuesAsList("container").add(
             Object_2Facade.getPath(classDef)
@@ -677,27 +661,17 @@ extends ModelImporter_1 {
                 operationName.substring(0,1).toUpperCase() +
                 operationName.substring(1);
             Object_2Facade parameterTypeFacade;
-            try {
-                parameterTypeFacade = Object_2Facade.newInstance(
-                    new Path(
-                        Object_2Facade.getPath(classDef).toString() + capOperationName + "Params"
-                    ),
-                    ModelAttributes.STRUCTURE_TYPE
-                );
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            parameterTypeFacade = Facades.newObject(
+			    new Path(
+			        Object_2Facade.getPath(classDef).toString() + capOperationName + "Params"
+			    ),
+			    ModelAttributes.STRUCTURE_TYPE
+			);
             parameterTypeFacade.attributeValuesAsList("visibility").add(VisibilityKind.PUBLIC_VIS);
             parameterTypeFacade.attributeValuesAsList("isAbstract").add(Boolean.FALSE);
-            try {
-                parameterTypeFacade.attributeValuesAsList("container").addAll(
-                    Object_2Facade.newInstance(classDef).attributeValuesAsList("container")
-                );
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            parameterTypeFacade.attributeValuesAsList("container").addAll(
+                Facades.asObject(classDef).attributeValuesAsList("container")
+            );
 
             // parse parameters (features of modelInParameterType)
             lexer.assertToken("parameters");
@@ -732,14 +706,9 @@ extends ModelImporter_1 {
                             new BasicException.Parameter("operation", operationDefFacade.getDelegate())
                         );              
                     }
-                    try {
-                        parameterTypeFacade = Object_2Facade.newInstance(
-                            (Path)Object_2Facade.newInstance(parameterDef).attributeValuesAsList("type").get(0)
-                        );
-                    } 
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
+                    parameterTypeFacade = Facades.newObject(
+					    (Path)Facades.asObject(parameterDef).attributeValuesAsList("type").get(0)
+					);
                     createParameterType = false;
                 }
                 /**
@@ -774,18 +743,13 @@ extends ModelImporter_1 {
             }
             // in-parameter
             Object_2Facade inParameterDefFacade;
-            try {
-                inParameterDefFacade = Object_2Facade.newInstance(
-                    newFeaturePath(
-                        operationDefFacade.getPath(),
-                        "in"
-                    ),
-                    ModelAttributes.PARAMETER
-                );
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            inParameterDefFacade = Facades.newObject(
+			    newFeaturePath(
+			        operationDefFacade.getPath(),
+			        "in"
+			    ),
+			    ModelAttributes.PARAMETER
+			);
             inParameterDefFacade.attributeValuesAsList("container").add(
                 operationDefFacade.getPath()
             );  
@@ -807,18 +771,13 @@ extends ModelImporter_1 {
         // void in-parameter
         else {
             Object_2Facade inParameterDefFacade;
-            try {
-                inParameterDefFacade = Object_2Facade.newInstance(
-                    newFeaturePath(
-                        operationDefFacade.getPath(),
-                        "in"
-                    ),
-                    ModelAttributes.PARAMETER
-                );
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            inParameterDefFacade = Facades.newObject(
+			    newFeaturePath(
+			        operationDefFacade.getPath(),
+			        "in"
+			    ),
+			    ModelAttributes.PARAMETER
+			);
             inParameterDefFacade.attributeValuesAsList("container").add(
                 operationDefFacade.getPath()
             );  
@@ -839,18 +798,13 @@ extends ModelImporter_1 {
 
         // result
         Object_2Facade resultDefFacade;
-        try {
-            resultDefFacade = Object_2Facade.newInstance(
-                newFeaturePath(
-                    operationDefFacade.getPath(),
-                    "result"
-                ),
-                ModelAttributes.PARAMETER
-            );
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        resultDefFacade = Facades.newObject(
+		    newFeaturePath(
+		        operationDefFacade.getPath(),
+		        "result"
+		    ),
+		    ModelAttributes.PARAMETER
+		);
         resultDefFacade.attributeValuesAsList("container").add(
             operationDefFacade.getPath()
         );  
@@ -971,18 +925,13 @@ extends ModelImporter_1 {
         String roleName = lexer.getToken();
 
         Object_2Facade associationEndDefFacade;
-        try {
-            associationEndDefFacade = Object_2Facade.newInstance(
-                newFeaturePath(
-                    Object_2Facade.getPath(associationDef),
-                    roleName
-                ),
-                ModelAttributes.ASSOCIATION_END
-            );
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        associationEndDefFacade = Facades.newObject(
+		    newFeaturePath(
+		        Object_2Facade.getPath(associationDef),
+		        roleName
+		    ),
+		    ModelAttributes.ASSOCIATION_END
+		);
 
         // warning if assocation end is unnamed
         if(roleName.startsWith("$UNNAMED$")) {
@@ -1096,18 +1045,13 @@ extends ModelImporter_1 {
             if(!constraintIsFrozen) {
                 // add new constraint
                 Object_2Facade associationEndConstraintDefFacade;
-                try {
-                    associationEndConstraintDefFacade = Object_2Facade.newInstance(
-                        newFeaturePath(
-                            associationEndDefFacade.getPath(),
-                            constraints
-                        ),
-                        ModelAttributes.CONSTRAINT
-                    );
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
+                associationEndConstraintDefFacade = Facades.newObject(
+				    newFeaturePath(
+				        associationEndDefFacade.getPath(),
+				        constraints
+				    ),
+				    ModelAttributes.CONSTRAINT
+				);
                 // container
                 associationEndConstraintDefFacade.attributeValuesAsList("container").add(
                     associationEndDefFacade.getPath()
@@ -1201,18 +1145,13 @@ extends ModelImporter_1 {
         String attributeName = lexer.getToken();
 
         Object_2Facade attributeDefFacade;
-        try {
-            attributeDefFacade = Object_2Facade.newInstance(
-                newFeaturePath(
-                    Object_2Facade.getPath(classDef),
-                    attributeName
-                ),
-                ModelAttributes.STRUCTURE_FIELD
-            );
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        attributeDefFacade = Facades.newObject(
+		    newFeaturePath(
+		        Object_2Facade.getPath(classDef),
+		        attributeName
+		    ),
+		    ModelAttributes.STRUCTURE_FIELD
+		);
 
         if(isStructureField) {
             attributeDefFacade.getValue().setRecordName(
@@ -1440,18 +1379,13 @@ extends ModelImporter_1 {
 
         // ModelAssociation object
         Object_2Facade modelAssociationFacade;
-        try {
-            modelAssociationFacade = Object_2Facade.newInstance(
-                toElementPath(
-                    scope,
-                    associationName
-                ),
-                ModelAttributes.ASSOCIATION
-            );
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        modelAssociationFacade = Facades.newObject(
+		    toElementPath(
+		        scope,
+		        associationName
+		    ),
+		    ModelAttributes.ASSOCIATION
+		);
 
         // container
         modelAssociationFacade.attributeValuesAsList("container").add(
@@ -1522,22 +1456,12 @@ extends ModelImporter_1 {
             scope
         );
         // remove name attributes before setting
-        try {
-            Object_2Facade.newInstance(modelAssociationEnd1).getValue().keySet().remove("name");
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Facades.asObject(modelAssociationEnd1).getValue().keySet().remove("name");
         this.createModelElement(
             scope,
             modelAssociationEnd1
         );
-        try {
-            Object_2Facade.newInstance(modelAssociationEnd2).getValue().keySet().remove("name");
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Facades.asObject(modelAssociationEnd2).getValue().keySet().remove("name");
         this.createModelElement(
             scope,
             modelAssociationEnd2
@@ -1562,18 +1486,13 @@ extends ModelImporter_1 {
 
         // ModelClass object
         Object_2Facade classifierDefFacade;
-        try {
-            classifierDefFacade = Object_2Facade.newInstance(
-                toElementPath(
-                    scope,
-                    className
-                ),
-                ModelAttributes.CLASS
-            );
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        classifierDefFacade = Facades.newObject(
+		    toElementPath(
+		        scope,
+		        className
+		    ),
+		    ModelAttributes.CLASS
+		);
 
         // container
         classifierDefFacade.attributeValuesAsList("container").add(
@@ -1915,18 +1834,13 @@ extends ModelImporter_1 {
             // The container package can be overwritten at a later time depending 
             // on the structure of the mdl/cat files
             Object_2Facade modelPackageFacade;
-            try {
-                modelPackageFacade = Object_2Facade.newInstance(
-                    toElementPath(
-                        newScope,
-                        (String)newScope.get(newScope.size()-1)
-                    ),
-                    ModelAttributes.PACKAGE
-                );
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            modelPackageFacade = Facades.newObject(
+			    toElementPath(
+			        newScope,
+			        (String)newScope.get(newScope.size()-1)
+			    ),
+			    ModelAttributes.PACKAGE
+			);
             modelPackageFacade.attributeValuesAsList("isAbstract").add(Boolean.FALSE);
             modelPackageFacade.attributeValuesAsList("visibility").add(VisibilityKind.PUBLIC_VIS);
             createModelElement(
@@ -2023,18 +1937,13 @@ extends ModelImporter_1 {
 
                 // internal unit --> ModelPackage
                 else {
-                    try {
-                        modelPackageFacade = Object_2Facade.newInstance(
-                            toElementPath(
-                                newScope,
-                                (String)newScope.get(newScope.size()-1)
-                            ),
-                            ModelAttributes.PACKAGE
-                        );
-                    } 
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
+                    modelPackageFacade = Facades.newObject(
+					    toElementPath(
+					        newScope,
+					        (String)newScope.get(newScope.size()-1)
+					    ),
+					    ModelAttributes.PACKAGE
+					);
                     modelPackageFacade.attributeValuesAsList("isAbstract").add(Boolean.FALSE);
                     modelPackageFacade.attributeValuesAsList("visibility").add(VisibilityKind.PUBLIC_VIS);
                 }

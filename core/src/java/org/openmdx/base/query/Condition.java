@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Condition.java,v 1.15 2010/06/21 17:33:10 hburger Exp $
+ * Name:        $Id: Condition.java,v 1.17 2011/11/26 01:34:59 hburger Exp $
  * Description: Condition
- * Revision:    $Revision: 1.15 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 17:33:10 $
+ * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,8 +54,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import javax.resource.ResourceException;
 
 import org.openmdx.base.resource.Records;
 
@@ -253,6 +251,54 @@ public abstract class Condition implements Serializable, Cloneable {
      */
     public abstract ConditionType getType();
 
+    private String getTypeName(
+        List<?> values
+    ){
+        ConditionType type = this.getType();
+        if(type == null) {
+            return null;
+        } else if (!values.isEmpty() && values.get(0) instanceof Filter){
+            switch(type){
+                case IS_IN: return "WHERE";
+                case IS_NOT_IN: return "WHERE_NOT";
+            }
+        }
+        return this.getType().name();
+    }
+    
+    private String getDescription(
+        List<?> values
+    ){
+        ConditionType type = this.getType();
+        if(type == null) {
+            return null;
+        } else {
+            StringBuilder description = new StringBuilder();
+            if(this.quantifier != null) {
+                description.append(
+                    this.quantifier.symbol()
+                ).append(
+                    ' '
+                ).append(
+                    this.feature
+                ).append(
+                    " | "
+                ).append(
+                    this.feature
+                ).append(
+                    ' '
+                );
+            }
+            return description.append(
+                type.symbol()
+            ).append(
+                ' '
+            ).append(
+                values
+            ).toString();
+        }
+    }
+    
     /**
      * Retrieve the condition's string representation, e.g.<code> 
      * &#x2026;(&#x2200; color | color &#x2208; ["RED", "GREEN"])&#x2026;</code> 
@@ -262,51 +308,18 @@ public abstract class Condition implements Serializable, Cloneable {
     @Override
     public String toString (
     ) {
-        try {
-            ConditionType type = this.getType();
-            List<?> values = this.values == null ? Collections.emptyList() : Arrays.asList(this.values);
-            StringBuilder description;
-            if(type == null) {
-                description = null;
-            } else {
-                description = new StringBuilder();
-                if(this.quantifier != null) {
-                    description.append(
-                        this.quantifier.symbol()
-                    ).append(
-                        ' '
-                    ).append(
-                        this.feature
-                    ).append(
-                        " | "
-                    ).append(
-                        this.feature
-                    ).append(
-                        ' '
-                    );
-                }
-                description.append(
-                    type.symbol()
-                ).append(
-                    ' '
-                ).append(
-                    values
-                );
-            }
-            return Records.getRecordFactory().asMappedRecord(
-                this.getClass().getName(), 
-                description == null ? null : description.toString(),
-                Condition.TO_STRING_FIELDS, 
-                new Object[]{
-                    this.quantifier,
-                    this.feature, 
-                    this.getType(), 
-                    values
-                }
-            ).toString();
-        } catch (ResourceException exception) {
-            return super.toString();
-        }
+        List<?> values = this.values == null ? Collections.emptyList() : Arrays.asList(this.values);
+		return Records.getRecordFactory().asMappedRecord(
+		    this.getClass().getName(), 
+		    getDescription(values),
+		    Condition.TO_STRING_FIELDS, 
+		    new Object[]{
+		        this.quantifier,
+		        this.feature, 
+		        getTypeName(values), 
+		        values
+		    }
+		).toString();
     }
   
     /**

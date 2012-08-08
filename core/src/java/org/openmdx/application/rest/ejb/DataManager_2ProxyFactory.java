@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataManager_2ProxyFactory.java,v 1.16 2010/01/05 10:52:06 hburger Exp $
+ * Name:        $Id: DataManager_2ProxyFactory.java,v 1.17 2011/04/12 15:29:27 hburger Exp $
  * Description: Data Manager Proxy Factory
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/05 10:52:06 $
+ * Date:        $Date: 2011/04/12 15:29:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,6 +64,7 @@ import org.openmdx.base.resource.spi.Port;
 /**
  * Data Manager Proxy Factory
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class DataManager_2ProxyFactory extends EntityManagerProxyFactory_2 {
 
     /**
@@ -91,7 +92,6 @@ public class DataManager_2ProxyFactory extends EntityManagerProxyFactory_2 {
      * 
      * @return a new <code>PersistenceManagerFactory</code>
      */
-    @SuppressWarnings("unchecked")
     public static PersistenceManagerFactory getPersistenceManagerFactory (
         Map props
     ){
@@ -111,7 +111,6 @@ public class DataManager_2ProxyFactory extends EntityManagerProxyFactory_2 {
      * 
      * @return a new <code>PersistenceManagerFactory</code>
      */
-    @SuppressWarnings("unchecked")
     public static PersistenceManagerFactory getPersistenceManagerFactory (
         Map overrides, 
         Map props

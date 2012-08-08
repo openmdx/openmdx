@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Throwables.java,v 1.14 2009/10/08 14:04:50 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Throwables.java,v 1.16 2011/06/21 22:33:00 hburger Exp $
  * Description: Throwables
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/08 14:04:50 $
+ * Date:        $Date: 2011/06/21 22:33:00 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,10 +51,9 @@
 package org.openmdx.kernel.exception;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.openmdx.kernel.exception.BasicException.Parameter;
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.log.SysLog;
 
 /**
  * JRE dependent exception handling methods. 
@@ -67,11 +65,6 @@ public class Throwables {
     }
 
     /**
-     * The Throwables' Standard Logger
-     */
-    private final static Logger logger = LoggerFactory.getLogger();
-    
-    /**
      * Log the throwable at warning level.
      * 
      * @param throwable
@@ -82,7 +75,7 @@ public class Throwables {
         T throwable
     ){
         BasicException exceptionStack = BasicException.toExceptionStack(throwable);
-        logger.log(
+        SysLog.log(
             Level.WARNING,
             exceptionStack.getDescription(), 
             exceptionStack
@@ -108,7 +101,7 @@ public class Throwables {
         Throwable cause,
         String exceptionDomain,
         int exceptionCode,
-        Parameter... parameters
+        BasicException.Parameter... parameters
     ) {
         throwable.initCause(
             new BasicException(
@@ -143,7 +136,7 @@ public class Throwables {
         String exceptionDomain,        
         int exceptionCode,
         String description,
-        Parameter... parameters
+        BasicException.Parameter... parameters
     ) {
         throwable.initCause(
             new BasicException(
@@ -198,4 +191,26 @@ public class Throwables {
         }
         return exceptionDomain == null ? exceptionStack : null;
     }
+
+    /**
+     * Compose the exception's message
+     * 
+     * @param exception
+     * 
+     * @return the exception message consisting of exception domain, exception
+     * code and description
+     */
+    public static String getMessage(
+    	BasicException.Holder exception
+    ){
+        BasicException cause = exception.getCause();
+        if(cause == null) {
+            return null;
+        } else {
+            String message = cause.getMessage();
+            String description = cause.getDescription();
+            return description == null ? message : (message + ": " + description);
+        }
+    }
+
 }

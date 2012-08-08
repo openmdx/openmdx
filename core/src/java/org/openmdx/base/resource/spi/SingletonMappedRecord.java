@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SingletonMappedRecord.java,v 1.3 2009/09/17 13:17:12 hburger Exp $
+ * Name:        $Id: SingletonMappedRecord.java,v 1.4 2011/04/12 15:44:02 hburger Exp $
  * Description: SingletonMappedRecord 
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/17 13:17:12 $
+ * Date:        $Date: 2011/04/12 15:44:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,7 @@ import javax.resource.cci.MappedRecord;
 /**
  * SingletonMappedRecord
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 final class SingletonMappedRecord
     extends AbstractMap
     implements MappedRecord 

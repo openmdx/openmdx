@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Uml1ModelMapper.java,v 1.6 2010/04/13 18:07:28 wfro Exp $
+ * Name:        $Id: Uml1ModelMapper.java,v 1.9 2011/07/08 13:20:51 wfro Exp $
  * Description: write XML schema (XSD)
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/13 18:07:28 $
+ * Date:        $Date: 2011/07/08 13:20:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,7 +63,8 @@ import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.ModelHelper;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.text.conversion.XMLEncoder;
 
@@ -73,7 +74,7 @@ import org.openmdx.base.text.conversion.XMLEncoder;
  * mapping and follows the UML Profile for MOF as closely as possible for the
  * openMDX project. 
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class Uml1ModelMapper {
   
   //---------------------------------------------------------------------------
@@ -220,7 +221,7 @@ public class Uml1ModelMapper {
         )
       );
     }    
-    if (!Multiplicities.SINGLE_VALUE.equals(multiplicity))
+    if (!Multiplicity.SINGLE_VALUE.toString().equals(multiplicity))
     {
       pw.write(indent, 0, nTabs); pw.write("\t<UML:ModelElement.stereotype>\n");
       pw.write(indent, 0, nTabs); pw.write("\t\t<UML:Stereotype xmi.idref = '"); pw.write(this.getStereotypeId(multiplicity, "Parameter")); pw.write("'/>\n");
@@ -522,7 +523,7 @@ public class Uml1ModelMapper {
     {    
       this.writeTaggedValue("derived", "true");
     }
-    if (!Multiplicities.SINGLE_VALUE.equals(multiplicity))
+    if (!Multiplicity.SINGLE_VALUE.toString().equals(multiplicity))
     {
       pw.write(indent, 0, nTabs); pw.write("\t<UML:ModelElement.stereotype>\n");
       pw.write(indent, 0, nTabs); pw.write("\t\t<UML:Stereotype xmi.idref = '"); pw.write(this.getStereotypeId(multiplicity, "Attribute")); pw.write("'/>\n");
@@ -837,22 +838,22 @@ public class Uml1ModelMapper {
     pw.write("\t\t<UML:Model xmi.id = '"); pw.write(this.createId()); pw.write("' name = 'models' isSpecification = 'false'\n");
     pw.write("\t\t\tisRoot = 'false' isLeaf = 'false' isAbstract = 'false'>\n");
     pw.write("\t\t\t<UML:Namespace.ownedElement>\n");
-    this.writeStereotype(Multiplicities.OPTIONAL_VALUE, "Attribute");
-    this.writeStereotype(Multiplicities.SINGLE_VALUE, "Attribute");
-    this.writeStereotype(Multiplicities.MULTI_VALUE, "Attribute");
-    this.writeStereotype(Multiplicities.LIST, "Attribute");
-    this.writeStereotype(Multiplicities.SET, "Attribute");
-    this.writeStereotype(Multiplicities.SPARSEARRAY, "Attribute");
-    this.writeStereotype(Multiplicities.STREAM, "Attribute");
-    this.writeStereotype(Multiplicities.MAP, "Attribute");
-    this.writeStereotype(Multiplicities.OPTIONAL_VALUE, "Parameter");
-    this.writeStereotype(Multiplicities.SINGLE_VALUE, "Parameter");
-    this.writeStereotype(Multiplicities.MULTI_VALUE, "Parameter");
-    this.writeStereotype(Multiplicities.LIST, "Parameter");
-    this.writeStereotype(Multiplicities.SET, "Parameter");
-    this.writeStereotype(Multiplicities.SPARSEARRAY, "Parameter");
-    this.writeStereotype(Multiplicities.STREAM, "Parameter");
-    this.writeStereotype(Multiplicities.MAP, "Parameter");
+    this.writeStereotype(Multiplicity.OPTIONAL.toString(), "Attribute");
+    this.writeStereotype(Multiplicity.SINGLE_VALUE.toString(), "Attribute");
+    this.writeStereotype(ModelHelper.UNBOUNDED, "Attribute");
+    this.writeStereotype(Multiplicity.LIST.toString(), "Attribute");
+    this.writeStereotype(Multiplicity.SET.toString(), "Attribute");
+    this.writeStereotype(Multiplicity.SPARSEARRAY.toString(), "Attribute");
+    this.writeStereotype(Multiplicity.STREAM.toString(), "Attribute");
+    this.writeStereotype(Multiplicity.MAP.toString(), "Attribute");
+    this.writeStereotype(Multiplicity.OPTIONAL.toString(), "Parameter");
+    this.writeStereotype(Multiplicity.SINGLE_VALUE.toString(), "Parameter");
+    this.writeStereotype(ModelHelper.UNBOUNDED, "Parameter");
+    this.writeStereotype(Multiplicity.LIST.toString(), "Parameter");
+    this.writeStereotype(Multiplicity.SET.toString(), "Parameter");
+    this.writeStereotype(Multiplicity.SPARSEARRAY.toString(), "Parameter");
+    this.writeStereotype(Multiplicity.STREAM.toString(), "Parameter");
+    this.writeStereotype(Multiplicity.MAP.toString(), "Parameter");
     this.writeStereotype(Stereotypes.PRIMITIVE, "DataType");
     this.writeStereotype(Stereotypes.STRUCT, "Class");
     this.writeStereotype(Stereotypes.ALIAS, "Class");

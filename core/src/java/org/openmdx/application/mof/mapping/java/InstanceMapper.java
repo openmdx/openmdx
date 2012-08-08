@@ -1,15 +1,15 @@
 /*
  * ====================================================================
- * Name:        $Id: InstanceMapper.java,v 1.16 2010/10/11 11:28:11 hburger Exp $
+ * Name:        $Id: InstanceMapper.java,v 1.17 2011/01/12 17:07:09 hburger Exp $
  * Description: Instance Mapper 
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/11 11:28:11 $
+ * Date:        $Date: 2011/01/12 17:07:09 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2010, OMEX AG, Switzerland
+ * Copyright (c) 2005-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -384,7 +384,7 @@ extends AbstractClassMapper {
         this.pw.println("  /**");
         this.pw.println(MapperUtils.wrapText(
             "   * ",
-            "Retrieves the value for the reference <code>" + referenceDef.getName() + "</code> for the specified qualifier attribute value."));
+            "Retrieves the members of the given container referencing this object via <code>" + referenceDef.getName() + "</code>."));
         this.pw.println("   * <p>");
         this.pw.println(MapperUtils.wrapText(
             "   * ",
@@ -395,11 +395,11 @@ extends AbstractClassMapper {
             this.pw.println("   * <p>");
             this.pw.println(MapperUtils.wrapText("   * ", referenceDef.getAnnotation()));
         }
-        this.pw.println("   * @param " + referenceDef.getQualifierName() + " The value for the qualifier attribute that qualifies this reference.");
-        this.pw.println("   * @return The collection of referenced objects.");
+        this.pw.println("   * @param " + referenceDef.getQualifierName() + " The container of the objects to be retrieved.");
+        this.pw.println("   * @return The members referencing ths object via <code>" + referenceDef.getName() + "</code>.");
         this.pw.println("   */");
         this.pw.println("  public " + this.getType(referenceDef, "java.util.Collection", Boolean.TRUE, TypeMode.MEMBER) + " " + this.getMethodName(referenceDef.getBeanGetterName()) + "(");
-        this.pw.println("    " + getType(referenceDef, null, Boolean.FALSE, TypeMode.MEMBER) + " " + referenceDef.getQualifierName());
+        this.pw.println("    " + getType(referenceDef.getQualifiedQualifierTypeName(), true) + " " + referenceDef.getQualifierName());
         if(getFormat() == Format.JPA3) {
             this.pw.println("  ){");
             this.pw.println("    throw new java.lang.UnsupportedOperationException(\"Not yet implemented\");"); // TODO

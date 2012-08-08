@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: RootMenuControl.java,v 1.27 2010/09/17 10:59:45 wfro Exp $
+ * Name:        $Id: RootMenuControl.java,v 1.31 2011/07/07 22:35:42 wfro Exp $
  * Description: RootMenuControl
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.31 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/17 10:59:45 $
+ * Date:        $Date: 2011/07/07 22:35:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -64,6 +64,8 @@ import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.UserSettings;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.action.SelectAndNewObjectAction;
+import org.openmdx.portal.servlet.action.SelectObjectAction;
 import org.openmdx.portal.servlet.texts.Texts_1_0;
 import org.openmdx.portal.servlet.view.ObjectView;
 
@@ -129,20 +131,21 @@ public class RootMenuControl
         int indexItemLevel0 = 0;
         int nItemsLevel0 = 0;
         int topNavigationShowMax = 6;
-        boolean topNavigationShowSublevel = true; 
+        boolean topNavigationShowSublevel = false; 
         try {
             topNavigationShowMax = Integer.valueOf(app.getSettings().getProperty(UserSettings.TOP_NAVIGATION_SHOW_MAX, "7")).intValue();
-            topNavigationShowSublevel = Boolean.valueOf(app.getSettings().getProperty(UserSettings.TOP_NAVIGATION_SHOW_SUBLEVEL, "true")).booleanValue();
-        } 
+            // Never show sub levels. Use Dashlets instead
+            // topNavigationShowSublevel = Boolean.valueOf(app.getSettings().getProperty(UserSettings.TOP_NAVIGATION_SHOW_SUBLEVEL, "true")).booleanValue();
+        }
         catch(Exception e) {}
         String stateItemLevel0 = "1";                
         while(i < selectRootObjectAction.length) {
             Action action = selectRootObjectAction[i];
             currentItemLevel = 0;
-            if((action.getEvent() == Action.EVENT_SELECT_OBJECT) && (action.getParameter(Action.PARAMETER_REFERENCE).length() > 0)) {
+            if((action.getEvent() == SelectObjectAction.EVENT_ID) && (action.getParameter(Action.PARAMETER_REFERENCE).length() > 0)) {
               currentItemLevel = 1;
             }
-            else if(action.getEvent() == Action.EVENT_SELECT_AND_NEW_OBJECT) {
+            else if(action.getEvent() == SelectAndNewObjectAction.EVENT_ID) {
               currentItemLevel = 2;
             }
             // Get state of root object
@@ -194,7 +197,7 @@ public class RootMenuControl
                     	p.write("<li ", selectedTag, "><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", action.getIconKey(), "\""), "&nbsp;&nbsp;&nbsp;<span>", action.getTitle(), "</span></a>");                    	
                     }
                     else {
-                    	p.write("<li ", selectedTag, "><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"><span>", action.getTitle(), "</span></a>");
+                    	p.write("<li ", selectedTag, "><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\"><span>", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", action.getIconKey(), "\""), "&nbsp;&nbsp;", action.getTitle(), "</span></a>");
                     }
                 }
             }
@@ -212,12 +215,12 @@ public class RootMenuControl
         } 
         if(i < selectRootObjectAction.length) {
             if(p.getViewPortType() != ViewPort.Type.MOBILE) {        	
-	            p.write("<li><a href=\"#\" onclick=\"javascript:return false;\"><span>\u00BB</span></a>");
+	            p.write("<li><a href=\"#\" onclick=\"javascript:return false;\"><span>", p.getImg("src=\"", p.getResourcePathPrefix(), "images/spacer.gif\" width=\"0\" height=\"15\" border=\"0\""), "\u00BB</span></a>");
 	            p.write("  <ul>");
             }
             while(i < selectRootObjectAction.length) {
                 Action action = selectRootObjectAction[i];
-                if((action.getEvent() == Action.EVENT_SELECT_OBJECT) && (action.getParameter(Action.PARAMETER_REFERENCE).length() == 0)) {                
+                if((action.getEvent() == SelectObjectAction.EVENT_ID) && (action.getParameter(Action.PARAMETER_REFERENCE).length() == 0)) {                
                     stateItemLevel0 = app.getSettings().getProperty(
                     	UserSettings.ROOT_OBJECT_STATE + (currentPerspective == 0 ? "" : "[" + Integer.toString(currentPerspective) + "]") + "." + indexItemLevel0 + ".State", 
                     	"1"
@@ -228,7 +231,7 @@ public class RootMenuControl
                     		p.write("    <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", action.getIconKey(), "\""), "&nbsp;&nbsp;&nbsp;<span>", action.getTitle(), "</span></a></li>");                    		
                     	}
                     	else {
-                    		p.write("    <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", action.getTitle(), "</a></li>");
+                    		p.write("    <li><a href=\"#\" onmouseover=\"javascript:this.href=", p.getEvalHRef(action), ";onmouseover=function(){};\">", p.getImg("src=\"", p.getResourcePathPrefix(), "images/", action.getIconKey(), "\""), "&nbsp;&nbsp;", action.getTitle(), "</a></li>");
                     	}
                     }
                 }
@@ -240,5 +243,20 @@ public class RootMenuControl
             }
         }
     }
-               
+         
+    //-------------------------------------------------------------------------
+    public static void paintMenuFlyIn(
+    	ViewPort p
+    ) throws ServiceException {
+    	p.write("<div id=\"menuFlyIn\">");
+    	p.write("  <ul id=\"nav\" class=\"nav\" onmouseover=\"sfinit(this);\" >");
+    	p.write("    <li><a href=\"#\" onclick=\"javascript:return false;\"><img id=\"rootMenuAnchor\" src=\"./images/flyin.gif\" border=\"0\"/></a>");
+    	p.write("      <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
+    	RootMenuControl.paintQuickAccessors(p);
+    	p.write("      </ul>");
+    	p.write("    </li>");
+    	p.write("  </ul>");
+    	p.write("</div> <!-- menuFlyIn -->");    	
+    }
+    
 }

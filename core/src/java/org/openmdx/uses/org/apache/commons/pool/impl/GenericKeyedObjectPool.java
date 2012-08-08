@@ -1,7 +1,7 @@
 /*
  * $Source: /cvsroot/openmdx/core/src/java/org/openmdx/uses/org/apache/commons/pool/impl/GenericKeyedObjectPool.java,v $
- * $Revision: 1.8 $
- * $Date: 2010/06/02 13:46:51 $
+ * $Revision: 1.9 $
+ * $Date: 2011/04/12 15:30:21 $
  *
  * ====================================================================
  *
@@ -141,7 +141,8 @@ import org.openmdx.uses.org.apache.commons.pool.KeyedPoolableObjectFactory;
  * <ul>
  *  <li>
  *   {@link #setTimeBetweenEvictionRunsMillis <i>timeBetweenEvictionRunsMillis</i>}
- *   indicates how long the eviction thread should sleep before "runs" of examining
+ *   indicates how long the eviction thread s@SuppressWarnings("unchecked")
+hould sleep before "runs" of examining
  *   idle objects.  When non-positive, no eviction thread will be launched.
  *  </li>
  *  <li>
@@ -165,9 +166,9 @@ import org.openmdx.uses.org.apache.commons.pool.KeyedPoolableObjectFactory;
  * @see GenericObjectPool
  * @author Rodney Waldhoff
  * @author Dirk Verbeeck
- * @version $Revision: 1.8 $ $Date: 2010/06/02 13:46:51 $
+ * @version $Revision: 1.9 $ $Date: 2011/04/12 15:30:21 $
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class GenericKeyedObjectPool extends BaseKeyedObjectPool implements KeyedObjectPool {
 
     //--- public constants -------------------------------------------

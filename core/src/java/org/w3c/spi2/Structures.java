@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Structures.java,v 1.30 2010/05/05 15:07:04 wfro Exp $
+ * Name:        $Id: Structures.java,v 1.35 2011/11/26 01:34:56 hburger Exp $
  * Description: Structures 
- * Revision:    $Revision: 1.30 $
+ * Revision:    $Revision: 1.35 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/05 15:07:04 $
+ * Date:        $Date: 2011/11/26 01:34:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -51,6 +51,7 @@
 package org.w3c.spi2;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -74,17 +75,20 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.PersistenceManager;
 import javax.jdo.spi.PersistenceCapable;
-import javax.resource.ResourceException;
+import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.Record;
 
 import org.omg.mof.spi.Identifier;
 import org.omg.mof.spi.Names;
+import org.openmdx.base.accessor.jmi.cci.RefStruct_1_0;
+import org.openmdx.base.collection.Maps;
 import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.resource.Records;
 import org.openmdx.kernel.collection.ArraysExtension;
@@ -205,8 +209,8 @@ public class Structures {
      * @param persistenceManager the persistence manager is optional
      * if the record does not contain references to persistence capable
      * objects.
-     * 
-     * @param record
+     * @param structureClass
+     * @param content
      * 
      * @return the corresponding structure proxy
      * 
@@ -231,8 +235,8 @@ public class Structures {
      * @param persistenceManager the persistence manager is optional
      * if the record does not contain references to persistence capable
      * objects.
-     * 
-     * @param record
+     * @param structureClass
+     * @param content
      * 
      * @return the corresponding structure proxy
      * 
@@ -259,13 +263,85 @@ public class Structures {
     }
 
     /**
+     * Create a structure from a Java Bean
+     * 
+     * @param persistenceManager the persistence manager is optional
+     * if the record does not contain references to persistence capable
+     * objects.
+     * @param structureClass
+     * @param javaBean
+     * 
+     * @return the corresponding structure proxy
+     * 
+     * @throws IllegalArgumentException
+     */
+    public static <S> S fromJavaBean(
+        PersistenceManager persistenceManager,
+        Class<S> structureClass,
+        Object javaBean
+    ){
+        if(javaBean == null) {
+            return null;
+        } else {
+            MetaData metaData = MetaData.getInstance(structureClass);
+            return create(
+                structureClass,
+                metaData,
+                metaData.fromJavaBean(persistenceManager, javaBean)
+            );
+        }
+    }
+    
+    /**
+     * Save a record into a Java Bean
+     * 
+     * @param source the record to be saved
+     * @param target the target bean
+     * 
+     * @exception IllegalArgumentException if the record can't be saved into the bean
+     * @exception NullPointerException if either the source or the target is <code>null</code>
+     */
+    public static <T> T toJavaBean(
+        MappedRecord source,
+        T target
+    ){
+        try {
+            return MetaData.getInstance(source).toJavaBean(source, target);
+        } catch (Exception exception) {
+            throw new IllegalArgumentException(
+                "Unable to save the record type " + source.getRecordName() + " into the java bean type " + target.getClass().getName(),
+                exception
+            );
+        }
+    }
+ 
+    /**
+     * Save a structure into a Java Bean
+     * 
+     * @param source the structure to be saved
+     * @param target the target bean
+     * 
+     * @exception IllegalArgumentException if the record can't be saved into the bean
+     * @exception NullPointerException if either the source or the target is <code>null</code>
+     */
+    public static <T> T toJavaBean(
+        Object source,
+        T target
+    ){
+        return toJavaBean(
+            source instanceof MappedRecord ? (MappedRecord)source : toRecord(source, true),
+            target
+        );
+    }
+    
+    /**
      * Retrieve the record type
      * 
      * @param record
      * 
      * @return the record name components
      */
-    private static List<String> refTypeName(
+    static List<String> refTypeName(
         Record record
     ){
         String name = record.getRecordName();
@@ -329,7 +405,7 @@ public class Structures {
             && Proxy.getInvocationHandler(object) instanceof ProxyHandler;
     }
 
-    private static IllegalArgumentException newIllegalArgumentException(
+    static IllegalArgumentException newIllegalArgumentException(
         String type,
         List<String> qualifiedClassName,
         ClassNotFoundException cause
@@ -357,7 +433,7 @@ public class Structures {
      * 
      * @return the corresponding cci class name
      */
-    private static String cciClassName (
+    static String cciClassName (
         List<String> modelClass
     ){
         StringBuilder javaClass = new StringBuilder();
@@ -423,7 +499,15 @@ public class Structures {
 
         private transient String string = null;
         
+        /**
+         * Record names are internal qualified names using ":" as separator
+         */
         private transient MappedRecord record = null;
+
+        /**
+         * Record names are external qualified names using "::" as separator
+         */
+        private transient MappedRecord delegate = null;
         
         /**
          * Maps primitive types to their respective object class
@@ -495,7 +579,7 @@ public class Structures {
                     }
                 } else if ("toString".equals(methodName)) {
                     if (this.string == null) {
-                        this.string = toRecord(true).toString();
+                        this.string = toRecord(true, true).toString();
                     }
                     return this.string;
                 } else if ("hashCode".equals(methodName)) {
@@ -512,7 +596,17 @@ public class Structures {
                     }
                     return values;
                 } else if ("openmdxjdoRecord".equals(methodName)) {
-                    return toRecord((Boolean)args[0]);
+                    if(this.record == null) {
+                        this.record =  toRecord(Boolean.TRUE.equals(args[0]), true);
+                    }
+                    return this.record;
+                }
+            } else if(RefStruct_1_0.class.equals(declaringClass)) {
+                if("refDelegate".equals(methodName)) {
+                    if(this.delegate == null) {
+                        this.delegate = toRecord(true, false); 
+                    }
+                    return this.delegate;
                 }
             } else {
                 Enum<?> member = this.metaData.accessors.get(method);
@@ -695,78 +789,90 @@ public class Structures {
         }
 
         MappedRecord toRecord(
-            boolean mapNullValues
+            boolean mapNullValues, 
+            boolean mofCompliant
         ) {
-            if(this.record == null) try {
-                List<Object> values = new ArrayList<Object>();
-                List<String> keys = new ArrayList<String>();
-                for(Enum<?> field : this.metaData.names) {
-                    int slot = field.ordinal();
-                    Object v = this.values[slot];
-                    Object value = null;
-                    Class<?> t = this.metaData.memberTypes[slot];
-                    if (Iterable.class.isAssignableFrom(t)) {
-                        Object[] i = (Object[]) v;
-                        if (SparseArray.class == t) {
-                            if(v == null) {
-                                value = Records.getRecordFactory().asMappedRecord(
-                                    MetaData.toType(t),
-                                    null, // recordShortDescription 
-                                    NO_INDICES,
-                                    EMPTY_COLLECTION
-                                );
-                            } else {
-                                value = Records.getRecordFactory().asMappedRecord(
-                                    MetaData.toType(t),
-                                    null, // recordShortDescription 
-                                    (Object[])i[0], // keys
-                                    toRecordValues(
-                                        (Object[])i[1], 
-                                        mapNullValues
-                                    ) // values
-                                );
-                            }
-                        } else {
-                            if(v == null) {
-                                value = Records.getRecordFactory().asIndexedRecord(
-                                    MetaData.toType(t),
-                                    null, // recordShortDescription 
-                                    EMPTY_COLLECTION
-                                );
-                            } else {
-                                value = Records.getRecordFactory().asIndexedRecord(
-                                    MetaData.toType(t),
-                                    null, // recordShortDescription 
-                                    toRecordValues(
-                                        i, 
-                                        mapNullValues
-                                    )
-                                );
-                            }
-                        }
+            List<Object> values = new ArrayList<Object>();
+			List<String> keys = new ArrayList<String>();
+			for(Enum<?> field : this.metaData.names) {
+			    int slot = field.ordinal();
+			    Object v = this.values[slot];
+			    Object value = null;
+			    Class<?> t = this.metaData.memberTypes[slot];
+			    if (Iterable.class.isAssignableFrom(t)) {
+			        Object[] i = (Object[]) v;
+			        if (SparseArray.class == t) {
+			            if(v == null) {
+			                value = Records.getRecordFactory().asMappedRecord(
+			                    MetaData.toType(t, mofCompliant),
+			                    null, // recordShortDescription 
+			                    NO_INDICES,
+			                    EMPTY_COLLECTION
+			                );
+			            } else {
+			                value = Records.getRecordFactory().asMappedRecord(
+			                    MetaData.toType(t, mofCompliant),
+			                    null, // recordShortDescription 
+			                    (Object[])i[0], // keys
+			                    toRecordValues(
+			                        (Object[])i[1], 
+			                        mapNullValues
+			                    ) // values
+			                );
+			            }
+			        } else {
+			            if(v == null) {
+			                value = Records.getRecordFactory().asIndexedRecord(
+			                    MetaData.toType(t, mofCompliant),
+			                    null, // recordShortDescription 
+			                    EMPTY_COLLECTION
+			                );
+			            } else {
+			                value = Records.getRecordFactory().asIndexedRecord(
+			                    MetaData.toType(t, mofCompliant),
+			                    null, // recordShortDescription 
+			                    toRecordValues(
+			                        i, 
+			                        mapNullValues
+			                    )
+			                );
+			            }
+			        }
+			    } else {
+			        value = v instanceof PersistenceAware
+			            ? Structures.toRecord(v, mapNullValues)
+			            : v;
+			    }
+			    if(mapNullValues || (value != null)) {
+			        keys.add(this.metaData.keys[slot]);
+			        values.add(value);                        
+			    }
+			}
+			return Records.getRecordFactory().asMappedRecord(
+			    mofCompliant ? this.metaData.type : Names.toQualifiedName(this.metaData.type), 
+			    null, // recordShortDescription, 
+			    keys.toArray(new String[keys.size()]),
+			    toRecordValues(values)
+			);
+        }
+        
+        private static Object[] toRecordValues(
+            List<?> source
+        ){
+            Object[] target = new Object[source.size()];
+            for(int i = 0; i < target.length; i++) {
+                Object value = source.get(i);
+                if(value instanceof PersistenceCapable) {
+                    if(JDOHelper.isPersistent(value)) {
+                        target[i] = JDOHelper.getObjectId(value);
                     } else {
-                        value = v instanceof PersistenceAware
-                            ? Structures.toRecord(v, mapNullValues)
-                            : v;
+                        target[i] = JDOHelper.getTransactionalObjectId(value);
                     }
-                    if(mapNullValues || (value != null)) {
-                        keys.add(this.metaData.keys[slot]);
-                        values.add(value);                        
-                    }
+                } else {
+                    target[i] = value;
                 }
-                this.record = Records.getRecordFactory().asMappedRecord(
-                    this.metaData.type, 
-                    null, // recordShortDescription, 
-                    keys.toArray(new String[keys.size()]),
-                    values.toArray(new Object[values.size()])
-                );
-            } catch (ResourceException exception) {
-                throw new RuntimeException(
-                    "Can not represent the structure '" + this.metaData.type + "' as mapped record",
-                    exception
-               );
             }
-            return this.record;
+            return target;
         }
         
         private Object[] toRecordValues(
@@ -1211,17 +1317,19 @@ public class Structures {
         MetaData(
             Class<?> structureClass
         ) {
-            this.type = toType(structureClass);
+            this.type = toType(structureClass, true);
             this.nameClass = getInnerClass(structureClass, MEMBER);
             if (!this.nameClass.isEnum()) throw new IllegalArgumentException(
                 "The member class '" + MEMBER + "' of '" + structureClass.getName() + "' is not an enumeration class"
             );
             this.names = (Enum<?>[]) nameClass.getEnumConstants();
             this.accessors = new HashMap<Method, Enum<?>>(names.length);
+            this.beanGetter = new HashMap<Enum<?>, String>(names.length);
+            this.beanSetter = new HashMap<Enum<?>, String>(names.length);
             this.memberTypes = new Class<?>[names.length];
             this.elementTypes = new Class<?>[names.length];
             this.keys = new String[names.length];
-            Method[] methods = structureClass.getDeclaredMethods();
+            Method[] methods = structureClass.getMethods();
             Names: for (Enum<?> name : names) {
                 int slot = name.ordinal();
                 String memberName = this.keys[slot] = name.toString();
@@ -1237,6 +1345,8 @@ public class Structures {
                             )
                         ) {
                             this.accessors.put(method, name);
+                            this.beanGetter.put(name, candidate);
+                            this.beanSetter.put(name, "set" + suffix);
                             this.memberTypes[slot] = returnType;
                             if(Iterable.class.isAssignableFrom(returnType)) {
                                 Type elementType = method.getGenericReturnType();
@@ -1280,6 +1390,10 @@ public class Structures {
 
         final Map<Method, Enum<?>> accessors;
 
+        final Map<Enum<?>, String> beanGetter;
+
+        final Map<Enum<?>, String> beanSetter;
+        
         final Class<?>[] memberTypes;
 
         final Class<?>[] elementTypes;
@@ -1294,10 +1408,10 @@ public class Structures {
         
         private static final String STEREOTYPE_SPARSEARRAY = "\u00absparsearray\u00bb";                    
 
-        private static final Map<Class<?>, MetaData> cache = Collections.synchronizedMap(
-            new WeakHashMap<Class<?>, MetaData>()
-        );
+        private static final ConcurrentMap<Class<?>, MetaData> forStructureClass = new ConcurrentHashMap<Class<?>, Structures.MetaData>();
 
+        private static final ConcurrentMap<List<String>, MetaData> forTypeName = new ConcurrentHashMap<List<String>, Structures.MetaData>();
+        
         Object[] toValues(Structures.Member<?>... members) {
             Object[] values = new Object[this.names.length];
             for (Structures.Member<?> member : members) {
@@ -1317,6 +1431,182 @@ public class Structures {
                 values[member.getName().ordinal()] = member.getValue();
             }
             return values;
+        }
+
+        private boolean isStructureType(
+            Class<?> candidate
+        ){
+            if(candidate != null) {
+                for(Class<?> innerClass : candidate.getClasses()) {
+                    if(MEMBER.equals(innerClass.getSimpleName())) {
+                        return true;
+                    }
+                }
+                for(Class<?> superClass : candidate.getInterfaces()) {
+                    for(Class<?> innerClass : superClass.getClasses()) {
+                        if(MEMBER.equals(innerClass.getSimpleName())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        private final boolean isMultivalueType(
+            Class<?> type
+        ){
+            return type.isArray() && type.getComponentType() != Byte.TYPE;
+        }
+        
+        /**
+         * Save a mapped record into a Java Bean
+         * 
+         * @param source
+         * @param target the Java bean to be updated
+         * 
+         * @throws Exception 
+         */
+        @SuppressWarnings("unchecked")
+        <T> T toJavaBean(
+            MappedRecord structure,
+            T javaBean
+        ) throws Exception{
+            Members: for(Enum<?> member : this.names) {
+                String name = member.name();
+                if(structure.containsKey(name)) {
+                    Object source = structure.get(name);
+                    String methodName = this.beanSetter.get(member);
+                    Object target;
+                    Methods: for(Method method : javaBean.getClass().getMethods()) {
+                        if(methodName.equals(method.getName())){
+                            Class<?>[] arguments = method.getParameterTypes(); 
+                            if(arguments.length == 1) try {
+                                Class<?> type = arguments[0];
+                                if(isMultivalueType(type)) {
+                                    if(source == null) {
+                                        target = Array.newInstance(type, 0); 
+                                    } else {
+                                        List<?> values;
+                                        if(source instanceof IndexedRecord) {
+                                            values = (IndexedRecord)source;
+                                        } else if (source instanceof MappedRecord) {
+                                            values = new TreeSparseArray<Object>((Map<Integer,?>)source).asList();
+                                        } else {
+                                            continue Methods;
+                                        }
+                                        Class<?> componentType = type.getComponentType();
+                                        target = Array.newInstance(componentType, values.size());
+                                        int i = 0;
+                                        for(Object value : values){
+                                            Array.set(target, i++, toJavaBeanValue(value, componentType));
+                                        }
+                                    } 
+                                } else {
+                                    target = toJavaBeanValue(source, type);
+                                }
+                                method.invoke(javaBean, target);
+                                continue Members;
+                            } catch (Exception ignore) {
+                                continue Methods;
+                            }
+                        }
+                    }
+                    throw new NoSuchMethodException(
+                        "No matching " + methodName + " method found to save member " + member + ": " + source
+                    );
+                }
+            }
+            return javaBean;
+        }
+         
+        /**
+         * Provide the Java bean value and assert its type
+         * 
+         * @param value
+         * @param type
+         * 
+         * @return the Java bean value
+         * @throws Exception
+         */
+        Object toJavaBeanValue(
+            Object value,
+            Class<?> type
+        ) throws Exception {
+            return getObjectType(type).cast(
+                value instanceof MappedRecord ? Structures.toJavaBean((MappedRecord)value, type.newInstance()) : value
+            );
+        }
+
+        /**
+         * Retrieve the type of its object equivalent
+         * <p>
+         * Converts neither <code>byte</code> nor <code>character</code>!
+         * 
+         * @param type or its object equivalent
+         * 
+         * @return the reflectively assignable component type
+         */
+        Class<?> getObjectType(
+            Class<?> type
+        ){
+            return
+                Boolean.TYPE == type ? Boolean.class :
+                Short.TYPE ==  type ? Short.class :
+                Integer.TYPE == type ? Integer.class :
+                Long.TYPE == type ? Long.class :
+                type;
+        }
+        
+        Object[] fromJavaBean(
+            PersistenceManager persistenceManager,
+            Object javaBean
+        ){
+            if(javaBean == null) {
+                return null;
+            } else {
+                Object[] values = new Object[this.names.length];
+                for(Enum<?> name : this.names) {
+                    int slot = name.ordinal();
+                    try {
+                        Object value = javaBean.getClass().getMethod(this.beanGetter.get(name)).invoke(javaBean);
+                        //
+                        // Handle Nested Java Beans
+                        //
+                        if(isStructureType(this.memberTypes[slot])) {
+                            values[slot] = Structures.fromJavaBean(persistenceManager, this.memberTypes[slot], value);
+                        } else if (isStructureType(this.elementTypes[slot])){
+                            Object[] source = (Object[]) value;
+                            Object[] target = new Object[source.length];
+                            for(int i = 0; i < source.length; i++) {
+                                target[i] = Structures.fromJavaBean(persistenceManager, this.elementTypes[slot], source[i]);
+                            }
+                            values[slot] = target;
+                        } else {
+                            values[slot] = value;
+                        }
+                        //
+                        // Handle Sparse Arrays
+                        //
+                        if(this.memberTypes[slot] == SparseArray.class) {
+                            Object[] source = (Object[]) values[slot];
+                            SparseArray<Object> target = new TreeSparseArray<Object>();
+                            for(int i = 0; i < source.length; i++) {
+                                if(source[i] != null) {
+                                    target.put(i, source[i]);
+                                }
+                            }
+                            values[slot] = target;
+                        }
+                    } catch (Exception exception) {
+                        throw new IllegalArgumentException(
+                            "Unable to retrieve field '" + name.name() + "' from " + (javaBean == null ? "null" : javaBean.getClass().getName()) + " Java bean",
+                            exception
+                        );
+                    }
+                }
+                return values;
+            }
         }
 
         Object[] toValues(
@@ -1473,19 +1763,49 @@ public class Structures {
          * interface enumerating its members.
          */
         static MetaData getInstance(Class<?> structureClass) {
-            MetaData metaData = MetaData.cache.get(structureClass);
+            MetaData metaData = MetaData.forStructureClass.get(structureClass);
             if (metaData == null) { 
                 if (!structureClass.isInterface()) throw new IllegalArgumentException(
                     "Class " + structureClass.getName() + " is not an interface"
                 );
-                MetaData.cache.put(
+                metaData = Maps.putUnlessPresent(
+                    MetaData.forStructureClass,
                     structureClass, 
-                    metaData = new MetaData(structureClass)
+                    new MetaData(structureClass)
                 );
             }
             return metaData;
         }
 
+        /**
+         * Retrieve the meta data instance
+         * 
+         * @param structureClass
+         * 
+         * @return the structure's meta data
+         * 
+         * @throws IllegalArgumentException if structureClass is not an
+         * interface enumerating its members.
+         */
+        static MetaData getInstance(Record structure) {
+            List<String> typeName = refTypeName(structure);
+            MetaData metaData = MetaData.forTypeName.get(typeName);
+            if (metaData == null) try { 
+                metaData = Maps.putUnlessPresent(
+                    MetaData.forTypeName,
+                    typeName, 
+                    MetaData.getInstance(Classes.getApplicationClass(cciClassName(typeName)))
+                );
+            } catch (ClassNotFoundException exception) {
+                throw newIllegalArgumentException(
+                    "structure",
+                    typeName,
+                    exception
+                );
+            }
+            return metaData;
+        }
+        
         private static Class<?> getInnerClass(
             Class<?> outerClass,
             String name
@@ -1493,6 +1813,13 @@ public class Structures {
             for (Class<?> innerClass : outerClass.getDeclaredClasses()) {
                 if (name.equals(innerClass.getSimpleName())) {
                     return innerClass;
+                }
+            }
+            for(Class<?> superClass : outerClass.getInterfaces()) {
+                for (Class<?> innerClass : superClass.getDeclaredClasses()) {
+                    if (name.equals(innerClass.getSimpleName())) {
+                        return innerClass;
+                    }
                 }
             }
             throw new IllegalArgumentException(
@@ -1504,11 +1831,13 @@ public class Structures {
          * Retrieve the corresponding MOF id
          * 
          * @param javaClass
+         * @param mofCompliant "::" is used as separator if <code>true</code> 
          * 
          * @return the class' MOF id
          */
         static String toType(
-            Class<?> javaClass
+            Class<?> javaClass, 
+            boolean mofCompliant
         ){
             if(Iterable.class.isAssignableFrom(javaClass)) {
                 return 
@@ -1520,7 +1849,7 @@ public class Structures {
                 String[] qualifiedName = javaClass.getName().split("\\.");
                 StringBuilder type = new StringBuilder();
                 for (int i = 0, iLimit = qualifiedName.length - 2; i < iLimit; i++) {
-                    type.append(qualifiedName[i]).append("::");
+                    type.append(qualifiedName[i]).append(mofCompliant ? "::" : ":");
                 }
                 return type.append(
                     qualifiedName[qualifiedName.length - 1]

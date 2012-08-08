@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StateImportPlugIn.java,v 1.7 2010/06/22 07:05:47 hburger Exp $
+ * Name:        $Id: StateImportPlugIn.java,v 1.13 2011/11/26 01:35:00 hburger Exp $
  * Description: State Import Plug-In
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/22 07:05:47 $
+ * Date:        $Date: 2011/11/26 01:35:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -71,13 +71,14 @@ import org.openmdx.application.xml.spi.ImportMode;
 import org.openmdx.base.accessor.spi.PersistenceManager_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.cci.DateStateViews;
-import org.openmdx.state2.jmi1.BasicState;
 import org.openmdx.state2.jmi1.DateState;
 import org.openmdx.state2.jmi1.StateCapable;
 import org.openmdx.state2.spi.DateStateViewContext;
+import org.openmdx.state2.spi.Parameters;
 
 /**
  * State Import Plug-In
@@ -120,12 +121,7 @@ public class StateImportPlugIn implements ImportPlugIn {
         Class<T> objectClass
     ) throws ServiceException {
         if(DateState.class.isAssignableFrom(objectClass)) {
-            Object_2Facade facade;
-            try {
-                facade = Object_2Facade.newInstance(objectHolder);
-            } catch (ResourceException exception) {
-                throw new ServiceException(exception);
-            }
+            Object_2Facade facade = Facades.asObject(objectHolder);
             if(Boolean.TRUE.equals(facade.attributeValue("validTimeUnique"))) {
                 Path externalId = Object_2Facade.getPath(objectHolder);
                 T refObject = null;
@@ -148,14 +144,14 @@ public class StateImportPlugIn implements ImportPlugIn {
                             refObject = (T) persistenceManager.getObjectById(externalId);
                         } catch (JDOObjectNotFoundException exception) {
                             refObject = persistenceManager.newInstance(objectClass);
-                            this.initialize(persistenceManager, externalId, refObject);
+                            this.makeObjectWithUnqiueTimesPersistent(persistenceManager, externalId, refObject);
                         } catch (JDOException exception) {
                             throw new ServiceException(exception);
                         }
                         break;
                     case CREATE:
                         refObject = persistenceManager.newInstance(objectClass);
-                        this.initialize(persistenceManager, externalId, refObject);
+                        this.makeObjectWithUnqiueTimesPersistent(persistenceManager, externalId, refObject);
                         break;
                 }
                 return refObject;
@@ -174,8 +170,9 @@ public class StateImportPlugIn implements ImportPlugIn {
                 switch(mode) {
                     case UPDATE:
                         try {
-                            return (T) DateStateViews.getViewForTimeRange(
-                                (StateCapable) persistenceManager.getObjectById(objectId), 
+                        	RefObject core = (RefObject) persistenceManager.getObjectById(objectId);
+                            return DateStateViews.<RefObject,T>getViewForTimeRange(
+                            	core, 
                                 validFrom, 
                                 validTo
                             );
@@ -192,7 +189,7 @@ public class StateImportPlugIn implements ImportPlugIn {
                         }
                     case SET:
                         try {
-                            RefContainer refContainer = (RefContainer) persistenceManager.getObjectById(objectId.getParent());
+                            RefContainer<?> refContainer = (RefContainer<?>) persistenceManager.getObjectById(objectId.getParent());
                             String qualifier = objectId.getBase();
                             StateCapable core = qualifier.startsWith("!") ? (StateCapable) refContainer.refGet(
                                 QualifierType.PERSISTENT,
@@ -222,7 +219,7 @@ public class StateImportPlugIn implements ImportPlugIn {
                             StateCapable core = this.delegate.getInstance(
                                 persistenceManager, 
                                 ImportMode.UPDATE, 
-                                Object_2Facade.newInstance(
+                                Facades.newObject(
                                     (Path)facade.getValue().get("core")
                                 ).getDelegate(), 
                                 StateCapable.class
@@ -231,13 +228,11 @@ public class StateImportPlugIn implements ImportPlugIn {
                                 DateStateViewContext.newTimeRangeViewContext(validFrom, validTo)
                             );
                             T view = viewManager.newInstance(objectClass); // states must not be initialized!
-                            ((BasicState)view).setCore(core);
+                            DateStateViews.linkStateAndCore((DateState)view,core);
                             return viewManager.newInstance(objectClass); 
                         } catch (JDOException exception) {
                             throw new ServiceException(exception);
                         } catch (JmiException exception) {
-                            throw new ServiceException(exception);
-                        } catch (ResourceException exception) {
                             throw new ServiceException(exception);
                         }
                 }
@@ -259,7 +254,7 @@ public class StateImportPlugIn implements ImportPlugIn {
      * 
      * @throws ServiceException
      */
-    private void initialize(
+    private void makeObjectWithUnqiueTimesPersistent(
         PersistenceManager persistenceManager,
         Path objectId,
         RefObject refObject
@@ -267,7 +262,8 @@ public class StateImportPlugIn implements ImportPlugIn {
         //
         // Set the validTimeUnique flag
         //
-        refObject.refSetValue("core", refObject);
+        refObject.refSetValue("validTimeUnique", Boolean.TRUE);
+        refObject.refSetValue("transactionTimeUnique", Boolean.TRUE);
         //
         // Make transient instances persistent
         //
@@ -300,8 +296,8 @@ public class StateImportPlugIn implements ImportPlugIn {
      */
     private static boolean isValidTimeUnique(
         MappedRecord objectHolder
-    ) throws ResourceException, ServiceException {
-        Object_2Facade facade = Object_2Facade.newInstance(objectHolder);
+    ) throws ServiceException {
+        Object_2Facade facade = Facades.asObject(objectHolder);
         return Boolean.TRUE.equals(
             facade.attributeValue("validTimeUnique")
         );
@@ -316,52 +312,49 @@ public class StateImportPlugIn implements ImportPlugIn {
         MappedRecord objectHolder, 
         Map<Path, RefObject> cache
      ) throws ServiceException {
-        try {
-            if(
-                refObject instanceof DateState && 
-                refObject instanceof StateCapable && 
-                !StateImportPlugIn.isValidTimeUnique(objectHolder)
-            ) {
-                DateState dateState = (DateState) refObject;
-                JmiHelper.toRefObject(
-                    objectHolder, // source
-                    dateState, // target
-                    cache, // maps externalIds to refObjects
-                    StateImportPlugIn.IGNORABLE_FEATURES_FOR_STATE_CAPABLE_INSTANCES
-                );
-                if(!JDOHelper.isPersistent(refObject)){
-                    Object_2Facade facade = Object_2Facade.newInstance(objectHolder);
-                    if(facade.attributeValue("removedAt") == null) {
-                        Path objectId = (Path)facade.attributeValue("core");
-                        if(objectId == null) {
-                            throw new ServiceException(
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.BAD_PARAMETER,
-                                "Missing core value, objectId can't be determined",
-                                new BasicException.Parameter("externalId", facade.getPath().toXRI())
-                            );
-                        }
-                        dateState.setCore(
-                            this.getInstance(
-                                persistenceManager,
-                                ImportMode.UPDATE,
-                                Object_2Facade.newInstance(objectId).getDelegate(), 
-                                StateCapable.class
-                            )
-                        );
-                    }
-                }
-            } else {
-                this.delegate.prepareInstance(
-                    persistenceManager, 
-                    refObject, 
-                    objectHolder, 
-                    cache
-                );
-            }
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
-        }
+        if(
+		    refObject instanceof DateState && 
+		    refObject instanceof StateCapable && 
+		    !StateImportPlugIn.isValidTimeUnique(objectHolder)
+		) {
+		    DateState dateState = (DateState) refObject;
+		    JmiHelper.toRefObject(
+		        objectHolder, // source
+		        dateState, // target
+		        cache, // maps externalIds to refObjects
+		        StateImportPlugIn.IGNORABLE_FEATURES_FOR_STATE_CAPABLE_INSTANCES, 
+		        !Parameters.STRICT_QUERY
+		    );
+		    if(!JDOHelper.isPersistent(refObject)){
+		        Object_2Facade facade = Facades.asObject(objectHolder);
+		        if(facade.attributeValue("removedAt") == null) {
+		            Path objectId = (Path)facade.attributeValue("core");
+		            if(objectId == null) {
+		                throw new ServiceException(
+		                    BasicException.Code.DEFAULT_DOMAIN,
+		                    BasicException.Code.BAD_PARAMETER,
+		                    "Missing core value, objectId can't be determined",
+		                    new BasicException.Parameter("externalId", facade.getPath().toXRI())
+		                );
+		            }
+		            dateState.setCore(
+		                this.getInstance(
+		                    persistenceManager,
+		                    ImportMode.UPDATE,
+		                    Facades.newObject(objectId).getDelegate(), 
+		                    StateCapable.class
+		                )
+		            );
+		        }
+		    }
+		} else {
+		    this.delegate.prepareInstance(
+		        persistenceManager, 
+		        refObject, 
+		        objectHolder, 
+		        cache
+		    );
+		}
     }
 
 }

@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Filter.java,v 1.21 2010/06/21 17:33:11 hburger Exp $
+ * Name:        $Id: Filter.java,v 1.22 2011/11/26 01:34:59 hburger Exp $
  * Description: Filter
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 17:33:11 $
+ * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.base.query;
 
@@ -68,7 +67,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import javax.resource.ResourceException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.accessor.cci.SystemAttributes;
@@ -406,20 +404,16 @@ public class Filter
     @Override
     public String toString(
     ) {
-        try {
-            return Records.getRecordFactory().asMappedRecord(
-                this.getClass().getName(),
-                null,
-                Filter.TO_STRING_FIELDS, 
-                new Object[]{
-                    this.conditions,
-                    this.orderSpecifiers,
-                    this.extension
-                }
-            ).toString();
-        } catch (ResourceException exception) {
-            return super.toString();
-        }
+        return Records.getRecordFactory().asMappedRecord(
+		    this.getClass().getName(),
+		    null,
+		    Filter.TO_STRING_FIELDS, 
+		    new Object[]{
+		        this.conditions,
+		        this.orderSpecifiers,
+		        this.extension
+		    }
+		).toString();
     }
 
     

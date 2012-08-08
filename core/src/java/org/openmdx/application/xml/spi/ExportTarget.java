@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ExportTarget.java,v 1.5 2009/10/15 10:19:47 hburger Exp $
+ * Name:        $Id: ExportTarget.java,v 1.6 2011/07/01 16:16:42 hburger Exp $
  * Description: Export Target 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/15 10:19:47 $
+ * Date:        $Date: 2011/07/01 16:16:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,6 +54,7 @@ package org.openmdx.application.xml.spi;
 import javax.jmi.reflect.RefObject;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.Multiplicity;
 
 /**
  * Export Target
@@ -120,7 +121,7 @@ public interface ExportTarget {
     void startAttribute(
         String qualifiedName,
         String typeName, 
-        String multiplicity, 
+        Multiplicity multiplicity, 
         Object values,
         boolean empty
     ) throws ServiceException;
@@ -137,7 +138,7 @@ public interface ExportTarget {
      */
     void write(
         String typeName, 
-        String multiplicity, 
+        Multiplicity multiplicity, 
         int position, 
         Object value
     ) throws ServiceException;
@@ -155,7 +156,7 @@ public interface ExportTarget {
     void endAttribute(
         String qualifiedName,
         String typeName, 
-        String multiplicity, 
+        Multiplicity multiplicity, 
         Object values,
         boolean empty
     ) throws ServiceException;

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.14 2010/12/23 17:42:52 hburger Exp $
+ * Name:        $Id: PlugIn_1.java,v 1.18 2011/12/29 03:06:35 hburger Exp $
  * Description: Standard Plug-In
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/23 17:42:52 $
+ * Date:        $Date: 2011/12/29 03:06:35 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,7 +50,7 @@
  */
 package org.openmdx.base.aop0;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -66,6 +66,7 @@ import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.rest.UnitOfWork_1;
 import org.openmdx.base.aop1.Removable_1;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.PathComponent;
@@ -168,18 +169,25 @@ public class PlugIn_1
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.aop0.PlugIn_1_0#getSharedObject()
-     */
-    public Object getUserObject(Object key) {
-        return null;
-    }
-
+	 * @see org.openmdx.base.aop0.PlugIn_1_0#getPlugInObject(java.lang.Class)
+	 */
+	public <T> T getPlugInObject(Class<T> type) {
+		return null;
+	}
     
+    /* (non-Javadoc)
+	 * @see org.openmdx.base.aop0.PlugIn_1_0#isExemptFromValidation(org.openmdx.base.mof.cci.ModelElement_1_0)
+	 */
+	public boolean isExemptFromValidation(DataObject_1 object, ModelElement_1_0 feature) {
+		return false;
+	}
+
+	
     //------------------------------------------------------------------------
     // Implements StoreLifecycleListener
     //------------------------------------------------------------------------
 
-    /* (non-Javadoc)
+	/* (non-Javadoc)
      * @see javax.jdo.listener.StoreLifecycleListener#postStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
 //  @Override
@@ -200,7 +208,7 @@ public class PlugIn_1
             if(model.isInstanceof(persistentInstance, "org:openmdx:base:Creatable")){
                 if(persistentInstance.jdoIsNew()) {
                     persistentInstance.objSetValue(SystemAttributes.CREATED_AT, unitOfWork.getTransactionTime());
-                    Collection<Object> createdBy = persistentInstance.objGetSet(SystemAttributes.CREATED_BY);
+                    List<Object> createdBy = persistentInstance.objGetList(SystemAttributes.CREATED_BY);
                     createdBy.clear();
                     createdBy.addAll(UserObjects.getPrincipalChain(dataObjectManager));
                 } else {
@@ -215,7 +223,7 @@ public class PlugIn_1
             ){
                 if(persistentInstance.jdoIsDirty() && !persistentInstance.jdoIsDeleted()) {
                     persistentInstance.objSetValue(SystemAttributes.MODIFIED_AT, unitOfWork.getTransactionTime());
-                    Collection<Object> modifiedBy = persistentInstance.objGetSet(SystemAttributes.MODIFIED_BY);
+                    List<Object> modifiedBy = persistentInstance.objGetList(SystemAttributes.MODIFIED_BY);
                     modifiedBy.clear();
                     modifiedBy.addAll(UserObjects.getPrincipalChain(dataObjectManager));                
                 } else {
@@ -227,7 +235,7 @@ public class PlugIn_1
             if(model.isInstanceof(persistentInstance, "org:openmdx:base:Removable")){
                 if(Removable_1.IN_THE_FUTURE.equals(persistentInstance.objGetValue(SystemAttributes.REMOVED_AT))) {
                     persistentInstance.objSetValue(SystemAttributes.REMOVED_AT, unitOfWork.getTransactionTime());
-                    Collection<Object> removedBy = persistentInstance.objGetSet(SystemAttributes.REMOVED_BY);
+                    List<Object> removedBy = persistentInstance.objGetList(SystemAttributes.REMOVED_BY);
                     removedBy.clear();
                     removedBy.addAll(UserObjects.getPrincipalChain(dataObjectManager));
                 } else {
@@ -271,8 +279,11 @@ public class PlugIn_1
                 }
                 if(model.isInstanceof(persistentInstance, "org:openmdx:base:Aspect")) {
                     DataObject_1 core = (DataObject_1)persistentInstance.objGetValue("core");
-                    if(core.jdoIsDeleted()) {
-                        return; // a core object's aspects may be deleted together with the core object
+                    if(core == null || core.jdoIsDeleted()) {
+                    	// a core object's aspects may be deleted together with the core object
+                    	// or if the core object is lacking due to model misuse (e.g. stated objects
+                    	//  used in a non-stated way).
+                        return;
                     }
                 }
                 throw new ServiceException(

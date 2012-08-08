@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: FilterProperty.java,v 1.6 2010/06/08 11:57:15 hburger Exp $
+ * Name:        $Id: FilterProperty.java,v 1.8 2011/11/26 01:34:58 hburger Exp $
  * Description: Filter Property
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/08 11:57:15 $
+ * Date:        $Date: 2011/11/26 01:34:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -65,10 +65,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.resource.ResourceException;
-
 import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.query.AnyTypeCondition;
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.ConditionType;
@@ -177,7 +174,7 @@ public final class FilterProperty implements Serializable  {
      */
     public static List<FilterProperty> getFilterProperties(
         Filter filter
-    ) throws ServiceException {
+    ){
         if(filter == null) {
             return Collections.emptyList();
         } else {
@@ -329,21 +326,17 @@ public final class FilterProperty implements Serializable  {
     ){
         Quantifier quantifier = Quantifier.valueOf(this.quantor());
         ConditionType conditionType = ConditionType.valueOf(this.operator());
-        try {
-            return Records.getRecordFactory().asMappedRecord(
-                this.getClass().getName(), 
-                (quantifier == null ? "PIGGY_BACK" : quantifier.name()) + " " + this.name() + " " + conditionType + " " + this.values(),
-                TO_STRING_FIELDS,
-                new Object[]{
-                    quantifier,
-                    this.name(), 
-                    conditionType, 
-                    this.values()
-                }
-            ).toString();
-        } catch (ResourceException exception) {
-            return super.toString();
-        }
+        return Records.getRecordFactory().asMappedRecord(
+		    this.getClass().getName(), 
+		    (quantifier == null ? "PIGGY_BACK" : quantifier.name()) + " " + this.name() + " " + conditionType + " " + this.values(),
+		    TO_STRING_FIELDS,
+		    new Object[]{
+		        quantifier,
+		        this.name(), 
+		        conditionType, 
+		        this.values()
+		    }
+		).toString();
     }
 
 

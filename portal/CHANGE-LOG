@@ -4,6 +4,80 @@
                     =====================================
 
 ==============================================================================
+Version 2.8.28+                                                     2011-09-16
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019878
+      GridMoveUpObjectAction, GridMoveDownObjectAction. Add grid actions which 
+      allow to move position of values for multi-valued, ordered reference features.
+      
+      CR10010042
+      PortalExtension: grid actions. Allow to add custom-specific actions 
+      to grid menu 'Actions'.              
+                                    
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019914
+      Deprecate RoleMapper_1_0 and remove dependency to openMDX/Security.
+            
+      CR10010109
+      The method PortalExtension_1_0.isEnabled() was renamed to the more general
+      method hasPermission(). The new signature allows to control show- and edit-
+      permissions for GUI elements such as fields, field groups, operations and
+      references.
+            
+2.1.  FIXED BUGS
+      none      
+      
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
+Version 2.8.20                                                      2011-05-04
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR10009791
+      Workspaces. Left-pane added which hosts workspace-level dashboard. The
+      workspace-level dashboard works like the (horizontal) object-level dashboard:
+      * dashlets can be added removed by admin or user
+      * dashlets can be shared by admin by prefixing the label with a *
+      Workspaces can be managed by the segment admin only.
+       
+                                    
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019725
+      Portal: refactoring event handlers. Event handlers are object-oriented. 
+            
+2.1.  FIXED BUGS
+      
+      C10009805	 
+      Portal: Main Menu Error.
+      More info see http://sourceforge.net/projects/opencrx/forums/forum/329844/topic/4064101
+      
+      CR20019583
+      Fix pm handling for INVOKE_OPERATION. INVOKE_OPERATION closes pm 
+      sometimes to early.
+      
+      
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
 Version 2.8.0                                                       2010-12-27
 ==============================================================================
 

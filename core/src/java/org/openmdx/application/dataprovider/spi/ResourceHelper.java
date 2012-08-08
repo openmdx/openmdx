@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ResourceHelper.java,v 1.1 2010/09/21 16:19:13 hburger Exp $
+ * Name:        $Id: ResourceHelper.java,v 1.2 2011/11/26 01:34:57 hburger Exp $
  * Description: Abstract persistence layer
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/21 16:19:13 $
+ * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,15 +50,18 @@
  */
 package org.openmdx.application.dataprovider.spi;
 
-import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 
 /**
  * Resource Helper
+ * 
+ * @deprecated use {@link Facades}
  */
+@Deprecated
 public class ResourceHelper {
 
     /**
@@ -77,15 +80,14 @@ public class ResourceHelper {
      * @return an object facade for the given record
      * 
      * @throws ServiceException
+     * 
+     * @deprecated use {@link Facades#asObject(MappedRecord)}
      */
+    @Deprecated
     public static Object_2Facade getObjectFacade(
         MappedRecord object
     ) throws ServiceException{
-        try {
-            return Object_2Facade.newInstance(object);
-        } catch (ResourceException exception) {
-            throw new ServiceException(exception);
-        }
+    	return Facades.asObject(object);
     }
     
 }

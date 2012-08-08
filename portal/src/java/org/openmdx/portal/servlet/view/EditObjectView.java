@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: EditObjectView.java,v 1.44 2010/04/27 12:21:07 wfro Exp $
+ * Name:        $Id: EditObjectView.java,v 1.47 2011/08/11 11:58:29 wfro Exp $
  * Description: EditObjectView
- * Revision:    $Revision: 1.44 $
+ * Revision:    $Revision: 1.47 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/27 12:21:07 $
+ * Date:        $Date: 2011/08/11 11:58:29 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,6 +71,8 @@ import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.action.CancelAction;
+import org.openmdx.portal.servlet.action.SaveAction;
 import org.openmdx.portal.servlet.attribute.Attribute;
 import org.openmdx.portal.servlet.control.EditInspectorControl;
 
@@ -149,7 +151,7 @@ public class EditObjectView
         this.forReference = forReference;
         this.mode = mode;
         this.parent = parent;
-        EditInspectorControl inspectorControl = this.application.createEditInspectorControl(
+        EditInspectorControl inspectorControl = this.app.createEditInspectorControl(
             id,
             object.refClass().refMofId()
         );
@@ -175,14 +177,17 @@ public class EditObjectView
       return this.parent;
   }
   
-  //-------------------------------------------------------------------------
-  public void refresh(
-      boolean refreshData
-  ) throws ServiceException {
-      for(int i = 0; i < this.getAttributePane().getAttributeTab().length; i++) {
-          this.getAttributePane().getAttributeTab()[i].refresh(refreshData);
-      }
-  }
+    //-------------------------------------------------------------------------
+  	@Override
+  	public PersistenceManager refresh(
+  		boolean refreshData,
+  		boolean closePm
+  	) throws ServiceException {
+  		for(int i = 0; i < this.getAttributePane().getAttributeTab().length; i++) {
+  			this.getAttributePane().getAttributeTab()[i].refresh(refreshData);
+  		}
+  		return null;
+  	}
 
 	// -------------------------------------------------------------------------
 	public void storeObject(
@@ -210,11 +215,11 @@ public class EditObjectView
 			PersistenceManager pm = JDOHelper.getPersistenceManager(target);
 			try {
 				pm.currentTransaction().begin();
-				this.application.getPortalExtension().updateObject(
+				this.app.getPortalExtension().updateObject(
 				    target,
 				    parameterMap,
 				    attributeMap,
-				    this.application
+				    this.app
 				);
 				pm.currentTransaction().commit();
 			} catch(Exception e) {
@@ -227,13 +232,13 @@ public class EditObjectView
 			PersistenceManager pm = JDOHelper.getPersistenceManager(this.parent);
 			try {
 				pm.currentTransaction().begin();
-				this.application.getPortalExtension().updateObject(
+				this.app.getPortalExtension().updateObject(
 				    target,
 				    parameterMap,
 				    attributeMap,
-				    this.application
+				    this.app
 				);
-				if(this.application.getErrorMessages().isEmpty()) {
+				if(this.app.getErrorMessages().isEmpty()) {
 					Object[] qualifiers = (Object[])parameterMap.get("qualifier");
 					if (qualifiers == null) {
 						qualifiers = new String[] {
@@ -272,9 +277,9 @@ public class EditObjectView
 	public Action getCancelAction(
 	) {
 		return new Action(
-			Action.EVENT_CANCEL,
+			CancelAction.EVENT_ID,
 			new Action.Parameter[]{},
-			this.application.getTexts().getCancelTitle(),
+			this.app.getTexts().getCancelTitle(),
 			WebKeys.ICON_CANCEL,
 			true
 		); 
@@ -284,9 +289,9 @@ public class EditObjectView
 	public Action getSaveAction(
 	) {
 		return new Action(
-			Action.EVENT_SAVE,
+			SaveAction.EVENT_ID,
 			new Action.Parameter[]{},
-			this.application.getTexts().getSaveTitle(),
+			this.app.getTexts().getSaveTitle(),
 			WebKeys.ICON_SAVE,
 			true
 		);

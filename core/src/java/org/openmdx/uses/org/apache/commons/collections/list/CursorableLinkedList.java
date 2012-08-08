@@ -53,14 +53,14 @@ import java.util.ListIterator;
  *
  * @see java.util.LinkedList
  * @since Commons Collections 1.0
- * @version $Revision: 1.5 $ $Date: 2010/06/02 13:46:30 $
+ * @version $Revision: 1.6 $ $Date: 2011/04/12 15:30:21 $
  * 
  * @author Rodney Waldhoff
  * @author Janek Bogucki
  * @author Simon Kitching
  * @author Stephen Colebourne
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class CursorableLinkedList extends AbstractLinkedList implements Serializable {
 
     /** Ensure serialization compatibility */

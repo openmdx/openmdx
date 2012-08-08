@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DateTimeState_1.java,v 1.16 2010/11/03 11:45:13 hburger Exp $
+ * Name:        $Id: DateTimeState_1.java,v 1.19 2011/10/28 18:17:50 hburger Exp $
  * Description: Date State
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/03 11:45:13 $
+ * Date:        $Date: 2011/10/28 18:17:50 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -223,10 +223,9 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
     protected boolean isInvolved(
         DataObject_1_0 candidate, 
         DateTimeStateContext context, 
-        boolean exact, 
-        boolean includeRemoved
+        AccessMode accessMode
      ) throws ServiceException {
-        if(super.isInvolved(candidate, context, exact, includeRemoved)) {
+        if(super.isInvolved(candidate, context, accessMode)) {
             //
             // Valid Time Test
             // 
@@ -240,30 +239,22 @@ public class DateTimeState_1 extends BasicState_1<DateTimeStateContext> {
                         (Date) candidate.objGetValue("stateInvalidFrom")
                     ) <= 0;
                 case TIME_RANGE_VIEW:
-                    return !exact? (
-                        Order.compareValidFromToValidTo(
-                            context.getValidFrom(), 
-                            (Date) candidate.objGetValue("stateInvalidFrom")
-                        ) <= 0 && Order.compareValidFromToValidTo(
-                            (Date) candidate.objGetValue("stateValidFrom"),
-                            context.getInvalidFrom()
-                        ) <= 0 
-                    ) : candidate.jdoIsNew() ? (
+                	return accessMode == AccessMode.UNDERLYING_STATE ? (
                         Order.compareValidFrom(
                             context.getValidFrom(), 
-                            (Date) candidate.objGetValue("stateInvalidFrom")
-                        ) >= 0 && Order.compareInvalidFrom(
-                            (Date) candidate.objGetValue("stateValidFrom"), 
-                            context.getInvalidFrom()
-                        ) >= 0
-                    ) : (
-                        Order.compareValidFrom(
-                            context.getValidFrom(),
                             (Date) candidate.objGetValue("stateValidFrom")
-                        ) == 0 && Order.compareInvalidFrom(
-                            context.getInvalidFrom(),
-                            (Date) candidate.objGetValue("stateInvalidFrom")
-                        ) == 0
+                        ) >= 0 && Order.compareInvalidFrom(
+                            (Date) candidate.objGetValue("stateInvalidFrom"),
+                            context.getInvalidFrom()
+                        ) >= 0 
+                    ) : (
+                		Order.compareValidFromToValidTo(
+	                        context.getValidFrom(), 
+	                        (Date) candidate.objGetValue("stateValidTo")
+	                    ) <= 0 && Order.compareValidFromToValidTo(
+	                        (Date) candidate.objGetValue("stateValidFrom"),
+	                        context.getInvalidFrom()
+	                    ) <= 0 
                     );
             }
         }

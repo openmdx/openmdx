@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelImporter_1.java,v 1.12 2010/03/23 17:00:01 hburger Exp $
+ * Name:        $Id: ModelImporter_1.java,v 1.17 2011/11/26 01:34:59 hburger Exp $
  * Description: ModelImporter_1 class
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.17 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/23 17:00:01 $
+ * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,12 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
- */
-
-/**
- * @author wfro
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.mof.externalizer.spi;
 
@@ -67,18 +62,20 @@ import javax.resource.cci.MappedRecord;
 import org.omg.mof.cci.ScopeKind;
 import org.omg.mof.cci.VisibilityKind;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
-import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.application.dataprovider.cci.DataproviderRequestProcessor;
+import org.openmdx.application.dataprovider.cci.Dataprovider_1_0;
 import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.application.mof.cci.ModelExceptions;
 import org.openmdx.application.mof.externalizer.cci.ModelImporter_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.ModelHelper;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
@@ -86,7 +83,7 @@ import org.openmdx.kernel.log.SysLog;
 /**
  * Common functions for model importers.
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 abstract public class ModelImporter_1
 implements ModelImporter_1_0 {
 
@@ -118,7 +115,7 @@ implements ModelImporter_1_0 {
         Path classPath,
         String featureName
     ){
-        return classPath.getParent().add(
+        return classPath.getParent().getChild(
             classPath.getLastComponent().getChild(featureName)
         );
     }
@@ -145,15 +142,10 @@ implements ModelImporter_1_0 {
             String modelName = Object_2Facade.getPath(object).get(4);
             if(!this.segments.contains(modelName)) {
                 MappedRecord segment;
-                try {
-                    segment = Object_2Facade.newInstance(
-                        Object_2Facade.getPath(object).getPrefix(5),
-                        "org:omg:model1:Segment"
-                    ).getDelegate();
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
+                segment = Facades.newObject(
+				    Object_2Facade.getPath(object).getPrefix(5),
+				    "org:omg:model1:Segment"
+				).getDelegate();
                 this.getChannel().addCreateRequest(
                     segment
                 );
@@ -335,37 +327,15 @@ implements ModelImporter_1_0 {
         String elementName,
         StringBuffer multiplicity
     ) throws ServiceException {
-
-        if(Multiplicities.LIST.equals(text)) {
-            multiplicity.append(Multiplicities.LIST);
-            return new String();
+        for(Multiplicity candidate : Multiplicity.values()){
+            String value = candidate.toString();
+            if(value.equals(text)) {
+                multiplicity.append(value);
+                return new String();
+            }
         }
-        else if(Multiplicities.SET.equals(text)) {
-            multiplicity.append(Multiplicities.SET);
-            return new String();
-        }
-        else if(Multiplicities.SPARSEARRAY.equals(text)) {
-            multiplicity.append(Multiplicities.SPARSEARRAY);
-            return new String();
-        }
-        else if(Multiplicities.MAP.equals(text)) {
-            multiplicity.append(Multiplicities.MAP);
-            return new String();
-        }
-        else if(Multiplicities.STREAM.equals(text)) {
-            multiplicity.append(Multiplicities.STREAM);
-            return new String();
-        }
-        else if(Multiplicities.SINGLE_VALUE.equals(text)) {
-            multiplicity.append(Multiplicities.SINGLE_VALUE);
-            return new String();
-        }
-        else if(Multiplicities.OPTIONAL_VALUE.equals(text)) {
-            multiplicity.append(Multiplicities.OPTIONAL_VALUE);
-            return new String();
-        }
-        else if(Multiplicities.MULTI_VALUE.equals(text)) {
-            multiplicity.append(Multiplicities.MULTI_VALUE);
+        if(ModelHelper.UNBOUNDED.equals(text)) {
+            multiplicity.append(ModelHelper.UNBOUNDED);
             return new String();
         }
 
@@ -379,7 +349,7 @@ implements ModelImporter_1_0 {
 
         // if text does not contain a multiplicity return 1..1
         if((delimiterPos < 0) && (stereotypeOpeningPos < 0)) {
-            multiplicity.append(Multiplicities.SINGLE_VALUE);
+            multiplicity.append(Multiplicity.SINGLE_VALUE.toString());
             return text;
         }
 
@@ -390,22 +360,24 @@ implements ModelImporter_1_0 {
                     stereotypeClosingPos < 0 ? (lastPos < 0 ? text.length() : lastPos) : stereotypeClosingPos
             ).trim();
             upperBound = lowerBound;
-
-            if(Multiplicities.LIST.equals(lowerBound)) {
-                multiplicity.append(Multiplicities.LIST);
-                return text.substring(lastPos).trim();
-            } else if(Multiplicities.SET.equals(lowerBound)) {
-                multiplicity.append(Multiplicities.SET);
-                return text.substring(lastPos).trim();
-            } else if(Multiplicities.SPARSEARRAY.equals(lowerBound)) {
-                multiplicity.append(Multiplicities.SPARSEARRAY);
-                return text.substring(lastPos).trim();
-            } else if(Multiplicities.STREAM.equals(lowerBound)) {
-                multiplicity.append(Multiplicities.STREAM);
-                return text.substring(lastPos).trim();
+            Multiplicity l = ModelHelper.toMultiplicity(lowerBound);
+            if(l != null) {
+            	switch(l){
+            		case LIST:
+                        multiplicity.append(Multiplicity.LIST.toString());
+                        return text.substring(lastPos).trim();
+            		case SET:
+                        multiplicity.append(Multiplicity.SET.toString());
+                        return text.substring(lastPos).trim();
+            		case SPARSEARRAY:
+                        multiplicity.append(Multiplicity.SPARSEARRAY.toString());
+                        return text.substring(lastPos).trim();
+            		case STREAM:	
+                        multiplicity.append(Multiplicity.STREAM.toString());
+                        return text.substring(lastPos).trim();
+            	}
             }
-        }
-        else {
+        } else {
             lowerBound = text.substring(
                 stereotypeOpeningPos < 0 ? 0 : stereotypeOpeningPos + 2,
                     delimiterPos
@@ -424,8 +396,7 @@ implements ModelImporter_1_0 {
             if(!"n".equals(upperBound)) {
                 Integer.decode(upperBound);
             }
-        }
-        catch(NumberFormatException e) {
+        } catch(NumberFormatException e) {
             SysLog.error("multiplicity must be of the form [\"<<\"] lowerBound [\"..\" upperBound ] [\">>\"]");
             throw new ServiceException(
                 ModelExceptions.MODEL_DOMAIN,
@@ -457,8 +428,8 @@ implements ModelImporter_1_0 {
         List scope
     ) throws ServiceException {
         try {
-            Object_2Facade associationEndDef1Facade = Object_2Facade.newInstance(associationEndDef1);
-            Object_2Facade associationEndDef2Facade = Object_2Facade.newInstance(associationEndDef2);        
+            Object_2Facade associationEndDef1Facade = Facades.asObject(associationEndDef1);
+            Object_2Facade associationEndDef2Facade = Facades.asObject(associationEndDef2);        
             if(
                 ((Boolean)associationEndDef2Facade.attributeValue("isNavigable")).booleanValue()
             ) {
@@ -513,8 +484,8 @@ implements ModelImporter_1_0 {
         MappedRecord associationEndDef2
     ) throws ServiceException {
         try {
-            Object_2Facade associationEndDef1Facade = Object_2Facade.newInstance(associationEndDef1);
-            Object_2Facade associationEndDef2Facade = Object_2Facade.newInstance(associationEndDef2);
+            Object_2Facade associationEndDef1Facade = Facades.asObject(associationEndDef1);
+            Object_2Facade associationEndDef2Facade = Facades.asObject(associationEndDef2);
             // end1.aggregation=COMPOSITE --> end2.isChangeable=false
             if(AggregationKind.COMPOSITE.equals(associationEndDef1Facade.attributeValue("aggregation"))) {
                 associationEndDef2Facade.attributeValuesAsList("isChangeable").clear();
@@ -579,13 +550,7 @@ implements ModelImporter_1_0 {
     private void verifyNavigabilityOfCompositeAggregation(
         MappedRecord associationEndDef
     ) throws ServiceException {
-        Object_2Facade associationEndDefFacade = null;
-        try {
-            associationEndDefFacade = Object_2Facade.newInstance(associationEndDef);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Object_2Facade associationEndDefFacade = Facades.asObject(associationEndDef);
         if(
             (AggregationKind.COMPOSITE.equals(associationEndDefFacade.attributeValue("aggregation")) ||
                 AggregationKind.SHARED.equals(associationEndDefFacade.attributeValue("aggregation")))
@@ -610,13 +575,7 @@ implements ModelImporter_1_0 {
     private void checkUnnecessaryQualifiers(
         MappedRecord associationEndDef
     ) throws ServiceException {
-        Object_2Facade associationEndDefFacade = null;
-        try {
-            associationEndDefFacade = Object_2Facade.newInstance(associationEndDef);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }        
+        Object_2Facade associationEndDefFacade = Facades.asObject(associationEndDef);
         if(
             (associationEndDefFacade.attributeValuesAsList("qualifierName").size() > 0) &&
             !((Boolean)associationEndDefFacade.attributeValue("isNavigable")).booleanValue()

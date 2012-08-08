@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestConnectionSpec.java,v 1.5 2010/10/24 21:46:37 hburger Exp $
+ * Name:        $Id: RestConnectionSpec.java,v 1.6 2011/04/27 06:03:08 hburger Exp $
  * Description: REST Connection Specification
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/24 21:46:37 $
+ * Date:        $Date: 2011/04/27 06:03:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -64,7 +64,7 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
      */
     public RestConnectionSpec(
     ){
-    	this(null, null, null);
+    	this(null, null);
     }
     
     /**
@@ -77,7 +77,7 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
         String user,
         String password
     ){
-    	this(user, password, null);
+    	this(user, password, null, false);
     }
 
     /**
@@ -85,15 +85,38 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
      *
      * @param user
      * @param password
+     * @param tenant
+     * 
+     * @deprecated specify refInitialzeOnCreate as well
      */
+    @Deprecated
     public RestConnectionSpec(
         String user,
         String password,
         Object tenant
     ){
+        this(user, password, tenant, false);
+    }
+
+    /**
+     * Constructor 
+     *
+     * @param user
+     * @param password
+     * @param tenant
+     * 
+     * @param refInitializeOnCreate
+     */
+    public RestConnectionSpec(
+        String user,
+        String password,
+        Object tenant, 
+        boolean refInitializeOnCreate
+    ){
         this.userName = user;
         this.password = password;
         this.tenant = tenant;
+        this.refInitializeOnCreate = refInitializeOnCreate;
     }
     
     /**
@@ -112,9 +135,14 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
     private Object tenant;
     
     /**
+     * @serial The 'RefInitializeOnCreate' property
+     */
+    private boolean refInitializeOnCreate;
+    
+    /**
      * Implements <code>Serializable</code>
      */
-    private static final long serialVersionUID = -7736215086099158839L;
+    private static final long serialVersionUID = -1796197177166229193L;
 
     /**
      * Set userName.
@@ -171,7 +199,25 @@ public class RestConnectionSpec implements ConnectionSpec, Serializable {
 		this.tenant = tenant;
 	}
 
-	/* (non-Javadoc)
+    /**
+     * Retrieve refInitializeOnCreate.
+     *
+     * @return Returns the refInitializeOnCreate.
+     */
+    public boolean isRefInitializeOnCreate() {
+        return this.refInitializeOnCreate;
+    }
+    
+    /**
+     * Set refInitializeOnCreate.
+     * 
+     * @param refInitializeOnCreate The refInitializeOnCreate to set.
+     */
+    public void setRefInitializeOnCreate(boolean refInitializeOnCreate) {
+        this.refInitializeOnCreate = refInitializeOnCreate;
+    }
+
+    /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override

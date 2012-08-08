@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: InboundConnection_2.java,v 1.60 2010/12/23 17:42:52 hburger Exp $
+ * Name:        $Id: InboundConnection_2.java,v 1.68 2011/11/26 01:34:54 hburger Exp $
  * Description: InboundConnection_2 
- * Revision:    $Revision: 1.60 $
+ * Revision:    $Revision: 1.68 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/23 17:42:52 $
+ * Date:        $Date: 2011/11/26 01:34:54 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -63,9 +63,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 import javax.jdo.Constants;
 import javax.jdo.JDOException;
@@ -101,10 +101,10 @@ import org.openmdx.base.accessor.jmi.spi.Jmi1ContainerInvocationHandler;
 import org.openmdx.base.accessor.rest.spi.Synchronization_2_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
-import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
@@ -121,6 +121,7 @@ import org.openmdx.base.rest.cci.RestConnectionSpec;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.AbstractConnection;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.text.conversion.JavaBeans;
@@ -143,18 +144,14 @@ public class InboundConnection_2
      * 
      * @param connectionSpec 
      * @param persistenceManager
-     * @param refRefInitializeOnCreate defines whether refInitialize() shall be applied to new objects
-     * 
      * @throws ResourceException 
      */
     public InboundConnection_2(
         RestConnectionSpec connectionSpec, 
-        PersistenceManager persistenceManager, 
-        boolean refRefInitializeOnCreate
+        PersistenceManager persistenceManager
     ) throws ResourceException{
         super(connectionSpec);
         this.persistenceManager = persistenceManager;
-        this.refRefInitializeOnCreate = refRefInitializeOnCreate;
         this.localTransaction = Constants.RESOURCE_LOCAL.equals(
             persistenceManager.getPersistenceManagerFactory().getTransactionType()
         ) ? LocalTransactions.getLocalTransaction(
@@ -167,11 +164,6 @@ public class InboundConnection_2
      */
     private static final long serialVersionUID = 279566182728456308L;
 
-    /**
-     * Defines whether new object's shall use refInitialize or not.
-     */
-    private final boolean refRefInitializeOnCreate;
-    
     /**
      * 
      */
@@ -193,7 +185,8 @@ public class InboundConnection_2
      * @return <code>true</code> if refInitialize() shall be applied to new objects
      */
     protected boolean isRefInitializeOnCreate(){
-       return this.refRefInitializeOnCreate; 
+        RestConnectionSpec connectionSpec = super.getConnectionSpec();
+        return connectionSpec != null && connectionSpec.isRefInitializeOnCreate(); 
     }
     
     /**
@@ -284,7 +277,7 @@ public class InboundConnection_2
         ((Synchronization_2_0)this.persistenceManager.currentTransaction()).clear();
     }
 
-    /* (non-Javadoc)
+	/* (non-Javadoc)
      * @see javax.transaction.Synchronization#afterCompletion(int)
      */
     public void afterCompletion(int status) {
@@ -434,10 +427,10 @@ public class InboundConnection_2
          */
         @SuppressWarnings("unchecked")
         private IndexedRecord toJcaValue(
-            String type,
+            Multiplicity type,
             Collection<?> source
         ) throws ServiceException, ResourceException{
-            IndexedRecord target = Records.getRecordFactory().createIndexedRecord(type);
+            IndexedRecord target = Records.getRecordFactory().createIndexedRecord(type.toString());
             for(
                 Iterator<?> i = source.iterator();
                 i.hasNext();
@@ -466,10 +459,10 @@ public class InboundConnection_2
          */
         @SuppressWarnings("unchecked")
         private MappedRecord toJcaValue(
-            String type,
+            Multiplicity type,
             Map<?,?> source
         ) throws ServiceException, ResourceException{
-            MappedRecord target = Records.getRecordFactory().createMappedRecord(type);
+            MappedRecord target = Records.getRecordFactory().createMappedRecord(type.toString());
             for(
                 Iterator<?> i = source.keySet().iterator();
                 i.hasNext();
@@ -556,7 +549,7 @@ public class InboundConnection_2
                 if(
                     featureDef.isReferenceType() &&
                     model.referenceIsStoredAsAttribute(featureDef) && 
-                    !ModelUtils.isDerived(featureDef)
+                    !ModelHelper.isDerived(featureDef)
                 ) {
                     return this.toJcaValue(
                         PersistenceHelper.getFeatureReplacingObjectById(source, featureName)
@@ -584,7 +577,6 @@ public class InboundConnection_2
          * @throws ResourceException
          * @throws ServiceException  
          */
-        @SuppressWarnings("unchecked")
         private Object toJcaValue(
             Object refValue
         ) throws ResourceException, ServiceException {
@@ -592,18 +584,18 @@ public class InboundConnection_2
                 return getResourceIdentifier(refValue);
             } else if(refValue instanceof Set) {
                 return this.toJcaValue(
-                    Multiplicities.SET,
+                    Multiplicity.SET,
                     (Set<?>)refValue
                 );
             } else if(refValue instanceof List) {
                 return this.toJcaValue(
-                    Multiplicities.LIST,
+                		Multiplicity.LIST,
                     (List<?>)refValue
                 );
             } else if(refValue instanceof SparseArray) {
                 return this.toJcaValue(  
-                    Multiplicities.SPARSEARRAY,
-                    (SparseArray)refValue
+            		Multiplicity.SPARSEARRAY,
+                    (SparseArray<?>)refValue
                 );
             } else if(refValue instanceof RefStruct){
                 RefStruct refStruct = (RefStruct) refValue;
@@ -632,7 +624,7 @@ public class InboundConnection_2
         ) throws ResourceException{
             try {
                 ModelElement_1_0 featureType = this.model.getDereferencedType(featureDef.objGetValue("type"));
-                if(Multiplicities.STREAM.equals(featureDef.objGetValue("multiplicity"))) {
+                if(ModelHelper.getMultiplicity(featureDef) == Multiplicity.STREAM) {
                     return 
                         jcaValue instanceof char[] ? CharacterLargeObjects.valueOf((char[])jcaValue) :
                         jcaValue instanceof byte[] ? BinaryLargeObjects.valueOf((byte[])jcaValue) :
@@ -672,6 +664,8 @@ public class InboundConnection_2
          * Convert a <code>RefObject</code> to a <code>MappedRecord</code>
          * 
          * @param object the <code>RefObject</code>
+         * @param requestedFeatures, the requested features, maybe <code>null</code> 
+         * @param fetchGroups, the requested getch groups maybe <code>null</code>  
          * 
          * @return its <code>MappedRecord</code> representation
          * 
@@ -680,12 +674,12 @@ public class InboundConnection_2
         @SuppressWarnings("unchecked")
         private MappedRecord toJcaRecord(
             RefObject object,
-            Set<String> requestedFeatures
+            Set<String> requestedFeatures, 
+            Set<String> fetchGroups
         ) throws ServiceException {
             try{
                 RefObject_1_0 refObject = (RefObject_1_0) object;
-                Object_2Facade reply = Object_2Facade.newInstance();
-                reply.setPath(getResourceIdentifier(object));
+                Object_2Facade reply = Facades.newObject(getResourceIdentifier(object));
                 reply.setVersion(JDOHelper.getVersion(refObject));
                 MappedRecord jcaValue = Records.getRecordFactory().createMappedRecord(
                     refObject.refClass().refMofId()
@@ -713,9 +707,10 @@ public class InboundConnection_2
                 for(ModelElement_1_0 feature : features.values()) {
                     String featureName = (String)feature.objGetValue("name");
                     if(
-                        !"context".equals(featureName) && 
-                        featureName.indexOf(":") < 0
-                    ) {        
+                        (requestedFeatures != null && requestedFeatures.contains(featureName)) ||
+                        (JDOHelper.isPersistent(refObject) && !JDOHelper.isNew(refObject)) || // TODO make it fetch group dependent
+                        ((RefPackage_1_0)refObject.refOutermostPackage()).refPersistenceManager().isLoaded((UUID) JDOHelper.getTransactionalObjectId(refObject), featureName)
+                    ) try {
                         jcaValue.put(
                             featureName,
                             this.getJcaValue(
@@ -723,6 +718,15 @@ public class InboundConnection_2
                                 feature
                             )
                         );
+                    } catch (RuntimeException exception) {
+                        new ServiceException(
+                            exception,
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.TRANSFORMATION_FAILURE,
+                            "Unable to retrieve feature value",
+                            new BasicException.Parameter("xri", refObject.refMofId()),
+                            new BasicException.Parameter("feature", featureName)
+                        ).log();
                     }
                 }
                 return reply.getDelegate();
@@ -732,8 +736,11 @@ public class InboundConnection_2
         }
 
         /**
-         * Create a query object
-         * 
+         * Create a query object.
+         * <ul>
+         * <li>TODO take explicitly requested features into consideration
+         * <li>TODO take extensions into consideration
+         * </ul>
          * @param input
          * 
          * @return a new query object
@@ -795,77 +802,80 @@ public class InboundConnection_2
                         );
                     }
                     featureName = (String) featureDef.objGetValue("name");
-                    Object multiplicity = ModelUtils.getMultiplicity(featureDef);
                     Boolean isChangeable = (Boolean)featureDef.objGetValue("isChangeable");                
                     Boolean isDerived = (Boolean)featureDef.objGetValue("isDerived");
                     if(isChangeable != null && isChangeable && (isDerived == null || !isDerived)) {
-                        if(
-                            Multiplicities.LIST.equals(multiplicity) ||
-                            Multiplicities.SET.equals(multiplicity)
-                        ) {
-                            Collection target = (Collection) refTarget.refGetValue(featureName);
-                            target.clear();
-                            Collection<?> source = 
-                                rawValue == null ? Collections.EMPTY_LIST :
-                                    rawValue instanceof List ? (List<?>)rawValue : 
-                                        Collections.singletonList(rawValue);
-                                    for(Object v : source) {
-                                        target.add(
-                                            this.toRefValue(
-                                                v,
-                                                featureDef
-                                            )
-                                        );
-                                    }
-                        } 
-                        else if (Multiplicities.SPARSEARRAY.equals(multiplicity)) {
-                            SparseArray target = (SparseArray) refTarget.refGetValue(featureName);
-                            target.clear();
-                            if(rawValue != null) {
-                                if(rawValue instanceof MappedRecord) {
-                                    Map<?,?> source = (MappedRecord) rawValue;
-                                    for(Map.Entry<?,?> e : source.entrySet()) {
-                                        target.put(
-                                            e.getKey(),
-                                            this.toRefValue(
-                                                e.getValue(), 
-                                                featureDef
-                                            )
-                                        );
-                                    }
-                                } else if (rawValue instanceof SparseArray<?>){
-                                    SparseArray<?> source = (SparseArray<?>)rawValue;
-                                    for(
-                                        ListIterator<?> i = source.populationIterator();
-                                        i.hasNext();
-                                    ){
-                                        target.put(
-                                            Integer.valueOf(i.nextIndex()),
-                                            this.toRefValue(
-                                                i.next(), 
-                                                featureDef
-                                            )
-                                        );
-                                    }
-                                } else {
-                                    target.put(
-                                        Integer.valueOf(0),
+                    	switch(ModelHelper.getMultiplicity(featureDef)) {
+	                    	case LIST: case SET: {
+	                            @SuppressWarnings("rawtypes")
+	                            Collection target = (Collection) refTarget.refGetValue(featureName);
+	                            target.clear();
+	                            Collection<?> source = 
+	                                rawValue == null ? Collections.EMPTY_LIST : 
+	                                rawValue instanceof List ? (List<?>)rawValue : 
+	                                Collections.singletonList(rawValue);
+	                            for(Object v : source) {
+	                                target.add(
+	                                    this.toRefValue(
+	                                        v,
+	                                        featureDef
+	                                    )
+	                                );
+	                            }
+	                        } 
+	                    	break;
+	                    	case SPARSEARRAY: {
+	                            @SuppressWarnings("rawtypes")
+	                            SparseArray target = (SparseArray) refTarget.refGetValue(featureName);
+	                            target.clear();
+	                            if(rawValue != null) {
+	                                if(rawValue instanceof MappedRecord) {
+	                                    Map<?,?> source = (MappedRecord) rawValue;
+	                                    for(Map.Entry<?,?> e : source.entrySet()) {
+	                                        target.put(
+	                                            e.getKey(),
+	                                            this.toRefValue(
+	                                                e.getValue(), 
+	                                                featureDef
+	                                            )
+	                                        );
+	                                    }
+	                                } else if (rawValue instanceof SparseArray<?>){
+	                                    SparseArray<?> source = (SparseArray<?>)rawValue;
+	                                    for(
+	                                        ListIterator<?> i = source.populationIterator();
+	                                        i.hasNext();
+	                                    ){
+	                                        target.put(
+	                                            Integer.valueOf(i.nextIndex()),
+	                                            this.toRefValue(
+	                                                i.next(), 
+	                                                featureDef
+	                                            )
+	                                        );
+	                                    }
+	                                } else {
+	                                    target.put(
+	                                        Integer.valueOf(0),
+	                                        this.toRefValue(
+	                                            rawValue, 
+	                                            featureDef
+	                                        )
+	                                    );
+	                                }
+	                            }
+	                    	}
+                            break;
+                            default: {
+                                refTarget.refSetValue(
+                                        featureName, 
                                         this.toRefValue(
                                             rawValue, 
                                             featureDef
                                         )
                                     );
-                                }
                             }
-                        } else {
-                            refTarget.refSetValue(
-                                featureName, 
-                                this.toRefValue(
-                                    rawValue, 
-                                    featureDef
-                                )
-                            );
-                        }
+                    	}
                     }
                 }
             } catch (ResourceException exception) {
@@ -908,20 +918,25 @@ public class InboundConnection_2
          * 
          * @param refObject
          * @param output
-         * @param requestedFeatures 
+         * @param requestedFeatures the requested features, may be <code>null</code>
+         * @param featchGroups the requested fetch groups, may be <code>null</code>
+         * 
          * @return <code>true</code>
+         * 
          * @throws ResourceException 
          */
         @SuppressWarnings("unchecked")
         private boolean propagate(
             RefObject refObject,
             IndexedRecord output, 
-            Set<String> requestedFeatures
+            Set<String> requestedFeatures, 
+            Set<String> featchGroups
         ) throws ServiceException{
             if(output != null) output.add(
                 this.toJcaRecord(
                     refObject,
-                    requestedFeatures
+                    requestedFeatures, 
+                    featchGroups
                 )
             );
             return true;
@@ -960,19 +975,18 @@ public class InboundConnection_2
                 if(output == null) {
                     return true;
                 } else {
-                    Set<String> requestedFeatures = new HashSet<String>();
-                    if(
-                        (input.getQuery() != null) && 
-                        input.getQuery().startsWith("<?xml")
-                    ) {
-                        Filter filter = (Filter)JavaBeans.fromXML(input.getQuery());
+                    Set<String> features = input.getFeatures();
+                    String query = input.getQuery();
+                    if(query != null && query.startsWith("<?xml")) {
+                        features = features == null ? new HashSet<String>() : new HashSet<String>(features);
+                        Filter filter = (Filter)JavaBeans.fromXML(query);
                         for(OrderSpecifier orderSpecifier: filter.getOrderSpecifier()) {
-                            requestedFeatures.add(
+                            features.add(
                                 orderSpecifier.getFeature()
                             );
                         }
                     }
-                    return propagate(refObject, output, requestedFeatures);
+                    return propagate(refObject, output, features, input.getGroups());
                 }
 
             }
@@ -1024,7 +1038,7 @@ public class InboundConnection_2
                     newObject,
                     input.getValue()
                 );
-                return propagate(newObject, output, null);
+                return propagate(newObject, output, null, null);
             } else {
                 boolean newId = xri.size() % 2 == 0; 
                 int featurePosition = xri.size() - (newId ? 1 : 2);
@@ -1040,6 +1054,7 @@ public class InboundConnection_2
                 );
                 Object container = refParent.refGetValue(xri.get(featurePosition));
                 if(newId) {
+                    @SuppressWarnings("rawtypes")
                     Collection refContainer = (Collection) container;
                     refContainer.add(refObject);
                 } else {
@@ -1048,7 +1063,7 @@ public class InboundConnection_2
                         toAddArguments(refContainer.getClass(), xri.getBase(), refObject)
                     );
                 }
-                return propagate(refObject, output, null);
+                return propagate(refObject, output, null, null);
             }
         }
 
@@ -1062,7 +1077,7 @@ public class InboundConnection_2
          * @return the <code>add()</code> argument list
          * @throws ServiceException 
          */
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings("rawtypes")
         private Object[] toAddArguments(
             Class<? extends RefContainer> containerClass,
             String qualifier,
@@ -1113,7 +1128,7 @@ public class InboundConnection_2
                 persistent ? qualifier.substring(1) : qualifier,
                 newObject
             );
-            return propagate(newObject, output, null);
+            return propagate(newObject, output, null, null);
         }
 
         /* (non-Javadoc)
@@ -1160,7 +1175,7 @@ public class InboundConnection_2
                 refObject,
                 input.getValue()
             );
-            return propagate(refObject, output, null);
+            return propagate(refObject, output, null, null);
         }
 
         /* (non-Javadoc)
@@ -1185,7 +1200,8 @@ public class InboundConnection_2
                         output.add(
                             this.toJcaRecord(
                                 i.next(),
-                                null
+                                input.getFeatures(), 
+                                input.getGroups()
                             )
                         );
                         count++;
@@ -1209,7 +1225,8 @@ public class InboundConnection_2
                             0,
                             this.toJcaRecord(
                                 i.previous(),
-                                null
+                                input.getFeatures(), 
+                                input.getGroups()
                             )
                         );
                     }

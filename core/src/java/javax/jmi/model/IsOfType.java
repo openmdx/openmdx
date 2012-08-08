@@ -2,7 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public interface IsOfType extends RefAssociation {
     public boolean exists(Classifier type, TypedElement typedElements);
     public Classifier getType(TypedElement typedElements);

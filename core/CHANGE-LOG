@@ -3,6 +3,2374 @@
                              CHANGE LOG openMDX
                     =====================================
 
+
+==============================================================================
+Version 2.9.0+                                                      2012-01-05
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+      
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      none
+       
+2.2.  DEPRECATED FEATURES
+
+      CR20019352
+      Cleanup Configuration Specification
+      
+      The following class has been deprecated:
+      * org.openmdx.application.cci.ConfigurationSpecifier 
+            
+2.3.  REMOVED FEATURES
+
+      CR20019352
+      Cleanup Configuration Constants 
+      
+      The following configuration constants have been removed
+      * KERNEL/persistenceManagerBinding
+      * KERNEL/modelPackage
+      * KERNEL/packageImpl
+      * KERNEL/exposedPath
+      * KERNEL/delegationPath
+      * KERNEL/serverId
+      * KERNEL/bypassedByLenientRequests
+      * PERSISTENCE/optimizedType
+      * PERSISTENCE/optimizedTable
+      * PERSISTENCE/storageFolder
+
+      CR20019998
+      context:BeforeImage 
+      
+      context:BeforeImage:<feature> replies have been removed.
+       
+      
+==============================================================================
+Version 2.9.0                                                       2012-01-04
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+      
+1.    NEW FEATURES
+
+      CR20019858
+      UpdateAvoidance
+      
+      Its is now possible to disable comparison of dirty objects with
+      their before image for a single unit of work:
+      
+         UserObjects.getPlugInObject(
+            entityManager, 
+            UpdateAvoidance.class
+         ).touchAllDirtyObjects(
+            entityManager.currentTransaction()
+         );      
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019896
+      Superclass callback invocation
+      
+      The responsibility for handling the callback interfaces
+      * LoadCallback
+      * StoreCallback
+      * ClearCallback
+      * DeleteCallback
+      * ConstructCallback
+      has been clarified as following:
+      1. The Jmi1ObjectInvicationHandler propagates the callbacks to all 
+         matching plug-ins, i.e. to all Impl classes implementing
+         the corresponding callback interface.
+      2. Each implementation class propagates the callbacks to its direct
+         super-class it wants to suppress it on purpose.
+      3. The Jmi1ObjectInvicationHandler propagates the callbacks to next
+         layer provided its instance proxy implements the corresponding
+         callback interface.      
+
+      CR20019835
+      Missing Mandatory Attributes
+      
+      Persistent and persistent-new objects are validated during commit. If
+      there are some mandatory attributes missing after the before-completion
+      and pre-store callbacks than a validation exception prevents the commit
+      from succeeding.
+       
+      CR10010250
+      refSetValue for multivalued primitive types
+      
+      refSetValue(feature,source) for all multivalued features is now 
+      dispatched to:
+      
+          target = refGetValue(feature);
+          target.clear();
+          if(target instanceof Collection || target instanceof List) {
+             target.addAll(asList(source)) 
+          } else if (target instanceof Map) {
+             target.putAll(asMap(source));
+          }
+            
+      CR20019341
+      Nachf�hrung des Rose-Modells
+      
+      Die �nderung beinhaltet
+      * CR20019340: StateCapable should extend ContextCapable
+      * CR20019978: modifiedBy, createdBy, removedBy
+      * CR20019979: audit1 
+     
+      CR20019978
+      modifiedBy, createdBy, removedBy
+      
+      Die Attribute
+      * Modifiable.modifiedBy
+      * Creatable.createdBy
+      * Removable.removedBy
+      sind neu vom Typ List<String> anstelle von Set<String>
+      
+      CR20019858
+      org.openmdx.base.aop0.PlugIn_1_0
+      
+      The method 
+      
+         Object getUserObject(
+            Object key
+         );
+         
+      has been replaced by 
+      
+         <T> T getPlugInObject(
+            Class<T> type
+         );     
+      
+2.1.  FIXED BUGS
+      
+      CR20019996
+      refSetValue fails with qualified name
+       
+      CR20019991
+      Erroneous ObjectAndValidStateComparator
+      
+      actual != null & extected == null not recognized 
+       
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3.  REMOVED FEATURES
+
+      CR20019835
+      Missing Mandatory Attributes
+
+      The following methods have been removed from AbstractObject:
+      * protected void jdoPreClear(Class<? super N>);
+      * protected void jdoPreStore(Class<? super N>);
+      * protected void jdoPostLoad(Class<? super N>);
+      * protected void jdoPreDelete(Class<? super N>);
+      * protected void openmdxjdoPostConstruct(Class<? super N>);
+      * protected final <I> Iterable<I> mixedInTargets(Class<I>,Class<? super N>...)
+
+      CR20019981
+      Multiplicites
+      
+      The deprecated class Multiplicites has been removed.
+      
+      CR20019858
+      org.openmdx.base.aop0.PlugIn_1_0
+      
+      The method 
+      
+         Object getUserObject(
+            Object key
+         );
+         
+      has been removed in favour of
+      
+         <T> T getPlugInObject(
+            Class<T> type
+         );     
+
+      CR20019979
+      audit1
+      
+      The deprecated model package org::openmdx::compatibility::audit1 has 
+      been removed.
+
+      
+==============================================================================
+Version 2.8.37                                                      2011-11-18
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+      
+      CR20019896
+      Superclass callback invocation
+      
+      Superclass callbacks are not invoked
+
+1.    NEW FEATURES
+
+      CR20019260
+      PersistenceHelper.getLastXRISegment
+      
+      This method retrieves the last segment of the object's current or future
+      XRI. It returns null if the object is not contained yet.
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019962
+      Exception in case of null qualifier
+      
+      A JmiServiceException with exception domain DEFAULT_DOMAIN and
+      exception code BAD_PARAMETER is thrown as opposed to the former
+      ClassCastException,
+
+      CR20019971
+      Parent Accessor
+      
+      The parent accessor threw NullPointerException when invoked on a 
+      transient object.
+      
+      Now it returns null if the object is not yet contained and the parent 
+      object in all other cases.
+      
+2.1.  FIXED BUGS
+      none
+       
+2.2.  DEPRECATED FEATURES
+
+      CR20019927
+      Path modification
+      
+      All path modification methods have been deprecated:
+      * add()
+      * addAll()
+      * remove()
+      * setTo()
+            
+2.3.  REMOVED FEATURES
+      
+      CR20019927
+      Path.toResourcePattern
+      
+      The deprecated method toResourcePattern() has been removed.
+
+      
+==============================================================================
+Version 2.8.36                                                      2011-11-11
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+      
+      CR20019896
+      Superclass callback invocation
+      
+      Superclass callbacks are not invoked
+
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+2.1.  FIXED BUGS
+      
+      CR20019968
+      refresh() 
+
+      PersistenceManager.refresh(persistenceCapable) does not afffect
+      * PERSISTENT-CLEAN
+      * PERSISTENT-NONTRANSACTIONAL
+      instances
+       
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3.  REMOVED FEATURES
+      none
+
+      
+==============================================================================
+Version 2.8.35                                                      2011-11-01
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+      
+      CR20019896
+      Superclass callback invocation
+      
+      Superclass callbacks are not invoked
+
+1.    NEW FEATURES
+      
+      CR20019959
+      Nested Query
+      
+      PersistenceHelper.asSubquery() wraps a query into a sub-query argument, e.g.
+      * query.aReference().elementOf(
+          PersistenceHelper.asSubquery(aSubQuery)
+        );  
+      * query.thereExistsAnotherReference().notAnElementOf(
+          PersistenceHelper.asSubquery(anotherSubQuery)
+        );        
+
+      CR20019916	 
+      getView for Container
+      
+      The getViewForTimeRange and the getViewForTimePoint method are now 
+      available for containers as well.
+      
+      CR20019920
+      Database_1: nested queries for composite parents. Nested queries support 
+      composite parent features.
+      
+      CR20019858
+      Update avoidance
+      
+      The UpdateAvoidance_1 AOP0 plug-in avoids unnecessary update requests to
+      the persistence layer by discarding modification requests for unchanged 
+      features.
+      
+      The same holds now for the audit2 AOP0 plug-in in respect to 
+      non-audited objects.
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+            
+      CR20019966
+      Support for OpenJPA 2.x. Replace OpenJPA 1.x with OpenJPA 2.x.
+      
+      CR20019939
+      State feature access
+      
+      The set of states involved in feature queries is now cached.
+      
+      CR20019916	 
+      getView for Container
+      
+      Unification of
+      * generic arguments for containers
+      * RuntimeExceptions to be thrown
+                  
+      CR20019918
+      Allow skipping of index values
+      
+      The index values need no longer be consecutive for the following DB 
+      configuration entries:
+      * String Macros
+      * Path Macros
+      
+      CR20019913
+      Multiplicity Determination
+      
+      Exception contains now the feature's qualified name
+                        
+2.1.  FIXED BUGS
+      
+      CR20019917
+      setUserObject(Object)/getUserObject()
+      
+      The PersistenceManager's  setUserObject(Object) and getUserObject() 
+      methods throw an exception.
+      
+      CR20019915
+      Erroneous container proxy behaviour 
+      
+      The following predicate is not true in a persistence manager proxy: 
+      
+        propertyHolder.<Property>getProperty().size() == 
+        propertyHolder.<Property>getProperty(
+           (PropertyQuery)this.entityManager.newQuery(Property.class)
+        ).size()
+
+2.2.  DEPRECATED FEATURES
+      
+      CR20019916
+      getViewForTimeRange
+      
+      The method 
+      
+        getViewForTimeRange(
+          Collection,
+          String, 
+          XMLGregorianCalendar, 
+          XMLGregorianCalendar
+        )
+        
+      has been deprecated in favour of
+
+        getViewForTimeRange(
+          Container, 
+          XMLGregorianCalendar, 
+          XMLGregorianCalendar
+        ).get(
+          QualifierType.REASSIGNABLE,
+          String
+        )
+      
+            
+2.3.  REMOVED FEATURES
+      
+      CR20019958
+      Container Id Retrieval
+ 
+      Remove the deprecated getContainerId and getTransientContainerId
+      methods from the PersistenceHelper.
+      
+      CR20019916	 
+      getViewForContiguousStates
+ 
+      The unsupported method getViewForContiguousStates has been removed.
+
+      
+==============================================================================
+Version 2.8.34                                                      2011-10-11
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019917
+      setUserObject(Object)/getUserObject()
+      
+      The PersistenceManager's  setUserObject(Object) and getUserObject() 
+      methods throw an exception.
+      
+      CR20019915
+      Erroneous container proxy behaviour 
+      
+      The following predicate is not true in a persistence manager proxy: 
+      
+        propertyHolder.<Property>getProperty().size() == 
+        propertyHolder.<Property>getProperty(
+           (PropertyQuery)this.entityManager.newQuery(Property.class)
+        ).size()
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+      
+      CR20019896
+      Superclass callback invocation
+      
+      Superclass callbacks are not invoked
+
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+            
+      CR20019941
+      Immutable DataType Serialization
+      
+      Serialization replaces an ImmutableDate or an ImmutableDateTime by its 
+      mutable counterpart.      
+                              
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3.  REMOVED FEATURES
+      none
+ 
+
+==============================================================================
+Version 2.8.33                                                      2011-09-29
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+      
+      CR20019896
+      Superclass callback invocation
+      
+      Superclass callbacks are not invoked
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+      
+      CR20019921
+      ImmutableDate to GregorianCalendar
+      
+      Erroneous conversion
+      
+      There is an offset of one month
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3.  REMOVED FEATURES
+      none
+ 
+
+==============================================================================
+Version 2.8.32                                                      2011-09-27
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+      
+      CR20019896
+      Superclass callback invocation
+      
+      Superclass callbacks are not invoked
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+      
+      CR20019919
+      Apply string macros to URIs
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3.  REMOVED FEATURES
+      none
+ 
+
+==============================================================================
+Version 2.8.31                                                      2011-09-11
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+      
+      CR20019896
+      Superclass callback invocation
+      
+      Superclass callbacks are not invoked
+
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+            
+      CR20019905
+      Performance Improvement
+      
+      Get rid if SELECT statements retrieving configured values such as 
+      transactionTimeUnique or validTimeUnique.
+      
+      There is a state plug-in to support the improvement:
+      * KERNEL/MODEL=org.openmdx.application.dataprovider.layer.model.State_2
+      * MODEL/transactionTimeUnique=(java.lang.Boolean)false
+      * MODEL/validTimeUnique=(java.lang.Boolean)false
+      
+                        
+2.1.  FIXED BUGS
+      
+      CR20019908
+      Concurrent Access Failure
+      
+      Concurrent DB plug-in activation may lead to concurrent access failure.
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3.  REMOVED FEATURES
+      
+      CR20019907
+      Database Plug-In Clean-Up
+      
+      Remove features which are deprecated for a long time already:
+      * supportsObjectReplacement
+      * createMultiValuedObject 
+
+ 
+==============================================================================
+Version 2.8.30                                                      2011-08-28
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+            
+      CR20019861
+      Query columns have too long column names
+      
+      Queries create views with column aliases starting with the private
+      attribute prefix, e.g. p$$.
+      
+      Formerly the column mapping was applied to the resulting alias requiring 
+      all mappings made to avoid too long column names had to be applied twice, 
+      once to the column name and once to the prefixed column name.
+      
+      Now the column mapping is applied to the original column name and the
+      prefix is prepended to the resulting name.      
+                        
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3.  REMOVED FEATURES
+      none
+
+ 
+==============================================================================
+Version 2.8.29                                                      2011-08-24
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+            
+      CR20019861
+      Database: autonum fields for Oracle. use to_char(nextval) instead of 
+      CAST(nextval TO VARHAR2(n)). Refactoring of Database_1.getAutonumValue()
+      and jdbc-driver-sql.properties.
+                        
+2.1.  FIXED BUGS
+
+      CR20019854
+      Core attribute replication
+      
+      Some core attributes are not replicated to their states.
+      
+      Queries relying on it fail therefore.
+      
+      CR20019859
+      Database: forAll support for nested queries.
+      query.forAllAddress().name().equalTo("abc");
+
+      FOR_ALL:
+      select v.* from OOCKE1_ACCOUNT v where object_id not in (select p$$parent from OOCKE1_ADDRESS vv WHERE NOT (vv.name = 'abc'))
+      
+      THERE_EXISTS:
+      select v.* from OOCKE1_ACCOUNT v where object_id in (select p$$parent from OOCKE1_ADDRESS vv WHERE vv.name = 'abc')
+      
+
+      CR20019668
+      REST and nested queries
+      
+      Nested queries are processed correctly in XML mode only.
+      
+      CR20019771
+      
+      ModelAware filter
+      
+      Complex queries are resolved correctly when passed down to the database 
+      plug-in but fail when applied to a cached collection.
+      
+      CR20019857
+      forAll in complex query
+      
+      
+      Erroneous implementation
+      
+      forAll is mapped to thereExists in case of complex queries.
+      
+      CR20019855
+      In-Memory Update
+      
+      Erroneous implementation
+      
+      Untouched properties are cleared by an in-memory PUT request.
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3.  REMOVED FEATURES
+      none
+
+  
+==============================================================================
+Version 2.8.28                                                      2011-08-08
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019836
+      State-Aware Proxy
+      
+      BasicState state instances returned by a container based iterator must 
+      not be updated while the iteration is in progress.
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+
+1.    NEW FEATURES
+
+      CR20019836
+      State-Aware Proxy
+      
+      Erlaubt die Konfiguration von PlugIns f�r den DataManager-Proxy.
+      
+      CR20019830
+      Multiplicity
+      
+      New classes:
+      * The class oorg.openmdx.base.mof.cci.ModelHelper replaces
+        org.openmdx.base.mof.spi.ModelUtils 
+      * The the enumeration org.openmdx.base.mof.cci.Multiplicity replaces
+        the class org.openmdx.base.mof.cci.Multiplicities.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+      
+      CR20019842
+      Container interface determination is erroneous
+      
+      Simple name required
+      
+      The fully qualified names is used in case of a String argument for 
+      example.
+      
+      CR20019840
+      Persistent-new children visited twice
+
+      CR20019717
+      Dead code in dynamic WBXML Plug-in
+                       
+2.2.  DEPRECATED FEATURES
+      
+      20019830
+      Multiplicity
+      
+      Deprecated classes:      
+      * The class org.openmdx.base.mof.spi.ModelUtils has been deprecated
+        in favour of org.openmdx.base.mof.cci.ModelHelper 
+      * The class org.openmdx.base.mof.cci.Multiplicities has been deprecated
+        in favour of the enumeration org.openmdx.base.mof.cci.Multiplicity
+      
+2.3.  REMOVED FEATURES
+      
+      CR20019384
+      The MODEL layer's optimistic locking locking feature
+            
+ 
+==============================================================================
+Version 2.8.27                                                      2011-06-30
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's allow now the timeout setting but
+      ignores it.
+       
+1.    NEW FEATURES
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+
+      CR20019825
+      Transaction Timeout
+      
+      The lightweight transaction manager's setTimeout() implementation is 
+      erroneous.
+
+                       
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+            
+ 
+==============================================================================
+Version 2.8.26                                                      2011-06-28
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+       
+1.    NEW FEATURES
+
+      CR20019824
+      Non Managed Naming Context
+      
+      Support for global entries
+      
+      Allow creation of entries in the global context through the JNDI API.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+      none
+                       
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+            
+
+==============================================================================
+Version 2.8.25                                                      2011-06-21
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+       
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019818
+      Version Logging
+      
+      The openMDX version is now logged upon the first logger retrieval (as
+      opposed to SysLog's initialization).
+      
+      CR20019816
+      Lenient PersistenceManager Validation
+      
+      When modifying references
+      * do not test for their outermost package's identity
+      * but for their InteractionSpec-free outermost package's identity
+            
+      CR20019764
+      Unit of work support for transient objects
+      
+      makeTransactional(transientObject) throws now a 
+      JDOUnsupportedOptionException.
+                        
+2.1.  FIXED BUGS
+      
+      CR20019819
+      Erroneous State Merging
+      
+      Non-matching states are merged under the following conditions
+      * two adjacent states differ only in attributes not belonging to the
+        default fetch set (usually multi-valued attributes)
+      * the differing attributes are not in the cache
+                       
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      
+      CR20019782
+      Together-Exporter
+      
+      Support for the following formats has been removed:
+      * "together.openmdx-1" (no replacement)
+      * "xmi.openmdx-1" (replaced by "xmi1")
+            
+ 
+==============================================================================
+Version 2.8.24                                                      2011-05-18
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+       
+1.    NEW FEATURES
+      
+      CR20019764
+      PersistenceManager Validation
+
+      The following methods help to comply with the persistence manager 
+      validation policy:
+      * org.openmdx.base.aop2.AbstractObject
+        toNext(same)
+        toSame(next)
+      * org.openmdx.state2.cci.DateStateViews
+        linkStateAndCore(state,core)
+        getViewForContext(context,object)
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019764
+      PersistenceManager Validation
+      
+      Validate whether value and target share the same PersistenceManager.
+                        
+2.1.  FIXED BUGS
+
+      CR20019762
+      Stack Trace Of Modelled Exception
+      
+      The stack trace of modelled exceptions is not printed.
+      
+      The printStackTrace() methods of modelled exceptions prints 
+      the exception class and the exception parameters only.
+                  
+      CR20019763
+      Code Class Arguments In Modelled Exceptions
+      
+      Code class arguments in modelled exceptions are mapped to null.
+      
+      Arguments of a type other than one of the built-in primitive types are 
+      mapped to null. 
+      
+      The default mapping should be java.lang.String in future.
+                       
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+ 
+==============================================================================
+Version 2.8.23                                                      2011-05-17
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+       
+1.    NEW FEATURES
+      none
+
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+
+      CR20019761
+      DateStateViews: Incomplete ValidTimeUnique support
+      
+      getCore() is not validTimeUniqueAware
+                  
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+ 
+==============================================================================
+Version 2.8.22                                                      2011-05-16
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+       
+1.    NEW FEATURES
+      none
+
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019749
+      openMDX Kernel Log Entry
+      
+      org.openmdx.kernel.log.SysLog logs org.openmdx.base.Version instead of
+      org.openmdx.kernel.Version.
+                        
+      CR20019751
+      Caching of aspects
+      
+      There is no special caching for aspects anymore.
+                        
+2.1.  FIXED BUGS
+      none
+                  
+2.2.  DEPRECATED FEATURES
+      
+      CR20019749
+      openMDX Kernel Log Entry
+      
+      The class org.openmdx.kernel.Version is deprecated as it's information 
+      is redundant to org.openmdx.base.Version.
+      
+2.3.  REMOVED FEATURES
+      none
+      
+ 
+==============================================================================
+Version 2.8.21                                                      2011-05-11
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+       
+1.    NEW FEATURES
+      none
+
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      
+      CR20019744
+      NullPointerException bei Container-Iteration
+                  
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+ 
+==============================================================================
+Version 2.8.20                                                      2011-04-28
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+       
+1.    NEW FEATURES
+
+      CR20019729
+      RestServlet: RefInitializeOnCreate
+      
+      The connection URL parameter RefInitializeOnCreate is used to determine
+      the connection's mode.
+
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019729
+      RestServlet: RefInitializeOnCreate
+      
+      RefInitializeOnCreate is now set per connection. It's default is true
+      in auto-commit mode and false for connections established via HttpPort.
+                        
+2.1.  FIXED BUGS
+      
+      CR20019735
+      State Comparator: Validity
+      
+      The validity must be ignored if and only if validTimeUnique is false.
+      
+      CR20019730
+      SimplePort ignores cookies
+      
+      The reply cookies must be offered to the cookie handler.
+                  
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+
+      CR20019729
+      RestServlet: RefInitializeOnCreate
+      
+      The servlet init parameter RefInitializeOnCreate is no longer supported.
+      
+
+==============================================================================
+Version 2.8.19                                                      2011-04-19
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+       
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+                  
+      CR20019731
+      ObjectAndValidStateComparator
+      
+      Use qualified feature name to select comparator and correct default 
+      ignore list.
+
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+
+==============================================================================
+Version 2.8.18                                                      2011-04-18
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+       
+1.    NEW FEATURES
+      
+      CR20019434 & CR20019727
+      Structure Factory
+
+      The structure factory may be used for jmi1 structures as well.
+            
+      CR20019726
+      RefContainer
+      Structure Factory
+      A RefContainer is now PersistenceCapable
+      * two instances are equal if they share the same PersistenceManager and
+        their respective transient container ids are equal
+      * it may be retrieved via both
+        persistenceManager.getObjectById(containerId) and 
+        persistenceManager.getObjectById(transientContainerId)  
+      
+      CR20019723
+      getTimeIndependentView
+      
+      The static method getTimeIndependentView(RefBaseObject) has been added to
+      DateStateViews.
+      
+      CR20019669
+      PersistenceCapable Containers
+      
+      The following JDOHelper methods may now be applied to containers as well
+      * getPersistenceManager(container)
+      * getObjectId(container)
+      * getTransactionalObjectId(container)
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019584
+      REST Request Exception
+      
+      Unparsable requests are no longer treated as system exception leading to 
+      a connection destruction.
+
+      CR20019728
+      Offer Awareness
+      
+      ObjectAndValidStateComparator enhancement
+      
+      CR20019723
+      getTimeIndependentView
+      
+      The static method getTimeIndependentView(RefObject) in DateStateViews has 
+      been replaced by getTimeIndependentView(RefBaseObject).
+       
+      DateStateViews.
+      
+      CR20019724
+      Jmi1ObjectInvocationHandler
+      
+      Improve information about ClassCastException
+                        
+2.1.  FIXED BUGS
+                  
+      CR20019591
+      getObjectById fails in case of containers
+      
+      PersistenceManager.getObjectById(containerId)
+      
+      CR20019719
+      SQL Placeholder
+      
+      The SQL placeholder determination is ignored in case of equalTo().
+
+2.2.  DEPRECATED FEATURES
+
+      CR20019669
+      PersistenceCapable Containers
+      
+      The following PersistenceHelper methods have been deprecated 
+      * getContainerId(container)
+      * getTransientContainerId(container)
+      as they have been replaced by:
+      * getObjectId(container)
+      * getTransactionalObjectId(container)
+      
+2.3.  REMOVED FEATURES
+
+      CR20019723
+      getTimeIndependentView
+
+      The static method getTimeIndependentView(RefObject) has been removed 
+      from DateStateViews.
+      
+
+==============================================================================
+Version 2.8.17                                                      2011-04-11
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019584
+      REST Request Exception
+      
+      Runtime exceptions are not yet handled properly.
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+       
+1.    NEW FEATURES
+      
+      CR20019708
+      interposedSynchronization support
+      
+      interposedSynchronization support added to lightweight transaction. 
+      
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019685
+      A BasicException.Holder's Message
+      
+      getMessage() of a BasicException.Holder should delegate to 
+      Throwables.getMessage(), i.e. returning the exception domain, the 
+      exception code and the description.
+                        
+2.1.  FIXED BUGS
+            
+      CR20019716
+      A lightweight transaction's afterCompletion callback
+      
+      The LightweightTransaction invokes afterCompletion() with status ACTIVE 
+      if no resources are enlisted with a transaction.
+      
+      CR20019709  
+      getTimeIndependentView
+      
+      The generic argument S is unnecessary      
+      
+      CR20019708
+      beforeCompletion failures
+      
+      A beforeCompletion() failure must mark the transaction for rollback only.
+
+      CR20019584
+      REST Request Exception
+      
+      Rollback and rollback exceptions handled properly in auto-commit mode.
+
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+
+==============================================================================
+Version 2.8.16                                                      2011-04-05
+==============================================================================
+
+0.    KNOWN ISSUES
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      A state capable container's get method may not return null just because
+      a state capable object has no states in order for the given unit tests 
+      to run properly.
+       
+       
+1.    NEW FEATURES
+
+      CR20019630
+      aop2 Impl context access
+      
+      Use PlugInContexts.uncheckedGetPlugInContext() instead of 
+      PlugInContexts.getPlugInContext() in case of plug-in classes with
+      wildcard types.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019630
+      aop2 Impl context access
+      
+      Plug-in sub-classing support added
+                        
+2.1.  FIXED BUGS
+
+      CR20019649
+      Container in time-point view contains null elements
+
+      CR20019628
+      Valid Time Unique
+      
+      The ValidTimeUniqueType property is now evaluated properly.
+
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+      
+==============================================================================
+Version 2.8.15                                                      2011-03-30
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019630
+      aop2 Impl context access
+      
+      An aop2 Impl can access / create its context with this.thisContext(). 
+      This context can now be retrieved via the object itself by using
+      org.openmdx.base.aop2.PlugInContexts' getPlugInContext() method.
+      
+      CR20019663
+      XML Comparator
+      
+      Allow feature specific methods to detect differences.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019666
+      Modeled Exceptions
+      
+      The "typeName" parameter has been renamed to "class" to avoid naming
+      conflicts.
+      
+      Note:
+      This change requires re-generation of the JMI1 exception classes.
+
+      CR20019663	
+      Object And Valid State Comparator
+
+      The class has been renamed from StateAwareXMLComparator to
+      ObjectAndValidStateComparator.
+      
+      The modifiable set of ignored features has been replaced by a
+      comparator callback method.
+                        
+2.1.  FIXED BUGS
+      
+      CR20019649
+      Container in time-point view contains null elements
+      
+      The issue occurs in case of newly removed time ranges. 
+      
+      CR20019672
+      Non-Transactional Read
+      
+      Non-transactional reads fail in case of a non-optimistic persistence 
+      manager.
+      
+      CR20019670 
+      Application Managed Unit Of Work
+      
+      No local transaction is provided for non-optimistic application managed 
+      units of work.
+
+      CR20019663	
+      Object And Valid State Comparator
+      
+      Invalidated states must be ignored.
+      
+      CR20019666
+      Modeled Exceptions
+      
+      Null descriptions lead to a stack overflow on getMessage().
+      A null description is now replaced by the exception's qualified name.
+      
+      Note:
+      This change requires re-generation of the JMI1 exception classes.
+
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+
+      CR20019663
+      XML Comparator
+      
+      The modifiable set of ignored features has been removed.
+      
+      
+==============================================================================
+Version 2.8.14                                                      2011-03-22
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019662
+      Persistence Manager Locking
+      
+      Allow locking the persistence manager while an application provided
+      action is executed.
+      
+      CR20019661
+      TestResultComparator
+      
+      The class StateAwareXMLComparator has been added
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+
+      CR20019628
+      Valid Time Unique
+      
+      The ValidTimeUniqueType property has been ignored in some (important) 
+      cases.
+                  
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+      
+==============================================================================
+Version 2.8.13                                                      2011-03-18
+==============================================================================
+
+0.    KNOWN BUGS
+      none
+
+1.    NEW FEATURES
+
+      CR20019628
+      Valid Time Unique
+      
+      The ValidTimeUniqueType property for the org.openmdx.state2.aop0.PlugIn_1 
+      accepts the fully qualified class name of non-stated parents holding 
+      children for which unique-time only is true.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019628
+      Valid Time Unique
+      
+      Replace each
+      * stateCapable.setCore(stateCapable) 
+      invocation by the two following invocations:
+      * stateCapable.setValidTimeUnique(true)
+      * stateCapable.setTransactionTimeUnique(true)      
+                        
+2.1.  FIXED BUGS
+      
+      CR20019656
+      isEmpty()'s iteration
+
+      isEmpty() did often iterate over the whole collection.
+      It should iterate as few as possible.
+      
+      CR20019660
+      Oracle INTERVALDS
+      
+      INTERVALDS.toString() is erroneous:
+      1.023 s are represented as 1.23 s
+      
+      A work-around for this Oracle bug has been added to openMDX.
+                  
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+
+      CR20019628
+      Valid Time Unique
+      
+      The stateCapable.setCore(stateCapable) work-around support has been
+      discontinued in favour of stateCapable.setValidTimeUnique(true).
+      
+      
+==============================================================================
+Version 2.8.12                                                      2011-03-15
+==============================================================================
+
+0.    KNOWN BUGS
+      none
+
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+      
+      CR20019629	 
+      Proxy has problems with flushed objects
+      
+      Deleted objects are subtracted twice from the container's size.
+      
+      CR20019654
+      dereferencedType
+      
+      dereferencedType() is null in Container_1's getQueryType()
+                  
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+
+==============================================================================
+Version 2.8.11                                                      2011-03-15
+==============================================================================
+
+0.    KNOWN BUGS
+
+      CR20019629	 
+      Proxy has problems with flushed objects
+      
+      Deleted objects are subtracted twice from the container's size.
+
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+      
+      CR20019649
+      Container in time-point view contains null elements
+      
+      The issue occurs in case of newly populated time ranges. 
+                  
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+
+==============================================================================
+Version 2.8.10                                                      2011-03-10
+==============================================================================
+
+0.    KNOWN BUGS
+
+      CR20019629	 
+      Proxy has problems with flushed objects
+      
+      It seems that deleted objects remain invisible after rollback.
+
+1.    NEW FEATURES
+      
+      CR20019647	 
+      Optimistic Unit Of Work
+      
+      * Loosely coupled with the JTA transaction.
+      * Enable some units of work in a transaction to be committed while 
+        others are rolled back.
+      
+      The new UnitOfWork interface provides tow methods:
+      * void setForgetOnly()
+      * boolean isForgetOnly()
+      
+      CR20019644	 
+      Structure as JavaBean
+      
+      The method toJavaBean() has been added to the class Structures.
+      
+      CR20019589
+      getValidStates with query
+      
+      The method getValidStates(Container,AnyTypePredicate) has been added to
+      DateStateViews.
+      
+      CR20019637
+      Java Bean as Structure
+      
+      The method fromJavaBean() has been added to the class Structures.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019635
+      getViewForPropagatedState
+
+      getViewForPropagatedState() shall delegate to getViewForTimeRange()
+      where possible.
+      
+      The STRICT_QUERY mode has to be relaxed in the way, that the 
+      underlaying state may be larger then required even if it is not new.
+                        
+2.1.  FIXED BUGS
+      
+      CR20019629	 
+      Proxy has problems with flushed objects
+      
+      The actual fix disable caching for container proxies.
+
+      CR20019648
+      getViewForTimePoint
+      
+      The optimization is erroneous.
+      
+      CR20019636
+      Transaction Time Query
+
+      Deleted states must not be suppressed if existsAt is set.
+                  
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+
+==============================================================================
+Version 2.8.8                                                       2011-02-24
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019576
+      getTimeIndependentView
+
+      getTimeIndependentView() is a generalized version of getViewForCore().
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20019576
+      Query for core objects
+
+      BasicState instance are excluded from DateStateContext-free views unless
+      requested explicitely.
+
+      CR20019625
+      rollback-only
+
+      beforeCompletion shall do nothing if rollback-only is set.
+                        
+2.1.  FIXED BUGS
+      none
+            
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+
+==============================================================================
+Version 2.8.7                                                       2011-02-16
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019622
+      Clone for states
+
+      Add to clone methods to DateStateViews
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019577
+      Unique Transaction & Valid Time
+      
+      Avoid "removedAt" access if the feature is non-persistent.
+                        
+2.1.  FIXED BUGS
+      none
+            
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      
+      CR20019623
+      Deprecated DateStateViews methods
+
+      The deprecated DateStateViews methods have been removed.
+      
+
+==============================================================================
+Version 2.8.6                                                       2011-02-10
+==============================================================================
+
+1.    NEW FEATURES
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019615	 
+      removableReferenceIdPrefix
+      
+      The removableReferenceIdPrefix configuration is ignored for queries.
+      
+      CR20019555
+      Involvement retrieval optimization
+      
+      Eliminate "LIKE '%'" SQL clauses.
+                        
+2.1.  FIXED BUGS
+
+      CR20019613
+      IRI Import
+      
+      Erroneous com.sun.jndi.toolkit.url.Uri reference.
+      
+      The import handler tries to create com.sun.jndi.toolkit.url.Uri 
+      instances instead of java.net.URI instances.      
+            
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+
+==============================================================================
+Version 2.8.5                                                       2011-02-06
+==============================================================================
+
+1.    NEW FEATURES
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+
+      CR20019555
+      Involvement retrieval optimization
+      
+      Aspect queries used erroneous SQL statements.      
+            
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+
+==============================================================================
+Version 2.8.4                                                       2011-02-04
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20019555
+      Involvement retrieval optimization
+      
+      Avoid function based index searches for audit queries. Audit queries 
+      should use persistent columns and avoid the view's derived attributes.
+      
+      The functionality is activated by a PERSISTENCE/referenceIdPattern
+      entry, a white space separated list of 
+      <feature-name>=<referenice-id-pattern> entries, e.g. 
+      	
+      	PERSISTENCE/referenceIdPattern=beforeImage=^([^.]+)[.](.+)$ object=^([^.]+)[.](.+)$
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+      none
+            
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      
+      CR20019555
+      Involvement retrieval optimization
+      
+      The referenceIdSuffixQueriesfunctionality has been replace by the
+      more general referenceIdPattern functionality.
+      
+
+==============================================================================
+Version 2.8.3                                                       2011-01-31
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20019587
+      State Query Optimization
+      
+      Requires a configuration change:
+      * KERNEL/PERSISTENCE
+        org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1 ->
+          org.openmdx.application.dataprovider.layer.persistence.jdbc.RidOidQueryDatabase_1
+      * PERSISTENCE/dbObjectFormat
+        sliced -> sliced2
+        slicedNonIndexed -> sliced2NonIndexed          
+        slicedNonIndexedParentRidOnly -> sliced2NonIndexedParentRidOnly          
+        slicedParentRidOnly -> sliced2NonIndexedParentRidOnly          
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019555
+      Involvement retrieval optimization
+      
+      Requires a configuration change:
+      * KERNEL/PERSISTENCE
+        org.openmdx.application.dataprovider.layer.persistence.jdbc.Database_1 ->
+          org.openmdx.application.dataprovider.layer.persistence.jdbc.RidOidQueryDatabase_1
+      * PERSISTENCE/dbObjectFormat
+        sliced -> sliced2
+        slicedNonIndexed -> sliced2NonIndexed          
+        slicedNonIndexedParentRidOnly -> sliced2NonIndexedParentRidOnly          
+        slicedParentRidOnly -> sliced2NonIndexedParentRidOnly          
+
+      CR20019605
+      useNormalizedReferences
+      
+      useNormalizedReferences is used for very different switches.
+      
+      It is used 
+      * as designed
+      * as "not REF_TABLE" switch
+                        
+2.1.  FIXED BUGS
+      none
+            
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+      
+
+==============================================================================
+Version 2.8.2                                                       2011-01-24
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20019555
+      Involvement retrieval optimization
+      
+      Avoid function based index searches for audit queries. Audit queries 
+      should use persistent columns and avoid the view's derived attributes.
+      
+      The functionality is activated by a PERSISTENCE/referenceIdSuffixQueries
+      entry, a white space separated list of 
+      <column-name>=<reference-id-prefix> entries, e.g. 
+      	
+      	PERSISTENCE/referenceIdSuffixQueries=before_image=audit* object=data*
+           
+                        
+2.1.  FIXED BUGS
+      
+      CR20019599
+      Empty multi-value slices
+      
+      Empty multi-value slices must be neither produced nor being required.
+            
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      
+      CR20019352
+      Configuration Clean-Up
+
+      The PERSISTENCE layer configuration property 
+      disableStateFilterSubstitution has been removed.
+      
+
+==============================================================================
+Version 2.8.1                                                       2011-01-21
+==============================================================================
+
+1.    NEW FEATURES
+      none
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+                        
+2.1.  FIXED BUGS
+      
+      CR20019580
+      InboundConnection & Partial Object
+      
+      The synchronization between entity manager and proxy did not work 
+      correctly in case of partial objects.
+      
+      CR20019566
+      Wrong Type Of Container Qualifier
+      
+      The qualifier has erroneously the member's type instead of the modeled 
+      one.
+            
+2.2.  DEPRECATED FEATURES
+      none
+      
+2.3.  REMOVED FEATURES
+      none
+
+
 ==============================================================================
 Version 2.8.0                                                       2010-12-27
 ==============================================================================
@@ -2038,7 +4406,7 @@ Version 2.5.3                                                       2009-10-23
         time its toString() method is invoked  
        
       CR20018822 	
-      XmlImporter / XmlExporter f�r openMDX 2
+      XmlImporter / XmlExporter f�r openMDX 2
       
       Re-factored and aspect aware
       (to support org::openmdx::state2 for example).
@@ -8982,7 +11350,7 @@ Version 1.5.3                                                       2004-12-14
 
       CR0002784       
       Replace moduleID by moduleURI. The openMDX deployment configuration parser relies 
-      on its Â«module idÂ»s (the module URIs last component) being unique.
+      on its module ids (the module URIs last component) being unique.
 
 2.1.  FIXED BUGS
 
@@ -9043,7 +11411,7 @@ Version 1.5.3                                                       2004-12-14
 			"::*" 
 			"A::B" 
 			"A::B/::*" 
-			"A::B/Fran\u00e7ois" // "A::B/Franæ®©s" 
+			"A::B/Fran\u00e7ois"  
 			"A::B/provider/P::Q/segment/S.T/object/RR_1;state=0" 
 			"A::B/provider/P::Q/segment/S.T/object/012345;transient" 
 			"A::B/(xri::@openmdx::B.B0//B1)/C" 
@@ -9068,7 +11436,7 @@ Version 1.5.3                                                       2004-12-14
 			"xri:@openmdx:*" 
 			"xri:@openmdx:A.B" 
 			"xri:@openmdx:A.B/:*" 
-			"xri:@openmdx:A.B/Fran\u00e7ois" // "xri:@openmdx:A.B/Franæ®©s" 
+			"xri:@openmdx:A.B/Fran\u00e7ois" 
 			"xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/RR_1;state=0" 
 			"xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/012345;transient 
 			"xri:@openmdx:A.B/(xri:@openmdx:B.B0/B1)/C" 
@@ -9084,7 +11452,7 @@ Version 1.5.3                                                       2004-12-14
 			"xri:@openmdx:*" 
 			"xri:@openmdx:A.B" 
 			"xri:@openmdx:A.B/:*" 
-			"xri:@openmdx:A.B/Fran\u00e7ois" // "xri:@openmdx:A.B/Franæ®©s" 
+			"xri:@openmdx:A.B/Fran\u00e7ois" 
 			"xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/RR_1;state=0" 
 			"xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/012345;transient" 
 			"xri:@openmdx:A.B/(xri:@openmdx:B.B0%2FB1)/C" 
@@ -9100,7 +11468,7 @@ Version 1.5.3                                                       2004-12-14
 			"xri:@openmdx:*" 
 			"xri:@openmdx:A.B" 
 			"xri:@openmdx:A.B/:*" 
-			"xri:@openmdx:A.B/Fran%C3%A7ois" // "xri:@openmdx:A.B/Franæ®©s" 
+			"xri:@openmdx:A.B/Fran%C3%A7ois" 
 			"xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/RR_1;state=0" 
 			"xri:@openmdx:A.B/provider/P:Q/segment/S.T/object/012345;transient" 
 			"xri:@openmdx:A.B/(xri:@openmdx:B.B0%2FB1)/C" 
@@ -9317,8 +11685,9 @@ Version 1.5.1                                                       2004-10-05
       Non-ASCII characters hsould be escaped as the source files are stored
       with ISO-Latin-1 encoding.
 
-      'Â«' and 'Â»' have been replaced by their unicode escapes '\u00ab' and 
-      '\u00bb' respectively.
+      The following characters have been replaced by their unicode escapes:
+      * '\u00ab' 
+      * '\u00bb'
 
 2.2.  DEPRECATED FEATURES
 
@@ -9642,10 +12011,10 @@ Version 1.4.0                                                       2004-08-18
       You should be able to
       * leave out 
         -Dorg.openmdx.compatibility.base.application.cci.Application.register=
-        Â‹startup-classÂ› unless you rely on a deployment configuration XML file 
-      * rely upon -Dweblogic.Name=Â‹server-nameÂ›
+        <startup-class> unless you rely on a deployment configuration XML file 
+      * rely upon -Dweblogic.Name=<server-name>
       * define -Dorg.openmdx.compatibility.base.application.j2ee.domain=
-        Â‹domain-nameÂ›
+        <domain-name>
          
       
 2.2.  DEPRECATED FEATURES
@@ -9935,7 +12304,7 @@ Version 1.3.4                                                       2004-07-16
       CR0002414
       env entries without values  
       
-      Â«envÂ» entries without values should be allowed according to the DTD.  
+      env entries without values should be allowed according to the DTD.  
 
       
 2.2.  DEPRECATED FEATURES
@@ -10287,22 +12656,22 @@ Version 1.3.0                                                       2004-05-06
       
       Separate ViewCapable/"view" from ContextCapable and RoleCapable.  
       
-      Diese Ã®derung beinhaltet folgende Schritte:
+      Diese Aenderung beinhaltet folgende Schritte:
       1. Wir lassen "view" wie es ist. 
-         Es dient nur zur Unterstï¿½ des Modells 
+         Es dient nur zur Unterstuetzung des Modells 
          org::openmdx::compatibility::audit1.
          Diese Pattern werden wir in openMDX 2 nur noch im Zusammenhang mit 
-         Object_1_0/DataproviderObject unterstï¿½ das heisst, die 
-         Anwendungen mï¿½auf org::openmdx::audit2 umsteigen, um die neuen 
-         Infrastrukturkomponenten nutzen zu kï¿½n. 
+         Object_1_0/DataproviderObject unterstuetzen, das heisst, die 
+         Anwendungen muessen auf org::openmdx::audit2 umsteigen, um die neuen 
+         Infrastrukturkomponenten nutzen zu koennen. 
       2. Wir entkoppeln "ContextCapable" von "ViewCapable".
-         "ContextCapable" dient zur Unterstï¿½ der 
-         Nichtkompatibilitã³³modelle wie org::openmdx::lock1 und 
+         "ContextCapable" dient zur Unterstuetzung der 
+         Nichtkompatibilitaetsmodelle wie org::openmdx::lock1 und 
          org::openmdx::datastore1. 
-         Im DataproviderObject werden ContextCapable-Features durch das Prã¥©x 
+         Im DataproviderObject werden ContextCapable-Features durch das Praefix 
          "context:" ausgezeichnet. 
       3. Wir entkoppeln RoleCapable von "view". 
-         Im DataproviderObject werden RoleCapable-Features durch das Prã¥©x 
+         Im DataproviderObject werden RoleCapable-Features durch das Praefix 
          "role:" ausgezeichnet. 
 
       CR0002226

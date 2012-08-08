@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UserSettings.java,v 1.2 2010/09/21 15:16:34 wfro Exp $
+ * Name:        $Id: UserSettings.java,v 1.6 2011/10/23 11:44:27 wfro Exp $
  * Description: UserSettings 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/21 15:16:34 $
+ * Date:        $Date: 2011/10/23 11:44:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -69,5 +69,9 @@ public class UserSettings {
 	public static final String DEFAULT_FILTER = "Filter.Default";
 	public static final String PAGE_SIZE = "Page.Size";
 	public static final String ROOT_OBJECT_STATE = "RootObject";
+	public static final String WORKSPACE_ID = "Workspace.ID";	
+	public static final String HIDE_WORKSPACE_DASHBOARD = "WorkspaceDashboard.Hide";
+	public static final String GRID_DEFAULT_ALIGNMENT_IS_WIDE = "Grid.DefaultAlignmentIsWide";
+	public static final String AUTOSTART_URL = "Autostart.URL";
 	
 }

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LocalTransactionContext.java,v 1.3 2009/08/25 17:23:05 hburger Exp $
+ * Name:        $Id: LocalTransactionContext.java,v 1.4 2011/06/21 22:54:53 hburger Exp $
  * Description: LocalTransactionContext
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/08/25 17:23:05 $
+ * Date:        $Date: 2011/06/21 22:54:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,6 +68,7 @@ import javax.transaction.TransactionManager;
 import javax.transaction.TransactionRequiredException;
 
 import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 
 /**
  * LocalTransactionContext
@@ -112,13 +113,12 @@ class LocalTransactionContext
     EJBException end(
          Throwable cause
     ){
-        Logger logger = LoggerFactory.getLogger();
         try {
             super.endFail();
         } catch (Exception exception) {
-            logger.log(Level.SEVERE,"Transaction Management Failure", exception);
+            SysLog.log(Level.SEVERE,"Transaction Management Failure", exception);
         }
-        logger.log(Level.SEVERE,"Caught non-application exception", cause);
+        SysLog.log(Level.SEVERE,"Caught non-application exception", cause);
         return new TransactionRolledbackLocalException(
              "Caught non-application exception",
              cause instanceof Exception ? (Exception)cause : new UndeclaredThrowableException(cause)

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightTransactionManager.java,v 1.2 2009/09/07 15:14:13 hburger Exp $
+ * Name:        $Id: LightweightTransactionManager.java,v 1.5 2011/06/30 09:14:37 hburger Exp $
  * Description: Lightweight Transaction Manager
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 15:14:13 $
+ * Date:        $Date: 2011/06/30 09:14:37 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2005-2009, OMEX AG, Switzerland
+ * Copyright (c) 2005-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -48,12 +48,11 @@
  * This product includes software developed by the Apache Software
  * Foundation (http://www.apache.org/).
  */
-
 package org.openmdx.kernel.lightweight.transaction;
 
-import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
@@ -65,7 +64,7 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 
 /**
  * JTA Transaction manager implementation.
@@ -81,36 +80,50 @@ public final class LightweightTransactionManager implements TransactionManager {
     /**
      * Constructor 
      */
-    public LightweightTransactionManager() {
+    private LightweightTransactionManager() {
         this.transactionIdFactory = new TransactionIdFactory();
+        this.bindings = new ConcurrentHashMap<Thread, LightweightTransaction>();
     }
 
     /**
-     * 
-     */
-    public static final int DEFAULT_TRANSACTION_TIMEOUT = 30;
-
-    /**
-     * The logger instance
-     */
-    private final Logger logger = LoggerFactory.getLogger();
-    
-    /**
      * Transaction bindings thread id <-> transaction object.
      */
-    final Hashtable<Thread, LightweightTransaction> bindings = 
-        new Hashtable<Thread, LightweightTransaction>();
-
-
-    /**
-     * Transaction bindings thread id <-> transaction timeout.
-     */
-    private final Hashtable<Thread,Integer> timeouts = new Hashtable<Thread,Integer>();
+    final ConcurrentMap<Thread, LightweightTransaction> bindings;
 
     /**
      * The transaction id factory singleton
      */
     private final TransactionIdFactory transactionIdFactory;
+
+    /**
+     * The transaction manager must be a singleton
+     */
+    private static LightweightTransactionManager instance;
+    
+    private static final ThreadLocal<Integer> timeouts = new ThreadLocal<Integer>(){
+
+		/* (non-Javadoc)
+		 * @see java.lang.ThreadLocal#initialValue()
+		 */
+		@Override
+		protected Integer initialValue() {
+			return Integer.valueOf(0);
+		}
+    	
+    };
+    
+    /**
+     * The transaction manager must be a singleton
+     * 
+     * @return the transaction manager singleton
+     */
+    public static synchronized LightweightTransactionManager getInstance(
+    ){
+        if(instance == null) {
+            instance = new LightweightTransactionManager();
+        }
+        return instance;
+    }
 
     // --------------------------------------------- TransactionManager Methods
 
@@ -123,20 +136,17 @@ public final class LightweightTransactionManager implements TransactionManager {
      * @exception SystemException Thrown if the transaction manager encounters
      * an unexpected error condition.
      */
-    public void begin()
-        throws NotSupportedException, SystemException {
-
-        if (getTransaction() != null) throw new NotSupportedException(
-            "Nested transactions are not supported"
-         );
-
+    public void begin(
+    ) throws NotSupportedException, SystemException {
+        if(getTransaction() != null) throw new NotSupportedException(
+            "There is already an active transaction, nested transactions are not supported"
+        );        
         LightweightTransaction currentTransaction = new LightweightTransaction(
             this.transactionIdFactory
         );
+        currentTransaction.setTimeout(timeouts.get());
         bindings.put(Thread.currentThread(), currentTransaction);
-
-        this.logger.log(Level.FINEST,"Begin {0}", currentTransaction);
-
+        SysLog.log(Level.FINEST,"Begin {0}", currentTransaction);
     }
 
 
@@ -166,20 +176,13 @@ public final class LightweightTransactionManager implements TransactionManager {
         HeuristicRollbackException, SecurityException, IllegalStateException,
         SystemException {
 
-        Thread currentThread = Thread.currentThread();
-        Transaction currentTransaction = bindings.get(currentThread);
-        if (currentTransaction == null)
-            throw new IllegalStateException();
-
-
-        this.logger.log(Level.FINEST,"Commit {0}", currentTransaction);
+        Transaction currentTransaction = getTransaction(true);
+        SysLog.log(Level.FINEST,"Commit {0}", currentTransaction);
         try {
             currentTransaction.commit();
         } finally {
-            timeouts.remove(currentThread);
-            bindings.remove(currentThread);
+            bindings.remove(Thread.currentThread());
         }
-
     }
 
 
@@ -195,17 +198,13 @@ public final class LightweightTransactionManager implements TransactionManager {
      * @exception SystemException Thrown if the transaction manager encounters
      * an unexpected error condition.
      */
-    public void rollback()
-        throws SecurityException, IllegalStateException, SystemException {
-
-        Thread currentThread = Thread.currentThread();
-        Transaction currentTransaction = bindings.remove(currentThread);
-        if (currentTransaction == null)
-            throw new IllegalStateException();
-
-        timeouts.remove(currentThread);
-
-        this.logger.log(Level.FINEST,"Rollback {0}", currentTransaction);
+    public void rollback(
+    ) throws SecurityException, IllegalStateException, SystemException {
+        Transaction currentTransaction = bindings.remove(Thread.currentThread());
+        if (currentTransaction == null) throw new IllegalStateException(
+            "There is no active transaction"
+        );
+        SysLog.log(Level.FINEST,"Rollback {0}", currentTransaction);
         currentTransaction.rollback();
 
     }
@@ -221,13 +220,10 @@ public final class LightweightTransactionManager implements TransactionManager {
      * @exception SystemException Thrown if the transaction manager encounters
      * an unexpected error condition.
      */
-    public void setRollbackOnly()
-        throws IllegalStateException, SystemException {
-
-        Transaction currentTransaction = getTransaction();
-        if (currentTransaction == null)
-            throw new IllegalStateException();
-        this.logger.log(Level.INFO,"Set {0} to rollback-only", currentTransaction);
+    public void setRollbackOnly(
+    ) throws IllegalStateException, SystemException {
+        Transaction currentTransaction = getTransaction(true);
+        SysLog.log(Level.INFO,"Set {0} to rollback-only", currentTransaction);
         currentTransaction.setRollbackOnly();
     }
 
@@ -240,13 +236,10 @@ public final class LightweightTransactionManager implements TransactionManager {
      * @return The transaction status. If no transaction is associated with
      * the current thread, this method returns the Status.NoTransaction value.
      */
-    public int getStatus()
-        throws SystemException {
-
+    public int getStatus(
+    ) throws SystemException {
         Transaction currentTransaction = getTransaction();
-        return currentTransaction == null ? 
-            Status.STATUS_NO_TRANSACTION : 
-            currentTransaction.getStatus();
+        return currentTransaction == null ? Status.STATUS_NO_TRANSACTION : currentTransaction.getStatus();
     }
 
 
@@ -259,12 +252,33 @@ public final class LightweightTransactionManager implements TransactionManager {
      * @exception SystemException Thrown if the transaction manager encounters
      * an unexpected error condition.
      */
-    public Transaction getTransaction(
-    ) throws SystemException {
+    public LightweightTransaction getTransaction(
+    ){
         return bindings.get(Thread.currentThread());
     }
 
-
+    /**
+     * Get the transaction object that represents the transaction context of
+     * the calling thread.
+     * 
+     * @param exists tells whether the transaction must exit or not
+     * 
+     * @return the transaction object
+     * 
+     * @exception IllegalStateException if there is no active transaction when one is expected
+     * @exception NotSupportedException in case of a nested transaction attempt
+     */
+    private LightweightTransaction getTransaction(
+        boolean exists
+    ){
+        LightweightTransaction transaction = getTransaction();
+        if(exists == (transaction != null)) {
+            return transaction;
+        } else  throw new IllegalStateException(
+            exists ? "There is no active transaction" : "The current transaction is still active"
+        );
+    }
+    
     /**
      * Resume the transaction context association of the calling thread with
      * the transaction represented by the supplied Transaction object. When
@@ -280,16 +294,13 @@ public final class LightweightTransactionManager implements TransactionManager {
      * @exception SystemException Thrown if the transaction manager encounters
      * an unexpected error condition.
      */
-    public void resume(Transaction tobj)
-        throws InvalidTransactionException, IllegalStateException,
-        SystemException {
-
-        if (getTransaction() != null)
-            throw new IllegalStateException();
-
+    public void resume(
+        Transaction tobj
+    ) throws InvalidTransactionException, IllegalStateException, SystemException {
+        getTransaction(false); // assert that no transaction is active
         if (tobj instanceof LightweightTransaction) {
             bindings.put(Thread.currentThread(), (LightweightTransaction) tobj);
-        } else  throw new InvalidTransactionException();
+        } else throw new InvalidTransactionException();
 
 
     }
@@ -306,19 +317,9 @@ public final class LightweightTransactionManager implements TransactionManager {
      * @exception SystemException Thrown if the transaction manager encounters
      * an unexpected error condition.
      */
-    public Transaction suspend()
-        throws SystemException {
-
-        Transaction currentTransaction = getTransaction();
-
-        if (currentTransaction != null) {
-            Thread currentThread = Thread.currentThread();
-            bindings.remove(currentThread);
-            timeouts.remove(currentThread);
-        }
-
-        return currentTransaction;
-
+    public Transaction suspend(
+    ) throws SystemException {
+        return bindings.remove(Thread.currentThread());
     }
 
 
@@ -334,11 +335,10 @@ public final class LightweightTransactionManager implements TransactionManager {
      * @exception SystemException Thrown if the transaction manager encounters
      * an unexpected error condition.
      */
-    public void setTransactionTimeout(int seconds)
-        throws SystemException {
-
-        timeouts.put(Thread.currentThread(), new Integer(seconds));
-
+    public void setTransactionTimeout(
+        int seconds
+    ) throws SystemException {
+    	timeouts.set(Integer.valueOf(seconds));
     }
 
 }

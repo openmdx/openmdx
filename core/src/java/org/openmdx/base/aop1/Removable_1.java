@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Removable_1.java,v 1.8 2010/11/05 18:16:27 hburger Exp $
+ * Name:        $Id: Removable_1.java,v 1.9 2011/12/02 15:04:30 hburger Exp $
  * Description: Removable_1 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/05 18:16:27 $
+ * Date:        $Date: 2011/12/02 15:04:30 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,11 +53,10 @@ package org.openmdx.base.aop1;
 import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_AT;
 import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_BY;
 
-import java.util.AbstractSet;
+import java.util.AbstractList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
 import org.openmdx.base.accessor.view.Interceptor_1;
 import org.openmdx.base.accessor.view.ObjectView_1_0;
@@ -91,7 +90,7 @@ public class Removable_1 extends Interceptor_1 {
     /**
      * The cached <code<removedBy</code> value
      */
-    private transient Set<Object> removedBy;    
+    private transient List<Object> removedBy;    
 
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.view.PlugIn_1#objDelete()
@@ -131,15 +130,15 @@ public class Removable_1 extends Interceptor_1 {
     } 
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.aop1.Aspect_1#objGetSet(java.lang.String)
+     * @see org.openmdx.base.aop1.Aspect_1#objGetList(java.lang.String)
      */
     @Override
-    public Set<Object> objGetSet(
+    public List<Object> objGetList(
         String feature
     ) throws ServiceException {
         return REMOVED_BY.equals(feature) ? (
             this.removedBy == null ? this.removedBy = new RemovedBy() : this.removedBy
-        ) : super.objGetSet(
+        ) : super.objGetList(
             feature
         );
     }
@@ -152,36 +151,28 @@ public class Removable_1 extends Interceptor_1 {
     /**
      * Optimizing Removed By Implementation
      */
-    class RemovedBy extends AbstractSet<Object> {
+    class RemovedBy extends AbstractList<Object> {
 
         /**
          * The data object's <code>removedBy</code> set
          */
-        private transient Set<Object> delegate;
+        private transient List<Object> delegate;
 
         /**
          * 
          * @return
          */
         @SuppressWarnings("synthetic-access")
-        private Set<Object> getDelegate(
+        private List<Object> getDelegate(
         ){
             try {
                 return 
-                    Removable_1.super.objGetValue(REMOVED_AT) == null ? Collections.emptySet() :
-                    this.delegate == null ? this.delegate = Removable_1.super.objGetSet(REMOVED_BY) :
+                    Removable_1.super.objGetValue(REMOVED_AT) == null ? Collections.emptyList() :
+                    this.delegate == null ? this.delegate = Removable_1.super.objGetList(REMOVED_BY) :
                     this.delegate;    
             } catch (ServiceException exception) {
                 throw new RuntimeServiceException(exception);
             }
-        }
-
-        /* (non-Javadoc)
-         * @see java.util.AbstractCollection#iterator()
-         */
-        @Override
-        public Iterator<Object> iterator() {
-            return getDelegate().iterator();
         }
 
         /* (non-Javadoc)
@@ -198,6 +189,14 @@ public class Removable_1 extends Interceptor_1 {
         @Override
         public boolean isEmpty() {
             return getDelegate().isEmpty();
+        }
+
+        /* (non-Javadoc)
+         * @see java.util.AbstractList#get(int)
+         */
+        @Override
+        public Object get(int index) {
+            return getDelegate().get(index);
         }
 
     }

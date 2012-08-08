@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: UiUtility.java,v 1.22 2010/04/27 08:30:36 wfro Exp $
+ * Name:        $Id: UiUtility.java,v 1.23 2011/11/06 23:03:42 wfro Exp $
  * Description: UiUtility
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       CRIXP AG, Switzerland, http://www.crixp.com
- * Date:        $Date: 2010/04/27 08:30:36 $
+ * Date:        $Date: 2011/11/06 23:03:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -63,6 +63,7 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -85,14 +86,12 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * Command line utility which supports the management of openCRX ui configuration files:
+ * Command line utility which supports the management of openMDX/Portal UI configuration files:
  * <ul>
  *   <li>merge: merges locale separated ui files (en_US, de_DE) to one merged file.</li> 
  *   <li>split: splits a merged ui file to locale separated files.</li>
  * </ul>
  * <p>
- * 
- * @author wfro
  */
 @SuppressWarnings("unchecked")
 public class UiUtility {
@@ -448,7 +447,7 @@ public class UiUtility {
   ) throws ServiceException {
       Map<Path,MappedRecord> elementDefinitions = new LinkedHashMap<Path,MappedRecord>();
       if(file.exists()) {
-          System.out.println("loading " + file);
+          System.out.println("Loading " + file);
           try {
         	  Importer.importObjects(
         		  Importer.asTarget(elementDefinitions),
@@ -482,27 +481,21 @@ public class UiUtility {
                   MappedRecord elementDefinition = elementDefinitions.get(key);
                   Object_2Facade elementDefinitionFacade = Object_2Facade.newInstance(elementDefinition);
                   Object_2Facade mergedElementDefinitionFacade = Object_2Facade.newInstance(mergedElementDefinition);
-                  if(elementDefinitionFacade.getAttributeValues("label") != null) {
-                	  mergedElementDefinitionFacade.attributeValuesAsList("label").add(
-                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValuesAsList("label").size() > 0)
-                        ? elementDefinitionFacade.attributeValue("label")
-                        : "" // empty string as default
-                    );
-                  }
-                  if(mergedElementDefinitionFacade.getAttributeValues("shortLabel") != null) {
-                	  mergedElementDefinitionFacade.attributeValuesAsList("shortLabel").add(
-                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValuesAsList("shortLabel").size() > 0)
-                        ? elementDefinitionFacade.attributeValue("shortLabel")
-                        : "" // empty string as default
-                    );
-                  }
-                  if(mergedElementDefinitionFacade.getAttributeValues("toolTip") != null) {
-                	  mergedElementDefinitionFacade.attributeValuesAsList("toolTip").add(
-                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValuesAsList("toolTip").size() > 0)
-                        ? elementDefinitionFacade.attributeValue("toolTip")
-                        : ""  // empty string as default
-                    );
-                  }
+            	  mergedElementDefinitionFacade.attributeValuesAsList("label").add(
+            		  (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValuesAsList("label").size() > 0) ? 
+            			  elementDefinitionFacade.attributeValue("label") : 
+            				  "" // empty string as default
+            	  );
+               	  mergedElementDefinitionFacade.attributeValuesAsList("shortLabel").add(
+                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValuesAsList("shortLabel").size() > 0) ? 
+                    	  elementDefinitionFacade.attributeValue("shortLabel") : 
+                    		  "" // empty string as default
+                  );
+               	  mergedElementDefinitionFacade.attributeValuesAsList("toolTip").add(
+                      (elementDefinitionFacade != null) && (elementDefinitionFacade.attributeValuesAsList("toolTip").size() > 0) ? 
+                    	  elementDefinitionFacade.attributeValue("toolTip") : 
+                    		  ""  // empty string as default
+                  );
               }
             }
             // add if it does not exist. Only add for locale=0 (en_US)
@@ -515,11 +508,12 @@ public class UiUtility {
             // locale > 0 requires that locale=0 exists. Complain if it
             // does not
             else {
-              System.err.println("entry " + key + " of locale " + locales.get(localeIndex) + " has no corresponding entry for locale " + locales.get(0) + ". Not loading");
+              System.out.println("Entry " + key + " of locale " + locales.get(localeIndex) + " has no corresponding entry for locale " + locales.get(0) + ". Not loading");
             }
           }
       }
       catch(Exception e) {
+    	  e.printStackTrace(System.out);
           System.err.println("Can not import. Reason is " + e.getMessage());
       }
   }
@@ -530,7 +524,7 @@ public class UiUtility {
       File templateFile,
       Map<Path,MappedRecord> elementDefinitions
   ) throws ServiceException {          
-      System.out.println("loading " + templateFile);
+      System.out.println("Loading " + templateFile);
       try {
     	  Importer.importObjects(
     		  Importer.asTarget(elementDefinitions),
@@ -546,7 +540,7 @@ public class UiUtility {
           System.out.println("STATUS: " + e.getMessage());
       }
       try {
-          System.out.println("loading " + file.getAbsolutePath());
+          System.out.println("Loading " + file.getAbsolutePath());
           org.w3c.dom.Document mergedElementDefinitions = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file);
           for(Iterator<MappedRecord> i = elementDefinitions.values().iterator(); i.hasNext(); ) {
               MappedRecord elementDefinition = i.next();
@@ -650,8 +644,10 @@ public class UiUtility {
               w.write(s, 0, s.length());
               for(int k = 0; k < locales.size(); k++) {
                   s = "      <" + locales.get(k) + ">";
-                  w.write(s, 0, s.length());
-                  s = (String)entryFacade.attributeValuesAsList("label").get(k);
+                  w.write(s, 0, s.length());                  
+                  s = k < entryFacade.attributeValuesAsList("label").size() ?
+                	  (String)entryFacade.attributeValuesAsList("label").get(k) :
+                		  null;
                   if(s == null) s = "";
                   fw.write(s, 0, s.length());
                   s = "</" + locales.get(k) + ">\n";
@@ -667,7 +663,9 @@ public class UiUtility {
               for(int k = 0; k < locales.size(); k++) {
                   s = "      <" + locales.get(k) + ">";
                   w.write(s, 0, s.length());
-                  s = (String)entryFacade.attributeValuesAsList("shortLabel").get(k);
+                  s = k < entryFacade.attributeValuesAsList("shortLabel").size() ?
+                	  (String)entryFacade.attributeValuesAsList("shortLabel").get(k) : 
+                		  null;
                   if(s == null) s = "";
                   fw.write(s, 0, s.length());
                   s = "</" + locales.get(k) + ">\n";
@@ -683,7 +681,9 @@ public class UiUtility {
               for(int k = 0; k < locales.size(); k++) {
                   s = "      <" + locales.get(k) + ">";
                   w.write(s, 0, s.length());
-                  s = (String)entryFacade.attributeValuesAsList("toolTip").get(k);
+                  s = k < entryFacade.attributeValuesAsList("toolTip").size() ?
+                	  (String)entryFacade.attributeValuesAsList("toolTip").get(k) :
+                		  null;
                   if(s == null) s = "";
                   fw.write(s, 0, s.length());
                   s = "</" + locales.get(k) + ">\n";
@@ -835,7 +835,7 @@ public class UiUtility {
                       continue;                      
                   }
               }
-              System.out.println("writing file " + outFileName);
+              System.out.println("Writing file " + outFileName);
               Writer w = new OutputStreamWriter(new FileOutputStream(outFileName), "UTF-8");
               Writer fw = new XMLWriter(w);
               if("table".equals(format)) {
@@ -878,12 +878,9 @@ public class UiUtility {
       String command = "merge";
 	  for(int i = 0; i < args.length; i++) {
 	      // locales. get locale and assert en_US to be the first in the list
-	      if("--locale".equals(args[i])) {
-	    	  int j = i + 1;
-	    	  while(j < args.length && !args[j].startsWith("--")) {
-	    		  this.locales.add(args[j]);
-	    		  j++;
-	    	  }
+	      if("--locale".equals(args[i]) && (i + 1 < args.length)) {
+	    	  String[] locales = args[i+1].split("/");
+	    	  this.locales.addAll(Arrays.asList(locales));
 	      }
 	      // sourceDir
 	      else if("--sourceDir".equals(args[i]) && (i + 1 < args.length)) {

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.20 2010/06/02 13:42:52 hburger Exp $
+ * Name:        $Id: Model_1.java,v 1.23 2012/01/05 15:16:44 hburger Exp $
  * Description: model1 application plugin
- * Revision:    $Revision: 1.20 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:42:52 $
+ * Date:        $Date: 2012/01/05 15:16:44 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -69,11 +69,12 @@ import org.openmdx.application.mof.repository.utils.ModelUtils;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.w3c.format.DateTimeFormat;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class Model_1 extends Layer_1 {
 
     //---------------------------------------------------------------------------
@@ -108,13 +109,7 @@ public class Model_1 extends Layer_1 {
         ServiceHeader header,
         MappedRecord object
     ) throws ServiceException {
-        Object_2Facade facade;
-        try {
-            facade = Object_2Facade.newInstance(object);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Object_2Facade facade = Facades.asObject(object);
         //SysLog.trace("> completeObject for " + object);
         if(facade.getObjectClass() != null) {
             List supertype = ModelUtils.getallSupertype(
@@ -226,30 +221,45 @@ public class Model_1 extends Layer_1 {
         }
     
         //---------------------------------------------------------------------------
+        private void touch(
+            boolean isNew,
+            RestInteractionSpec ispec,
+            Object_2Facade input
+        ) throws ServiceException{
+            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
+            // exclude Authority, Provider, Segment
+            if(Model_1.this.isInstanceOfBasicObject(request.object())) try {
+                ServiceHeader header = this.getServiceHeader();
+                List<String> by = header.getPrincipalChain();
+                Date at = getTransactionTime(header);
+                Object_2Facade facade = Facades.asObject(request.object());                        
+                if(isNew){
+                    List<Object> createdBy = facade.attributeValuesAsList(SystemAttributes.CREATED_BY);
+                    createdBy.clear();
+                    createdBy.addAll(by);
+                    List<Object> createdAt = facade.attributeValuesAsList(SystemAttributes.CREATED_AT);
+                    createdAt.clear();
+                    createdAt.add(at);
+                }
+                List<Object> modifiedBy = facade.attributeValuesAsList(SystemAttributes.MODIFIED_BY);
+                modifiedBy.clear();
+                modifiedBy.addAll(by);
+                List<Object> modifiedAt = facade.attributeValuesAsList(SystemAttributes.MODIFIED_AT);
+                modifiedAt.clear();
+                modifiedAt.add(at);
+            } catch (ParseException exception) {
+                throw new ServiceException(exception);
+            }
+        }
+        
+        //---------------------------------------------------------------------------
         @Override
         public boolean create(
             RestInteractionSpec ispec,
             Object_2Facade input,
             IndexedRecord output
         ) throws ServiceException {
-            ServiceHeader header = this.getServiceHeader();
-            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
-            // exclude Authority, Provider, Segment
-            if(Model_1.this.isInstanceOfBasicObject(request.object())) try {
-                List<String> by = header.getPrincipalChain();
-                Date at = getTransactionTime(header);
-                Object_2Facade facade = Object_2Facade.newInstance(request.object());                        
-                facade.attributeValuesAsList(SystemAttributes.CREATED_BY).clear();
-                facade.attributeValuesAsList(SystemAttributes.CREATED_BY).addAll(by);
-                facade.attributeValuesAsList(SystemAttributes.CREATED_AT).clear();
-                facade.attributeValuesAsList(SystemAttributes.CREATED_AT).add(at);
-                facade.attributeValuesAsList(SystemAttributes.MODIFIED_BY).clear();
-                facade.attributeValuesAsList(SystemAttributes.MODIFIED_BY).addAll(by);
-                facade.attributeValuesAsList(SystemAttributes.MODIFIED_AT).clear();
-                facade.attributeValuesAsList(SystemAttributes.MODIFIED_AT).add(at);
-            } catch (Exception exception) {
-                throw new ServiceException(exception);
-            }
+            touch(true, ispec, input);
             super.create(
                 ispec, 
                 input, 
@@ -265,20 +275,7 @@ public class Model_1 extends Layer_1 {
             Object_2Facade input,
             IndexedRecord output
         ) throws ServiceException {
-            ServiceHeader header = this.getServiceHeader();
-            DataproviderRequest request = this.newDataproviderRequest(ispec, input);
-            // exclude Authority, Provider, Segment
-            if(Model_1.this.isInstanceOfBasicObject(request.object())) try {
-                List<String> by = header.getPrincipalChain();
-                Date at = getTransactionTime(header);
-                Object_2Facade facade = Object_2Facade.newInstance(request.object());                        
-                facade.attributeValuesAsList(SystemAttributes.MODIFIED_BY).clear();
-                facade.attributeValuesAsList(SystemAttributes.MODIFIED_BY).addAll(by);
-                facade.attributeValuesAsList(SystemAttributes.MODIFIED_AT).clear();
-                facade.attributeValuesAsList(SystemAttributes.MODIFIED_AT).add(at);
-            } catch (Exception exception) {
-                throw new ServiceException(exception);
-            }
+            touch(false, ispec, input);
             super.put(
                 ispec, 
                 input, 

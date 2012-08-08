@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: TrustingLoginModule.java,v 1.2 2010/11/18 08:16:05 hburger Exp $
+ * Name:        $Id: TrustingLoginModule.java,v 1.3 2011/04/27 06:20:08 hburger Exp $
  * Description: Trusting Login Module 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/18 08:16:05 $
+ * Date:        $Date: 2011/04/27 06:20:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -62,17 +62,25 @@ import org.openmdx.base.rest.cci.RestConnectionSpec;
  */
 public class TrustingLoginModule extends AbstractLoginModule {
 
+    /**
+     * The default value for the <code>RefInitializeOnCreate</code> property
+     */
+    private static Boolean REF_INITIALIZE_ON_CREATE_DEFAULT = Boolean.FALSE;
+    
 //	@Override
 	public boolean login(
 	) throws LoginException {
 		NameCallback nameCallback = new NameCallback(CallbackPrompts.CONNECTION_USER);
 		PasswordCallback passwordCallback = new PasswordCallback(CallbackPrompts.CONNECTION_PASSWORD, false);
-		this.handle(nameCallback, passwordCallback);
+        BooleanCallback refInitializeOnCreate = new BooleanCallback(CallbackPrompts.REF_INITIALIZE_ON_CREATE, REF_INITIALIZE_ON_CREATE_DEFAULT);
+        this.handle(nameCallback, passwordCallback, refInitializeOnCreate);
 		char[] password = passwordCallback.getPassword();
 		this.setPublicCredential(
 			new RestConnectionSpec(
 				nameCallback.getName(),
-				password == null ? null : new String(password)
+				password == null ? null : new String(password),
+				null,
+                Boolean.TRUE.equals(refInitializeOnCreate.getValue())
 			)
 		);
 		return true;

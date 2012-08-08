@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Action.java,v 1.41 2009/09/25 17:20:03 wfro Exp $
+ * Name:        $Id: Action.java,v 1.42 2011/07/07 22:35:37 wfro Exp $
  * Description: Action
- * Revision:    $Revision: 1.41 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/25 17:20:03 $
+ * Date:        $Date: 2011/07/07 22:35:37 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,6 +58,8 @@ package org.openmdx.portal.servlet;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+
+import org.openmdx.portal.servlet.action.FindObjectAction;
 
 public final class Action
   implements Serializable {
@@ -150,7 +152,7 @@ public final class Action
       String id
   ) {
       return new Action(
-          Action.EVENT_FIND_OBJECT,
+          FindObjectAction.EVENT_ID,
           new Action.Parameter[]{
               new Action.Parameter(Action.PARAMETER_REFERENCE, feature),
               new Action.Parameter(Action.PARAMETER_ID, id)
@@ -490,52 +492,10 @@ public final class Action
     // Events
     //-------------------------------------------------------------------------
     public final static int EVENT_NONE = 0;
-    public final static int EVENT_SELECT_FILTER = 1;
-    public final static int EVENT_PAGE_NEXT = 2;
-    public final static int EVENT_PAGE_PREVIOUS = 3;
-    public final static int EVENT_SET_PAGE = 4;
-    public final static int EVENT_NEW_OBJECT = 5;
-    public final static int EVENT_SELECT_OBJECT = 6;
-    public final static int EVENT_SAVE = 8;
-    public final static int EVENT_CANCEL = 9;
-    public final static int EVENT_SET_ORDER_ASC = 10;
-    public final static int EVENT_SET_ORDER_DESC = 11;
-    public final static int EVENT_SET_ORDER_ANY = 12;
-    public final static int EVENT_SET_COLUMN_FILTER = 13;
-    public final static int EVENT_SELECT_LOCALE = 14;
-    public final static int EVENT_SELECT_REFERENCE = 15;
-    public final static int EVENT_EDIT = 16;
-    public final static int EVENT_DELETE = 17;
-    public final static int EVENT_ADD_OBJECT = 18;
-    public final static int EVENT_SET_GRID_ALIGNMENT_NARROW = 19;
-    public final static int EVENT_SET_GRID_ALIGNMENT_WIDE = 20;
-    public final static int EVENT_FIND_OBJECT = 21;
-    public final static int EVENT_INVOKE_OPERATION = 22;
     public final static int EVENT_DOWNLOAD_FROM_LOCATION = 23;
-    public final static int EVENT_LOGOFF = 24;
-    public final static int EVENT_RELOAD = 25;
-    public final static int EVENT_ADD_COLUMN_FILTER = 26;
-    public final static int EVENT_SELECT_AND_EDIT_OBJECT = 27;
-    public final static int EVENT_MULTI_DELETE = 28;
-    public final static int EVENT_SELECT_AND_NEW_OBJECT = 29;
-    public final static int EVENT_SET_CURRENT_FILTER_AS_DEFAULT = 30;
-    public final static int EVENT_SAVE_SETTINGS = 31;
-    public final static int EVENT_ADD_ORDER_ASC = 32;
-    public final static int EVENT_ADD_ORDER_DESC = 33;
-    public final static int EVENT_ADD_ORDER_ANY = 34;
     public final static int EVENT_DOWNLOAD_FROM_FEATURE = 35;
-    public final static int EVENT_SAVE_GRID = 36;
-    public final static int EVENT_SET_SHOW_ROWS_ON_INIT = 37;
-    public final static int EVENT_SET_HIDE_ROWS_ON_INIT = 38;
-    public final static int EVENT_SET_PANEL_STATE = 39;
-    public final static int EVENT_FIND_OBJECTS = 40;
     public final static int EVENT_INVOKE_WIZARD = 41;
-    public final static int EVENT_MACRO = 43;
-    public final static int EVENT_GRID_GET_ROW_MENU = 44;
-    public final static int EVENT_OBJECT_GET_ATTRIBUTES = 45;
     public final static int EVENT_SET_ROLE = 47;
-    public final static int EVENT_SELECT_PERSPECTIVE = 48;
-    public final static int EVENT_SELECT_VIEWPORT = 49;
     
     //-----------------------------------------------------------------------
     // Macro types

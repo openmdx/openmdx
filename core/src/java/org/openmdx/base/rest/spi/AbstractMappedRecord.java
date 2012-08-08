@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractMappedRecord.java,v 1.5 2010/06/02 14:27:18 hburger Exp $
+ * Name:        $Id: AbstractMappedRecord.java,v 1.7 2011/11/26 01:34:57 hburger Exp $
  * Description: Abstract Mapped Record 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 14:27:18 $
+ * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,7 +59,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import javax.resource.ResourceException;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.MappedRecord;
 
@@ -74,7 +73,7 @@ import org.openmdx.kernel.text.format.IndentingFormatter;
 /**
  * Abstract Mapped Record
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 abstract class AbstractMappedRecord implements MultiLineStringRepresentation, MappedRecord {
 
     /**
@@ -390,11 +389,7 @@ abstract class AbstractMappedRecord implements MultiLineStringRepresentation, Ma
     protected static IndexedRecord asSet(
         Object[] set
     ){
-        try {
-            return set == null ? null : Records.getRecordFactory().asIndexedRecord("set", null, set);
-        } catch (ResourceException exception) {
-            throw new RuntimeException(exception);
-        }
+        return set == null ? null : Records.getRecordFactory().asIndexedRecord("set", null, set);
     }
     
     /**

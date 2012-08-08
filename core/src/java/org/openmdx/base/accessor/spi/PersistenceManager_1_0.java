@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersistenceManager_1_0.java,v 1.4 2010/12/02 08:56:44 hburger Exp $
+ * Name:        $Id: PersistenceManager_1_0.java,v 1.9 2011/11/25 14:18:33 hburger Exp $
  * Description: Persistence Manager Interface 2.0
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/02 08:56:44 $
+ * Date:        $Date: 2011/11/25 14:18:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008, OMEX AG, Switzerland
+ * Copyright (c) 2008-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,10 +50,14 @@
  */
 package org.openmdx.base.accessor.spi;
 
+import java.security.PrivilegedExceptionAction;
 import java.util.UUID;
 
+import javax.jdo.JDODataStoreException;
 import javax.jdo.PersistenceManager;
 import javax.resource.cci.InteractionSpec;
+
+import org.openmdx.base.persistence.spi.TransientContainerId;
 
 /**
  * Persistence Manager Interface 1.0
@@ -85,5 +89,55 @@ public interface PersistenceManager_1_0 extends PersistenceManager {
         UUID transientObjectId,
         String featureName
     );
-                
+
+    /**
+     * Retrieve the object's default fetch group
+     * 
+     * @param transientObjectId
+     * @param fieldName
+     * 
+     * @return <code>true</code> if the field is already loaded
+     * 
+     * @throws JDODataStoreException if the field's state can't be determined
+     */
+    boolean isLoaded(
+        UUID transientObjectId,
+        String fieldName
+    );
+
+    /**
+     * Lock the persistence manager while the action is performed
+     * 
+     * @param action
+     * 
+     * @throws the exception propagated from the action
+     */
+    <T> T lock(
+        PrivilegedExceptionAction<T> action
+    ) throws Exception;
+
+    
+    /**
+     * Retrieve the object's last XRI segment
+     * 
+     * @param pc the persistent capable object
+     * 
+     * @return the last segment of the object's current or future XRI
+     */
+    String getLastXRISegment(
+    	Object pc
+    );
+
+    /**
+     * Retrieve the transient id of the object's container 
+     * 
+     * @param pc the persistent capable object
+     * 
+     * @return the transient id of the object's container, 
+     * or <code>null</code> if the object is not contained 
+     */
+	public TransientContainerId getContainerId(
+    	Object pc
+    );
+
 }

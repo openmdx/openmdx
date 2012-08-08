@@ -2,7 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public interface DependsOn extends RefAssociation {
     public boolean exists(ModelElement dependent, ModelElement provider);
     public java.util.Collection getDependent(ModelElement provider);

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SystemAttributes.java,v 1.7 2010/06/09 16:18:15 hburger Exp $
+ * Name:        $Id: SystemAttributes.java,v 1.8 2012/01/05 23:20:21 hburger Exp $
  * Description: Generated constants for SystemAttributes
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/09 16:18:15 $
+ * Date:        $Date: 2012/01/05 23:20:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -76,6 +76,12 @@ public class SystemAttributes {
      */
     static public final String OBJECT_INSTANCE_OF = "object_instanceof";
 
+    /**
+     * The query context prefix
+     */
+    static public final String CONTEXT_PREFIX = "context:";
+
+    
     //------------------------------------------------------------------------
     // ExtentCapable
     //------------------------------------------------------------------------
@@ -85,15 +91,6 @@ public class SystemAttributes {
      */
     static public final String OBJECT_IDENTITY = "identity";
 
-
-    //------------------------------------------------------------------------
-    // ContextCapable
-    //------------------------------------------------------------------------
-
-    /**
-     * The prefix of a DataproviderObject's view attribute.
-     */
-    static public final String CONTEXT_PREFIX = "context:";
 
     //------------------------------------------------------------------------
     // Creatable

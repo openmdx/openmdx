@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Exporter.java,v 1.9 2010/06/09 16:18:15 hburger Exp $
+ * Name:        $Id: Exporter.java,v 1.13 2011/08/23 22:14:59 hburger Exp $
  * Description: XML Exporter
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.13 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/09 16:18:15 $
+ * Date:        $Date: 2011/08/23 22:14:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -76,20 +76,24 @@ import javax.jmi.model.AggregationKind;
 import javax.jmi.model.AggregationKindEnum;
 import javax.jmi.reflect.RefObject;
 
+import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.application.xml.spi.ExportFilter;
 import org.openmdx.application.xml.spi.ExportTarget;
 import org.openmdx.application.xml.spi.XMLTarget;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
-import org.openmdx.base.mof.spi.ModelUtils;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.state2.cci2.DateStateQuery;
+import org.openmdx.state2.jmi1.DateState;
+import org.openmdx.state2.jmi1.StateCapable;
 import org.w3c.cci2.SparseArray;
 
 /**
@@ -159,7 +163,12 @@ public class Exporter {
         public boolean exclude(
             Path objectId
         ) {
-            return false;
+        	if(objectId == null) {
+        		return false;
+        	} else {
+        		int s = objectId.size();
+        		return s % 2 == 0 && s > 2 && objectId.getComponent(s - 2).isPrivate();
+        	}
         }
         
     };
@@ -225,7 +234,7 @@ public class Exporter {
         Object attributeValue = this.model.isReferenceType(attributeDef) ? 
            PersistenceHelper.getFeatureReplacingObjectById(object, attributeName) : 
            object.refGetValue(attributeName);
-        String multiplicity = ModelUtils.getMultiplicity(attributeDef);
+        Multiplicity multiplicity = ModelHelper.getMultiplicity(attributeDef);
         boolean empty =  
             attributeValue instanceof Map<?,?> ? ((Map<?,?>)attributeValue).isEmpty() :
             attributeValue instanceof Collection<?> ? ((Collection<?>)attributeValue).isEmpty() :
@@ -238,55 +247,56 @@ public class Exporter {
             empty
         );    
         if(!empty) {
-            if(multiplicity.equals(Multiplicities.SPARSEARRAY)) {
-                if(attributeValue instanceof SortedMap<?,?>) {
-                    for(Map.Entry<?, ?> e : ((SortedMap<?,?>)attributeValue).entrySet()) {
-                        this.target.write(
-                            typeName, 
-                            multiplicity, 
-                            (Integer)e.getKey(), 
-                            toValue(e.getValue())
-                        );
-                    }
-                } else {
-                    for(
-                        ListIterator<?> i = ((SparseArray<?>)attributeValue).populationIterator();
-                        i.hasNext();
-                    ){
-                        this.target.write(
-                            typeName, 
-                            multiplicity, 
-                            i.nextIndex(), 
-                            toValue(i.next())
-                        );
-                    }
-                }
-            } else if (
-                multiplicity.equals(Multiplicities.MULTI_VALUE) || 
-                multiplicity.equals(Multiplicities.SET) || 
-                multiplicity.equals(Multiplicities.LIST)
-            ){
-                int position = 0;
-                for(
-                    Iterator<?> i = ((Collection<?>)attributeValue).iterator();
-                    i.hasNext();
-                    position++
-                ){
-                    this.target.write(
+        	switch(multiplicity) {
+	        	case SPARSEARRAY: {
+	                if(attributeValue instanceof SortedMap<?,?>) {
+	                    for(Map.Entry<?, ?> e : ((SortedMap<?,?>)attributeValue).entrySet()) {
+	                        this.target.write(
+	                            typeName, 
+	                            multiplicity, 
+	                            (Integer)e.getKey(), 
+	                            toValue(e.getValue())
+	                        );
+	                    }
+	                } else {
+	                    for(
+	                        ListIterator<?> i = ((SparseArray<?>)attributeValue).populationIterator();
+	                        i.hasNext();
+	                    ){
+	                        this.target.write(
+	                            typeName, 
+	                            multiplicity, 
+	                            i.nextIndex(), 
+	                            toValue(i.next())
+	                        );
+	                    }
+	                }
+	            } break;
+	        	case SET: case LIST: {
+	                int position = 0;
+	                for(
+	                    Iterator<?> i = ((Collection<?>)attributeValue).iterator();
+	                    i.hasNext();
+	                    position++
+	                ){
+	                    this.target.write(
+	                        typeName, 
+	                        multiplicity, 
+	                        position, 
+	                        toValue(i.next())
+	                    );
+	                }
+	            } break;
+	            default: {
+	                this.target.write(
                         typeName, 
                         multiplicity, 
-                        position, 
-                        toValue(i.next())
+                        0, 
+                        toValue(attributeValue)
                     );
-                }
-            } else {
-                this.target.write(
-                    typeName, 
-                    multiplicity, 
-                    0, 
-                    toValue(attributeValue)
-                );
-            }
+	            	
+	            }
+        	}
         }
         this.target.endAttribute(
             qualifiedName, 
@@ -876,10 +886,23 @@ public class Exporter {
                         }
                     }
                 } else {
-                    if (this.exportFilter.include(aggregationKind, qualifiedReferenceName, distance)) {
-                        Collection<? extends RefObject> container = (Collection<? extends RefObject>) current.refGetValue(referenceName);
+                    if (
+                    	this.exportFilter.include(aggregationKind, qualifiedReferenceName, distance) &&
+                    	!this.exportFilter.exclude(refId.getChild(referenceName))
+                    ) {
+                        RefContainer<?> container = (RefContainer<?>) current.refGetValue(referenceName);
+                        boolean stated = false;
                         for(RefObject referenced : container) {
                             probe(referenced, distance);
+                            if(!stated) {
+                            	stated = (referenced instanceof StateCapable) && !(referenced instanceof DateState);
+                            }
+                        }
+                        if(stated) {
+                        	DateStateQuery query = (DateStateQuery) JDOHelper.getPersistenceManager(current).newQuery(DateState.class);
+                            for(RefObject referenced : container.getAll(query)) {
+                                probe(referenced, distance);
+                            }
                         }
                     }
                 }

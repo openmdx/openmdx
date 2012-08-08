@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Filters.java,v 1.17 2010/06/29 08:21:13 wfro Exp $
+ * Name:        $Id: Filters.java,v 1.18 2011/11/28 09:24:47 wfro Exp $
  * Description: Filters
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.18 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/29 08:21:13 $
+ * Date:        $Date: 2011/11/28 09:24:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -62,8 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import javax.resource.ResourceException;
 
 import org.openmdx.base.query.Condition;
 import org.openmdx.base.query.OrderSpecifier;
@@ -292,47 +290,42 @@ public class Filters
       return (Filter[])preparedFilters.values().toArray(new Filter[preparedFilters.size()]);
   }
   
-  //-------------------------------------------------------------------------
-  public String toString(
-  ) {
-    try {
-      return Records.getRecordFactory().asMappedRecord(
-        this.getClass().getName(), 
-        null,
-        TO_STRING_FIELDS,
-        new Object[]{
-          Records.getRecordFactory().asIndexedRecord(
-            String.class.getName(),
-            null,
-            this.forReference
-          ),
-          Records.getRecordFactory().asIndexedRecord(
-            Filter.class.getName(),
-            null,
-            this.filter
-          )
-        }
-      ).toString();
-    } 
-    catch (ResourceException exception) {
-        return super.toString();
-    }    
-  }
+  	//-------------------------------------------------------------------------
+  	public String toString(
+  	) {
+  		return Records.getRecordFactory().asMappedRecord(
+  			this.getClass().getName(), 
+  			null,
+  			TO_STRING_FIELDS,
+  			new Object[]{
+  				Records.getRecordFactory().asIndexedRecord(
+  					String.class.getName(),
+  					null,
+  					this.forReference
+ 				),
+  				Records.getRecordFactory().asIndexedRecord(
+  					Filter.class.getName(),
+  					null,
+  					this.filter
+  				)
+  			}
+  		).toString();
+  	}
   
-  //-------------------------------------------------------------------------
-  // Variables
-  //-------------------------------------------------------------------------
-  private static final long serialVersionUID = 3906371506526040119L;
+  	//-------------------------------------------------------------------------
+  	// Variables
+  	//-------------------------------------------------------------------------
+  	private static final long serialVersionUID = 3906371506526040119L;
 
-  public static final String DEFAULT_FILTER_NAME = "Default";
+  	public static final String DEFAULT_FILTER_NAME = "Default";
 
-  private Filter[] filter = null;
-  private String[] forReference = null;
+  	private Filter[] filter = null;
+  	private String[] forReference = null;
   
-  private static final String[] TO_STRING_FIELDS = {
-      "forReference",
-      "filters"
-  };
+  	private static final String[] TO_STRING_FIELDS = {
+  		"forReference",
+  		"filters"
+	};
   
 }
 

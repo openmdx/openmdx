@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SegmentImpl.java,v 1.1 2010/09/22 09:04:29 hburger Exp $
+ * Name:        $Id: SegmentImpl.java,v 1.2 2011/04/05 13:40:26 hburger Exp $
  * Description: SegmentImpl 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/22 09:04:29 $
+ * Date:        $Date: 2011/04/05 13:40:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,6 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.text.ParseException;
 
 import org.openmdx.base.aop2.AbstractObject;
-import org.openmdx.base.naming.Path;
 import org.w3c.format.DateTimeFormat;
 
 import test.openmdx.clock1.jmi1.Clock1Package;

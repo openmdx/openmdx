@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: ReferenceGrid.java,v 1.10 2010/03/28 00:49:52 wfro Exp $
+ * Name:        $Id: ReferenceGrid.java,v 1.12 2011/11/28 13:35:19 wfro Exp $
  * Description: ReferenceGridControl
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/28 00:49:52 $
+ * Date:        $Date: 2011/11/28 13:35:19 $
  * ====================================================================
  *
  *
@@ -92,7 +92,7 @@ public class ReferenceGrid
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     @Override
-    protected Collection<RefObject_1_0> getAllObjects(
+    public Collection<RefObject_1_0> getAllObjects(
     	PersistenceManager pm
     ) {
     	RefObject_1_0 parent = (RefObject_1_0)pm.getObjectById(
@@ -109,7 +109,7 @@ public class ReferenceGrid
     
     //-------------------------------------------------------------------------
     @Override
-    protected List<RefObject_1_0> getFilteredObjects(
+    public List<RefObject_1_0> getFilteredObjects(
     	PersistenceManager pm,
         Filter filter
     ) {
@@ -130,7 +130,7 @@ public class ReferenceGrid
                         Arrays.asList(
                             this.view.getObjectReference().refMofId(), 
                             this.getGridControl().getObjectContainer().getReferenceName(), 
-                            this.view.getApplicationContext().getLoginPrincipalId(), 
+                            this.view.getApplicationContext().getLoginPrincipal(), 
                             e0.getMessage()
                         )
                     );

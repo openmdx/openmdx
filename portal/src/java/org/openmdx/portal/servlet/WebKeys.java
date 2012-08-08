@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: WebKeys.java,v 1.32 2010/09/21 15:16:34 wfro Exp $
+ * Name:        $Id: WebKeys.java,v 1.36 2011/08/19 22:50:47 wfro Exp $
  * Description: WebKeys 
- * Revision:    $Revision: 1.32 $
+ * Revision:    $Revision: 1.36 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/21 15:16:34 $
+ * Date:        $Date: 2011/08/19 22:50:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -140,6 +140,16 @@ public class WebKeys {
     
     // Pages
     public static final String ERROR_PAGE = "/Error.jsp";
+    
+    // Security
+    public static final String LOCKED_VALUE = "\u2015";
+	// Predefined actions used for hasPermission() methods
+    public static final String REVOKE_PREFIX = "-";
+    public static final String GRANT_PREFIX = "+";
+    public static final String PERMISSION_REVOKE_SHOW = REVOKE_PREFIX + "show";
+	public static final String PERMISSION_REVOKE_EDIT = REVOKE_PREFIX + "edit";
+    public static final String PERMISSION_GRANT_SHOW = GRANT_PREFIX + "show";
+	public static final String PERMISSION_GRANT_EDIT = GRANT_PREFIX + "edit";
     
 }
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MarshallingObject_1.java,v 1.25 2010/12/07 23:07:37 hburger Exp $
+ * Name:        $Id: MarshallingObject_1.java,v 1.26 2011/04/12 15:50:29 hburger Exp $
  * Description: MarshallingObject_1 class
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.26 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/07 23:07:37 $
+ * Date:        $Date: 2011/04/12 15:50:29 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 
+import javax.jdo.JDOHelper;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 
@@ -66,7 +67,6 @@ import org.openmdx.base.collection.MarshallingSortedMap;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.ExceptionListenerMarshaller;
 import org.openmdx.base.marshalling.Marshaller;
-import org.openmdx.base.persistence.cci.PersistenceHelper;
 import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -435,7 +435,7 @@ public abstract class MarshallingObject_1<M extends Marshaller>
                 //
                 // Manager has changed, e.g. in case of context switch
                 //
-                TransientContainerId containerId = PersistenceHelper.getTransientContainerId(getDelegate());
+                TransientContainerId containerId = (TransientContainerId) JDOHelper.getTransactionalObjectId(getDelegate());
                 container = (MarshallingContainer)((DataObject_1_0)((DataObjectManager_1_0)actualMarshaller).getObjectById(
                     containerId.getParent()
                 )).objGetContainer(

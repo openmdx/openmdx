@@ -2,7 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public interface Contains extends RefAssociation {
     public boolean exists(Namespace container, ModelElement containedElement);
     public Namespace getContainer(ModelElement containedElement);

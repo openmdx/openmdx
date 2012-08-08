@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractPlugIn_1.java,v 1.12 2010/11/30 14:11:43 hburger Exp $
+ * Name:        $Id: AbstractPlugIn_1.java,v 1.25 2011/12/29 03:07:19 hburger Exp $
  * Description: Abstract org::openmdx::state2 Plug-In
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.25 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/30 14:11:43 $
+ * Date:        $Date: 2011/12/29 03:07:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -62,6 +62,7 @@ import javax.jdo.listener.InstanceLifecycleEvent;
 import javax.jdo.listener.StoreLifecycleListener;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
+import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.accessor.rest.DataObjectManager_1;
 import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.rest.UnitOfWork_1;
@@ -69,11 +70,12 @@ import org.openmdx.base.accessor.spi.ExceptionHelper;
 import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
-import org.openmdx.base.mof.spi.ModelUtils;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.naming.PathComponent;
+import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.spi.Configuration;
 import org.openmdx.state2.spi.Propagation;
@@ -95,12 +97,22 @@ public abstract class AbstractPlugIn_1 implements Configuration, PlugIn_1_0, Sto
      * To support the lack of valid-time-unique patterns
      */
     private static final Path[] NO_XRIS = {};
+
+    /**
+     * To support the lack of valid-time-unique containers
+     */
+    private static final String[] NO_TYPES = {};
     
     /**
      * The XRI pattern of the objects to be audited
      */
     private Path[] validTimeUniquePattern = NO_XRIS;
 
+    /**
+     * 
+     */
+    private String[] validTimeUniqueTypes = NO_TYPES;
+    
     /**
      * Defines whether StateCapable objects may be deleted
      */
@@ -183,7 +195,35 @@ public abstract class AbstractPlugIn_1 implements Configuration, PlugIn_1_0, Sto
         return this.validTimeUniquePattern[index].toXRI();
     }
 
-    /* (non-Javadoc)
+    /**
+	 * @return the validTimeUniqueTypes
+	 */
+	public String[] getValidTimeUniqueType() {
+		return validTimeUniqueTypes;
+	}
+
+    /**
+	 * @return the validTimeUniqueTypes
+	 */
+	public String getValidTimeUniqueType(int index) {
+		return validTimeUniqueTypes[index];
+	}
+
+	/**
+	 * @param validTimeUniqueTypes the validTimeUniqueTypes to set
+	 */
+	public void setValidTimeUniqueType(String[] validTimeUniqueTypes) {
+		this.validTimeUniqueTypes = validTimeUniqueTypes;
+	}
+	
+	/**
+	 * @param validTimeUniqueType the validTimeUniqueTypes to set
+	 */
+	public void setValidTimeUniqueType(int index, String validTimeUniqueType) {
+		this.validTimeUniqueTypes[index] = validTimeUniqueType;
+	}
+
+	/* (non-Javadoc)
      * @see org.openmdx.base.aop0.PlugIn_1_0#flush(org.openmdx.base.accessor.rest.UnitOfWork_1)
      */
 //  @Override
@@ -205,10 +245,15 @@ public abstract class AbstractPlugIn_1 implements Configuration, PlugIn_1_0, Sto
         Model_1_0 model = target.jdoGetPersistenceManager().getModel();
         for(String aspectType : ASPECT_TYPE) {
             if(model.isInstanceof(target, aspectType)) {
-                if(target == core){
-                    core.objSetValue("validTimeUnique", Boolean.TRUE);
-                    return;
-                }
+                if(target == core) throw new ServiceException(
+                	BasicException.Code.DEFAULT_DOMAIN,
+                	BasicException.Code.NOT_SUPPORTED,
+                	"setCore() must no longer be used to set the validTimeUnique flag",
+                	new BasicException.Parameter(
+            			"xri", 
+            			(target.jdoIsPersistent() ? target.jdoGetObjectId() : new Path(target.jdoGetTransactionalObjectId())).toXRI()
+                	)
+                );
                 if(model.isInstanceof(core, "org:openmdx:state2:StateCapable")) {
                     core.getAspect(aspectType).values().add(target);
                     return;
@@ -250,16 +295,19 @@ public abstract class AbstractPlugIn_1 implements Configuration, PlugIn_1_0, Sto
         if(object.jdoGetPersistenceManager().getModel().isInstanceof(object, "org:openmdx:state2:BasicState")) {
             if(!Boolean.TRUE.equals(object.objGetValue("validTimeUnique"))) {
                 DataObject_1_0 core = (DataObject_1_0) object.objGetValue("core");
-                if(qualifier == null || core == null) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        "A state is added to the container through its core reference only",
-                        ExceptionHelper.newObjectIdParameter("id", this),
-                        new BasicException.Parameter("qualifier", qualifier),
-                        ExceptionHelper.newObjectIdParameter("core", core)
-                     );
-                }
+                if(qualifier == null) {
+                   throw new ServiceException(
+                       BasicException.Code.DEFAULT_DOMAIN,
+                       BasicException.Code.BAD_PARAMETER,
+                       "A state is added to the container through its core reference only",
+                       ExceptionHelper.newObjectIdParameter("id", this),
+                       new BasicException.Parameter("qualifier", qualifier),
+                       ExceptionHelper.newObjectIdParameter("core", core)
+                    );
+               }
+                if(core == null) {
+                   // We are processing a proxy's request
+                } else {
                  PathComponent placeholder = new PathComponent(qualifier);
                  if(placeholder.isPlaceHolder()){
                      if(placeholder.size() != 3) throw new ServiceException(
@@ -301,28 +349,50 @@ public abstract class AbstractPlugIn_1 implements Configuration, PlugIn_1_0, Sto
                          return aspectQualifier.toString();
                      }
                  }
+                }
             }
         }
         return qualifier;        
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.aop0.PlugIn_1_0#getSharedObject()
-     */
-//  @Override
-    public Object getUserObject(Object key) {
-        return Configuration.class == key ? this : null;
-    }
+	 * @see org.openmdx.base.aop0.PlugIn_1_0#getPlugInObject(java.lang.Class)
+	 */
+	public <T> T getPlugInObject(Class<T> type) {
+        return Configuration.class == type ? type.cast(this) : null;
+	}
 
     /* (non-Javadoc)
      * @see org.openmdx.state2.spi.Configuration#isValidTimeUnique(org.openmdx.base.naming.Path)
      */
 //  @Override
     public boolean isValidTimeUnique(Path xri) {
-        Path oid = xri.size() % 2 == 1 ? xri : xri.getChild("-");
-        for(Path validTimeUniqePattern : this.validTimeUniquePattern) {
-            if(oid.isLike(validTimeUniqePattern)) {
-                return true;
+        if(this.validTimeUniquePattern != NO_XRIS){
+            Path oid = xri.size() % 2 == 1 ? xri : xri.getChild("-");
+            for(Path validTimeUniqePattern : this.validTimeUniquePattern) {
+                if(oid.isLike(validTimeUniqePattern)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.state2.spi.Configuration#isTheChildrensValidTimeUnique(org.openmdx.base.accessor.view.ObjectView_1_0)
+     */
+//  @Override
+    public boolean isTheChildrensValidTimeUnique(ModelElement_1_0 parentClassifierDef) throws ServiceException {
+        if(this.validTimeUniqueTypes != NO_TYPES) {
+            for(String validTimeUniqueType : this.validTimeUniqueTypes) {
+                if(validTimeUniqueType.equals(parentClassifierDef.objGetValue("qualifiedName"))){
+                    return true;
+                }
+                for(Object subType : parentClassifierDef.objGetList("supertype")) {
+                    if(((Path)subType).getBase().equals(validTimeUniqueType)) {
+                    	return true;
+                    }
+                }            
             }
         }
         return false;
@@ -336,12 +406,26 @@ public abstract class AbstractPlugIn_1 implements Configuration, PlugIn_1_0, Sto
         return false;
     }
 
+    /* (non-Javadoc)
+	 * @see org.openmdx.base.aop0.PlugIn_1_0#isExemptFromValidation(org.openmdx.base.mof.cci.ModelElement_1_0)
+	 */
+	public boolean isExemptFromValidation(
+		DataObject_1 object, 
+		ModelElement_1_0 feature
+	) throws ServiceException {
+		Object qualifiedFeatureName = feature.objGetValue("qualifiedName");
+		return 
+			("org:openmdx:base:Aspect:core".equals(qualifiedFeatureName) && isValidTimeUnqiue(object)) ||
+			("org:openmdx:state2:StateCapable:stateVersion".equals(qualifiedFeatureName)) ||
+			("org:openmdx:base:Modifiable:modifiedAt".equals(qualifiedFeatureName) && isStateOnly(object));
+	}
+
     
     //------------------------------------------------------------------------
     // Implements StoreLifecycleListener
     //------------------------------------------------------------------------
 
-    /* (non-Javadoc)
+	/* (non-Javadoc)
      * @see javax.jdo.listener.StoreLifecycleListener#postStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
 //  @Override
@@ -351,6 +435,26 @@ public abstract class AbstractPlugIn_1 implements Configuration, PlugIn_1_0, Sto
         // nothing to do
     }
 
+    private boolean isValidTimeUnqiue(DataObject_1 object) throws ServiceException {
+    	Path xri = object.jdoGetObjectId();
+    	return xri == null ? (
+			object.jdoGetPersistenceManager().getModel().isInstanceof(object, "org:openmdx:state2:StateCapable") &&
+			Boolean.TRUE.equals(object.objGetValue("validTimeUnique"))
+		) : isValidTimeUnique(xri);
+    }
+
+    private boolean isStateOnly(DataObject_1 object) throws ServiceException {
+		if(object.jdoGetPersistenceManager().getModel().isInstanceof(object, "org:openmdx:state2:StateCapable")) {
+        	Path xri = object.jdoGetObjectId();
+        	return xri == null ?
+    			!Boolean.TRUE.equals(object.objGetValue("validTimeUnique")) :
+    			!isValidTimeUnique(xri);
+    	} else {
+    		return false;
+    	}
+    }
+    
+    
     /* (non-Javadoc)
      * @see javax.jdo.listener.StoreLifecycleListener#preStore(javax.jdo.listener.InstanceLifecycleEvent)
      */
@@ -362,81 +466,105 @@ public abstract class AbstractPlugIn_1 implements Configuration, PlugIn_1_0, Sto
         if(persistentInstance.jdoIsDirty()) try {
             DataObjectManager_1 dataObjectManager = persistentInstance.jdoGetPersistenceManager(); 
             Model_1_0 model = dataObjectManager.getModel(); 
-            if(
-                model.isInstanceof(persistentInstance, "org:openmdx:state2:StateCapable") &&
-                !model.isInstanceof(persistentInstance, "org:openmdx:state2:BasicState")
-            ){
-                if(persistentInstance.jdoIsDeleted() && !persistentInstance.jdoIsNew() && !this.isStateCapableDeletable()) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ILLEGAL_STATE,
-                        "The configuration inhibits the removal of StateCapable instances unless they are new",
-                        new BasicException.Parameter("stateCapableDeletable", this.stateCapableDeletable),
-                        new BasicException.Parameter("state", JDOHelper.getObjectState(this.stateCapableDeletable))
-                    );
-                }
-                AspectTypes: for(String aspectType : ASPECT_TYPE) {
-                    Map<String, DataObject_1_0> states = persistentInstance.getAspect(aspectType);
-                    if(states.isEmpty()) {
-                        continue AspectTypes;
-                    } else {
-                        //
-                        // Propagate all core attributes except stateVersion to all states
-                        //
-                        if(persistentInstance.jdoIsDeleted()) {
-                            states.clear();
-                        } else {
-                            UnitOfWork_1 unitOfWork = persistentInstance.getUnitOfWork();
-                            Set<String> dirtyFeatures = new HashSet<String>(
-                                unitOfWork.getState(persistentInstance,false).dirtyFeatures(true)
-                            );
-                            dirtyFeatures.removeAll(Propagation.NON_PROPAGATED_ATTRIBUTES);
-                            if(persistentInstance.jdoIsNew() || !dirtyFeatures.isEmpty()) {
-                                Map<String, ModelElement_1_0> attributes = model.getAttributeDefs(
-                                    model.getElement(persistentInstance.objGetClass()),
-                                    false, // sub-types
-                                    true // includeDerived
-                                );
-                                for(DataObject_1_0 state: states.values()) {
-                                    for(String feature : dirtyFeatures) {
-                                        String multiplicity = ModelUtils.getMultiplicity(
-                                            attributes.get(feature)
-                                        );
-                                        if(Multiplicities.SPARSEARRAY.equals(multiplicity)){
-                                            SortedMap<Integer,Object> source = persistentInstance.objGetSparseArray(feature); 
-                                            SortedMap<Integer,Object> target = state.objGetSparseArray(feature);
-                                            if(!target.equals(source)) {
-                                                target.clear();
-                                                target.putAll(source);
-                                            }
-                                        } else if (Multiplicities.LIST.equals(multiplicity)){
-                                            List<Object> source = persistentInstance.objGetList(feature);
-                                            List<Object> target = state.objGetList(feature);
-                                            if(!target.equals(source)) {
-                                                target.clear();
-                                                target.addAll(source);
-                                            }
-                                        } else if (Multiplicities.SET.equals(multiplicity)){
-                                            Set<Object> source = persistentInstance.objGetSet(feature); 
-                                            Set<Object> target = state.objGetSet(feature);
-                                            if(!target.equals(source)) {
-                                                target.clear();
-                                                target.addAll(source);
-                                            }
-                                        } else if(!Multiplicities.STREAM.equals(multiplicity)){
-                                            Object source = persistentInstance.objGetValue(feature);
-                                            Object target = state.objGetValue(feature);
-                                            if(source == null ? target != null : !source.equals(target)) {
-                                                state.objSetValue(feature, source);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        break AspectTypes;
-                    }
-                }
+            if(model.isInstanceof(persistentInstance, "org:openmdx:state2:StateCapable")) {
+	            if(model.isInstanceof(persistentInstance, "org:openmdx:state2:BasicState")){
+	            	if(!persistentInstance.jdoIsDeleted() && isValidTimeUnqiue(persistentInstance)) {
+	                    UnitOfWork_1 unitOfWork = persistentInstance.getUnitOfWork();
+	                    persistentInstance.objSetValue(SystemAttributes.MODIFIED_AT, unitOfWork.getTransactionTime());
+	                    List<Object> modifiedBy = persistentInstance.objGetList(SystemAttributes.MODIFIED_BY);
+	                    modifiedBy.clear();
+	                    modifiedBy.addAll(UserObjects.getPrincipalChain(dataObjectManager));                
+	            	}
+	            } else {
+	                if(persistentInstance.jdoIsDeleted() && !persistentInstance.jdoIsNew() && !this.isStateCapableDeletable()) {
+	                    throw new ServiceException(
+	                        BasicException.Code.DEFAULT_DOMAIN,
+	                        BasicException.Code.ILLEGAL_STATE,
+	                        "The configuration inhibits the removal of StateCapable instances unless they are new",
+	                        new BasicException.Parameter("stateCapableDeletable", this.stateCapableDeletable),
+	                        new BasicException.Parameter("state", JDOHelper.getObjectState(persistentInstance))
+	                    );
+	                }
+	                AspectTypes: for(String aspectType : ASPECT_TYPE) {
+	                    Map<String, DataObject_1_0> states = persistentInstance.getAspect(aspectType);
+	                    if(states.isEmpty()) {
+	                        continue AspectTypes;
+	                    } else {
+	                        //
+	                        // Propagate all core attributes except stateVersion to all states
+	                        //
+	                        if(persistentInstance.jdoIsDeleted()) {
+	                            states.clear();
+	                        } else {
+	                            UnitOfWork_1 unitOfWork = persistentInstance.getUnitOfWork();
+	                            Set<String> dirtyFeatures = new HashSet<String>(
+	                                unitOfWork.getState(persistentInstance,false).dirtyFeatures(true)
+	                            );
+	                            dirtyFeatures.removeAll(Propagation.NON_PROPAGATED_ATTRIBUTES);
+	                            if(persistentInstance.jdoIsNew() || !dirtyFeatures.isEmpty()) {
+	                                Map<String, ModelElement_1_0> attributes = model.getAttributeDefs(
+	                                    model.getElement(persistentInstance.objGetClass()),
+	                                    false, // sub-types
+	                                    true // includeDerived
+	                                );
+	                                for(DataObject_1_0 state: states.values()) {
+	                                    for(String feature : dirtyFeatures) {
+	                                    	Multiplicity multiplicity = ModelHelper.getMultiplicity(attributes.get(feature));
+											switch(multiplicity) {
+		                                    	case SINGLE_VALUE: case OPTIONAL: {
+		                                            Object source = persistentInstance.objGetValue(feature);
+		                                            Object target = state.objGetValue(feature);
+		                                            if(source == null ? target != null : !source.equals(target)) {
+		                                                state.objSetValue(feature, source);
+		                                            }
+		                                    	}
+		                                        break;
+		                                    	case LIST: {
+		                                            SortedMap<Integer,Object> source = persistentInstance.objGetSparseArray(feature); 
+		                                            SortedMap<Integer,Object> target = state.objGetSparseArray(feature);
+		                                            if(!target.equals(source)) {
+		                                                target.clear();
+		                                                target.putAll(source);
+		                                            }
+		                                        }
+		                                    	break;
+		                                    	case SET: {
+		                                            Set<Object> source = persistentInstance.objGetSet(feature); 
+		                                            Set<Object> target = state.objGetSet(feature);
+		                                            if(!target.equals(source)) {
+		                                                target.clear();
+		                                                target.addAll(source);
+		                                            }
+		                                    	}
+		                                    	break;
+		                                    	case SPARSEARRAY: {
+		                                            SortedMap<Integer,Object> source = persistentInstance.objGetSparseArray(feature); 
+		                                            SortedMap<Integer,Object> target = state.objGetSparseArray(feature);
+		                                            if(!target.equals(source)) {
+		                                                target.clear();
+		                                                target.putAll(source);
+		                                            }
+		                                        }
+		                                    	break;
+		                                    	case STREAM:
+		                                    		// Streams are not propagated to their states
+	                                    		break;
+		                                    	default: throw new ServiceException(
+		                                    		BasicException.Code.DEFAULT_DOMAIN,
+		                                    		BasicException.Code.NOT_SUPPORTED,
+		                                    		"The given multiplicity is not supported for core atttributes",
+		                                    		new BasicException.Parameter("multiplicity", multiplicity),
+		                                            new BasicException.Parameter("attribute", feature)
+		                                    	);
+	                                    	}
+	                                    }
+	                                }
+	                            }
+	                        }
+	                        break AspectTypes;
+	                    }
+	                }
+	            }
             }
         } catch (ServiceException exception) {
             throw new JDOUserCallbackException(

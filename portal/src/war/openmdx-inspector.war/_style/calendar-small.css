@@ -23,7 +23,7 @@
   color: #888;
   cursor: default;
   background: #fff;
-  font-family: tahoma,verdana,sans-serif;
+  font-family: "DejaVu Sans Condensed", "lucida sans", tahoma, verdana, arial, sans-serif;
   z-index: 21001;
 }
 
@@ -36,7 +36,7 @@
   color: #888;
   cursor: default;
   background: #fff;
-  font-family: tahoma,verdana,sans-serif;
+  font-family: "DejaVu Sans Condensed", "lucida sans", tahoma, verdana, arial, sans-serif;
 }
 
 /* Header part -- contains navigation buttons and day names. */

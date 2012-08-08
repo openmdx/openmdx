@@ -2,17 +2,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: QuickAccessDashlet.jsp,v 1.16 2009/10/27 15:14:47 wfro Exp $
+ * Name:        $Id: QuickAccessDashlet.jsp,v 1.29 2011/09/16 10:41:12 wfro Exp $
  * Description: QuickAccessDashlet.jsp
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.29 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/27 15:14:47 $
+ * Date:        $Date: 2011/09/16 10:41:12 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  *
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -63,10 +63,13 @@ java.text.*,
 java.math.*,
 java.net.*,
 org.openmdx.base.naming.*,
+org.openmdx.kernel.exception.*,
+org.openmdx.base.exception.*,
 org.openmdx.portal.servlet.*,
 org.openmdx.portal.servlet.view.*,
 org.openmdx.portal.servlet.texts.*,
 org.openmdx.portal.servlet.control.*,
+org.openmdx.portal.servlet.action.*,
 org.openmdx.kernel.log.*
 " %>
 <%
@@ -106,29 +109,23 @@ org.openmdx.kernel.log.*
 		    String submitFormScriptlet = "var form = document.forms['" + dashletId + "Form'];var params = Form.serialize(form);new Ajax.Updater('" + dashletId + "Content', './wizards/Dashboard/QuickAccessDashlet.jsp', {asynchronous:true, evalScripts: true, parameters: params, onComplete: function(){}});return false;";
 	        boolean isEditMode = COMMAND_SELECT_EDIT_MODE.equals(command) || (selectedTargetXri != null && selectedTargetXri.length() > 0);
 %>			
-			<div id="<%= dashletId %>Content" style="padding:5px;">
+			<div id="<%= dashletId %>Content" style="padding:5px;min-width:150px;">
 			<form id="<%= dashletId %>Form" name="<%= dashletId %>Form" />
 				<input id="<%= WebKeys.REQUEST_ID %>" name="<%= Action.PARAMETER_REQUEST_ID %>" type="hidden" value="<%= requestId %>" />
 				<input id="<%= WebKeys.REQUEST_PARAMETER %>" name="<%= WebKeys.REQUEST_PARAMETER %>" type="hidden" value="<%= parameters %>" />
 				<input id="<%= FIELD_NAME_COMMAND %>" name="<%= FIELD_NAME_COMMAND %>" type="hidden" value=""/>
            		<input id="<%= FIELD_NAME_FUNCTION %>" name="<%= FIELD_NAME_FUNCTION %>" type="hidden" value="" />
-				<table width="100%">
-					<tr>
-						<th />
-						<th width="5%" />
-					</tr>
-					<tr>
-						<td>					
+						<div>					
 <%			
 							// Menu
 							Set<String> menuEntries = new TreeSet<String>();
 							Properties settings = null;
 							if(isSharedDashlet) {
 								settings = app.getUserSettings(
-									app.getUserHomeIdentity().getParent().getDescendant(
-										app.getRoleMapper().getAdminPrincipal(app.getCurrentSegment())
+									app.getUserHomeIdentityAsPath().getParent().getDescendant(
+										app.getPortalExtension().getAdminPrincipal(app.getCurrentSegment())
 									)
-								);	
+								);
 							}
 							else {
 								settings = app.getSettings();
@@ -178,234 +175,215 @@ org.openmdx.kernel.log.*
 %>
 							<table>
 <%							
+								final String SPACER = "</td></tr><tr><td><img src=\"images/spacer.gif\" height=\"1px;\" /></td></tr>";
+								String spacer = "";
 								for(String menuEntry: menuEntries) {
-									Path targetXri = new Path(menuEntry.substring(0, menuEntry.indexOf(" > ")));
-									String function = menuEntry.substring(menuEntry.indexOf(" > ") + 3);
-									ShowObjectView targetView = new ShowObjectView(
-										view.getId(),
-										(String)null,
-										targetXri,
-										app,
-										new HashMap(),
-										(String)null,
-										Collections.emptyMap()
-									);
-									if(function.startsWith("Operation.")) {
-										String operationName = function.substring(10);
-										List<OperationPaneControl> operationPaneControls = new ArrayList<OperationPaneControl>();
-										// Operations
-										for(OperationPaneControl paneControl: targetView.getShowInspectorControl().getOperationPaneControl()) {
-											for(OperationTabControl tabControl: paneControl.getOperationTabControl()) {
-												if(tabControl.getQualifiedOperationName().equals(operationName)) {
-													String tabId = Integer.toString(tabControl.getTabId());
-													Action action = null;
-													if(tabControl instanceof WizardTabControl) {
-														WizardTabControl wizardTabControl = (WizardTabControl)tabControl;
-														if(wizardTabControl.isInplace()) {
-															String script = "$('UserDialogWait').className='loading udwait';new Ajax.Updater('UserDialog', '." + tabControl.getName() + "?requestId=REQUEST_ID&xri=" + targetXri + "', {evalScripts: true});";
-															action = new Action(
-																Action.EVENT_MACRO,
-																new Action.Parameter[]{
-																    new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
-																    new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
-																    new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
-																},
-																tabControl.getToolTip(),
-																tabControl.getToolTip(),
-																true
-															);
+									try {
+										Path targetXri = new Path(menuEntry.substring(0, menuEntry.indexOf(" > ")));
+										String function = menuEntry.substring(menuEntry.indexOf(" > ") + 3);
+										ShowObjectView targetView = new ShowObjectView(
+											view.getId(),
+											(String)null,
+											targetXri,
+											app,
+											new HashMap(),
+											(String)null,
+											Collections.emptyMap()
+										);
+										if(function.startsWith("Operation.")) {
+											String operationName = function.substring(10);
+											List<OperationPaneControl> operationPaneControls = new ArrayList<OperationPaneControl>();
+											// Operations
+											for(OperationPaneControl paneControl: targetView.getShowInspectorControl().getOperationPaneControl()) {
+												for(OperationTabControl tabControl: paneControl.getOperationTabControl()) {
+													if(tabControl.getQualifiedOperationName().equals(operationName)) {
+														String tabId = Integer.toString(tabControl.getTabId());
+														Action action = null;
+														String target = "";
+														if(tabControl instanceof WizardTabControl) {
+															WizardTabControl wizardTabControl = (WizardTabControl)tabControl;
+															if(wizardTabControl.isInplace()) {
+																String script = "$('UserDialogWait').className='loading udwait';new Ajax.Updater('UserDialog', '." + tabControl.getName() + "?requestId=REQUEST_ID&xri=" + targetXri + "', {evalScripts: true});";
+																action = new Action(
+																	MacroAction.EVENT_ID,
+																	new Action.Parameter[]{
+																		  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
+																		  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
+																		  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
+																	},
+																	tabControl.getToolTip(),
+																	tabControl.getToolTip(),
+																	true
+																);
+															}
+															else {
+																String script = "window.location.href=$('op" + tabId + "Trigger').href;";
+																action = new Action(
+																	MacroAction.EVENT_ID,
+																	new Action.Parameter[]{
+																		  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
+																		  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
+																		  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
+																	},
+																	tabControl.getToolTip(),
+																	tabControl.getToolTip(),
+																	true
+																);
+																target = "_blank".equals(wizardTabControl.getWizardDefinition().getTargetType()) ? "target=\"_blank\"" : "target=\"_self\"";
+															}
 														}
 														else {
-															String script = "window.location.href=$('op" + tabId + "Trigger').href;";
+															String script = "eval($('op" + tabId + "Trigger').getAttribute('onclick'));";
 															action = new Action(
-																Action.EVENT_MACRO,
+																MacroAction.EVENT_ID,
 																new Action.Parameter[]{
-																    new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
-																    new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
-																    new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
+																	  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
+																	  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
+																	  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
 																},
-																tabControl.getToolTip(),
+																tabControl.getName(),
 																tabControl.getToolTip(),
 																true
 															);
 														}
+														if(!targetXri.equals(previousTargetXri)) {
+%>
+										                  	<%= spacer %>
+															<tr>
+																<td>
+																	<div style="font-size:90%;font-style:italic;"><img src="images/<%= targetView.getObjectReference().getIconKey() %>" />&nbsp;&nbsp;<%= targetView.getObjectReference().getTitle() %></div>
+<%
+															spacer = SPACER;
+														}
+%>
+														<div>								                    		                    	
+<%
+															if(isEditMode) {
+%>									            		
+										          				<a onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_DELETE_MENU_ENTRY %>';$('<%= FIELD_NAME_TARGET_XRI %>').value='<%= targetXri %>';$('<%= FIELD_NAME_FUNCTION %>').value='<%= function %>';<%= submitFormScriptlet %>"><img src="./images/collapse.gif" /></a>
+<%															
+															}
+%>									            			
+										          			&nbsp;&nbsp;&raquo;&nbsp;<a <%= target %> href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};" style="font-size:90%;"><%= action.getTitle().replace(" ", "&nbsp;") %></a>
+										          		</div>
+<%
+														previousTargetXri = targetXri;
 													}
-													else {
-														String script = "eval($('op" + tabId + "Trigger').getAttribute('onclick'));";
+												}
+											}
+											// Wizards
+											for(WizardTabControl tabControl: targetView.getShowInspectorControl().getWizardControl().getWizardTabControls()) {
+												String tabId = Integer.toString(tabControl.getTabId());
+												if(tabControl.getQualifiedOperationName().equals(operationName)) {
+													Action action = null;
+													if(tabControl.isInplace()) {
+														String script = "$('UserDialogWait').className='loading udwait';new Ajax.Updater('UserDialog', '." + tabControl.getName() + "?requestId=REQUEST_ID&xri=" + targetXri + "', {evalScripts: true});";
 														action = new Action(
-															Action.EVENT_MACRO,
+															MacroAction.EVENT_ID,
 															new Action.Parameter[]{
-															    new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
-															    new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
-															    new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
+																  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
+																  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
+																  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
 															},
-															tabControl.getName(),
+															tabControl.getToolTip(),
 															tabControl.getToolTip(),
 															true
 														);
 													}
-%>						
-													<tr>
-<%
-														if(targetXri.equals(previousTargetXri)) {
+													else {
+														String script = "window.location.href=$('op" + tabId + "Trigger').href;";
+														action = new Action(
+															MacroAction.EVENT_ID,
+															new Action.Parameter[]{
+																  new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
+																  new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
+																  new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
+															},
+															tabControl.getToolTip(),
+															tabControl.getToolTip(),
+															true
+														);
+													}
+													if(!targetXri.equals(previousTargetXri)) {
 %>
-															<td />
-															<td />															
-<%															
-														}
-														else {
-%>
-															<td><img src="images/<%= targetView.getObjectReference().getIconKey() %>" />&nbsp;&nbsp;</td>																	
-								                    		<td><i><%= targetView.getObjectReference().getTitle() %></i></td>
+									                  	<%= spacer %>
+														<tr>
+															<td>
+																<div style="font-size:90%;font-style:italic;"><img src="images/<%= targetView.getObjectReference().getIconKey() %>" />&nbsp;&nbsp;<%= targetView.getObjectReference().getTitle() %></div>
 <%
-														}
-%>								                    		                    	
-								                    	<td>&nbsp;&nbsp;&gt;&nbsp;&nbsp;</td>                    	
-									            		<td><a href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};"><%= action.getTitle() %></a></td>
+														spacer = SPACER;
+													}
+%>								                    
+													<div>	                    	
 <%
 														if(isEditMode) {
 %>									            		
-									            			<td><a onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_DELETE_MENU_ENTRY %>';$('<%= FIELD_NAME_TARGET_XRI %>').value='<%= targetXri %>';$('<%= FIELD_NAME_FUNCTION %>').value='<%= function %>';<%= submitFormScriptlet %>"><img src="./images/collapse.gif" /></a></td>
-<%														}
-														else {
-%>
-															<td />
-<%																														
+									          				<a onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_DELETE_MENU_ENTRY %>';$('<%= FIELD_NAME_TARGET_XRI %>').value='<%= targetXri %>';$('<%= FIELD_NAME_FUNCTION %>').value='<%= function %>';<%= submitFormScriptlet %>"><img src="./images/collapse.gif" /></a>
+<%
 														}
-%>									            			
-									            	</tr>                    	
+														String target = "_blank".equals(tabControl.getWizardDefinition().getTargetType()) ? "target=\"_blank\"" : "target=\"_self\"";
+%>
+									          			&nbsp;&nbsp;&raquo;&nbsp;<a href="#" <%= target %> onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};" style="font-size:90%;"><%= action.getTitle().replace(" ", "&nbsp;") %></a>
+									          		</div>
 <%
 													previousTargetXri = targetXri;
 												}
 											}
 										}
-										// Wizards
-										for(WizardTabControl tabControl: targetView.getShowInspectorControl().getWizardControl().getWizardTabControls()) {
-											String tabId = Integer.toString(tabControl.getTabId());
-											if(tabControl.getQualifiedOperationName().equals(operationName)) {
-												Action action = null;
-												if(tabControl.isInplace()) {
-													String script = "$('UserDialogWait').className='loading udwait';new Ajax.Updater('UserDialog', '." + tabControl.getName() + "?requestId=REQUEST_ID&xri=" + targetXri + "', {evalScripts: true});";
-													action = new Action(
-														Action.EVENT_MACRO,
-														new Action.Parameter[]{
-														    new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
-														    new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
-														    new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
-														},
-														tabControl.getToolTip(),
-														tabControl.getToolTip(),
-														true
-													);
-												}
-												else {
-													String script = "window.location.href=$('op" + tabId + "Trigger').href;";
-													action = new Action(
-														Action.EVENT_MACRO,
-														new Action.Parameter[]{
-														    new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri()),
-														    new Action.Parameter(Action.PARAMETER_NAME, org.openmdx.base.text.conversion.Base64.encode(script.getBytes("UTF-8"))),
-														    new Action.Parameter(Action.PARAMETER_TYPE, Integer.toString(Action.MACRO_TYPE_JAVASCRIPT))                    
-														},
-														tabControl.getToolTip(),
-														tabControl.getToolTip(),
-														true
-													);
-												}
-%>						
-												<tr>
-<%
-													if(targetXri.equals(previousTargetXri)) {
+										else if(function.startsWith("Reference.")) {
+											String referenceName = function.substring(10);
+											for(ReferencePane pane: targetView.getReferencePane()) {
+												for(Action action: pane.getReferencePaneControl().getSelectReferenceAction()) {
+													if(referenceName.equals(action.getParameter(Action.PARAMETER_REFERENCE_NAME))) {
+														List<Action.Parameter> actionParams = new ArrayList<Action.Parameter>(Arrays.asList(action.getParameters()));
+														actionParams.add(
+															new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri())
+														);
+														Action selectObjectAndReferenceAction = new Action(
+															SelectObjectAction.EVENT_ID,
+															actionParams.toArray(new Action.Parameter[actionParams.size()]),
+															action.getTitle(),
+															action.getIconKey(),
+															action.isEnabled()
+														);
+														if(!targetXri.equals(previousTargetXri)) {
 %>
-														<td />
-														<td />															
-<%															
-													}
-													else {
-%>
-														<td><img src="images/<%= targetView.getObjectReference().getIconKey() %>" />&nbsp;&nbsp;</td>																	
-							                    		<td><i><%= targetView.getObjectReference().getTitle() %></i></td>
+										                  	<%= spacer %>
+															<tr>
+																<td>
+																	<div style="font-size:90%;font-style:italic;"><img src="images/<%= targetView.getObjectReference().getIconKey() %>" />&nbsp;&nbsp;<%= targetView.getObjectReference().getTitle() %></div>
 <%
-													}
-%>								                    		                    	
-							                    	<td>&nbsp;&nbsp;&gt;&nbsp;&nbsp;</td>                    	
-								            		<td><a href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(action) %>;onmouseover=function(){};"><%= action.getTitle() %></a></td>
-<%
-													if(isEditMode) {
-%>									            		
-								            			<td><a onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_DELETE_MENU_ENTRY %>';$('<%= FIELD_NAME_TARGET_XRI %>').value='<%= targetXri %>';$('<%= FIELD_NAME_FUNCTION %>').value='<%= function %>';<%= submitFormScriptlet %>"><img src="./images/collapse.gif" /></a></td>
-<%
-													}
-													else {
-%>
-														<td />
-<%																														
-													}
-%>									            			
-								            	</tr>                    	
-<%
-												previousTargetXri = targetXri;
-											}
-										}
-									}
-									else if(function.startsWith("Reference.")) {
-										String referenceName = function.substring(10);
-										for(ReferencePane pane: targetView.getReferencePane()) {
-											for(Action action: pane.getReferencePaneControl().getSelectReferenceAction()) {
-												if(referenceName.equals(action.getParameter(Action.PARAMETER_REFERENCE_NAME))) {
-													List<Action.Parameter> actionParams = new ArrayList<Action.Parameter>(Arrays.asList(action.getParameters()));
-													actionParams.add(
-														new Action.Parameter(Action.PARAMETER_OBJECTXRI, targetXri.toXri())
-													);
-													Action selectObjectAndReferenceAction = new Action(
-														Action.EVENT_SELECT_OBJECT,
-														actionParams.toArray(new Action.Parameter[actionParams.size()]),
-														action.getTitle(),
-														action.getIconKey(),
-														action.isEnabled()
-													);
-%>													
-													<tr>		
-<%
-														if(targetXri.equals(previousTargetXri)) {
-%>
-															<td />
-															<td />															
-<%															
+															spacer = SPACER;
 														}
-														else {
 %>
-															<td><img src="images/<%= targetView.getObjectReference().getIconKey() %>" />&nbsp;&nbsp;</td>																	
-									                    	<td><i><%= targetView.getObjectReference().getTitle() %></i></td>
+														<div>									                    	                    	
 <%
-														}
-%>									                    	                    	
-								                    	<td>&nbsp;&nbsp;&gt;&nbsp;&nbsp;</td>                    	
-								                    	<td><a href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(selectObjectAndReferenceAction) %>;onmouseover=function(){};"><%= texts.getSearchText() + " " + (action.getTitle().startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? action.getTitle().substring(1) : action.getTitle()) %></a></td>
-<%
-														if(isEditMode) {
+															if(isEditMode) {
 %>								                    	
-									            			<td><a onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_DELETE_MENU_ENTRY %>';$('<%= FIELD_NAME_TARGET_XRI %>').value='<%= targetXri %>';$('<%= FIELD_NAME_FUNCTION %>').value='<%= function %>';<%= submitFormScriptlet %>"><img src="./images/collapse.gif" /></a></td>
+										          				<a onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_DELETE_MENU_ENTRY %>';$('<%= FIELD_NAME_TARGET_XRI %>').value='<%= targetXri %>';$('<%= FIELD_NAME_FUNCTION %>').value='<%= function %>';<%= submitFormScriptlet %>"><img src="./images/collapse.gif" /></a>
 <%
-														}
-														else {
-%>
-															<td />
-<%																														
-														}
+															}
 %>									            			
-								                    </tr>               	
+									                  		&nbsp;&nbsp;&raquo;&nbsp;<a href="#" onmouseover="javascript:this.href=<%= view.getEvalHRef(selectObjectAndReferenceAction) %>;onmouseover=function(){};" style="font-size:90%;"><%= (action.getTitle().startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? action.getTitle().substring(1).replace(" ", "&nbsp;") : action.getTitle().replace(" ", "&nbsp;")) %></a>
+									                  	</div>
 <%
-													previousTargetXri = targetXri;
-												}						
+														previousTargetXri = targetXri;
+													}						
+												}
 											}
+										}
+									} catch (Exception e) {
+										ServiceException e0 = new ServiceException(e);
+										if(e0.getExceptionCode() != BasicException.Code.AUTHORIZATION_FAILURE) {
+											e0.log();
 										}
 									}
 								}
 %>
+								<%= spacer.isEmpty() ? "" : "</td></tr>" %>
 							</table>
-						</td>
-						<td valign="bottom" align="right">
+						</div>
+						<div>
 <%						
 				            if(!isEditMode && !isSharedDashlet) {
 %>	            	
@@ -415,10 +393,8 @@ org.openmdx.kernel.log.*
 <%
 	            			}
 %>						
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2">
+						</div>					
+						<div>
 <%				
 							// Edit area
 							List<String> options = new ArrayList<String>();
@@ -466,18 +442,20 @@ org.openmdx.kernel.log.*
 							<fieldset id="<%= dashletId %>.AddMenuEntryFieldSet" style="display:<%= isEditMode ? "block" : "none" %>">
 								<table width="100%">
 									<tr>
-										<td>					 				
-						                	<input id="<%= FIELD_NAME_TARGET_XRI %>.Title" name="<%= FIELD_NAME_TARGET_XRI %>.Title" type="text" class="valueL mandatory" readonly value="<%= selectedTargetXriTitle == null ? "" : selectedTargetXriTitle %>" />
-						                    <input id="<%= FIELD_NAME_TARGET_XRI %>" name="<%= FIELD_NAME_TARGET_XRI %>" type="hidden" class="valueLLocked" value="<%= selectedTargetXri == null ? "" : selectedTargetXri %>" onchange="javascript:<%= submitFormScriptlet %>" />
-						                </td>
-						                <td class="addon">
+						                <td>
 				                    		<img class="popUpButton" border="0" alt="Click to open ObjectFinder" src="images/<%= findObjectAction.getIconKey() %>" onclick="javascript:OF.findObject(<%= view.getEvalHRef(findObjectAction) %>, $('<%= FIELD_NAME_TARGET_XRI %>.Title'), $('<%= FIELD_NAME_TARGET_XRI %>'), '<%= lookupId %>');" />
 				                    	</td>
-				                    	<td>
+										<td>					 				
+						                	<input id="<%= FIELD_NAME_TARGET_XRI %>.Title" name="<%= FIELD_NAME_TARGET_XRI %>.Title" type="text" class="valueL mandatory" style="font-size:90%;" readonly value="<%= selectedTargetXriTitle == null ? "" : selectedTargetXriTitle %>" />
+						                    <input id="<%= FIELD_NAME_TARGET_XRI %>" name="<%= FIELD_NAME_TARGET_XRI %>" type="hidden" class="valueLLocked" value="<%= selectedTargetXri == null ? "" : selectedTargetXri %>" onchange="javascript:<%= submitFormScriptlet %>" />
+						                </td>
+				                    </tr>
+				                    <tr>
+				                    	<td colspan="2">
 <%
 											if(!options.isEmpty()) {
 %>	                    
-					                    		<select id="<%= FIELD_NAME_FUNCTION_SELECT %>" name="<%= FIELD_NAME_FUNCTION_SELECT %>" class="valueL">
+					                    		<select id="<%= FIELD_NAME_FUNCTION_SELECT %>" name="<%= FIELD_NAME_FUNCTION_SELECT %>" class="valueL" style="font-size:90%;">
 <%
 													for(String option: options) {
 %>
@@ -490,22 +468,22 @@ org.openmdx.kernel.log.*
 											}
 %>					
 										</td>
-										<td align="right">
+									</tr>
+									<tr>
+										<td colspan="2">
 <%
 											if(selectedTargetXri != null) {
 %>								
-												&nbsp;&nbsp;&nbsp;<a class="abutton" onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_ADD_MENU_ENTRY %>';<%= submitFormScriptlet %>">&nbsp;&nbsp;+&nbsp;&nbsp;</a>
+												<a class="abutton" style="font-size:90%;" onclick="javascript:$('<%= FIELD_NAME_COMMAND %>').value='<%= COMMAND_ADD_MENU_ENTRY %>';<%= submitFormScriptlet %>">&nbsp;&nbsp;+&nbsp;&nbsp;</a>&nbsp;&nbsp;
 <%
 											}
 %>									
-											&nbsp;&nbsp;&nbsp;<a class="abutton" onclick="javascript:$('<%= FIELD_NAME_TARGET_XRI %>').value='';$('<%= FIELD_NAME_TARGET_XRI %>.Title').value='';<%= submitFormScriptlet %>"><%= texts.getCancelTitle() %></a>
+											<a class="abutton" style="font-size:90%;" onclick="javascript:$('<%= FIELD_NAME_TARGET_XRI %>').value='';$('<%= FIELD_NAME_TARGET_XRI %>.Title').value='';<%= submitFormScriptlet %>"><%= texts.getCancelTitle() %></a>
 										</td>
 									</tr>		
 								</table>	                                        			
 							</fieldset>
-						</td>
-					</tr>
-				</table>
+						</div>
 			</form>
 			</div>
 <%				

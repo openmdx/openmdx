@@ -14,6 +14,8 @@ REM Test test::openmdx::app1
     description VARCHAR2 (200) NULL ,
     created_at TIMESTAMP (3) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (3) WITH TIME ZONE NULL,
+    modified_by_0 VARCHAR2 (50) NULL ,
+    created_by_0 VARCHAR2 (50) NULL ,
     postal_code VARCHAR2 (100) NULL ,
     street VARCHAR2 (100) NULL ,
     country VARCHAR2 (100) NULL ,
@@ -30,12 +32,6 @@ REM Test test::openmdx::app1
     p$$object_oid$0 VARCHAR2 (100)  NULL ,
     p$$object_oid$1 VARCHAR2 (100)  NULL ,
     object_idx INTEGER NOT NULL ,
-    p$$object_parent__rid VARCHAR2 (100)  NULL ,
-    p$$object_parent__oid VARCHAR2 (100)  NULL ,
-    object__class VARCHAR2 (200) NULL ,
-    p$$unit_of_work__rid VARCHAR2 (100)  NULL,
-    modified_by VARCHAR2 (50) NULL ,
-    created_by VARCHAR2 (50) NULL ,
     address_line VARCHAR2 (100) NULL
   );
   
@@ -53,8 +49,8 @@ REM Test test::openmdx::app1
     p$$unit_of_work__rid VARCHAR2 (100)  NULL,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR2 (200) NULL ,
-    modified_by VARCHAR2 (200) NULL ,
+    created_by_0 VARCHAR2 (50) NULL ,
+    modified_by_0 VARCHAR2 (50) NULL ,
     description VARCHAR2 (100) NULL ,
     content BLOB NULL ,
     keyword VARCHAR2 (32) NULL
@@ -76,8 +72,9 @@ REM Test test::openmdx::app1
     product_group_id VARCHAR2 (100) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR2 (100) NULL ,
-    modified_by VARCHAR2 (100) NULL
+    created_by_0 VARCHAR2 (50) NULL ,
+    modified_by_0 VARCHAR2 (50) NULL ,
+    INTERNATIONALPRODUCTGROUPID VARCHAR2 (100) NULL
   );
   
   DROP TABLE app1_InvoicePosition;
@@ -95,8 +92,8 @@ REM Test test::openmdx::app1
     description VARCHAR2 (200) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR2 (100) NULL ,
-    modified_by VARCHAR2 (100) NULL ,
+    created_by_0 VARCHAR2 (50) NULL ,
+    modified_by_0 VARCHAR2 (50) NULL ,
     product_id VARCHAR2 (50) NULL
   );
   
@@ -115,8 +112,8 @@ REM Test test::openmdx::app1
     description VARCHAR2 (200) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    modified_by VARCHAR2 (50) NULL ,
-    created_by VARCHAR2 (50) NULL ,
+    modified_by_0 VARCHAR2 (50) NULL ,
+    created_by_0 VARCHAR2 (50) NULL ,
     m1 VARCHAR2 (200) NULL ,
     p$$m1__rid VARCHAR2 (200) NULL ,
     p$$m1__oid VARCHAR2 (200) NULL ,
@@ -140,8 +137,8 @@ REM Test test::openmdx::app1
     description VARCHAR2 (200) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    modified_by VARCHAR2 (50) NULL ,
-    created_by VARCHAR2 (50) NULL ,
+    modified_by_0 VARCHAR2 (50) NULL ,
+    created_by_0 VARCHAR2 (50) NULL ,
     name VARCHAR2 (100) NULL
   );
   
@@ -159,8 +156,8 @@ REM Test test::openmdx::app1
     p$$unit_of_work__rid VARCHAR2 (100)  NULL,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR2 (200) NULL ,
-    modified_by VARCHAR2 (200) NULL ,
+    created_by_0 VARCHAR2 (50)NULL ,
+    modified_by_0 VARCHAR2 (50)NULL ,
     m1 VARCHAR2 (200) NULL ,
     last_name VARCHAR2 (200) NULL ,
     house_number VARCHAR2 (200) NULL ,
@@ -218,8 +215,8 @@ REM Test test::openmdx::app1
     description VARCHAR2 (200) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR2 (100) NULL ,
-    modified_by VARCHAR2 (100) NULL
+    created_by_0 VARCHAR2 (50) NULL ,
+    modified_by_0 VARCHAR2 (50) NULL
   );
   
   DROP TABLE audit2_UnitOfWork;
@@ -229,6 +226,7 @@ REM Test test::openmdx::app1
     p$$object_parent__rid VARCHAR2 (200)  NULL ,
     p$$object_parent__oid VARCHAR2 (200)  NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    created_by_0 VARCHAR2 (50)NULL ,
     object__class VARCHAR2 (60) NULL ,
     task_id VARCHAR2 (200) NULL
   );
@@ -238,7 +236,6 @@ REM Test test::openmdx::app1
     object_rid VARCHAR2 (200) NOT NULL ,
     object_oid VARCHAR2 (200) NOT NULL ,
     object_idx INTEGER NOT NULL ,
-    created_by VARCHAR2 (200) NULL ,
     involved VARCHAR2 (200) NULL ,
     p$$involved__rid VARCHAR2 (200) NULL ,
     p$$involved__oid VARCHAR2 (200) NULL
@@ -276,8 +273,8 @@ REM Test Booking
     object_idx INTEGER NOT NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR2 (200) NULL ,
-    modified_by VARCHAR2 (200) NULL ,
+    created_by_0 VARCHAR2 (50)NULL ,
+    modified_by_0 VARCHAR2 (50)NULL ,
     object__class VARCHAR2 (60) NULL ,
     cb_type VARCHAR2 (10) NULL ,
     advice_text VARCHAR2 (200) NULL ,
@@ -291,8 +288,8 @@ REM Test Booking
     object_idx INTEGER NOT NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    created_by VARCHAR2 (200) NULL ,
-    modified_by VARCHAR2 (200) NULL ,
+    created_by_0 VARCHAR2 (50)NULL ,
+    modified_by_0 VARCHAR2 (50)NULL ,
     object__class VARCHAR2 (60) NULL ,
     slb_type VARCHAR2 (10) NULL ,
     pos VARCHAR2 (512) NULL ,
@@ -323,7 +320,7 @@ REM Test Extension
     OBJECT_RID VARCHAR2(200) NOT NULL ENABLE, 
 	  OBJECT_OID VARCHAR2(200) NOT NULL ENABLE, 
 	  OBJECT_IDX NUMBER(*,0) NOT NULL ENABLE, 
-    P$$OBJECT_parent__oid VARCHAR2(200), 
+      P$$OBJECT_parent__oid VARCHAR2(200), 
 	  P$$OBJECT_parent__rid VARCHAR2(200) ,
 	  OBJECT__VALID_FROM CHAR(20), 
 	  OBJECT__VALID_TO CHAR(20), 
@@ -332,6 +329,8 @@ REM Test Extension
 	  OBJECT__STATE_NUMBER NUMBER(10,0), 
 	  OBJECT__STATE_ID VARCHAR2(100), 
 	  SEGMENT VARCHAR2(200), 
+	  P$$SEGMENT__rid VARCHAR2(200), 
+	  P$$SEGMENT__oid VARCHAR2(200), 
 	  VALUE1 CHAR(9), 
 	  VALUE2 NUMBER, 
 	  VALUE3 NUMBER, 
@@ -341,8 +340,6 @@ REM Test Extension
 	  VALUE10 RAW(2000), 
 	  VALUE11A VARCHAR2(20), 
 	  VALUE11B VARCHAR2(20), 
-	  P$$SEGMENT_parent__rid VARCHAR2(200), 
-	  P$$SEGMENT_parent__oid VARCHAR2(200), 
 	  VALUE6 VARCHAR2(200), 
 	  VALUE7 CHAR(20), 
 	  VALUE8 VARCHAR2(8)
@@ -364,8 +361,8 @@ REM Test Extension
 	  STATE_VALID_FROM DATE, 
 	  STATE_VALID_TO DATE, 
 	  SEGMENT VARCHAR2(200), 
-	  P$$SEGMENT_parent__rid VARCHAR2(200), 
-	  P$$SEGMENT_parent__oid VARCHAR2(200),
+	  P$$SEGMENT__rid VARCHAR2(200), 
+	  P$$SEGMENT__oid VARCHAR2(200),
 	  VALUE1 CHAR(1 CHAR), 
 	  VALUE2 NUMBER,
 	  VALUE3 NUMBER, 
@@ -394,6 +391,8 @@ REM Test Extension
 	  OBJECT__STATE_NUMBER NUMBER(10,0), 
 	  OBJECT__STATE_ID VARCHAR2(100), 
 	  SEGMENT VARCHAR2(200), 
+	  P$$SEGMENT__rid VARCHAR2(200),
+	  P$$SEGMENT__oid VARCHAR2(200),
 	  VALUE1 NUMBER(1,0), 
 	  VALUE2 NUMBER, 
 	  VALUE3 NUMBER,
@@ -403,8 +402,6 @@ REM Test Extension
 	  VALUE10 RAW(2000), 
 	  VALUE11A NUMBER(9,0),
 	  VALUE11B NUMBER(12,3),
-	  P$$SEGMENT_parent__rid VARCHAR2(200),
-	  P$$SEGMENT_parent__oid VARCHAR2(200),
 	  VALUE6 VARCHAR2(200),
 	  VALUE7 NUMBER(19,3),
 	  VALUE8 VARCHAR2(8)
@@ -435,9 +432,9 @@ REM Test org::openmdx::base::Aspect
     object__class VARCHAR2 (100) NULL ,
     core VARCHAR2 (100) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL ,
-    created_by_ NUMBER(10, 0) NULL ,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL ,
-    modified_by_ NUMBER(10, 0) NULL ,
+    created_by_0 VARCHAR2 (50)NULL ,
+    modified_by_0 VARCHAR2 (50)NULL ,
     string VARCHAR2 (200) NULL ,
     prime_ NUMBER(10, 0) NULL ,
     url VARCHAR2 (200) NULL
@@ -447,9 +444,6 @@ REM Test org::openmdx::base::Aspect
   CREATE TABLE aspect_Object_ (
     object_id VARCHAR2 (100) NOT NULL ,
     object_idx INTEGER NOT NULL ,
-    object__class VARCHAR2 (100) NULL ,
-    created_by VARCHAR2 (200) NULL ,
-    modified_by VARCHAR2 (200) NULL ,
     prime NUMBER(10, 0) NULL
   );
 
@@ -462,6 +456,8 @@ REM org::openmdx::state2
   	OBJECT__CLASS VARCHAR2(200) NOT NULL,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
     removed_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    created_by_0 VARCHAR2(50) NULL,
+    removed_by_0 VARCHAR2(50) NULL,
     openmdxjdo_version NUMBER(5, 0) NULL,
     core VARCHAR2(200) NULL,
     state_valid_from DATE NULL,
@@ -488,9 +484,6 @@ REM org::openmdx::state2
   CREATE TABLE datestate_NATIVE_ (
     OBJECT_ID VARCHAR2(200) NOT NULL, 
     OBJECT_IDX NUMBER(5,0) NOT NULL,
-    OBJECT__CLASS VARCHAR2(200) NOT NULL,
-    created_by VARCHAR2(50) NULL,
-    removed_at VARCHAR2(50) NULL,
     string_list VARCHAR2(100) NULL,
     long_array NUMBER(20, 0) NULL,
     c_reference VARCHAR2 (200) NULL,
@@ -506,6 +499,9 @@ REM org::openmdx::state2
     created_at TIMESTAMP (6) WITH TIME ZONE NULL ,
     removed_at TIMESTAMP (6) WITH TIME ZONE NULL ,
     modified_at TIMESTAMP (6) WITH TIME ZONE NULL ,
+    created_by_0 VARCHAR2 (60) NULL ,
+    removed_by_0 VARCHAR2 (60) NULL ,
+    modified_by_0 VARCHAR2 (60) NULL ,
     state_valid_from DATE,
     state_valid_to DATE,
     state_a VARCHAR2 (256) NULL ,
@@ -528,10 +524,6 @@ REM org::openmdx::state2
   CREATE TABLE state2_NATIVE_ (
     object_id VARCHAR2 (100) NOT NULL ,
     object_idx INTEGER NOT NULL ,
-    object__class VARCHAR2 (100) NULL ,
-    created_by VARCHAR2 (60) NULL ,
-    removed_by VARCHAR2 (60) NULL ,
-    modified_by VARCHAR2 (60) NULL ,
     string_list VARCHAR2 (60) NULL ,
     long_array INTEGER NULL ,
     state_c VARCHAR2 (256) NULL
@@ -549,7 +541,9 @@ REM Test org::openmdx::generic1
     object__class VARCHAR2(200) NULL ,
     description VARCHAR2(200) NULL ,
     created_at TIMESTAMP (6) WITH TIME ZONE NULL,
-    modified_at TIMESTAMP (6) WITH TIME ZONE NULL
+    modified_at TIMESTAMP (6) WITH TIME ZONE NULL,
+    modified_by_0 VARCHAR2(50) NULL ,
+    created_by_0 VARCHAR2(50) NULL
   );
 
   DROP TABLE generic1_Property_N ;
@@ -557,8 +551,6 @@ REM Test org::openmdx::generic1
     object_rid VARCHAR2(100) NOT NULL,
     object_oid VARCHAR2(200) NOT NULL,
     object_idx INTEGER NOT NULL ,
-    modified_by VARCHAR2(50) NULL ,
-    created_by VARCHAR2(50) NULL,
     boolean_value CHAR(1 CHAR) NULL ,
     uri_value VARCHAR2(200) NULL ,
     decimal_value NUMBER(18, 6) NULL ,

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: XMLTarget.java,v 1.8 2010/03/31 14:34:35 hburger Exp $
+ * Name:        $Id: XMLTarget.java,v 1.9 2011/07/01 16:16:42 hburger Exp $
  * Description: XML Target 
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/03/31 14:34:35 $
+ * Date:        $Date: 2011/07/01 16:16:42 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,7 +68,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
@@ -226,7 +226,7 @@ public class XMLTarget implements ExportTarget {
     public void startAttribute(
         String qualifiedName,
         String typeName,
-        String multiplicity,
+        Multiplicity multiplicity,
         Object values,
         boolean empty
     ) throws ServiceException {
@@ -238,17 +238,11 @@ public class XMLTarget implements ExportTarget {
      */
     public void write(
         String typeName, 
-        String multiplicity, 
+        Multiplicity multiplicity, 
         int position, 
         Object value
     ) throws ServiceException {
-        boolean needsPosition = multiplicity.equals(Multiplicities.SPARSEARRAY);
-        boolean multiValued = 
-            multiplicity.equals(Multiplicities.MULTI_VALUE) || 
-            multiplicity.equals(Multiplicities.SET) || 
-            multiplicity.equals(Multiplicities.LIST) || 
-            multiplicity.equals(Multiplicities.SPARSEARRAY);                
-        String stringValue;
+        final String stringValue;
         if(PrimitiveTypes.DATETIME.equals(typeName)) {
             stringValue = DateTimeFormat.EXTENDED_UTC_FORMAT.format((Date) value);
         } else if(PrimitiveTypes.DATE.equals(typeName)) {
@@ -262,9 +256,9 @@ public class XMLTarget implements ExportTarget {
         } else {
             stringValue = value.toString();
         }
-        if(multiValued) {
+        if(multiplicity.isMultiValued()) {
             Map<String, String> atts = new LinkedHashMap<String,String>();
-            if(needsPosition) {
+            if((multiplicity == Multiplicity.SPARSEARRAY)) {
                 atts.put("_position", String.valueOf(position));
             }
             this.xmlWriter.startElement("", "", "_item", atts, false);
@@ -281,17 +275,12 @@ public class XMLTarget implements ExportTarget {
     public void endAttribute(
         String qualifiedName,
         String typeName,
-        String multiplicity,
+        Multiplicity multiplicity,
         Object values,
         boolean empty
     ) throws ServiceException {
         if(!empty) {
-            boolean multiValued = 
-                multiplicity.equals(Multiplicities.MULTI_VALUE) || 
-                multiplicity.equals(Multiplicities.SET) || 
-                multiplicity.equals(Multiplicities.LIST) || 
-                multiplicity.equals(Multiplicities.SPARSEARRAY);                
-            this.xmlWriter.endElement("", "", getSimpleName(qualifiedName), multiValued);
+            this.xmlWriter.endElement("", "", getSimpleName(qualifiedName), multiplicity.isMultiValued());
         }
     }
 

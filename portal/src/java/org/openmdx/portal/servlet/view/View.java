@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: View.java,v 1.66 2010/04/22 09:27:00 wfro Exp $
+ * Name:        $Id: View.java,v 1.71 2011/08/11 12:04:17 wfro Exp $
  * Description: View 
- * Revision:    $Revision: 1.66 $
+ * Revision:    $Revision: 1.71 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/22 09:27:00 $
+ * Date:        $Date: 2011/08/11 12:04:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,8 +57,11 @@ package org.openmdx.portal.servlet.view;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.jdo.PersistenceManager;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.text.conversion.UUIDConversion;
@@ -67,6 +70,10 @@ import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ApplicationContext;
 import org.openmdx.portal.servlet.QuickAccessor;
+import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.action.LogoffAction;
+import org.openmdx.portal.servlet.action.SaveSettingsAction;
+import org.openmdx.portal.servlet.action.SetPanelStateAction;
 import org.openmdx.portal.servlet.control.Control;
 
 //---------------------------------------------------------------------------
@@ -94,7 +101,7 @@ public abstract class View
         this.id = id;
         this.containerElementId = containerElementId;
         this.object = object;
-        this.application = application;
+        this.app = application;
     }
 
     //-------------------------------------------------------------------------
@@ -115,16 +122,16 @@ public abstract class View
     //-------------------------------------------------------------------------
     public ApplicationContext getApplicationContext(
     ) {
-        return this.application;
+        return this.app;
     }
   
     //-------------------------------------------------------------------------
     public Action getLogoffAction(
     ) {
         return new Action(
-            Action.EVENT_LOGOFF,
+            LogoffAction.EVENT_ID,
             null,
-            this.application.getTexts().getLogoffText(),
+            this.app.getTexts().getLogoffText(),
             true
         );
     }
@@ -133,9 +140,9 @@ public abstract class View
     public Action getSaveSettingsAction(
     ) {
         return new Action(
-            Action.EVENT_SAVE_SETTINGS,
+            SaveSettingsAction.EVENT_ID,
             null,
-            this.application.getTexts().getSaveSettingsText(),
+            this.app.getTexts().getSaveSettingsText(),
             true
         );
     }
@@ -143,27 +150,31 @@ public abstract class View
     //-------------------------------------------------------------------------
     public Action[] getSetRoleActions(
     ) {
-        List userRoles = this.application.getUserRoles();
-        Action[] selectRoleActions = new Action[userRoles.size()];
-        int ii = 0;
-        for(
-            Iterator i = userRoles.iterator(); 
-            i.hasNext(); 
-            ii++
-        ) {
-          String roleName = (String)i.next();
-          selectRoleActions[ii] = new Action(
-              Action.EVENT_SET_ROLE,
-              new Action.Parameter[]{
-                  new Action.Parameter(Action.PARAMETER_NAME, roleName)
-              },
-              this.application.getTexts().getSelectUserRoleText(),
-              true
-          );          
-        }
-        return selectRoleActions;
+    	List<String> userRoles = this.app.getUserRoles();
+    	Map<String,Action> selectRoleActions = new TreeMap<String,Action>();
+    	for(String roleName: userRoles) {
+    		Action action = new Action(
+    			Action.EVENT_SET_ROLE,
+    			new Action.Parameter[]{
+    				new Action.Parameter(Action.PARAMETER_NAME, roleName)
+    			},
+    			this.app.getPortalExtension().getTitle(
+        			Action.EVENT_SET_ROLE,
+        			roleName,
+        			this.app
+        		),
+        		this.app.getTexts().getSelectUserRoleText(),
+    			WebKeys.ICON_ROLE,
+    			true
+    		);
+    		selectRoleActions.put(
+    			action.getTitle(),
+    			action
+    		);
+    	}
+    	return selectRoleActions.values().toArray(new Action[selectRoleActions.size()]);
     }
-  
+
     //-------------------------------------------------------------------------
     public Action[] getQuickAccessActions(
     ) {
@@ -200,7 +211,7 @@ public abstract class View
         int panelState
     ) {
         return new Action(
-            Action.EVENT_SET_PANEL_STATE,
+            SetPanelStateAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_NAME, panelName),
                 new Action.Parameter(Action.PARAMETER_STATE, "" + panelState)
@@ -247,41 +258,39 @@ public abstract class View
     public void handleCanNotCommitException(
         BasicException e
     ) {
-        BasicException e0 = e.getCause(this.application.getExceptionDomain());
+        BasicException e0 = e.getCause(this.app.getExceptionDomain());
         if(e0 == null) {
-            this.application.addErrorMessage(
-                this.application.getTexts().getErrorTextCanNotCreateOrEditObject(),
+            this.app.addErrorMessage(
+                this.app.getTexts().getErrorTextCanNotCreateOrEditObject(),
                 new String[]{e.getMessage()}
             );
         }
-        else if(application.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
+        else if(app.getTexts().getUserDefinedText(e0.getExceptionCode() + "") != null) {
             List<String> parameters = new ArrayList<String>();
             int i = 0;
             while(e0.getParameter("param" + i) != null) {
                 parameters.add(e0.getParameter("param" + i));
                 i++;
             }
-            this.application.addErrorMessage(
-                this.application.getTexts().getUserDefinedText(e0.getExceptionCode() + ""),
+            this.app.addErrorMessage(
+                this.app.getTexts().getUserDefinedText(e0.getExceptionCode() + ""),
                 (String[])parameters.toArray(new String[parameters.size()])
 	        );             
         }
         else {
-            this.application.addErrorMessage(
-                this.application.getTexts().getErrorTextCanNotCreateOrEditObject(),
+            this.app.addErrorMessage(
+                this.app.getTexts().getErrorTextCanNotCreateOrEditObject(),
                 new String[]{e.getMessage()}
 	        );              
         }
     }
   
     //-------------------------------------------------------------------------
-    /**
-     * Refresh view. refreshData ==> do refresh data. Do not refresh 
-     * rendering information.
-     */
-    public void refresh(
-        boolean refreshData
+    public PersistenceManager refresh(
+        boolean refreshData,
+        boolean closePm
     ) throws ServiceException {
+    	return null;
     }
   
     //-------------------------------------------------------------------------
@@ -289,7 +298,7 @@ public abstract class View
         String id,
         Class controlClass
     ) throws ServiceException {
-        return this.application.createControl(
+        return this.app.createControl(
             id,
             controlClass
         );
@@ -301,7 +310,7 @@ public abstract class View
         Class controlClass,
         Object... parameter
     ) throws ServiceException {
-        return this.application.createControl(
+        return this.app.createControl(
             id,
             controlClass,
             parameter
@@ -425,7 +434,7 @@ public abstract class View
     public static final short REQUEST_ID_FORMAT_UID = 1;
     public static final short REQUEST_ID_FORMAT_TEMPLATE = 2;
     
-    protected final ApplicationContext application;
+    protected final ApplicationContext app;
     protected final String id;
     protected final String containerElementId;
     protected Object object;

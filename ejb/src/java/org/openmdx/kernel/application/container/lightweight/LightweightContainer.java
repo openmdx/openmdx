@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightContainer.java,v 1.22 2010/08/09 13:16:16 hburger Exp $
+ * Name:        $Id: LightweightContainer.java,v 1.24 2011/06/21 22:54:40 hburger Exp $
  * Description: Lightweight Container
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/09 13:16:16 $
+ * Date:        $Date: 2011/06/21 22:54:40 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -78,7 +78,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.naming.Context;
 import javax.naming.LinkRef;
@@ -96,8 +95,6 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.TextOutputCallback;
 import javax.sql.XADataSource;
-import javax.transaction.TransactionManager;
-import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.UserTransaction;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -132,7 +129,7 @@ import org.openmdx.kernel.lightweight.transaction.LightweightUserTransaction;
 import org.openmdx.kernel.loading.BeanFactory;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.loading.Factory;
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.naming.Contexts;
 import org.openmdx.kernel.naming.component.java.ComponentContextFactory;
 import org.openmdx.kernel.naming.container.openmdx.ContainerContextFactory;
@@ -173,20 +170,12 @@ public class LightweightContainer {
         InitialContextFactory componentContextFactory, 
         ContextSwitcher contextSwitcher
     ) throws NamingException {
-        logger.log(Level.INFO,"Starting {0}", mode);
+        SysLog.log(Level.INFO,"Starting {0}", mode);
         LightweightContainer.instance = this;
         this.mode = mode;        
         System.setProperty(
            LightweightContainer.class.getName() + ".Mode",
            mode.toString()
-        );
-        //
-        // Transaction set-up
-        //
-        LightweightTransactionManager transactionManager = new LightweightTransactionManager();
-        this.transactionManager = transactionManager;
-        this.transactionSynchronizationRegistry = new LightweightTransactionSynchronizationRegistry(
-    		transactionManager
         );
         //
         // URL setup
@@ -273,7 +262,7 @@ public class LightweightContainer {
             // Auto-Deploy Connectors 
             //
             for(String url : getUrls(DeploymentProperties.CONNECTOR_URLS)){
-                logger.log(Level.INFO,"Auto-deploying connector {0}", url);
+                SysLog.log(Level.INFO,"Auto-deploying connector {0}", url);
                 try {
                     Report report = deployConnector(new URL(url));
                     log("connector", url, report);
@@ -285,7 +274,7 @@ public class LightweightContainer {
             // Auto-Deploy Applications
             //
             for(String url : getUrls(DeploymentProperties.APPLICATION_URLS)){
-                logger.log(Level.INFO,"Auto-deploying application {0}", url);
+                SysLog.log(Level.INFO,"Auto-deploying application {0}", url);
                 try {
                     Report[] reports = deployApplication(new URL(url));
                     log("application", url, reports);
@@ -309,7 +298,7 @@ public class LightweightContainer {
             );
         } catch (ParserConfigurationException exception) {            
             System.err.println("Deplyoment manager acquisition failed: " + exception.getMessage());
-            logger.log(Level.SEVERE,"Deplyoment manager acquisition failed", exception);
+            SysLog.log(Level.SEVERE,"Deplyoment manager acquisition failed", exception);
             return null;
         }
     }
@@ -329,7 +318,7 @@ public class LightweightContainer {
     ){
         String values = System.getProperty(name);
         if(values == null || values.length() == 0){
-            logger.log(
+            SysLog.log(
                 Level.INFO,
                 "Set system property {0} to \"{1}\"",
                 new Object[]{name,value}
@@ -340,7 +329,7 @@ public class LightweightContainer {
             );
         } else if ((separator + values + separator).indexOf(separator + value + separator) < 0) {
             String newValue = value + separator + values; 
-            logger.log(
+            SysLog.log(
                 Level.INFO,
                 "Change system property {0} from \"{1}\" to \"{2}\"",
                 new Object[]{name, values, newValue}
@@ -369,10 +358,10 @@ public class LightweightContainer {
         if(report.isSuccess()){
             message += "completed";
             System.out.println(message + " (see log for details)");
-            logger.log(Level.INFO,"{0}|{1}", logParameters);
+            SysLog.log(Level.INFO,"{0}|{1}", logParameters);
         } else {
             System.err.println(message + " (see log for reason)");
-            logger.log(Level.WARNING,"{0}|{1}", logParameters);
+            SysLog.log(Level.WARNING,"{0}|{1}", logParameters);
         }
     }
 
@@ -404,16 +393,16 @@ public class LightweightContainer {
         if(reports[0].isSuccess()){
             if(reports[0].hasWarning()) {
                 message.append("completed, but some modules failed");
-                logger.log(Level.WARNING,"{0}|{1}", logParameters);
+                SysLog.log(Level.WARNING,"{0}|{1}", logParameters);
                 System.err.println(message.append(" (see log for reason)"));
             } else {
                 message.append("successfully completed");
-                logger.log(Level.INFO,"{0}|{1}", logParameters);
+                SysLog.log(Level.INFO,"{0}|{1}", logParameters);
                 System.out.println(message.append(" (see log for details)"));
             }
         } else {
             message.append("failed");
-            logger.log(Level.WARNING,"{}|{}", logParameters);
+            SysLog.log(Level.WARNING,"{}|{}", logParameters);
             System.err.println(message.append(" (see log for reason)"));
         }
     }
@@ -431,7 +420,7 @@ public class LightweightContainer {
         Throwable exception
     ){
         String message = type + " '" + url + "' aborted";
-        logger.log(Level.WARNING,message, exception);
+        SysLog.log(Level.WARNING,message, exception);
         System.err.println(message + ": " + exception);
     }
 
@@ -487,7 +476,7 @@ public class LightweightContainer {
                 contextSwitcher
             );
         } catch (NamingException exception) {
-            logger.log(Level.SEVERE,"Lightweight Container Activation Failure", exception);
+            SysLog.log(Level.SEVERE,"Lightweight Container Activation Failure", exception);
             return null;
         }
     }
@@ -504,7 +493,7 @@ public class LightweightContainer {
         if(hasInstance()) {
             return LightweightContainer.instance;
         } else {
-            logger.log(
+            SysLog.log(
                 Level.WARNING,
                 "LightweightContainer.getInstance() in order to acquire an instance is deprecated. " +
                 "Use getInstance(Mode.ENTERPRISE_APPLICATION_CONTAINER) instead"
@@ -1174,11 +1163,11 @@ public class LightweightContainer {
             if("Bean".equals(value)) {
                 sessionContext = new LightweightSessionContext(
                     null,
-                    userTransaction = new LightweightUserTransaction(this.transactionManager)
+                    userTransaction = LightweightUserTransaction.getInstance()
                 );
             } else if ("Container".equals(value)) {
                 sessionContext = new LightweightSessionContext(
-                    this.transactionManager,
+                    LightweightTransactionManager.getInstance(),
                     userTransaction = null
                 );
             } else {
@@ -1197,12 +1186,12 @@ public class LightweightContainer {
         }
         componentContext.bind(
         	"TransactionManager",
-        	this.transactionManager
+        	LightweightTransactionManager.getInstance()
         );
         report.addInfo("'TransactionManager' bound to 'java:comp'");
         componentContext.bind(
             "TransactionSynchronizationRegistry",
-            this.transactionSynchronizationRegistry
+            LightweightTransactionSynchronizationRegistry.getInstance()
         );
         report.addInfo("'TransactionSynchronizationRegistry' bound to 'java:comp'");
         //
@@ -1268,7 +1257,7 @@ public class LightweightContainer {
                     instanceFactory.getInstanceClass(),
                     instancePool,
                     containerTransaction,
-                    this.transactionManager
+                    LightweightTransactionManager.getInstance()
                 );
                 if(getMode() == Mode.ENTERPRISE_JAVA_BEAN_CONTAINER){
                     sessionContext.remoteReference = createProxyReference (
@@ -1345,11 +1334,11 @@ public class LightweightContainer {
         );
         componentContext.bind(
             "UserTransaction",
-            new LightweightUserTransaction(this.transactionManager)
+            LightweightUserTransaction.getInstance()
         );
         componentContext.bind(
             "TransactionSynchronizationRegistry",
-            this.transactionSynchronizationRegistry
+            LightweightTransactionSynchronizationRegistry.getInstance()
         );
         try {
             return new Main(
@@ -1565,7 +1554,7 @@ public class LightweightContainer {
 	                ) : new LightweightConnectionManager(
 	                    credentials,
 	                    connectionImplClass,
-	                    transactionManager,
+	                    LightweightTransactionManager.getInstance(),
 	                    resourceAdapter.getMaximumCapacity(),
 	                    resourceAdapter.getMaximumWait(), 
 	                    resourceAdapter.getMaximumIdle(), 
@@ -1910,9 +1899,9 @@ public class LightweightContainer {
     ){
         reports.add(report);
         if(report.isSuccess()){
-            logger.log(Level.INFO,"Successfully validated|{0}", report);
+            SysLog.log(Level.INFO,"Successfully validated|{0}", report);
         } else {
-            logger.log(Level.WARNING,"Validation failed|{0}", report);
+            SysLog.log(Level.WARNING,"Validation failed|{0}", report);
         }
         return report.isSuccess();
     }
@@ -2040,7 +2029,7 @@ public class LightweightContainer {
                 providerURL
             );
             System.out.flush();
-            logger.log(
+            SysLog.log(
                 Level.INFO,
                 "ENTERPRISE_JAVA_BEAN_SERVER is listening at {0}",
                 providerURL
@@ -2127,16 +2116,6 @@ public class LightweightContainer {
     private final Context containerContext;
 
     /**
-     * Transaction Manager Singleton
-     */
-    private final TransactionManager transactionManager;
-
-    /**
-     * Transaction Synchronization Registry Singleton
-     */
-    private final TransactionSynchronizationRegistry transactionSynchronizationRegistry;
-    
-    /**
      * The callback handler in case of an application client
      */
     private CallbackHandler callbackHandler = null;
@@ -2168,12 +2147,7 @@ public class LightweightContainer {
      * The provider URL in case of ENTERPRISE_JAVA_BEAN_SERVER
      */
     private final String providerURL;
-
-    /**
-     * We have to log in static and instance methods.
-     */
-    private static final Logger logger = LoggerFactory.getLogger(); 
-
+    
     
     //------------------------------------------------------------------------
     // Class Mode

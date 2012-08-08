@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DurationMarshaller.java,v 1.2 2009/12/14 15:00:13 hburger Exp $
+ * Name:        $Id: DurationMarshaller.java,v 1.4 2011/03/18 16:51:26 hburger Exp $
  * Description: DurationMarshaller 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/14 15:00:13 $
+ * Date:        $Date: 2011/03/18 16:51:26 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -52,8 +52,6 @@ package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,17 +75,10 @@ public class DurationMarshaller implements Marshaller {
      * @throws ServiceException 
      */
     private DurationMarshaller(
-        String durationType
+        DurationType durationType
     ) throws ServiceException {
-        if(!DURATION_TYPES.contains(durationType)) throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.INVALID_CONFIGURATION,
-            "Unsupported duration type",
-            new BasicException.Parameter("supported", DURATION_TYPES),
-            new BasicException.Parameter("requested", durationType)
-        );
-        this.durationType = durationType.intern();
-        if(this.durationType == LayerConfigurationEntries.DURATION_TYPE_INTERVAL) {
+    	this.durationType = durationType;
+        if(durationType == DurationType.INTERVAL) {
             this.YEAR_TO_MONTH = Pattern.compile(
                 "^(-?)([0-9]+)-([0-9]+)$"
             );
@@ -102,6 +93,7 @@ public class DurationMarshaller implements Marshaller {
 
     /**
      * Factory
+     * 
      * @param type the duration type
      * 
      * @return an new <code>DurationMarshaller</code> instance
@@ -110,36 +102,32 @@ public class DurationMarshaller implements Marshaller {
     public static DurationMarshaller newInstance(
         String durationType
     ) throws ServiceException{
-        return new DurationMarshaller(durationType);
+        return new DurationMarshaller(DurationType.toDurationType(durationType));
     }
 
-    /**
-     * The type used to store <code>org::w3c::duration</code> values, i.e. one of<ul>
-     * <li><code>INTERVAL</code> <i>(domain defined by the database field definition)</i>
-     * <li><code>CHARACTER</code> <i>(default)</i>
-     * <li><code>NUMERIC</code> <i>(domain <b>either</b> year-month <b>or</b> date-time intervals!)</i>
-     * </ul>
-     * 
-     * @see LayerConfigurationEntries#DURATION_TYPE_INTERVAL
-     * @see LayerConfigurationEntries#DURATION_TYPE_CHARACTER
-     * @see LayerConfigurationEntries#DURATION_TYPE_NUMERIC
-     */
-    private final String durationType;  
-    private static final List<String> DURATION_TYPES = Arrays.asList(
-        LayerConfigurationEntries.DURATION_TYPE_INTERVAL,
-        LayerConfigurationEntries.DURATION_TYPE_CHARACTER,
-        LayerConfigurationEntries.DURATION_TYPE_NUMERIC
-    );
-
-    private static final BigDecimal DAY_TIME_ZERO = BigDecimal.valueOf(0, 3);
+    private final DurationType durationType;  
+    private static final int PRECISION = 3; // milliseconds
+    private static final BigDecimal DAY_TIME_ZERO = BigDecimal.valueOf(0, PRECISION);
     private static final BigInteger MONTHS_PER_YEAR = BigInteger.valueOf(12);
     private static final BigInteger HOURS_PER_DAY = BigInteger.valueOf(24);
     private static final BigInteger MINUTES_PER_HOUR = BigInteger.valueOf(60);
-    private static final BigInteger SECONDS_PER_MINUTE = BigInteger.valueOf(60);
+    private static final BigDecimal SECONDS_PER_MINUTE = BigDecimal.valueOf(60);
 
     final private Pattern YEAR_TO_MONTH;
     final private Pattern DAY_TO_SECOND;
 
+    @SuppressWarnings("unchecked")
+	private <T extends Number> T getValue(
+    	Duration duration,
+    	DatatypeConstants.Field field
+    ){
+    	Number value = duration.getField(field);
+    	if(value == null) {
+    		value = field == DatatypeConstants.SECONDS ? DAY_TIME_ZERO : BigInteger.ZERO;
+    	}
+    	return (T) value;
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.marshalling.Marshaller#marshal(java.lang.Object)
      */
@@ -147,78 +135,151 @@ public class DurationMarshaller implements Marshaller {
         Object source
     ) throws ServiceException {
         if(source instanceof Duration) {
-            if(LayerConfigurationEntries.DURATION_TYPE_CHARACTER == durationType) {
-                return source.toString();
-            } else if (
-                    LayerConfigurationEntries.DURATION_TYPE_INTERVAL == durationType ||
-                    LayerConfigurationEntries.DURATION_TYPE_NUMERIC == durationType 
-            ) {
-                Duration duration = (Duration) source;
-                int signum = duration.getSign();
-                BigInteger years = duration.isSet(DatatypeConstants.YEARS) ? 
-                    (BigInteger) duration.getField(DatatypeConstants.YEARS) :
-                        BigInteger.ZERO;
-                    BigInteger months = duration.isSet(DatatypeConstants.MONTHS) ? 
-                        (BigInteger) duration.getField(DatatypeConstants.MONTHS) :
-                            BigInteger.ZERO;
-                        BigInteger days = duration.isSet(DatatypeConstants.DAYS) ?
-                            (BigInteger) duration.getField(DatatypeConstants.DAYS) :
-                                BigInteger.ZERO;
-                            BigInteger hours = duration.isSet(DatatypeConstants.HOURS) ?
-                                (BigInteger) duration.getField(DatatypeConstants.HOURS) :
-                                    BigInteger.ZERO;
-                                BigInteger minutes = duration.isSet(DatatypeConstants.MINUTES) ?
-                                    (BigInteger) duration.getField(DatatypeConstants.MINUTES) :
-                                        BigInteger.ZERO;
-                                    BigDecimal seconds = duration.isSet(DatatypeConstants.SECONDS) ?
-                                        (BigDecimal) duration.getField(DatatypeConstants.SECONDS) :
-                                            DAY_TIME_ZERO;
-                                        boolean yearMonth = 
-                                            years.signum() != 0 ||
-                                            months.signum() != 0;
-                                        boolean dayTime =
-                                            days.signum() != 0 ||
-                                            hours.signum() != 0 ||
-                                            minutes.signum() != 0 ||
-                                            seconds.signum() != 0;                
-                                        if(yearMonth & dayTime) throw new ServiceException(
-                                            BasicException.Code.DEFAULT_DOMAIN,
-                                            BasicException.Code.TRANSFORMATION_FAILURE,
-                                            "The duration must be either a year-month or a day-time duration",
-                                            new BasicException.Parameter("duration", duration)
-                                        );
-                                        if(!yearMonth & !dayTime) yearMonth = 
-                                            duration.isSet(DatatypeConstants.YEARS) ||
-                                            duration.isSet(DatatypeConstants.MONTHS);
-                                        if (LayerConfigurationEntries.DURATION_TYPE_INTERVAL == durationType) {
-                                            return (
-                                                    signum < 0 ? "-" : ""
-                                            ) + (
-                                                    yearMonth ? 
-                                                        years + "-" + months :
-                                                            days + " " + hours + ":" + minutes + ":" + seconds
-                                            );
-                                        } else {
-                                            if(yearMonth) {
-                                                BigInteger value = months.add(
-                                                    years.multiply(MONTHS_PER_YEAR)
-                                                );
-                                                return signum < 0 ? value.negate() : value;
-                                            } else {
-                                                BigDecimal value = seconds.add(
-                                                    new BigDecimal(
-                                                        minutes.add(
-                                                            hours.add(
-                                                                days.multiply(HOURS_PER_DAY)
-                                                            ).multiply(MINUTES_PER_HOUR)
-                                                        ).multiply(SECONDS_PER_MINUTE)
-                                                    )
-                                                );
-                                                return signum < 0 ? value.negate() : value;
-                                            }
-                                        }
-            } else {
-                return source;
+            Duration duration = (Duration) source;
+            ValueType valueType = ValueType.of(duration);
+            if(valueType == null) return null;
+            switch(durationType) {
+	            case INTERVAL: {
+	            	StringBuilder target = new StringBuilder(duration.getSign() < 0 ? "-" : "");
+	            	switch(valueType) {
+			            case YEAR_MONTH:
+			            	return target.append(
+			            		getValue(duration, DatatypeConstants.YEARS)
+			            	).append(
+			            		"-"
+			            	).append(
+			            		getValue(duration, DatatypeConstants.MONTHS)
+			            	).toString();
+			            case DAY_TIME:
+			            	return target.append(
+			            		getValue(duration, DatatypeConstants.DAYS)
+			            	).append(
+			            		" "
+			            	).append(
+			            		getValue(duration, DatatypeConstants.HOURS)
+			            	).append(
+			            		":"
+			            	).append(
+			            		getValue(duration, DatatypeConstants.MINUTES)
+			            	).append(
+			            		":"
+			            	).append(
+			            		getValue(duration, DatatypeConstants.SECONDS)
+			            	).toString();
+			            case YEAR_MONTH_DAY_TIME:
+			            	throw new ServiceException(
+		    	                BasicException.Code.DEFAULT_DOMAIN,
+		    	                BasicException.Code.TRANSFORMATION_FAILURE,
+		    	                "An INTERVAL duration must be either a year-month or a day-time duration",
+		    	                new BasicException.Parameter("duration", duration)
+		    	            );
+			            default:
+			            	return null;
+		            }
+		        }
+	            case NUMERIC:  switch(valueType){
+		            case YEAR_MONTH: {
+		            	BigInteger years = getValue(duration, DatatypeConstants.YEARS);
+		            	BigInteger months = getValue(duration, DatatypeConstants.MONTHS);
+                        BigInteger value = months.add(
+                            years.multiply(MONTHS_PER_YEAR)
+                        );
+                        return duration.getSign() < 0 ? value.negate() : value;
+		            }
+		            case DAY_TIME:
+		            	BigInteger days = getValue(duration, DatatypeConstants.DAYS);
+		            	BigInteger hours = getValue(duration, DatatypeConstants.HOURS);
+		            	BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
+		            	BigDecimal seconds = getValue(duration, DatatypeConstants.SECONDS);
+                        BigDecimal value = seconds.add(
+                            new BigDecimal(
+                                minutes.add(
+                                    hours.add(
+                                        days.multiply(HOURS_PER_DAY)
+                                    ).multiply(MINUTES_PER_HOUR)
+                                )
+                            ).multiply(SECONDS_PER_MINUTE)
+                        );
+                        return duration.getSign() < 0 ? value.negate() : value;
+		            case YEAR_MONTH_DAY_TIME:
+		            	throw new ServiceException(
+	    	                BasicException.Code.DEFAULT_DOMAIN,
+	    	                BasicException.Code.TRANSFORMATION_FAILURE,
+	    	                "A NUMERIC duration must be either a year-month or a day-time duration",
+	    	                new BasicException.Parameter("duration", duration)
+	    	            );	            
+		            default:
+		            	return null;
+	            }
+	            case CHARACTER: {
+	            	boolean normalized = true;
+	            	BigInteger years = getValue(duration, DatatypeConstants.YEARS);
+	            	BigInteger months = getValue(duration, DatatypeConstants.MONTHS);
+	            	BigInteger days = getValue(duration, DatatypeConstants.DAYS);
+	            	BigInteger hours = getValue(duration, DatatypeConstants.HOURS);
+	            	BigInteger minutes = getValue(duration, DatatypeConstants.MINUTES);
+	            	BigDecimal seconds = getValue(duration, DatatypeConstants.SECONDS);
+	            	if(seconds.compareTo(SECONDS_PER_MINUTE) > 0) {
+	            		normalized = false;
+	            		BigDecimal[] values = seconds.divideAndRemainder(SECONDS_PER_MINUTE);
+	            		seconds = values[1];
+	            		minutes = minutes.add(values[0].toBigInteger());
+	            	}
+	            	if(minutes.compareTo(MINUTES_PER_HOUR) > 0) {
+	            		normalized = false;
+	            		BigInteger[] values = minutes.divideAndRemainder(MINUTES_PER_HOUR);
+	            		minutes = values[1];
+	            		hours = hours.add(values[0]);
+	            	}
+	            	if(hours.compareTo(HOURS_PER_DAY) > 0) {
+	            		normalized = false;
+	            		BigInteger[] values = hours.divideAndRemainder(HOURS_PER_DAY);
+	            		hours = values[1];
+	            		days = days.add(values[0]);
+	            	}
+	            	if(months.compareTo(MONTHS_PER_YEAR) > 0) {
+	            		normalized = false;
+	            		BigInteger[] values = months.divideAndRemainder(MONTHS_PER_YEAR);
+	            		months = values[1];
+	            		years = years.add(values[0]);
+	            	}
+	            	if(normalized) {
+	            		return duration.toString();
+	            	} else {
+		            	StringBuilder target = new StringBuilder(duration.getSign() < 0 ? "-" : "");
+	            		target.append("P");
+	            		boolean empty = true;
+	            		if(years.signum() > 0) {
+	            			empty = false;
+	            			target.append(years).append("Y");
+	            		}
+	            		if(months.signum() > 0) {
+	            			empty = false;
+	            			target.append(months).append("M");
+	            		}
+	            		if(days.signum() > 0) {
+	            			empty = false;
+	            			target.append(days).append("D");
+	            		}
+	            		if(empty || hours.signum() > 0 || minutes.signum() > 0 || seconds.signum() > 0) {
+	            			target.append("T");
+	            			if(hours.signum() > 0) {
+		            			empty = false;
+	            				target.append(hours).append("H");
+	            			}
+	            			if(minutes.signum() > 0) {
+		            			empty = false;
+	            				target.append(minutes).append("M");
+	            			}
+	            			if(empty || seconds.signum() > 0) {
+	            				target.append(seconds).append("S");
+	            			}
+	            		}
+	            		return target.toString();
+	            	}
+	            }
+	            default:
+	            	return null;
             }
         } else {
             return source;
@@ -231,79 +292,106 @@ public class DurationMarshaller implements Marshaller {
     public Object unmarshal(
         Object source
     ) throws ServiceException {
-        if(source == null) {
+    	if(source == null || source instanceof Duration) {
             return source;
-        } else if(LayerConfigurationEntries.DURATION_TYPE_CHARACTER == durationType) {
-            return Datatypes.create(Duration.class, source.toString());
-        } else if (LayerConfigurationEntries.DURATION_TYPE_INTERVAL == durationType){
-            String value = source.toString();
-            Matcher matcher;
-            if((matcher = DAY_TO_SECOND.matcher(value)).matches()) {
-                StringBuilder duration = new StringBuilder(
-                ).append(
-                    matcher.group(1)
-                ).append(
-                    'P'
-                ).append(
-                    matcher.group(2)
-                ).append(
-                    "DT"
-                ).append(
-                    matcher.group(3)
-                ).append(
-                    "H"
-                );
-                if(matcher.group(4) != null) duration.append(
-                    matcher.group(4)
-                ).append(
-                    "M"
-                );
-                if(matcher.group(5) != null) duration.append(
-                    matcher.group(5)
-                ).append(
-                    "S"
-                );
-                return Datatypes.create(Duration.class, duration.toString());                
-            } else if ((matcher = YEAR_TO_MONTH.matcher(value)).matches()) {
-                StringBuilder duration = new StringBuilder(
-                ).append(
-                    matcher.group(1)
-                ).append(
-                    'P'
-                ).append(
-                    matcher.group(2)
-                ).append(
-                    "Y"
-                ).append(
-                    matcher.group(3)
-                ).append(
-                    "M"
-                );
-                return Datatypes.create(Duration.class, duration.toString());                
-            } else throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.TRANSFORMATION_FAILURE,
-                getClass().getName() +
-                " expects at least two fields (years and months or days and hours)",
-                new BasicException.Parameter("value", value)
-            );
-        } else if (LayerConfigurationEntries.DURATION_TYPE_NUMERIC == durationType) {
-            if(source instanceof Number) {
-                Number value = (Number)source;
-                return source instanceof BigDecimal && ((BigDecimal)source).scale() > 0 ?
-                    toDuration("T", value, "S") :
-                    toDuration("", value, "M");
-            } else throw new ServiceException(
-                BasicException.Code.DEFAULT_DOMAIN,
-                BasicException.Code.TRANSFORMATION_FAILURE,
-                getClass().getName() + " expects durationType " +
-                LayerConfigurationEntries.DURATION_TYPE_NUMERIC + 
-                " values being instances of " + Number.class.getName(),
-                new BasicException.Parameter("class", source.getClass().getName()),
-                new BasicException.Parameter("value", source)
-            );             
         } else {
-            return source;
+        	switch(durationType) {
+	        	case CHARACTER: 
+	                return Datatypes.create(Duration.class, source.toString());
+	        	case INTERVAL: {
+	        		String value = source.toString();
+	                 Matcher matcher;
+	                 if((matcher = DAY_TO_SECOND.matcher(value)).matches()) {
+	                     StringBuilder duration = new StringBuilder(
+	                     ).append(
+	                         matcher.group(1)
+	                     ).append(
+	                         'P'
+	                     ).append(
+	                         matcher.group(2)
+	                     ).append(
+	                         "DT"
+	                     ).append(
+	                         matcher.group(3)
+	                     ).append(
+	                         "H"
+	                     );
+	                     String minutes = matcher.group(4);
+	                     if(minutes != null) duration.append(
+                    		 minutes
+	                     ).append(
+	                         "M"
+	                     );
+	                     String seconds = matcher.group(5);
+	                     if(seconds != null) {
+	                    	 int dp = seconds.indexOf('.');
+	                    	 if(dp < 0) {
+	                    		 dp = seconds.indexOf(',');
+	                    	 }
+	                    	 int precision;
+	                    	 if(dp > 0) {
+	                    		 precision = seconds.length() - dp - 1;
+	                    		 if(precision > PRECISION) {
+	                    			 seconds = seconds.substring(0, dp + PRECISION + 1);
+	                    		 }
+		                    	 duration.append(seconds);
+	                    	 } else {
+	                    		 precision = 0;
+		                    	 duration.append(
+	 	                    		seconds
+	 	                    	 ).append(
+	 	                    		"."
+	 	                    	 );
+	                    	 }
+	                    	 while(precision++ < PRECISION) {
+	                    		 duration.append("0");
+	                    	 }
+	                    	 duration.append("S");
+	                     }
+	                     return Datatypes.create(Duration.class, duration.toString());                
+	                 } else if ((matcher = YEAR_TO_MONTH.matcher(value)).matches()) {
+	                     StringBuilder duration = new StringBuilder(
+	                     ).append(
+	                         matcher.group(1)
+	                     ).append(
+	                         'P'
+	                     ).append(
+	                         matcher.group(2)
+	                     ).append(
+	                         "Y"
+	                     ).append(
+	                         matcher.group(3)
+	                     ).append(
+	                         "M"
+	                     );
+	                     return Datatypes.create(Duration.class, duration.toString());                
+	                 } else throw new ServiceException(
+	                     BasicException.Code.DEFAULT_DOMAIN,
+	                     BasicException.Code.TRANSFORMATION_FAILURE,
+	                     getClass().getName() +
+	                     " expects at least two fields (years and months or days and hours)",
+	                     new BasicException.Parameter("value", value)
+	                 );
+	        	}
+	        	case NUMERIC: {
+	                if(source instanceof Number) {
+	                    Number value = (Number)source;
+	                    return source instanceof BigDecimal && ((BigDecimal)source).scale() > 0 ?
+	                        toDuration("T", value, "S") :
+	                        toDuration("", value, "M");
+	                } else throw new ServiceException(
+	                    BasicException.Code.DEFAULT_DOMAIN,
+	                    BasicException.Code.TRANSFORMATION_FAILURE,
+	                    getClass().getName() + " expects durationType " +
+	                    LayerConfigurationEntries.DURATION_TYPE_NUMERIC + 
+	                    " values being instances of " + Number.class.getName(),
+	                    new BasicException.Parameter("class", source.getClass().getName()),
+	                    new BasicException.Parameter("value", source)
+	                );             
+	        	}
+	            default:
+	                return source;
+        	}
         }
     }
 
@@ -321,6 +409,77 @@ public class DurationMarshaller implements Marshaller {
                 "P" + prefix + value + suffix 
             )
         );
+    }
+
+    //------------------------------------------------------------------------
+    // Enum DurationType
+    //------------------------------------------------------------------------
+
+    /**
+     * The type used to store <code>org::w3c::duration</code> values
+     */
+    static enum DurationType {
+    	
+    	/**
+    	 * <code>INTERVAL</code> <i>(domain defined by the database field definition)
+    	 */
+    	INTERVAL,
+    	
+    	/**
+    	 * <li><code>CHARACTER</code> <i>(default)</i>
+    	 */
+    	CHARACTER,
+    	
+    	/**
+    	 * <code>NUMERIC</code> <i>(domain <b>either</b> year-month <b>or</b> date-time intervals!)</i>
+    	 */
+    	NUMERIC;
+    	
+    	static DurationType toDurationType(
+    		String durationType
+    	) throws ServiceException {
+        	try {
+                return DurationType.valueOf(durationType);
+        	} catch (RuntimeException exception) { 
+    	        throw new ServiceException(
+    	        	exception,
+    	            BasicException.Code.DEFAULT_DOMAIN,
+    	            BasicException.Code.INVALID_CONFIGURATION,
+    	            "Unsupported duration type",
+    	            new BasicException.Parameter("supported", (Object[])DurationType.values()),
+    	            new BasicException.Parameter("requested", durationType)
+    	        );
+        	}
+    	}
+    	
+    }
+
+    /**
+     * The value type defines which fields are set 
+     */
+    static enum ValueType {
+    	YEAR_MONTH,
+    	YEAR_MONTH_DAY_TIME,
+    	DAY_TIME;
+    	
+    	static ValueType of(
+    			Duration duration
+    	) {
+            boolean yearMonth = 
+            	duration.isSet(DatatypeConstants.YEARS) || 
+            	duration.isSet(DatatypeConstants.MONTHS); 
+            boolean dayTime = 
+            	duration.isSet(DatatypeConstants.DAYS) || 
+            	duration.isSet(DatatypeConstants.HOURS) || 
+            	duration.isSet(DatatypeConstants.MINUTES) || 
+            	duration.isSet(DatatypeConstants.SECONDS); 
+            return yearMonth ? (
+            	dayTime ? YEAR_MONTH_DAY_TIME : YEAR_MONTH
+            ) : (
+            	dayTime ? DAY_TIME : null
+            );
+    	}
+    	
     }
 
 }

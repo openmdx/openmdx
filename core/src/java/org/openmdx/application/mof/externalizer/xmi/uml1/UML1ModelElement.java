@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: UML1ModelElement.java,v 1.1 2009/01/13 02:10:38 wfro Exp $
+ * Name:        $Id: UML1ModelElement.java,v 1.2 2011/04/12 15:30:02 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/01/13 02:10:38 $
+ * Date:        $Date: 2011/04/12 15:30:02 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -57,7 +57,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes"})
 public abstract class UML1ModelElement {
 
   public UML1ModelElement(

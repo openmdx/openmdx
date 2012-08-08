@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: MappedRecordFilter.java,v 1.8 2010/06/02 13:41:49 hburger Exp $
+ * Name:        $Id: MappedRecordFilter.java,v 1.10 2011/11/26 01:34:57 hburger Exp $
  * Description: Dataprovider Object Filter
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:41:49 $
+ * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -54,25 +54,21 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.application.dataprovider.spi.AbstractFilter;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.query.Filter;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.w3c.cci2.SparseArray;
 
 /**
  * Dataprovider Object Filter
  */
-public class MappedRecordFilter extends AbstractFilter {
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 3256436997697515571L;
+public abstract class MappedRecordFilter extends AbstractFilter {
 
     /**
      * Constructor
@@ -84,9 +80,9 @@ public class MappedRecordFilter extends AbstractFilter {
      * @exception   NullPointerException
      *              if the filter is <code>null</code>
      */
-    public MappedRecordFilter(
+    protected MappedRecordFilter(
         FilterProperty[] filter
-    ){
+    ){        
         super(filter);
     }
 
@@ -97,20 +93,52 @@ public class MappedRecordFilter extends AbstractFilter {
     protected Iterator<?> getValuesIterator(
         Object candidate, 
         String attribute
-    ) throws ResourceException, ServiceException {
+    ) throws ServiceException {
         MappedRecord object = (MappedRecord)candidate;
-        Object_2Facade facade = Object_2Facade.newInstance(object);
-        Object values = SystemAttributes.OBJECT_CLASS.equals(attribute) ?
-            Collections.singletonList(facade.getObjectClass()) :
-                facade.getAttributeValues(attribute);
-        return 
-            values instanceof SparseArray<?> ? 
-                ((SparseArray<?>)values).populationIterator() : 
-                    values instanceof List<?> ?
-                        ((List<?>)values).listIterator() :
-                            SystemAttributes.OBJECT_IDENTITY.equals(attribute) ? 
-                                Collections.singleton(facade.getPath()).iterator() :
-                                Collections.EMPTY_LIST.iterator();
+        Object_2Facade facade = Facades.asObject(object);
+        if(SystemAttributes.OBJECT_CLASS.equals(attribute)) {
+            return Collections.singleton(facade.getObjectClass()).iterator();
+        } else if (SystemAttributes.OBJECT_IDENTITY.equals(attribute)) {
+            return Collections.singleton(facade.getPath()).iterator();
+        } else {
+            Object values = facade.getAttributeValues(attribute);
+            return 
+                values instanceof SparseArray<?> ? ((SparseArray<?>)values).populationIterator() : 
+                values instanceof List<?> ? ((List<?>)values).listIterator() :
+                Collections.EMPTY_LIST.iterator();
+        }
     }
-      
-  }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.application.dataprovider.spi.AbstractFilter#equal(java.lang.Object, java.lang.Object)
+     */
+    @Override
+    @SuppressWarnings("synthetic-access")
+    protected boolean equal(Object candidate, Object filterValue) {
+        if(filterValue instanceof Filter){
+            List<FilterProperty> filterProperties = FilterProperty.getFilterProperties((Filter)filterValue);
+            MappedRecordFilter mappedRecordFilter = new MappedRecordFilter(
+                filterProperties.toArray(new FilterProperty[filterProperties.size()])
+            ){
+                @Override
+                protected Iterator<?> getObjectIterator(
+                    Object candidate,
+                    String attribute
+                ) throws Exception {
+                    return MappedRecordFilter.this.getObjectIterator(candidate, attribute);
+                }
+                @Override
+                protected Iterator<?> getValuesIterator(
+                    Object candidate,
+                    String attribute
+                ) throws ServiceException {
+                    return MappedRecordFilter.this.getValuesIterator(candidate, attribute);
+                }
+            };
+            return mappedRecordFilter.accept(candidate);
+        } else {
+            return super.equal(candidate, filterValue);
+        }
+    }
+    
+}

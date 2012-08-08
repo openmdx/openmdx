@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectInspectorServlet.java,v 1.115 2010/08/10 08:40:44 wfro Exp $
+ * Name:        $Id: ObjectInspectorServlet.java,v 1.127 2011/11/28 13:32:27 wfro Exp $
  * Description: ObjectInspectorServlet 
- * Revision:    $Revision: 1.115 $
+ * Revision:    $Revision: 1.127 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/10 08:40:44 $
+ * Date:        $Date: 2011/11/28 13:32:27 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -69,7 +69,6 @@
  *       translation must be supported.</li>
  *   <li>evaluator: class implementing the interface org.openmdx.base.application.generic.servlet.Evaluation_1_0.</li>
  *   <li>httpEncoder: class implementing the interface org.openmdx.portal.servlet.HttpEncoder_1_0.</li>
- *   <li>roleMapper: class implementing the interface org.openmdx.portal.servlet.RoleMapper_1_0.</li>
  *   <li>realm: xri of realm containing the security principals.</li>
  *   <li>rootObject[i]: xri of segment containing application data to browse. Must by provided by ejb/data.</li>
  *   <li>uiSegment: xri of segment used to store ui configuration. Must be provided by ejb/data.</li>
@@ -99,6 +98,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -130,22 +130,21 @@ import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.id.UUIDs;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.action.AbstractAction;
+import org.openmdx.portal.servlet.action.ActionPerformResult;
+import org.openmdx.portal.servlet.action.BoundAction;
+import org.openmdx.portal.servlet.action.FindObjectAction;
+import org.openmdx.portal.servlet.action.FindObjectsAction;
+import org.openmdx.portal.servlet.action.ReloadAction;
+import org.openmdx.portal.servlet.action.UnboundAction;
 import org.openmdx.portal.servlet.control.ControlFactory;
-import org.openmdx.portal.servlet.eventhandler.EditObjectEventHandler;
-import org.openmdx.portal.servlet.eventhandler.EventHandlerHelper;
-import org.openmdx.portal.servlet.eventhandler.FindObjectsEventHandler;
-import org.openmdx.portal.servlet.eventhandler.GridEventHandler;
-import org.openmdx.portal.servlet.eventhandler.HandleEventResult;
-import org.openmdx.portal.servlet.eventhandler.LookupObjectEventHandler;
-import org.openmdx.portal.servlet.eventhandler.SessionEventHandler;
-import org.openmdx.portal.servlet.eventhandler.ShowObjectEventHandler;
 import org.openmdx.portal.servlet.loader.CodesLoader;
 import org.openmdx.portal.servlet.loader.DataLoader;
 import org.openmdx.portal.servlet.loader.FilterLoader;
@@ -179,9 +178,8 @@ import org.openmdx.uses.org.apache.commons.fileupload.FileUploadException;
  *   <li>initPrincipal: principal during servlet init for loading codes and data. Default is root.</li>
  *   <li>codeSegment: xri of segment containing codes. This is required if code-to-text
  *       translation must be supported.</li>
- *   <li>evaluator: class implementing the interface org.openmdx.portal.servlet.PortalExtension_1_0.</li>
+ *   <li>portalExtension: class implementing the interface org.openmdx.portal.servlet.PortalExtension_1_0.</li>
  *   <li>httpEncoder: class implementing the interface org.openmdx.portal.servlet.HttpEncoder_1_0.</li>
- *   <li>roleMapper: class implementing the interface org.openmdx.portal.servlet.RoleMapper_1_0.</li>
  *   <li>realm: xri of realm containing the security principals.</li>
  *   <li>rootObject[i]: xri of segment containing application data to browse. Must by provided by ejb/data.</li>
  *   <li>uiSegment: xri of segment used to store ui configuration. Must be provided by ejb/ui.</li>
@@ -245,7 +243,7 @@ public class ObjectInspectorServlet
         System.out.println();
         System.out.println();
         System.out.println(messagePrefix + "Starting web application \"" + conf.getServletContext().getContextPath() + "\"");
-        System.out.println(messagePrefix + "Driven by openMDX/Portal. Revision: $Revision: 1.115 $");
+        System.out.println(messagePrefix + "Driven by openMDX/Portal. Revision: $Revision: 1.127 $");
         System.out.println(messagePrefix + "For more information see http://www.openmdx.org");
         System.out.println(messagePrefix + "Loading... (see log for more information)");
         
@@ -306,24 +304,28 @@ public class ObjectInspectorServlet
                 break;
             }
         }      
-        // Role mapper
-        this.roleMapper = new DefaultRoleMapper();
+        // Ui config
+        this.uiProviderPath = new Path(this.getInitParameter("uiSegment")).getPrefix(3);
+        // Get portal extension
+        this.portalExtension = new DefaultPortalExtension();
         try {
-            if(this.getInitParameter(WebKeys.CONFIG_ROLE_MAPPER) != null) {
-                this.roleMapper = Classes.<RoleMapper_1_0>getApplicationClass(this.getInitParameter(WebKeys.CONFIG_ROLE_MAPPER)).newInstance();
+            if(this.getInitParameter("evaluator") != null) {
+                this.portalExtension = Classes.<PortalExtension_1_0>getApplicationClass(this.getInitParameter("evaluator")).newInstance();
+            }
+            else if(this.getInitParameter("portalExtension") != null) {
+                this.portalExtension = Classes.<PortalExtension_1_0>getApplicationClass(this.getInitParameter("portalExtension")).newInstance();
             }
         }
         catch(Exception e) {
-            this.log("loading " + WebKeys.CONFIG_ROLE_MAPPER + " failed", e);
-        }      
-        // Ui config
-        this.uiProviderPath = new Path(this.getInitParameter("uiSegment")).getPrefix(3);
+        	this.log("loading PortalExtension failed", e);
+        }
+        // Reload UI
         this.reloadUi();
         // Get texts
         try {
             this.textsLoader = new TextsLoader(
                 this.getServletContext(),
-                this.roleMapper
+                this.portalExtension
             );
             this.textsFactory = this.textsLoader.loadTexts(
                 this.locale
@@ -336,7 +338,7 @@ public class ObjectInspectorServlet
         try {
             this.layoutLoader = new LayoutLoader(
                 this.getServletContext(),
-                this.roleMapper
+                this.portalExtension
             );
             this.layoutFactory = this.layoutLoader.loadLayouts(
                 this.locale,
@@ -350,7 +352,7 @@ public class ObjectInspectorServlet
         try {
             this.reportsLoader = new ReportsLoader(
                 this.getServletContext(),
-                this.roleMapper
+                this.portalExtension
             );
             this.reportFactory = this.reportsLoader.loadReportDefinitions(
                 context,
@@ -365,12 +367,12 @@ public class ObjectInspectorServlet
         try {
             this.wizardsLoader = new WizardsLoader(
                 this.getServletContext(),
-                this.roleMapper
+                this.portalExtension
             );
             this.wizardFactory = this.wizardsLoader.loadWizardDefinitions(
                 context,
                 this.locale,
-                model
+                this.model
             );
         }
         catch(ServiceException e) {
@@ -399,7 +401,7 @@ public class ObjectInspectorServlet
         try {
             new DataLoader(
                 this.getServletContext(), 
-                this.roleMapper,
+                this.portalExtension,
                 this.pmfMetaData              
             ).loadData(
                 "bootstrap"
@@ -412,8 +414,8 @@ public class ObjectInspectorServlet
         try {
             this.filterLoader = new FilterLoader(
                 this.getServletContext(),
-                this.roleMapper,
-                model
+                this.portalExtension,
+                this.model
             );
             this.filterLoader.loadFilters(
                 this.uiContext,
@@ -455,16 +457,6 @@ public class ObjectInspectorServlet
             catch(Exception e) {}
         }        
         SysLog.info("uiRefreshRate", new Integer(this.uiRefreshRate));
-        // Portal extension
-        this.evaluator = new DefaultPortalExtension();
-        try {
-            if(this.getInitParameter("evaluator") != null) {
-                this.evaluator = Classes.<PortalExtension_1_0>getApplicationClass(this.getInitParameter("evaluator")).newInstance();
-            }
-        }
-        catch(Exception e) {
-        	this.log("loading evaluator failed", e);
-        }
         // httpEncoder
         this.htmlEncoder = new DefaultHtmlEncoder();
         try {
@@ -500,13 +492,13 @@ public class ObjectInspectorServlet
             PersistenceManager pm = this.createPersistenceManagerData(
                 Arrays.asList(
                     new String[]{
-                        this.roleMapper.getAdminPrincipal(new Path(codeSegmentIdentity).get(4))
+                        this.portalExtension.getAdminPrincipal(new Path(codeSegmentIdentity).get(4))
                     }
                 )
             );
-            RefObject_1_0 codeSegment = codeSegmentIdentity == null
-                ? null
-                : (RefObject_1_0)pm.getObjectById(codeSegmentIdentity);
+            RefObject_1_0 codeSegment = codeSegmentIdentity == null ? 
+            	null : 
+            		(RefObject_1_0)pm.getObjectById(codeSegmentIdentity);
             if(codeSegment != null) {
                 this.codes = new Codes(codeSegment);
             }
@@ -560,6 +552,18 @@ public class ObjectInspectorServlet
     }
 
     //-------------------------------------------------------------------------
+    /**
+     * Override for custom-specific application context implementation.
+     */
+    protected ApplicationContext newApplicationContext(
+    ) {
+    	return new ApplicationContext();
+    }
+    
+    //-------------------------------------------------------------------------
+    /**
+     * Override for custom-specific application context implementation.
+     */
     protected ApplicationContext createApplicationContext(
         HttpSession session,
         HttpServletRequest request,
@@ -576,46 +580,34 @@ public class ObjectInspectorServlet
 	        	}
 	        }
         }
-        ApplicationContextConfiguration configuration = new ApplicationContextConfiguration();
-        configuration.setApplicationName(this.applicationName);
-        configuration.setLocale((String)session.getAttribute(WebKeys.LOCALE_KEY));
-        configuration.setTimezone( (String)session.getAttribute(WebKeys.TIMEZONE_KEY));
-        configuration.setControlFactory(this.controlFactory);
-        configuration.setSessionId(session.getId());
-        configuration.setViewPortType(isMobileUserAgent ? ViewPort.Type.MOBILE : ViewPort.Type.STANDARD);
-        configuration.setLoginPrincipal(request.getUserPrincipal() == null ? null : request.getUserPrincipal().getName());
-        configuration.setUserRole(userRole);
-        configuration.setLoginRealmIdentity(this.realmIdentity);
-        configuration.setRetrieveByPathPatterns(this.retrieveByPathPatterns);
-        configuration.setUserHomeIdentity(this.userHomeIdentity);
-        configuration.setRootObjectIdentities(this.rootObjectIdentities);
-        configuration.setPortalExtension(this.evaluator);
-        configuration.setHttpEncoder(this.htmlEncoder);
-        configuration.setFilters(this.filters);
-        configuration.setCodes(this.codes);
-        configuration.setLayoutFactory(this.layoutFactory);
-        configuration.setTempDirectory((File)this.getServletContext().getAttribute("javax.servlet.context.tempdir"));
-        configuration.setTempFilePrefix(request.getSession().getId() + "-");
-        configuration.setQuickAccessorsReference(this.favoritesReference);
-        configuration.setMimeTypeImpls(this.mimeTypeImpls);
-        configuration.setExceptionDomain(this.exceptionDomain);
-        configuration.setFilterCriteriaField(this.filterCriteriaField);
-        configuration.setFilterValuePatterns(this.filterValuePattern);
-        configuration.setPmfData(this.pmfData);
-        configuration.setRoleMapper(this.roleMapper);
-        configuration.setModel(this.model);
-        
-		try {
-			String applicationContextClassName = this.getInitParameter("applicationContextClassName") == null ?
-				ApplicationContext.class.getName() :
-					this.getInitParameter("applicationContextClassName");
-			ApplicationContext app = Classes.<ApplicationContext>getApplicationClass(applicationContextClassName).newInstance();
-	        app.apply(configuration);
-	        return app;
-		} catch(Exception e) {
-			throw new ServiceException(e);
-		}
-        
+        ApplicationContext app = this.newApplicationContext();
+        app.setApplicationName(this.applicationName);
+        app.setLocale((String)session.getAttribute(WebKeys.LOCALE_KEY));
+        app.setTimezone( (String)session.getAttribute(WebKeys.TIMEZONE_KEY));
+        app.setControlFactory(this.controlFactory);
+        app.setSessionId(session.getId());
+        app.setViewPortType(isMobileUserAgent ? ViewPort.Type.MOBILE : ViewPort.Type.STANDARD);
+        app.setLoginPrincipal(request.getUserPrincipal() == null ? null : request.getUserPrincipal().getName());
+        app.setUserRole(userRole);
+        app.setLoginRealmIdentity(this.realmIdentity);
+        app.setRetrieveByPathPatterns(this.retrieveByPathPatterns);
+        app.setUserHomeIdentity(this.userHomeIdentity);
+        app.setRootObjectIdentities(this.rootObjectIdentities);
+        app.setPortalExtension(this.portalExtension);
+        app.setHttpEncoder(this.htmlEncoder);
+        app.setFilters(this.filters);
+        app.setCodes(this.codes);
+        app.setLayoutFactory(this.layoutFactory);
+        app.setTempDirectory((File)this.getServletContext().getAttribute("javax.servlet.context.tempdir"));
+        app.setTempFilePrefix(request.getSession().getId() + "-");
+        app.setQuickAccessorsReference(this.favoritesReference);
+        app.setMimeTypeImpls(this.mimeTypeImpls);
+        app.setExceptionDomain(this.exceptionDomain);
+        app.setFilterCriteriaField(this.filterCriteriaField);
+        app.setFilterValuePatterns(this.filterValuePattern);
+        app.setPmfData(this.pmfData);
+        app.setModel(this.model);
+        return app;
     }
   
     //-------------------------------------------------------------------------
@@ -624,7 +616,7 @@ public class ObjectInspectorServlet
         try {
             this.uiLoader = new UiLoader(
                 this.getServletContext(),
-                this.roleMapper,
+                this.portalExtension,
                 this.model,
                 this.uiProviderPath
             );
@@ -659,6 +651,18 @@ public class ObjectInspectorServlet
         }
     }
 
+    //-------------------------------------------------------------------------
+    protected PrintWriter getWriter(
+        HttpServletRequest request,
+        HttpServletResponse response        
+    ) throws IOException {
+        OutputStream os = response.getOutputStream(); 
+        response.setContentType("text/html");
+        // Do not cache replies
+        response.addDateHeader("Expires", -1);
+        return new PrintWriter(os);
+    }
+    
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     private void handleRequest(
@@ -727,15 +731,17 @@ public class ObjectInspectorServlet
             this.reloadUi();
         }        
         // Application
-        ApplicationContext application = (ApplicationContext)session.getAttribute(WebKeys.APPLICATION_KEY);
-        if(application == null) {
+        ApplicationContext app = (ApplicationContext)session.getAttribute(WebKeys.APPLICATION_KEY);
+        if(app == null) {
             try {
             	synchronized(session) {
-            		application = (ApplicationContext)session.getAttribute(WebKeys.APPLICATION_KEY);
-            		if(application == null) {
+            		app = (ApplicationContext)session.getAttribute(WebKeys.APPLICATION_KEY);
+            		if(app == null) {
+            			app = this.createApplicationContext(session, request, null);
+            			app.init();
 		                session.setAttribute(
 		                    WebKeys.APPLICATION_KEY,
-		                    application = this.createApplicationContext(session, request, null)
+		                    app
 		                );
             		}
             	}
@@ -761,12 +767,12 @@ public class ObjectInspectorServlet
                 return;
             }
         }
-        Map parameterMap = request.getParameterMap();
+        Map<String,String[]> parameterMap = request.getParameterMap();
         // Set locale if passed as parameter
         if(parameterMap.get(WebKeys.REQUEST_PARAMETER_LOCALE) != null) {
             String[] locales = (String[])parameterMap.get(WebKeys.REQUEST_PARAMETER_LOCALE);
             if(locales.length > 0) {
-                application.setCurrentLocale(locales[0]);
+                app.setCurrentLocale(locales[0]);
             }
         }
           
@@ -782,24 +788,18 @@ public class ObjectInspectorServlet
                     request,
                     this.requestSizeThreshold,
                     this.requestSizeMax,
-                    application.getTempDirectory().getPath()
+                    app.getTempDirectory().getPath()
                 );
                 SysLog.detail("request parsed");
                 for(Iterator i = items.iterator(); i.hasNext(); ) {
                     FileItem item = (FileItem)i.next();
                     if(item.isFormField()) {
-                    	SysLog.trace("form field=" + item.getFieldName());
                         parameterMap.put(
                           item.getFieldName(),
                           new String[]{item.getString("UTF-8")}
                         );
                     }
                     else {
-                    	SysLog.trace("file.fieldName", item.getFieldName());
-                    	SysLog.trace("file.contentType", item.getContentType());
-                    	SysLog.trace("file.isInMemory", item.isInMemory());
-                    	SysLog.trace("file.sizeInBytes", item.getSize());
-                    	SysLog.trace("file.name", item.getName());                        
                         // Reset binary
                         if("#NULL".equals(item.getName())) {
                             parameterMap.put(
@@ -813,7 +813,7 @@ public class ObjectInspectorServlet
                                 item.getFieldName(),
                                 new String[]{item.getName()}
                             );
-                            String location = application.getTempFileName(item.getFieldName(), "");
+                            String location = app.getTempFileName(item.getFieldName(), "");
                             // Bytes
                             File outFile = new File(location);                          
                             try {
@@ -845,7 +845,7 @@ public class ObjectInspectorServlet
             catch(FileUploadException e) {
                 ServiceException e0 = new ServiceException(e);
                 SysLog.detail(e.getMessage(), e0);
-                SysLog.warning("Can not upload file", Arrays.asList(e.getMessage(), application.getCurrentUserRole()));
+                SysLog.warning("Can not upload file", Arrays.asList(e.getMessage(), app.getCurrentUserRole()));
             }
         }    
         // requestId. The form field has priority over referrer
@@ -857,14 +857,14 @@ public class ObjectInspectorServlet
               this.getParameter(parameterMap, WebKeys.REQUEST_ID + ".submit");
         SysLog.detail(WebKeys.REQUEST_ID, requestId);    
         // event. The form field has priority over referer
-        int event = Action.EVENT_NONE;
+        short event = Action.EVENT_NONE;
         try {
             event = 
                 this.getParameter(parameterMap, WebKeys.REQUEST_EVENT + ".submit") == null ? 
                     this.getParameter(parameterMap, WebKeys.REQUEST_EVENT) == null ? 
                         Action.EVENT_NONE : 
-                        Integer.parseInt(this.getParameter(parameterMap, WebKeys.REQUEST_EVENT)) : 
-                    Integer.parseInt(this.getParameter(parameterMap, WebKeys.REQUEST_EVENT + ".submit"));
+                        Short.parseShort(this.getParameter(parameterMap, WebKeys.REQUEST_EVENT)) : 
+                    Short.parseShort(this.getParameter(parameterMap, WebKeys.REQUEST_EVENT + ".submit"));
         }
         catch(Exception e) {}
         SysLog.detail("event", event);    
@@ -933,13 +933,13 @@ public class ObjectInspectorServlet
             null;
         String newRole = event == Action.EVENT_SET_ROLE ? 
             Action.getParameter(parameter, Action.PARAMETER_NAME) : 
-            (requestId != null) || (requestedObjectIdentity == null) || (requestedObjectIdentity.size() < 5) ? 
-                application.getCurrentUserRole() : 
-                application.getCurrentUserRole().substring(0, application.getCurrentUserRole().indexOf("@") + 1) + requestedObjectIdentity.get(4);
+            	(requestId != null) || (requestedObjectIdentity == null) || (requestedObjectIdentity.size() < 5) ? 
+            		app.getCurrentUserRole() : 
+            			app.getPortalExtension().getNewUserRole(app, requestedObjectIdentity);
         // A new application context must be created in case of a role change. 
         if(
             (event == Action.EVENT_SET_ROLE) ||            
-            !newRole.equals(application.getCurrentUserRole())
+            !newRole.equals(app.getCurrentUserRole())
         ) {
             // A role change always resets all current and cached views
             view = null;
@@ -948,16 +948,18 @@ public class ObjectInspectorServlet
                 this.uiRefreshedAt
             );
             try {
+            	app = this.createApplicationContext(
+                    session, 
+                    request, 
+                    newRole
+                );
+            	app.init();
                 session.setAttribute(
                     WebKeys.APPLICATION_KEY,
-                    application = this.createApplicationContext(
-                        session, 
-                        request, 
-                        newRole
-                    )
+                    app
                 );
-                application.createPmControl();
-                application.createPmData();
+                app.createPmControl();
+                app.createPmData();
             }
             catch(Exception e) {
                 ServiceException e0 = new ServiceException(e);
@@ -967,7 +969,7 @@ public class ObjectInspectorServlet
         }
         if(
             (view == null) &&
-            (event !=  Action.EVENT_FIND_OBJECTS)
+            (event !=  FindObjectsAction.EVENT_ID)
         ) {
           SysLog.detail("no view or view with empty object, creating default");
           try {
@@ -977,7 +979,7 @@ public class ObjectInspectorServlet
                           UUIDs.newUUID().toString(),
                           null,
                           requestedObjectIdentity,
-                          application,
+                          app,
                           new LinkedHashMap<Path,Action>(),
                           null,
                           null
@@ -992,7 +994,7 @@ public class ObjectInspectorServlet
               if(view == null) {
                   // Try to retrieve home XRI from quick accessors. Locate quick
                   // accessor with name ending with *
-                  QuickAccessor[] quickAccessors = application.getQuickAccessors();
+                  QuickAccessor[] quickAccessors = app.getQuickAccessors();
                   Path homeObjectIdentity = null;
                   for(int i = 0; i < quickAccessors.length; i++) {
                       if(quickAccessors[i].getName().endsWith("*")) {
@@ -1002,13 +1004,13 @@ public class ObjectInspectorServlet
                   }
                   // If no quick accessor is found fall back to root object 0
                   if(homeObjectIdentity == null) {
-                      homeObjectIdentity = application.getRootObject()[0].refGetPath();
+                      homeObjectIdentity = app.getRootObject()[0].refGetPath();
                   }              
                   view = new ShowObjectView(
                       UUIDs.newUUID().toString(),
                       null,
                       homeObjectIdentity,
-                      application,
+                      app,
                       new LinkedHashMap<Path,Action>(),
                       null,
                       null
@@ -1018,7 +1020,7 @@ public class ObjectInspectorServlet
               // Otherwise send back a window.location.href. This reloads the page based on this view
               if(
                   (view != null) && 
-                  (event != Action.EVENT_FIND_OBJECT)
+                  (event != FindObjectAction.EVENT_ID)
               ) {
                   view.createRequestId();
                   showViewsCache.addView(
@@ -1029,7 +1031,7 @@ public class ObjectInspectorServlet
                   ViewPort p = ViewPortFactory.openPage(
                       view,
                       request,
-                      EventHandlerHelper.getWriter(request, response)
+                      this.getWriter(request, response)
                   );
                   p.write("<script language=\"javascript\" type=\"text/javascript\">");
                   String requestURL = request.getRequestURL().toString();
@@ -1064,23 +1066,22 @@ public class ObjectInspectorServlet
         SysLog.detail("time (ms) to parse parameters and refresh config", (t1-t0));
         t0 = t1;        
         // EVENT_RELOAD. Refresh application context.
-        if(event == Action.EVENT_RELOAD) {
+        if(event == ReloadAction.EVENT_ID) {
             try {            
-                application.createPmControl();
-                application.resetPmData();
-                // Reload codes and data in case the init principal
-                // issues a reload
-                if(this.roleMapper.isRootPrincipal(application.getCurrentUserRole())) {
+                app.createPmControl();
+                app.resetPmData();
+                // Reload codes and data in case the root principal issues a reload
+                if(this.portalExtension.isRootPrincipal(app.getCurrentUserRole())) {
                     // Codes
                     try {
                         new CodesLoader(
                             this.getServletContext(), 
-                            this.roleMapper,
+                            this.portalExtension,
                             this.pmfMetaData              
                         ).loadCodes(
                             this.locale
                         );
-                        this.codes.refresh();
+                        Codes.refresh(app.getPmControl());
                     }
                     catch(ServiceException e) {
                     	this.log("code import failed", e);
@@ -1089,7 +1090,7 @@ public class ObjectInspectorServlet
                     try {
                         new DataLoader(
                             this.getServletContext(),
-                            this.roleMapper,
+                            this.portalExtension,
                             this.pmfMetaData
                         ).loadData(
                             "data"
@@ -1113,7 +1114,7 @@ public class ObjectInspectorServlet
             catch(ServiceException e) {
                 throw new ServletException("Can not refresh application", e);
             } 
-        }        
+        }
         // EVENT_DOWNLOAD
         if(
             (event == Action.EVENT_DOWNLOAD_FROM_LOCATION) ||
@@ -1131,7 +1132,7 @@ public class ObjectInspectorServlet
                 String location = Action.getParameter(parameter, Action.PARAMETER_LOCATION);
                 SysLog.trace("location", location);
                 InputStream is = new FileInputStream(
-                    application.getTempFileName(location, "")
+                    app.getTempFileName(location, "")
                 );
                 if(is != null) {
                     int b = 0;
@@ -1155,11 +1156,11 @@ public class ObjectInspectorServlet
             else {
                 try {
                     Path objectIdentity = new Path(Action.getParameter(parameter, Action.PARAMETER_OBJECTXRI));
-                    PersistenceManager pm = application.getNewPmData();
+                    PersistenceManager pm = app.getNewPmData();
                     RefObject_1_0 refObj = (RefObject_1_0)pm.getObjectById(objectIdentity);
                     String feature = Action.getParameter(parameter, Action.PARAMETER_FEATURE);
-                    ModelElement_1_0 featureDef = application.getModel().getElement(feature);
-                    if(Multiplicities.STREAM.equals(featureDef.objGetValue("multiplicity"))) {
+                    ModelElement_1_0 featureDef = app.getModel().getElement(feature);
+                    if(Multiplicity.STREAM.toString().equals(featureDef.objGetValue("multiplicity"))) {
                         long length = refObj.refGetValue(feature, os, 0);
                         response.setContentLength(new Long(length).intValue());       
                     }
@@ -1186,163 +1187,128 @@ public class ObjectInspectorServlet
             SysLog.detail("time (ms) to handle event", (t1-t0));
             t0 = t1;       
         }    
-        // FindObjectsEventHandler
-        else if(FindObjectsEventHandler.acceptsEvent(event)) {
-            FindObjectsEventHandler.handleRequest(
-                request,
-                response,
-                application,
-                parameter,
-                (String[])parameterMap.get(WebKeys.REQUEST_PARAMETER_FILTER_VALUES)
-            );
-            t1 = System.currentTimeMillis();
-            SysLog.detail("time (ms) to handle find object event", (t1-t0));
-            t0 = t1;                   
-        }    
-        // GridEventHandler
-        else if(GridEventHandler.acceptsEvent(event)) {
-            GridEventHandler.handleEvent(
-                event,
-                view,
-                request,
-                response,
-                application,
-                parameter,
-                parameterMap,
-                showViewsCache
-            );
-            t1 = System.currentTimeMillis();
-            SysLog.detail("time (ms) to handle grid event", (t1-t0));
-            t0 = t1;                   
-        }
-        // SessionEventHandler
-        else if(SessionEventHandler.acceptsEvent(event)) {
-            SessionEventHandler.handleEvent(
-                event,
-                view,
-                request,
-                response,
-                application,
-                parameter,
-                parameterMap
-            );
-            t1 = System.currentTimeMillis();
-            SysLog.detail("time (ms) to handle session event", (t1-t0));
-            t0 = t1;                       
-        }                
-        // Dispatch event to view    
-        else {                    
-            // handle action and return view for new target
-        	SysLog.detail("parameterMap", parameterMap);
-            HandleEventResult result = null;
-            try {
-                if(view != null) {
-                    view.getApplicationContext().getErrorMessages().clear();
-                    if(LookupObjectEventHandler.acceptsEvent(event)) {
-                        result = LookupObjectEventHandler.handleEvent(
-                            event,
-                            view,
-                            request,
-                            response,
-                            application,
-                            parameter,
-                            parameterMap
-                        );                  
-                    }
-                    else if(ShowObjectEventHandler.acceptsEvent(event)) {
-                        result = ShowObjectEventHandler.handleEvent(
-                            event,
-                            (ShowObjectView)view,
-                            parameter,
-                            session,
-                            parameterMap,
-                            showViewsCache
-                        );
-                    }
-                    else if(EditObjectEventHandler.acceptsEvent(event)) {
-                        result = EditObjectEventHandler.handleEvent(
-                            event,
-                            (EditObjectView)view,
-                            request,
-                            response,
-                            parameter,
-                            session,
-                            parameterMap,
-                            editViewsCache,
-                            showViewsCache
-                        );                  
-                    }
-                }
-            }
-            catch(Exception e) {
-            	SysLog.warning("handleEvent throws exception", e.getMessage());
-                new ServiceException(e).log();
-            }    
-            // PERFORMANCE
-            t1 = System.currentTimeMillis();
-            SysLog.detail("time (ms) to handle event", (t1-t0));
-            t0 = t1;      
-            if(
-                (result == null) ||
-                (result.getStatusCode() == HandleEventResult.StatusCode.FORWARD)
-            ) {
-                ObjectView nextView = result == null ? 
-                    null : 
-                    result.getView();
-                // No nextView. go back to default view
-                if(nextView == null) {
-                	SysLog.detail("no nextView. Creating default");
-                    try {
-                        nextView = new ShowObjectView(
-                            UUIDs.newUUID().toString(),
-                            null,
-                            application.getRootObject()[0].refGetPath(),
-                            application,
-                            new LinkedHashMap<Path,Action>(),
-                            null,
-                            null
-                        );
-                    }
-                    catch(Exception e) {
-                    	SysLog.warning("Can not get default view", e.getMessage());
-                        new ServiceException(e).log();
-                    }
-                }              
-                // Set next view
-                session.setAttribute(
-                    WebKeys.CURRENT_VIEW_KEY,
-                    nextView
-                );              
-                // Add next view to set of views
-                nextView.createRequestId();
-                if(nextView instanceof ShowObjectView) {
-                    showViewsCache.addView(
-                        nextView.getRequestId(),
-                        nextView
-                    );
-                }
-                else if(nextView instanceof EditObjectView){
-                    editViewsCache.addView(
-                        nextView.getRequestId(),
-                        nextView
-                    );
-                }            
-                // reply
-                ServletContext sc = this.getServletContext();
-                RequestDispatcher rd = sc.getRequestDispatcher(
-                    "/jsp/" + nextView.getType() + ".jsp" + 
-                    "?" + Action.PARAMETER_REQUEST_ID + "=" + nextView.getRequestId() +
-                    (result.getViewPortType() == null ? "" : "&" + Action.PARAMETER_VIEW_PORT + "=" + result.getViewPortType().toString())
-                ); 
-                SysLog.detail("forward reply");
-                try {
-                    rd.forward(request, response);
-                }
+        // Dispatch event to action
+        else {
+        	AbstractAction action = this.portalExtension.getActionFactory().getAction(event);
+        	if(action instanceof UnboundAction) {
+        		UnboundAction unboundAction = (UnboundAction)action;
+        		unboundAction.perform(
+        			request, 
+        			response, 
+        			app, 
+        			parameter, 
+        			parameterMap
+        		);
+                t1 = System.currentTimeMillis();
+                SysLog.detail("time (ms) to handle find object event", (t1-t0));
+                t0 = t1;                   
+        	} else if(action instanceof BoundAction) {
+        		ActionPerformResult result = null;        		
+        		try {
+	        		if(view != null) {
+	                    view.getApplicationContext().getErrorMessages().clear();        			
+		        		BoundAction boundAction = (BoundAction)action;        		
+		        		result = boundAction.perform(
+		        			view, 
+		        			request, 
+		        			response, 
+		        			parameter, 
+		        			session, 
+		        			parameterMap, 
+		        			editViewsCache, 
+		        			showViewsCache
+		        		);
+		                t1 = System.currentTimeMillis();
+		                SysLog.detail("time (ms) to handle find object event", (t1-t0));
+		                t0 = t1;                   
+	        		}
+        		}
                 catch(Exception e) {
-                	SysLog.warning("Unable forward request", e.getMessage());
+                	SysLog.warning("handleEvent throws exception", e.getMessage());
+                    new ServiceException(e).log();
+                }    
+                // PERFORMANCE
+                t1 = System.currentTimeMillis();
+                SysLog.detail("time (ms) to handle event", (t1-t0));
+                t0 = t1;      
+                if(
+                    (result == null) ||
+                    (result.getStatusCode() == ActionPerformResult.StatusCode.FORWARD)
+                ) {
+                    ObjectView nextView = result == null ? 
+                        null : 
+                        result.getView();
+                    // No nextView. go back to default view
+                    if(nextView == null) {
+                    	SysLog.detail("no nextView. Creating default");
+                        try {
+                            nextView = new ShowObjectView(
+                                UUIDs.newUUID().toString(),
+                                null,
+                                app.getRootObject()[0].refGetPath(),
+                                app,
+                                new LinkedHashMap<Path,Action>(),
+                                null,
+                                null
+                            );
+                        }
+                        catch(Exception e) {
+                        	SysLog.warning("Can not get default view", e.getMessage());
+                            new ServiceException(e).log();
+                        }
+                    }              
+                    // Set next view
+                    session.setAttribute(
+                        WebKeys.CURRENT_VIEW_KEY,
+                        nextView
+                    );              
+                    // Add next view to set of views
+                    nextView.createRequestId();
+                    if(nextView instanceof ShowObjectView) {
+                        showViewsCache.addView(
+                            nextView.getRequestId(),
+                            nextView
+                        );
+                    }
+                    else if(nextView instanceof EditObjectView){
+                        editViewsCache.addView(
+                            nextView.getRequestId(),
+                            nextView
+                        );
+                    }            
+                    String autostartUrl = app.getPortalExtension().getAutostartUrl(app);
+                    // Redirect to autostart URL
+                    if(autostartUrl != null) {
+                    	URL url = new URL("http://localhost/" + request.getContextPath() + autostartUrl);
+                    	boolean hasQuery = url.getQuery() != null;
+                    	boolean hasXri = autostartUrl.indexOf(Action.PARAMETER_OBJECTXRI) >= 0;
+                    	response.sendRedirect(
+                        	request.getContextPath() + 
+                        	autostartUrl + 
+                        	((hasQuery ? "&" : "?") + Action.PARAMETER_REQUEST_ID + "=" + nextView.getRequestId()) +
+                        	(hasXri ? "" : "&" + Action.PARAMETER_OBJECTXRI + "=" + nextView.getRefObject().refMofId())
+                    	);
+                    }
+                    // Forward to page renderer JSP
+                    else {
+	                    RequestDispatcher rd = this.getServletContext().getRequestDispatcher(
+	                        "/jsp/" + nextView.getType() + ".jsp" + 
+	                        "?" + Action.PARAMETER_REQUEST_ID + "=" + nextView.getRequestId() +
+	                        (result.getViewPortType() == null ? "" : ("&" + Action.PARAMETER_VIEW_PORT + "=" + result.getViewPortType().toString()))
+	                    );
+	                    SysLog.detail("forward reply");
+	                    try {
+	                        rd.forward(
+	                        	request, 
+	                        	response
+	                        );
+	                    } catch(Exception e) {
+	                    	SysLog.warning("Unable forward request", e.getMessage());
+	                    }
+                    }
+                    SysLog.detail("done");
                 }
-                SysLog.detail("done");
-            }
+        	}
         }
     }
   
@@ -1376,9 +1342,8 @@ public class ObjectInspectorServlet
     private Path realmIdentity;
     private String userHomeIdentity;
     private String[] rootObjectIdentities;
-    private PortalExtension_1_0 evaluator = null;
+    private PortalExtension_1_0 portalExtension = null;
     private HtmlEncoder_1_0 htmlEncoder = null;
-    private RoleMapper_1_0 roleMapper = null;
     private Model_1_0 model = null;
     private List<Path> retrieveByPathPatterns = null;
     private Map filters = new HashMap();

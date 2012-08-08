@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DataLoader.java,v 1.26 2009/12/17 14:41:56 wfro Exp $
+ * Name:        $Id: DataLoader.java,v 1.28 2011/09/16 09:01:41 wfro Exp $
  * Description: DataLoader
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/17 14:41:56 $
+ * Date:        $Date: 2011/09/16 09:01:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -81,24 +81,24 @@ import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.portal.servlet.RoleMapper_1_0;
+import org.openmdx.portal.servlet.PortalExtension_1_0;
 
 public class DataLoader
     extends Loader {
 
-  //-------------------------------------------------------------------------
-  public DataLoader(
-      ServletContext context,
-      RoleMapper_1_0 roleMapper,            
-      PersistenceManagerFactory pmf
-  ) {
-      super(
-          context,
-          roleMapper
-      );
-      this.pmf = pmf;
-  }
-    
+	//-------------------------------------------------------------------------
+	public DataLoader(
+		ServletContext context,
+		PortalExtension_1_0 portalExtension,            
+		PersistenceManagerFactory pmf
+	) {
+		super(
+			context,
+			portalExtension
+		);
+		this.pmf = pmf;
+	}
+
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
     synchronized public void loadData(
@@ -175,7 +175,8 @@ public class DataLoader
                                         entry,
                                         existing,
                                         loadedObjects, // object cache
-                                        null // ignorable features
+                                        null, // ignorable features
+                                        true // compareWithBeforeImage
                                     ); // modified is no longer determined by toRefObject()
                                 }
                                 else {
@@ -190,7 +191,8 @@ public class DataLoader
                                         entry,
                                         newEntry,
                                         loadedObjects, // object cache
-                                        null // ignorable features
+                                        null, // ignorable features
+                                        true // compareWithBeforeImage
                                     );
                                     Path entryPath = Object_2Facade.getPath(entry);
                                     Path parentIdentity = entryPath.getParent().getParent();

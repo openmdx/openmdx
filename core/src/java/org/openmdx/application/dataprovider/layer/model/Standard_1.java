@@ -1,16 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.42 2010/11/16 00:12:32 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Standard_1.java,v 1.46 2012/01/05 23:20:21 hburger Exp $
  * Description: Model layer
- * Revision:    $Revision: 1.42 $
+ * Revision:    $Revision: 1.46 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/16 00:12:32 $
+ * Date:        $Date: 2012/01/05 23:20:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,19 +50,8 @@
  */
 package org.openmdx.application.dataprovider.layer.model;
 
-import static org.openmdx.base.accessor.cci.SystemAttributes.CONTEXT_PREFIX;
-import static org.openmdx.base.accessor.cci.SystemAttributes.CREATED_AT;
-import static org.openmdx.base.accessor.cci.SystemAttributes.CREATED_BY;
-import static org.openmdx.base.accessor.cci.SystemAttributes.MODIFIED_AT;
-import static org.openmdx.base.accessor.cci.SystemAttributes.MODIFIED_BY;
-import static org.openmdx.base.accessor.cci.SystemAttributes.OBJECT_CLASS;
 import static org.openmdx.base.accessor.cci.SystemAttributes.OBJECT_IDENTITY;
-import static org.openmdx.base.accessor.cci.SystemAttributes.OBJECT_INSTANCE_OF;
-import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_AT;
-import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_BY;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -72,21 +61,18 @@ import javax.resource.ResourceException;
 import javax.resource.cci.Connection;
 import javax.resource.cci.IndexedRecord;
 import javax.resource.cci.Interaction;
+import javax.resource.cci.InteractionSpec;
 import javax.resource.cci.MappedRecord;
 
-import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.AttributeSelectors;
-import org.openmdx.application.dataprovider.cci.DataproviderOperations;
 import org.openmdx.application.dataprovider.cci.DataproviderReply;
 import org.openmdx.application.dataprovider.cci.DataproviderRequest;
-import org.openmdx.application.dataprovider.cci.ServiceHeader;
 import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.mof.cci.ModelAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
-import org.openmdx.base.mof.cci.PrimitiveTypes;
-import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
@@ -106,13 +92,14 @@ import org.openmdx.kernel.exception.BasicException;
  * </ul>
  */
 public class Standard_1 extends Layer_1 {
-
-    // --------------------------------------------------------------------------
-    public Standard_1(
-    ) {
-    }
     
-    // --------------------------------------------------------------------------
+    /**
+     * Constructor 
+     */
+    public Standard_1() {
+        super();
+    }
+
     @Override
     public Interaction getInteraction(
         Connection connection
@@ -121,131 +108,13 @@ public class Standard_1 extends Layer_1 {
     }
         
     // --------------------------------------------------------------------------
-    /* (non-Javadoc)
-     * @see org.openmdx.application.dataprovider.layer.model.SystemAttributes_1#activate(short, org.openmdx.compatibility.base.application.configuration.Configuration, org.openmdx.compatibility.base.dataprovider.spi.Layer_1_0)
-     */
-    @Override
-    public void activate(
-        short id,
-        Configuration configuration,
-        Layer_1 delegation
-    ) throws ServiceException {
-        super.activate(id, configuration, delegation);
-        this.optimisticLocking = configuration.isOn(
-            LayerConfigurationEntries.OPTIMISTIC_LOCKING
-         ) || "whenModified".equalsIgnoreCase(
-             configuration.getFirstValue(LayerConfigurationEntries.OPTIMISTIC_LOCKING)
-        );       
-    }
-
-    // --------------------------------------------------------------------------
     protected String getObjectClassName(
         MappedRecord object
     ){
         return object == null ? null : Object_2Facade.getObjectClass(object);
     }
     
-    // --------------------------------------------------------------------------
-    /**
-     * An object is freed from derived attributes in the RoleObject_1. But if an
-     * object is retrieved and not returned to the client but only to a 
-     * higher layer, and the same object or a copy of it is saved again, the 
-     * derived attributes of this object have to be removed again. 
-     * <p>
-     * For example Standard itself adds the derived attribute object_instanceOf.
-     * But there may be other derived attributes added in state or role.
-     * <p> 
-     * To avoid multiple scanning of the entire object, object_instanceOf is 
-     * used as a trigger for a new scan for derived attributes. 
-     * 
-     * @param  object  object to remove derived attributes from 
-     */
-    protected void triggeredRemoveDerivedAttributes(
-        MappedRecord object
-    ) throws ServiceException {
-        if(this.getObjectClassName(object) != null) {
-            this.removeNonPersistentAttributes(object);
-        }
-    }
 
-    // --------------------------------------------------------------------------
-    /**
-     * remove the attributes which are in the model as derived
-     */
-    @SuppressWarnings("unchecked")
-    protected void removeNonPersistentAttributes(
-        MappedRecord object
-    ) throws ServiceException {
-        try {
-            String objectClassName = this.getObjectClassName(object);
-            if(objectClassName != null) {
-                Object_2Facade facade = Object_2Facade.newInstance(object);
-                Map<?,?> modelAttributes = (Map<?,?>)getModel().getDereferencedType(objectClassName).objGetValue("attribute");
-                for (
-                    Iterator<String> i = facade.getValue().keySet().iterator(); 
-                    i.hasNext();
-                ) {
-                    String attributeName = i.next();
-                    // remove derived attributes except the attributes listed below 
-                    // NOTE: This is a hack and must be fixed as soon as each layer can have 
-                    // its own model, i.e. persistence layer uses persistence model, application 
-                    // layer uses application model, etc.
-                    if (
-                        facade.getAttributeValues(attributeName) != null &&
-                        !PERSISTENT_ATTRIBUTES.contains(attributeName)
-                     ) {
-                        ModelElement_1_0 attributeDef = (ModelElement_1_0)modelAttributes.get(attributeName);
-                        // non-modeled attributes are not removed. 
-                        if(
-                            attributeDef == null ? attributeName.equals(OBJECT_INSTANCE_OF) : (
-                                Boolean.TRUE.equals(attributeDef.objGetValue("isDerived")) ||
-                                NON_PERSISTENT_ATTRIBUTES.contains(attributeName) // TODO use jpa3 meta data
-                            )
-                        ) {
-                            // remove derived attributes
-                            i.remove();
-                        }
-                    }
-                }
-            }
-        } catch(ResourceException e) {
-            throw new ServiceException(e);
-        }
-    }
-
-    // --------------------------------------------------------------------------
-    protected Boolean attributeIsInstanceOf(
-        Map<?,?> attributeDefs,
-        String attributeName,
-        Collection<?> candidates
-    ) throws ServiceException {
-        ModelElement_1_0 attributeDef = (ModelElement_1_0) attributeDefs.get(attributeName);
-        return attributeDef == null ? null : Boolean.valueOf(
-            candidates.contains(
-                getModel().getElementType(
-                    attributeDef
-                ).objGetValue("qualifiedName")
-            )
-        );
-    }
-
-    // --------------------------------------------------------------------------
-    protected boolean isTimeDateDuration(
-        Map<?,?> attributeDefs,
-        String attributeName
-    ) throws ServiceException {
-        Boolean xmlDatatype = attributeIsInstanceOf(
-            attributeDefs,
-            attributeName,
-            TIME_OR_DATE_DATATYPES
-        );
-        return xmlDatatype == null ? (
-                CREATED_AT.equals(attributeName) ||
-                MODIFIED_AT.equals(attributeName)
-        ) : xmlDatatype.booleanValue();
-    }
-
-    // --------------------------------------------------------------------------
     /**
      * Set the derived attribute 'identity' in case the class supports this feature,
      * e.g. ch:omex:generic:BasicObject
@@ -253,21 +122,15 @@ public class Standard_1 extends Layer_1 {
      * @param request
      * @param object
      */
-    protected void setIdentity(
+    private void setIdentity(
         DataproviderRequest request, 
         MappedRecord object
     ) throws ServiceException {
-        Object_2Facade facade = null;
-        try {
-            facade = Object_2Facade.newInstance(object);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Object_2Facade facade = Facades.asObject(object);
         if(facade.getObjectClass() != null) {
             if(
                 this.getModel().isSubtypeOf(facade.getObjectClass(), "org:openmdx:base:ExtentCapable") &&
-                (!facade.getValue().keySet().contains(OBJECT_IDENTITY))                      
+                (!facade.getValue().containsKey(OBJECT_IDENTITY))                      
             ) {
                 facade.attributeValuesAsList(OBJECT_IDENTITY).clear();
                 facade.attributeValuesAsList(OBJECT_IDENTITY).add(
@@ -290,13 +153,7 @@ public class Standard_1 extends Layer_1 {
         boolean touchNonDerivedFeatures, 
         Set<String> features
     ) throws ServiceException {
-        Object_2Facade facade = null;
-        try {
-            facade = Object_2Facade.newInstance(object);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Object_2Facade facade = Facades.asObject(object);
         String objectClass = facade.getObjectClass();
         ModelElement_1_0 classDef = null;
         try {
@@ -348,13 +205,7 @@ public class Standard_1 extends Layer_1 {
         MappedRecord object, 
         boolean touchNonDerivedFeatures
     ) throws ServiceException {
-        Object_2Facade facade = null;
-        try {
-            facade = Object_2Facade.newInstance(object);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Object_2Facade facade = Facades.asObject(object);
         Set<String> features = new HashSet<String>(facade.getValue().keySet());
         for(String attributeName : features) {
             if(attributeName.lastIndexOf(':') > 0 || attributeName.indexOf('$') > 0) {
@@ -375,26 +226,6 @@ public class Standard_1 extends Layer_1 {
     }
 
     // --------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
-    protected void removeContexts(
-        MappedRecord object
-    ) throws ServiceException {
-        Object_2Facade facade;
-        try {
-            facade = Object_2Facade.newInstance(object);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
-        for(Iterator<String> i = facade.getValue().keySet().iterator(); i.hasNext(); ) {
-            String attributeName = i.next();
-            if(attributeName.startsWith(CONTEXT_PREFIX)) {
-                i.remove();
-            }
-        }
-    }
-    
-    // --------------------------------------------------------------------------
     /**
      * Set known derived features and do some v2 -> v3 compatibility handling.
      * <p>
@@ -407,7 +238,6 @@ public class Standard_1 extends Layer_1 {
         MappedRecord object
     ) throws ServiceException {
         this.setIdentity(request, object);
-        this.removeContexts(object);
         this.adjustEmptyFeatureSet(
             object, 
             request.attributeSelector() == AttributeSelectors.ALL_ATTRIBUTES
@@ -430,149 +260,35 @@ public class Standard_1 extends Layer_1 {
         return reply;
     }
 
-    //--------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
-    protected boolean isModified(
-        MappedRecord afterImage
-    ) throws ServiceException {
-        Object_2Facade facade = null;
-        try {
-            facade = Object_2Facade.newInstance(afterImage);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
-        for(String attribute : (Set<String>)facade.getValue().keySet()) {
-            if(
-                !OBJECT_CLASS.equals(attribute) &&
-                !MODIFIED_AT.equals(attribute) &&
-                !MODIFIED_BY.equals(attribute) &&
-                !attribute.startsWith(CONTEXT_PREFIX)
-            ){
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    //--------------------------------------------------------------------------
-    protected ModelElement_1_0 getObjectClass(
-        MappedRecord object
-    ) throws ServiceException {
-        String objectClassName = this.getObjectClassName(object);
-        return objectClassName == null ?
-            null :
-            this.getModel().getDereferencedType(objectClassName);
-    }
-
-    // --------------------------------------------------------------------------
-    /**
-     * Called before given object is deleted. 
-     */
-    protected void notifyPreDelete(
-        Path objectIdentity
-    ) {
-        //
-    }
-
     // --------------------------------------------------------------------------
     public class LayerInteraction extends Layer_1.LayerInteraction {
-        
-        public LayerInteraction(
+
+    	/**
+    	 * Constructor
+    	 * 
+    	 * @param connection
+    	 * @throws ResourceException
+    	 */
+        protected LayerInteraction(
             Connection connection
         ) throws ResourceException {
             super(connection);
         }
         
         /**
-         * Verify the digest of an object to be modified
+         * Tells whether reply data is expected
          * 
-         * @param header
-         * @param request
+         * @param ispec
          * 
-         * @throws ServiceException CONCURRENT_ACCESS_FAILURE
-         * in case of a digest mismatch.
+         * @return <code>true</code> if a reply data is expected
          */
-        protected void verifyDigest(
-            ServiceHeader header,
-            DataproviderRequest request
-        ) throws ServiceException {
-            if(optimisticLocking){
-                MappedRecord afterImage = request.object();
-                if(Standard_1.this.isModified(afterImage)){
-                    MappedRecord beforeImage = this.getBeforeImage(header, request.path());
-                    Object_2Facade beforeImageFacade = null;
-                    Object_2Facade afterImageFacade = null;
-                    try {
-                        beforeImageFacade = Object_2Facade.newInstance(beforeImage);
-                        afterImageFacade = Object_2Facade.newInstance(afterImage);
-                    } 
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
-                    byte[] aferImageVersion = (byte[])afterImageFacade.getVersion();
-                    if(
-                        aferImageVersion!= null && 
-                        !Arrays.equals((byte[])beforeImageFacade.getVersion(), aferImageVersion)
-                    ) {
-                        throw new ServiceException(
-                            BasicException.Code.DEFAULT_DOMAIN, 
-                            BasicException.Code.CONCURRENT_ACCESS_FAILURE,
-                            "Digest mismatch",
-                            new BasicException.Parameter(
-                                "path",
-                                request.path()
-                            ),
-                            new BasicException.Parameter(
-                                "beforeImage.version",
-                                beforeImageFacade.getVersion()
-                            ),
-                            new BasicException.Parameter(
-                                "afterImage.version",
-                                afterImageFacade.getVersion()
-                            ),
-                            new BasicException.Parameter(
-                                "beforeImage",
-                                beforeImage
-                            ),
-                            new BasicException.Parameter(
-                                "afterImage",
-                                afterImage
-                            )
-                        );
-                    }
-                }
-            }
+        protected final boolean expectsReplyData(
+            RestInteractionSpec ispec
+        ){
+        	int interactionVerb = ispec.getInteractionVerb();
+        	return interactionVerb == InteractionSpec.SYNC_SEND_RECEIVE || interactionVerb == InteractionSpec.SYNC_RECEIVE;
         }
-
-        /* (non-Javadoc)
-         * @see org.openmdx.compatibility.base.dataprovider.spi.BeforeImageCachingLayer_1#getBeforeImage(org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader, org.openmdx.compatibility.base.dataprovider.cci.DataproviderRequest)
-         */
-        protected MappedRecord getBeforeImage(
-            ServiceHeader header, 
-            Path path
-        ) throws ServiceException {
-            try {
-                DataproviderRequest getRequest = new DataproviderRequest(
-                    Query_2Facade.newInstance(path).getDelegate(),
-                    DataproviderOperations.OBJECT_RETRIEVAL,
-                    AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES,
-                    null
-                );
-                DataproviderReply getReply = super.newDataproviderReply();
-                super.get(
-                    getRequest.getInteractionSpec(), 
-                    Query_2Facade.newInstance(getRequest.object()), 
-                    getReply.getResult()
-                );            
-                MappedRecord beforeImage = getReply.getObject();
-                return beforeImage;
-            }
-            catch(ResourceException e) {
-                throw new ServiceException(e);
-            }
-        }
-        
+        		
         // --------------------------------------------------------------------------
         @Override
         public boolean get(
@@ -582,19 +298,17 @@ public class Standard_1 extends Layer_1 {
         ) throws ServiceException {
             DataproviderRequest request = this.newDataproviderRequest(ispec, input);
             DataproviderReply reply = this.newDataproviderReply(output);
-            try {
-                super.get(
-                    request.getInteractionSpec(), 
-                    Query_2Facade.newInstance(request.object()), 
-                    reply.getResult()
-                );
-            } catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
-            Standard_1.this.completeReply(
-                request,
-                reply
+            super.get(
+                request.getInteractionSpec(), 
+                Facades.asQuery(request.object()), 
+                reply.getResult()
             );
+            if(expectsReplyData(ispec)) {
+            	Standard_1.this.completeReply(
+	                request,
+	                reply
+	            );
+            }
             return true;
         }
     
@@ -607,19 +321,17 @@ public class Standard_1 extends Layer_1 {
         ) throws ServiceException {
             DataproviderRequest request = this.newDataproviderRequest(ispec, input);
             DataproviderReply reply = this.newDataproviderReply(output);
-            try {
-                super.find(
-                    request.getInteractionSpec(), 
-                    Query_2Facade.newInstance(request.object()), 
-                    reply.getResult()
-                );
-            } catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
-            Standard_1.this.completeReply(
-                request,
-                reply
+            super.find(
+                request.getInteractionSpec(), 
+                Facades.asQuery(request.object()), 
+                reply.getResult()
             );
+            if(expectsReplyData(ispec)) {
+            	Standard_1.this.completeReply(
+	                request,
+	                reply
+	            );
+            }
             return true;
         }
     
@@ -632,20 +344,17 @@ public class Standard_1 extends Layer_1 {
         ) throws ServiceException {
             DataproviderRequest request = this.newDataproviderRequest(ispec, input);
             DataproviderReply reply = this.newDataproviderReply(output);
-            Standard_1.this.triggeredRemoveDerivedAttributes(request.object());
-            try {
-                super.create(
-                    request.getInteractionSpec(), 
-                    Object_2Facade.newInstance(request.object()), 
-                    reply.getResult()
-                );
-            } catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
-            Standard_1.this.completeReply(
-                request,
-                reply
+            super.create(
+                request.getInteractionSpec(), 
+                Facades.asObject(request.object()), 
+                reply.getResult()
             );
+            if(expectsReplyData(ispec)) {
+            	Standard_1.this.completeReply(
+	                request,
+	                reply
+	            );
+            }
             return true;
         }
     
@@ -656,24 +365,19 @@ public class Standard_1 extends Layer_1 {
             Object_2Facade input,
             IndexedRecord output
         ) throws ServiceException {
-            ServiceHeader header = this.getServiceHeader();
             DataproviderRequest request = this.newDataproviderRequest(ispec, input);
             DataproviderReply reply = this.newDataproviderReply(output);
-            Standard_1.this.triggeredRemoveDerivedAttributes(request.object());
-            this.verifyDigest(header,request);        
-            try {
-                super.put(
-                    request.getInteractionSpec(), 
-                    Object_2Facade.newInstance(request.object()), 
-                    output
-                );
-            } catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
-            Standard_1.this.completeReply(
-                request,
-                reply
+            super.put(
+                request.getInteractionSpec(), 
+                Facades.asObject(request.object()), 
+                output
             );
+            if(expectsReplyData(ispec)) {
+            	Standard_1.this.completeReply(
+	                request,
+	                reply
+	            );
+            }
             return true;
         }
     
@@ -686,58 +390,20 @@ public class Standard_1 extends Layer_1 {
         ) throws ServiceException {
             DataproviderRequest request = this.newDataproviderRequest(ispec, input);
             DataproviderReply reply = this.newDataproviderReply(output);
-            try {
-                super.delete(
-                    request.getInteractionSpec(),
-                    Object_2Facade.newInstance(request.object()),
-                    output
-                );
-            } catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
-            Standard_1.this.completeReply(
-                request,
-                reply
+            super.delete(
+                request.getInteractionSpec(),
+                Facades.asObject(request.object()),
+                output
             );
+            if(expectsReplyData(ispec)) {
+            	Standard_1.this.completeReply(
+	                request,
+	                reply
+	            );
+            }
             return true;
         }
     
     }
-    
-    //--------------------------------------------------------------------------
-
-    /**
-     * Tells whether the plug-in is active of inactive.
-     */
-    protected boolean optimisticLocking = false;
-
-    protected final static Collection<String> TIME_OR_DATE_DATATYPES = Arrays.asList(
-        PrimitiveTypes.DATE,
-        PrimitiveTypes.DATETIME,
-        PrimitiveTypes.DURATION
-    );
-
-    /**
-     * TODO get the information from the jpa3 meta data
-     */
-    protected final static Collection<String> NON_PERSISTENT_ATTRIBUTES = Arrays.asList(
-        "transactionTimeUnique",
-        "validTimeUnique"
-    );
-    
-    /**
-     * TODO get the information from the jpa3 meta data
-     */
-    protected final static Collection<String> PERSISTENT_ATTRIBUTES = Arrays.asList(
-        MODIFIED_AT,
-        MODIFIED_BY,
-        CREATED_AT,
-        CREATED_BY,
-        REMOVED_AT,
-        REMOVED_BY,
-        OBJECT_CLASS,
-        "stateVersion",
-        "modifiedFeature"
-    );
     
 }

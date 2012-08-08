@@ -34,12 +34,12 @@ import java.util.Set;
  * But, you might want that loophole, so this class is kept simple.
  *
  * @since Commons Collections 3.0
- * @version $Revision: 1.3 $ $Date: 2010/06/02 13:44:25 $
+ * @version $Revision: 1.4 $ $Date: 2011/04/12 12:19:18 $
  * 
  * @author Daniel Rall
  * @author Stephen Colebourne
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","rawtypes"})
 abstract class AbstractMapDecorator implements Map {
 
     /** The map to decorate */

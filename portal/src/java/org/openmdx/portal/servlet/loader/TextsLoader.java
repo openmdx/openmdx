@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TextsLoader.java,v 1.11 2009/10/29 23:37:19 wfro Exp $
+ * Name:        $Id: TextsLoader.java,v 1.12 2011/09/16 09:01:41 wfro Exp $
  * Description: TextsLoader
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/29 23:37:19 $
+ * Date:        $Date: 2011/09/16 09:01:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,7 +67,7 @@ import javax.servlet.ServletContext;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.portal.servlet.RoleMapper_1_0;
+import org.openmdx.portal.servlet.PortalExtension_1_0;
 import org.openmdx.portal.servlet.texts.TextsFactory;
 
 public class TextsLoader
@@ -76,11 +76,11 @@ public class TextsLoader
   //-------------------------------------------------------------------------
   public TextsLoader(
       ServletContext context,
-      RoleMapper_1_0 roleMapper      
+      PortalExtension_1_0 portalExtension      
   ) {
       super(
           context,
-          roleMapper
+          portalExtension
       );
   }
   

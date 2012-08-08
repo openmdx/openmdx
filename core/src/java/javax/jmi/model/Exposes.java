@@ -2,7 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public interface Exposes extends RefAssociation {
     public boolean exists(Reference referrer, AssociationEnd exposedEnd);
     public java.util.Collection getReferrer(AssociationEnd exposedEnd);

@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractComparator.java,v 1.4 2010/06/02 13:42:04 hburger Exp $
+ * Name:        $Id: AbstractComparator.java,v 1.6 2011/11/26 01:34:57 hburger Exp $
  * Description: Abstract Comparator
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:42:04 $
+ * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,10 +53,7 @@ package org.openmdx.application.dataprovider.spi;
 import java.util.Comparator;
 import java.util.Iterator;
 
-import javax.resource.ResourceException;
-
 import org.openmdx.application.dataprovider.cci.AttributeSpecifier;
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.Records;
 
@@ -91,7 +88,7 @@ public abstract class AbstractComparator<E> implements Comparator<E> {
     /* (non-Javadoc)
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public int compare(E left, E right) {
         specifications: for(
             int i = 0;
@@ -146,15 +143,11 @@ public abstract class AbstractComparator<E> implements Comparator<E> {
      */
     @Override
     public String toString() {
-        try {
-            return Records.getRecordFactory().asIndexedRecord(
-                getClass().getName(), 
-                null, 
-                this.order
-            ).toString();
-        } catch (ResourceException e) {
-            throw new RuntimeServiceException(e);
-        }
+        return Records.getRecordFactory().asIndexedRecord(
+		    getClass().getName(), 
+		    null, 
+		    this.order
+		).toString();
     }
 
 }

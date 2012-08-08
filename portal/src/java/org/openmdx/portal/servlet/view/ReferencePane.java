@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePane.java,v 1.11 2009/06/16 17:08:26 wfro Exp $
+ * Name:        $Id: ReferencePane.java,v 1.12 2011/12/23 11:28:10 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/16 17:08:26 $
+ * Date:        $Date: 2011/12/23 11:28:10 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,8 @@ import java.util.List;
 import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
+import org.openmdx.portal.servlet.ApplicationContext;
+import org.openmdx.portal.servlet.WebKeys;
 import org.openmdx.portal.servlet.control.GridControl;
 import org.openmdx.portal.servlet.control.ReferencePaneControl;
 
@@ -71,52 +73,44 @@ public class ReferencePane
     extends ControlState
     implements Serializable {
   
-    //-------------------------------------------------------------------------
-    public ReferencePane(
-        ReferencePaneControl control,
-        ObjectView view,
-        String lookupType
-    ) {
-        super(
-            control,
-            view
-        );
-        
-        this.lookupType = lookupType;
-        
-        Model_1_0 model = view.getApplicationContext().getModel();
-        int initialReference = -1;
-        for(
-            int i = 0; 
-            i < control.getGridControl().length; 
-            i++
-        ) {
-          try {
-              if(
-                  (initialReference == -1) &&
-                  GridControl.getShowRowSelectors(
-                      lookupType, 
-                      model.getElement(control.getGridControl()[i].getObjectContainer().getReferencedTypeName()), 
-                      model
-                  )
-              ) {
-                  initialReference = i;
-              }
-          } 
-          catch(Exception e) {}
-        }
-    
-        // init grid
-        SysLog.detail("initializing grids");
-        this.grid = new Grid[control.getGridControl().length];
-        this.selectReference(
-            initialReference == -1 
-                ? 0 
-                : initialReference
-        );
-        SysLog.detail("end initializing grids");
-    }
-      
+	//-------------------------------------------------------------------------
+	public ReferencePane(
+		ReferencePaneControl control,
+		ObjectView view,
+		String lookupType
+	) {
+		super(
+			control,
+			view
+		);
+		this.lookupType = lookupType;        
+		ApplicationContext app = view.getApplicationContext();
+		Model_1_0 model = view.getApplicationContext().getModel();
+		int initialReference = -1;
+		for(int i = 0; i < control.getGridControl().length; i++) {
+			try {
+				boolean isRevokeShow = app.getPortalExtension().hasPermission(
+					control.getGridControl()[i].getQualifiedReferenceName(), 
+					view.getRefObject(), 
+					app, 
+					WebKeys.PERMISSION_REVOKE_SHOW
+				);
+				boolean showRowSelectors = GridControl.getShowRowSelectors(
+					lookupType, 
+					model.getElement(control.getGridControl()[i].getObjectContainer().getReferencedTypeName()), 
+					model
+				);
+				if(initialReference == -1 && (lookupType == null || showRowSelectors) && !isRevokeShow) {
+					initialReference = i;
+				}
+			}
+			catch(Exception e) {}
+		}
+		// Init grids
+		this.grid = new Grid[control.getGridControl().length];
+		this.selectReference(initialReference == -1 ? 0 : initialReference);
+	}
+
     //-------------------------------------------------------------------------
     public ReferencePaneControl getReferencePaneControl(
     ) {

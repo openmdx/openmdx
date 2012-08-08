@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIModelMapper.java,v 1.9 2010/01/03 15:02:03 wfro Exp $
+ * Name:        $Id: XMIModelMapper.java,v 1.10 2011/04/12 15:29:20 hburger Exp $
  * Description: write model as org.omg.model1.xsd compliant XML file
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/03 15:02:03 $
+ * Date:        $Date: 2011/04/12 15:29:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -65,7 +65,7 @@ import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 import org.w3c.format.DateTimeFormat;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes"})
 public class XMIModelMapper {
 
   //---------------------------------------------------------------------------
@@ -119,7 +119,7 @@ public class XMIModelMapper {
     }
     this.pw.println(spaces(44) + "<" + elementName +  ">");
     for(
-      Iterator i = elementValues.iterator();
+      Iterator<?> i = elementValues.iterator();
       i.hasNext();
     ) {
       java.lang.Object elementValue = i.next();

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: UML1AssociationEnd.java,v 1.2 2010/06/18 13:13:42 hburger Exp $
+ * Name:        $Id: UML1AssociationEnd.java,v 1.3 2011/04/12 15:30:02 hburger Exp $
  * Description: lab client
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/18 13:13:42 $
+ * Date:        $Date: 2011/04/12 15:30:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -54,7 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes"})
 public class UML1AssociationEnd
   extends UML1ModelElement
 {

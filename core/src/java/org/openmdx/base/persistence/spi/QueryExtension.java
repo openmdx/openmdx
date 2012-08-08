@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: QueryExtension.java,v 1.4 2010/06/02 13:44:54 hburger Exp $
+ * Name:        $Id: QueryExtension.java,v 1.5 2011/11/26 01:35:00 hburger Exp $
  * Description: Query Extension 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:44:54 $
+ * Date:        $Date: 2011/11/26 01:35:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.resource.ResourceException;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.openmdx.base.query.Extension;
@@ -415,24 +414,20 @@ public class QueryExtension implements Extension {
     @Override
     public String toString(
     ) {
-        try {
-            return Records.getRecordFactory().asMappedRecord(
-                this.getClass().getName(),
-                null,
-                TO_STRING_FIELDS, 
-                new Object[]{
-                    this.clause,
-                    this.booleanParam,
-                    this.dateParam,
-                    this.dateTimeParam,
-                    this.decimalParam,
-                    this.integerParam,
-                    this.stringParam
-                }
-            ).toString();
-        } catch (ResourceException exception) {
-            return super.toString();
-        }
+        return Records.getRecordFactory().asMappedRecord(
+		    this.getClass().getName(),
+		    null,
+		    TO_STRING_FIELDS, 
+		    new Object[]{
+		        this.clause,
+		        this.booleanParam,
+		        this.dateParam,
+		        this.dateTimeParam,
+		        this.decimalParam,
+		        this.integerParam,
+		        this.stringParam
+		    }
+		).toString();
     }
 
     /* (non-Javadoc)

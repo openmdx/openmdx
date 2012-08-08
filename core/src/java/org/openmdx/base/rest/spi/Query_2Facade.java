@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Query_2Facade.java,v 1.12 2010/11/23 17:34:52 wfro Exp $
+ * Name:        $Id: Query_2Facade.java,v 1.16 2011/11/26 01:34:57 hburger Exp $
  * Description: Query Facade
- * Revision:    $Revision: 1.12 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/23 17:34:52 $
+ * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -73,22 +73,24 @@ public class Query_2Facade {
     /**
      * Constructor 
      *
-     * @param record
+     * @param delegate the query record
      */
     private Query_2Facade(
         MappedRecord delegate
     ) throws ResourceException {
-        if(!isDelegate(delegate)) throw BasicException.initHolder(
-            new ResourceException(
-                "Unsupported query record",
-                BasicException.newEmbeddedExceptionStack(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.BAD_QUERY_CRITERIA,
-                    new BasicException.Parameter("actual", delegate.getRecordName()),
-                    new BasicException.Parameter("expected", QueryRecord.NAME)
+        if(!isDelegate(delegate)) {
+            throw BasicException.initHolder(
+                new ResourceException(
+                    "Unsupported query record",
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_QUERY_CRITERIA,
+                        new BasicException.Parameter("actual", delegate.getRecordName()),
+                        new BasicException.Parameter("expected", QueryRecord.NAME)
+                    )
                 )
-            )
-        );
+            );
+        }
         this.delegate = (QueryRecord) delegate;
     }
     
@@ -143,7 +145,7 @@ public class Query_2Facade {
     public static Query_2Facade newInstance(
         Path path
     ) throws ResourceException {
-        Query_2Facade facade = newInstance();
+        Query_2Facade facade = new Query_2Facade();
         facade.setPath(path);
         return facade;
     }
@@ -171,7 +173,10 @@ public class Query_2Facade {
      * @return the object facade
      * 
      * @throws ResourceException
+     * 
+     * @deprecated use {@link Query_2Facade#newInstance(Path)}
      */
+    @Deprecated
     public static Query_2Facade newInstance(
     ) throws ResourceException {
         return new Query_2Facade();
@@ -360,8 +365,24 @@ public class Query_2Facade {
      */
     public final void setGroups(
         Set<String> groups
-    ) throws ResourceException{
+    ){
         this.delegate.setGroups(groups);
+    }
+
+    /**
+     * @return
+     * @see org.openmdx.base.rest.cci.QueryRecord#getFeatures()
+     */
+    public Set<String> getFeatures() {
+        return this.delegate.getFeatures();
+    }
+
+    /**
+     * @param features
+     * @see org.openmdx.base.rest.cci.QueryRecord#setFeatures(java.util.Set)
+     */
+    public void setFeatures(Set<String> features) {
+        this.delegate.setFeatures(features);
     }
 
     /* (non-Javadoc)

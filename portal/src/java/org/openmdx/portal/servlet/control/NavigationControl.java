@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: NavigationControl.java,v 1.27 2009/10/19 23:53:07 wfro Exp $
+ * Name:        $Id: NavigationControl.java,v 1.28 2011/04/13 13:13:20 wfro Exp $
  * Description: NavigationControl 
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/19 23:53:07 $
+ * Date:        $Date: 2011/04/13 13:13:20 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -114,7 +114,7 @@ public class NavigationControl
                     "headerHidden";
                 Action showHeaderAction = view.getSetPanelStateAction("Header", 0);
                 Action hideHeaderAction = view.getSetPanelStateAction("Header", 1);
-                p.write("<div id=\"", id, "\" onClick=\"javascript:if(this.id=='headerHidden'){new Ajax.Request(", p.getEvalHRef(showHeaderAction), ", {asynchronous:true});this.id='headerShown';$('logoTableNH').id='logoTable';$('contentNH').id='content';}else{new Ajax.Request(", p.getEvalHRef(hideHeaderAction), ", {asynchronous:true});this.id='headerHidden';$('logoTable').id='logoTableNH';$('content').id='contentNH';};\">&nbsp;</div>");
+                p.write("<div id=\"", id, "\" onClick=\"javascript:if(this.id=='headerHidden'){new Ajax.Request(", p.getEvalHRef(showHeaderAction), ", {asynchronous:true});this.id='headerShown';$('logoTableNH').id='logoTable';try{$('contentHeaderNoLeftYes').id='contentHeaderYesLeftYes';}catch(e){};try{$('contentHeaderNoLeftNo').id='contentHeaderYesLeftNo';}catch(e){};}else{new Ajax.Request(", p.getEvalHRef(hideHeaderAction), ", {asynchronous:true});this.id='headerHidden';$('logoTable').id='logoTableNH';try{$('contentHeaderYesLeftYes').id='contentHeaderNoLeftYes';}catch(e){};try{$('contentHeaderYesLeftNo').id='contentHeaderNoLeftNo';}catch(e){};};\">&nbsp;</div>");
             }
         }
         catch(Exception e) {

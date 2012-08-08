@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<shortcuts>
+	<programGroup defaultName="openMDX SDK $PROJECT_VERSION" location="applications" />
+	<shortcut
+		name="Uninstall $APP_NAME"
+		description="Uninstall $APP_NAME"
+		target="java"
+		commandLine="-jar Uninstall.jar"
+		iconFile="$INSTALL_PATH/favicon.ico"
+		workingDirectory="$INSTALL_PATH/Uninstall/"
+		terminal="false"
+		type="Application"
+		encoding="UTF-8"
+		programGroup="yes"
+    	desktop="no"
+    	applications="no"
+    	startMenu="no"
+    	startup="no">
+		<creatForPack name="Main" />		
+	</shortcut>
+</shortcuts>	

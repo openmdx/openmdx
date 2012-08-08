@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PersonImpl.java,v 1.4 2010/10/29 12:42:44 hburger Exp $
+ * Name:        $Id: PersonImpl.java,v 1.6 2011/04/01 22:08:59 hburger Exp $
  * Description: Person 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/29 12:42:44 $
+ * Date:        $Date: 2011/04/01 22:08:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,7 @@ package test.openmdx.app1.aop2;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.jdo.listener.StoreCallback;
@@ -65,6 +66,8 @@ import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.jmi1.Void;
 import org.openmdx.kernel.exception.BasicException;
+import org.w3c.cci2.SparseArray;
+
 import test.openmdx.app1.jmi1.Address;
 import test.openmdx.app1.jmi1.App1Package;
 import test.openmdx.app1.jmi1.CanNotFormatNameException;
@@ -75,14 +78,13 @@ import test.openmdx.app1.jmi1.PersonDateOpParams;
 import test.openmdx.app1.jmi1.PersonDateOpResult;
 import test.openmdx.app1.jmi1.PersonFormatNameAsParams;
 import test.openmdx.app1.jmi1.PersonFormatNameAsResult;
-import org.w3c.cci2.SparseArray;
 
 
 /**
  * Person
  */
-public class PersonImpl 
-    extends AbstractObject<test.openmdx.app1.jmi1.Person,test.openmdx.app1.cci2.Person,Void> 
+public class PersonImpl <S extends test.openmdx.app1.jmi1.Person, N extends test.openmdx.app1.cci2.Person, C extends Date>  
+    extends AbstractObject<S,N,C> 
     implements StoreCallback, NaturalPerson
 {
 
@@ -93,8 +95,8 @@ public class PersonImpl
      * @param next
      */
     public PersonImpl(
-        test.openmdx.app1.jmi1.Person same,
-        test.openmdx.app1.cci2.Person next
+        S same,
+        N next
     ) {
         super(same, next);
     }
@@ -276,6 +278,14 @@ public class PersonImpl
         );
       }
       super.jdoPreStore();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.aop2.AbstractObject#newContext()
+     */
+    @Override
+    protected C newContext() {
+        return (C) new Date();
     }
 
     /* (non-Javadoc)

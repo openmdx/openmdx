@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ProxyPlugIn_1.java,v 1.4 2010/12/23 17:41:47 hburger Exp $
+ * Name:        $Id: ProxyPlugIn_1.java,v 1.6 2011/12/29 03:05:33 hburger Exp $
  * Description: Proxy Plug-In
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/23 17:41:47 $
+ * Date:        $Date: 2011/12/29 03:05:33 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,6 +53,8 @@ package org.openmdx.application.rest.spi;
 import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.rest.UnitOfWork_1;
 import org.openmdx.base.aop0.PlugIn_1_0;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.PathComponent;
 
 /**
@@ -101,9 +103,9 @@ class ProxyPlugIn_1 implements PlugIn_1_0 {
     }
 
     /* (non-Javadoc)
-     * @see org.openmdx.base.aop0.PlugIn_1_0#getSharedObject()
-     */
-    public Object getUserObject(Object key) {
+	 * @see org.openmdx.base.aop0.PlugIn_1_0#getPlugInObject(java.lang.Class)
+	 */
+	public <T> T getPlugInObject(Class<T> type) {
         return null;
     }
 
@@ -114,5 +116,13 @@ class ProxyPlugIn_1 implements PlugIn_1_0 {
     public boolean requiresCallbackOnCascadedDelete(DataObject_1 object) {
         return false;
     }
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.aop0.PlugIn_1_0#isExemptFromValidation(org.openmdx.base.mof.cci.ModelElement_1_0)
+	 */
+	public boolean isExemptFromValidation(DataObject_1 object, ModelElement_1_0 feature)
+			throws ServiceException {
+		return false;
+	}
 
 }

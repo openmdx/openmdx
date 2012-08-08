@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.22 2010/12/23 17:38:45 hburger Exp $
+ * Name:        $Id: PlugIn_1.java,v 1.27 2011/12/29 03:05:57 hburger Exp $
  * Description: Audit Plug-In
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/23 17:38:45 $
+ * Date:        $Date: 2011/12/29 03:05:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -71,13 +71,22 @@ import org.openmdx.base.accessor.rest.DataObjectManager_1;
 import org.openmdx.base.accessor.rest.DataObject_1;
 import org.openmdx.base.accessor.rest.UnitOfWork_1;
 import org.openmdx.base.aop0.PlugIn_1_0;
+import org.openmdx.base.aop0.UpdateAvoidance;
+import org.openmdx.base.aop0.UpdateAvoidance_1;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.UserObjects;
 import org.openmdx.kernel.exception.BasicException;
 
 /**
  * Audit Plug-In
+ * <p><em>
+ * Note:<br>
+ * Together with this plug-in one should use 
+ * {@link org.openmdx.base.aop0.PlugIn_1} rather than
+ * {@link org.openmdx.base.aop0.UpdateAvoidance_1}.
+ * </em>
  */
 public class PlugIn_1 implements Configuration, PlugIn_1_0 {
 
@@ -172,14 +181,14 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
 
     };
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.openmdx.base.aop0.PlugIn_1_0#g<Object>etSharedObject()
-     */
-    //  @Override
-    public Object getUserObject(Object key) {
-        return Configuration.class == key ? this : null;
+    /* (non-Javadoc)
+	 * @see org.openmdx.base.aop0.PlugIn_1_0#getPlugInObject(java.lang.Class)
+	 */
+	public <T> T getPlugInObject(Class<T> type) {
+        return 
+        	Configuration.class == type ? type.cast(this) :
+        	UpdateAvoidance.class == type ? type.cast(UpdateAvoidance_1.plugInObject) :
+    		null;
     }
 
     /**
@@ -488,7 +497,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     /*
      * (non-Javadoc)
      * 
-     * @see org.openmdx.base.aop0.PlugIn_1_0#beforeCompletion(UnitOfWork_1)
+     * @see org.openmdx.base.aop0.PlugIn_1_0#flush(UnitOfWork_1,boolean)
      */
     public void flush(
         UnitOfWork_1 unitOfWork, 
@@ -499,8 +508,18 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
             Map<Path,DataObject_1> auditBeforeImages = new HashMap<Path, DataObject_1>();
             for (Object managedObject : persistenceManager.getManagedObjects(involvedStatesForInvolvementPersistenceEmbedded)) {
                 DataObject_1 candidate = (DataObject_1) managedObject;
-                if(this.getMatchingIndex(candidate) >= 0) {
-                    DataObject_1 beforeImage = candidate.getBeforeImage(null); // do not in-line!
+                if(this.getMatchingIndex(candidate) < 0) {
+                    //
+                    // Objects without audit
+                    //
+                    if(unitOfWork.isUpdateAvoidanceEnabled() && !candidate.jdoIsDeleted()){
+                        candidate.makePersistentCleanWhenUnmodified();
+                    }
+                } else {
+                    //
+                    // Objects with audit
+                    //
+                    DataObject_1 beforeImage = candidate.getBeforeImage(); // do not in-line!
                     if(beforeImage != null && !beforeImage.jdoIsPersistent()) {
                         if(candidate.jdoIsDeleted() || candidate.objIsModified()){
                             auditBeforeImages.put(
@@ -511,8 +530,8 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
                                 ), 
                                 beforeImage
                             );
-                        } else if (candidate.jdoIsDirty()) {
-                            candidate.unconditionalEvict();
+                        } else {
+                            candidate.evictUnconditionally();
                         }
                     }
                 }
@@ -528,7 +547,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
                     DataObject_1_0 auditUnitOfWork = persistenceManager.newInstance("org:openmdx:audit2:UnitOfWork", null);
                     auditUnitOfWork.objSetValue("taskId", unitOfWork.getTaskIdentifier());
                     auditUnitOfWork.objSetValue(SystemAttributes.CREATED_AT, unitOfWork.getTransactionTime());
-                    auditUnitOfWork.objGetSet(SystemAttributes.CREATED_BY).addAll(UserObjects.getPrincipalChain(persistenceManager));
+                    auditUnitOfWork.objGetList(SystemAttributes.CREATED_BY).addAll(UserObjects.getPrincipalChain(persistenceManager));
                     auditUnitOfWork.objMove(
                         unitOfWorkContainer, 
                         unitOfWorkId
@@ -543,7 +562,7 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
             }
         } catch (ServiceException exception) {
             throw new javax.jdo.JDOUserCallbackException(
-                "audit2's beforeCompletion() callback failed",
+                "audit2's flush() callback failed",
                 exception
             );
         }
@@ -558,5 +577,13 @@ public class PlugIn_1 implements Configuration, PlugIn_1_0 {
     ) throws ServiceException {
         return this.isInvolved(object);
     }
+
+	/* (non-Javadoc)
+	 * @see org.openmdx.base.aop0.PlugIn_1_0#isExemptFromValidation(org.openmdx.base.mof.cci.ModelElement_1_0)
+	 */
+	public boolean isExemptFromValidation(DataObject_1 object, ModelElement_1_0 feature)
+			throws ServiceException {
+		return false;
+	}
 
 }

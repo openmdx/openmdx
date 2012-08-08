@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractDataObject_1.java,v 1.8 2010/06/30 13:08:14 hburger Exp $
+ * Name:        $Id: AbstractDataObject_1.java,v 1.9 2011/11/26 01:34:59 hburger Exp $
  * Description: SPICE Object Layer: Abstract Object_1_0 Implementation
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/30 13:08:14 $
+ * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,7 +52,6 @@ package org.openmdx.base.accessor.spi;
 
 import javax.jdo.JDOHelper;
 import javax.jdo.ObjectState;
-import javax.resource.ResourceException;
 
 import org.openmdx.base.accessor.cci.DataObject_1_0;
 import org.openmdx.base.exception.ServiceException;
@@ -178,11 +177,7 @@ public abstract class AbstractDataObject_1
                     description
                  );
             }
-        } 
-        catch (ResourceException exception) {
-            return source.getClass().getName() + '@' + System.identityHashCode(source);
-        } 
-        catch (ServiceException exception) {
+        } catch (ServiceException exception) {
             return toString(
                 source, 
                 "n/a", // objectClass
@@ -207,26 +202,20 @@ public abstract class AbstractDataObject_1
         Path objectId;
         try {
             objectId = source.jdoGetObjectId();
-        } 
-        catch (Exception exception) {
+        } catch (Exception exception) {
             objectId = null;
         }
-        try {
-            return Records.getRecordFactory().asMappedRecord(
-                source.getClass().getName(), // recordName
-                description, // recordShortDescription
-                TO_STRING_KEYES, // keys, 
-                new Object[]{
-                    objectId,
-                    objectClass,
-                    JDOHelper.getObjectState(source),
-                    defaultFetchGroupToString(source)
-                }
-            ).toString();
-        } 
-        catch (ResourceException exception) {
-            return source.getClass().getName() + '@' + System.identityHashCode(source);
-        }
+        return Records.getRecordFactory().asMappedRecord(
+		    source.getClass().getName(), // recordName
+		    description, // recordShortDescription
+		    TO_STRING_KEYES, // keys, 
+		    new Object[]{
+		        objectId,
+		        objectClass,
+		        JDOHelper.getObjectState(source),
+		        defaultFetchGroupToString(source)
+		    }
+		).toString();
     }
 
     @Override

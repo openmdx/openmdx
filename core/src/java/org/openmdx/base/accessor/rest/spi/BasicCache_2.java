@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: BasicCache_2.java,v 1.7 2010/06/02 16:14:39 hburger Exp $
+ * Name:        $Id: BasicCache_2.java,v 1.8 2011/11/26 01:34:57 hburger Exp $
  * Description: Virtual Object Port
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 16:14:39 $
+ * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009-2010, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -80,7 +80,7 @@ import org.openmdx.base.resource.spi.ResourceExceptions;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
-import org.openmdx.base.rest.spi.Object_2Facade;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
@@ -893,15 +893,11 @@ public class BasicCache_2 implements Port, DataStoreCache_2_0  {
                     return object;
                 }
             }            
-            try {
-                for(Map.Entry<Path,String> entry : BasicCache_2.this.sownByPattern.entrySet()) {
-                    if(oid.isLike(entry.getKey())) {
-                        return Object_2Facade.newInstance(oid, entry.getValue()).getDelegate();
-                    }
-                }
-            } catch (ResourceException exception) {
-                throw new ServiceException(exception);
-            }
+            for(Map.Entry<Path,String> entry : BasicCache_2.this.sownByPattern.entrySet()) {
+			    if(oid.isLike(entry.getKey())) {
+			        return Facades.newObject(oid, entry.getValue()).getDelegate();
+			    }
+			}
             return null;
         }
         

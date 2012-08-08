@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.15 2010/03/19 17:16:31 wfro Exp $
+= Name:        $Id: build.xml,v 1.17 2011/04/20 14:03:27 wfro Exp $
 = Description: openMDX/OpenEJB
-= Revision:    $Revision: 1.15 $
-= Date:        $Date: 2010/03/19 17:16:31 $
+= Revision:    $Revision: 1.17 $
+= Date:        $Date: 2011/04/20 14:03:27 $
 = Copyright:   (c) 2003-2007 OMEX AG
 =======================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -54,7 +54,7 @@
 	xmlns:openmdx="xri://(antlib:org.openmdx.tools.ant)"
 	xmlns:antcontrib="antlib:net.sf.antcontrib"
 >
-	<description>Builds the openMDX/Platform.OpenEJB component</description>
+	<description>Builds openMDX/Platform OpenEJB</description>
 	<property name="project.specification.title" value="openMDX/OpenEJB"/>
 
 	<property name="openmdx.home" location=".."/>
@@ -68,18 +68,18 @@
 	
 	<!-- OpenEJB -->    
 	<path id="apache.openejb.lib">
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-loader-3.1.2.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-tomcat-common-3.1.2.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-tomcat-catalina-3.1.2.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-core-3.1.2.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-server-3.1.2.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-ejbd-3.1.2.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-webservices-3.1.2.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/asm-finder-3.1.2.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-jee-3.1.2.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-http-3.1.2.jar"/>
-		<pathelement location="${build.dir}/module/openejb.war/lib/xbean-naming-3.6.jar"/>
-	</path>		
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-loader-3.1.4.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-tomcat-common-3.1.4.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-tomcat-catalina-3.1.4.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-core-3.1.4.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-server-3.1.4.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-ejbd-3.1.4.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-webservices-3.1.4.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/asm-finder-3.1.4.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-jee-3.1.4.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/openejb-http-3.1.4.jar"/>
+		<pathelement location="${build.dir}/module/openejb.war/lib/xbean-naming-3.7.jar"/>
+	</path>
 	<path id="project.lib.classpath">
 		<path refid="openmdx.core.lib"/>	
 		<path refid="openmdx.core.bin"/>	
@@ -94,23 +94,15 @@
 	<patternset id="openejb-tomcat-catalina.jar.content">
 		<include name="org/apache/openejb/tomcat/catalina/**"/>
 	</patternset>
-	<patternset id="catalina.jar.content">
-		<include name="org/apache/catalina/**"/>
+	<patternset id="catalina-extension.jar.content">
 		<include name="org/openmdx/catalina/**"/>
-	</patternset>
-	<patternset id="openmdx.openejb.jar.content">
-		<include name="org/openmdx/openejb/**"/>
-		<include name="org/openmdx/kernel/**"/>
-		<include name="META-INF/**"/>
-	</patternset>
-	
+	</patternset>	
 	<!-- ******************************************************************* -->
 	<!-- * generate -->
 	<!-- ******************************************************************* -->
 	<target name="generate" description="Generate version, jt and model dependend files" depends="build-init">
 		<unzip src="${openejb.war}" dest="${build.dir}/module/openejb.war" overwrite="true"/>
 	</target>
-
 	<!-- ******************************************************************* -->
 	<!-- * deliverables -->
 	<!-- ******************************************************************* -->
@@ -119,13 +111,12 @@
 		description="Populate the project's distribution directory" 
 		depends="deliverables-init,java-archives,source-archives"
 	/>
-
 	<!-- ******************************************************************* -->
 	<!-- * java-archives -->
 	<!-- ******************************************************************* -->
 	<target name="java-archives" depends="deliverables-init,build">
 		<openmdx:archive
-			destfile="${deliver.dir}/lib/openejb-tomcat-catalina-3.1.2.jar"
+			destfile="${deliver.dir}/lib/openejb-tomcat-catalina-3.1.4.jar"
 			format="jar"
 			duplicate="preserve"
 		>
@@ -137,10 +128,10 @@
 			<openmdx:archivefileset dir="${build.dir}/bin">
 				<patternset refid="openejb-tomcat-catalina.jar.content"/>
 			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${build.dir}/module/openejb.war/lib/openejb-tomcat-catalina-3.1.2.jar"/>
+			<openmdx:archivefileset src="${build.dir}/module/openejb.war/lib/openejb-tomcat-catalina-3.1.4.jar"/>
 		</openmdx:archive>
 		<openmdx:archive
-			destfile="${deliver.dir}/lib/catalina.jar"
+			destfile="${deliver.dir}/lib/catalina-extension.jar"
 			format="jar"
 		>
 			<openmdx:archivemanifest refid="project.manifest"/>
@@ -149,51 +140,15 @@
 				<attribute name="Implementation-Title" value="catalina.jar for ${build.target.platform}"/>
 			</openmdx:archivemanifest>
 			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="catalina.jar.content"/>
-			</openmdx:archivefileset>
-			<openmdx:archivefileset src="${openmdx.home}/apache/${build.java.platform}/tomcat/lib/catalina.jar"/>
-		</openmdx:archive>		
-		<openmdx:archive
-			destfile="${deliver.dir}/lib/openmdx-openejb.jar"
-			format="jar"
-		>
-			<openmdx:archivemanifest refid="project.manifest"/>
-			<manifest>
-				<attribute name="Specification-Title" value="${project.specification.title} openMDX Library for OpenEJB"/>
-				<attribute name="Implementation-Title" value="openmdx-ejb for ${build.target.platform}"/>
-				<attribute 
-					name="J2EE-DeploymentFactory-Implementation-Class" 
-					value="org.openmdx.openejb.deployment.OpenEJBDeploymentFactory"
-				/>
-			</manifest>
-			<openmdx:archivefileset dir="${build.dir}/bin">
-				<patternset refid="openmdx.openejb.jar.content"/>
-			</openmdx:archivefileset>
-			<openmdx:archivefileset dir="src/resource">
-				<patternset refid="openmdx.openejb.jar.content"/>
+				<patternset refid="catalina-extension.jar.content"/>
 			</openmdx:archivefileset>
 		</openmdx:archive>		
 	</target>
-
 	<!-- ******************************************************************* -->
 	<!-- * assemble -->
 	<!-- ******************************************************************* -->
 	<target name="assemble" description="Builds the openEJB WARs and EARs" depends="build-init">
-		<mkdir dir="${deliver.dir}/deployment-unit"/>
-	  <!-- openEJB WAR -->
-	  <zip destfile="${deliver.dir}/deployment-unit/openmdx-openejb.war" duplicate="preserve">
-	  	<zipfileset dir="${build.dir}/module/openejb.war">
-	  		<exclude name="lib/openejb-tomcat-catalina-3.1.2.jar"/>
-			<!-- Configure in tomcat/lib or tomcat-juli.jar -->
-	  		<exclude name="lib/slf4j*.jar"/>
-	  	</zipfileset>
-	  	<zipfileset dir="${deliver.dir}/lib" prefix="lib">
-	  		<include name="openejb-tomcat-catalina-3.1.2.jar"/>
-	  		<include name="openmdx-openejb.jar"/>
-	  	</zipfileset>
-	  </zip>
 	</target>
-
 	<!-- ******************************************************************* -->
 	<!-- * distribution -->
 	<!-- ******************************************************************* -->
@@ -245,5 +200,4 @@
 			</openmdx:archivefilterchain>						
 		</openmdx:archive>
 	</target>
-	
 </project>

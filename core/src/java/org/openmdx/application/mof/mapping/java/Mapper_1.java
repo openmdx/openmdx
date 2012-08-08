@@ -1,9 +1,16 @@
 /*
  * ====================================================================
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Mapper_1.java,v 1.23 2011/07/08 13:20:51 wfro Exp $
+ * Description: Mapper class
+ * Revision:    $Revision: 1.23 $
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Date:        $Date: 2011/07/08 13:20:51 $
+ * ====================================================================
  * 
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -78,8 +85,9 @@ import org.openmdx.application.mof.mapping.spi.AbstractMapper_1;
 import org.openmdx.application.mof.repository.accessor.ModelElement_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
@@ -138,12 +146,12 @@ public class Mapper_1
         ModelElement_1_0 attributeDef,
         QueryMapper queryMapper,
         InstanceMapper instanceMapper,
-        MetaDataMapper ormMetaDataMapper,
-        MetaDataMapper ormSliceMetaDataMapper)
+        AbstractMetaDataMapper ormMetaDataMapper,
+        AbstractMetaDataMapper ormSliceMetaDataMapper)
         throws ServiceException {
 
         SysLog.trace("attribute", attributeDef.jdoGetObjectId());
-        String multiplicity = (String) attributeDef.objGetValue("multiplicity");
+        Multiplicity multiplicity = ModelHelper.toMultiplicity((String) attributeDef.objGetValue("multiplicity"));
         boolean isDerived =
             ((Boolean) attributeDef.objGetValue("isDerived")).booleanValue();
         // required for ...Class.create...() operations
@@ -174,143 +182,161 @@ public class Mapper_1
                     // attribute
                     // is changeable and is not derived.
 
-                    // set/get interface 0..1
-                    if (Multiplicities.OPTIONAL_VALUE.equals(multiplicity)) {
-                        if (instanceMapper != null) {
-                            instanceMapper.mapAttributeGet0_1(mAttributeDef);
-                        }
-                        if (this.format == Format.JPA3) {
-                            ormMetaDataMapper.mapAttribute(mAttributeDef);
-                        }
-                        if (!isDerived) {
-                            if (instanceMapper != null) {
-                                instanceMapper
-                                    .mapAttributeSet0_1(mAttributeDef);
-                            }
-                        }
-                    }
-
-                    // set/get interface 1..1
-                    else if (Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
-                        if (instanceMapper != null) {
-                            instanceMapper.mapAttributeGet1_1(mAttributeDef);
-                        }
-                        if (this.format == Format.JPA3) {
-                            ormMetaDataMapper.mapAttribute(mAttributeDef);
-                        }
-                        if (!isDerived) {
-                            if (instanceMapper != null) {
-                                instanceMapper
-                                    .mapAttributeSet1_1(mAttributeDef);
-                            }
-                        }
-                    }
-
-                    // set/get interface list
-                    else if (Multiplicities.LIST.equals(multiplicity)) {
+                    if(multiplicity == null) {
+                    	//
+                        // set/get interface with lower and upper bound, e.g. 0..n
+                    	//
                         if (instanceMapper != null) {
                             instanceMapper.mapAttributeGetList(mAttributeDef);
                         }
-                        if (this.format == Format.JPA3) {
-                            FieldMetaData fieldMetaData =
-                                instanceMapper.getFieldMetaData(mAttributeDef
-                                    .getQualifiedName());
-                            Integer embedded =
-                                fieldMetaData == null ? null : fieldMetaData
-                                    .getEmbedded();
-                            if (embedded == null) {
-                                ormSliceMetaDataMapper
-                                    .mapAttribute(mAttributeDef);
-                                ormMetaDataMapper.mapSize(mAttributeDef);
-                            } else {
-                                ormMetaDataMapper.mapEmbedded(
-                                    mAttributeDef,
-                                    fieldMetaData);
-                            }
-                        }
-                        if (!isDerived) {
-                            if (instanceMapper != null) {
-                                instanceMapper
-                                    .mapAttributeSetList(mAttributeDef);
-                            }
-                        }
-                    }
-                    // set/get interface set
-                    else if (Multiplicities.SET.equals(multiplicity)) {
-                        if (instanceMapper != null) {
-                            instanceMapper.mapAttributeGetSet(mAttributeDef);
-                        }
-                        if (this.format == Format.JPA3) {
-                            FieldMetaData fieldMetaData =
-                                instanceMapper.getFieldMetaData(mAttributeDef
-                                    .getQualifiedName());
-                            Integer embedded =
-                                fieldMetaData == null ? null : fieldMetaData
-                                    .getEmbedded();
-                            if (embedded == null) {
-                                ormSliceMetaDataMapper
-                                    .mapAttribute(mAttributeDef);
-                                ormMetaDataMapper.mapSize(mAttributeDef);
-                            } else {
-                                ormMetaDataMapper.mapEmbedded(
-                                    mAttributeDef,
-                                    fieldMetaData);
-                            }
-                        }
-                        if (!isDerived) {
-                            if (instanceMapper != null) {
-                                instanceMapper
-                                    .mapAttributeSetSet(mAttributeDef);
-                            }
-                        }
-                    }
-
-                    // set/get interface sparsearray
-                    else if (Multiplicities.SPARSEARRAY.equals(multiplicity)) {
-                        if (instanceMapper != null) {
-                            instanceMapper
-                                .mapAttributeGetSparseArray(mAttributeDef);
-                        }
-                        if (this.format == Format.JPA3) {
+	                    if (this.format == Format.CCI2) {
+	                    	ormMetaDataMapper.mapAttribute(mAttributeDef);
+	                    } else if (this.format == Format.JPA3) {
                             ormSliceMetaDataMapper.mapAttribute(mAttributeDef);
                             ormMetaDataMapper.mapSize(mAttributeDef);
                         }
-                        if (!isDerived) {
-                            if (instanceMapper != null) {
-                                instanceMapper
-                                    .mapAttributeSetSparseArray(mAttributeDef);
-                            }
-                        }
-                    }
-                    // set/get interface map
-                    else if (Multiplicities.MAP.equals(multiplicity)) {
-                        if (instanceMapper != null) {
-                            instanceMapper.mapAttributeGetMap(mAttributeDef);
-                        }
-
-                    }
-                    // set/get interface stream
-                    else if (Multiplicities.STREAM.equals(multiplicity)) {
-                        if (instanceMapper != null) {
-                            instanceMapper.mapAttributeGetStream(mAttributeDef);
-                        }
-
-                        if (!isDerived) {
-                            if (instanceMapper != null) {
-                                instanceMapper
-                                    .mapAttributeSetStream(mAttributeDef);
-                            }
-                        }
-                    }
-                    // set/get interface with lower and upper bound, e.g. 0..n
-                    else {
-                        if (instanceMapper != null) {
-                            instanceMapper.mapAttributeGetList(mAttributeDef);
-                        }
-                        if (this.format == Format.JPA3) {
-                            ormSliceMetaDataMapper.mapAttribute(mAttributeDef);
-                            ormMetaDataMapper.mapSize(mAttributeDef);
-                        }
+                    } else {
+                    	switch(multiplicity) {
+	                    	case OPTIONAL: {
+	                    		//
+	                            // set/get interface 0..1
+	                    		//
+	                            if (instanceMapper != null) {
+	                                instanceMapper.mapAttributeGet0_1(mAttributeDef);
+	                            }	
+	                            if (this.format == Format.JPA3 || this.format == Format.CCI2) {
+	                                ormMetaDataMapper.mapAttribute(mAttributeDef);
+	                            }
+	                            if (!isDerived) {
+	                                if (instanceMapper != null) {
+	                                    instanceMapper
+	                                        .mapAttributeSet0_1(mAttributeDef);
+	                                }
+	                            }
+	                    	} break;
+	                    	case SINGLE_VALUE: {
+	                    		//
+	                            // set/get interface 1..1
+	                    		//
+	                            if (instanceMapper != null) {
+	                                instanceMapper.mapAttributeGet1_1(mAttributeDef);
+	                            }
+	                            if (this.format == Format.JPA3  || this.format == Format.CCI2) {
+	                                ormMetaDataMapper.mapAttribute(mAttributeDef);
+	                            }
+	                            if (!isDerived) {
+	                                if (instanceMapper != null) {
+	                                    instanceMapper
+	                                        .mapAttributeSet1_1(mAttributeDef);
+	                                }
+	                            }
+	                    	} break;
+	                    	case LIST: {
+	                    		//
+	                            // set/get interface list
+	                    		//
+	                            if (instanceMapper != null) {
+	                                instanceMapper.mapAttributeGetList(mAttributeDef);
+	                            }
+	                            if (this.format == Format.JPA3 || this.format == Format.CCI2) {
+	                                FieldMetaData fieldMetaData = instanceMapper.getFieldMetaData(
+	                                	mAttributeDef.getQualifiedName()
+	                                );
+	                                if(this.format == Format.CCI2) {
+	                                	ormMetaDataMapper.mapAttribute(mAttributeDef);
+	                                } else { 
+	                                    Integer embedded = fieldMetaData == null ? null : fieldMetaData.getEmbedded();
+	                                	if (embedded == null) {
+	    	                                ormSliceMetaDataMapper.mapAttribute(mAttributeDef);
+	    	                                ormMetaDataMapper.mapSize(mAttributeDef);
+	    	                            } else {
+	    	                                ormMetaDataMapper.mapEmbedded(
+	    	                                    mAttributeDef,
+	    	                                    fieldMetaData
+	    	                                );
+	    	                            }
+	                                }
+	                            }
+	                            if (!isDerived) {
+	                                if (instanceMapper != null) {
+	                                    instanceMapper
+	                                        .mapAttributeSetList(mAttributeDef);
+	                                }
+	                            }
+	                    	} break;
+	                    	case SET: {
+	                    		//
+	                            // set/get interface set
+	                    		//
+	                            if (instanceMapper != null) {
+	                                instanceMapper.mapAttributeGetSet(mAttributeDef);
+	                            }
+	                            if (this.format == Format.JPA3 || this.format == Format.CCI2) {
+	                                FieldMetaData fieldMetaData = instanceMapper.getFieldMetaData(
+	                                	mAttributeDef.getQualifiedName()
+	                                );
+	                                if(this.format == Format.CCI2) {
+	                                	ormMetaDataMapper.mapAttribute(mAttributeDef);
+	                                } else { 
+	                                    Integer embedded = fieldMetaData == null ? null : fieldMetaData.getEmbedded();
+	    	                            if (embedded == null) {
+	    	                                ormSliceMetaDataMapper.mapAttribute(mAttributeDef);
+	    	                                ormMetaDataMapper.mapSize(mAttributeDef);
+	    	                            } else {
+	    	                                ormMetaDataMapper.mapEmbedded(
+	    	                                    mAttributeDef,
+	    	                                    fieldMetaData
+	    	                                );
+	    	                            }
+	                                }
+	                            }
+	                            if (!isDerived) {
+	                                if (instanceMapper != null) {
+	                                    instanceMapper.mapAttributeSetSet(mAttributeDef);
+	                                }
+	                            }
+	                    	} break;
+	                    	case SPARSEARRAY: {
+	                    		//
+	                            // set/get interface sparsearray
+	                    		//
+	                            if (instanceMapper != null) {
+	                                instanceMapper.mapAttributeGetSparseArray(mAttributeDef);
+	                            }
+	                            if (this.format == Format.CCI2) {
+	                            	ormMetaDataMapper.mapAttribute(mAttributeDef);
+	                            } else if (this.format == Format.JPA3) {
+	                                ormSliceMetaDataMapper.mapAttribute(mAttributeDef);
+	                                ormMetaDataMapper.mapSize(mAttributeDef);
+	                            }
+	                            if (!isDerived) {
+	                                if (instanceMapper != null) {
+	                                    instanceMapper.mapAttributeSetSparseArray(mAttributeDef);
+	                                }
+	                            }
+	                    	} break;
+	                    	case MAP: {
+	                    		//
+	                            // set/get interface map
+	                    		//
+	                            if (instanceMapper != null) {
+	                                instanceMapper.mapAttributeGetMap(mAttributeDef);
+	                            }
+	                    	} break;
+	                    	case STREAM: {
+	                    		//
+	                            // set/get interface stream
+	                    		//
+	                            if (instanceMapper != null) {
+	                                instanceMapper.mapAttributeGetStream(mAttributeDef);
+	                            }
+	                            if (!isDerived) {
+	                                if (instanceMapper != null) {
+	                                    instanceMapper.mapAttributeSetStream(mAttributeDef);
+	                                }
+	                            }
+	                    	} break;
+                    	}
                     }
                 }
             }
@@ -320,14 +346,13 @@ public class Mapper_1
     }
 
     // ---------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     void mapReference(
         ModelElement_1_0 classDef,
         ModelElement_1_0 referenceDef,
         QueryMapper queryMapper,
         InstanceMapper instanceMapper,
-        MetaDataMapper ormMetaDataMapper,
-        MetaDataMapper ormSliceMetaDataMapper,
+        AbstractMetaDataMapper ormMetaDataMapper,
+        AbstractMetaDataMapper ormSliceMetaDataMapper,
         boolean inherited)
         throws ServiceException {
         SysLog.trace("reference", referenceDef.jdoGetObjectId());
@@ -338,18 +363,17 @@ public class Mapper_1
         ClassDef mClassDef = new ClassDef(classDef, this.model, this.metaData);
         SysLog.trace("referencedEnd", referencedEnd);
         SysLog.trace("association", association);
-        // setter/getter interface only if modelAttribute.container =
-        // modelClass.
+        // setter/getter interface only if modelAttribute.container == modelClass.
         // Otherwise inherit from super interfaces.
         boolean includeInClass =
             ((this.format == Format.JPA3) && (((ClassMetaData) mClassDef
                 .getClassMetaData()).getBaseClass() == null))
                 || referenceDef.objGetValue("container").equals(
                     classDef.jdoGetObjectId());
-        String multiplicity = (String) referenceDef.objGetValue("multiplicity");
+        Multiplicity multiplicity = ModelHelper.toMultiplicity((String) referenceDef.objGetValue("multiplicity"));
         String visibility = (String) referenceDef.objGetValue("visibility");
-        List qualifierNames = referencedEnd.objGetList("qualifierName");
-        List qualifierTypes = referencedEnd.objGetList("qualifierType");
+        List<?> qualifierNames = referencedEnd.objGetList("qualifierName");
+        List<?> qualifierTypes = referencedEnd.objGetList("qualifierType");
         boolean isChangeable =
             ((Boolean) referenceDef.objGetValue("isChangeable")).booleanValue();
         boolean isDerived =
@@ -368,14 +392,12 @@ public class Mapper_1
                 String newMultiplicity =
                     qualifierTypes.size() == 1
                         && PrimitiveTypes.STRING.equals(((Path) qualifierTypes
-                            .get(0)).getBase()) ? Multiplicities.MAP
-                        : Multiplicities.MULTI_VALUE;
+                            .get(0)).getBase()) ? Multiplicity.MAP.toString()
+                        : ModelHelper.UNBOUNDED;
                 SysLog.trace("Adjust multiplicity to "
-                    + Multiplicities.MULTI_VALUE, newMultiplicity);
-                // 0..n association
-                // set multiplicity to 0..n, this ensures that the instance
-                // creator uses
-                // a multivalued parameter for this reference attribute
+                    + ModelHelper.UNBOUNDED, newMultiplicity);
+                // 0..n association set multiplicity to 0..n, 
+                // this ensures that the instance creator uses a multivalued parameter for this reference attribute
                 referenceAsAttribute.objSetValue(
                     "multiplicity",
                     newMultiplicity);
@@ -386,7 +408,9 @@ public class Mapper_1
         try {
             if (VisibilityKind.PUBLIC_VIS.equals(visibility)) {
                 ReferenceDef mReferenceDef =
-                    new ReferenceDef(referenceDef, this.model, false // openmdx1
+                    new ReferenceDef(
+                        referenceDef, 
+                        this.model
                     );
                 /**
                  * References are read-only if they are not changeable. In
@@ -403,20 +427,19 @@ public class Mapper_1
                 if(this.model.referenceIsStoredAsAttribute(referenceDef)) {
                     if(includeInClass && (this.format == Format.JPA3)) {
                         if (qualifierNames.isEmpty()) {
-                            if (Multiplicities.OPTIONAL_VALUE.equals(multiplicity) || Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
-                                ormMetaDataMapper.mapReference(mReferenceDef);
-                            } 
-                            else if (
-                                Multiplicities.LIST.equals(multiplicity) || 
-                                Multiplicities.SET.equals(multiplicity) || 
-                                Multiplicities.MULTI_VALUE.equals(multiplicity) || 
-                                Multiplicities.SPARSEARRAY.equals(multiplicity)
-                            ) {
-                                ormSliceMetaDataMapper.mapReference(mReferenceDef);
-                                ormMetaDataMapper.mapSize(mReferenceDef);
-                            }
-                        } 
-                        else {
+                        	if(multiplicity != null) {
+                        		switch(multiplicity){
+	                        		case OPTIONAL: case SINGLE_VALUE: {
+	                                    ormMetaDataMapper.mapReference(mReferenceDef);
+	                        		} break;
+	                        		case LIST: case SET: case SPARSEARRAY: {
+	                                    ormSliceMetaDataMapper.mapReference(mReferenceDef);
+	                                    ormMetaDataMapper.mapSize(mReferenceDef);
+	                        		} break;
+	                        			
+                        		}
+                        	}
+                        } else {
                             ormSliceMetaDataMapper.mapReference(mReferenceDef);
                             ormMetaDataMapper.mapSize(mReferenceDef);
                         }
@@ -425,7 +448,7 @@ public class Mapper_1
                 // no qualifier, multiplicity must be [0..1|1..1|0..n]
                 if (qualifierNames.isEmpty()) {
                     // 0..1
-                    if (Multiplicities.OPTIONAL_VALUE.equals(multiplicity)) {
+                    if (Multiplicity.OPTIONAL == multiplicity) {
                         if (includeInClass && !inherited) {
                             if (instanceMapper != null) {
                                 // get
@@ -449,7 +472,7 @@ public class Mapper_1
                         }
                     }
                     // 1..1
-                    else if (Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
+                    else if (Multiplicity.SINGLE_VALUE == multiplicity) {
                         if (includeInClass && !inherited) {
                             if (instanceMapper != null) {
                                 // get
@@ -481,14 +504,7 @@ public class Mapper_1
                 }
                 // 0..n association where qualifier qualifies 1..1, 0..1, 0..n
                 else {
-                    boolean qualifierTypeIsPrimitive =
-                        this.model.isPrimitiveType(qualifierTypes.get(0));
-                    boolean optional =
-                        Multiplicities.OPTIONAL_VALUE.equals(multiplicity);
-                    boolean mandatory =
-                        Multiplicities.SINGLE_VALUE.equals(multiplicity);
-                    boolean qualifiesUniquely = optional | mandatory;
-                    if (qualifiesUniquely) {
+                    if ((Multiplicity.OPTIONAL == multiplicity | Multiplicity.SINGLE_VALUE == multiplicity)) {
                         if (includeInClass && instanceMapper != null) {
                             if (this.model.referenceIsStoredAsAttribute(referenceDef)) {
                                 instanceMapper.mapReferenceGet0_nNoQuery(
@@ -497,7 +513,7 @@ public class Mapper_1
                             } else {
                                 instanceMapper
                                     .mapReferenceGet0_nWithQuery(mReferenceDef);
-                                if (optional) {
+                                if ((Multiplicity.OPTIONAL == multiplicity)) {
                                     instanceMapper
                                         .mapReferenceGet0_1WithQualifier(mReferenceDef);
                                 } else {
@@ -524,13 +540,9 @@ public class Mapper_1
                                             inherited);
                                 }
                                 if (this.format == Format.JPA3) {
-                                    // TODO: feature not yet implemented for
-                                    // JPA3.
-                                    // Do not generate meta data
-//                                    if (false) {
-//                                        ormMetaDataMapper
-//                                            .mapReference(mReferenceDef);
-//                                    }
+                                    // TODO: feature not yet implemented for JPA3.
+                                    // Do not generate meta data 
+//                                  ormMetaDataMapper.mapReference(mReferenceDef);
                                 }
                             }
                         }
@@ -551,21 +563,17 @@ public class Mapper_1
                                 BasicException.Code.DEFAULT_DOMAIN,
                                 BasicException.Code.ASSERTION_FAILURE,
                                 "reference with non-primitive, ambiguous qualifier cannot be stored as attribute",
-                                new BasicException.Parameter(
-                                    "reference",
-                                    referenceDef.jdoGetObjectId()),
-                                new BasicException.Parameter(
-                                    "qualifier",
-                                    qualifierNames.get(0)));
+                                new BasicException.Parameter("reference", referenceDef.jdoGetObjectId()),
+                                new BasicException.Parameter("qualifier",qualifierNames.get(0))
+                             );
                         }
                     }
                     // add with qualifier
-                    if (qualifiesUniquely && qualifierTypeIsPrimitive) {
+                    if (multiplicity != null && multiplicity.isSingleValued() && this.model.isPrimitiveType(qualifierTypes.get(0))) {
                         if (!isReadOnly) {
                             if (includeInClass) {
                                 if (instanceMapper != null) {
-                                    instanceMapper
-                                        .mapReferenceAddWithQualifier(mReferenceDef);
+                                    instanceMapper.mapReferenceAddWithQualifier(mReferenceDef);
                                 }
                             }
                         }
@@ -575,19 +583,17 @@ public class Mapper_1
                         if (!isReadOnly) {
                             if (includeInClass) {
                                 if (instanceMapper != null) {
-                                    instanceMapper
-                                        .mapReferenceAddWithoutQualifier(mReferenceDef);
+                                    instanceMapper.mapReferenceAddWithoutQualifier(mReferenceDef);
                                 }
                             }
                         }
                         // remove with qualifier if qualifier qualifies uniquely
-                        if (qualifiesUniquely) {
+                        if ((Multiplicity.OPTIONAL == multiplicity | Multiplicity.SINGLE_VALUE == multiplicity)) {
 
                             if (!isReadOnly) {
                                 if (includeInClass) {
                                     if (instanceMapper != null) {
-                                        instanceMapper
-                                            .mapReferenceRemoveWithQualifier(mReferenceDef);
+                                        instanceMapper.mapReferenceRemoveWithQualifier(mReferenceDef);
                                     }
                                 }
                             }
@@ -667,8 +673,8 @@ public class Mapper_1
         ClassMapper classMapper,
         InstanceMapper instanceMapper,
         InterfaceMapper interfaceMapper,
-        MetaDataMapper ormMetaDataMapper,
-        MetaDataMapper ormSliceMetaDataMapper)
+        AbstractMetaDataMapper ormMetaDataMapper,
+        AbstractMetaDataMapper ormSliceMetaDataMapper)
         throws ServiceException {
 
         SysLog.trace("class", classDef.jdoGetObjectId());
@@ -726,7 +732,7 @@ public class Mapper_1
                 SysLog.trace(attributeDef
                     .objGetValue("qualifiedName")
                     .toString(), multiplicity);
-                if (Multiplicities.SINGLE_VALUE.equals(attributeDef
+                if (Multiplicity.SINGLE_VALUE.toString().equals(attributeDef
                     .objGetValue("multiplicity"))) {
                     requiredAttributes.add(att);
                 } else {
@@ -773,8 +779,8 @@ public class Mapper_1
         ClassMapper classMapper,
         InstanceMapper instanceMapper,
         InterfaceMapper interfaceMapper,
-        MetaDataMapper ormMetaDataMapper,
-        MetaDataMapper ormSliceMetaDataMapper)
+        AbstractMetaDataMapper ormMetaDataMapper,
+        AbstractMetaDataMapper ormSliceMetaDataMapper)
         throws ServiceException {
 
         if (this.format == Format.JMI1) {
@@ -800,13 +806,13 @@ public class Mapper_1
                         // skip references for which a qualifier exists and the
                         // qualifier is
                         // not a primitive type
-                        if (qualifierTypes.isEmpty()
-                            || this.model
-                                .isPrimitiveType(qualifierTypes.get(0))) {
-                            structuralFeatures.add(new ReferenceDef(
-                                feature,
-                                this.model,
-                                true));
+                        if (qualifierTypes.isEmpty() || this.model.isPrimitiveType(qualifierTypes.get(0))) {
+                            structuralFeatures.add(
+                                new ReferenceDef(
+                                    feature,
+                                    this.model
+                                )
+                            );
                         }
                     } else if (feature.isOperationType()) {
                         operations.add(new OperationDef(feature, this.model));
@@ -903,16 +909,19 @@ public class Mapper_1
         throws ServiceException {
 
         SysLog.trace("structure field", structureFieldDef.jdoGetObjectId());
-        String multiplicity =
-            (String) structureFieldDef.objGetValue("multiplicity");
+        Multiplicity multiplicity = ModelHelper.toMultiplicity(
+            (String) structureFieldDef.objGetValue("multiplicity")
+        );
 
         // required for ...Class.create...() operations
         this.processedAttributes.add(structureFieldDef);
         try {
             AttributeDef mStructureFieldDef =
                 new AttributeDef(structureFieldDef, this.model);
-            StructDef mStructDef = new StructDef(classDef, this.model, false // openmdx1
-                );
+            StructDef mStructDef = new StructDef(
+                classDef, 
+                this.model
+            );
             // getter interface only if modelAttribute.container = modelClass.
             // Otherwise inherit from super interfaces.
             if (this.format == Format.JPA3
@@ -924,33 +933,40 @@ public class Mapper_1
                         mStructDef,
                         mStructureFieldDef);
                 }
-                // get interface 0..1
-                if (Multiplicities.OPTIONAL_VALUE.equals(multiplicity)) {
-                    structureMapper.mapFieldGet0_1(mStructureFieldDef);
-                }
-                // get interface 1..1
-                else if (Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
-                    structureMapper.mapFieldGet1_1(mStructureFieldDef);
-                }
-                // get interface list
-                else if (Multiplicities.LIST.equals(multiplicity)) {
+                if(multiplicity == null) {
+                    // get interface with lower and upper bound, e.g. 0..n
                     structureMapper.mapFieldGetList(mStructureFieldDef);
-                }
-                // get interface set
-                else if (Multiplicities.SET.equals(multiplicity)) {
-                    structureMapper.mapFieldGetSet(mStructureFieldDef);
-                }
-                // get interface sparsearray
-                else if (Multiplicities.SPARSEARRAY.equals(multiplicity)) {
-                    structureMapper.mapFieldGetSparseArray(mStructureFieldDef);
-                }
-                // get interface stream
-                else if (Multiplicities.STREAM.equals(multiplicity)) {
-                    structureMapper.mapFieldGetStream(mStructureFieldDef);
-                }
-                // get interface with lower and upper bound, e.g. 0..n
-                else {
-                    structureMapper.mapFieldGetList(mStructureFieldDef);
+                } else {
+                	switch(multiplicity) {
+	                	case OPTIONAL:
+	                        // get interface 0..1
+	                        structureMapper.mapFieldGet0_1(mStructureFieldDef);
+	                        break;
+	                	case SINGLE_VALUE:
+	                        // get interface 1..1
+	                        structureMapper.mapFieldGet1_1(mStructureFieldDef);
+	                        break;
+	                	case LIST:
+	                        // get interface list
+	                        structureMapper.mapFieldGetList(mStructureFieldDef);
+	                        break;
+	                	case SET:
+	                        // get interface set
+	                        structureMapper.mapFieldGetSet(mStructureFieldDef);
+	                        break;
+	                	case SPARSEARRAY:
+	                        // get interface sparsearray
+	                        structureMapper.mapFieldGetSparseArray(mStructureFieldDef);
+	                        break;
+	                	case STREAM:
+	                        // get interface stream
+	                        structureMapper.mapFieldGetStream(mStructureFieldDef);
+	                        break;
+	                	case MAP: 
+	                		// TODO verify whether this branch is correct	                		
+	                        structureMapper.mapFieldGetList(mStructureFieldDef);
+	                        break;
+                	}
                 }
             }
         } catch (Exception ex) {
@@ -1009,8 +1025,10 @@ public class Mapper_1
         PackageMapper packageMapper)
         throws ServiceException {
         try {
-            StructDef mStructDef = new StructDef(structDef, this.model, false // openmdx1
-                );
+            StructDef mStructDef = new StructDef(
+                structDef, 
+                this.model
+            );
             packageMapper.mapStructCreator(mStructDef);
         } catch (Exception ex) {
             throw new ServiceException(ex).log();
@@ -1109,7 +1127,7 @@ public class Mapper_1
             ByteArrayOutputStream sliceInstanceFile =
                 jpa3 ? new ByteArrayOutputStream() : null;
             ByteArrayOutputStream ormMetaDataFile =
-                jpa3 ? new ByteArrayOutputStream() : null;
+                jpa3 | cci2 ? new ByteArrayOutputStream() : null;
             ByteArrayOutputStream structFile =
                 jpa3 ? null : new ByteArrayOutputStream();
             ByteArrayOutputStream queryFile =
@@ -1130,16 +1148,20 @@ public class Mapper_1
             Writer sliceInstanceWriter =
                 jpa3 ? new OutputStreamWriter(sliceInstanceFile) : null;
             Writer ormMetaDataWriter =
-                jpa3 ? new OutputStreamWriter(ormMetaDataFile) : null;
+                jpa3 | cci2 ? new OutputStreamWriter(ormMetaDataFile) : null;
             CharArrayWriter ormSliceMetaDataWriter =
                 jpa3 ? new CharArrayWriter() : null;
             Writer structWriter =
                 jpa3 ? null : new OutputStreamWriter(structFile);
             // Export matching packages
             PrintWriter ormMetaDataPrintWriter = null;
-            if (jpa3) {
+            if (jpa3 | cci2) {
                 ormMetaDataPrintWriter = new PrintWriter(ormMetaDataWriter);
-                MetaDataMapper.fileHeader(ormMetaDataPrintWriter);
+                if(jpa3) {
+	                StandardMetaDataMapper.fileHeader(ormMetaDataPrintWriter);
+                } else {
+                    NativeMetaDataMapper.fileHeader(ormMetaDataPrintWriter);
+                }
                 ormMetaDataPrintWriter.flush();
             }
             for (Iterator<ModelElement_1_0> pkgs = packagesToExport.iterator(); pkgs
@@ -1235,8 +1257,7 @@ public class Mapper_1
                                                 Names.SPI2_PACKAGE_SUFFIX,
                                                 this.metaData)
                                                 : null;
-                                        MetaDataMapper ormMetaDataMapper =
-                                            jpa3 ? new MetaDataMapper(
+                                        AbstractMetaDataMapper ormMetaDataMapper = jpa3 ? new StandardMetaDataMapper(
                                                 element,
                                                 ormMetaDataWriter,
                                                 getModel(),
@@ -1244,10 +1265,19 @@ public class Mapper_1
                                                 this.packageSuffix,
                                                 null,
                                                 this.metaData,
-                                                new StandardObjectRepositoryMetadataPlugin())
-                                                : null;
-                                        MetaDataMapper ormSliceMetaDataMapper =
-                                            jpa3 ? new MetaDataMapper(
+                                                new StandardObjectRepositoryMetadataPlugin()
+                                         ) : cci2 ? new NativeMetaDataMapper(
+                                                 element,
+                                                 ormMetaDataWriter,
+                                                 getModel(),
+                                                 this.format,
+                                                 this.packageSuffix,
+                                                 null,
+                                                 this.metaData,
+                                                 new StandardObjectRepositoryMetadataPlugin()
+                                          ) : null;
+                                        AbstractMetaDataMapper ormSliceMetaDataMapper =
+                                            jpa3 ? new StandardMetaDataMapper(
                                                 element,
                                                 ormSliceMetaDataWriter,
                                                 getModel(),
@@ -1370,14 +1400,18 @@ public class Mapper_1
                             else if (getModel().isStructureType(element)) {
                                 SysLog.trace(
                                     "processing structure type",
-                                    element.jdoGetObjectId());
+                                    element.jdoGetObjectId()
+                                );
                                 StructDef mStructDef =
-                                    new StructDef(element, getModel(), false // openmdx1
+                                    new StructDef(
+                                        element, 
+                                        getModel()
                                     );
                                 if (jmi1) {
                                     this.mapStructureCreator(
                                         element,
-                                        packageMapper);
+                                        packageMapper
+                                     );
                                 }
                                 if (structFile != null) {
                                     structFile.reset();
@@ -1538,11 +1572,15 @@ public class Mapper_1
                     }
                 }
             }
-            if (jpa3) {
-                MetaDataMapper.fileFooter(ormMetaDataPrintWriter);
+            if (jpa3 | cci2) {
+            	if(jpa3) {
+	                StandardMetaDataMapper.fileFooter(ormMetaDataPrintWriter);
+            	} else {
+	                NativeMetaDataMapper.fileFooter(ormMetaDataPrintWriter);
+            	}
                 ormMetaDataPrintWriter.flush();
                 ormMetaDataWriter.flush();
-                ZipEntry zipEntry = new JarEntry("META-INF/orm.xml");
+                ZipEntry zipEntry = new JarEntry(jpa3 ? "META-INF/orm.xml" : "META-INF/openmdxorm.properties");
                 zipEntry.setSize(ormMetaDataFile.size());
                 zip.putNextEntry(zipEntry);
                 ormMetaDataFile.writeTo(zip);

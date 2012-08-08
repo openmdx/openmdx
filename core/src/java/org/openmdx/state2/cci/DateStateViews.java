@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DateStateViews.java,v 1.71 2010/12/17 13:40:06 hburger Exp $
+ * Name:        $Id: DateStateViews.java,v 1.94 2011/12/02 15:06:41 hburger Exp $
  * Description: Date State Views
- * Revision:    $Revision: 1.71 $
+ * Revision:    $Revision: 1.94 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/17 13:40:06 $
+ * Date:        $Date: 2011/12/02 15:06:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2007-2010, OMEX AG, Switzerland
+ * Copyright (c) 2007-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -77,13 +77,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.oasisopen.cci2.QualifierType;
 import org.oasisopen.jmi1.RefContainer;
 import org.openmdx.base.accessor.cci.SystemAttributes;
-import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
 import org.openmdx.base.accessor.jmi.cci.RefPackage_1_0;
 import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.accessor.jmi.spi.DelegatingRefObject_1_0;
 import org.openmdx.base.accessor.spi.ExceptionHelper;
-import org.openmdx.base.exception.RuntimeServiceException;
-import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.jmi1.AspectCapable;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.PersistenceHelper;
@@ -117,7 +114,7 @@ public class DateStateViews {
     /**
      * Constructor 
      */
-    private DateStateViews(
+    protected DateStateViews(
     ) {
         // Avoid instantiation 
     }
@@ -131,6 +128,13 @@ public class DateStateViews {
         1, // 1st
         DatatypeConstants.FIELD_UNDEFINED
     );
+    
+    private static final String[] EXCLUDE_FROM_STATE_CLONING = {
+    	"identity", "core", "stateValidFrom", "stateValidTo", "removedAt", "removedBy", "createdAt", "createdBy"
+    };
+    private static final String[] EXCLUDE_FROM_CORE_CLONING = {
+    	"identity", "stateVersion", "modifiedAt", "modifiedBy"
+    };
     
     /**
      * Retrieve the PersistenceManager for a given state view context
@@ -191,6 +195,37 @@ public class DateStateViews {
                 validAt
             )
         );
+    }
+
+    /**
+     * Validates a container
+     * 
+     * @param container the container to be validated
+     * 
+     * @return the RefContainer
+     * 
+     * @throws IllegalArgumentException if the container is not an instance of RefContainer<?>
+     */
+    @SuppressWarnings("unchecked")
+	private static <T extends RefObject> RefContainer<T> asRefContainer(
+    	Container<?> container
+    ){
+    	if(container instanceof RefContainer<?>) {
+    		return (RefContainer<T>) container;
+    	} else if(container == null) {
+	        throw new IllegalArgumentException("The container must not be null");
+    	} else {
+	        throw BasicException.initHolder(
+                new IllegalArgumentException(
+                    "The container should be an instance of " + RefBaseObject.class.getName(),
+                    BasicException.newEmbeddedExceptionStack(
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("class", container.getClass().getName())
+                    )
+                )
+            );
+    	}    	
     }
     
     /**
@@ -296,6 +331,9 @@ public class DateStateViews {
      * @param container
      * @param qualifier
      * @param core
+     * 
+     * @throws IllegalArgumentException if one of the arguments is null or if the
+     * core object is not context free
      */
     @SuppressWarnings("unchecked")
     public static <T extends org.openmdx.state2.jmi1.StateCapable>  void addCoreToContainer(
@@ -303,12 +341,15 @@ public class DateStateViews {
         String qualifier,
         T core
     ){
+    	if(core == null) {
+            new IllegalArgumentException("The core object must not be null");
+    	}
         DateStateContext context = DateStateViews.getContext(core); 
         if(context != null) {
             throw BasicException.initHolder(
                 new IllegalArgumentException(
                     "The core object must be context free",
-                    BasicException.newEmbeddedExceptionStack(
+                    BasicException.newEmbeddedExceptionStack( 
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.BAD_PARAMETER,
                         new BasicException.Parameter("context", context)
@@ -316,10 +357,10 @@ public class DateStateViews {
                 )
             );
         }
-        RefContainer<? super T> refContainer = (RefContainer<? super T>) container;
+        RefContainer<? super T> refContainer = asRefContainer(container);
         if(DateStateViews.getContext(refContainer) != null) {
             refContainer = (RefContainer<? super T>) DateStateViews.getPersistenceManager(refContainer, null).getObjectById(
-                PersistenceHelper.getTransientContainerId(refContainer)
+                JDOHelper.getTransactionalObjectId(refContainer)
             );
         }
         refContainer.refAdd(
@@ -329,6 +370,19 @@ public class DateStateViews {
         );
     }
 
+    /**
+     * Link core and state
+     * 
+     * @param state
+     * @param core
+     */
+    public static void linkStateAndCore(
+    	DateState state,
+    	StateCapable core
+    ){
+    	state.setCore(core);
+    }
+    
     /**
      * Create an additional state
      * 
@@ -356,7 +410,7 @@ public class DateStateViews {
         ).newInstance(
             stateClass
         );
-        state.setCore(core);
+        linkStateAndCore(state, core);
         return state;
     }
 
@@ -426,33 +480,95 @@ public class DateStateViews {
         newFilter.getCondition().addAll(amendment);
         return newFilter;
     }
-    
+
     /**
+     * Retrieve the valid state predicate
+     * 
+     * @param refContainer
+     * @param predicate
+     * 
+     * @return the valid state predicate
+     */
+    private static AnyTypePredicate getValidStatePredicate(
+        AnyTypePredicate predicate
+    ){
+    	Filter newFilter;
+        if(predicate == null) {
+        	newFilter = new Filter(
+        		new IsInstanceOfCondition("org:openmdx:state2:DateState")
+        	);
+        } else {
+            Filter original = ((RefQuery_1_0)predicate).refGetFilter();
+            newFilter = new Filter(
+                original.getCondition(),
+                original.getOrderSpecifier(),
+                null // extension
+            );
+        }
+        newFilter.getCondition().add(
+        	new IsInCondition(
+        		Quantifier.FOR_ALL,
+        		SystemAttributes.REMOVED_AT,
+        		true
+        	)
+        );
+    	return newFilter;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static <T extends DateState> Container<T> getTimeIndependentContainer(
+		RefContainer<? super T> refContainer
+    ){
+        return (Container<T>)DateStateViews.getPersistenceManager(
+            refContainer,
+            null
+        ).getObjectById(
+            JDOHelper.getTransactionalObjectId(refContainer)
+        );
+    }
+   
+    /**
+     * Retrieve the states selected by the given predicate
      * 
      * @param container
      * @param predicate
      * 
-     * @return
+     * @return the states selected by the given predicate
      */
-    @SuppressWarnings("unchecked")
     public static <T extends DateState> List<T> getStates(
         Container<? super T> container,
         AnyTypePredicate predicate
     ){
         RefContainer<? super T> refContainer = (RefContainer<? super T>)container; 
-        Container<T> stateContainer = (Container<T>)DateStateViews.getPersistenceManager(
-            refContainer,
-            null
-        ).getObjectById(
-            PersistenceHelper.getTransientContainerId(container)
-        );
+        Container<T> coreContainer = getTimeIndependentContainer(refContainer); 
         return new StateList<T>(
-            stateContainer.getAll(
+    		coreContainer.getAll(
                 getStatePredicate(refContainer,predicate)
             )
         );
     }
-            
+
+    /**
+     * Retrieve the valid states selected by the given predicate
+     * 
+     * @param container
+     * @param predicate
+     * 
+     * @return the states selected by the given predicate
+     */
+    public static <T extends DateState> List<T> getValidStates(
+        Container<? super T> container,
+        AnyTypePredicate predicate
+    ){
+        RefContainer<? super T> refContainer = (RefContainer<? super T>)container; 
+        Container<T> coreContainer = getTimeIndependentContainer(refContainer); 
+        return new StateList<T>(
+        		coreContainer.getAll(
+                getValidStatePredicate(predicate)
+            )
+        );
+    }
+    
     /**
      * Retrieve a view appropriate to represent the given state, i.e.<ul>
      * <li>a <em>time-range</em> view for a <em>valid</em> state
@@ -500,42 +616,84 @@ public class DateStateViews {
      * @param refObject the object for which a context free view is requested
      * 
      * @return a context-free view onto the given object
+     * 
+     * @exception NullPointerException if refObject is <code>null</code>
      */
     @SuppressWarnings("unchecked")
-    public static <C extends RefObject, S extends C> C getViewForCore(
+    public static <C extends StateCapable, S extends C> C getViewForCore(
         S refObject
     ){
-        return (C) DateStateViews.getPersistenceManager(
-            refObject,
-            null
-        ).getObjectById(
-            JDOHelper.getTransactionalObjectId(refObject)
-        );
+    	if(getContext(refObject) == null){
+    		if(refObject instanceof BasicState) {
+    			return (C) ((BasicState)refObject).getCore();
+    		} else {
+    			return refObject;
+    		}
+    	} else {
+            return (C) DateStateViews.getPersistenceManager(
+                refObject,
+                null
+            ).getObjectById(
+                JDOHelper.getTransactionalObjectId(refObject)
+            );
+    	}
     }
 
+    /**
+     * Retrieve a context-free view onto the given object or container
+     * 
+     * @param refBaseObject the object or container for which a context free view is requested
+     * 
+     * @return a context-free view onto the given object or container
+     */
+    @SuppressWarnings("unchecked")
+    public static <C extends RefBaseObject> C getTimeIndependentView(
+        RefBaseObject refBaseObject
+    ){
+        return (C) (
+            getContext(refBaseObject) == null ? refBaseObject : DateStateViews.getPersistenceManager(
+                refBaseObject,
+                null
+            ).getObjectById(
+                JDOHelper.getTransactionalObjectId(refBaseObject)
+            )
+        );
+    }
     
     private static boolean equals(
-        Object left,
-        Object right
+        XMLGregorianCalendar left,
+        XMLGregorianCalendar right
     ){
         if(left == right) {
             return true;
-        } else if (left == null || right == null) {
-            return false;
-        } else if (left.getClass() == right.getClass()) {
-            return left.equals(right);
-        } else if (left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>) {
-            ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
-            return left instanceof XMLGregorianCalendar || right instanceof XMLGregorianCalendar ? (
-                datatypeFactory.toDate((XMLGregorianCalendar) left).equals(datatypeFactory.toDate((XMLGregorianCalendar)right))
-            ) : left instanceof Date && right instanceof Date ? (
-                datatypeFactory.toDateTime((Date) left).equals(datatypeFactory.toDateTime((Date) right))
-            ) : false;
-        } else {
+        }
+        if (left == null || right == null) {
             return false;
         }
+        if (left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>) {
+            ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
+            return datatypeFactory.toDate(left).equals(datatypeFactory.toDate(right));
+        }
+        return left.equals(right);
     }
-    
+
+    private static boolean equals(
+        Date left,
+        Date right
+    ){
+        if(left == right) {
+            return true;
+        }
+        if (left == null || right == null) {
+            return false;
+        }
+        if (left instanceof ImmutableDatatype<?> != right instanceof ImmutableDatatype<?>) {
+            ImmutableDatatypeFactory datatypeFactory = DatatypeFactories.immutableDatatypeFactory();
+            return datatypeFactory.toDateTime(left).equals(datatypeFactory.toDateTime(right));
+        }
+        return left.equals(right);
+    }
+
     /**
      * Retrieve a state's core
      * 
@@ -548,6 +706,9 @@ public class DateStateViews {
     ){
     	RefObject core = state.getCore();
         if(core == null) {
+            if(state instanceof StateCapable && ((StateCapable)state).isValidTimeUnique()) {
+                return state;
+            }
         	if(JDOHelper.isDirty(state) && !JDOHelper.isTransactional(state)) {
         		SysLog.log(
         			Level.FINE, 
@@ -634,8 +795,8 @@ public class DateStateViews {
             }
         } else if(
             context.getViewKind() == ViewKind.TIME_POINT_VIEW &&
-            DateStateViews.equals(validFor, context.getExistsAt()) &&
-            DateStateViews.equals(validAt, context.getValidAt())
+            DateStateViews.equals(validAt, context.getExistsAt()) &&
+            DateStateViews.equals(validFor, context.getValidAt())
         ){
             return (V)object;
         }
@@ -647,6 +808,50 @@ public class DateStateViews {
             JDOHelper.getTransactionalObjectId(refObject)
         );
     }
+    
+    /**
+     * Retrieve a view for a given validity, which is propagated
+     * through navigation and applied to <code>DateState</code> instances.
+     * <p>
+     * Views to DateState instances are read-only, views to other objects
+     * are readable and writable.
+     * 
+     * @param container a plain JMI container or a date view of a container
+     * @param validFor exclude all states not valid at the given date,
+     * use <code>today()</code> in case of <code>null</code>
+     * @param validAt exclude all states created after the given time point
+     * 
+     * @return a view to the given container
+     * 
+     * @exception IllegalArgumentException if the <code>container</code> is neither <code>null</code>
+     * nor an instance of <code>RefBaseObject</code>
+     */
+    @SuppressWarnings("unchecked")
+	public static <T extends Container<?>> T getViewForTimePoint(
+    	T container,
+        XMLGregorianCalendar validFor,
+        Date validAt
+    ){
+        RefContainer<?> source = asRefContainer(container);
+        DateStateContext context = DateStateViews.getContext(source);
+        if(
+            context != null &&
+            context.getViewKind() == ViewKind.TIME_POINT_VIEW &&
+            DateStateViews.equals(validAt, context.getExistsAt()) &&
+            DateStateViews.equals(validFor, context.getValidAt())
+        ){
+        	return (T) source;
+        } else {
+        	return (T) DateStateViews.getPersistenceManager( 
+                source,
+                validFor,
+                validAt
+            ).getObjectById(
+                JDOHelper.getTransactionalObjectId(source)
+            );
+        }
+    }
+    
 
     /**
      * 
@@ -685,29 +890,34 @@ public class DateStateViews {
      * date unless validTo is <code>null</code>
      * 
      * @return a list of DateState instances
-     * 
+     * getViewForTimeRange
      * @throws IllegalArgumentException if validTo is less than validFrom 
+     * 
+     * @deprecated use {@link #getViewForTimeRange(Container, 
+     * XMLGregorianCalendar, XMLGregorianCalendar)}.get(QualifierType.REASSIGNABLE, String)
      */
     @SuppressWarnings("unchecked")
-    public static <T extends RefObject> T getViewForTimeRange(
+    @Deprecated
+	public static <T extends RefObject> T getViewForTimeRange(
         Collection<? extends DateState> referenceCollection,
         String qualifier,
         XMLGregorianCalendar validFrom,
         XMLGregorianCalendar validTo
     ){
-        RefContainer<T> refContainer = (RefContainer<T>) DateStateViews.getPersistenceManager(
-            (RefBaseObject)referenceCollection, 
-            validFrom,
-            validTo
-        ).getObjectById(
-            PersistenceHelper.getTransientContainerId(referenceCollection)
-        );
-        return refContainer.refGet(
-            REASSIGNABLE, 
-            qualifier
-        );
+    	Container<? super T> container = (Container<? super T>) referenceCollection;
+		RefContainer<T> refContainer = (RefContainer<T>) DateStateViews.getPersistenceManager(
+			asRefContainer(container), 
+		    validFrom,
+		    validTo
+		).getObjectById(
+		    JDOHelper.getTransactionalObjectId(container)
+		);
+		return refContainer.refGet(
+		    REASSIGNABLE, 
+		    qualifier
+		);
     }    
-    
+
     /**
      * Retrieve a view for a given period.
      * 
@@ -778,6 +988,50 @@ public class DateStateViews {
         );
         return (V) refView;
     }
+
+    /**
+     * Retrieve a view for a given period.
+     * <p>
+     * Views to DateState instances are write-only except for stateValidFrom 
+     * and stateValidTo. Attribute modification operations are propagated to 
+     * all included states. Holes remain untouched.
+     * 
+     * @param refObject a plain JMI object or a date state view
+     * @param validFrom exclude all states not valid at or after the given 
+     * date unless validFrom is <code>null</code>
+     * @param validTo exclude all states not valid at or before the given 
+     * date unless validTo is <code>null</code>
+     * 
+     * @return a view to the given object
+     * 
+     * @exception IllegalArgumentException if the <code>container</code> is neither <code>null</code>
+     * nor an instance of <code>RefBaseObject</code> or if validTo is less than validFrom. 
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Container<?>> T getViewForTimeRange(
+        T container,
+        XMLGregorianCalendar validFrom,
+        XMLGregorianCalendar validTo
+    ){
+        RefBaseObject refContainer = (RefBaseObject) container;
+        DateStateContext context = DateStateViews.getContext(refContainer);
+        if(
+            context != null &&
+            context.getViewKind() == ViewKind.TIME_RANGE_VIEW &&
+            DateStateViews.equals(validFrom, context.getValidFrom()) &&
+            DateStateViews.equals(validTo, context.getValidTo())
+        ){
+            return container;
+        } else {
+            return (T) DateStateViews.getPersistenceManager( 
+                refContainer,
+                validFrom,
+                validTo
+            ).getObjectById(
+                JDOHelper.getTransactionalObjectId(refContainer)
+            );
+        }        
+    }
     
     /**
      * Retrieve time-range views for the states in a given range
@@ -819,7 +1073,7 @@ public class DateStateViews {
      * and stateValidTo. Attribute modification operations are propagated to 
      * all included states. Holes inside the given range remain untouched.
      * 
-     * @param dateState a plain JMI object or a date state view
+     * @param stateCapable a plain JMI object or a date state view
      * 
      * @return a view covering the whole period
      * 
@@ -827,37 +1081,19 @@ public class DateStateViews {
      */
     @SuppressWarnings("unchecked")
     public static <T extends DateState> T getViewForLifeTime(
-        StateCapable dateState
+        StateCapable stateCapable
     ){
-        if(dateState == null) return null;
-        List<? extends DateState> states = DateStateViews.getValidStates(dateState);
-        return states.isEmpty() ? null : (T)DateStateViews.getViewForTimeRange(
-            dateState, 
+        if(stateCapable == null) return null;
+        List<? extends DateState> states = DateStateViews.getValidStates(stateCapable);
+        if(states.isEmpty()) return null;
+        return (T) DateStateViews.<StateCapable,StateCapable>getViewForTimeRange(
+            stateCapable, 
             states.get(0).getStateValidFrom(), 
             states.get(states.size()-1).getStateValidTo()
         );
     }
 
-    /**
-     * Retrieve a view for adjacent states.
-     * <p>
-     * Views to DateState instances are write-only except for stateValidFrom 
-     * and stateValidTo. Attribute modification operations are propagated to 
-     * all included states.
-     * 
-     * @param dateStateView the underlying date state view
-     * 
-     * @return a view covering the whole period
-     * 
-     * @exception IllegalArgumentException if the <code>dateStateView</code> does not support views
-     */
-    public static <T extends DateState> T getViewForContiguousStates(
-        T dateStateView
-    ){
-        throw new UnsupportedOperationException();
-    }
     
-        
     //------------------------------------------------------------------------
     // State Propagation Views (readable and writable)
     //------------------------------------------------------------------------
@@ -874,6 +1110,8 @@ public class DateStateViews {
      * @param override tells whether it is allowed to override valid states 
      * 
      * @return a view to the given object
+     * 
+     * @throws IllegalArgumentException if override is false and the given range is not empty
      */
     public static <T extends DateState> T getViewForInitializedState(
         Class<T> stateClass,
@@ -895,18 +1133,23 @@ public class DateStateViews {
             if(override) {
                 targetManager.deletePersistent(object);
             } else {
-                throw new RuntimeServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.DUPLICATE,
-                    "The given range is not empty",
-                    ExceptionHelper.newObjectIdParameter("id", core),
-                    new BasicException.Parameter("validFrom", validFrom),
-                    new BasicException.Parameter("validTo", validTo)
+                throw BasicException.initHolder(
+                    new IllegalArgumentException(
+                		"The given range is not empty",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.DUPLICATE,
+                            ExceptionHelper.newObjectIdParameter("xri", core),
+                            new BasicException.Parameter("validFrom", validFrom),
+                            new BasicException.Parameter("validTo", validTo),
+                            new BasicException.Parameter("override", override)
+                        )
+                    )
                 );
             }
         }
         T range = targetManager.newInstance(stateClass);
-        range.setCore(core);
+        linkStateAndCore(range, core);
         return range;
     }
         
@@ -921,6 +1164,8 @@ public class DateStateViews {
      * @param override tells whether it is allowed to override valid states 
      * 
      * @return a view to the given object
+     * 
+     * @throws IllegalArgumentException if override is false and the given range is not empty
      */
     @SuppressWarnings("unchecked")
     public static <T extends DateState> T getViewForInitializedState(
@@ -942,21 +1187,25 @@ public class DateStateViews {
             if(override) {
                 range.refDelete();
             } else {
-                throw new RuntimeServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.DUPLICATE,
-                    "The given range is not empty",
-                    ExceptionHelper.newObjectIdParameter("xri", source),
-                    new BasicException.Parameter("validFrom", validFrom),
-                    new BasicException.Parameter("validTo", validTo),
-                    new BasicException.Parameter("override", override)
+                throw BasicException.initHolder(
+                    new IllegalArgumentException(
+                		"The given range is not empty",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.DUPLICATE,
+                            ExceptionHelper.newObjectIdParameter("xri", source),
+                            new BasicException.Parameter("validFrom", validFrom),
+                            new BasicException.Parameter("validTo", validTo),
+                            new BasicException.Parameter("override", override)
+                        )
+                    )
                 );
             }
         }
         range = (T) persistenceManager.newInstance(
             source.getClass().getInterfaces()[0]
         ); 
-        range.setCore((AspectCapable) source);
+        linkStateAndCore(range, (StateCapable) source);
         return range;
     }
     
@@ -990,7 +1239,9 @@ public class DateStateViews {
         if(nextFrom != null && Order.compareValidTo(nextFrom, validTo) <= 0) {
             DateStateViews.createState(core, nextFrom, validTo, stateClass);
         }
-        return stateClass.cast(DateStateViews.getViewForTimeRange(core, validFrom, validTo));
+        return stateClass.cast(
+        	DateStateViews.<StateCapable,StateCapable>getViewForTimeRange(core, validFrom, validTo)
+        );
     }
     
     /**
@@ -998,14 +1249,15 @@ public class DateStateViews {
      * <p>
      * The attributes are readable and writable.
      * 
-     * @param dateStateView the underlying date state view
+     * @param source the underlying date state view
      * @param validFrom begin of the overridden period 
      * @param validTo end of the overridden period
      * @param override tells whether it is allowed to override valid states 
      * 
      * @return a view to the given object
      * 
-     * @exception IllegalArgumentException if the <code>source</code> does not support views
+     * @throws IllegalArgumentException if source is deleted or if override is 
+     * false and the given range is not empty
      */
     @SuppressWarnings("unchecked")
     public static <T extends DateState> T getViewForPropagatedState(
@@ -1015,9 +1267,11 @@ public class DateStateViews {
         boolean override
     ){
         if(source == null) return null;
-        if(JDOHelper.isDeleted(source)) throw new IllegalArgumentException(
-            "The source must not be deleted"
-        );
+        if(JDOHelper.isDeleted(source)) {
+        	throw new IllegalArgumentException(
+	            "The source must not be deleted"
+	        );
+        }
         //
         // Compare source and view validity
         //
@@ -1037,13 +1291,10 @@ public class DateStateViews {
             source.getStateValidTo(),
             validTo
         );
-        if(
-            (lowerFlag != 0 || upperFlag != 0) && 
-            (lowerFlag > 0 || upperFlag < 0 || (Parameters.STRICT_QUERY && !JDOHelper.isNew(source)))
-        ){
+        if(lowerFlag > 0 || upperFlag < 0){
             if(override || target == null) {
                 T state = (T) targetManager.getObjectById(
-                    DateStateViews.getResourceIdentifierOfClone(source)
+                    DateStateViews.getResourceIdentifierOfClone(source, DateStateViews.EXCLUDE_FROM_STATE_CLONING)
                 );
                 state.setStateValidFrom(validFrom);
                 state.setStateValidTo(validTo);
@@ -1052,20 +1303,25 @@ public class DateStateViews {
                 } else {
                     target.refDelete();
                 }
-                state.setCore((AspectCapable) source);
+                linkStateAndCore(state, (StateCapable) source);
             } else {
                 for(org.openmdx.state2.jmi1.DateState state : DateStateViews.getValidStates((StateCapable)source, validFrom, validTo)){
-                    if(source != state) throw new JmiServiceException(
-                        new ServiceException(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.DUPLICATE,
-                            "There is another valid state in the given period",
-                            ExceptionHelper.newObjectIdParameter("xri", source),
-                            new BasicException.Parameter("override", Boolean.FALSE),
-                            new BasicException.Parameter("viewContext", DateStateViews.getContext(target)),
-                            new BasicException.Parameter("stateContext", DateStateViews.getContext(state))
-                        )
-                    );
+                    if(source != state) {
+                        throw BasicException.initHolder(
+                            new IllegalArgumentException(
+                                "There is another valid state in the given period",
+                                BasicException.newEmbeddedExceptionStack(
+                                    BasicException.Code.DEFAULT_DOMAIN,
+                                    BasicException.Code.DUPLICATE,
+                                    ExceptionHelper.newObjectIdParameter("xri", source),
+                                    new BasicException.Parameter("override", override),
+                                    new BasicException.Parameter("viewContext", DateStateViews.getContext(target)),
+                                    new BasicException.Parameter("stateContext", DateStateViews.getContext(state))
+                                )
+                            )
+                        );
+                    	
+                    }
                 }
             }
         }
@@ -1098,6 +1354,72 @@ public class DateStateViews {
     }
 
     /**
+     * Clones a state
+     * <p>
+     * The attributes are readable and writable.
+     * 
+     * @param source the underlying date state view
+     * @param validFrom begin of the overridden period 
+     * @param validTo end of the overridden period
+     * 
+     * @return a view for the clone
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends DateState> T getViewForClonedState(
+        T source,
+        XMLGregorianCalendar validFrom,
+        XMLGregorianCalendar validTo
+    ){
+        T state = (T) DateStateViews.getPersistenceManager(
+            source,
+            validFrom,
+            validTo
+        ).getObjectById(
+            DateStateViews.getResourceIdentifierOfClone(source, DateStateViews.EXCLUDE_FROM_STATE_CLONING)
+        );
+        state.setStateValidFrom(validFrom);
+        state.setStateValidTo(validTo);
+        return state;
+    }
+
+    /**
+     * Clones a state
+     * <p>
+     * The attributes are readable and writable.
+     * 
+     * @param source the underlying date state view
+     * 
+     * @return a view for the clone
+     */
+    public static <T extends DateState> T getViewForClonedState(
+        T source
+    ){
+    	return getViewForClonedState(
+    		source,
+    		source.getStateValidFrom(),
+    		source.getStateValidTo()
+    	);
+    }
+
+    /**
+     * Clones a core object
+     * <p>
+     * The attributes are readable and writable.
+     * 
+     * @param source the underlying 
+     * 
+     * @return a view for the clone
+     */
+    public static <T extends StateCapable> T getViewForClonedCore(
+        T source
+    ){
+    	return PersistenceHelper.clone(
+        	DateStateViews.<T, T>getViewForCore(source),
+        	DateStateViews.EXCLUDE_FROM_CORE_CLONING
+        );
+    }
+    
+    /**
      * Retrieve states by their core reference 
      * 
      * @param refContainer
@@ -1105,9 +1427,8 @@ public class DateStateViews {
      * 
      * @return the states belonging to a core object
      */
-    @SuppressWarnings("unchecked")
     private static <T extends DateState> List<T> getRawStates(
-        RefContainer refContainer,
+        RefContainer<T> refContainer,
         Object... resourceIdentifier
     ){
         return refContainer.refGetAll(
@@ -1142,7 +1463,7 @@ public class DateStateViews {
      * @throws IllegalArgumentException if validTo is less than validFrom 
      */
     @SuppressWarnings("unchecked")
-    private static <T extends DateState> List<T> getStates(
+	private static <T extends DateState> List<T> getStates(
         Container<? super T> referenceCollection,
         XMLGregorianCalendar validFrom,
         XMLGregorianCalendar validTo,
@@ -1150,12 +1471,12 @@ public class DateStateViews {
         String... qualifiers
     ){
         Order.assertTimeRange(validFrom, validTo);
-        Path containerId = PersistenceHelper.getContainerId(referenceCollection);
-        RefContainer contextFreeContainer = (RefContainer<?>) DateStateViews.getPersistenceManager(
-            ((RefContainer)referenceCollection),
+        Path containerId = (Path) JDOHelper.getObjectId(referenceCollection);
+        RefContainer<T> contextFreeContainer = (RefContainer<T>) DateStateViews.getPersistenceManager(
+            ((RefContainer<T>)referenceCollection),
             null
         ).getObjectById(
-            PersistenceHelper.getTransientContainerId(referenceCollection)
+            JDOHelper.getTransactionalObjectId(referenceCollection)
         );
         Object[] resourceIdentifiers = new Object[qualifiers.length];
         int i = 0;
@@ -1183,28 +1504,6 @@ public class DateStateViews {
             null, 
             AccessMode.FOR_QUERY
         );
-    }
-    
-    /**
-     * Retrieve states 
-     * 
-     * @param referenceCollection the result of the parent view's getXXX() method
-     * @param qualifier the object's qualifier
-     * @param invalidated tells whether valid or invalid states excluded<ul>
-     * <li><code>null</code>: Neither valid nor invalid states are excluded
-     * <li><code>TRUE</code>: Valid states are excluded
-     * <li><code>FALSE</code>: Invalid states are excluded
-     * </ul>
-     * @return a collection of DateState instances
-     * @deprecated Use {@link #getStates(Container<? super T>,Boolean,String)} instead
-     */
-    @Deprecated
-    public static <T extends DateState> List<T> getStates(
-        Container<? super T> referenceCollection,
-        String qualifier,
-        Boolean invalidated
-    ){
-        return getStates(referenceCollection, invalidated, qualifier);
     }
 
     /**
@@ -1256,32 +1555,6 @@ public class DateStateViews {
         );
     }    
     
-    /**
-     * Retrieve valid states
-     * 
-     * @param referenceCollection the result of the parents getXXX() method
-     * @param qualifier the object's qualifier
-     * @param validFrom include all states ending at validFrom or later
-     * @param validTo include all states beginning at validTo or earlier
-     * 
-     * @return a list of DateState instances
-     * @deprecated Use {@link #getValidStates(Container<? super T>,XMLGregorianCalendar,XMLGregorianCalendar,String)} instead
-     */
-    @Deprecated
-    public static <T extends DateState> List<T> getValidStates(
-        Container<? super T> referenceCollection,
-        String qualifier,
-        XMLGregorianCalendar validFrom,
-        XMLGregorianCalendar validTo
-    ){
-        return getValidStates(
-            referenceCollection,
-            validFrom,
-            validTo,
-            qualifier
-         );
-    }
-
     /**
      * Retrieve valid states
      * 
@@ -1345,7 +1618,8 @@ public class DateStateViews {
      * 
      * @throws IllegalArgumentException if validTo is less than validFrom 
      */
-    private static <T extends DateState> List<T> getStates(
+    @SuppressWarnings("unchecked")
+	private static <T extends DateState> List<T> getStates(
         StateCapable stateCapable,
         XMLGregorianCalendar validFrom,
         XMLGregorianCalendar validTo,
@@ -1357,7 +1631,7 @@ public class DateStateViews {
         Path resourceIdentifier = (Path) JDOHelper.getObjectId(stateCapable);
         return new FilteredStates<T>(
             DateStateViews.<T>getRawStates(
-                (RefContainer<?>) DateStateViews.getPackageForContext(
+                (RefContainer<T>) DateStateViews.getPackageForContext(
                     stateCapable,
                     null
                 ).refContainer(
@@ -1484,6 +1758,20 @@ public class DateStateViews {
             DateStateViews.<T>getValidStates(dateState, context.getValidFrom(), context.getValidTo()); 
     }
     
+	@SuppressWarnings("unchecked")
+	public static <T extends RefBaseObject> T getViewForContext(
+		RefBaseObject context,
+		T value
+	){
+		if(context == null || value == null) {
+			return value;
+		} else {
+			 PersistenceManager actual = JDOHelper.getPersistenceManager(value);
+			 PersistenceManager expected = JDOHelper.getPersistenceManager(context);
+			 return actual == expected ? value : (T) expected.getObjectById(JDOHelper.getTransactionalObjectId(value));
+		}
+	}
+	
     
     //------------------------------------------------------------------------
     // Date State Context
@@ -1526,20 +1814,6 @@ public class DateStateViews {
         return viewContext == null ? null : viewContext.getViewKind();
     }
     
-    /**
-     * Tells whether the object is a validity aware view
-     * 
-     * @param refObject a plain JMI object or a date state view
-     * 
-     * @deprecated use {@link DateStateViews#getViewKind(RefBaseObject)} != null instead
-     */
-    @Deprecated
-    public static boolean isView(
-        RefObject refObject
-    ){
-        return DateStateViews.getContext(refObject) != null;
-    }
-
     /**
      * Tests whether a given object is readable
      * 
@@ -1597,26 +1871,23 @@ public class DateStateViews {
                 List<DateState> involvedStates = DateStateViews.getStatesInvolvedInView((StateCapable)state);
                 return involvedStates.size() == 1 && state == involvedStates.get(0);
             default:
-                throw new RuntimeServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE,
-                    "Unexpected view kind",
-                    new BasicException.Parameter("actual", viewKind),
-                    new BasicException.Parameter("expected", ViewKind.TIME_POINT_VIEW, ViewKind.TIME_RANGE_VIEW)
-                );
+                throw new RuntimeException("Assertion failure");
         }
     }
-    
     
     /**
      * Clone an object 
      * 
      * @param refObject view to the object to be cloned
+     * @param exclude features not to be cloned
      *
      * @return the clone's transient resource identifier
+     * 
+     * @throws IllegalArgumentException if the refObject is null, deleted or 
+     * not represented by one state exactly
      */
     static UUID getResourceIdentifierOfClone(
-        DateState refObject
+        DateState refObject, String... exclude
     ){
         if(refObject == null || JDOHelper.isDeleted(refObject)) throw BasicException.initHolder(
             new IllegalArgumentException(
@@ -1670,11 +1941,11 @@ public class DateStateViews {
             );
             state = involved.get(0);
         }
-        DateState clone = (DateState) ((org.openmdx.base.persistence.spi.Cloneable<?>)state).openmdxjdoClone(
-        	"identity", "core", "stateValidFrom", "stateValidTo"
-        	
+        return (UUID) JDOHelper.getTransactionalObjectId(
+        	((org.openmdx.base.persistence.spi.Cloneable<?>)state).openmdxjdoClone(
+        		exclude
+        	)
         );
-        return (UUID) JDOHelper.getTransactionalObjectId(clone);
     }
     
     /**
@@ -1968,6 +2239,10 @@ public class DateStateViews {
      */
     private static class FilteredStates<E extends DateState> extends AbstractSequentialList<E> {
 
+        private static final String[] EXCLUDE_FROM_STATE_SPLITTING = {
+            "identity", "core", "stateValidFrom", "stateValidTo"
+        };
+
         /**
          * Constructor 
          *
@@ -2017,12 +2292,12 @@ public class DateStateViews {
                                 JDOHelper.getTransactionalObjectId(core)
                             );
                             DateState state = (DateState) viewManager.getObjectById(
-                                DateStateViews.getResourceIdentifierOfClone(raw)
+                                DateStateViews.getResourceIdentifierOfClone(raw, EXCLUDE_FROM_STATE_SPLITTING)
                             );
                             state.setStateValidFrom(stateValidFrom);
                             state.setStateValidTo(stateValidTo);
                             target.refDelete();
-                            state.setCore(core);
+                            linkStateAndCore(state, (StateCapable) core);
                         }
                     }
                 }
@@ -2077,7 +2352,7 @@ public class DateStateViews {
                 int validFrom = Order.compareValidFrom(
                     o1.getStateValidFrom(),
                     o2.getStateValidFrom()
-                ); 
+                );
                 if(validFrom != 0) {
                     return validFrom;
                 }
@@ -2095,7 +2370,7 @@ public class DateStateViews {
          * 
          * @return the delegate collection
          */
-        private Collection<E> getDelegate(){
+        Collection<E> getDelegate(){
             SortedSet<E> set = new TreeSet<E>(FilteredStates.stateComparator);
             for(E state : this.dateStates) {
                 if(
@@ -2118,35 +2393,77 @@ public class DateStateViews {
             return set;
         }
         
+        E marshal(E raw){
+           switch(this.mode){
+	          case RAW:
+	              return raw;
+	          case FOR_QUERY:
+	        	  return DateStateViews.getViewForState(raw);
+	          case FOR_UPDATE:
+	              XMLGregorianCalendar validFrom = raw.getStateValidFrom();
+	              XMLGregorianCalendar validTo = raw.getStateValidTo();
+	              return DateStateViews.<E,E>getViewForTimeRange(
+                      raw,
+                      Order.compareValidFrom(this.validFrom, validFrom) > 0 ? this.validFrom : validFrom,
+                      Order.compareValidTo(this.validTo, validTo) < 0 ? this.validTo : validTo
+                  );
+	           default:
+	        	   return null;
+	      	}       	
+        }
         
         /* (non-Javadoc)
          * @see java.util.AbstractSequentialList#listIterator(int)
          */
         @Override
-        public ListIterator<E> listIterator(int index) {
-            List<E> list = new ArrayList<E>();
-            for(E raw : this.getDelegate()) {
-                switch(this.mode){
-                    case RAW:
-                        list.add(raw);
-                        break;
-                    case FOR_QUERY:
-                        list.add(DateStateViews.getViewForState(raw));
-                        break;
-                    case FOR_UPDATE:
-                        XMLGregorianCalendar validFrom = raw.getStateValidFrom();
-                        XMLGregorianCalendar validTo = raw.getStateValidTo();
-                        list.add(
-                            DateStateViews.<E,E>getViewForTimeRange(
-                                raw,
-                                Order.compareValidFrom(this.validFrom, validFrom) > 0 ? this.validFrom : validFrom,
-                                Order.compareValidTo(this.validTo, validTo) < 0 ? this.validTo : validTo
-                            )
-                        );
-                        break;
-                }
-            }
-            return list.listIterator(index);
+        public ListIterator<E> listIterator(final int index) {
+        	return new ListIterator<E>() {
+        		
+        		private final ListIterator<E> delegate = new ArrayList<E>(getDelegate()).listIterator(index);
+        		private E current;
+        		
+				public boolean hasNext() {
+					return delegate.hasNext();
+				}
+
+				public E next() {
+					return this.current = marshal(delegate.next());
+				}
+
+				public boolean hasPrevious() {
+					return delegate.hasPrevious();
+				}
+
+				public E previous() {
+					return this.current = marshal(delegate.previous());
+				}
+
+				public int nextIndex() {
+					return delegate.nextIndex();
+				}
+
+				public int previousIndex() {
+					return delegate.previousIndex();
+				}
+
+				public void remove() {
+					if(this.current == null) {
+						throw new IllegalStateException("No current element");
+					} else {
+						this.current.refDelete();
+						this.current = null;
+					}
+				}
+
+				public void set(E o) {
+					throw new UnsupportedOperationException();
+				}
+
+				public void add(E o) {
+					throw new UnsupportedOperationException();
+				}
+        		
+        	};
         }
 
         /* (non-Javadoc)

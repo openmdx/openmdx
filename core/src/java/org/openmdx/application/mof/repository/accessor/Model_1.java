@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.47 2010/08/06 12:25:25 hburger Exp $
+ * Name:        $Id: Model_1.java,v 1.56 2012/01/05 23:20:21 hburger Exp $
  * Description: MOF repository accessor
- * Revision:    $Revision: 1.47 $
+ * Revision:    $Revision: 1.56 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:25:25 $
+ * Date:        $Date: 2012/01/05 23:20:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -18,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -45,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes or is based on software developed by other 
- * organizations as listed in the NOTICE file.
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.mof.repository.accessor;
 
@@ -96,21 +96,22 @@ import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
 import org.w3c.cci2.LargeObject;
-import org.w3c.cci2.SparseArray;
 import org.w3c.spi2.Datatypes;
 import org.xml.sax.InputSource;
 
@@ -119,6 +120,7 @@ import org.xml.sax.InputSource;
  * functions and provides a cache for fast model element access.
  */
 //---------------------------------------------------------------------------
+@SuppressWarnings({"rawtypes","unchecked"})
 public class Model_1 implements Model_1_0 {
 
     //-------------------------------------------------------------------------
@@ -175,31 +177,22 @@ public class Model_1 implements Model_1_0 {
     //-------------------------------------------------------------------------
     static class Model_1Provider extends Layer_1 {
 
-        //-----------------------------------------------------------------------    
+        /**
+         * Constructor 
+         *
+         * @param plugInChain
+         * @throws Exception
+         */
         public Model_1Provider(            
-            List<Layer_1> delegates
+            Layer_1 plugInChain
         ) throws Exception {
-            this.delegates = delegates;
             this.activate(
                 (short)5, 
                 new Configuration(), 
-                delegates.get(0)
+                plugInChain
             );
         }
 
-        //-----------------------------------------------------------------------
-        @Override
-        public void deactivate(
-        ) throws Exception {
-            for(Iterator<Layer_1> i = this.delegates.iterator(); i.hasNext(); ) {
-                (i.next()).deactivate();
-            }          
-        }
-
-        //-----------------------------------------------------------------------
-        // Variables
-        //-----------------------------------------------------------------------
-        private final List<Layer_1> delegates;
     }
 
     //-------------------------------------------------------------------------
@@ -248,15 +241,7 @@ public class Model_1 implements Model_1_0 {
                 Boolean.TRUE
             );
             interceptionPlugin.activate((short)4, interceptionConfiguration, typePlugin);
-            return new Model_1Provider(
-                Arrays.asList(
-                    interceptionPlugin,
-                    typePlugin,
-                    applicationPlugin,
-                    modelPlugin,
-                    persistencePlugin
-                )
-            );
+            return new Model_1Provider(interceptionPlugin);
         }
         catch(ServiceException e) {
             throw e;
@@ -650,20 +635,18 @@ public class Model_1 implements Model_1_0 {
     private void verifyObjectCollection(
         Object values,
         Object type,
-        String multiplicity,
+        Multiplicity multiplicity,
         boolean enforceRequired,
         Stack<List<?>> validationContext, 
         boolean attributesOnly, 
         boolean verifyDerived
     ) throws ServiceException {
-        int size;
+        final int size;
         if(values instanceof Collection<?>){
             size = ((Collection<?>)values).size();
-        } 
-        else if (values instanceof Map<?,?>){
+        } else if (values instanceof Map<?,?>){
             size = ((Map<?,?>)values).size();
-        } 
-        else throw new ServiceException(
+        } else throw new ServiceException(
             BasicException.Code.DEFAULT_DOMAIN,
             BasicException.Code.ASSERTION_FAILURE, 
             "values expected to be in [Collectin|Map]",
@@ -673,10 +656,7 @@ public class Model_1 implements Model_1_0 {
             new BasicException.Parameter("context", validationContext)
         );      
         // Verify multiplicity
-        if(
-            (Multiplicities.OPTIONAL_VALUE.equals(multiplicity) || Multiplicities.SINGLE_VALUE.equals(multiplicity)) &&
-            (size > 1) 
-        ) {
+        if(Multiplicity.OPTIONAL == multiplicity || Multiplicity.SINGLE_VALUE == multiplicity && size > 1) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
@@ -689,10 +669,7 @@ public class Model_1 implements Model_1_0 {
         }
 
         // verify stream muliplicity
-        if(
-            Multiplicities.STREAM.equals(multiplicity) &&
-            size > 2
-        ) {
+        if(Multiplicity.STREAM == multiplicity && size > 2) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE, 
@@ -705,9 +682,9 @@ public class Model_1 implements Model_1_0 {
         // Verify collection and multiplicity type.
         // MULTI_VALUE is valid for openMDX compatibility
         if(
-            (Multiplicities.SET.equals(multiplicity) && !(values instanceof Set<?> || values instanceof List<?>)) ||
-            ((Multiplicities.LIST.equals(multiplicity) || Multiplicities.MULTI_VALUE.equals(multiplicity)) && !(values instanceof List<?>)) ||
-            (Multiplicities.SPARSEARRAY.equals(multiplicity) && !(values instanceof SortedMap<?,?> || values instanceof SparseArray<?>)) 
+            (Multiplicity.SET == multiplicity && !(values instanceof Collection<?>)) ||
+            (Multiplicity.LIST == multiplicity && !(values instanceof List<?>)) ||
+            (Multiplicity.SPARSEARRAY == multiplicity && !(values instanceof SortedMap<?,?>)) 
         ) {
             throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
@@ -748,11 +725,10 @@ public class Model_1 implements Model_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
     private void verifyObject(
         Object value,
         Object type,
-        String multiplicity,
+        Multiplicity multiplicity,
         boolean enforceRequired,
         Stack<List<?>> validationContext, 
         boolean attributesOnly, 
@@ -856,14 +832,14 @@ public class Model_1 implements Model_1_0 {
             else if(
                 (value instanceof Reader || value instanceof Long) && 
                 PrimitiveTypes.STRING.equals(typeName) &&
-                Multiplicities.STREAM.equals(multiplicity)
+                Multiplicity.STREAM.toString().equals(multiplicity)
             ) {
                 return;
             }
             else if(
                 (value instanceof InputStream || value instanceof LargeObject || value instanceof Long) && 
                 PrimitiveTypes.BINARY.equals(typeName) &&
-                Multiplicities.STREAM.equals(multiplicity)
+                Multiplicity.STREAM.toString().equals(multiplicity)
             ) {
                 return;
             }
@@ -918,13 +894,7 @@ public class Model_1 implements Model_1_0 {
         else if(this.isStructureType(type)) {
             Set<String> fieldNames;
             if(value instanceof MappedRecord) {
-                Object_2Facade valueFacade;
-                try {
-                    valueFacade = Object_2Facade.newInstance((MappedRecord)value);
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
+                Object_2Facade valueFacade = Facades.asObject((MappedRecord)value);
                 fieldNames = new TreeSet<String>(valueFacade.getValue().keySet());
                 // remove empty fields
                 for(Iterator<String> i = fieldNames.iterator(); i.hasNext(); ) {
@@ -951,7 +921,7 @@ public class Model_1 implements Model_1_0 {
                     i.hasNext();
                 ) {
                     ModelElement_1_0 fieldDef = i.next();
-                    if(Multiplicities.SINGLE_VALUE.equals(fieldDef.objGetValue("multiplicity"))) {
+                    if(Multiplicity.SINGLE_VALUE.toString().equals(fieldDef.objGetValue("multiplicity"))) {
                         fieldNames.add(
                             (String)fieldDef.objGetValue("name")
                         );
@@ -982,15 +952,9 @@ public class Model_1 implements Model_1_0 {
                         );
                     }
                     else {
-                        Object fieldValue;
-                        try {
-                            fieldValue = value instanceof Structure_1_0 ? 
-                                ((Structure_1_0)value).objGetValue(fieldName) : 
-                                Object_2Facade.newInstance((MappedRecord)value).getAttributeValues(fieldName);
-                        } 
-                        catch (ResourceException e) {
-                            throw new ServiceException(e);
-                        }
+                        Object fieldValue = value instanceof Structure_1_0 ? 
+                            ((Structure_1_0)value).objGetValue(fieldName) : 
+                            Facades.asObject((MappedRecord)value).getAttributeValues(fieldName);
                         if(enforceRequired && (fieldValue == null)) {
                             throw new ServiceException(
                                 BasicException.Code.DEFAULT_DOMAIN,
@@ -1007,7 +971,7 @@ public class Model_1 implements Model_1_0 {
                         this.verifyObject(
                             fieldValue,
                             featureDef.objGetValue("type"),
-                            (String)featureDef.objGetValue("multiplicity"),
+                            ModelHelper.toMultiplicity((String)featureDef.objGetValue("multiplicity")),
                             enforceRequired,
                             validationContext, 
                             attributesOnly, 
@@ -1031,13 +995,7 @@ public class Model_1 implements Model_1_0 {
                 attributeNames = new TreeSet<String>(((DataObject_1_0)value).objDefaultFetchGroup());
             }
             else if(value instanceof MappedRecord) {
-                Object_2Facade valueFacade;
-                try {
-                    valueFacade = Object_2Facade.newInstance((MappedRecord)value);
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
+                Object_2Facade valueFacade = Facades.asObject((MappedRecord)value);
                 attributeNames = new TreeSet<String>(valueFacade.getValue().keySet());
             }
             else {
@@ -1064,7 +1022,7 @@ public class Model_1 implements Model_1_0 {
                 ) {
                     ModelElement_1_0 fieldDef = i.next();
                     if(
-                        Multiplicities.SINGLE_VALUE.equals(fieldDef.objGetValue("multiplicity")) && 
+                        Multiplicity.SINGLE_VALUE.toString().equals(fieldDef.objGetValue("multiplicity")) && 
                         (verifyDerived || !Boolean.TRUE.equals(fieldDef.objGetValue("isDerived")))
                     ) {
                         attributeNames.add(
@@ -1104,26 +1062,26 @@ public class Model_1 implements Model_1_0 {
                     if (value instanceof DataObject_1_0) {
                         DataObject_1_0 object = (DataObject_1_0)value;
                         if(
-                            Multiplicities.LIST.equals(featureMultiplicity) ||
-                            Multiplicities.MULTI_VALUE.equals(featureMultiplicity) || (
+                            Multiplicity.LIST.toString().equals(featureMultiplicity) ||
+                            ModelHelper.UNBOUNDED.equals(featureMultiplicity) || (
                                 this.isReferenceType(featureDef) &&
                                 this.referenceIsStoredAsAttribute(featureDef) &&
-                                Multiplicities.OPTIONAL_VALUE.equals(featureMultiplicity)
+                                Multiplicity.OPTIONAL.toString().equals(featureMultiplicity)
                             )                      
                         ) {
                             attributeValue = object.objGetList(attributeName);
                         } 
-                        else if(Multiplicities.SET.equals(featureMultiplicity)) {
+                        else if(Multiplicity.SET.toString().equals(featureMultiplicity)) {
                             attributeValue = object.objGetSet(attributeName);
                         } 
-                        else if(Multiplicities.SPARSEARRAY.equals(featureMultiplicity)) {
+                        else if(Multiplicity.SPARSEARRAY.toString().equals(featureMultiplicity)) {
                             attributeValue = object.objGetSparseArray(attributeName);
                         } 
                         else {
                             attributeValue = object.objGetValue(attributeName);                      
                             if(
                                 enforceRequired && 
-                                Multiplicities.SINGLE_VALUE.equals(featureMultiplicity) &&
+                                Multiplicity.SINGLE_VALUE.toString().equals(featureMultiplicity) &&
                                 attributeValue == null
                             ) {
                                 throw new ServiceException(
@@ -1139,17 +1097,11 @@ public class Model_1 implements Model_1_0 {
                         }
                     } 
                     else if (value instanceof MappedRecord) {
-                        Object genericValue;
-                        try {
-                            genericValue = Object_2Facade.newInstance((MappedRecord)value).getAttributeValues(attributeName);
-                        } 
-                        catch (ResourceException e) {
-                            throw new ServiceException(e);
-                        }
+                        Object genericValue = Facades.asObject((MappedRecord)value).getAttributeValues(attributeName);
                         attributeValue = genericValue; 
                         if(
                             enforceRequired && 
-                            Multiplicities.SINGLE_VALUE.equals(featureMultiplicity) &&
+                            Multiplicity.SINGLE_VALUE.toString().equals(featureMultiplicity) &&
                             (attributeValue == null || ((List)genericValue).isEmpty())
                         ) {
                             throw new ServiceException(
@@ -1176,13 +1128,13 @@ public class Model_1 implements Model_1_0 {
                             featureDef.objGetValue("referencedEnd")
                         );
                         if(!referencedEnd.objGetList("qualifierType").isEmpty()) {
-                            attributeMultiplicity = Multiplicities.MULTI_VALUE;
+                            attributeMultiplicity = ModelHelper.UNBOUNDED;
                         }
                     }
                     this.verifyObject(
                         attributeValue,
                         featureDef.objGetValue("type"),
-                        attributeMultiplicity,
+                        ModelHelper.toMultiplicity(attributeMultiplicity),
                         enforceRequired,
                         validationContext, 
                         attributesOnly, 
@@ -1219,7 +1171,6 @@ public class Model_1 implements Model_1_0 {
      *   <li> references which are stored as attributes are added to the 'attribute' list. </li>
      * </ul>
      */
-    @SuppressWarnings("unchecked")
     private void refreshCache(
     ) throws ServiceException {
 
@@ -1232,7 +1183,11 @@ public class Model_1 implements Model_1_0 {
         synchronized(this.repository) {
             List<MappedRecord> modelPackages = this.channel.addFindRequest(
                 PROVIDER_ROOT_PATH.getChild("segment"),
-                null
+                null,
+                AttributeSelectors.ALL_ATTRIBUTES,
+                0,
+                Integer.MAX_VALUE,
+                SortOrder.ASCENDING.code()
             );
             for(
                 Iterator<MappedRecord> i = modelPackages.iterator();
@@ -1341,7 +1296,7 @@ public class Model_1 implements Model_1_0 {
                             );
                             // If reference has a qualifier --> multiplicity 0..n
                             if(!this.getElement(contentElement.objGetValue("referencedEnd"), cache).objGetList("qualifierName").isEmpty()) {
-                                attribute.objSetValue("multiplicity", Multiplicities.MULTI_VALUE);
+                                attribute.objSetValue("multiplicity", ModelHelper.UNBOUNDED);
                             }
                             SysLog.trace("referenceIsStoredAsAttribute", attribute.jdoGetObjectId());
                             attributes.put(
@@ -1513,10 +1468,12 @@ public class Model_1 implements Model_1_0 {
         if(size <= 5) {
             return false;
         } else {
-            Path key = xri.getPrefix(1);
-            for(int i = 1; i < size; i+=2){
-                key.add(xri.get(i));
+        	String[] k = new String[size / 2 + 1];
+        	k[0] = xri.get(0);
+            for(int i = 1, j = 1; i < size; i+=2){
+            	k[j++] = xri.get(i);
             }
+            Path key = new Path(k);
             Boolean sharedAssociation = this.sharedAssociations.get(key);
             if(sharedAssociation == null) {
                 Boolean parentIsShared = this.sharedAssociations.get(key.getParent());
@@ -1610,9 +1567,7 @@ public class Model_1 implements Model_1_0 {
      * @return Map map of features of class, its supertypes and subtypes. The
      *          map contains an entry of the form (featureName, featureDef).
      */
-    @SuppressWarnings({
-        "unchecked", "cast"
-    })
+    @SuppressWarnings("cast")
     public Map<String,ModelElement_1_0> getStructuralFeatureDefs(
         ModelElement_1_0 classDef,
         boolean includeSubtypes,
@@ -1776,7 +1731,7 @@ public class Model_1 implements Model_1_0 {
                 if(
                     PrimitiveTypes.XRI_ALIAS.equals(elementType.getBase())
                 ) {
-                    element = elementType.getParent().add(PrimitiveTypes.XRI);
+                    element = elementType.getParent().getChild(PrimitiveTypes.XRI);
                 }
             }
             else {
@@ -1898,7 +1853,7 @@ public class Model_1 implements Model_1_0 {
         this.verifyObjectCollection(
             values,
             type,
-            multiplicity,
+            ModelHelper.toMultiplicity(multiplicity),
             includeRequired,
             validationContext, 
             true, // attributesOnly
@@ -2057,7 +2012,7 @@ public class Model_1 implements Model_1_0 {
         this.verifyObject(
             value,
             type,
-            multiplicity,
+            ModelHelper.toMultiplicity(multiplicity),
             enforceRequired,
             validationContext, 
             attributesOnly, 
@@ -2269,8 +2224,7 @@ public class Model_1 implements Model_1_0 {
     public boolean isAssociationType(
         Object type
     ) throws ServiceException {
-        ModelElement_1_0 typeDef = this.getDereferencedType(type);
-        return typeDef.isAssociationType();
+        return this.getDereferencedType(type).isAssociationType();
     }
 
     //------------------------------------------------------------------------

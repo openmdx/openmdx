@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RestInteractionSpec.java,v 1.7 2010/04/08 01:18:59 hburger Exp $
+ * Name:        $Id: RestInteractionSpec.java,v 1.8 2011/11/26 01:34:59 hburger Exp $
  * Description: REST Interaction Specification
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/08 01:18:59 $
+ * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,7 +50,6 @@
  */
 package org.openmdx.base.resource.spi;
 
-import javax.resource.ResourceException;
 import javax.resource.cci.InteractionSpec;
 
 import org.openmdx.base.resource.Records;
@@ -128,24 +127,20 @@ public final class RestInteractionSpec implements InteractionSpec {
     @Override
     public String toString(
     ) {
-        try {
-            return IndentingFormatter.toString(
-                Records.getRecordFactory().asMappedRecord(
-                    this.getClass().getName(), 
-                    "openMDX/REST Interaction Spec", 
-                    new String[]{
-                        "function",
-                        "interactionVerb"
-                    },
-                    new Object[]{
-                        this.function,
-                        INTERACTION_VERBS[this.interactionVerb]
-                    }
-                )
-            );
-        } catch(ResourceException e) {
-            return super.toString();
-        }
+        return IndentingFormatter.toString(
+		    Records.getRecordFactory().asMappedRecord(
+		        this.getClass().getName(), 
+		        "openMDX/REST Interaction Spec", 
+		        new String[]{
+		            "function",
+		            "interactionVerb"
+		        },
+		        new Object[]{
+		            this.function,
+		            INTERACTION_VERBS[this.interactionVerb]
+		        }
+		    )
+		);
     }
 
     /* (non-Javadoc)

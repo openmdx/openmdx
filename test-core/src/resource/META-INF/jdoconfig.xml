@@ -91,6 +91,8 @@
         <property name="test.openmdx.datatypes1.jdo.NumericPlugIn.configuration" value="xri://+resource/META-INF/datatypes1NumericPlugIn.properties"/>
         <property name="org.openmdx.jdo.DataManager.xriPattern[2]" value="xri://@openmdx*test.openmdx.datatypes1/provider/Persistent/segment/Native/($...)"/>
         <property name="org.openmdx.jdo.DataManager.restPlugIn[2]" value="test.openmdx.datatypes1.jdo.NativePlugIn"/>
+        <property name="org.openmdx.jdo.DataManager.xriPattern[3]" value="xri://@openmdx*test.openmdx.datatypes1/provider/Persistent/segment/Bulk/($...)"/>
+        <property name="org.openmdx.jdo.DataManager.restPlugIn[3]" value="test.openmdx.datatypes1.jdo.NativePlugIn"/>
         <property name="test.openmdx.datatypes1.jdo.NativePlugIn.class" value="org.openmdx.application.dataprovider.kernel.EmbeddedDataprovider_1"/>
         <property name="test.openmdx.datatypes1.jdo.NativePlugIn.configuration" value="xri://+resource/META-INF/datatypes1NativePlugIn.properties"/>
     </persistence-manager-factory>

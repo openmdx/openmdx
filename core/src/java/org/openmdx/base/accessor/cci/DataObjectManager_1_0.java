@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: DataObjectManager_1_0.java,v 1.7 2010/01/21 17:11:57 hburger Exp $
+ * Name:        $Id: DataObjectManager_1_0.java,v 1.8 2011/11/25 14:21:56 hburger Exp $
  * Description: openMDX Object Layer: Object Factory Interface
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/21 17:11:57 $
+ * Date:        $Date: 2011/11/25 14:21:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -80,7 +80,7 @@ public interface DataObjectManager_1_0 extends PersistenceManager_1_0 {
     ) throws ServiceException;
     
     /**
-     * Set the optimal fetch size
+     * Retrieve the optimal fetch size
      * 
      * @return the optimal fetch size
      */

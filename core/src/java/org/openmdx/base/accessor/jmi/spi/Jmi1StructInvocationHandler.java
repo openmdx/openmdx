@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.39 2010/08/06 12:23:42 hburger Exp $
+ * Name:        $Id: Jmi1StructInvocationHandler.java,v 1.44 2011/08/24 07:12:59 hburger Exp $
  * Description: Jmi1StructInvocationHandler 
- * Revision:    $Revision: 1.39 $
+ * Revision:    $Revision: 1.44 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/06 12:23:42 $
+ * Date:        $Date: 2011/08/24 07:12:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -80,8 +80,8 @@ import org.openmdx.base.collection.TreeSparseArray;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
@@ -226,36 +226,38 @@ public class Jmi1StructInvocationHandler implements InvocationHandler, Marshalle
      * 
      * @return the structure field value
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({
+        "unchecked", "rawtypes"
+    })
     private Object getValue(
         ModelElement_1_0 fieldDef
     ) throws ServiceException {
         String fieldName = (String)fieldDef.objGetValue("name");
-        String multiplicity = (String)fieldDef.objGetValue("multiplicity");
         Object value = this.delegate.get(fieldName);
-        if(Multiplicities.OPTIONAL_VALUE.equals(multiplicity) || Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
-            return marshal(
-                value instanceof Collection ? ((Collection)value).iterator().next() : value
-            );
-        } else if (Multiplicities.LIST.equals(multiplicity)) {
-            return  new MarshallingList(
-                this, 
-                value instanceof List ? (List)value : Collections.singletonList(value)
-            );
-        } else if (Multiplicities.SET.equals(multiplicity)) {
-            return  new MarshallingSet(
-                this, 
-                value instanceof Collection ? (Collection)value : Collections.singleton(value)
-            );
-        } else if (Multiplicities.SPARSEARRAY.equals(multiplicity) && value instanceof Map) {
-            SparseArray target = new TreeSparseArray();
-            for(Object e : ((Map)value).entrySet()) {
-                Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
-                target.put(entry.getKey(), marshal(entry.getValue()));
-            }
-            return target;
-        } else {
-            return value;
+        switch(ModelHelper.getMultiplicity(fieldDef)){
+	        case OPTIONAL: case SINGLE_VALUE:
+	            return marshal(
+                    value instanceof Collection ? ((Collection<?>)value).iterator().next() : value
+                );
+	        case LIST:
+	            return  new MarshallingList(
+                    this, 
+                    value instanceof List ? (List)value : Collections.singletonList(value)
+                );
+	        case SET:
+	            return  new MarshallingSet(
+                    this, 
+                    value instanceof Collection ? (Collection)value : Collections.singleton(value)
+                );
+	        case SPARSEARRAY:
+	            SparseArray target = new TreeSparseArray();
+	            for(Object e : ((Map)value).entrySet()) {
+	                Map.Entry<?, ?> entry = (Map.Entry<?, ?>) e;
+	                target.put(entry.getKey(), marshal(entry.getValue()));
+	            }
+	            return target;
+        	default:
+                return value;
         }
     }
 

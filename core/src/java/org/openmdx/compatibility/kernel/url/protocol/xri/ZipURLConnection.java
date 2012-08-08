@@ -331,7 +331,7 @@ public class ZipURLConnection extends JarURLConnection {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
     @Override
     public Object getContent(Class[] classes) throws IOException {
         try {

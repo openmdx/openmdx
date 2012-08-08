@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: DBOSlicedWithIdAsKey.java,v 1.17 2010/11/09 23:54:23 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: DBOSlicedWithIdAsKey.java,v 1.24 2011/12/02 15:01:11 hburger Exp $
  * Description: SlicedDbObjectParentRidOnly class
- * Revision:    $Revision: 1.17 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/09 23:54:23 $
+ * Date:        $Date: 2011/12/02 15:01:11 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
  */
 package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 
@@ -59,17 +58,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
-import org.openmdx.application.dataprovider.spi.ResourceHelper;
 import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
-import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.w3c.cci2.SparseArray;
@@ -80,6 +77,7 @@ import org.w3c.cci2.SparseArray;
  * object type is used when the calculation of object_rid is expensive
  * compared to the calculation of the object_parent columns.
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class DBOSlicedWithIdAsKey
 extends SlicedDbObject 
 {
@@ -130,9 +128,9 @@ extends SlicedDbObject
         this.objectIdColumn.clear();
         this.objectIdColumn.add(database.OBJECT_ID);
         if(isExtent) {
-            this.referenceValues.clear();
+            this.getReferenceValues().clear();
             String base = accessPath.getBase();
-            this.referenceValues.add(
+            this.getReferenceValues().add(
                 base.equals("%") || base.equals(":*") ? 
                     rid + "/%" : 
                         rid
@@ -140,7 +138,7 @@ extends SlicedDbObject
             this.referenceClause = "(v." + database.OBJECT_ID + " LIKE ? " + this.database.getEscapeClause(conn) + ")";
         }
         else {
-            this.referenceValues.clear();
+            this.getReferenceValues().clear();
             if(this.getJoinCriteria() == null) {
                 String databaseProductName = "N/A";
                 try {
@@ -154,8 +152,8 @@ extends SlicedDbObject
                 // Use like for oid matching (e.g. required for PostgreSQL databases with non-C locale)
                 // Otherwise use the more efficient <> operators
                 if(Boolean.valueOf(useLikeForOidMatching).booleanValue()) {
-                    this.referenceValues.clear();
-                    this.referenceValues.add(rid + "/%");
+                    this.getReferenceValues().clear();
+                    this.getReferenceValues().add(rid + "/%");
                     this.referenceClause = "(v." + database.OBJECT_ID + " LIKE ?)";                     
                 }
                 else {
@@ -166,18 +164,18 @@ extends SlicedDbObject
                     // </ul>
                     // rid is a LIKE pattern. Remove %
                     if(rid.endsWith("/%")) {           
-                        this.referenceValues.add(rid.substring(0, rid.length()-1));
-                        this.referenceValues.add(rid.substring(0, rid.length()-2) + "0");
+                        this.getReferenceValues().add(rid.substring(0, rid.length()-1));
+                        this.getReferenceValues().add(rid.substring(0, rid.length()-2) + "0");
                     }
                     else {
-                        this.referenceValues.add(rid + "/");
-                        this.referenceValues.add(rid + "0");            
+                        this.getReferenceValues().add(rid + "/");
+                        this.getReferenceValues().add(rid + "0");            
                     }
                     this.referenceClause = "((v." + database.OBJECT_ID + " > ?) AND (v." + database.OBJECT_ID + " < ?))";
                 }
             }
             else {
-                this.referenceValues.add(
+                this.getReferenceValues().add(
                     this.database.getObjectId(
                         conn,
                         this.getReference().getParent()
@@ -187,7 +185,7 @@ extends SlicedDbObject
                 this.referenceClause = "(vj." + this.database.getDatabaseSpecificColumnName(conn, this.getJoinCriteria()[1], false) + " = ?)";            
             }
         }
-        this.referenceColumn.clear();
+        this.getReferenceColumn().clear();
         // non index column for non-indexed sliced DB objects
         this.indexColumn = null;
         this.excludeAttributes.add("objectIdx");        
@@ -267,7 +265,7 @@ extends SlicedDbObject
         return 
         !"object_id".equalsIgnoreCase(columnName) &&
         !this.database.OBJECT_IDX.equalsIgnoreCase(columnName) &&
-        !columnName.toLowerCase().startsWith(this.database.privateAttributesPrefix) &&
+        !columnName.toLowerCase().startsWith(this.database.getPrivateAttributesPrefix()) &&
         !columnName.endsWith(AbstractDatabase_1.SIZE_SUFFIX);
     }
 
@@ -425,26 +423,16 @@ extends SlicedDbObject
     }
 
     //---------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
+    
     @Override
     public MappedRecord[] sliceAndNormalizeObject(
         MappedRecord object, boolean discardValuesProvidedByView
     ) throws ServiceException {
         DbObjectConfiguration dbObjectConfiguration = this.getConfiguration();    
-        Object_2Facade facade = null;
-        MappedRecord normalizedObject = null;
-        Object_2Facade normalizedObjectFacade = null;
-        try {
-            facade = Object_2Facade.newInstance(object);
-            normalizedObject = Object_2Facade.newInstance(
-                new Path(""),
-                facade.getObjectClass()
-            ).getDelegate();
-            normalizedObjectFacade = Object_2Facade.newInstance(normalizedObject);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Object_2Facade facade = Facades.asObject(object);
+        Object_2Facade normalizedObjectFacade = Facades.newObject(new Path(""),
+		    facade.getObjectClass()
+		);
         // Add object class as attribute. This way it can be handled as a standard feature
         if(facade.getAttributeValues(SystemAttributes.OBJECT_CLASS) == null) {
             facade.attributeValuesAsList(SystemAttributes.OBJECT_CLASS).add(
@@ -458,30 +446,19 @@ extends SlicedDbObject
             ModelElement_1_0 classDef = model.getElement(facade.getObjectClass());
             for(ModelElement_1_0 feature : model.getAttributeDefs(classDef, false, false).values()) {
                 String featureName = (String)feature.objGetValue("name");
-                String featureQualifiedName = (String)feature.objGetValue("qualifiedName");                
                 if(
                     !this.database.embeddedFeatures.containsKey(featureName) &&
-                    !this.database.nonPersistentFeatures.contains(featureQualifiedName)
-                ) {                
-                    String multiplicity = ModelUtils.getMultiplicity(feature);
-                    if(
-                        ModelUtils.isChangeable(feature) &&
-                        (Multiplicities.MULTI_VALUE.equals(multiplicity) ||
-                        Multiplicities.LIST.equals(multiplicity) ||
-                        Multiplicities.SET.equals(multiplicity) ||
-                        Multiplicities.SPARSEARRAY.equals(multiplicity))                    
-                    ) {
-                        Object source = facade.getAttributeValues(featureName); 
-                        List target = facade.attributeValuesAsList(featureName + AbstractDatabase_1.SIZE_SUFFIX);
-                        target.clear();
-                        target.add(
-                            source instanceof SparseArray ?
-                                ((SparseArray)source).size() :
-                                    source instanceof List ?
-                                        ((List)source).size() :
-                                            -1
-                        );
-                    }
+                    this.database.isPersistent(feature) &&
+                    ModelHelper.isChangeable(feature) &
+                    ModelHelper.getMultiplicity(feature).isMultiValued()
+                ){
+                    List target = facade.attributeValuesAsList(featureName + AbstractDatabase_1.SIZE_SUFFIX);
+                    target.clear();
+                    target.add(
+                    	Integer.valueOf(
+                			facade.getAttributeValues(featureName) == null ? 0 : facade.attributeValuesAsList(featureName).size()
+                    	)
+                    );
                 }
             }
             // created_by, modified_by are derived and persistent
@@ -490,21 +467,21 @@ extends SlicedDbObject
                 Object values = facade.getAttributeValues(featureName);
                 facade.attributeValuesAsList(featureName + AbstractDatabase_1.SIZE_SUFFIX).clear();
                 facade.attributeValuesAsList(featureName + AbstractDatabase_1.SIZE_SUFFIX).add(
-                    values instanceof SparseArray ?
-                        ((SparseArray)values).size() :
-                            values instanceof List ?
-                                ((List)values).size() :
-                                    0
+                    Integer.valueOf(
+                        values instanceof SparseArray ? ((SparseArray)values).size() :
+                        values instanceof List ? ((List)values).size() :
+                        0
+                    )
                 );
                 featureName = SystemAttributes.MODIFIED_BY;
                 values = facade.getAttributeValues(featureName);
                 facade.attributeValuesAsList(featureName + AbstractDatabase_1.SIZE_SUFFIX).clear();
                 facade.attributeValuesAsList(featureName + AbstractDatabase_1.SIZE_SUFFIX).add(
-                    values instanceof SparseArray ?
-                        ((SparseArray)values).size() :
-                            values instanceof List ?
-                                ((List)values).size() :
-                                    0
+                    Integer.valueOf(
+                        values instanceof SparseArray ? ((SparseArray)values).size() :
+                        values instanceof List ? ((List)values).size() :
+                        0
+                    )
                 );
             }
         }
@@ -512,7 +489,7 @@ extends SlicedDbObject
         if(pathNormalizeLevel > 0) {  
             Path parentObjectPath = facade.getPath().getPrefix(facade.getPath().size()-2);    
             if(parentObjectPath.size() >= 5) {
-                normalizedObjectFacade.attributeValuesAsList(this.database.privateAttributesPrefix + "parent").add(
+                normalizedObjectFacade.attributeValuesAsList(this.database.getPrivateAttributesPrefix() + "parent").add(
                     this.database.getReferenceId(
                         conn, 
                         parentObjectPath, 
@@ -557,7 +534,7 @@ extends SlicedDbObject
                             if(pathNormalizeLevel > 2) {
                                 Path parentPath = objectPath.getPrefix(objectPath.size()-2);
                                 if(parentPath.size() >= 5) {
-                                    normalizedObjectFacade.attributeValuesAsList(this.database.privateAttributesPrefix + attributeName + "Parent").add(
+                                    normalizedObjectFacade.attributeValuesAsList(this.database.getPrivateAttributesPrefix() + attributeName + "Parent").add(
                                         this.database.getReferenceId(
                                             conn, 
                                             parentPath, 
@@ -602,19 +579,14 @@ extends SlicedDbObject
                 j++
             ) {
                 if(slices[j] == null) {
-                    try {
-                        slices[j] = Object_2Facade.newInstance(
-                            facade.getPath(),
-                            facade.getObjectClass()
-                        ).getDelegate();
-                    }
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
+                    slices[j] = Facades.newObject(
+					    facade.getPath(),
+					    facade.getObjectClass()
+					).getDelegate();
                 }
                 // Embedded features are mapped to slice 0
                 if(this.database.embeddedFeatures.containsKey(attributeName)) {                    
-                    ResourceHelper.getObjectFacade(slices[0]).attributeValuesAsList(
+                    Facades.asObject(slices[0]).attributeValuesAsList(
                         attributeName + AbstractDatabase_1.SIZE_SUFFIX + j
                     ).add(
                         facade.attributeValuesAsList(attributeName).get(j)
@@ -622,13 +594,7 @@ extends SlicedDbObject
                 }
                 // Map to slice with corresponding index
                 else {               
-                    Object_2Facade sliceFacade = null;
-                    try {
-                        sliceFacade = Object_2Facade.newInstance(slices[j]);
-                    } 
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
+                    Object_2Facade sliceFacade = Facades.asObject(slices[j]);
                     sliceFacade.attributeValuesAsList("objectIdx").add(
                         Integer.valueOf(j)
                     );

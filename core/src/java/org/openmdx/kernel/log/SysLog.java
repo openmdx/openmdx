@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: SysLog.java,v 1.22 2010/11/10 06:30:20 hburger Exp $
+ * Name:        $Id: SysLog.java,v 1.24 2011/06/21 22:51:56 hburger Exp $
  * Description: Former Log API
- * Revision:    $Revision: 1.22 $
+ * Revision:    $Revision: 1.24 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/10 06:30:20 $
+ * Date:        $Date: 2011/06/21 22:51:56 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -53,8 +53,6 @@ package org.openmdx.kernel.log;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-
-import org.openmdx.kernel.Version;
 
 /**
  * <code>SysLog</code> wraps the Log class to do application-general
@@ -585,9 +583,5 @@ public class SysLog {
     ) {
         log(Level.INFO, "Sys Statistics|Group {0}|{1}", group, record);
    	}
-
-    static {
-        SysLog.info("openMDX Kernel", Version.getImplementationVersion());
-    }
 
 }

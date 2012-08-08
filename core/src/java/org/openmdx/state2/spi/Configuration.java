@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: Configuration.java,v 1.1 2010/01/26 15:44:28 hburger Exp $
+ * Name:        $Id: Configuration.java,v 1.4 2011/03/23 14:45:28 hburger Exp $
  * Description: Configuration 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:44:28 $
+ * Date:        $Date: 2011/03/23 14:45:28 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -49,9 +48,10 @@
  * This product includes software developed by other organizations as
  * listed in the NOTICE file.
  */
-
 package org.openmdx.state2.spi;
 
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 
 
@@ -70,5 +70,18 @@ public interface Configuration {
     boolean isValidTimeUnique(
         Path xri
     );
+
+    /**
+     * Tells whether the valid time is unique for its children
+     * 
+     * @param parentClassifierDef the parent's classifier definition
+     * 
+     * @return <code>true</code> if the valid time is unique for its children
+     * 
+     * @throws ServiceException 
+     */
+    boolean isTheChildrensValidTimeUnique(
+        ModelElement_1_0 parentClassifierDef
+    ) throws ServiceException;
     
 }

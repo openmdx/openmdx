@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Security, http://www.openmdx.org/
- * Name:        $Id: TestLDAPConnector.java,v 1.2 2010/08/03 14:29:48 hburger Exp $
+ * Name:        $Id: TestLDAPConnector.java,v 1.3 2011/04/05 13:44:41 hburger Exp $
  * Description: LDAP Connector Test
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/08/03 14:29:48 $
+ * Date:        $Date: 2011/04/05 13:44:41 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -119,6 +119,7 @@ public class TestLDAPConnector {
 		String name
 	) throws NamingException, LDAPException {
 		System.out.println("Test '" + name + "' started");
+		@SuppressWarnings("unchecked")
 		ConnectionFactory<LDAPv3, LDAPException> ldapConnectionFactory = (ConnectionFactory<LDAPv3, LDAPException>) new InitialContext(
 		).lookup(
 			"java:comp/env/ldap/" + name

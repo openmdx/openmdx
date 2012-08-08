@@ -2,7 +2,7 @@ package javax.jmi.reflect;
 
 import java.util.List;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 public interface RefFeatured extends RefBaseObject {
     public void refSetValue(RefObject feature, Object value);
     public void refSetValue(String featureName, Object value);

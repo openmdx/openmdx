@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: SingletonIndexedRecord.java,v 1.2 2009/05/07 14:30:49 hburger Exp $
+ * Name:        $Id: SingletonIndexedRecord.java,v 1.3 2011/04/12 15:44:02 hburger Exp $
  * Description: SingletonMappedRecord 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.3 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/07 14:30:49 $
+ * Date:        $Date: 2011/04/12 15:44:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -57,7 +57,7 @@ import javax.resource.cci.IndexedRecord;
 /**
  * SingletonMappedRecord
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings("rawtypes")
 final class SingletonIndexedRecord
     extends AbstractList
     implements IndexedRecord 

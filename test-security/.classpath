@@ -7,5 +7,6 @@
 	<classpathentry kind="lib" path="src/resource"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ OSGi Enterprise (jre-1.6)"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ OSGi Extension (jre-1.6)"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ TinyRadius 1 (jre-1.6)"/>
 	<classpathentry kind="output" path="build/jre-1.6/eclipse"/>
 </classpath>

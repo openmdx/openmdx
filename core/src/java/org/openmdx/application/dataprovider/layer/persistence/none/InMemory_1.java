@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: InMemory_1.java,v 1.16 2010/06/02 13:41:49 hburger Exp $
+ * Name:        $Id: InMemory_1.java,v 1.22 2012/01/07 01:38:04 hburger Exp $
  * Description: InMemory_1 class
- * Revision:    $Revision: 1.16 $
+ * Revision:    $Revision: 1.22 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:41:49 $
+ * Date:        $Date: 2012/01/07 01:38:04 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.dataprovider.layer.persistence.none;
 
@@ -62,6 +61,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -87,10 +87,13 @@ import org.openmdx.application.dataprovider.layer.persistence.common.AbstractPer
 import org.openmdx.application.dataprovider.spi.Layer_1;
 import org.openmdx.application.dataprovider.spi.OperationAwareLayer_1;
 import org.openmdx.base.accessor.cci.SystemAttributes;
+import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
@@ -100,7 +103,7 @@ import org.w3c.cci2.SparseArray;
 /**
  * An in-memory data store
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class InMemory_1 extends AbstractPersistence_1 {
 
     // --------------------------------------------------------------------------
@@ -115,9 +118,25 @@ public class InMemory_1 extends AbstractPersistence_1 {
     ) throws ResourceException {
         return new InMemoryLayerInteraction(connection);
     }
-            
+
+    /**
+     * Lookup a feature's meta-data
+     * 
+     * @param objectClass
+     * 
+     * @param featureName
+     * @return the feature's meta-data
+     * @throws ServiceException 
+     */
+    ModelElement_1_0 getFeatureDef(
+        String objectClass,
+        String featureName
+    ) throws ServiceException{
+        return (ModelElement_1_0)((Map)getModel().getElement(objectClass).objGetValue("allFeature")).get(featureName);
+    }
+    
     // --------------------------------------------------------------------------
-    private static class InMemoryIterator {
+    private static class InMemoryIterator implements Serializable {
 
         private static final long serialVersionUID = 3905236814703769655L;
         private final AttributeSpecifier[] attributeSpecifier;
@@ -313,43 +332,15 @@ public class InMemory_1 extends AbstractPersistence_1 {
         synchronized(InMemory_1.referenceMaps) {
             this.referenceMap = (Map)InMemory_1.referenceMaps.get(namespaceId);
             if (this.referenceMap == null) {
-                SparseArray<?> storageFolder = configuration.values(LayerConfigurationEntries.STORAGE_FOLDER);
-                if(storageFolder.size() == 0) {        
-                    SysLog.detail("Create namespace", namespaceId);
-                    InMemory_1.referenceMaps.put(
-                        namespaceId,
-                        this.referenceMap = new HashMap(INITIAL_REFERENCE_MAP_CAPACITY)
-                    );
-                }
-                else {
-                    InMemory_1.referenceMaps.put(
-                        namespaceId,
-                        this.referenceMap = new HashMap(INITIAL_REFERENCE_MAP_CAPACITY)
-                    );
-                }
-            } 
-            else {
+                SysLog.detail("Create namespace", namespaceId);
+                InMemory_1.referenceMaps.put(
+                    namespaceId,
+                    this.referenceMap = new HashMap(INITIAL_REFERENCE_MAP_CAPACITY)
+                );
+            } else {
                 SysLog.detail("Attach to namespace", namespaceId);
             }
         }
-    }
-
-    //-------------------------------------------------------------------------
-    /**
-     * Deactivates a dataprovider layer
-     * <p>
-     * Subclasses overriding this method have to apply the following pattern:
-     * <pre>
-     *  public void deactivate(
-     *  ) throws Exception, ServiceException {
-     *    // local activation code
-     *    super.deactivate();
-     *  }
-     * </pre>   
-     */
-    @Override
-    public void deactivate(
-    ) throws Exception, ServiceException {
     }
 
     //-------------------------------------------------------------------------
@@ -363,7 +354,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
      *      the original object.
      * @param attributeSelector
      *      specifies the set of attributes to be returned.
-     * @param attributeSpecifier
+     * @param attributeSpecifiers
      *      specifies specific attributes to be returned.
      *
      * @return  a copy of the object containing the requested attributes.
@@ -371,63 +362,40 @@ public class InMemory_1 extends AbstractPersistence_1 {
     protected MappedRecord replyObject(
         MappedRecord source,
         short attributeSelector,
-        AttributeSpecifier[] attributeSpecifier
+        AttributeSpecifier[] attributeSpecifiers
     ) throws ServiceException {
         switch (attributeSelector) {
-            case AttributeSelectors.NO_ATTRIBUTES:
-                try {
-                    return Object_2Facade.newInstance(
-                        Object_2Facade.getPath(source)
-                    ).getDelegate();
-                }
-                catch(Exception e) {
-                    throw new ServiceException(e);
-                }
-            case AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES:
-            case AttributeSelectors.ALL_ATTRIBUTES: {
-                MappedRecord target;
-                try {
-                    target = Object_2Facade.cloneObject(source);
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
-                return target;
-            }
-            case AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES: {
-                MappedRecord target;
-                try {
-                    target = Object_2Facade.cloneObject(source);
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
-                Set attributes = new HashSet();
-                for(
-                    int index = 0;
-                    index < attributeSpecifier.length;
-                    index++
-                ) {
-                    attributes.add(attributeSpecifier[index].name());
-                }
-                attributes.add(SystemAttributes.CREATED_AT);
-                attributes.add(SystemAttributes.CREATED_BY);
-                attributes.add(SystemAttributes.MODIFIED_AT);
-                attributes.add(SystemAttributes.MODIFIED_BY);
-                Object_2Facade.getValue(target).keySet().retainAll(attributes);
-                return target;
-            }
-            default:
-                throw new ServiceException(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.BAD_PARAMETER,
-                    "Unsupported attributeSelector", 
-                    new BasicException.Parameter(
-                        "attributeSelector",
-                        AttributeSelectors.toString(attributeSelector)
-                    )
-                );          
-        }
+		    case AttributeSelectors.NO_ATTRIBUTES:
+		        return Facades.newObject(
+		            Object_2Facade.getPath(source)
+		        ).getDelegate();
+		    case AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES:
+		    case AttributeSelectors.ALL_ATTRIBUTES: 
+		        return Object_2Facade.cloneObject(source);
+		    case AttributeSelectors.SPECIFIED_AND_SYSTEM_ATTRIBUTES: {
+		        MappedRecord target = Object_2Facade.cloneObject(source);
+		        Set attributes = new HashSet();
+		        for(AttributeSpecifier attributeSpecifier : attributeSpecifiers){
+		            attributes.add(attributeSpecifier.name());
+		        }
+		        attributes.add(SystemAttributes.CREATED_AT);
+		        attributes.add(SystemAttributes.CREATED_BY);
+		        attributes.add(SystemAttributes.MODIFIED_AT);
+		        attributes.add(SystemAttributes.MODIFIED_BY);
+		        Object_2Facade.getValue(target).keySet().retainAll(attributes);
+		        return target;
+		    }
+		    default:
+		        throw new ServiceException(
+		            BasicException.Code.DEFAULT_DOMAIN,
+		            BasicException.Code.BAD_PARAMETER,
+		            "Unsupported attributeSelector", 
+		            new BasicException.Parameter(
+		                "attributeSelector",
+		                AttributeSelectors.toString(attributeSelector)
+		            )
+		        );    
+		}
     }
 
     //-------------------------------------------------------------------------
@@ -452,58 +420,53 @@ public class InMemory_1 extends AbstractPersistence_1 {
         String attribute,
         int index
     ) throws ServiceException {
-        try {
-            int aLarger = 1;
-            int bLarger = -1;
-            int equal = 0;
-            int result = 0;
-            if(SystemAttributes.OBJECT_IDENTITY.equals(attribute)) {
-                return Object_2Facade.getPath(a).compareTo(Object_2Facade.getPath(b));
-            }
-            else if(SystemAttributes.OBJECT_CLASS.equals(attribute)) {
-                return Object_2Facade.getObjectClass(a).compareTo(Object_2Facade.getObjectClass(b));
-            }
-            Object_2Facade aFacade = Object_2Facade.newInstance(a);
-            Object_2Facade bFacade = Object_2Facade.newInstance(b);
-            Object aValues = aFacade.getAttributeValues(attribute);
-            int aSize = aValues instanceof SparseArray ?
-                ((SparseArray)aValues).size() :
-                    ((List)aValues).size();
-            Object bValues = bFacade.getAttributeValues(attribute);                
-            int bSize = bValues instanceof SparseArray ?
-                ((SparseArray)bValues).size() :
-                    ((List)bValues).size();
-            // a
-            if(
-                (aValues == null) || 
-                (aSize <= index)
-            ) {
-                result = aLarger;
-            }
-            // b
-            if(
-                (bValues == null) || 
-                (bSize <= index)
-            ) {
-                if(result == aLarger) {
-                    return equal;
-                }
-                return bLarger;
-            }
+        int aLarger = 1;
+        int bLarger = -1;
+        int equal = 0;
+        int result = 0;
+        if(SystemAttributes.OBJECT_IDENTITY.equals(attribute)) {
+            return Object_2Facade.getPath(a).compareTo(Object_2Facade.getPath(b));
+        }
+        else if(SystemAttributes.OBJECT_CLASS.equals(attribute)) {
+            return Object_2Facade.getObjectClass(a).compareTo(Object_2Facade.getObjectClass(b));
+        }
+        Object_2Facade aFacade = Facades.asObject(a);
+        Object_2Facade bFacade = Facades.asObject(b);
+        Object aValues = aFacade.getAttributeValues(attribute);
+        int aSize = aValues instanceof SparseArray ?
+            ((SparseArray)aValues).size() :
+                ((List)aValues).size();
+        Object bValues = bFacade.getAttributeValues(attribute);                
+        int bSize = bValues instanceof SparseArray ?
+            ((SparseArray)bValues).size() :
+                ((List)bValues).size();
+        // a
+        if(
+            (aValues == null) || 
+            (aSize <= index)
+        ) {
+            result = aLarger;
+        }
+        // b
+        if(
+            (bValues == null) || 
+            (bSize <= index)
+        ) {
             if(result == aLarger) {
-                return aLarger;
+                return equal;
             }
-            Object aValue = aValues instanceof SparseArray ?
-                ((SparseArray)aValues).get(index) :
-                    ((List)aValues).get(index);
-            Object bValue = bValues instanceof SparseArray ?
-                ((SparseArray)bValues).get(index) :
-                    ((List)bValues).get(index);
-            return ((Comparable)aValue).compareTo(bValue);
+            return bLarger;
         }
-        catch(Exception e) {
-            throw new ServiceException(e);
+        if(result == aLarger) {
+            return aLarger;
         }
+        Object aValue = aValues instanceof SparseArray ?
+            ((SparseArray)aValues).get(index) :
+                ((List)aValues).get(index);
+        Object bValue = bValues instanceof SparseArray ?
+            ((SparseArray)bValues).get(index) :
+                ((List)bValues).get(index);
+        return ((Comparable)aValue).compareTo(bValue);
     }
 
     // --------------------------------------------------------------------------
@@ -548,19 +511,13 @@ public class InMemory_1 extends AbstractPersistence_1 {
                         new BasicException.Parameter("path",path)
                     );
                 }
-                try {
-                    reply.getResult().add(
-                        InMemory_1.this.replyObject(
-                            Object_2Facade.cloneObject(source),
-                            request.attributeSelector(),
-                            request.attributeSpecifier()
-                        )
-                    );
-                    return true;
-                }
-                catch(Exception e) {
-                    throw new ServiceException(e);
-                }
+                MappedRecord object = InMemory_1.this.replyObject(
+				    Object_2Facade.cloneObject(source),
+				    request.attributeSelector(),
+				    request.attributeSpecifier()
+				);
+				reply.getResult().add(object);
+                return true;
             }
         }
 
@@ -596,42 +553,122 @@ public class InMemory_1 extends AbstractPersistence_1 {
                 final AttributeSpecifier[] sorters = (AttributeSpecifier[])
                 sortersList.toArray(new AttributeSpecifier[sortersList.size()]);
                 MappedRecordFilter filter;
-                try {
-                    List<FilterProperty> attributeFilter = new ArrayList<FilterProperty>(
-                        Arrays.asList(specification.getAttributeFilter())
-                    );
-                    FilterProperty objectClassFilterProperty = null;
-                    for(Iterator<FilterProperty> i = attributeFilter.iterator(); i.hasNext(); ) {
-                        FilterProperty p = i.next();
-                        if(SystemAttributes.OBJECT_INSTANCE_OF.equals(p.name()) && !p.values().isEmpty()) {
-                            Set<String> allSubtypes = InMemory_1.this.getAllSubtypes((String)p.getValue(0));
-                            if(allSubtypes != null) {
-                                objectClassFilterProperty = new FilterProperty(
-                                    p.quantor(),
-                                    SystemAttributes.OBJECT_CLASS,
-                                    p.operator(),
-                                    allSubtypes.toArray()
-                                );
-                            }
-                            i.remove();
+                List<FilterProperty> attributeFilter = new ArrayList<FilterProperty>(
+                    Arrays.asList(specification.getAttributeFilter())
+                );
+                FilterProperty objectClassFilterProperty = null;
+                for(Iterator<FilterProperty> i = attributeFilter.iterator(); i.hasNext(); ) {
+                    FilterProperty p = i.next();
+                    if(SystemAttributes.OBJECT_INSTANCE_OF.equals(p.name()) && !p.values().isEmpty()) {
+                        Set<String> allSubtypes = InMemory_1.this.getAllSubtypes((String)p.getValue(0));
+                        if(allSubtypes != null) {
+                            objectClassFilterProperty = new FilterProperty(
+                                p.quantor(),
+                                SystemAttributes.OBJECT_CLASS,
+                                p.operator(),
+                                allSubtypes.toArray()
+                            );
+                        }
+                        i.remove();
+                    }
+                }
+                if(objectClassFilterProperty != null) {
+                    attributeFilter.add(objectClassFilterProperty);
+                }
+                filter = new MappedRecordFilter(
+                    attributeFilter.toArray(new FilterProperty[attributeFilter.size()])
+                ){
+
+                    /* (non-Javadoc)
+                     * @see org.openmdx.application.dataprovider.layer.persistence.none.MappedRecordFilter#getValuesIterator(java.lang.Object, java.lang.String)
+                     */
+                    @SuppressWarnings("synthetic-access")
+                    @Override
+                    protected Iterator<?> getValuesIterator(
+                        Object candidate,
+                        String attribute
+                    ) throws ServiceException {
+                        if(SystemAttributes.OBJECT_INSTANCE_OF.equals(attribute)) {
+                            final Object_2Facade object = Facades.asObject((MappedRecord) candidate);
+                            final List<?> superTypes = getModel().getElement(object.getObjectClass()).objGetList("allSupertype");
+                            return new Iterator<String>(){
+                                
+                                private final Iterator<?> delegate = superTypes.iterator();
+
+//                              @Override
+                                public boolean hasNext() {
+                                    return delegate.hasNext();
+                                }
+                                
+
+//                              @Override
+                                public String next() {
+                                    Path superType = (Path) this.delegate.next();
+                                    return superType.getBase();
+                                }
+
+//                              @Override
+                                public void remove() {
+                                    throw new UnsupportedOperationException();
+                                }
+                                
+                            };
+                        } else {
+                            return super.getValuesIterator(candidate, attribute);
                         }
                     }
-                    if(objectClassFilterProperty != null) {
-                        attributeFilter.add(objectClassFilterProperty);
+
+                    @Override
+                    protected Iterator<?> getObjectIterator(
+                        final Object candidate,
+                        final String attribute
+                    ) throws Exception {
+                        Object_2Facade object = Facades.asObject((MappedRecord) candidate);
+                        ModelElement_1_0 featureDef = getFeatureDef(object.getObjectClass(), attribute);
+                        if(featureDef.getModel().referenceIsStoredAsAttribute(featureDef)) {
+                            return new Iterator<MappedRecord>(){
+
+                                private final Iterator<?> delegate = getValuesIterator(candidate, attribute);
+                                
+//                              @Override
+                                public boolean hasNext() {
+                                    return delegate.hasNext();
+                                }
+
+//                              @Override
+                                public MappedRecord next() {
+                                    Path path = (Path) this.delegate.next();
+                                    Map<String, MappedRecord> container = InMemory_1.this.referenceMap.get(
+                                        path.getParent()
+                                    );
+                                    MappedRecord object = container == null ? null : container.get(path.getBase());
+                                    if(object == null) {
+                                        throw new RuntimeServiceException(
+                                            BasicException.Code.DEFAULT_DOMAIN,
+                                            BasicException.Code.NOT_FOUND,
+                                            "Referenced object not found",
+                                            new BasicException.Parameter("xri", path.toXRI())
+                                        );
+                                    } else {
+                                        return object;
+                                    }
+                                }
+
+//                              @Override
+                                public void remove() {
+                                    throw new UnsupportedOperationException();
+                                }
+                                
+                            };
+                        } else {
+                            Map<String, MappedRecord> container = InMemory_1.this.referenceMap.get(
+                                object.getPath().getChild(attribute)
+                            );
+                            return (container == null ? Collections.emptyMap() : container).values().iterator();
+                        }
                     }
-                    filter = new MappedRecordFilter(
-                        attributeFilter.toArray(new FilterProperty[attributeFilter.size()])
-                    );
-                }   
-                catch (RuntimeException exception){
-                    throw new ServiceException(
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        "Invalid attribute filter",
-                        new BasicException.Parameter("attributeFilter", (Object[])specification.getAttributeFilter())
-                    );
-                }    
+                    
+                };
                 List<MappedRecord> objects = new ArrayList<MappedRecord>();
                 List<MappedRecord> sortedObjects = new ArrayList<MappedRecord>();
                 Collection unfiltered = null;
@@ -836,16 +873,12 @@ public class InMemory_1 extends AbstractPersistence_1 {
                     AttributeSelectors.NO_ATTRIBUTES,
                     null
                 );
-                try {
-                    this.get(
-                        getRequest.getInteractionSpec(),
-                        Query_2Facade.newInstance(getRequest.object()),
-                        super.newDataproviderReply().getResult()
-                    );
-                } catch (ResourceException e) {
-                    throw new ServiceException(e);
-                } // to throw NOT_FOUND if necessary
                 Path path = request.path();     
+                this.get(
+				    getRequest.getInteractionSpec(),
+				    Facades.newQuery(path),
+				    super.newDataproviderReply().getResult()
+				);
                 Map<String,MappedRecord> reference = InMemory_1.this.getReference(
                     path, 
                     false
@@ -865,7 +898,7 @@ public class InMemory_1 extends AbstractPersistence_1 {
                         SysLog.trace("not removing", r);
                     }
                 } 
-                if(source != null) {
+                if(source != null && output != null) {
                     reply.getResult().add(
                         InMemory_1.this.replyObject(
                             source,
@@ -889,32 +922,32 @@ public class InMemory_1 extends AbstractPersistence_1 {
             DataproviderReply reply = this.newDataproviderReply(output);
             
             synchronized(InMemory_1.this.referenceMap){
-                MappedRecord source = request.object();            
-                Path path = Object_2Facade.getPath(source);
+                Object_2Facade source = Facades.asObject(request.object());            
+                Path path = source.getPath();
                 Map<String,MappedRecord> container = InMemory_1.this.getReference(
                     path, 
                     true
                 );
-                MappedRecord target = container.get(path.getBase());
+                Object_2Facade target = Facades.asObject(container.get(path.getBase()));
                 if(target == null) {
                     throw new ServiceException(
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.NOT_FOUND,
-                        "Object \u00ab" + path + "\u00bb not found",
-                        new BasicException.Parameter("path",path)
+                        "Object not found",
+                        new BasicException.Parameter("path",path == null ? null : path.toXRI())
                     );
                 }
-                container.put(
-                    path.getBase(),
-                    source
+                target.getValue().putAll(source.getValue());
+                MappedRecord object = InMemory_1.this.replyObject(
+                    target.getDelegate(),
+                    request.attributeSelector(),
+                    request.attributeSpecifier()
                 );
-                reply.getResult().add(
-                    InMemory_1.this.replyObject(
-                        target,
-                        request.attributeSelector(),
-                        request.attributeSpecifier()
-                    )
-                ); 
+                if(output != null) {
+                    reply.getResult().add(
+                        object
+                    ); 
+                }
                 return true;
             }
         }

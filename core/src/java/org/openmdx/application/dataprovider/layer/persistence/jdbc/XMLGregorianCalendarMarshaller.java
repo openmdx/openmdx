@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: XMLGregorianCalendarMarshaller.java,v 1.7 2009/12/14 15:00:31 hburger Exp $
+ * Name:        $Id: XMLGregorianCalendarMarshaller.java,v 1.8 2011/04/18 16:36:34 hburger Exp $
  * Description: XMLGregorianCalendarMarshaller 
- * Revision:    $Revision: 1.7 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/12/14 15:00:31 $
+ * Date:        $Date: 2011/04/18 16:36:34 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -315,9 +315,28 @@ public class XMLGregorianCalendarMarshaller {
             } else if (DatatypeConstants.DATE.equals(schemaType)) {
                 String dateType = sqlDataTypes.getDateType(connection).intern();
                 String date = value.toString();
-                return dateType == LayerConfigurationEntries.DATE_TYPE_CHARACTER ?
-                    date.replaceAll("-", "") :
-                        (Object) Date.valueOf(date);    
+                if(dateType == LayerConfigurationEntries.DATE_TYPE_CHARACTER) {
+                    return date.replaceAll("-", "");
+                } else try {
+                    return Date.valueOf(date);    
+                } catch (IllegalArgumentException exception) {
+                    throw new ServiceException(
+                        exception,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.TRANSFORMATION_FAILURE,
+                        "Unable to convert the value into an SQL date, maybe there are some inappropriate fields set",
+                        new BasicException.Parameter("dateType", dateType),
+                        new BasicException.Parameter("value", date),
+                        new BasicException.Parameter("valid", value.isValid()),
+                        new BasicException.Parameter("years", value.getEonAndYear()),
+                        new BasicException.Parameter("months", maskUndefined(value.getMonth())),
+                        new BasicException.Parameter("days", maskUndefined(value.getDay())),
+                        new BasicException.Parameter("hours", maskUndefined(value.getHour())),
+                        new BasicException.Parameter("minutes", maskUndefined(value.getMinute())),
+                        new BasicException.Parameter("seconds", maskUndefined(value.getSecond(), value.getFractionalSecond())),
+                        new BasicException.Parameter("timzone", maskUndefined(value.getTimezone()))
+                    );
+                }
             } else throw new ServiceException(
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.TRANSFORMATION_FAILURE,
@@ -330,6 +349,41 @@ public class XMLGregorianCalendarMarshaller {
         }
     }
 
+    /**
+     * Stringify a Datatype field
+     * 
+     * @param value the <code>int</code> representation of the field value
+     * 
+     * @return the <code>String</code> representation of the field value, or 
+     * <code>null</code> if the field is undefined
+     */
+    private static String maskUndefined(
+        int value
+    ){
+        return value == DatatypeConstants.FIELD_UNDEFINED ? null : Integer.toString(value);
+    }
+
+    /**
+     * Stringify the seconds fields
+     * 
+     * @param seconds
+     * @param fractionalSeconds
+     * 
+     * @return the complete seconds fields
+     */
+    private static String maskUndefined(
+        int seconds,
+        BigDecimal fractionalSeconds
+    ){
+        if(seconds == DatatypeConstants.FIELD_UNDEFINED) {
+            return null;
+        } else if (fractionalSeconds == null) {
+            return Integer.toString(seconds);
+        } else {
+            return fractionalSeconds.add(BigDecimal.valueOf(seconds)).toString();
+        }
+    }
+    
     /**
      * Use UTC for org::w3c::dateTime values < 1970-01-01T00:00:00.000Z
      * 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Loader.java,v 1.11 2009/10/28 13:26:57 wfro Exp $
+ * Name:        $Id: Loader.java,v 1.12 2011/09/16 09:01:41 wfro Exp $
  * Description: Loader
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/28 13:26:57 $
+ * Date:        $Date: 2011/09/16 09:01:41 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -66,17 +66,17 @@ import java.util.zip.CRC32;
 import javax.servlet.ServletContext;
 
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.portal.servlet.RoleMapper_1_0;
+import org.openmdx.portal.servlet.PortalExtension_1_0;
 
 public class Loader {
 
   //-------------------------------------------------------------------------
   public Loader(
       ServletContext context,
-      RoleMapper_1_0 roleMapper
+      PortalExtension_1_0 portalExtension
   ) {
       this.context = context;
-      this.roleMapper = roleMapper;
+      this.portalExtension = portalExtension;
   }
           
   //-------------------------------------------------------------------------
@@ -102,7 +102,7 @@ public class Loader {
       String path
   ) {
       String[] segmentName = this.getSegmentName(path);
-      return this.roleMapper.getAdminPrincipal(segmentName[segmentName.length-1]);
+      return this.portalExtension.getAdminPrincipal(segmentName[segmentName.length-1]);
   }
   
   //-------------------------------------------------------------------------
@@ -157,7 +157,7 @@ public class Loader {
   
   //-------------------------------------------------------------------------
   protected final ServletContext context;
-  protected final RoleMapper_1_0 roleMapper;
+  protected final PortalExtension_1_0 portalExtension;
   
 }
 

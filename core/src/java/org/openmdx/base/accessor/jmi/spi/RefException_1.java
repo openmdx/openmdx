@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefException_1.java,v 1.9 2010/06/02 13:43:29 hburger Exp $
+ * Name:        $Id: RefException_1.java,v 1.10 2011/04/11 08:56:27 hburger Exp $
  * Description: RefException_1 class
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:43:29 $
+ * Date:        $Date: 2011/04/11 08:56:27 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,179 +62,188 @@ import javax.jmi.reflect.RefException;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.kernel.exception.Throwables;
 
 /**
  * RefException extension 
  */
 public class RefException_1
-  extends RefException
-  implements BasicException.Holder
+    extends RefException
+    implements BasicException.Holder
 {
 
-  /**
+    /**
      * 
      */
     private static final long serialVersionUID = -6994022553371842584L;
 
-//-------------------------------------------------------------------------
-  public RefException_1(
-    Exception cause,
-    String exceptionDomain,
-    int exceptionCode,
-    String description,
-    BasicException.Parameter[] properties
-  ) {
-      super.initCause(
-        new BasicException(
-          cause,
-          exceptionDomain,
-          exceptionCode,
-          properties,
-          description,
-          this
-        )
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  public RefException_1(
-    BasicException.Parameter[] properties
-  ) {
-    this(
-      null,
-      BasicException.Code.DEFAULT_DOMAIN,
-      BasicException.Code.PROCESSING_FAILURE,
-      null,
-      properties
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  public RefException_1(
-    String domain,
-    int errorCode,
-    String description,
-    BasicException.Parameter[] properties
-  ) {
-    this(
-      null,
-      domain,
-      errorCode,
-      description,
-      properties
-    );
-  }
-
-  //-------------------------------------------------------------------------
-  public RefException_1(
-    ServiceException e
-  ) {
-    this(e.getCause());
-  }
-
-  //-------------------------------------------------------------------------
-  public RefException_1(
-    BasicException e
-  ) {
-    super(e.getMessage());
-    super.initCause(e);
-  }
-
-  //-------------------------------------------------------------------------
-  public RefException_1 log(
-  ) {
-     return BasicException.log(this);
-  }
-
-  //-------------------------------------------------------------------------
-  public java.lang.Object refGetValue(
-    String propertyName
-  ) {
-      return getCause().getParameter(propertyName);
-  }
-
-  //-------------------------------------------------------------------------
-  public java.lang.Object refGetValue(
-    String propertyName,
-    int index
-  ) {
-    java.lang.Object values = refGetValue(propertyName);
-    if(values != null) {
-      return ((List<?>)values).get(index);
+    //-------------------------------------------------------------------------
+    public RefException_1(
+        Exception cause,
+        String exceptionDomain,
+        int exceptionCode,
+        String description,
+        BasicException.Parameter[] properties
+    ) {
+        super.initCause(
+            new BasicException(
+                cause,
+                exceptionDomain,
+                exceptionCode,
+                properties,
+                description,
+                this
+            )
+        );
     }
-    return null;
-  }
 
-  //-------------------------------------------------------------------------
-  public static BasicException.Parameter refNewProperty(
-    String propertyName,
-    java.lang.Object propertyValue
-  ) {
-    return new BasicException.Parameter(
-      propertyName,
-      propertyValue
-    );
-  }
+    //-------------------------------------------------------------------------
+    public RefException_1(
+        BasicException.Parameter[] properties
+    ) {
+        this(
+            null,
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.PROCESSING_FAILURE,
+            null,
+            properties
+        );
+    }
 
-  //-------------------------------------------------------------------------
-  public ServiceException refGetServiceException(
-  ) {
-      return new ServiceException(getCause());
-  }
+    //-------------------------------------------------------------------------
+    public RefException_1(
+        String domain,
+        int errorCode,
+        String description,
+        BasicException.Parameter[] properties
+    ) {
+        this(
+            null,
+            domain,
+            errorCode,
+            description,
+            properties
+        );
+    }
 
-  /**
-   * Returns the cause of an exception. The cause actually is the wrapped exception.
-   *
-   * @return Throwable  The exception cause.
-   */
-  @Override
-  public final BasicException getCause(
-  ){
-      return (BasicException) super.getCause();
-  }
+    //-------------------------------------------------------------------------
+    public RefException_1(
+        ServiceException e
+    ) {
+        this(e.getCause());
+    }
 
-  /* (non-Javadoc)
-   * @see org.openmdx.kernel.exception.BasicException.Holder#getCause(java.lang.String)
-   */
-  public BasicException getCause(String exceptionDomain) {
-      return getCause().getCause(exceptionDomain);
-  }
+    //-------------------------------------------------------------------------
+    public RefException_1(
+        BasicException e
+    ) {
+        super(e.getMessage());
+        super.initCause(e);
+    }
 
-  /**
-   * Retrieves the exception domain of this <code>ServiceException</code>.
-   *
-   * @return the exception domain
-   */
-  public String getExceptionDomain(
-  ){
-      return getCause().getExceptionDomain();
-  }
+    //-------------------------------------------------------------------------
+    public RefException_1 log(
+    ) {
+        return BasicException.log(this);
+    }
 
-  /**
-   * Retrieves the exception code of this <code>ServiceException</code>.
-   *
-   * @return the exception code
-   */
-  public int getExceptionCode(
-  ){
-      return getCause().getExceptionCode();
-  }
+    //-------------------------------------------------------------------------
+    public java.lang.Object refGetValue(
+        String propertyName
+    ) {
+        return getCause().getParameter(propertyName);
+    }
 
-  /* (non-Javadoc)
-   * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
-   */
-  @Override
-  public void printStackTrace(PrintStream s) {
-      getCause().printStackTrace(s);
-  }
+    //-------------------------------------------------------------------------
+    public java.lang.Object refGetValue(
+        String propertyName,
+        int index
+    ) {
+        java.lang.Object values = refGetValue(propertyName);
+        if(values != null) {
+            return ((List<?>)values).get(index);
+        }
+        return null;
+    }
 
-  /* (non-Javadoc)
-   * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
-   */
-  @Override
-  public void printStackTrace(PrintWriter s) {
-      getCause().printStackTrace(s);
-  }
+    //-------------------------------------------------------------------------
+    public static BasicException.Parameter refNewProperty(
+        String propertyName,
+        java.lang.Object propertyValue
+    ) {
+        return new BasicException.Parameter(
+            propertyName,
+            propertyValue
+        );
+    }
+
+    //-------------------------------------------------------------------------
+    public ServiceException refGetServiceException(
+    ) {
+        return new ServiceException(getCause());
+    }
+
+    /**
+     * Returns the cause of an exception. The cause actually is the wrapped exception.
+     *
+     * @return Throwable  The exception cause.
+     */
+    @Override
+    public final BasicException getCause(
+    ){
+        return (BasicException) super.getCause();
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.kernel.exception.BasicException.Holder#getCause(java.lang.String)
+     */
+    public BasicException getCause(String exceptionDomain) {
+        return getCause().getCause(exceptionDomain);
+    }
+
+    /**
+     * Retrieves the exception domain of this <code>ServiceException</code>.
+     *
+     * @return the exception domain
+     */
+    public String getExceptionDomain(
+    ){
+        return getCause().getExceptionDomain();
+    }
+
+    /**
+     * Retrieves the exception code of this <code>ServiceException</code>.
+     *
+     * @return the exception code
+     */
+    public int getExceptionCode(
+    ){
+        return getCause().getExceptionCode();
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
+     */
+    @Override
+    public void printStackTrace(PrintStream s) {
+        getCause().printStackTrace(s);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
+     */
+    @Override
+    public void printStackTrace(PrintWriter s) {
+        getCause().printStackTrace(s);
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Throwable#getMessage()
+     */
+    @Override 
+    public String getMessage() {
+        return Throwables.getMessage(this);
+    }
 
 }
 //--- End of File -----------------------------------------------------------

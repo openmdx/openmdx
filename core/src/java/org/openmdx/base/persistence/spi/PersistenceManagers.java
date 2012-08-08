@@ -1,10 +1,10 @@
 /*
  * ====================================================================
- * Name:        $Id: PersistenceManagers.java,v 1.3 2010/07/09 13:51:44 hburger Exp $
+ * Name:        $Id: PersistenceManagers.java,v 1.6 2011/12/09 23:49:17 hburger Exp $
  * Description: Abstract PersistenceManager
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/07/09 13:51:44 $
+ * Date:        $Date: 2011/12/09 23:49:17 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -62,6 +62,7 @@ import javax.jdo.PersistenceManager;
  *
  * @since openMDX 2.0
  */
+@SuppressWarnings({"rawtypes"})
 public class PersistenceManagers {
 
     /**
@@ -483,7 +484,6 @@ public class PersistenceManagers {
      * 
      * @return
      */
-    @SuppressWarnings("unchecked")
     public static Collection getObjectsById(
         PersistenceManager pm,
         boolean validate,
@@ -538,14 +538,11 @@ public class PersistenceManagers {
             (username.startsWith("{") && username.endsWith("}"))
         ) {
             List<String> principalChain = new ArrayList<String>();
-            for(
-                int j = 0, i = 1, iLimit = username.length() - 1;
-                i < iLimit;
-                i = j + 2
-            ){
-                j = username.indexOf(", ", i);
-                if(j < 0) j = iLimit;
-                principalChain.add(username.substring(i, j));
+            for(String principal: username.substring(1, username.length() - 1).split(",")) {
+                principal = principal.trim();
+                if(!"".equals(principal)) {
+                    principalChain.add(principal);
+                }
             }
             return principalChain;
         } else {

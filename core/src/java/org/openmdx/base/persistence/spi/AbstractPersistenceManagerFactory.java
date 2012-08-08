@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractPersistenceManagerFactory.java,v 1.31 2010/11/18 17:36:42 hburger Exp $
+ * Name:        $Id: AbstractPersistenceManagerFactory.java,v 1.33 2011/05/16 09:34:06 hburger Exp $
  * Description: Abstract Manager Factory
- * Revision:    $Revision: 1.31 $
+ * Revision:    $Revision: 1.33 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/18 17:36:42 $
+ * Date:        $Date: 2011/05/16 09:34:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -73,7 +73,7 @@ import javax.jdo.listener.InstanceLifecycleListener;
 import org.openmdx.base.collection.MapBackedSet;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
 import org.openmdx.base.persistence.cci.NonConfigurableProperty;
-import org.openmdx.kernel.Version;
+import org.openmdx.base.Version;
 import org.openmdx.kernel.resource.spi.CloseCallback;
 
 /**
@@ -81,6 +81,7 @@ import org.openmdx.kernel.resource.spi.CloseCallback;
  *
  * @since openMDX 2.0
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public abstract class AbstractPersistenceManagerFactory<P extends PersistenceManager>
     implements PersistenceManagerFactory, CloseCallback
 {
@@ -148,7 +149,6 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
     /**
      * <code>PersistentManager</code> book keeping.
      */
-    @SuppressWarnings("unchecked")
     private Set<PersistenceManager> persistenceManagers = MapBackedSet.decorate( 
         new WeakHashMap<PersistenceManager,Object>()
     );
@@ -602,8 +602,6 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManagerFactory#getFetchGroup(java.lang.Class, java.lang.String)
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public FetchGroup getFetchGroup(Class type, String name) {
         return new StandardFetchGroup(type, name);
     }
@@ -611,8 +609,6 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManagerFactory#getFetchGroups()
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Set getFetchGroups() {
         Set<FetchGroup> fetchGroups = new HashSet<FetchGroup>();
         synchronized(this.fetchGroups) {
@@ -842,8 +838,6 @@ public abstract class AbstractPersistenceManagerFactory<P extends PersistenceMan
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManagerFactory#addInstanceLifecycleListener(javax.jdo.listener.InstanceLifecycleListener, java.lang.Class[])
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public void addInstanceLifecycleListener(
         InstanceLifecycleListener listener,
         Class[] classes

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: FindObjectsAutocompleter.java,v 1.35 2010/05/26 15:06:18 hburger Exp $
+ * Name:        $Id: FindObjectsAutocompleter.java,v 1.36 2011/07/07 22:35:36 wfro Exp $
  * Description: ListAutocompleteControl 
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.36 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/26 15:06:18 $
+ * Date:        $Date: 2011/07/07 22:35:36 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,6 +63,7 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.ConditionType;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.action.FindObjectsAction;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.ObjectReferenceValue;
 
@@ -167,7 +168,7 @@ public class FindObjectsAutocompleter
                 )
             );
             this.findObjectsActions[i] = new Action(
-                Action.EVENT_FIND_OBJECTS,
+                FindObjectsAction.EVENT_ID,
                 parameters.toArray(new Action.Parameter[parameters.size()]),
                 this.filterByLabel[i],
                 true

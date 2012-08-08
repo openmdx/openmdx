@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AuditQueries.java,v 1.14 2010/10/19 21:58:01 hburger Exp $
+ * Name:        $Id: AuditQueries.java,v 1.15 2011/10/21 13:02:04 hburger Exp $
  * Description: Audit Queries 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/19 21:58:01 $
+ * Date:        $Date: 2011/10/21 13:02:04 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -228,7 +228,15 @@ public class AuditQueries {
                 return unitsOfWork.values();
             }
             default: 
-                throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
+                throw BasicException.initHolder(
+                    new UnsupportedOperationException(
+                        "Persistence modes other than EMBEDDED are not yet supported",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_IMPLEMENTED
+                        )
+                    )
+                );
         }
     }
 
@@ -297,7 +305,15 @@ public class AuditQueries {
                     return unitsOfWork.values();
                 }
                 default: 
-                    throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
+                    throw BasicException.initHolder(
+                        new UnsupportedOperationException(
+                            "Persistence modes other than EMBEDDED are not yet supported",
+                            BasicException.newEmbeddedExceptionStack(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.NOT_IMPLEMENTED
+                            )
+                        )
+                    );
             }
         } else {
             throw BasicException.initHolder(
@@ -358,7 +374,15 @@ public class AuditQueries {
                 return unitsOfWork;
             }
             default: 
-                throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
+                throw BasicException.initHolder(
+                    new UnsupportedOperationException(
+                        "Persistence modes other than EMBEDDED are not yet supported",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_IMPLEMENTED
+                        )
+                    )
+                );
         }
     }
 
@@ -411,7 +435,15 @@ public class AuditQueries {
                     return unitsOfWork;
                 }
                 default: 
-                    throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
+                    throw BasicException.initHolder(
+                        new UnsupportedOperationException(
+                            "Persistence modes other than EMBEDDED are not yet supported",
+                            BasicException.newEmbeddedExceptionStack(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.NOT_IMPLEMENTED
+                            )
+                        )
+                    );
             }
         } else {
             throw BasicException.initHolder(
@@ -457,7 +489,15 @@ public class AuditQueries {
                 );
             }
             default: 
-                throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
+                throw BasicException.initHolder(
+                    new UnsupportedOperationException(
+                        "Persistence modes other than EMBEDDED are not yet supported",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_IMPLEMENTED
+                        )
+                    )
+                );
         }
     }
 
@@ -496,7 +536,15 @@ public class AuditQueries {
                     );
                 }
                 default: 
-                    throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
+                    throw BasicException.initHolder(
+                        new UnsupportedOperationException(
+                            "Persistence modes other than EMBEDDED are not yet supported",
+                            BasicException.newEmbeddedExceptionStack(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.NOT_IMPLEMENTED
+                            )
+                        )
+                    );
             }
         } else {
             throw BasicException.initHolder(
@@ -544,7 +592,15 @@ public class AuditQueries {
                 return unitsOfWork;
             }
             default: 
-                throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
+                throw BasicException.initHolder(
+                    new UnsupportedOperationException(
+                        "Persistence modes other than EMBEDDED are not yet supported",
+                        BasicException.newEmbeddedExceptionStack(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_IMPLEMENTED
+                        )
+                    )
+                );
         }
     }
 
@@ -588,7 +644,15 @@ public class AuditQueries {
                     return unitsOfWork;
                 }
                 default: 
-                    throw new UnsupportedOperationException("Persistence modes other than EMBEDDED are not yet supported");
+                    throw BasicException.initHolder(
+                        new UnsupportedOperationException(
+                            "Persistence modes other than EMBEDDED are not yet supported",
+                            BasicException.newEmbeddedExceptionStack(
+                                BasicException.Code.DEFAULT_DOMAIN,
+                                BasicException.Code.NOT_IMPLEMENTED
+                            )
+                        )
+                    );
             }
         } else {
             throw BasicException.initHolder(

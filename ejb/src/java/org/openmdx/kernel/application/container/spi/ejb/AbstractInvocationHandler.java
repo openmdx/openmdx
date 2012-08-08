@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractInvocationHandler.java,v 1.4 2009/08/25 13:47:02 hburger Exp $
+ * Name:        $Id: AbstractInvocationHandler.java,v 1.5 2011/06/21 22:54:53 hburger Exp $
  * Description: Abstract Invocation Handler
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/08/25 13:47:02 $
+ * Date:        $Date: 2011/06/21 22:54:53 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,7 +60,7 @@ import java.util.logging.Level;
 
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.loading.Classes;
-import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 
 /**
  * Abstract Invocation Handler
@@ -224,7 +224,7 @@ abstract class AbstractInvocationHandler implements InvocationHandler {
         try {
             return source.getMethod(name, parameterTypes);
         } catch (Exception exception) {
-            LoggerFactory.getLogger().log(
+            SysLog.log(
             	Level.SEVERE,
                 "Unable to acquire method '" + name + "' from class '" + source.getName() + "'",
                 exception

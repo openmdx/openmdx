@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: DefaultDataBinding.java,v 1.5 2010/02/04 11:25:03 wfro Exp $
+ * Name:        $Id: DefaultDataBinding.java,v 1.7 2011/12/10 16:09:30 wfro Exp $
  * Description: DefaultDataBinding 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/02/04 11:25:03 $
+ * Date:        $Date: 2011/12/10 16:09:30 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -96,15 +96,19 @@ public class DefaultDataBinding
      */
     public void setValue(
         RefObject object, 
-        String qualifiedFeatureName, 
+        String featureName, 
         Object newValue,
         ApplicationContext app
     ) {
+    	// Qualified feature name
+    	if(featureName.indexOf(":") > 0) {
+    		featureName = featureName.substring(featureName.lastIndexOf(":") + 1);
+    	}
         if(newValue instanceof Collection) {
             Collection<Object> newValues = valueAsCollection(newValue);
             Collection<Object> values = valueAsCollection(
             	object.refGetValue(
-            		qualifiedFeatureName
+            		featureName
                 )
             );
             values.clear();
@@ -112,7 +116,7 @@ public class DefaultDataBinding
         }
         else {
             object.refSetValue(
-                qualifiedFeatureName,
+                featureName,
                 newValue
             );
         }

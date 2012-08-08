@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: AbstractRestInteraction.java,v 1.26 2010/11/18 08:18:25 hburger Exp $
+ * Name:        $Id: AbstractRestInteraction.java,v 1.27 2011/11/26 01:34:57 hburger Exp $
  * Description: Abstract REST Interaction
- * Revision:    $Revision: 1.26 $
+ * Revision:    $Revision: 1.27 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/18 08:18:25 $
+ * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -507,8 +507,7 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
                         switch(interactionSpec.getFunction()) {
                             case POST: {
                                 for(Map.Entry<?, ?> e : (Set<Map.Entry<?, ?>>) inputRecord.entrySet()) {
-                                    Object_2Facade facade = Object_2Facade.newInstance();
-                                    facade.setPath(toResourceIdentifier(e.getKey()));
+                                    Object_2Facade facade = Facades.newObject(toResourceIdentifier(e.getKey()));
                                     facade.setValue(
                                         AbstractRestInteraction.cast(
                                             "Value", 
@@ -579,7 +578,7 @@ public class AbstractRestInteraction extends AbstractInteraction<Connection> {
                         case GET:
                             IndexedRecord entries = (IndexedRecord) input;
                             for(Object resourceIdentifier : entries){
-                                Query_2Facade facade = Query_2Facade.newInstance(toResourceIdentifier(resourceIdentifier));
+                                Query_2Facade facade = Facades.newQuery(toResourceIdentifier(resourceIdentifier));
                                 execute(ispec, facade.getDelegate(), output);
                             }
                             return !entries.isEmpty();

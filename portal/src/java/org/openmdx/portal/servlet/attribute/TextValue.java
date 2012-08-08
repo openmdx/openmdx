@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TextValue.java,v 1.14 2009/09/25 12:02:38 wfro Exp $
+ * Name:        $Id: TextValue.java,v 1.16 2011/08/15 09:40:39 wfro Exp $
  * Description: TextValue 
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/25 12:02:38 $
+ * Date:        $Date: 2011/08/15 09:40:39 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,17 +70,17 @@ public class TextValue
         FieldDef fieldDef,
         boolean isPassword,
         int maxLength,
-        ApplicationContext application    
+        ApplicationContext app    
     ) {
         // Return user defined attribute value class or TextValue as default
-        String valueClassName = (String)application.getMimeTypeImpls().get(fieldDef.mimeType);
+        String valueClassName = (String)app.getMimeTypeImpls().get(fieldDef.mimeType);
         AttributeValue attributeValue = valueClassName == null
             ? null
             : AttributeValue.createAttributeValue(
                 valueClassName,
                 object,
                 fieldDef,
-                application
+                app
               );
         return attributeValue != null
             ? attributeValue
@@ -89,7 +89,7 @@ public class TextValue
                 fieldDef,
                 isPassword,
                 maxLength,
-                application
+                app
             );
     }
     
@@ -139,7 +139,7 @@ public class TextValue
         boolean forEditing,
         boolean shortFormat
     ) {            
-        return this.application.getHtmlEncoder().encode(v.toString().trim(), forEditing);
+        return this.app.getHtmlEncoder().encode(v.toString().trim(), forEditing);
     }
   
     //-------------------------------------------------------------------------

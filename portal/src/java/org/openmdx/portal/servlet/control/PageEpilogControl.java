@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: PageEpilogControl.java,v 1.76 2009/10/14 08:32:27 wfro Exp $
+ * Name:        $Id: PageEpilogControl.java,v 1.78 2011/08/19 22:50:46 wfro Exp $
  * Description: PageEpilogControl 
- * Revision:    $Revision: 1.76 $
+ * Revision:    $Revision: 1.78 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/14 08:32:27 $
+ * Date:        $Date: 2011/08/19 22:50:46 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -573,36 +573,45 @@ public class PageEpilogControl
             // Prepare grid panels
             int nReferencePanes = showView.getReferencePane().length;
             for(int i = 0; i < nReferencePanes; i++) {
-                ReferencePane referencePane = showView.getReferencePane()[i];                
-                int paneIndex = referencePane.getReferencePaneControl().getPaneIndex();
+                ReferencePane referencePane = showView.getReferencePane()[i];
+                ReferencePaneControl referencePaneControl = referencePane.getReferencePaneControl();
+                int paneIndex = referencePaneControl.getPaneIndex();
                 String paneId = Integer.toString(paneIndex);
                 boolean isGroupTabActive = false;
-                int nGridControl = referencePane.getReferencePaneControl().getGridControl().length;
+                int nGridControl = referencePaneControl.getGridControl().length;
                 for(int j = 0; j < nGridControl; j++) {
-                    ReferencePaneControl gridTab = referencePane.getReferencePaneControl();
-                    Action selectReferenceTabAction = gridTab.getSelectReferenceAction()[j];     
-                    int tabIndex = 100*paneIndex + j;
-                    String tabId = Integer.toString(tabIndex);
-                    // Tab grouping. Generate hide/show tabs for each group of
-                    // tabs having a label starting with >>
-                    String tabTitle = selectReferenceTabAction.getTitle();
-                    boolean isGroupTab = tabTitle.startsWith(WebKeys.TAB_GROUPING_CHARACTER);
-                    if(isGroupTab) {
-                        tabTitle = tabTitle.substring(1);
-                    }
-                    // Prolog hidden tabs
-                    if(!isGroupTabActive && isGroupTab) {
-                        isGroupTabActive = true;
-                    }
-                    // Add tab
-                    // Get content for selected grid
-                    if(j == referencePane.getSelectedReference()) {
-                        p.write("      new Ajax.Updater('gridContent", paneId, "', ", p.getEvalHRef(selectReferenceTabAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});");
-                    }
-                    // Epilog hidden tabs. Special treatment if last tab of grid is a group tab 
-                    if(isGroupTabActive && (!isGroupTab || (j == nGridControl-1))) {
-                        isGroupTabActive = false;
-                    }                    
+                    Action selectReferenceTabAction = referencePaneControl.getSelectReferenceAction()[j];
+                    GridControl gridControl = referencePaneControl.getGridControl()[j];
+	            	boolean isRevokeShow = app.getPortalExtension().hasPermission(
+	            		gridControl.getQualifiedReferenceName(), 
+	            		showView.getRefObject(), 
+	            		app, 
+	            		WebKeys.PERMISSION_REVOKE_SHOW
+	            	);
+	            	if(!isRevokeShow) {
+	                    int tabIndex = 100*paneIndex + j;
+	                    String tabId = Integer.toString(tabIndex);
+	                    // Tab grouping. Generate hide/show tabs for each group of
+	                    // tabs having a label starting with >>
+	                    String tabTitle = selectReferenceTabAction.getTitle();
+	                    boolean isGroupTab = tabTitle.startsWith(WebKeys.TAB_GROUPING_CHARACTER);
+	                    if(isGroupTab) {
+	                        tabTitle = tabTitle.substring(1);
+	                    }
+	                    // Prolog hidden tabs
+	                    if(!isGroupTabActive && isGroupTab) {
+	                        isGroupTabActive = true;
+	                    }
+	                    // Add tab
+	                    // Get content for selected grid
+	                    if(j == referencePane.getSelectedReference()) {
+	                        p.write("      new Ajax.Updater('gridContent", paneId, "', ", p.getEvalHRef(selectReferenceTabAction), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});");
+	                    }
+	                    // Epilog hidden tabs. Special treatment if last tab of grid is a group tab 
+	                    if(isGroupTabActive && (!isGroupTab || (j == nGridControl-1))) {
+	                        isGroupTabActive = false;
+	                    }
+	            	}
                 }
             }
             p.write("");

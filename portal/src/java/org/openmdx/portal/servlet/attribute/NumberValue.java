@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: NumberValue.java,v 1.50 2010/09/08 09:41:08 wfro Exp $
+ * Name:        $Id: NumberValue.java,v 1.53 2011/08/11 15:08:58 wfro Exp $
  * Description: NumberValue
- * Revision:    $Revision: 1.50 $
+ * Revision:    $Revision: 1.53 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/08 09:41:08 $
+ * Date:        $Date: 2011/08/11 15:08:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -145,7 +145,7 @@ public class NumberValue
     private DecimalFormat getDecimalFormat(
     ) {
         if(this.decimalFormat == null) {
-            Locale userLocale = this.getLocaleByName(this.application.getCurrentLocaleAsString());
+            Locale userLocale = this.getLocaleByName(this.app.getCurrentLocaleAsString());
             this.decimalFormat = userLocale == null
                 ? (DecimalFormat)DecimalFormat.getInstance()
                 : (DecimalFormat)DecimalFormat.getInstance(userLocale);            
@@ -240,7 +240,6 @@ public class NumberValue
         String widthModifier,
         String rowSpanModifier,
         String readonlyModifier,
-        String disabledModifier,
         String lockedModifier,
         String stringifiedValue,
         boolean forEditing
@@ -248,7 +247,7 @@ public class NumberValue
         HtmlEncoder_1_0 htmlEncoder = p.getApplicationContext().getHtmlEncoder();       
         label = this.getLabel(attribute, p, label);
         String title = this.getTitle(attribute, label);
-        if(forEditing) {
+        if(forEditing && readonlyModifier.isEmpty()) {
             String feature = this.getName();
             id = (id == null) || (id.length() == 0) ? 
                 feature + "[" + Integer.toString(tabIndex) + "]" : 
@@ -261,7 +260,7 @@ public class NumberValue
                 );
                 // Predefined, selectable values only allowed for single-valued attributes with spanRow == 1
                 // Show drop-down instead of input field
-                if(autocompleter != null) {
+                if(autocompleter != null && readonlyModifier.isEmpty()) {
                     autocompleter.paint(
                         p,
                         id,
@@ -288,7 +287,7 @@ public class NumberValue
                         "valueR mandatory" :
                         "valueR";
                     p.debug("  <!-- " + minValue + " | " + maxValue + " | " + new BigDecimal(Long.MIN_VALUE) + " | " + new BigDecimal(Long.MAX_VALUE) + " | -->");
-                    p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"text\" class=\"", classModifier, "\"", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", stringifiedValue, "\" onkeypress=\"javascript: var kc = null; if (window.event) {kc = window.event.keyCode;} else {kc = event.which;}; if (!(((kc>=37) && (kc<=40)) || ((kc>=44) && (kc<=46)) || ((kc>=48) && (kc<=57)) || (kc==0) || (kc==8) || (kc==9) || (kc==13))) {if (window.event) {window.event.returnValue=false;} else {event.preventDefault();}}\" onchange=\"javascript: ", minValueModifier, " ", maxValueModifier, ";\"");
+                    p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"text\" class=\"", classModifier, lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", stringifiedValue, "\" onkeypress=\"javascript: var kc = null; if (window.event) {kc = window.event.keyCode;} else {kc = event.which;}; if (!(((kc>=37) && (kc<=40)) || ((kc>=44) && (kc<=46)) || ((kc>=48) && (kc<=57)) || (kc==0) || (kc==8) || (kc==9) || (kc==13))) {if (window.event) {window.event.returnValue=false;} else {event.preventDefault();}}\" onchange=\"javascript: ", minValueModifier, " ", maxValueModifier, ";\"");
                     p.writeEventHandlers("    ", attribute.getEventHandler());
                     p.write("  >");
                 }
@@ -300,8 +299,8 @@ public class NumberValue
                 p.write("  <textarea id=\"", id, "\" name=\"", id, "\" class=\"multiStringLocked\" rows=\"" + attribute.getSpanRow(), "\" cols=\"20\" readonly tabindex=\"" + tabIndex, "\">", stringifiedValue, "</textarea>");
                 p.write("</td>");
                 p.write("<td class=\"addon\" ", rowSpanModifier, ">");
-                if(this.isChangeable()) {
-                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("10"), "; popup_", EditObjectControl.EDIT_NUMBERS, " = ", EditObjectControl.EDIT_NUMBERS, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_NUMBERS, ", 'popup_", EditObjectControl.EDIT_NUMBERS, "', $('", id, "'), new Array());\""));
+                if(readonlyModifier.isEmpty()) {
+                    p.write("    ", p.getImg("class=\"popUpButton\" id=\"", id, ".popup\" border=\"0\" alt=\"Click to edit\" src=\"", p.getResourcePath("images/edit"), p.getImgType(), "\" onclick=\"javascript:multiValuedHigh=", this.getUpperBound("1..10"), "; popup_", EditObjectControl.EDIT_NUMBERS, " = ", EditObjectControl.EDIT_NUMBERS, "_showPopup(event, this.id, popup_", EditObjectControl.EDIT_NUMBERS, ", 'popup_", EditObjectControl.EDIT_NUMBERS, "', $('", id, "'), new Array());\""));
                 }
                 p.write("</td>");
             }
@@ -320,7 +319,6 @@ public class NumberValue
                 widthModifier,
                 rowSpanModifier,
                 readonlyModifier,
-                disabledModifier,
                 lockedModifier,
                 stringifiedValue,
                 forEditing

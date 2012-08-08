@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: StandardFetchPlan.java,v 1.4 2009/11/10 15:24:54 hburger Exp $
+ * Name:        $Id: StandardFetchPlan.java,v 1.5 2011/04/12 15:44:02 hburger Exp $
  * Description: Standard Fetch Plan 
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/11/10 15:24:54 $
+ * Date:        $Date: 2011/04/12 15:44:02 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,6 +63,7 @@ import javax.jdo.PersistenceManager;
 /**
  * Standard Fetch Plan 
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class StandardFetchPlan
     implements FetchPlan
 {
@@ -72,7 +73,6 @@ public class StandardFetchPlan
      *
      * @param that the fetch plan to be cloned
      */
-    @SuppressWarnings("unchecked")
     private StandardFetchPlan(
         FetchPlan that
     ){
@@ -114,10 +114,8 @@ public class StandardFetchPlan
     
     private final Set<String> groups;
     
-    @SuppressWarnings("unchecked")
     private Collection detachmentRoots = null;
     
-    @SuppressWarnings("unchecked")
     private Class[] detachmentRootClasses = null;
     
     /**
@@ -165,7 +163,6 @@ public class StandardFetchPlan
     /* (non-Javadoc)
      * @see javax.jdo.FetchPlan#getDetachmentRootClasses()
      */
-    @SuppressWarnings("unchecked")
     public Class[] getDetachmentRootClasses() {
         return this.detachmentRootClasses;
     }
@@ -173,7 +170,6 @@ public class StandardFetchPlan
     /* (non-Javadoc)
      * @see javax.jdo.FetchPlan#getDetachmentRoots()
      */
-    @SuppressWarnings("unchecked")
     public Collection getDetachmentRoots() {
         return this.detachmentRoots;
     }
@@ -188,7 +184,6 @@ public class StandardFetchPlan
     /* (non-Javadoc)
      * @see javax.jdo.FetchPlan#getGroups()
      */
-    @SuppressWarnings("unchecked")
     public Set getGroups() {
         return Collections.unmodifiableSet(new HashSet(this.groups));
     }
@@ -219,7 +214,6 @@ public class StandardFetchPlan
     /* (non-Javadoc)
      * @see javax.jdo.FetchPlan#setDetachmentRootClasses(java.lang.Class[])
      */
-    @SuppressWarnings("unchecked")
     public FetchPlan setDetachmentRootClasses(Class... rootClasses) {
         this.detachmentRootClasses = rootClasses;
         return this;
@@ -228,7 +222,6 @@ public class StandardFetchPlan
     /* (non-Javadoc)
      * @see javax.jdo.FetchPlan#setDetachmentRoots(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
     public FetchPlan setDetachmentRoots(Collection roots) {
         this.detachmentRoots = roots;
         return this;
@@ -254,7 +247,6 @@ public class StandardFetchPlan
     /* (non-Javadoc)
      * @see javax.jdo.FetchPlan#setGroups(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
     public FetchPlan setGroups(Collection fetchGroupNames) {
         this.groups.clear();
         this.groups.addAll(fetchGroupNames);

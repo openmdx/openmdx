@@ -3,16 +3,16 @@
  *
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: build.xml,v 1.108 2010/12/20 23:37:59 wfro Exp $
+ * Name:        $Id: build.xml,v 1.109 2011/12/27 18:09:19 wfro Exp $
  * Description: Ant master build file for openMDX
- * Revision:    $Revision: 1.108 $
+ * Revision:    $Revision: 1.109 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/20 23:37:59 $
+ * Date:        $Date: 2011/12/27 18:09:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -52,7 +52,7 @@
 >
 	<description>Builds the openMDX projects</description>
 	
-	<target name="all" depends="-all,-ant,-core,-security,-portal,-ejb,-openejb,-test-core" description="Cleans, builds and makes distributions for all projects"/>	
+	<target name="all" depends="-all,-ant,-core,-security,-portal,-tomcat,-test-core" description="Cleans, builds and makes distributions for all projects"/>	
 	
 	<!-- ******************************************************************* -->
 	<!-- * -projecthelp -->
@@ -98,20 +98,14 @@
 		<condition property="include.portal">
 			<available file="build.xml" filepath="portal"/>
 		</condition>
-		<condition property="include.ejb">
-			<available file="build.xml" filepath="ejb.dummy"/>
-		</condition>
-		<condition property="include.openejb">
-			<available file="build.xml" filepath="openejb"/>
+		<condition property="include.tomcat">
+			<available file="build.xml" filepath="tomcat"/>
 		</condition>
 		<condition property="include.test-core">
 			<available file="build.xml" filepath="test-core"/>
 		</condition>
 		<condition property="include.test-security">
 			<available file="build.xml" filepath="test-security"/>
-		</condition>
-		<condition property="include.test-ejb">
-			<available file="build.xml" filepath="test-ejb.dummy"/>
 		</condition>
 	</target>
 	
@@ -130,19 +124,13 @@
 	<target name="-portal" depends="-init" if="include.portal">
 		<ant inheritAll="false" dir="portal" target="${ant.target}"/>
 	</target>
-	<target name="-ejb" depends="-init" if="include.ejb">
-		<ant inheritAll="false" dir="ejb" target="${ant.target}"/>
-	</target>
-	<target name="-openejb" depends="-init" if="include.openejb">
-		<ant inheritAll="false" dir="openejb" target="${ant.target}"/>
+	<target name="-tomcat" depends="-init" if="include.tomcat">
+		<ant inheritAll="false" dir="tomcat" target="${ant.target}"/>
 	</target>
 	<target name="-test-core" depends="-init" if="include.test-core">
 		<ant inheritAll="false" dir="test-core"  target="${ant.target}"/>
 	</target>    
 	<target name="-test-security" depends="-init" if="include.test-security">
 		<ant inheritAll="false" dir="test-security" target="${ant.target}"/>
-	</target>    
-	<target name="-test-ejb" depends="-init" if="include.test-ejb">
-		<ant inheritAll="false" dir="test-ejb" target="${ant.target}"/>
 	</target>    
 </project>

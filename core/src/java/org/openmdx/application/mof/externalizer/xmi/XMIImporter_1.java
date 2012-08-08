@@ -1,17 +1,16 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMIImporter_1.java,v 1.14 2010/09/21 16:32:46 hburger Exp $
+ * Name:        $Id: XMIImporter_1.java,v 1.16 2011/11/26 01:35:00 hburger Exp $
  * Description: XMI Model Importer
- * Revision:    $Revision: 1.14 $
+ * Revision:    $Revision: 1.16 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/21 16:32:46 $
+ * Date:        $Date: 2011/11/26 01:35:00 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2005, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -46,8 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.mof.externalizer.xmi;
 
@@ -65,7 +64,6 @@ import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
-import javax.resource.ResourceException;
 import javax.resource.cci.MappedRecord;
 
 import org.omg.mof.cci.DirectionKind;
@@ -96,12 +94,13 @@ import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.Stereotypes;
 import org.openmdx.base.naming.Path;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.BasicException.Code;
 import org.openmdx.kernel.log.SysLog;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class XMIImporter_1
 extends ModelImporter_1
 implements UML1Consumer {
@@ -330,18 +329,13 @@ implements UML1Consumer {
 
         SysLog.detail("Processing package", umlPackage.getQualifiedName());
         Object_2Facade modelPackageFacade;
-        try {
-            modelPackageFacade = Object_2Facade.newInstance(
-                toElementPath(
-                    nameToPathComponent(umlPackage.getQualifiedName()),
-                    umlPackage.getName()
-                ),
-                ModelAttributes.PACKAGE
-            );
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        modelPackageFacade = Facades.newObject(
+		    toElementPath(
+		        nameToPathComponent(umlPackage.getQualifiedName()),
+		        umlPackage.getName()
+		    ),
+		    ModelAttributes.PACKAGE
+		);
         modelPackageFacade.attributeValuesAsList("isAbstract").add(Boolean.FALSE);
         modelPackageFacade.attributeValuesAsList("visibility").add(VisibilityKind.PUBLIC_VIS);
 
@@ -398,13 +392,13 @@ implements UML1Consumer {
             null, 
             associationDefFacade.getDelegate()
         );
-        Object_2Facade associationEnd1DefFacade = Object_2Facade.newInstance(
+        Object_2Facade associationEnd1DefFacade = Facades.asObject(
             this.processAssociationEnd(
                 (UML1AssociationEnd)umlAssociation.getConnection().get(0),
                 associationDefFacade.getDelegate()
             )
         );
-        Object_2Facade associationEnd2DefFacade = Object_2Facade.newInstance(
+        Object_2Facade associationEnd2DefFacade = Facades.asObject(
             this.processAssociationEnd(
                 (UML1AssociationEnd)umlAssociation.getConnection().get(1),
                 associationDefFacade.getDelegate()
@@ -1007,10 +1001,10 @@ implements UML1Consumer {
     private void processOperation(
         UML1Operation umlOperation,
         MappedRecord aContainer
-    ) throws Exception {
+    ) throws ServiceException{
         SysLog.detail("Processing operation", umlOperation.getName());
         String operationName = umlOperation.getName();
-        Object_2Facade operationDefFacade = Object_2Facade.newInstance(
+        Object_2Facade operationDefFacade = Facades.newObject(
             newFeaturePath(
                 Object_2Facade.getPath(aContainer),
                 umlOperation.getName()
@@ -1077,7 +1071,7 @@ implements UML1Consumer {
                 operationName.substring(0,1).toUpperCase() +
                 operationName.substring(1);
 
-            Object_2Facade parameterTypeFacade = Object_2Facade.newInstance(
+            Object_2Facade parameterTypeFacade = Facades.newObject(
                 new Path(
                     Object_2Facade.getPath(aContainer).toString() + capOperationName + "Params"
                 ),
@@ -1087,7 +1081,7 @@ implements UML1Consumer {
             parameterTypeFacade.attributeValuesAsList("isAbstract").add(Boolean.FALSE);
             parameterTypeFacade.attributeValuesAsList("isSingleton").add(Boolean.FALSE);
             parameterTypeFacade.attributeValuesAsList("container").addAll(
-                Object_2Facade.newInstance(aContainer).attributeValuesAsList("container")
+            		Facades.asObject(aContainer).attributeValuesAsList("container")
             );
 
             /**
@@ -1120,8 +1114,9 @@ implements UML1Consumer {
                             new BasicException.Parameter("operation", operationDefFacade.getPath())
                         );
                     }
-                    parameterTypeFacade = Object_2Facade.newInstance(
-                        (Path)Object_2Facade.newInstance(parameterDef).attributeValue("type")
+                    parameterTypeFacade = Facades.newObject(
+                        (Path)Facades.asObject(parameterDef).attributeValue("type"),
+                        null
                     );
                     createParameterType = false;
                 }
@@ -1157,7 +1152,7 @@ implements UML1Consumer {
                 );
             }
             // in-parameter
-            Object_2Facade inParameterDefFacade = Object_2Facade.newInstance(
+            Object_2Facade inParameterDefFacade = Facades.newObject(
                 newFeaturePath(
                     operationDefFacade.getPath(),
                     "in"
@@ -1184,7 +1179,7 @@ implements UML1Consumer {
 
         // void in-parameter
         else {
-            Object_2Facade inParameterDefFacade = Object_2Facade.newInstance(
+            Object_2Facade inParameterDefFacade = Facades.newObject(
                 newFeaturePath(
                     operationDefFacade.getPath(),
                     "in"
@@ -1215,7 +1210,7 @@ implements UML1Consumer {
         // return parameter is ignored for exceptions (operations with stereotype
         // exception)
         if(!isException) {
-            Object_2Facade resultDefFacade = Object_2Facade.newInstance(
+            Object_2Facade resultDefFacade = Facades.newObject(
                 newFeaturePath(
                     operationDefFacade.getPath(),
                     "result"
@@ -1287,10 +1282,10 @@ implements UML1Consumer {
     private MappedRecord processParameter(
         UML1Parameter umlParameter,
         MappedRecord parameterType
-    ) throws Exception {
+    ) throws ServiceException{
         SysLog.detail("Processing parameter", umlParameter.getName());
 
-        Object_2Facade parameterDefFacade = Object_2Facade.newInstance(
+        Object_2Facade parameterDefFacade = Facades.newObject(
             newFeaturePath(
                 Object_2Facade.getPath(parameterType),
                 umlParameter.getName()

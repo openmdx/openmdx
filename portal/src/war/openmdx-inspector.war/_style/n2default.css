@@ -22,6 +22,7 @@ body {
 }
 #header {
   width:100%;
+  background-color:white;
 }
 html>body #header {
   position:fixed;
@@ -30,15 +31,22 @@ html>body #header {
 html>body #content-wrap {
   height:100%; /* 100 % height */
 }
-html>body #content { /* header visible */
-  padding:14.5em 0.5em 10em 0.5em; /* 13em = height of #header and #footer + 1em, 1em = give the content some breathing space */
+html>body #contentHeaderYesLeftYes { /* header visible, left panel visible */
+  padding:15.5em 0.5em 10em 160px;
   margin:0 5px 0 5px;
 }
-html>body #contentNH { /* header not visible */
-  padding:7.0em 0.5em 10em 0.5em; /* 7em = height of #header and #footer + 1em, 1em = give the content some breathing space */
+html>body #contentHeaderNoLeftYes { /* header not visible, left pane visible */
+  padding:8.0em 0.5em 10em 160px;l
   margin:0 5px 0 5px;
 }
-
+html>body #contentHeaderYesLeftNo { /* header visible, left panel not visible */
+  padding:15.5em 0.5em 10em 7px;
+  margin:0 5px 0 5px;
+}
+html>body #contentHeaderNoLeftNo { /* header not visible, left panel not visible */
+  padding:8.0em 0.5em 10em 7px;
+  margin:0 5px 0 5px;
+}
 #eheader {
   background-color: #CCCCCC;
   border-top:3px solid #CCCCCC;
@@ -70,6 +78,33 @@ html>body #footer {
   z-index:9998;
 }
 */
+#paneLeft {
+  position:absolute;
+  margin-top: 11px;
+  left:0px;
+  height: 100%;
+  overflow: hidden;
+  width: 150px;
+  border-right: 1px #E4E4E4 solid;
+  background-color: white;
+}
+.workspaceDashboard {
+    width:100%;
+    padding:0;
+    margin:0;
+    border-collapse: collapse;
+    border-spacing:0;
+}
+.dashlet {
+	/* border-bottom:1px solid #DDDDDD; */
+}
+.dashletTitle {
+  font-weight:bold;
+  padding:2px;
+  background-color:#EEEEEE;
+  border:1px solid #DDDDDD;
+  height:14px;	
+}
 #breadcrum {
   background:#E4E4E4;
   margin:0 11px 0 11px;
@@ -90,6 +125,7 @@ html>body #footer {
   background-image: url('../images/bc.png');
   background-repeat: repeat-x;
   background-position: left top;
+  background-color:#fff;
   border-right: 1px solid #ccc;
   border-left: 1px solid #ccc;
   font-size:13pt;
@@ -119,6 +155,7 @@ html>body #footer {
   position:relative;
   display:none;
 }
+
 /*------------------------------------------------------------------------------
 |  general layout
 + ----------------------------------------------------------------------------*/
@@ -148,17 +185,21 @@ a:hover {
 
 /* define consistent font-size across various browsers */
 *, * td, * ul {
-  font-family: Arial,Geneva,Helvetica,Verdana,sans-serif;
+  font-family: "DejaVu Sans Condensed", "lucida sans", tahoma, verdana, arial, sans-serif;
   text-decoration:none;
   font-size: 9pt;
   color:#444444;
 }
 .smallFont {
-  font-size:7pt;
+  font-size:8pt;
 }
 
 img {
   border:0;
+}
+
+.hilite {
+  background-color:#DDDDDD;
 }
 
 .abutton {
@@ -216,7 +257,7 @@ img {
 }
 #searchExpression {
   margin:1px 0px 0px 0px;
-  height:13px;
+  height:18px;
 }
 #segmentLogo {
   text-align:center;
@@ -228,10 +269,10 @@ img {
 }
 #menuOps {
 	padding: 2px 0 0 12px;
-  overflow: hidden;
-  white-space:nowrap;
-  background-color:white;
-  margin:0 5px 0 0px;
+	overflow: hidden;
+	white-space:nowrap;
+	background-color:white;
+	margin:0 5px 0 0px;
 }
 #opMenu{
   padding-top: 2px;
@@ -333,7 +374,7 @@ img {
   font-size: 9px;
   color: #888;
   background: #fff;
-  font-family: tahoma,verdana,sans-serif;
+  font-family: "DejaVu Sans Condensed", "lucida sans", tahoma, verdana, arial, sans-serif;
 }
 #stickyNote{
   width: 100%;
@@ -883,7 +924,7 @@ input.classsubmithover { /* IE :hover workaround */
   padding-left:3px;
   font-size:8pt;
   font-weight:bold;
-  text-decoration:none
+  text-decoration:none;
 }
 .imgfilter {
   border-style: solid;
@@ -1076,7 +1117,7 @@ input.selimgsubmithover { /* IE :hover workaround */
   vertical-align: middle;
   border-style: none none none none;
   border-width: 1px;
-  padding:3px 5px 2px 0px;
+  padding:3px 5px 0px 0px;
 }
 .gridTableHeader div, .gridTableHeaderFull div, .gridTableHeaderFullEdit div {
 /* uncomment this to fix the font size
@@ -1232,6 +1273,9 @@ input.selimgsubmithover { /* IE :hover workaround */
   padding-top: 0.15em;
   width: 12em;
   overflow: hidden;
+}
+td.label {
+  padding-top: 3px;
 }
 .nw {
   white-space: nowrap;

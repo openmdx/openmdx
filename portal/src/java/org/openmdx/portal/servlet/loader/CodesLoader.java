@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: CodesLoader.java,v 1.31 2010/01/25 17:03:40 wfro Exp $
+ * Name:        $Id: CodesLoader.java,v 1.34 2011/10/30 17:18:59 wfro Exp $
  * Description: TextsLoader class
- * Revision:    $Revision: 1.31 $
+ * Revision:    $Revision: 1.34 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/25 17:03:40 $
+ * Date:        $Date: 2011/10/30 17:18:59 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -63,9 +63,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.PersistenceManagerFactory;
@@ -84,24 +84,23 @@ import org.openmdx.base.jmi1.Authority;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.log.SysLog;
-import org.openmdx.portal.servlet.RoleMapper_1_0;
+import org.openmdx.portal.servlet.PortalExtension_1_0;
 
 public class CodesLoader
     extends Loader {
 
-  //-------------------------------------------------------------------------
-  public CodesLoader(      
-      ServletContext context,
-      RoleMapper_1_0 roleMapper,      
-      PersistenceManagerFactory pmf
-  ) {
-      super(
-          context,
-          roleMapper
-      );
-      this.pmf = pmf;
-      
-  }
+	//-------------------------------------------------------------------------
+	public CodesLoader(      
+		ServletContext context,
+		PortalExtension_1_0 portalExtension,      
+		PersistenceManagerFactory pmf
+	) {
+		super(
+			context,
+			portalExtension
+		);
+		this.pmf = pmf;     
+	}
     
     //-------------------------------------------------------------------------
     @SuppressWarnings("unchecked")
@@ -128,15 +127,6 @@ public class CodesLoader
               if(locale[j] != null) {
                   String codeResourcesPath = dir + locale[j];
                   codeResources = new TreeSet<String>(this.context.getResourcePaths(codeResourcesPath));
-                  if(codeResources == null) {
-                      for(int k = j-1; k >= 0; k--) {
-                          if(locale[j].substring(0,2).equals(locale[k].substring(0,2))) {
-                              fallbackLocaleIndex = k;
-                              break;
-                          }
-                      }
-                      SysLog.info(locale[j] + " not found. Fallback to " + locale[fallbackLocaleIndex]);
-                  }
               }
               try {
                 for(Iterator k = codeResources.iterator(); k.hasNext(); ) {        
@@ -257,7 +247,7 @@ public class CodesLoader
             Set<Path> codeSegmentIdentities = new HashSet<Path>();
             // Load objects in multiple runs in order to resolve object dependencies.
             Map<Path,RefObject> loadedObjects = new HashMap<Path,RefObject>(); 
-            for(int runs = 0; runs < 5; runs++) {
+            for(int run = 0; run < 5; run++) {
                 boolean hasNewObjects = false;
                 store.currentTransaction().begin();
                 for(
@@ -283,12 +273,17 @@ public class CodesLoader
                         	entryPath, 
                             existing
                         );
-                        JmiHelper.toRefObject(
-                            entry,
-                            existing,
-                            loadedObjects, // object cache
-                            null // ignorable features
-                        );
+                        // Object exists: if it was created on first run it does not have to be updated 
+                        // on subsequent runs. If it was updated on first run do not update it again.
+                        if(run == 0) {
+	                        JmiHelper.toRefObject(
+	                            entry,
+	                            existing,
+	                            loadedObjects, // object cache
+	                            null, // ignorable features
+	                            true // compareWithBeforeImage
+	                        );
+                        }
                     }
                     else {
                         String qualifiedClassName = Object_2Facade.getObjectClass(entry);
@@ -302,7 +297,8 @@ public class CodesLoader
                             entry,
                             newEntry,
                             loadedObjects, // object cache
-                            null // ignorable features
+                            null, // ignorable features
+                            true // compareWithBeforeImage
                         );
                         Path parentIdentity = entryPath.getParent().getParent();
                         RefObject_1_0 parent = null;

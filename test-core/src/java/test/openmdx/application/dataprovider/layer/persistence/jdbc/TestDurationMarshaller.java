@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: TestDurationMarshaller.java,v 1.3 2010/06/03 15:57:46 hburger Exp $
- * Description: class TestRecord
- * Revision:    $Revision: 1.3 $
+ * Name:        $Id: TestDurationMarshaller.java,v 1.4 2011/03/10 12:57:48 hburger Exp $
+ * Description: Duration Masrhaller Test
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:57:46 $
+ * Date:        $Date: 2011/03/10 12:57:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -316,19 +316,19 @@ public class TestDurationMarshaller extends TestCase {
         assertEquals("P0M", "P0M", externalized);
         internalized = this.numericDurationMarshaller.unmarshal(BigInteger.valueOf(90));
         externalized = this.characterDurationMarshaller.marshal(internalized);
-        assertEquals("P7Y6M", "P90M", externalized);
+        assertEquals("P90M", "P7Y6M", externalized);
         internalized = this.numericDurationMarshaller.unmarshal(new BigDecimal("14582.010"));
         externalized = this.characterDurationMarshaller.marshal(internalized);
-        assertEquals("PT4H3M2.010S", "PT14582.010S", externalized);
+        assertEquals("PT14582.010S", "PT4H3M2.010S", externalized);
         internalized = this.numericDurationMarshaller.unmarshal(new BigDecimal("-446582.010"));
         externalized = this.characterDurationMarshaller.marshal(internalized);
-        assertEquals("-P5DT4H3M2.010S", "-PT446582.010S", externalized);
+        assertEquals("-PT446582.010S", "-P5DT4H3M2.010S", externalized);
         internalized = this.numericDurationMarshaller.unmarshal(BigInteger.valueOf(-90));
         externalized = this.characterDurationMarshaller.marshal(internalized);
-        assertEquals("-P7Y6M", "-P90M", externalized);
+        assertEquals("-P90M", "-P7Y6M", externalized);
         internalized = this.numericDurationMarshaller.unmarshal(new BigDecimal("-14582.010"));
         externalized = this.characterDurationMarshaller.marshal(internalized);
-        assertEquals("-PT4H3M2.010S", "-PT14582.010S", externalized);
+        assertEquals("-PT14582.010S", "-PT4H3M2.010S", externalized);
     }  
 
     /**

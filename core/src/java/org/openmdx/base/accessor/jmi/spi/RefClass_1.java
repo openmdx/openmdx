@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefClass_1.java,v 1.85 2010/10/28 06:44:02 hburger Exp $
+ * Name:        $Id: RefClass_1.java,v 1.86 2011/04/12 12:12:48 hburger Exp $
  * Description: RefClass_1 class
- * Revision:    $Revision: 1.85 $
+ * Revision:    $Revision: 1.86 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/28 06:44:02 $
+ * Date:        $Date: 2011/04/12 12:12:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -78,6 +78,7 @@ import org.openmdx.kernel.exception.BasicException;
  * Standard implementation of RefClass_1_0. The implementation does not
  * support class-level features.
  */
+@SuppressWarnings("rawtypes")
 public class RefClass_1 implements Jmi1Class_1_0, Serializable {
 
     /**
@@ -123,8 +124,6 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     }
 
     //-------------------------------------------------------------------------
-    @SuppressWarnings("unchecked")
-//  @Override
     public RefObject refCreateInstance(
         List iargs
     ) {
@@ -251,8 +250,6 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not remember all created instances. Therefore this
      * operation is not supported.
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Collection refAllOfType() {
         throw new UnsupportedOperationException();
     }
@@ -262,8 +259,6 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not remember all created instances. Therefore this 
      * operation is not supported.
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Collection refAllOfClass() {
         throw new UnsupportedOperationException();
     }
@@ -272,8 +267,6 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     /**
      * The call is delegated to the refImmediatePackage().
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public final RefStruct refCreateStruct(
         RefObject structType,
         List args
@@ -288,8 +281,6 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
     /**
      * The call is delegated to the refImmediatePackage().
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public final RefStruct refCreateStruct(
         String structName,
         List args
@@ -389,9 +380,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. This operation
      * is not supported.
      */
-//  @Override
-    @SuppressWarnings("unchecked")
-    public Object refInvokeOperation(
+public Object refInvokeOperation(
         RefObject requestedOperation,
         List args
     ) throws JmiException {
@@ -403,9 +392,7 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. This operation
      * is not supported.
      */
-//  @Override
-    @SuppressWarnings("unchecked")
-    public Object refInvokeOperation(
+public Object refInvokeOperation(
         String operationName,
         List args
     ) throws JmiException {
@@ -454,8 +441,6 @@ public class RefClass_1 implements Jmi1Class_1_0, Serializable {
      * RefClass_1 does not support class-level features. Therefore verification
      * is always successful.
      */
-    @SuppressWarnings("unchecked")
-//  @Override
     public Collection refVerifyConstraints(
         boolean deepVerify
     ) {

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: StateCapable_1.java,v 1.9 2010/10/31 18:18:20 hburger Exp $
+ * Name:        $Id: StateCapable_1.java,v 1.10 2011/09/09 17:35:19 hburger Exp $
  * Description: org::openmdx::state2::StateCapable plug-in
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/31 18:18:20 $
+ * Date:        $Date: 2011/09/09 17:35:19 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -66,15 +66,24 @@ public class StateCapable_1 extends Interceptor_1 {
      *
      * @param self
      * @param next
+     * @param validTimeUnique 
+     * 
      * @throws ServiceException
      */
     public StateCapable_1(
         ObjectView_1_0 self, 
-        Interceptor_1 next
+        Interceptor_1 next, 
+        Boolean validTimeUnique
     ) throws ServiceException {
         super(self, next);
+        this.validTimeUnique = validTimeUnique;
     }
 
+    /**
+     * The value has already been determined
+     */
+    private final Boolean validTimeUnique;
+    
     /* (non-Javadoc)
      * @see org.openmdx.base.aop1.Aspect_1#objGetValue(java.lang.String)
      */
@@ -82,18 +91,23 @@ public class StateCapable_1 extends Interceptor_1 {
     public Object objGetValue(
         String feature
     ) throws ServiceException {
-        Object value = super.objGetValue(feature);
-        if(value == null) {
-            if("stateVersion".equals(feature)) {
-                return Integer.valueOf(-1);
-            }
-            if("validTimeUnique".equals(feature) || "transactionTimeUnique".equals(feature)) {
-                return Boolean.valueOf(
-                    super.getModel().isInstanceof(self, "org:openmdx:base:Aspect") && 
-                    super.objGetValue("core") == null
-                ); 
-            }
+        Object value = null;
+        boolean validTimeUniqueRequest = "validTimeUnique".equals(feature);
+        if(validTimeUniqueRequest) {
+        	value = this.validTimeUnique;
         }
+    	if (value == null) {
+	        value = super.objGetValue(feature);
+    	}
+        if(value == null) {
+        	if(validTimeUniqueRequest || "transactionTimeUnique".equals(feature)) {
+				value = Boolean.valueOf(
+                    super.getModel().isInstanceof(self, "org:openmdx:base:Aspect") && super.objGetValue("core") == null
+                ); 
+        	} else if("stateVersion".equals(feature)) {
+                value = Integer.valueOf(-1);
+            }
+    	}
         return value;
     }
 

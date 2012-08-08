@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: TestThreadSafety.java,v 1.10 2009/06/16 17:08:27 wfro Exp $
+ * Name:        $Id: TestThreadSafety.java,v 1.11 2011/07/07 22:35:42 wfro Exp $
  * Description: TestThreadSafety
- * Revision:    $Revision: 1.10 $
+ * Revision:    $Revision: 1.11 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/16 17:08:27 $
+ * Date:        $Date: 2011/07/07 22:35:42 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -78,6 +78,8 @@ import org.openmdx.base.text.conversion.Base64;
 import org.openmdx.kernel.log.SysLog;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.action.LogoffAction;
+import org.openmdx.portal.servlet.action.SelectObjectAction;
 
 //---------------------------------------------------------------------------  
 public class TestThreadSafety 
@@ -92,7 +94,7 @@ public class TestThreadSafety
           this.actions = new Action[objectXris.size()+1];
           for(int i = 0; i < objectXris.size(); i++) {
               this.actions[i] = new Action(
-                  Action.EVENT_SELECT_OBJECT,
+                  SelectObjectAction.EVENT_ID,
                   new Action.Parameter[]{   
                       new Action.Parameter(Action.PARAMETER_OBJECTXRI, (String)objectXris.get(i))                  
                   },
@@ -101,7 +103,7 @@ public class TestThreadSafety
               );
           }
           this.actions[objectXris.size()] = new Action(
-              Action.EVENT_LOGOFF,
+              LogoffAction.EVENT_ID,
               new Action.Parameter[]{},
               null,
               false

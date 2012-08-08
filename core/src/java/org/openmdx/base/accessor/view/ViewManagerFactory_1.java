@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: ViewManagerFactory_1.java,v 1.8 2010/11/18 17:36:43 hburger Exp $
+ * Name:        $Id: ViewManagerFactory_1.java,v 1.9 2011/04/12 15:48:43 hburger Exp $
  * Description: View Manager Factory
- * Revision:    $Revision: 1.8 $
+ * Revision:    $Revision: 1.9 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/18 17:36:43 $
+ * Date:        $Date: 2011/04/12 15:48:43 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -68,6 +68,7 @@ import org.openmdx.base.persistence.spi.AbstractPersistenceManagerFactory;
 /**
  * View Manager Factory
  */
+@SuppressWarnings({"rawtypes"})
 public class ViewManagerFactory_1 implements PersistenceManagerFactory {
 
     /**
@@ -98,7 +99,6 @@ public class ViewManagerFactory_1 implements PersistenceManagerFactory {
      */
     private PersistenceManagerFactory delegate;
 
-    @SuppressWarnings("unchecked")
     public void addInstanceLifecycleListener(
         InstanceLifecycleListener listener,
         Class[] classes
@@ -243,12 +243,10 @@ public class ViewManagerFactory_1 implements PersistenceManagerFactory {
         return this.delegate.getDetachAllOnCommit();
     }
 
-    @SuppressWarnings("unchecked")
     public FetchGroup getFetchGroup(Class cls, String name) {
         return this.delegate.getFetchGroup(cls, name);
     }
 
-    @SuppressWarnings("unchecked")
     public Set getFetchGroups() {
         return this.delegate.getFetchGroups();
     }

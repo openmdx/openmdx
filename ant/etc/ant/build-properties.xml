@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build-properties.xml,v 1.35 2010/09/13 15:22:29 hburger Exp $
+= Name:        $Id: build-properties.xml,v 1.37 2011/05/04 13:36:34 wfro Exp $
 = Description: openMDX Build Properties
-= Revision:    $Revision: 1.35 $
-= Date:        $Date: 2010/09/13 15:22:29 $
-= Copyright:   (c) 2003-2008 OMEX AG
+= Revision:    $Revision: 1.37 $
+= Date:        $Date: 2011/05/04 13:36:34 $
+= Copyright:   (c) 2003-2011 OMEX AG
 =======================================================================
 =
 = This software is published under the BSD license
@@ -282,6 +282,6 @@
 	<!-- =================================================================== -->
 	<!-- = Memory Allocation                                               = -->
 	<!-- =================================================================== -->
-	<property name="build.memory.limit" value="1000m"/>
+	<property name="build.memory.limit" value="1100m"/>
 	
 </project>

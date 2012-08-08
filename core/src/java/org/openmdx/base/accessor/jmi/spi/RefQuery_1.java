@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: RefQuery_1.java,v 1.47 2010/12/22 09:37:41 hburger Exp $
+ * Name:        $Id: RefQuery_1.java,v 1.54 2011/10/21 22:32:06 hburger Exp $
  * Description: RefQuery_1 class
- * Revision:    $Revision: 1.47 $
+ * Revision:    $Revision: 1.54 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/22 09:37:41 $
+ * Date:        $Date: 2011/10/21 22:32:06 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -84,14 +84,14 @@ import org.openmdx.base.accessor.jmi.cci.RefQuery_1_0;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
-import org.openmdx.base.mof.spi.ModelUtils;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.Queries;
 import org.openmdx.base.persistence.spi.ExtentCollection;
+import org.openmdx.base.persistence.spi.FilterCollection;
 import org.openmdx.base.persistence.spi.StandardFetchPlan;
 import org.openmdx.base.query.AnyTypeCondition;
 import org.openmdx.base.query.Condition;
@@ -120,6 +120,7 @@ import org.w3c.cci2.StringTypePredicate;
  * <p>
  * TODO handle reference to a PersistenceManager
  */
+@SuppressWarnings({"rawtypes","unchecked"})
 public class RefQuery_1 implements RefQuery_1_0 {
 
     //-------------------------------------------------------------------------
@@ -168,50 +169,23 @@ public class RefQuery_1 implements RefQuery_1_0 {
         /**
          * Adding value to the filter
          * 
+         * @param quantifier
          * @param conditionType
          * @param operand
+         * 
+         * @exception NullPointerException if quantifier or operand is null
          */
         public void refAddValue(
             Quantifier quantifier,
             ConditionType conditionType,
             Collection<?> operand
         ){
-            try {
-                RefQuery_1.this.refAddValue(
-                    this.featureName,
-                    quantifier,
-                    conditionType,
-                    operand
-                );
-            } catch (NullPointerException exception) {
-                throw new JmiServiceException(
-                    new ServiceException(
-                        exception,
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.BAD_PARAMETER,
-                        "Either 'null operand' or 'candidate collection support not implemented for openMDX 1 compatibility mode'",
-                        new BasicException.Parameter(
-                            "quantifier", 
-                            quantifier
-                        ),
-                        new BasicException.Parameter(
-                            "name", 
-                            this.featureName
-                        ),
-                        new BasicException.Parameter(
-                            "conditionType",
-                            conditionType
-                        ),
-                        operand == null ? new BasicException.Parameter(
-                            "operand", 
-                            "null"
-                        ) : new BasicException.Parameter(
-                            "operand.size()", 
-                            operand.size()
-                        )
-                    )
-                );
-            }
+            RefQuery_1.this.refAddValue(
+                this.featureName,
+                quantifier,
+                conditionType,
+                operand
+            );
         }
 
         public RefQuery_1 getQuery(
@@ -315,7 +289,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
          * 
          * @return the modified operands
          */
-        @SuppressWarnings("unchecked")
         Collection jdoWildcard (
             Collection source,
             boolean prefix
@@ -342,11 +315,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         ) {
             return this.featureName;
         }
-
-        //-----------------------------------------------------------------------
-        // Members
-        //-----------------------------------------------------------------------
-        private static final long serialVersionUID = -5668618898901781191L;
 
         protected final Quantifier quantifier;
         protected final String featureName;
@@ -912,7 +880,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         /* (non-Javadoc)
          * @see org.w3c.query.PartiallyOrderedTypePredicate#between(V, V)
          */
-        @SuppressWarnings("unchecked")
         public void between(
             V lowerBound,
             V upperBound
@@ -930,7 +897,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
         /* (non-Javadoc)
          * @see org.w3c.query.PartiallyOrderedTypePredicate#outside(V, V)
          */
-        @SuppressWarnings("unchecked")
         public void outside(
             V lowerBound,
             V upperBound
@@ -1383,22 +1349,32 @@ public class RefQuery_1 implements RefQuery_1_0 {
     }
 
     //-------------------------------------------------------------------------
-    protected void assertAttributeOrReferenceStoredAsAttribute(
+    protected void assertAttributeType(
         ModelElement_1_0 elementDef
     ) throws ServiceException {
-        if(
-            !elementDef.objGetClass().equals(ModelAttributes.ATTRIBUTE) &&
-            !elementDef.getModel().referenceIsStoredAsAttribute(elementDef)
-        ) {
+        if(!elementDef.getModel().isAttributeType(elementDef)) {
             throw new ServiceException (
                 BasicException.Code.DEFAULT_DOMAIN,
                 BasicException.Code.ASSERTION_FAILURE,
-                "model element not of type " + ModelAttributes.ATTRIBUTE + " and not " + ModelAttributes.REFERENCE + " stored as attribute",
+                "model element not of type " + ModelAttributes.ATTRIBUTE,
                 new BasicException.Parameter("model element", elementDef)
             );
         }
     }
 
+    protected void assertReferenceStoredAsAttribute(
+        ModelElement_1_0 elementDef
+    ) throws ServiceException {
+        if(!elementDef.getModel().referenceIsStoredAsAttribute(elementDef)) {
+            throw new ServiceException (
+                BasicException.Code.DEFAULT_DOMAIN,
+                BasicException.Code.ASSERTION_FAILURE,
+                "model element not of type " + ModelAttributes.REFERENCE + " stored as attribute",
+                new BasicException.Parameter("model element", elementDef)
+            );
+        }
+    }
+    
     //-------------------------------------------------------------------------
     //  @Override
     public void refAddValue(
@@ -1409,7 +1385,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
     ) {
         try {
             this.assertModifiable();
-            this.assertAttributeOrReferenceStoredAsAttribute(featureDef);
             String featureName = (String)featureDef.objGetValue("name");
             SysLog.log(
                 Level.FINEST, 
@@ -1418,42 +1393,58 @@ public class RefQuery_1 implements RefQuery_1_0 {
             );
             Model_1_0 model = featureDef.getModel();
             if(model.isReferenceType(featureDef)) {
-                List<Path> paths = new ArrayList<Path>();
-                for(
-                    Iterator<?> i = value.iterator();
-                    i.hasNext();
-                ) {
-                    Object v = i.next();
-                    if(v instanceof RefObject_1_0){
-                        RefObject_1_0 e = (RefObject_1_0) v;
-                        String objectClass = e.refClass().refMofId();
-                        if(
-                            model.isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") &&
-                            model.isSubtypeOf(objectClass, "org:openmdx:state2:BasicState") &&
-                            JDOHelper.isPersistent(e) &&
-                            !JDOHelper.isNew(e) &&
-                            !JDOHelper.isDeleted(e)
-                        ) try {
-                            paths.add(new Path((String)e.refGetValue(SystemAttributes.OBJECT_IDENTITY)));
-                        } catch (Exception exception) {
-                            paths.add(e.refGetPath());
+                if(value instanceof FilterCollection) {
+                    this.filter.getCondition().add(
+                        new AnyTypeCondition(
+                            quantifier,
+                            featureName,
+                            conditionType,
+                            ((FilterCollection)value).getFilter()
+                        )
+                    );
+                } else {
+                    this.assertReferenceStoredAsAttribute(featureDef);
+                    List<Object> values = new ArrayList<Object>();
+                    for(Object v : value){
+                        if(v instanceof RefObject_1_0){
+                            RefObject_1_0 e = (RefObject_1_0) v;
+                            String objectClass = e.refClass().refMofId();
+                            if(
+                                model.isSubtypeOf(objectClass, "org:openmdx:base:ExtentCapable") &&
+                                model.isSubtypeOf(objectClass, "org:openmdx:state2:BasicState") &&
+                                JDOHelper.isPersistent(e) &&
+                                !JDOHelper.isNew(e) &&
+                                !JDOHelper.isDeleted(e)
+                            ) try {
+                                values.add(new Path((String)e.refGetValue(SystemAttributes.OBJECT_IDENTITY)));
+                            } catch (Exception exception) {
+                                values.add(e.refGetPath());
+                            } else {
+                                values.add(e.refGetPath());
+                            }
+                        } else if (v instanceof Path){
+                            values.add(v);
+                        } else if (v instanceof String){
+                            values.add(new Path((String)v));
                         } else {
-                            paths.add(e.refGetPath());
+                            throw new ServiceException(
+                                BasicException.Code.DEFAULT_DOMAIN, 
+                                BasicException.Code.BAD_PARAMETER, 
+                                "A value's class is inapprpriate for a reference filter collection",
+                                new BasicException.Parameter("supported", RefObject_1_0.class.getName(), Path.class.getName(), String.class.getName()),
+                                new BasicException.Parameter("actual", v == null ? null : v.getClass().getName())
+                            );
                         }
-                    } else if (v instanceof Path){
-                        paths.add((Path)v);
-                    } else {
-                        paths.add(new Path((String)v));
                     }
+                    this.filter.getCondition().add(
+                        new AnyTypeCondition(
+                            quantifier,
+                            featureName,
+                            conditionType,
+                            values.toArray()
+                        )
+                    );
                 }
-                this.filter.getCondition().add(
-                    new AnyTypeCondition(
-                        quantifier,
-                        featureName,
-                        conditionType,
-                        paths.toArray()
-                    )
-                );
             } else if(model.isAttributeType(featureDef)) {
                 this.filter.getCondition().add(
                     new AnyTypeCondition(
@@ -1463,13 +1454,13 @@ public class RefQuery_1 implements RefQuery_1_0 {
                         value.toArray()
                     )
                 );
-            }
-
-            // unsupported feature type
-            else {
+            } else {
+                //
+                // unsupported feature type
+                //
                 throw new ServiceException (
                     BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.ASSERTION_FAILURE,
+                    BasicException.Code.BAD_PARAMETER,
                     "unsupported feature type. Must be [Attribute|Reference]",
                     new BasicException.Parameter("feature", featureName)
                 );
@@ -1488,7 +1479,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
     ) {
         try {
             this.assertModifiable();            
-            this.assertAttributeOrReferenceStoredAsAttribute(featureDef);
+            this.assertAttributeType(featureDef);
             String name = (String)featureDef.objGetValue("name"); 
             SysLog.log(Level.FINEST, "Order by {0} {1}", name, order);
             this.filter.getOrderSpecifier().add(
@@ -1521,7 +1512,7 @@ public class RefQuery_1 implements RefQuery_1_0 {
                         null,
                         BasicException.Code.DEFAULT_DOMAIN,
                         BasicException.Code.ILLEGAL_STATE,
-                        SystemAttributes.OBJECT_INSTANCE_OF + "implies THERE_EXISTS/IS_IN",
+                        SystemAttributes.OBJECT_INSTANCE_OF + " implies THERE_EXISTS/IS_IN",
                         new BasicException.Parameter("quantifier", quantifier),
                         new BasicException.Parameter("conditionType", conditionType)
                     );
@@ -1539,11 +1530,12 @@ public class RefQuery_1 implements RefQuery_1_0 {
                         BasicException.Code.ILLEGAL_STATE,
                         "This filter does not allow subclasses",
                         new BasicException.Parameter(
-                            this.filterTypeCondition.getName(), 
+                            this.filterTypeCondition.getFeature(), 
                             this.filterTypeCondition.getValue()
                         ),
                         new BasicException.Parameter(
-                            featureName, value
+                            featureName, 
+                            value
                         )
                     );
                 }
@@ -1612,18 +1604,18 @@ public class RefQuery_1 implements RefQuery_1_0 {
     ) throws ServiceException {
         String multiplicity = (String)featureDef.objGetValue("multiplicity");
         String featureName = (String)featureDef.objGetValue("qualifiedName");
-        if(
-            Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
-            Multiplicities.OPTIONAL_VALUE.equals(multiplicity)
-        ) {
-            return new RefSimpleTypeOrder(featureName);
-        } else throw new ServiceException(
-            BasicException.Code.DEFAULT_DOMAIN,
-            BasicException.Code.NOT_SUPPORTED,
-            "Ordering on multivalued attributes is no longer supported",
-            new BasicException.Parameter("feature", featureName),
-            new BasicException.Parameter("multiplicity", multiplicity)
-        );
+        switch(ModelHelper.getMultiplicity(featureDef)) {
+	        case SINGLE_VALUE: case OPTIONAL:
+	            return new RefSimpleTypeOrder(featureName);
+	        default:
+	        	throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.NOT_SUPPORTED,
+                    "Ordering on multivalued attributes is no longer supported",
+                    new BasicException.Parameter("feature", featureName),
+                    new BasicException.Parameter("multiplicity", multiplicity)
+                );        
+	     }        
     }
 
     //-------------------------------------------------------------------------
@@ -1644,18 +1636,23 @@ public class RefQuery_1 implements RefQuery_1_0 {
     private Object refGetPredicate(
         ModelElement_1_0 featureDef
     ) throws ServiceException {
-        String multiplicity = ModelUtils.getMultiplicity(featureDef);
-        String name = (String)featureDef.objGetValue("qualifiedName");
-        return Multiplicities.SINGLE_VALUE.equals(multiplicity) ? this.refGetPredicate(
-            Quantifier.THERE_EXISTS, // Quantors.FOR_ALL would give the same result but is very inefficient
-            featureDef
-        ) : Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ? (Object) new RefOptionalFeaturePredicate(
-            Quantifier.THERE_EXISTS,
-            name
-        ) : new RefMultiValuedAttributePredicate(
-            Quantifier.THERE_EXISTS,
-            name
-        );
+        switch(ModelHelper.getMultiplicity(featureDef)) {
+	    	case SINGLE_VALUE:
+	    		return this.refGetPredicate(
+    	            Quantifier.THERE_EXISTS, // Quantors.FOR_ALL would give the same result but is very inefficient
+    	            featureDef
+    	        );
+	    	case OPTIONAL:
+	    		return new RefOptionalFeaturePredicate(
+    	            Quantifier.THERE_EXISTS,
+    	            (String)featureDef.objGetValue("qualifiedName")
+    	        );
+	    	default:
+	    		return new RefMultiValuedAttributePredicate(
+    	            Quantifier.THERE_EXISTS,
+    	            (String)featureDef.objGetValue("qualifiedName")
+    	        );
+    	}
     }
 
     //-------------------------------------------------------------------------
@@ -1885,7 +1882,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#deletePersistentAll(java.util.Map)
      */
-    @SuppressWarnings("unchecked")
     public long deletePersistentAll(Map parameters) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -1948,7 +1944,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#executeWithMap(java.util.Map)
      */
-    @SuppressWarnings("unchecked")
     public Object executeWithMap(Map parameters) {
         throw new UnsupportedOperationException("Expression parsing and arguments not supported");
     }
@@ -1989,12 +1984,11 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setCandidates(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
     public void setCandidates(Collection pcs) {
         if(pcs instanceof ExtentCollection<?>) {
             ExtentCollection extentCollection = (ExtentCollection) pcs;
             //
-            // Apply the pattern olny expecting that the query is based on the extent
+            // Apply the pattern only expecting that the query is based on the extent
             // 
             Path pattern = extentCollection.getPattern();
             this.pcs = (Collection<?>) extentCollection.getExtent().getPersistenceManager().getObjectById(
@@ -2008,6 +2002,8 @@ public class RefQuery_1 implements RefQuery_1_0 {
                     ExtentCollection.toIdentityPattern(pattern)
                 )
             );
+        } else if (pcs instanceof FilterCollection) {
+            throw new IllegalArgumentException("A filter collection cant't be used as candidate collection");
         } else {
             this.pcs = pcs;
         }
@@ -2016,7 +2012,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setCandidates(javax.jdo.Extent)
      */
-    @SuppressWarnings("unchecked")
     public void setCandidates(Extent pcs) {
         throw new UnsupportedOperationException(
             "Extent can't be set via JDO query yet"
@@ -2028,7 +2023,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
      * @see javax.jdo.Query#setClass(java.lang.Class)
      */
     //  @Override
-    @SuppressWarnings("unchecked")
     public void setClass(Class cls) {
         if(
             !cls.isInterface() ||
@@ -2053,7 +2047,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setExtensions(java.util.Map)
      */
-    @SuppressWarnings("unchecked")
     public void setExtensions(
         Map extensions
     ) {
@@ -2129,7 +2122,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#setResultClass(java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
     public void setResultClass(Class cls) {
         throw new UnsupportedOperationException("Result classes, projections and aggregate function results not supported");
     }
@@ -2178,7 +2170,6 @@ public class RefQuery_1 implements RefQuery_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.Query#addSubquery(javax.jdo.Query, java.lang.String, java.lang.String, java.util.Map)
      */
-    @SuppressWarnings("unchecked")
     public void addSubquery(Query arg0, String arg1, String arg2, Map arg3) {
         throw new UnsupportedOperationException("Operation not supported by RefQuery_1");        
     }

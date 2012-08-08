@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: VariableSizeMappedRecord.java,v 1.21 2010/06/02 13:45:10 hburger Exp $
+ * Name:        $Id: VariableSizeMappedRecord.java,v 1.23 2011/11/02 00:56:01 hburger Exp $
  * Description: JCA: variable-size MappedRecord implementation
- * Revision:    $Revision: 1.21 $
+ * Revision:    $Revision: 1.23 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:45:10 $
+ * Date:        $Date: 2011/11/02 00:56:01 $
  * ====================================================================
  *
  * This software is published under the BSD license  as listed below.
@@ -63,12 +63,13 @@ import javax.resource.cci.MappedRecord;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
+import org.w3c.cci2.ImmutableDatatype;
 
 /**
  * Java Connector Architecture:
  * A variable-size MappedRecord implementation. Only keys of type string and Integers in the range [-128..127] are supported.
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 class VariableSizeMappedRecord 
     extends AbstractMap
     implements MappedRecord, MultiLineStringRepresentation
@@ -408,13 +409,14 @@ class VariableSizeMappedRecord
         ) {
             Entry e = (Entry) i.next();
             Object key = e.getKey();
-            Object value = e.getValue();
-            if (value == null) {
-                if (!(that.get(key)==null && that.containsKey(key)))
-                    return false;
+            Object thisValue = e.getValue();
+            Object thatValue = that.get(key);
+			if (thisValue == null) {
+                if (!(thatValue==null && that.containsKey(key))) return false;
+            } else if (thatValue instanceof ImmutableDatatype<?>){
+                if (!thatValue.equals(thisValue)) return false;
             } else {
-                if (!value.equals(that.get(key)))
-                    return false;
+                if (!thisValue.equals(thatValue)) return false;
             }
         }
         return true;

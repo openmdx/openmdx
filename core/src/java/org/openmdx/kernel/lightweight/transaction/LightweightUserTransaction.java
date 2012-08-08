@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightUserTransaction.java,v 1.1 2009/09/07 15:00:30 hburger Exp $
+ * Name:        $Id: LightweightUserTransaction.java,v 1.2 2011/06/10 12:45:58 hburger Exp $
  * Description: Lightweight User Transaction
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 15:00:30 $
+ * Date:        $Date: 2011/06/10 12:45:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -60,6 +60,8 @@ import javax.transaction.UserTransaction;
 
 /**
  * User Transaction Implementation
+ * <p>
+ * The lightweight user transaction is a thread-safe proxy.
  */
 public class LightweightUserTransaction implements UserTransaction {
 
@@ -68,7 +70,7 @@ public class LightweightUserTransaction implements UserTransaction {
      * 
 	 * @param transactionManager 
 	 */
-	public LightweightUserTransaction(
+	private LightweightUserTransaction(
         TransactionManager transactionManager
     ){
         this.transactionManager = transactionManager;
@@ -78,6 +80,23 @@ public class LightweightUserTransaction implements UserTransaction {
      * The transaction manager to delegate to.
      */
     private final TransactionManager transactionManager;    
+
+    /**
+     * A lightweight user transaction instance may be shared
+     */
+    private static UserTransaction instance;
+    
+    /**
+     * A lightweight user transaction instance may be shared
+     *
+     * @return Returns a lightweight user transaction instance
+     */
+    public static UserTransaction getInstance() {
+        if(LightweightUserTransaction.instance == null) {
+            LightweightUserTransaction.instance = new LightweightUserTransaction(LightweightTransactionManager.getInstance());
+        }
+        return LightweightUserTransaction.instance;
+    }
 
     /* (non-Javadoc)
 	 * @see javax.transaction.UserTransaction#begin()

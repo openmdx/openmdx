@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataObjectManager_1.java,v 1.71 2010/11/30 14:11:42 hburger Exp $
+ * Name:        $Id: DataObjectManager_1.java,v 1.85 2012/01/07 03:04:48 hburger Exp $
  * Description: Data Object Manager
- * Revision:    $Revision: 1.71 $
+ * Revision:    $Revision: 1.85 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/30 14:11:42 $
+ * Date:        $Date: 2012/01/07 03:04:48 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2009, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,6 +52,7 @@ package org.openmdx.base.accessor.rest;
 
 import static org.openmdx.base.persistence.cci.Queries.ASPECT_QUERY;
 
+import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -67,9 +68,11 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.jdo.Constants;
 import javax.jdo.Extent;
 import javax.jdo.FetchGroup;
 import javax.jdo.FetchPlan;
+import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOException;
 import javax.jdo.JDOFatalInternalException;
 import javax.jdo.JDOFatalUserException;
@@ -103,7 +106,9 @@ import org.openmdx.base.collection.Registry;
 import org.openmdx.base.collection.Sets;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.marshalling.Marshaller;
+import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.mof.cci.Persistency;
 import org.openmdx.base.mof.spi.Model_1Factory;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.UserObjects;
@@ -111,12 +116,14 @@ import org.openmdx.base.persistence.spi.InstanceLifecycleListenerRegistry;
 import org.openmdx.base.persistence.spi.PersistenceCapableCollection;
 import org.openmdx.base.persistence.spi.PersistenceManagers;
 import org.openmdx.base.persistence.spi.SharedObjects;
+import org.openmdx.base.persistence.spi.SharedObjects.Aspects;
 import org.openmdx.base.persistence.spi.StandardFetchGroup;
 import org.openmdx.base.persistence.spi.StandardFetchPlan;
-import org.openmdx.base.persistence.spi.SharedObjects.Aspects;
+import org.openmdx.base.persistence.spi.TransientContainerId;
 import org.openmdx.base.query.Selector;
 import org.openmdx.base.resource.InteractionSpecs;
 import org.openmdx.base.rest.cci.RestConnectionSpec;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.exception.Throwables;
@@ -125,6 +132,7 @@ import org.openmdx.kernel.loading.Factory;
 /**
  * A Data Object Manager 1.x implementation
  */
+@SuppressWarnings("rawtypes")
 public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
 
     /**
@@ -280,11 +288,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     };
 
     /**
-     * Implements <code>Serializable</code>
-     */
-    private static final long serialVersionUID = 3977865059621680436L;
-
-    /**
      * Unit of work for a single-threaded data object manager
      */ 
     private UnitOfWork_1 unitOfWork;
@@ -394,10 +397,10 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         }
 
 //      @Override
-        public Object getPlugInObject(
-            Object key
+        public <T> T getPlugInObject(
+            Class<T> type
         ){
-            return DataObjectManager_1.this.getPlugInObject(key);
+            return DataObjectManager_1.this.getPlugInObject(type);
         }
 
 //      @Override
@@ -679,7 +682,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
             throw new JDOUserException(
                 "unable to delete object",
                 e,
-                this
+                pc
             );
         }
     }
@@ -687,7 +690,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#deletePersistentAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
     public void deletePersistentAll(Collection pcs) {
         PersistenceManagers.deletePersistentAll(this, pcs);
     }
@@ -695,7 +697,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#evictAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
     public void evictAll(Collection pcs) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -768,7 +769,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectIdClass(java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
     public Class getObjectIdClass(Class cls) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -776,7 +776,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
     public Collection getObjectsById(Collection oids) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -805,7 +804,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#evictAll(boolean, java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
     public void evictAll(boolean arg0, Class arg1) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -834,7 +832,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getFetchGroup(java.lang.Class, java.lang.String)
      */
-    @SuppressWarnings("unchecked")
     public FetchGroup getFetchGroup(Class type, String name) {
         FetchGroup fetchGroup;
         synchronized(this.fetchGroups) {
@@ -906,7 +903,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getManagedObjects(java.lang.Class[])
      */
-    @SuppressWarnings("unchecked")
     public Set getManagedObjects(Class... arg0) {
         throw new UnsupportedOperationException("Unsupported because all objects are instances of the DataObject_1_0");
     }
@@ -914,7 +910,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getManagedObjects(java.util.EnumSet, java.lang.Class[])
      */
-    @SuppressWarnings("unchecked")
     public Set getManagedObjects(EnumSet<ObjectState> arg0, Class... arg1) {
         throw new UnsupportedOperationException("Unsupported because all objects are instances of the DataObject_1_0");
     }
@@ -1005,7 +1000,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#addInstanceLifecycleListener(javax.jdo.listener.InstanceLifecycleListener, java.lang.Class[])
      */
-    @SuppressWarnings("unchecked")
     public void addInstanceLifecycleListener(
         InstanceLifecycleListener listener,
         Class... classes
@@ -1050,7 +1044,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#getObjectsById(java.util.Collection, boolean)
      */
-    @SuppressWarnings("unchecked")
     public Collection getObjectsById(Collection oids, boolean validate) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1139,36 +1132,64 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @see javax.jdo.PersistenceManager#getUserObject(java.lang.Object)
      */
     public Object getUserObject(Object key) {
-        return SharedObjects.isKey(key) ? this.sharedObjects : getPlugInObject(key);
+        return 
+        	SharedObjects.isKey(key) ? this.sharedObjects :
+        	key instanceof Class<?> ? getPlugInObject((Class<?>)key) :
+        	null;
     }
 
     /**
-     * Retrieve the plug-in provided user objects
+     * Retrieve the plug-in provided objects
      * 
-     * @param key the user object's key
+     * @param type the plug-in object's type
      * 
-     * @return the plug-in provided user object
+     * @return the plug-in provided object
      */
-    protected Object getPlugInObject(
-        Object key
+    protected <T> T getPlugInObject(
+        Class<T> type
     ){
-        if(key == ManagedConnectionCache_2_0.class || key == DataStoreCache_2_0.class) {
+        if(type == ManagedConnectionCache_2_0.class || type == DataStoreCache_2_0.class) {
             Object nativeConnection = this.jdoConnection.getNativeConnection();
             if(nativeConnection instanceof CacheAccessor_2_0) try {
                 CacheAccessor_2_0 cacheAccessor = (CacheAccessor_2_0)nativeConnection;
-                return key == ManagedConnectionCache_2_0.class ? cacheAccessor.getManagedConnectionCache() : cacheAccessor.getDataStoreCache();
+                return type.cast(type == ManagedConnectionCache_2_0.class ? cacheAccessor.getManagedConnectionCache() : cacheAccessor.getDataStoreCache());
             } catch (ServiceException exception) {
                 exception.log();
             }
         } else {
             for(PlugIn_1_0 plugIn : DataObjectManager_1.this.plugIns) {
-                Object userObject = plugIn.getUserObject(key);
+                T userObject = plugIn.getPlugInObject(type);
                 if(userObject != null) {
                     return userObject;
                 }
             }
         }
         return null;
+    }
+    
+    /**
+     * This method is invoked by the data object validator
+     * in order to determine whether the given feature is 
+     * exempt from the standard validation.
+     * 
+     * @param object the object to be validated 
+     * @param feature the feature's meta-data
+     * 
+     * @return <code>true</code> if the feature is exempt
+     * from the standard validation.
+     * 
+     * @throws ServiceException 
+     */
+    protected boolean isExemptFromValidation(
+        DataObject_1 object, 
+        ModelElement_1_0 feature
+    ) throws ServiceException {
+        for(PlugIn_1_0 plugIn : DataObjectManager_1.this.plugIns) {
+        	if(plugIn.isExemptFromValidation(object, feature)) {
+        		return true;
+        	}
+        }
+        return false;
     }
     
     /* (non-Javadoc)
@@ -1186,7 +1207,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
             throw new JDOUserException(
                 "Unable to make object non-transactional",
                 e,
-                this
+                pc
             );
         }
     }
@@ -1194,7 +1215,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeNontransactionalAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
     public void makeNontransactionalAll(Collection pcs) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1205,16 +1225,32 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     public void makeTransactional(
         Object pc
     ) {
-        try {
-            if(pc instanceof DataObject_1) {
-                ((DataObject_1)pc).objMakeTransactional();
-            }
-        }
-        catch(Exception e) {
-            throw new JDOUserException(
-                "Unable to make object non-transactional",
-                e,
-                this
+        if(pc instanceof DataObject_1) {
+        	DataObject_1 dataObject = (DataObject_1) pc;
+        	if(dataObject.jdoIsPersistent() || dataObject.jdoGetPersistenceManager().getPersistenceManagerFactory().getProperties().contains(Constants.OPTION_TRANSACTIONAL_TRANSIENT)) try {
+				((DataObject_1)pc).objMakeTransactional();
+			} catch (ServiceException e) {
+	            throw new JDOUserException(
+                    "Unable to make object transactional",
+                    e.getCause(),
+                    pc
+                );
+			} else throw new JDOUnsupportedOptionException(
+				Constants.OPTION_TRANSACTIONAL_TRANSIENT + " is not supported"
+			);
+        } else {
+            throw BasicException.initHolder(
+                new JDOUserException(
+            		"Unable to make object transactional",
+                    BasicException.newEmbeddedExceptionStack(
+                        null,
+                        BasicException.Code.DEFAULT_DOMAIN,
+                        BasicException.Code.BAD_PARAMETER,
+                        new BasicException.Parameter("expected", DataObject_1.class.getName()),
+                        new BasicException.Parameter("actual", pc == null ? null : pc.getClass().getName())
+                    ),
+                    pc
+                )
             );
         }
     }
@@ -1222,7 +1258,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransactionalAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
     public void makeTransactionalAll(Collection pcs) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1244,7 +1279,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
     public void makeTransientAll(Collection pcs) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1259,7 +1293,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#makeTransientAll(java.util.Collection, boolean)
      */
-    @SuppressWarnings("unchecked")
     public void makeTransientAll(Collection pcs, boolean useFetchPlan) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1267,7 +1300,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newNamedQuery(java.lang.Class, java.lang.String)
      */
-    @SuppressWarnings("unchecked")
     public Query newNamedQuery(Class cls, String queryName) {
         if(ASPECT_QUERY.equals(queryName)) {
             return new Aspect_1(this);
@@ -1287,7 +1319,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newObjectIdInstance(java.lang.Class, java.lang.Object)
      */
-    @SuppressWarnings("unchecked")
     public Object newObjectIdInstance(Class pcClass, Object key) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1316,7 +1347,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
     public Query newQuery(Class cls) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1324,7 +1354,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(javax.jdo.Extent)
      */
-    @SuppressWarnings("unchecked")
     public Query newQuery(Extent cln) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1339,7 +1368,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
     public Query newQuery(Class cls, Collection cln) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1347,7 +1375,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.lang.String)
      */
-    @SuppressWarnings("unchecked")
     public Query newQuery(Class cls, String filter) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1355,7 +1382,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(javax.jdo.Extent, java.lang.String)
      */
-    @SuppressWarnings("unchecked")
     public Query newQuery(Extent cln, String filter) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1363,7 +1389,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#newQuery(java.lang.Class, java.util.Collection, java.lang.String)
      */
-    @SuppressWarnings("unchecked")
     public Query newQuery(Class cls, Collection cln, String filter) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
@@ -1372,15 +1397,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      * @see javax.jdo.PersistenceManager#putUserObject(java.lang.Object, java.lang.Object)
      */
     public Object putUserObject(Object key, Object val) {
-        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
-    }
-
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getPersistenceManager(javax.resource.cci.InteractionSpec)
-     */
-    public PersistenceManager_1_0 getPersistenceManager(
-        InteractionSpec interactionSpec
-    ) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
@@ -1394,16 +1410,15 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
             DataObject_1 dataObject = (DataObject_1) pc;
             if(
                 dataObject.jdoIsPersistent() &&
-                dataObject.jdoIsDirty() &&
                 !dataObject.jdoIsNew() &&
                 !dataObject.jdoIsDeleted()
             ) try {
-                dataObject.unconditionalRefresh();
-            } catch(ServiceException e) {
+                dataObject.refreshUnconditionally();
+            } catch(ServiceException exception) {
                 throw new JDOUserException(
                     "Unable to refresh object",
-                    e,
-                    this
+                    exception,
+                    pc
                 );                
             }
         }
@@ -1422,7 +1437,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#refreshAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
     public void refreshAll(Collection pcs) {
         if(pcs instanceof PersistenceCapableCollection) {
             ((PersistenceCapableCollection)pcs).openmdxjdoRefresh();
@@ -1468,7 +1482,9 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         if(pc instanceof DataObject_1) try {
             ((DataObject_1)pc).objRetrieve(
                 false, // reload
-                useFetchPlan ? this.getFetchPlan() : null
+                useFetchPlan ? this.getFetchPlan() : null, 
+                null, // features
+                false // beforeImage
             );
         } catch (ServiceException exception) {
             throw new JDOUserException(
@@ -1487,7 +1503,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(java.util.Collection)
      */
-    @SuppressWarnings("unchecked")
     public void retrieveAll(Collection pcs) {
         retrieveAll(pcs, false);
     }
@@ -1495,7 +1510,6 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     /* (non-Javadoc)
      * @see javax.jdo.PersistenceManager#retrieveAll(java.util.Collection, boolean)
      */
-    @SuppressWarnings("unchecked")
     public void retrieveAll(Collection pcs, boolean useFetchPlan) {
         if(pcs instanceof PersistenceCapableCollection) {
             ((PersistenceCapableCollection)pcs).openmdxjdoRetrieve(
@@ -1559,14 +1573,48 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
     }
 
+    //------------------------------------------------------------------------
+    // Implements PersistenceManager_1_0
+    //------------------------------------------------------------------------
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#lock(java.security.PrivilegedExceptionAction)
+     */
+//  @Override
+    public <T> T lock(PrivilegedExceptionAction<T> action) {
+        throw new UnsupportedOperationException();
+    }
+        
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getPersistenceManager(javax.resource.cci.InteractionSpec)
+     */
+    public PersistenceManager_1_0 getPersistenceManager(
+        InteractionSpec interactionSpec
+    ) {
+        throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+    }
+
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#getFeatureReplacingObjectById(java.lang.Object, java.lang.String)
      */
+//  @Override
     public Object getFeatureReplacingObjectById(
         UUID objectId,
         String featureName
     ) {
         throw new UnsupportedOperationException("Operation not supported by dataprovider connection");
+    }
+
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.spi.PersistenceManager_1_0#isLoaded(java.util.UUID, java.lang.String)
+     */
+//  @Override
+    public boolean isLoaded(UUID transientObjectId, String fieldName) {
+        try {
+            return this.getObjectById(transientObjectId).objDefaultFetchGroup().contains(fieldName);
+        } catch (ServiceException exception) {
+            throw new JDODataStoreException("Unable to determine a field's state", exception.getCause());
+        }
     }
 
     
@@ -1636,8 +1684,8 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
                         int i = id.size();
                         i > 6;
                     ){
-                        id.remove(--i);
-                        id.remove(--i);
+                    	i -= 2;
+                    	id = id.getPrefix(i);
                         DataObject_1_0 anchestor = this.persistentRegistry.get(id);
                         if(
                             anchestor != null &&
@@ -1662,14 +1710,14 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
                         null, // objectClass
                         false // untouchable
                     );
-                    DataObject_1 newObject = validate ? object.objRetrieve(false, this.getFetchPlan()) : object;
+                    DataObject_1 newObject = validate ? object.objRetrieve(false, this.getFetchPlan(), null, false) : object;
                     if(object == newObject) {
                         object = this.persistentRegistry.putUnlessPresent(xri, object); 
                     } else {
                         this.persistentRegistry.put(xri, object = newObject);
                     }
                 } else if(validate) {
-                    object.objRetrieve(false, this.getFetchPlan());
+                    object.objRetrieve(false, this.getFetchPlan(), null, false);
                 }
                 return object;
             } catch(ServiceException exception) {
@@ -1737,11 +1785,17 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
      */
     public DataObject_1_0 receive(MappedRecord record) {
         try {
-            Object_2Facade facade = Object_2Facade.newInstance(record);
+            Object_2Facade facade = Facades.asObject(record);
             DataObject_1 dataObject = getObjectById(facade.getPath(), false);
             dataObject.postLoad(record);
             return dataObject;
-        } catch (Exception exception) {
+        } catch (ServiceException exception) {
+            //
+            // TODO add exception to resource warnings
+            //
+            Throwables.log(exception); 
+            return null;
+        } catch (RuntimeException exception) {
             //
             // TODO add exception to resource warnings
             //
@@ -1845,7 +1899,7 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
             // Unmarshal of aspects is aspect-type specific. Only handle when
             // object is in state new.
             if(object.jdoIsNew()) {
-                if(getModel().isInstanceof(object, "org:openmdx:state2:BasicState")) {
+                if(getModel().isInstanceof(object, "org:openmdx:base:Aspect")) {
                     DataObject_1_0 core = (DataObject_1_0) object.objGetValue("core");
                     if(core != null) {
                         Path corePath = core.jdoGetObjectId(); 
@@ -1860,17 +1914,48 @@ public class DataObjectManager_1 implements Marshaller, DataObjectManager_1_0 {
     }
 
 
+    /**
+     * Retrieve the object's last segment XRI segment
+     * 
+     * @param the persistence capable object
+     * 
+     * @return the last segment of the actual or future XRI; or <code>null</code> if the object is not contained yet
+     */
+    public String getLastXRISegment(Object pc) {
+    	return pc instanceof DataObject_1 ? 
+    		((DataObject_1)pc).getQualifier() : 
+    		null;
+	}
+
+    /**
+     * Retrieve the transient id of the object's container 
+     * 
+     * @param pc the persistent capable object
+     * 
+     * @return the transient id of the object's container 
+     */
+	public TransientContainerId getContainerId(Object pc) {
+		if(pc instanceof DataObject_1) {
+			Container_1 container = ((DataObject_1)pc).getContainer(false);
+			if(container != null){
+				return container.jdoGetTransactionalObjectId();
+			}
+		}
+		return null;
+	}
+
+	
     //------------------------------------------------------------------------
     // Class AspectObjectDispatcher
     //------------------------------------------------------------------------
 
-    /**
+	/**
      * Aspect Object Dispatcher
      */
     class AspectObjectDispatcher implements SharedObjects.Aspects {
 
         /**
-         * Retrueve the object's state
+         * Retrieve the object's state
          * 
          * @param transactionalObjectId
          * @param optional

@@ -1,17 +1,17 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: QueryMapper.java,v 1.4 2010/05/26 15:36:02 hburger Exp $
+ * Name:        $Id: QueryMapper.java,v 1.7 2011/07/08 13:20:51 wfro Exp $
  * Description: JMI Query Mapper
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/05/26 15:36:02 $
+ * Date:        $Date: 2011/07/08 13:20:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
  * as listed below.
  * 
- * Copyright (c) 2006, OMEX AG, Switzerland
+ * Copyright (c) 2006-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -63,12 +63,11 @@ import org.openmdx.application.mof.mapping.cci.StructuralFeatureDef;
 import org.openmdx.application.mof.mapping.spi.MapperUtils;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 
 /**
  * JMI Query Mapper
  */
-@SuppressWarnings("unchecked")
 public class QueryMapper
     extends AbstractMapper {
 
@@ -111,7 +110,7 @@ public class QueryMapper
             featureDef instanceof ReferenceDef &&
             ((ReferenceDef)featureDef).getQualifiedQualifierTypeName() != null;
         if(
-            Multiplicities.SINGLE_VALUE.equals(featureDef.getMultiplicity()) &&
+            Multiplicity.SINGLE_VALUE.toString().equals(featureDef.getMultiplicity()) &&
             !qualifiedReference
         ) {
             //
@@ -133,7 +132,7 @@ public class QueryMapper
             // optional or multi-valued feature
             //
             if(
-                Multiplicities.OPTIONAL_VALUE.equals(featureDef.getMultiplicity()) &&
+                Multiplicity.OPTIONAL.toString().equals(featureDef.getMultiplicity()) &&
                 !qualifiedReference
              ) {
                 //
@@ -175,7 +174,7 @@ public class QueryMapper
             //
             this.pw.println("  /**");
             if (
-                Multiplicities.OPTIONAL_VALUE.equals(featureDef.getMultiplicity())
+                Multiplicity.OPTIONAL.toString().equals(featureDef.getMultiplicity())
             ) {
                 this.pw.println(
                     MapperUtils.wrapText(
@@ -218,7 +217,7 @@ public class QueryMapper
             //
             this.pw.println("  /**");
             if (
-                Multiplicities.OPTIONAL_VALUE.equals(featureDef.getMultiplicity())
+                Multiplicity.OPTIONAL.toString().equals(featureDef.getMultiplicity())
             ) {
                 this.pw.println(
                     MapperUtils.wrapText(
@@ -327,7 +326,7 @@ public class QueryMapper
         } else {
             String prefix = "";
             for (
-                Iterator i = classifierDef.getSupertypes().iterator(); 
+                Iterator<?> i = classifierDef.getSupertypes().iterator(); 
                 i.hasNext(); 
                 prefix = ",\n    "
             ) {

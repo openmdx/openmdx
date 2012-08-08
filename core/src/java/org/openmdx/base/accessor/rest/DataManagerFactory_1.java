@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: DataManagerFactory_1.java,v 1.25 2010/12/22 00:14:00 hburger Exp $
+ * Name:        $Id: DataManagerFactory_1.java,v 1.28 2011/12/08 11:27:10 hburger Exp $
  * Description: Data Object Manager Factory
- * Revision:    $Revision: 1.25 $
+ * Revision:    $Revision: 1.28 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/12/22 00:14:00 $
+ * Date:        $Date: 2011/12/08 11:27:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -67,6 +67,7 @@ import javax.jdo.JDODataStoreException;
 import javax.jdo.JDOFatalDataStoreException;
 import javax.jdo.PersistenceManagerFactory;
 import javax.resource.ResourceException;
+import javax.resource.cci.Connection;
 import javax.resource.cci.ConnectionFactory;
 
 import org.openmdx.application.configuration.Configuration;
@@ -76,7 +77,7 @@ import org.openmdx.base.accessor.rest.spi.BasicCache_2;
 import org.openmdx.base.accessor.rest.spi.DataStoreCache_2_0;
 import org.openmdx.base.accessor.rest.spi.PinningCache_2;
 import org.openmdx.base.accessor.rest.spi.Switch_2;
-import org.openmdx.base.aop0.PlugIn_1;
+import org.openmdx.base.aop0.UpdateAvoidance_1;
 import org.openmdx.base.aop0.PlugIn_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.persistence.cci.ConfigurableProperty;
@@ -246,7 +247,7 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
      * 
      */
     private static final PlugIn_1_0[] DEFAULT_PLUG_INS = {
-        new PlugIn_1()
+        new UpdateAvoidance_1()
     };
     
     /**
@@ -293,8 +294,8 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
      * 
      * @return a new <code>PersistenceManagerFactory</code>
      */
-    @SuppressWarnings("unchecked")
-    public static PersistenceManagerFactory getPersistenceManagerFactory (
+    @SuppressWarnings("rawtypes")
+	public static PersistenceManagerFactory getPersistenceManagerFactory (
         Map props
     ){
         return getPersistenceManagerFactory(
@@ -313,7 +314,7 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
      * 
      * @return a new <code>PersistenceManagerFactory</code>
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static PersistenceManagerFactory getPersistenceManagerFactory (
         Map overrides, 
         Map props
@@ -355,6 +356,33 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
         return ((String)name).split("\\.");
     }
     
+    /**
+     * Retrieve the connection for non-transactional read operations
+     * 
+     * @param connectionSpec
+     * 
+     * @return a connection for non-transactional read operations or <code>null</code>
+     * 
+     * @throws ResourceException
+     */
+    private Connection getConnection2(
+    	RestConnectionSpec connectionSpec
+    ) throws ResourceException{
+    	if(
+    		this.connectionFactory2 != null && (
+    			getOptimistic() || (
+    				!getContainerManaged() && (
+    					this.getNontransactionalRead() || this.getNontransactionalWrite()
+    				)
+    			)
+    		)
+    	) {
+    		return this.connectionFactory2.getConnection(connectionSpec);
+    	} else {
+    		return null;
+    	}
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.base.accessor.spi.AbstractPersistenceManagerFactory_1#newPersistenceManager(java.lang.String, java.lang.String)
      */
@@ -373,7 +401,7 @@ public class DataManagerFactory_1 extends AbstractPersistenceManagerFactory<Data
                 false,
                 userid == null ? null : PersistenceManagers.toPrincipalChain(userid),
                 this.connectionFactory.getConnection(connectionSpec),
-                getOptimistic() && this.connectionFactory2 != null ? this.connectionFactory2.getConnection(connectionSpec) : null,
+                getConnection2(connectionSpec),
                 this.plugIns, 
                 this.optimalFetchSize, 
                 this.cacheThreshold, 

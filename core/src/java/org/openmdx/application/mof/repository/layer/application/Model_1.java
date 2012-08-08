@@ -1,17 +1,16 @@
 /*
  * ====================================================================
- * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: Model_1.java,v 1.27 2010/06/02 13:42:46 hburger Exp $
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: Model_1.java,v 1.32 2012/01/05 23:20:20 hburger Exp $
  * Description: model1 application plugin
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.32 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:42:46 $
+ * Date:        $Date: 2012/01/05 23:20:20 $
  * ====================================================================
  *
- * This software is published under the BSD license
- * as listed below.
+ * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -19,16 +18,16 @@
  * conditions are met:
  * 
  * * Redistributions of source code must retain the above copyright
- * notice, this list of conditions and the following disclaimer.
+ *   notice, this list of conditions and the following disclaimer.
  * 
  * * Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in
- * the documentation and/or other materials provided with the
- * distribution.
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
  * 
  * * Neither the name of the openMDX team nor the names of its
- * contributors may be used to endorse or promote products derived
- * from this software without specific prior written permission.
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
  * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
  * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
@@ -46,12 +45,8 @@
  * 
  * ------------------
  * 
- * This product includes software developed by the Apache Software
- * Foundation (http://www.apache.org/).
- */
-
-/**
- * @author wfro
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
  */
 package org.openmdx.application.mof.repository.layer.application;
 
@@ -102,17 +97,22 @@ import org.openmdx.base.query.SortOrder;
 import org.openmdx.base.resource.Records;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
 import org.openmdx.base.rest.cci.MessageRecord;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
 
 //---------------------------------------------------------------------------
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class Model_1 extends Layer_1 {
 
+    /**
+     * Constructor 
+     */
     public Model_1(
     ) {
+        super();
     }
     
     // --------------------------------------------------------------------------
@@ -207,13 +207,7 @@ public class Model_1 extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord element = i.next();
-            Object_2Facade elementFacade;
-            try {
-                elementFacade = Object_2Facade.newInstance(element);
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            Object_2Facade elementFacade = Facades.asObject(element);
             // collect classifier
             if(elementFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
                 classifiers.put(
@@ -234,13 +228,7 @@ public class Model_1 extends Layer_1 {
             i.hasNext();
         ) { 
             MappedRecord classifier = i.next();
-            Object_2Facade classifierFacade;
-            try {
-                classifierFacade = Object_2Facade.newInstance(classifier);
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }            
+            Object_2Facade classifierFacade = Facades.asObject(classifier);
             if(classifierFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
                 classifierFacade.attributeValuesAsList("allSupertype").clear();
                 classifierFacade.attributeValuesAsList("allSupertype").addAll(
@@ -263,13 +251,7 @@ public class Model_1 extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord classifier = i.next();
-            Object_2Facade classifierFacade;
-            try {
-                classifierFacade = Object_2Facade.newInstance(classifier);
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }                        
+            Object_2Facade classifierFacade = Facades.asObject(classifier);
             if(classifierFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {
                 classifierFacade.attributeValuesAsList("allSubtype").clear();
                 classifierFacade.attributeValuesAsList("allSubtype").addAll(
@@ -292,13 +274,7 @@ public class Model_1 extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord classifier = i.next();
-            Object_2Facade classifierFacade;
-            try {
-                classifierFacade = Object_2Facade.newInstance(classifier);
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }                                    
+            Object_2Facade classifierFacade = Facades.asObject(classifier);
             if(classifierFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.CLASSIFIER)) {      
                 classifierFacade.attributeValuesAsList("feature").clear();
                 classifierFacade.attributeValuesAsList("feature").addAll(
@@ -378,32 +354,27 @@ public class Model_1 extends Layer_1 {
         Map<Path,MappedRecord> elements
     ) throws ServiceException {
         Set<Path> allSupertype = new TreeSet<Path>();
-        try {
-            for(
-                Iterator i = Object_2Facade.newInstance(classifier).attributeValuesAsList("supertype").iterator();
-                i.hasNext();
-            ) {
-                Path supertypePath = (Path)i.next();
-                MappedRecord supertype = elements.get(supertypePath);
-                if(supertype == null) {
-                    throw new ServiceException(
-                        BasicException.Code.DEFAULT_DOMAIN,
-                        BasicException.Code.ASSERTION_FAILURE, 
-                        "type not found in set of loaded models (HINT: probably not configured as 'modelPackage')",
-                        new BasicException.Parameter("classifier", Object_2Facade.getPath(classifier)),
-                        new BasicException.Parameter("supertype", supertypePath)
-                    );
-                }
-                allSupertype.addAll(
-                    this.getAllSupertype(
-                        supertype,
-                        elements
-                    )
+        for(
+            Iterator i = Facades.asObject(classifier).attributeValuesAsList("supertype").iterator();
+            i.hasNext();
+        ) {
+            Path supertypePath = (Path)i.next();
+            MappedRecord supertype = elements.get(supertypePath);
+            if(supertype == null) {
+                throw new ServiceException(
+                    BasicException.Code.DEFAULT_DOMAIN,
+                    BasicException.Code.ASSERTION_FAILURE, 
+                    "type not found in set of loaded models (HINT: probably not configured as 'modelPackage')",
+                    new BasicException.Parameter("classifier", Object_2Facade.getPath(classifier)),
+                    new BasicException.Parameter("supertype", supertypePath)
                 );
             }
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
+            allSupertype.addAll(
+                this.getAllSupertype(
+                    supertype,
+                    elements
+                )
+            );
         }
         allSupertype.add(
             Object_2Facade.getPath(classifier)
@@ -424,12 +395,7 @@ public class Model_1 extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord classifier = i.next();
-            try {
-                Object_2Facade.newInstance(classifier).attributeValuesAsList("subtype").clear();
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            Facades.asObject(classifier).attributeValuesAsList("subtype").clear();
         }
         // recalc subtype
         for(
@@ -437,36 +403,25 @@ public class Model_1 extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord classifier = i.next();
-            Object_2Facade classifierFacade;
-            try {
-                classifierFacade = Object_2Facade.newInstance(classifier);
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
-            try {
-                for(
-                    Iterator j = Object_2Facade.newInstance(classifier).attributeValuesAsList("supertype").iterator();
-                    j.hasNext();
-                ) {
-                    Object next = j.next();
-                    MappedRecord supertype = classifiers.get(next);
-                    if(supertype == null) {
-                        SysLog.error("supertype " + next + " of classifier " + Object_2Facade.getPath(classifier) + " not found in repository");
-                    }
-                    else {
-                        Object_2Facade superTypeFacade = Object_2Facade.newInstance(supertype);
-                        if(!superTypeFacade.attributeValuesAsList("subtype").contains(classifierFacade.getPath())) {
-                            superTypeFacade.attributeValuesAsList("subtype").add(
-                                classifierFacade.getPath()
-                            );
-                        }
-                    }
-                }
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            Object_2Facade classifierFacade = Facades.asObject(classifier);
+            for(
+			    Iterator j = Facades.asObject(classifier).attributeValuesAsList("supertype").iterator();
+			    j.hasNext();
+			) {
+			    Object next = j.next();
+			    MappedRecord supertype = classifiers.get(next);
+			    if(supertype == null) {
+			        SysLog.error("supertype " + next + " of classifier " + Object_2Facade.getPath(classifier) + " not found in repository");
+			    }
+			    else {
+			        Object_2Facade superTypeFacade = Facades.asObject(supertype);
+			        if(!superTypeFacade.attributeValuesAsList("subtype").contains(classifierFacade.getPath())) {
+			            superTypeFacade.attributeValuesAsList("subtype").add(
+			                classifierFacade.getPath()
+			            );
+			        }
+			    }
+			}
             if(!classifierFacade.attributeValuesAsList("subtype").contains(classifierFacade.getPath())) {
                 classifierFacade.attributeValuesAsList("subtype").add(
                     classifierFacade.getPath()
@@ -488,12 +443,7 @@ public class Model_1 extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord element = i.next();
-            try {
-                Object_2Facade.newInstance(element).attributeValuesAsList("content");
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            Facades.asObject(element).attributeValuesAsList("content");
         }
         // recalc content
         for(
@@ -501,13 +451,7 @@ public class Model_1 extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord content = i.next();
-            Object_2Facade contentFacade;
-            try {
-                contentFacade = Object_2Facade.newInstance(content);
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            Object_2Facade contentFacade = Facades.asObject(content);
             if(contentFacade.getAttributeValues("container") != null) {
                 MappedRecord container = elements.get(
                     contentFacade.attributeValue("container")
@@ -516,13 +460,7 @@ public class Model_1 extends Layer_1 {
                     SysLog.error("container " + contentFacade.attributeValue("container") + " of element " + contentFacade.getPath() + " not found in repository");
                 }
                 else { 
-                    Object_2Facade containerFacade;
-                    try {
-                        containerFacade = Object_2Facade.newInstance(container);
-                    } 
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
+                    Object_2Facade containerFacade = Facades.asObject(container);
                     if(!containerFacade.attributeValuesAsList("content").contains(contentFacade.getPath())) {
                         containerFacade.attributeValuesAsList("content").add(
                             contentFacade.getPath()
@@ -539,13 +477,7 @@ public class Model_1 extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord container = i.next();
-            Object_2Facade containerFacade;
-            try {
-                containerFacade = Object_2Facade.newInstance(container);
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            Object_2Facade containerFacade = Facades.asObject(container);
             if(containerFacade.getAttributeValues("content") != null) {
                 Set content = new TreeSet(
                     containerFacade.attributeValuesAsList("content")
@@ -571,27 +503,22 @@ public class Model_1 extends Layer_1 {
         Map<Path,MappedRecord> elements
     ) throws ServiceException {
         Set<Path> features = new TreeSet<Path>();    
-        try {
+        for(
+            Iterator i = Facades.asObject(classifier).attributeValuesAsList("allSupertype").iterator();
+            i.hasNext();
+        ) {
+            MappedRecord supertype = elements.get(i.next());
             for(
-                Iterator i = Object_2Facade.newInstance(classifier).attributeValuesAsList("allSupertype").iterator();
-                i.hasNext();
+                Iterator j = Facades.asObject(supertype).attributeValuesAsList("content").iterator();
+                j.hasNext();
             ) {
-                MappedRecord supertype = elements.get(i.next());
-                for(
-                    Iterator j = Object_2Facade.newInstance(supertype).attributeValuesAsList("content").iterator();
-                    j.hasNext();
-                ) {
-                    MappedRecord feature = elements.get(j.next());
-                    if(Object_2Facade.newInstance(feature).attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.FEATURE)) {
-                        features.add(
-                            Object_2Facade.getPath(feature)
-                        );
-                    }
+                MappedRecord feature = elements.get(j.next());
+                if(Facades.asObject(feature).attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.FEATURE)) {
+                    features.add(
+                        Object_2Facade.getPath(feature)
+                    );
                 }
             }
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
         }
         return features;
     }
@@ -606,25 +533,20 @@ public class Model_1 extends Layer_1 {
         Map<Path,MappedRecord> elements
     ) throws ServiceException {
         Set<Path> allSubtypes = new TreeSet<Path>();
-        try {
-            for(
-                Iterator i = Object_2Facade.newInstance(classifier).attributeValuesAsList("subtype").iterator();
-                i.hasNext();
-            ) {
-                MappedRecord subtype = elements.get(i.next());
-                // classifier is member of its subtypes
-                if(subtype != classifier) {
-                    allSubtypes.addAll(
-                        this.getAllSubtype(
-                            subtype,
-                            elements
-                        )
-                    );
-                }
+        for(
+            Iterator i = Facades.asObject(classifier).attributeValuesAsList("subtype").iterator();
+            i.hasNext();
+        ) {
+            MappedRecord subtype = elements.get(i.next());
+            // classifier is member of its subtypes
+            if(subtype != classifier) {
+                allSubtypes.addAll(
+                    this.getAllSubtype(
+                        subtype,
+                        elements
+                    )
+                );
             }
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
         }
         allSubtypes.add(
             Object_2Facade.getPath(classifier)
@@ -646,13 +568,7 @@ public class Model_1 extends Layer_1 {
             i.hasNext();
         ) {
             MappedRecord reference = i.next();
-            Object_2Facade referenceFacade;
-            try {
-                referenceFacade = Object_2Facade.newInstance(reference);
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            Object_2Facade referenceFacade = Facades.asObject(reference);
             if(referenceFacade.attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(ModelAttributes.REFERENCE)) {
                 MappedRecord type = classifiers.get(
                     referenceFacade.attributeValue("type")
@@ -661,13 +577,7 @@ public class Model_1 extends Layer_1 {
                     SysLog.error("type " + referenceFacade.attributeValue("type") + " of reference " + referenceFacade.getPath() + " is not found in repository");
                 }
                 else {
-                    Object_2Facade typeFacade;
-                    try {
-                        typeFacade = Object_2Facade.newInstance(type);
-                    } 
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
+                    Object_2Facade typeFacade = Facades.asObject(type);
                     MappedRecord referencedEnd = elements.get(
                         referenceFacade.attributeValue("referencedEnd")
                     );
@@ -675,13 +585,7 @@ public class Model_1 extends Layer_1 {
                         SysLog.error("association end " + referenceFacade.attributeValue("referencedEnd") + " of reference " + referenceFacade.getPath() + " is not found in repository");
                     }
                     else {
-                        Object_2Facade referencedEndFacade;
-                        try {
-                            referencedEndFacade = Object_2Facade.newInstance(referencedEnd);
-                        } 
-                        catch (ResourceException e) {
-                            throw new ServiceException(e);
-                        }
+                        Object_2Facade referencedEndFacade = Facades.asObject(referencedEnd);
                         if(AggregationKind.COMPOSITE.equals(referencedEndFacade.attributeValue("aggregation"))) {
                             typeFacade.attributeValuesAsList("compositeReference").clear();
                             typeFacade.attributeValuesAsList("compositeReference").add(
@@ -693,16 +597,11 @@ public class Model_1 extends Layer_1 {
                                 j.hasNext();
                             ) {
                                 MappedRecord subtype = classifiers.get(j.next());
-                                try {
-                                    Object_2Facade subtypeFacade = Object_2Facade.newInstance(subtype);
-                                    subtypeFacade.attributeValuesAsList("compositeReference").clear();
-                                    subtypeFacade.attributeValuesAsList("compositeReference").add(
-                                        referenceFacade.getPath()
-                                    );
-                                } 
-                                catch (ResourceException e) {
-                                    throw new ServiceException(e);
-                                }
+                                Object_2Facade subtypeFacade = Facades.asObject(subtype);
+								subtypeFacade.attributeValuesAsList("compositeReference").clear();
+								subtypeFacade.attributeValuesAsList("compositeReference").add(
+								    referenceFacade.getPath()
+								);
                             }
                         }
                     }
@@ -718,13 +617,7 @@ public class Model_1 extends Layer_1 {
     MappedRecord completeNames(
         MappedRecord object
     ) throws ServiceException {
-        Object_2Facade facade;
-        try {
-            facade = Object_2Facade.newInstance(object);
-        } 
-        catch (ResourceException e) {
-            throw new ServiceException(e);
-        }
+        Object_2Facade facade = Facades.asObject(object);
         // qualifiedName = last path component
         // name = last component of qualifiedName
         String qualifiedName = facade.getPath().getBase();
@@ -741,7 +634,13 @@ public class Model_1 extends Layer_1 {
     // --------------------------------------------------------------------------
     public class LayerInteraction extends Layer_1.LayerInteraction {
         
-        public LayerInteraction(
+        /**
+         * Constructor 
+         *
+         * @param connection
+         * @throws ResourceException
+         */
+        protected LayerInteraction(
             Connection connection
         ) throws ResourceException {
             super(connection);
@@ -758,12 +657,7 @@ public class Model_1 extends Layer_1 {
         ) throws ServiceException {
     
             Object_2Facade facade;
-            try {
-                facade = Object_2Facade.newInstance(object);
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            facade = Facades.asObject(object);
             
             // INSTANCEOF
             List allSupertype = ModelUtils.getallSupertype(facade.getObjectClass());
@@ -785,33 +679,23 @@ public class Model_1 extends Layer_1 {
                     )
                 ) {
                     MappedRecord referencedEnd;
-                    try {
-                        DataproviderRequest getRequest = new DataproviderRequest(
-                            Query_2Facade.newInstance((Path)facade.attributeValue("referencedEnd")).getDelegate(),
-                            DataproviderOperations.OBJECT_RETRIEVAL,
-                            AttributeSelectors.ALL_ATTRIBUTES,
-                            null
-                        );
-                        DataproviderReply getReply = this.newDataproviderReply();
-                        super.get(
-                            getRequest.getInteractionSpec(), 
-                            Query_2Facade.newInstance(getRequest.object()), 
-                            getReply.getResult()
-                        );
-                        referencedEnd = getReply.getObject();
-                    } 
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
-                    try {
-                        facade.attributeValuesAsList("referencedEndIsNavigable").clear();
-                        facade.attributeValuesAsList("referencedEndIsNavigable").addAll(
-                            Object_2Facade.newInstance(referencedEnd).attributeValuesAsList("isNavigable")
-                        );
-                    } 
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
+                    DataproviderRequest getRequest = new DataproviderRequest(
+						Facades.newQuery((Path)facade.attributeValue("referencedEnd")).getDelegate(),
+					    DataproviderOperations.OBJECT_RETRIEVAL,
+					    AttributeSelectors.ALL_ATTRIBUTES,
+					    null
+					);
+					DataproviderReply getReply = this.newDataproviderReply();
+					super.get(
+					    getRequest.getInteractionSpec(), 
+					    Facades.asQuery(getRequest.object()), 
+					    getReply.getResult()
+					);
+					referencedEnd = getReply.getObject();
+                    facade.attributeValuesAsList("referencedEndIsNavigable").clear();
+					facade.attributeValuesAsList("referencedEndIsNavigable").addAll(
+							Facades.asObject(referencedEnd).attributeValuesAsList("isNavigable")
+					);
                 }
                 // Operation.parameter
                 if(
@@ -881,38 +765,26 @@ public class Model_1 extends Layer_1 {
             Path accessPath = new Path(request.path().toString());
             // get ModelElement by 'content' reference
             if("content".equals(Model_1.this.getReferenceName(request))) {
-                // rewrite to .../element/<id> path
-                try {
-                    Object_2Facade.newInstance(request.object()).setPath(
-                        accessPath.getPrefix(accessPath.size()-3).getChild(accessPath.getBase())
-                    );
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
+                Facades.asObject(request.object()).setPath(
+				    accessPath.getPrefix(accessPath.size()-3).getChild(accessPath.getBase())
+				);
                 super.get(
                     ispec,
                     input,
                     output
                 );
-                // test whether container is correct
-                try {
-                    if(
-                        !((Path)Object_2Facade.newInstance(reply.getObject()).attributeValue("container")).equals(
-                            accessPath.getPrefix(accessPath.size()-2)
-                        )
-                    ) {
-                        throw new ServiceException(
-                            BasicException.Code.DEFAULT_DOMAIN,
-                            BasicException.Code.NOT_FOUND, 
-                            "no such member",
-                            new BasicException.Parameter("path", accessPath)
-                        );
-                    }
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
+                if(
+				    !((Path)Facades.asObject(reply.getObject()).attributeValue("container")).equals(
+				        accessPath.getPrefix(accessPath.size()-2)
+				    )
+				) {
+				    throw new ServiceException(
+				        BasicException.Code.DEFAULT_DOMAIN,
+				        BasicException.Code.NOT_FOUND, 
+				        "no such member",
+				        new BasicException.Parameter("path", accessPath)
+				    );
+				}
             }
             // non-derived access
             else {
@@ -928,14 +800,9 @@ public class Model_1 extends Layer_1 {
                 request,
                 reply
             );
-            try {
-                Object_2Facade.newInstance(reply.getObject()).setPath(
-                    accessPath
-                );
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            Facades.asObject(reply.getObject()).setPath(
+			    accessPath
+			);
             return true;
         }
     
@@ -964,25 +831,20 @@ public class Model_1 extends Layer_1 {
             }
             // namespaceContent
             else if("namespaceContent".equals(getReferenceName(request))) {
-                try {
-                    reply.getResult().addAll(
-                        new ArrayList(
-                            Model_1.this.getNamespaceContent(
-                                header,
-                                Object_2Facade.newInstance(Object_2Facade.getPath(request.object()).getParent()).getDelegate()
-                            )
-                        )
-                    );
-                    this.completeReply(
-                        header,
-                        request,
-                        reply
-                    );
-                    return true;
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
+                reply.getResult().addAll(
+				    new ArrayList(
+				        Model_1.this.getNamespaceContent(
+				            header,
+				            Facades.newObject(Object_2Facade.getPath(request.object()).getParent()).getDelegate()
+				        )
+				    )
+				);
+				this.completeReply(
+				    header,
+				    request,
+				    reply
+				);
+				return true;
             }
             // non-derived references
             else {
@@ -1063,27 +925,16 @@ public class Model_1 extends Layer_1 {
             Path target = input.getTarget();
             String operationName = target.getBase();
             Object_2Facade paramsFacade;
-            try {
-                paramsFacade = Object_2Facade.newInstance();
-                paramsFacade.setPath(input.getPath());
-                paramsFacade.setValue(input.getBody());
-            } 
-            catch (ResourceException e) {
-                throw new ServiceException(e);
-            }
+            paramsFacade = Facades.newObject(input.getPath());
+			paramsFacade.setValue(input.getBody());
             if("lookupElement".equals(operationName)) {
                 // get content  
                 // search elements with matching name
                 List<MappedRecord> contents;
-                try {
-                    contents = Model_1.this.getNamespaceContent(
-                        header,
-                        Object_2Facade.newInstance(input.getPath().getPrefix(input.getPath().size()-2)).getDelegate()
-                    );
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }  
+                contents = Model_1.this.getNamespaceContent(
+				    header,
+				    Facades.newObject(input.getPath().getPrefix(input.getPath().size()-2)).getDelegate()
+				);  
                 for(
                     Iterator<MappedRecord> i = contents.iterator();
                     i.hasNext();
@@ -1092,15 +943,10 @@ public class Model_1 extends Layer_1 {
                     Model_1.this.completeNames(
                         content
                     );
-                    try {
-                        if(Object_2Facade.newInstance(content).attributeValue("name").equals(paramsFacade.attributeValue("name"))) {
-                            paramsFacade.attributeValuesAsList("result").add(Object_2Facade.getPath(content));
-                            break;
-                        }
-                    } 
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
+                    if(Facades.asObject(content).attributeValue("name").equals(paramsFacade.attributeValue("name"))) {
+					    paramsFacade.attributeValuesAsList("result").add(Object_2Facade.getPath(content));
+					    break;
+					}
                 }
                 if(!paramsFacade.getValue().keySet().contains("result")) {
                     throw new ServiceException(
@@ -1119,15 +965,10 @@ public class Model_1 extends Layer_1 {
                 // get content  
                 // search elements with matching qualifiedName
                 List contents;
-                try {
-                    contents = Model_1.this.getNamespaceContent(
-                        header,
-                        Object_2Facade.newInstance(input.getPath().getPrefix(input.getPath().size()-2)).getDelegate()
-                    );
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }  
+                contents = Model_1.this.getNamespaceContent(
+				    header,
+				    Facades.newObject(input.getPath().getPrefix(input.getPath().size()-2)).getDelegate()
+				);  
                 for(
                     Iterator<MappedRecord> i = contents.iterator();
                     i.hasNext();
@@ -1136,17 +977,12 @@ public class Model_1 extends Layer_1 {
                     Model_1.this.completeNames(
                         content
                     );
-                    try {
-                        if(Object_2Facade.newInstance(content).attributeValue("qualifiedName").equals(paramsFacade.attributeValuesAsList("qualifiedName").get(0))) {
-                            paramsFacade.attributeValuesAsList("result").add(
-                                Object_2Facade.getPath(content)
-                            );
-                            break;
-                        }
-                    } 
-                    catch (ResourceException e) {
-                        throw new ServiceException(e);
-                    }
+                    if(Facades.asObject(content).attributeValue("qualifiedName").equals(paramsFacade.attributeValuesAsList("qualifiedName").get(0))) {
+					    paramsFacade.attributeValuesAsList("result").add(
+					        Object_2Facade.getPath(content)
+					    );
+					    break;
+					}
                 }
                 if(!paramsFacade.getValue().keySet().contains("result")) {
                     throw new ServiceException(
@@ -1164,15 +1000,10 @@ public class Model_1 extends Layer_1 {
             else if("findElementsByType".equals(operationName)) {
                 // get content ...
                 List contents;
-                try {
-                    contents = Model_1.this.getNamespaceContent(
-                        header,
-                        Object_2Facade.newInstance(input.getPath().getPrefix(input.getPath().size()-2)).getDelegate()
-                    );
-                } 
-                catch (ResourceException e) {
-                    throw new ServiceException(e);
-                }
+                contents = Model_1.this.getNamespaceContent(
+				    header,
+				    Facades.newObject(input.getPath().getPrefix(input.getPath().size()-2)).getDelegate()
+				);
                 // search elements with matching types
                 boolean includeSubtypes = ((Boolean)paramsFacade.attributeValue("includeSubtypes")).booleanValue();
                 for(
@@ -1188,29 +1019,18 @@ public class Model_1 extends Layer_1 {
                             Iterator j = subtypes.iterator();
                             j.hasNext();
                         ) {
-                            try {
-                                if(Object_2Facade.newInstance(content).attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(j.next())) {
-                                    paramsFacade.attributeValuesAsList("result").add(
-                                        Object_2Facade.getPath(content)
-                                    );
-                                    break;
-                                }
-                            } 
-                            catch (ResourceException e) {
-                                throw new ServiceException(e);
-                            }
+                            if(Facades.asObject(content).attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(j.next())) {
+							    paramsFacade.attributeValuesAsList("result").add(
+							        Object_2Facade.getPath(content)
+							    );
+							    break;
+							}
                         }
-                    } else
-                        try {
-                            if(Object_2Facade.newInstance(content).attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(paramsFacade.attributeValuesAsList("ofType").get(0))) {
-                                paramsFacade.attributeValuesAsList("result").add(
-                                    Object_2Facade.getPath(content)
-                                );
-                            }
-                        } 
-                        catch (ResourceException e) {
-                            throw new ServiceException(e);
-                        }
+                    } else if(Facades.asObject(content).attributeValuesAsList(SystemAttributes.OBJECT_INSTANCE_OF).contains(paramsFacade.attributeValuesAsList("ofType").get(0))) {
+					    paramsFacade.attributeValuesAsList("result").add(
+					        Object_2Facade.getPath(content)
+					    );
+					}
                 }
                 output.setPath(paramsFacade.getPath());
                 output.setBody(paramsFacade.getValue());
@@ -1311,7 +1131,11 @@ public class Model_1 extends Layer_1 {
                 // get full repository content ...
                 List segments = channel.addFindRequest(
                     PROVIDER_ROOT_PATH.getChild("segment"),
-                    null
+                    null,
+                    AttributeSelectors.ALL_ATTRIBUTES,
+                    0,
+                    Integer.MAX_VALUE,
+                    SortOrder.ASCENDING.code()
                 );
                 Map completedElements = new HashMap();
                 for(
@@ -1381,8 +1205,7 @@ public class Model_1 extends Layer_1 {
         Arrays.asList(
             MappingTypes.XMI1, 
             MappingTypes.UML_OPENMDX_1,
-            MappingTypes.UML2_OPENMDX_1,
-            MappingTypes.TOGETHER_OPENMDX_1
+            MappingTypes.UML2_OPENMDX_1
         )
     );
 

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightClassLoader.java,v 1.6 2010/06/04 22:45:00 hburger Exp $
+ * Name:        $Id: LightweightClassLoader.java,v 1.7 2011/06/21 22:55:17 hburger Exp $
  * Description: Lightweight Class Loader
- * Revision:    $Revision: 1.6 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/04 22:45:00 $
+ * Date:        $Date: 2011/06/21 22:55:17 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -74,6 +74,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.openmdx.kernel.log.LoggerFactory;
+import org.openmdx.kernel.log.SysLog;
 import org.openmdx.kernel.text.MultiLineStringRepresentation;
 import org.openmdx.kernel.text.format.IndentingFormatter;
 import org.openmdx.kernel.url.protocol.XRI_2Protocols;
@@ -241,7 +242,7 @@ public class LightweightClassLoader extends URLClassLoader
         try {
             return new URL("file","","");
         } catch (MalformedURLException exception) {
-            LoggerFactory.getLogger().log(
+            SysLog.log(
             	Level.SEVERE,
                 "NO_RESOURCE place holder URL \"file:\" can't created, no resource tracking will take place",
                 exception
@@ -357,17 +358,14 @@ public class LightweightClassLoader extends URLClassLoader
      * Return an empty array if either is missing.
      * 
      * @param url
-     * @param logger
-     *  
      * @return the manifest class path; never <code>null</code>.
      * 
      * @throws IOException
      */
     static public URL[] getManifestClassPath(
-        URL url, 
-        Logger logger
+        URL url
     ) throws IOException {
-    	return getManifestClassPath(url, new LoggerSink(logger));
+    	return getManifestClassPath(url, new LoggerSink(LoggerFactory.getLogger()));
     }
     
     /**

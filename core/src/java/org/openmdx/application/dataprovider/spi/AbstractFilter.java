@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: AbstractFilter.java,v 1.4 2010/06/30 12:44:27 hburger Exp $
+ * Name:        $Id: AbstractFilter.java,v 1.6 2011/11/26 01:34:57 hburger Exp $
  * Description: Abstract Filter Class
- * Revision:    $Revision: 1.4 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/30 12:44:27 $
+ * Date:        $Date: 2011/11/26 01:34:57 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,13 +52,13 @@ package org.openmdx.application.dataprovider.spi;
 
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Pattern;
-
-import javax.resource.ResourceException;
 
 import org.openmdx.application.dataprovider.cci.FilterProperty;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.query.ConditionType;
+import org.openmdx.base.query.Filter;
 import org.openmdx.base.query.LenientPathComparator;
 import org.openmdx.base.query.Quantifier;
 import org.openmdx.base.query.Selector;
@@ -71,15 +71,7 @@ import org.openmdx.kernel.url.protocol.XRI_1Protocols;
 /**
  * FilterProperty based Filter
  */
-public abstract class AbstractFilter implements Selector, Serializable {
-
-    /**
-     * Constructor
-     */
-    protected AbstractFilter(
-    ){
-        // For Deserialization
-    }
+public abstract class AbstractFilter implements Selector {
 
     /**
      * Constructor
@@ -147,6 +139,20 @@ public abstract class AbstractFilter implements Selector, Serializable {
 
     /**
      * 
+     * @param candidate
+     * @param attribute
+     * @return an iterator for the values, never <code>null</code>
+     * 
+     * @exception   Exception
+     *              in case of failure
+     */
+    protected abstract Iterator<?> getObjectIterator(
+        Object candidate,
+        String attribute
+    ) throws Exception;
+    
+    /**
+     * 
      */
     protected FilterProperty[] filter;
 
@@ -201,6 +207,13 @@ public abstract class AbstractFilter implements Selector, Serializable {
     // Implements Selector 
     //------------------------------------------------------------------------
 
+    private boolean isComplex(
+        FilterProperty predicate
+    ){
+        List<?> values = predicate.values();
+        return !values.isEmpty() && values.get(0) instanceof Filter;
+    }
+    
     /* (non-Javadoc)
      * @see org.openmdx.compatibility.base.query.Selector#accept(java.lang.Object)
      */
@@ -215,8 +228,8 @@ public abstract class AbstractFilter implements Selector, Serializable {
             FilterProperty property = this.filter[propertyIndex];
             Quantifier quantifier = Quantifier.valueOf(property.quantor());
             Iterator<?> iterator;
-            try {
-                iterator = getValuesIterator(candidate, property.name());
+            try {                
+                iterator = isComplex(property) ? getObjectIterator(candidate, property.name()) : getValuesIterator(candidate, property.name());
             } catch (Exception exception) {
                 Throwables.log(exception);
                 return false;
@@ -415,15 +428,11 @@ public abstract class AbstractFilter implements Selector, Serializable {
      */
     @Override
     public String toString() {
-        try {
-            return Records.getRecordFactory().asIndexedRecord(
-                getClass().getName(), 
-                null, 
-                this.filter
-            ).toString();
-        } catch (ResourceException e) {
-            return getClass().getName() + "//" + e.getMessage();
-        }
+        return Records.getRecordFactory().asIndexedRecord(
+		    getClass().getName(), 
+		    null, 
+		    this.filter
+		).toString();
     }
 
     public int size(){
@@ -814,10 +823,5 @@ public abstract class AbstractFilter implements Selector, Serializable {
         }
 
     }
-    
-    //-----------------------------------------------------------------------
-    //
-    //-----------------------------------------------------------------------
-    private static final long serialVersionUID = 8279786822145802222L;
     
 }

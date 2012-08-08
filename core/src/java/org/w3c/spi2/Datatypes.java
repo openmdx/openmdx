@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Datatypes.java,v 1.5 2010/04/26 16:06:45 hburger Exp $
+ * Name:        $Id: Datatypes.java,v 1.6 2011/04/18 09:18:00 hburger Exp $
  * Description: Date 
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.6 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/26 16:06:45 $
+ * Date:        $Date: 2011/04/18 09:18:00 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -95,35 +95,33 @@ public class Datatypes {
         Class<V> valueClass,
         String string
     ){
-        if(string == null) {
-            return null;
-        } else if (valueClass == Long.class) {
-            return valueClass.cast(Long.valueOf(string));
+        if (valueClass == Long.class) {
+            return string == null ? null : valueClass.cast(Long.valueOf(string));
         } else if (valueClass == Integer.class) {
-            return valueClass.cast(Integer.valueOf(string));
+            return string == null ? null : valueClass.cast(Integer.valueOf(string));
         } else if (valueClass == Short.class) {
-            return valueClass.cast(Short.valueOf(string));
+            return string == null ? null : valueClass.cast(Short.valueOf(string));
         } else if (valueClass == String.class) {
-            return valueClass.cast(string);
+            return string == null ? null : valueClass.cast(string);
         } else if(valueClass == Boolean.class) {
-            return valueClass.cast(Boolean.valueOf(string));
+            return string == null ? null : valueClass.cast(Boolean.valueOf(string));
         } else if(valueClass == BigDecimal.class) {
-            return valueClass.cast(new BigDecimal(string));
+            return string == null ? null : valueClass.cast(new BigDecimal(string));
         } else if(valueClass == BigInteger.class) {
-            return valueClass.cast(new BigInteger(string));
+            return string == null ? null : valueClass.cast(new BigInteger(string));
         } else if (valueClass == URI.class) {
-            return valueClass.cast(URI.create(string));
+            return string == null ? null : valueClass.cast(URI.create(string));
         } else if (valueClass == Date.class) {
-            return valueClass.cast(DatatypeFactories.immutableDatatypeFactory().newDateTime(string));
+            return string == null ? null : valueClass.cast(DatatypeFactories.immutableDatatypeFactory().newDateTime(string));
         } else if (valueClass == UUID.class){
-            return valueClass.cast(UUIDConversion.fromString(string));
+            return string == null ? null : valueClass.cast(UUIDConversion.fromString(string));
         } else if (valueClass == Duration.class){
-            return valueClass.cast(DatatypeFactories.immutableDatatypeFactory().newDuration(string));
+            return string == null ? null : valueClass.cast(DatatypeFactories.immutableDatatypeFactory().newDuration(string));
         } else if (valueClass == XMLGregorianCalendar.class){
-            return valueClass.cast(DatatypeFactories.immutableDatatypeFactory().newDate(string));
+            return string == null ? null : valueClass.cast(DatatypeFactories.immutableDatatypeFactory().newDate(string));
         } else if (valueClass == Oid.class){
             try {
-                return valueClass.cast(new Oid(string));
+                return string == null ? null : valueClass.cast(new Oid(string));
             } catch (GSSException exception) {
                 throw BasicException.initHolder(
                     new IllegalArgumentException(
@@ -138,17 +136,9 @@ public class Datatypes {
                     )
                 );
             }
-        } else throw BasicException.initHolder(
-            new UnsupportedOperationException(
-                "Unsupported value class",
-                BasicException.newEmbeddedExceptionStack(
-                    BasicException.Code.DEFAULT_DOMAIN,
-                    BasicException.Code.NOT_SUPPORTED,
-                    new BasicException.Parameter("class", valueClass.getName()),
-                    new BasicException.Parameter("value", string)
-                )
-            )
-        );
+        } else {
+            return create(valueClass, (Object)string);
+        }
     }
 
     /**
@@ -157,7 +147,7 @@ public class Datatypes {
      * @param structureInterface the structure's interface
      * @param values the structure's members
      * 
-     * @return
+     * @return a new structure
      */
     public static <S> S create(
         Class<S> structureInterface,

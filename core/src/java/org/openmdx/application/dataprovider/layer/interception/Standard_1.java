@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Standard_1.java,v 1.11 2010/06/02 13:39:53 hburger Exp $
+ * Name:        $Id: Standard_1.java,v 1.12 2012/01/05 23:20:21 hburger Exp $
  * Description: Standard Interception Plug-In
- * Revision:    $Revision: 1.11 $
+ * Revision:    $Revision: 1.12 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/02 13:39:53 $
+ * Date:        $Date: 2012/01/05 23:20:21 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -63,8 +63,12 @@ import org.openmdx.base.exception.ServiceException;
  */
 public class Standard_1 extends Layer_1 {
 
+    /**
+     * Constructor 
+     */
     public Standard_1(
     ) {
+        super();
     }
     
     //--------------------------------------------------------------------------

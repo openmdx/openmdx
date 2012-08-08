@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: ModelConstraintsChecker_1.java,v 1.5 2009/06/02 21:54:51 wfro Exp $
+ * Name:        $Id: ModelConstraintsChecker_1.java,v 1.8 2011/07/08 13:20:51 wfro Exp $
  * Description: check MOF Model Constraints
- * Revision:    $Revision: 1.5 $
+ * Revision:    $Revision: 1.8 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/06/02 21:54:51 $
+ * Date:        $Date: 2011/07/08 13:20:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -70,8 +70,9 @@ import org.openmdx.base.accessor.cci.SystemAttributes;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.AggregationKind;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
@@ -87,7 +88,7 @@ import org.openmdx.kernel.log.SysLog;
  * For details on MOF Model Constraints please refer to the MOF Specification 
  * which can be obtained from the OMG (http://www.omg.org)
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class ModelConstraintsChecker_1 {
 
     /**
@@ -338,7 +339,7 @@ public class ModelConstraintsChecker_1 {
             ModelElement_1_0 qualifierType = this.model.getDereferencedType(associationEndDef.objGetValue("qualifierType"));      
             if(
                 !qualifierType.isPrimitiveType() &&
-                !Multiplicities.MULTI_VALUE.equals(associationEndDef.objGetValue("multiplicity"))
+                !ModelHelper.UNBOUNDED.equals(associationEndDef.objGetValue("multiplicity"))
             ) {
                 violations.add(
                     new BasicException.Parameter(
@@ -950,10 +951,13 @@ public class ModelConstraintsChecker_1 {
 
         // !NONE --> primitive qualifier and multiplicity 0..1|1..1
         if(
-                !AggregationKind.NONE.equals(end1.objGetValue("aggregation")) &&
-                ((end1.objGetList("qualifierType").size() < 1) || 
-                        !this.model.isPrimitiveType(end1.objGetValue("qualifierType")) ||
-                        (!Multiplicities.OPTIONAL_VALUE.equals(end1.objGetValue("multiplicity"))) && !Multiplicities.SINGLE_VALUE.equals(end1.objGetValue("multiplicity")))
+            !AggregationKind.NONE.equals(end1.objGetValue("aggregation")) && (
+                end1.objGetList("qualifierType").size() < 1 || 
+                !this.model.isPrimitiveType(end1.objGetValue("qualifierType")) || (
+                    !Multiplicity.OPTIONAL.toString().equals(end1.objGetValue("multiplicity")) &&
+                    !Multiplicity.SINGLE_VALUE.toString().equals(end1.objGetValue("multiplicity"))
+                )
+            )
         ) {
             violations.add(
                 new BasicException.Parameter(
@@ -968,7 +972,7 @@ public class ModelConstraintsChecker_1 {
                 !AggregationKind.NONE.equals(end2.objGetValue("aggregation")) &&
                 ((end2.objGetList("qualifierType").size() < 1) || 
                         !this.model.isPrimitiveType(end2.objGetValue("qualifierType")) ||
-                        (!Multiplicities.OPTIONAL_VALUE.equals(end2.objGetValue("multiplicity"))) && !Multiplicities.SINGLE_VALUE.equals(end2.objGetValue("multiplicity")))
+                        (!Multiplicity.OPTIONAL.toString().equals(end2.objGetValue("multiplicity"))) && !Multiplicity.SINGLE_VALUE.toString().equals(end2.objGetValue("multiplicity")))
         ) {
             violations.add(
                 new BasicException.Parameter(
@@ -1010,8 +1014,8 @@ public class ModelConstraintsChecker_1 {
         if(
                 AggregationKind.NONE.equals(end1.objGetValue("aggregation")) &&
                 (end1.objGetList("qualifierType").size() >= 1) &&
-                (!this.model.isPrimitiveType(end1.objGetValue("qualifierType")) || !Multiplicities.OPTIONAL_VALUE.equals(end1.objGetValue("multiplicity"))) &&
-                (!this.model.isClassType(end1.objGetValue("qualifierType")) || !Multiplicities.MULTI_VALUE.equals(end1.objGetValue("multiplicity")))      
+                (!this.model.isPrimitiveType(end1.objGetValue("qualifierType")) || !Multiplicity.OPTIONAL.toString().equals(end1.objGetValue("multiplicity"))) &&
+                (!this.model.isClassType(end1.objGetValue("qualifierType")) || !ModelHelper.UNBOUNDED.equals(end1.objGetValue("multiplicity")))      
         ) {
             violations.add(
                 new BasicException.Parameter(
@@ -1025,10 +1029,14 @@ public class ModelConstraintsChecker_1 {
         //          || primitive qualifier & multiplicity 0..1
         //          || class qualifier & multiplicity 0..n    
         if(
-                AggregationKind.NONE.equals(end2.objGetValue("aggregation")) &&
-                (end2.objGetList("qualifierType").size() >= 1) &&
-                (!this.model.isPrimitiveType(end2.objGetValue("qualifierType")) || !Multiplicities.OPTIONAL_VALUE.equals(end2.objGetValue("multiplicity"))) &&
-                (!this.model.isClassType(end2.objGetValue("qualifierType")) || !Multiplicities.MULTI_VALUE.equals(end2.objGetValue("multiplicity")))      
+            AggregationKind.NONE.equals(end2.objGetValue("aggregation")) &&
+            end2.objGetList("qualifierType").size() >= 1 && (
+                !this.model.isPrimitiveType(end2.objGetValue("qualifierType")) || 
+                !Multiplicity.OPTIONAL.toString().equals(end2.objGetValue("multiplicity"))
+            ) && (
+                !this.model.isClassType(end2.objGetValue("qualifierType")) || 
+                !ModelHelper.UNBOUNDED.equals(end2.objGetValue("multiplicity"))
+            )      
         ) {
             violations.add(
                 new BasicException.Parameter(
@@ -1040,10 +1048,10 @@ public class ModelConstraintsChecker_1 {
 
         // end1:class qualifier --> end2:no or primitive qualifier
         if(
-                (end1.objGetList("qualifierType").size() >= 1) &&
-                this.model.isClassType(end1.objGetValue("qualifierType")) &&
-                (end2.objGetList("qualifierType").size() >= 1) && 
-                !this.model.isPrimitiveType(end2.objGetValue("qualifierType"))
+            end1.objGetList("qualifierType").size() >= 1 &&
+            this.model.isClassType(end1.objGetValue("qualifierType")) &&
+            end2.objGetList("qualifierType").size() >= 1 && 
+            !this.model.isPrimitiveType(end2.objGetValue("qualifierType"))
         ) {
             violations.add(
                 new BasicException.Parameter(
@@ -1056,10 +1064,10 @@ public class ModelConstraintsChecker_1 {
 
         // end2:class qualifier --> end1:no or numeric qualifier
         if(
-                (end2.objGetList("qualifierType").size() >= 1) &&
-                this.model.isClassType(end2.objGetValue("qualifierType")) &&
-                (end1.objGetList("qualifierType").size() >= 1) && 
-                !this.model.isPrimitiveType(end1.objGetValue("qualifierType"))
+            end2.objGetList("qualifierType").size() >= 1 &&
+            this.model.isClassType(end2.objGetValue("qualifierType")) &&
+            end1.objGetList("qualifierType").size() >= 1 && 
+            !this.model.isPrimitiveType(end1.objGetValue("qualifierType"))
         ) {
             violations.add(
                 new BasicException.Parameter(
@@ -1576,46 +1584,34 @@ public class ModelConstraintsChecker_1 {
         ModelElement_1_0 elementDef,
         List violations
     ) throws ServiceException {
-
-        /**
-         * get type of model element to verify (if any)
-         */
-        ModelElement_1_0 type = this.getType(elementDef);
-        String multiplicity = (String) elementDef.objGetValue("multiplicity");
-
-        /**
-         * <<stream>> implies primitive types
-         */
-        if(
-            Multiplicities.STREAM.equals(multiplicity) &&
-            !type.isPrimitiveType()
-        ) {
-            violations.add(
-                new BasicException.Parameter(
-                    ModelConstraints.STEREOTYPE_STREAM_IMPLIES_PRIMITIVE_TYPE,
-                    elementDef.objGetValue("qualifiedName") + "; type=" + type
-                )
-            );
-        }     
-        // check for valid multiplicities
-        if(
-            Multiplicities.LIST.equals(multiplicity) || 
-            Multiplicities.SET.equals(multiplicity) || 
-            Multiplicities.SPARSEARRAY.equals(multiplicity) ||
-            Multiplicities.STREAM.equals(multiplicity) ||
-            Multiplicities.OPTIONAL_VALUE.equals(multiplicity) ||
-            Multiplicities.SINGLE_VALUE.equals(multiplicity) ||
-            Multiplicities.MULTI_VALUE.equals(multiplicity) ||      
-            Multiplicities.MAP.equals(multiplicity)      
-        ) {
-            return;
+        //
+        // Validate the multiplicity
+        //
+        Multiplicity multiplicity = ModelHelper.toMultiplicity((String) elementDef.objGetValue("multiplicity"));
+        if(multiplicity == null) {
+	        violations.add(
+	            new BasicException.Parameter(
+	                ModelConstraints.INVALID_MULTIPLICITY,
+	                elementDef.objGetValue("qualifiedName")
+	            )
+	        );
+        } else {
+        	//
+        	// get type of model element to verify (if any)
+        	//
+            ModelElement_1_0 type = this.getType(elementDef);
+            // 
+        	// <<stream>> implies primitive types
+            //
+            if(Multiplicity.STREAM == multiplicity && !type.isPrimitiveType()) {
+                violations.add(
+                    new BasicException.Parameter(
+                        ModelConstraints.STEREOTYPE_STREAM_IMPLIES_PRIMITIVE_TYPE,
+                        elementDef.objGetValue("qualifiedName") + "; type=" + type
+                    )
+                );
+            }     
         }
-        violations.add(
-            new BasicException.Parameter(
-                ModelConstraints.INVALID_MULTIPLICITY,
-                elementDef.objGetValue("qualifiedName")
-            )
-        );
     }
 
     //---------------------------------------------------------------------------  

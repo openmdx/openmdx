@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: LightweightTransactionSynchronizationRegistry.java,v 1.1 2009/09/07 15:00:30 hburger Exp $
+ * Name:        $Id: LightweightTransactionSynchronizationRegistry.java,v 1.2 2011/06/10 12:45:58 hburger Exp $
  * Description: Lightweight Transaction Manager Registry
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/07 15:00:30 $
+ * Date:        $Date: 2011/06/10 12:45:58 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2009, OMEX AG, Switzerland
+ * Copyright (c) 2009-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without 
@@ -57,6 +57,8 @@ import javax.transaction.TransactionSynchronizationRegistry;
 
 /**
  * Lightweight Transaction Synchronization Registry
+ * <p>
+ * The transaction synchronization registry is a thread-safe proxy.
  */
 public final class LightweightTransactionSynchronizationRegistry 
     implements TransactionSynchronizationRegistry
@@ -64,27 +66,41 @@ public final class LightweightTransactionSynchronizationRegistry
 
     /**
      * Constructor 
-     *
-     * @param lightweightTransactionManager
      */
-    public LightweightTransactionSynchronizationRegistry(
-        LightweightTransactionManager lightweightTransactionManager
+    private LightweightTransactionSynchronizationRegistry(
     ) {
-        this.lightweightTransactionManager = lightweightTransactionManager;
+        this.transactionManager = LightweightTransactionManager.getInstance();
     }
 
     /**
-     * 
+     * Keep a reference to avoid repeated synchronized singleton retrieval
      */
-    private final LightweightTransactionManager lightweightTransactionManager;
+    private final LightweightTransactionManager transactionManager;
 
+    /**
+     * The transaction synchronization registry instance may be shared
+     */
+    private static TransactionSynchronizationRegistry instance;
+    
+    /**
+     * A transaction synchronization registry instance may be shared
+     * 
+     * @return a transaction synchronization registry instance
+     */
+    public static TransactionSynchronizationRegistry getInstance(){
+        if(instance == null) {
+            instance = new LightweightTransactionSynchronizationRegistry();
+        }
+        return instance;
+    }
+    
     /**
      * Retrieve the active transaction
      * 
      * @return the active transaction
      */
     private LightweightTransaction getTransaction(){
-        LightweightTransaction transaction = this.lightweightTransactionManager.bindings.get(Thread.currentThread());
+        LightweightTransaction transaction = this.transactionManager.bindings.get(Thread.currentThread());
         if (transaction == null) throw new IllegalStateException(
             "No transaction is active"
         );

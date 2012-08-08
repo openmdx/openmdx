@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: SlicedDbObjectParentRidOnly.java,v 1.2 2010/10/19 22:08:06 hburger Exp $
+ * Name:        $Id: SlicedDbObjectParentRidOnly.java,v 1.5 2011/09/05 22:39:47 hburger Exp $
  * Description: SlicedDbObjectParentRidOnly class
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.5 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/19 22:08:06 $
+ * Date:        $Date: 2011/09/05 22:39:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -53,7 +53,6 @@ package org.openmdx.application.dataprovider.layer.persistence.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
@@ -64,7 +63,6 @@ import org.openmdx.base.naming.Path;
  * object type is used when the calculation of object_rid is expensive
  * compared to the calculation of the object_parent columns.
  */
-@SuppressWarnings("unchecked")
 public class SlicedDbObjectParentRidOnly
   extends SlicedDbObject 
 {
@@ -80,12 +78,9 @@ public class SlicedDbObjectParentRidOnly
             conn, 
             typeConfiguration
         );
-        this.columnNameParentRid = this.database.toRid(
-            this.database.privateAttributesPrefix + "object_parent_"
-        );            
-        this.columnNameParentOid = this.database.toOid(
-            this.database.privateAttributesPrefix + "object_parent_"
-        );
+        String name = this.database.getPrivateAttributesPrefix() + "object_parent_"; 
+        this.columnNameParentRid = this.database.toRid(name);            
+        this.columnNameParentOid = this.database.toOid(name);
     }
     
     //-------------------------------------------------------------------------
@@ -105,27 +100,20 @@ public class SlicedDbObjectParentRidOnly
             isExtent,
             isQuery
         );
-        this.columnNameParentRid = this.database.toRid(
-            this.database.privateAttributesPrefix + "object_parent_"
-        );            
-        this.columnNameParentOid = this.database.toOid(
-            this.database.privateAttributesPrefix + "object_parent_"
-        );
+        String name = this.database.getPrivateAttributesPrefix() + "object_parent_"; 
+        this.columnNameParentRid = this.database.toRid(name);            
+        this.columnNameParentOid = this.database.toOid(name);
         if(
-            (
-                !isExtent ||
-                this.getReference().isLike(INVOLVEMENT_REFERENCE_PATTERN) // TODO make it more general!
-                
-            ) && ( 
+            !isExtent && ( 
                 accessPath.isLike(typeConfigurationEntry.getType()) || 
                 (accessPath.size() % 2 == 0 && accessPath.isLike(typeConfigurationEntry.getType().getParent()))
             )
         ) {
             // get rid|oid of parent object and construct reference clause
-            this.referenceValues = new ArrayList();
+            this.getReferenceValues().clear();
             // parent object rid
             Path parentResourceIdentifier = this.getReference().getParent();
-            this.referenceValues.add(
+            this.getReferenceValues().add(
                 this.database.getReferenceId(
                     conn, 
                     parentResourceIdentifier.getParent(), 
@@ -137,7 +125,7 @@ public class SlicedDbObjectParentRidOnly
                     "(v." + columnNameParentRid + " IN (?))";           
             } else {
                 // parent object oid
-                this.referenceValues.add(
+                this.getReferenceValues().add(
                     this.database.getObjectId(
                         parentResourceIdentifier.getBase()
                     )
@@ -170,9 +158,6 @@ public class SlicedDbObjectParentRidOnly
 
     //-------------------------------------------------------------------------
     private static final long serialVersionUID = 3257566196189706291L;
-    private static final Path INVOLVEMENT_REFERENCE_PATTERN = new Path(
-        "xri://@openmdx*org.openmdx.audit2/provider/($..)/segment/($..)/unitOfWork/($..)/involvement"
-    );
     private final String columnNameParentRid;
     private final String columnNameParentOid;
     

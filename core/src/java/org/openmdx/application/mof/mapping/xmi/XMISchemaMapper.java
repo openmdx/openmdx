@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openmdx, http://www.openmdx.org/
- * Name:        $Id: XMISchemaMapper.java,v 1.3 2009/05/16 22:17:50 wfro Exp $
+ * Name:        $Id: XMISchemaMapper.java,v 1.7 2011/08/23 22:22:26 hburger Exp $
  * Description: write XML schema (XSD)
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/05/16 22:17:50 $
+ * Date:        $Date: 2011/08/23 22:22:26 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -58,12 +58,13 @@ import java.util.TreeSet;
 
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.base.mof.cci.PrimitiveTypes;
 import org.openmdx.base.mof.cci.Stereotypes;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"rawtypes","unchecked"})
 public class XMISchemaMapper {
   
   //---------------------------------------------------------------------------
@@ -139,43 +140,45 @@ public class XMISchemaMapper {
    */
   private void writeField(
     String name,
-    String multiplicity,
+    Multiplicity multiplicity,
     String typeName
   ) throws ServiceException {
-    if(Multiplicities.OPTIONAL_VALUE.equals(multiplicity)) {
-      this.pw.println(spaces(24) + "<xsd:element name=\"" + name + "\" type=\"" + typeName + "\" minOccurs=\"0\" maxOccurs=\"1\"/>");
-    } 
-    else if(Multiplicities.SINGLE_VALUE.equals(multiplicity)) {
-      this.pw.println(spaces(24) + "<xsd:element name=\"" + name + "\" type=\"" + typeName + "\"/>");
-    } 
-    else {
-      String contentType = this.model.isPrimitiveType(typeName.replace('.',':')) ? "simple" : "complex";
-      boolean isMap = Multiplicities.MAP.equals(multiplicity);
-      this.pw.println(spaces(24) + "<xsd:element name=\"" + name + "\" minOccurs=\"0\" maxOccurs=\"1\">");
-      this.pw.println(spaces(24) + "    <xsd:complexType>");
-      this.pw.println(spaces(24) + "        <xsd:sequence minOccurs=\"0\" maxOccurs=\"unbounded\">");
-      this.pw.println(spaces(24) + "            <xsd:element name=\"_item\">");
-      this.pw.println(spaces(24) + "                <xsd:complexType>");
-      this.pw.println(spaces(24) + "                    <xsd:" + contentType + "Content>");
-      this.pw.println(spaces(24) + "                        <xsd:extension base=\"" + typeName + "\">");
-      this.pw.println(spaces(24) + "                            <xsd:attribute name=\"_operation\" type=\"xsd:string\" use=\"optional\" default=\"\"/>");
-      if(isMap) {
-        this.pw.println(spaces(24) + "                            <xsd:attribute name=\"_key\" type=\"xsd:string\" use=\"optional\" default=\"-1\"/>");
-      }
-      else {
-        this.pw.println(spaces(24) + "                            <xsd:attribute name=\"_position\" type=\"xsd:integer\" use=\"optional\" default=\"-1\"/>");
-      }
-      this.pw.println(spaces(24) + "                        </xsd:extension>");
-      this.pw.println(spaces(24) + "                    </xsd:" + contentType + "Content>");
-      this.pw.println(spaces(24) + "                </xsd:complexType>");
-      this.pw.println(spaces(24) + "            </xsd:element>");
-      this.pw.println(spaces(24) + "        </xsd:sequence>");
-      if(!isMap) {
-        this.pw.println(spaces(24) + "        <xsd:attribute name=\"_offset\" type=\"xsd:integer\" use=\"optional\" default=\"0\"/>");
-      }
-      this.pw.println(spaces(24) + "        <xsd:attribute name=\"_multiplicity\" type=\"xsd:string\" fixed=\"" + multiplicity + "\"/>");
-      this.pw.println(spaces(24) + "    </xsd:complexType>");
-      this.pw.println(spaces(24) + "</xsd:element>");      
+	  switch(multiplicity) {
+		case OPTIONAL: {
+		      this.pw.println(spaces(24) + "<xsd:element name=\"" + name + "\" type=\"" + typeName + "\" minOccurs=\"0\" maxOccurs=\"1\"/>");
+		} break;
+		case SINGLE_VALUE: {
+	      this.pw.println(spaces(24) + "<xsd:element name=\"" + name + "\" type=\"" + typeName + "\"/>");
+		} break;
+	    default: {
+	      String contentType = this.model.isPrimitiveType(typeName.replace('.',':')) ? "simple" : "complex";
+	      boolean isMap = Multiplicity.MAP == multiplicity;
+	      this.pw.println(spaces(24) + "<xsd:element name=\"" + name + "\" minOccurs=\"0\" maxOccurs=\"1\">");
+	      this.pw.println(spaces(24) + "    <xsd:complexType>");
+	      this.pw.println(spaces(24) + "        <xsd:sequence minOccurs=\"0\" maxOccurs=\"unbounded\">");
+	      this.pw.println(spaces(24) + "            <xsd:element name=\"_item\">");
+	      this.pw.println(spaces(24) + "                <xsd:complexType>");
+	      this.pw.println(spaces(24) + "                    <xsd:" + contentType + "Content>");
+	      this.pw.println(spaces(24) + "                        <xsd:extension base=\"" + typeName + "\">");
+	      this.pw.println(spaces(24) + "                            <xsd:attribute name=\"_operation\" type=\"xsd:string\" use=\"optional\" default=\"\"/>");
+	      if(isMap) {
+	        this.pw.println(spaces(24) + "                            <xsd:attribute name=\"_key\" type=\"xsd:string\" use=\"optional\" default=\"-1\"/>");
+	      }
+	      else {
+	        this.pw.println(spaces(24) + "                            <xsd:attribute name=\"_position\" type=\"xsd:integer\" use=\"optional\" default=\"-1\"/>");
+	      }
+	      this.pw.println(spaces(24) + "                        </xsd:extension>");
+	      this.pw.println(spaces(24) + "                    </xsd:" + contentType + "Content>");
+	      this.pw.println(spaces(24) + "                </xsd:complexType>");
+	      this.pw.println(spaces(24) + "            </xsd:element>");
+	      this.pw.println(spaces(24) + "        </xsd:sequence>");
+	      if(!isMap) {
+	        this.pw.println(spaces(24) + "        <xsd:attribute name=\"_offset\" type=\"xsd:integer\" use=\"optional\" default=\"0\"/>");
+	      }
+	      this.pw.println(spaces(24) + "        <xsd:attribute name=\"_multiplicity\" type=\"xsd:string\" fixed=\"" + multiplicity + "\"/>");
+	      this.pw.println(spaces(24) + "    </xsd:complexType>");
+	      this.pw.println(spaces(24) + "</xsd:element>");      
+	    }
     } 
   }
 
@@ -184,18 +187,10 @@ public class XMISchemaMapper {
     ModelElement_1_0 attributeDef,
     boolean isClass
   ) throws ServiceException {
-
-    String attributeName = (String)attributeDef.objGetValue("name");
-    String qualifiedTypeName = (String)this.model.getElementType(attributeDef).objGetValue("qualifiedName");
-    String multiplicity = (String) attributeDef.objGetValue("multiplicity");
-    String typeName = isClass
-      ? "org.openmdx.base.ObjectId"
-      : toXsdName(qualifiedTypeName);
-
     writeField(
-      attributeName,
-      multiplicity,
-      typeName
+        (String)attributeDef.objGetValue("name"), // attributeName
+        ModelHelper.getMultiplicity(attributeDef), // multiplicity
+        isClass ? "org.openmdx.base.ObjectId" : toXsdName((String)this.model.getElementType(attributeDef).objGetValue("qualifiedName")) // typeName
     );
     
     this.pw.flush();
@@ -206,18 +201,10 @@ public class XMISchemaMapper {
     ModelElement_1_0 structureFieldDef,
     boolean isClass
   ) throws ServiceException {
-
-    String fieldName = (String)structureFieldDef.objGetValue("name");
-    String qualifiedTypeName = (String)this.model.getElementType(structureFieldDef).objGetValue("qualifiedName");
-    String multiplicity = (String) structureFieldDef.objGetValue("multiplicity");
-    String typeName = isClass
-      ? "org.openmdx.base.ObjectId"
-      : toXsdName(qualifiedTypeName);
-
     writeField(
-      fieldName,
-      multiplicity,
-      typeName
+		(String)structureFieldDef.objGetValue("name"), // fieldName,
+		ModelHelper.getMultiplicity(structureFieldDef), // multiplicity
+		isClass ? "org.openmdx.base.ObjectId" : toXsdName((String)this.model.getElementType(structureFieldDef).objGetValue("qualifiedName")) // typeName
     );
     
     this.pw.flush();
@@ -291,14 +278,10 @@ public class XMISchemaMapper {
   public void writeReferenceStoredAsAttribute(
     ModelElement_1_0 referenceDef
   ) throws ServiceException {
-    String referenceName = (String)referenceDef.objGetValue("name");
-    String multiplicity = !this.model.getElement(referenceDef.objGetValue("referencedEnd")).objGetList("qualifierName").isEmpty() 
-      ? "list"
-      : (String)referenceDef.objGetValue("multiplicity");
     writeField(
-      referenceName,
-      multiplicity,
-      "org.openmdx.base.ObjectId"
+        (String)referenceDef.objGetValue("name"), // referenceName
+        ModelHelper.getMultiplicity(referenceDef), // multiplicity
+        "org.openmdx.base.ObjectId"
     );
     this.pw.flush();
   }

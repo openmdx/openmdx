@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Layer_1.java,v 1.35 2010/04/13 17:15:13 wfro Exp $
+ * Name:        $Id: Layer_1.java,v 1.41 2012/01/05 23:20:20 hburger Exp $
  * Description: User Profile Service
- * Revision:    $Revision: 1.35 $
+ * Revision:    $Revision: 1.41 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/04/13 17:15:13 $
+ * Date:        $Date: 2012/01/05 23:20:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2008, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -50,9 +50,7 @@
  */
 package org.openmdx.application.dataprovider.spi;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.resource.ResourceException;
@@ -65,7 +63,6 @@ import javax.resource.cci.LocalTransaction;
 import javax.resource.cci.MappedRecord;
 import javax.resource.cci.ResultSetInfo;
 
-import org.openmdx.application.cci.ConfigurationSpecifier;
 import org.openmdx.application.configuration.Configuration;
 import org.openmdx.application.dataprovider.cci.DataproviderLayers;
 import org.openmdx.application.dataprovider.cci.DataproviderOperations;
@@ -87,6 +84,7 @@ import org.openmdx.base.rest.cci.MessageRecord;
 import org.openmdx.base.rest.cci.ObjectRecord;
 import org.openmdx.base.rest.cci.ResultRecord;
 import org.openmdx.base.rest.spi.AbstractRestInteraction;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.base.rest.spi.Query_2Facade;
 import org.openmdx.base.text.conversion.UUIDConversion;
@@ -100,8 +98,12 @@ import org.w3c.cci2.SparseArray;
  */
 public abstract class Layer_1 implements Dataprovider_1_0, Port {
 
-    public Layer_1(
+	/**
+	 * Constructor
+	 */
+    protected Layer_1(
     ) {        
+    	super();
     }
     
     /**
@@ -187,29 +189,6 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
     }
 
     /**
-     * This layer's specific configuration specifiers.
-     * <p>
-     * Usage:
-     * <pre>
-     *   Map specification = super.configurationSpecification();
-     *   specification.put(
-     *     "specificOption1", new ConfigurationSpecifier([...])
-     *   );
-     *   specification.put(
-     *     "specificOption2", new ConfigurationSpecifier([...])
-     *   );
-     *   [...]
-     *   return specification;
-     * </pre>
-     *
-     * @return  a map with id/ConfigurationSpecifier entries
-     */
-    public Map<String,ConfigurationSpecifier> configurationSpecification(
-    ){
-        return new HashMap<String,ConfigurationSpecifier>();
-    }
-
-    /**
      * Activates a dataprovider layer
      * 
      * @param   id              the dataprovider layer's id
@@ -222,10 +201,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
      *              the layer to delegate to;
      *              or null if "persistenceLayer".equals(id)
      *
-     * @exception   Exception
-     *              unexpected exceptions
-     * @exception   ServiceException
-     *              expected exceptions
+     * @exception   ServiceException in case of an activation failure
      */
     public void activate(
         short id,
@@ -249,33 +225,6 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
             configuration
         );
     }
-
-    /**
-     * Deactivates a dataprovider layer
-     * <p>
-     * Subclasses overriding this method have to apply the following pattern:
-     * <pre>
-     *  public void deactivate(
-     *  ) throws Exception, ServiceException {
-     *      // local deactivation code
-     *      super.deactivate();
-     *  }
-     * </pre>       
-     *
-     * @exception   Exception
-     *              unexpected exceptions
-     * @exception   ServiceException
-     *              expected exceptions
-     */
-    public void deactivate(
-    ) throws Exception, ServiceException{
-        SysLog.info(
-            DataproviderLayers.toString(getId()) + " layer deactivated"
-        );
-        this.configuration = null;
-        this.delegation = null;
-        this.connectionFactory = null;
-    }
         
     //-----------------------------------------------------------------------
     public Interaction getInteraction(
@@ -284,6 +233,40 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
         return new LayerInteraction(connection);
     }
 
+    /**
+     * Wrap a MappedRecord into an object facade
+     * 
+     * @param object an object record
+     * @return the facade wrapping the given object record
+     * 
+     * @throws ServiceException
+     * 
+     * @deprecated use {@link Facades#asObject(MappedRecord)}
+     */
+    @Deprecated
+    public static Object_2Facade asObject(
+        MappedRecord object
+    ) throws ServiceException {
+    	return Facades.asObject(object);
+    }
+
+    /**
+     * Wrap a MappedRecord into a query facade
+     * 
+     * @param query a query record
+     * @return the facade wrapping the given query record
+     * 
+     * @throws ServiceException
+     * 
+     * @deprecated use {@link Facades#asQuery(MappedRecord)}
+     */
+    @Deprecated
+    public static Query_2Facade asQuery(
+        MappedRecord query
+    ) throws ServiceException {
+    	return Facades.asQuery(query);
+    }
+    
     //-----------------------------------------------------------------------
     public class LayerInteraction extends AbstractRestInteraction {
         
@@ -328,17 +311,12 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
             RestInteractionSpec ispec,
             MessageRecord input
         ) throws ServiceException {
-            try {
-                Object_2Facade objectFacade = Object_2Facade.newInstance();
-                objectFacade.setPath(input.getPath());
-                objectFacade.setValue(input.getBody());
-                return new DataproviderRequest(
-                    ispec,
-                    objectFacade.getDelegate()
-                );
-            } catch(ResourceException e) {
-                throw new ServiceException(e);
-            }
+            Object_2Facade objectFacade = Facades.newObject(input.getPath());
+			objectFacade.setValue(input.getBody());
+			return new DataproviderRequest(
+			    ispec,
+			    objectFacade.getDelegate()
+			);
         }
         
         /**
@@ -408,7 +386,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
                 Port delegation = this.getDelegatingLayer();
                 return delegation == null ?
                     null :
-                        (LayerInteraction)delegation.getInteraction(this.getConnection());
+                    (LayerInteraction)delegation.getInteraction(this.getConnection());
             } catch(ResourceException e) {
                 throw new ServiceException(e);
             }
@@ -431,7 +409,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
             IndexedRecord output
         ) throws ServiceException {
             LayerInteraction interaction = this.getDelegatingInteraction();
-            return interaction == null ? false : interaction.find(ispec, input, output);
+            return interaction != null && interaction.find(ispec, input, output);
         }
     
         @Override
@@ -461,7 +439,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
             IndexedRecord output
         ) throws ServiceException {
             LayerInteraction interaction = this.getDelegatingInteraction();
-            return interaction == null ? false : interaction.delete(ispec, input, output);
+            return interaction != null && interaction.delete(ispec, input, output);
         }
     
         @Override
@@ -490,27 +468,23 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
         /* (non-Javadoc)
          * @see javax.resource.cci.Connection#close()
          */
-        public void close()
-            throws ResourceException {
-            // TODO Auto-generated method stub
-            
+        public void close(
+        ) throws ResourceException {
         }
 
         /* (non-Javadoc)
          * @see javax.resource.cci.Connection#createInteraction()
          */
-        public Interaction createInteraction()
-            throws ResourceException {
-            // TODO Auto-generated method stub
+        public Interaction createInteraction(
+        ) throws ResourceException {
             return null;
         }
 
         /* (non-Javadoc)
          * @see javax.resource.cci.Connection#getLocalTransaction()
          */
-        public LocalTransaction getLocalTransaction()
-            throws ResourceException {
-            // TODO Auto-generated method stub
+        public LocalTransaction getLocalTransaction(
+        ) throws ResourceException {
             return null;
         }
 
@@ -554,9 +528,8 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
         /* (non-Javadoc)
          * @see javax.resource.cci.Connection#getResultSetInfo()
          */
-        public ResultSetInfo getResultSetInfo()
-            throws ResourceException {
-            // TODO Auto-generated method stub
+        public ResultSetInfo getResultSetInfo(
+        ) throws ResourceException {
             return null;
         }
         
@@ -588,7 +561,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
                     case DataproviderOperations.OBJECT_RETRIEVAL: {
                         interaction.get(
                             request.getInteractionSpec(), 
-                            Query_2Facade.newInstance(request.object()), 
+                            Facades.asQuery(request.object()), 
                             reply.getResult()
                         );
                         break;
@@ -596,7 +569,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
                     case DataproviderOperations.ITERATION_START: {
                         interaction.find(
                             request.getInteractionSpec(), 
-                            Query_2Facade.newInstance(request.object()), 
+                            Facades.asQuery(request.object()), 
                             reply.getResult()
                         );
                         break;
@@ -604,7 +577,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
                     case DataproviderOperations.OBJECT_REPLACEMENT: {
                         interaction.put(
                             request.getInteractionSpec(), 
-                            Object_2Facade.newInstance(request.object()), 
+                            Facades.asObject(request.object()), 
                             reply.getResult()
                         );
                         break;
@@ -612,7 +585,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
                     case DataproviderOperations.OBJECT_CREATION: {
                         interaction.create(
                             request.getInteractionSpec(), 
-                            Object_2Facade.newInstance(request.object()), 
+                            Facades.asObject(request.object()), 
                             reply.getResult()
                         );
                         break;
@@ -620,7 +593,7 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
                     case DataproviderOperations.OBJECT_REMOVAL: {
                         interaction.delete(
                             request.getInteractionSpec(), 
-                            Query_2Facade.newInstance(request.object()), 
+                            Facades.asQuery(request.object()), 
                             reply.getResult()
                         );
                         break;
@@ -666,8 +639,9 @@ public abstract class Layer_1 implements Dataprovider_1_0, Port {
                 replies.add(reply);
             }
             return null;
-        }
-        catch(Exception e) {
+        } catch(ServiceException e) {
+            return e;
+        } catch(Exception e) {
             return new ServiceException(e);
         }
     }

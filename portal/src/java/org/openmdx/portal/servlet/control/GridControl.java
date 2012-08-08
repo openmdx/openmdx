@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.opencrx.org/
- * Name:        $Id: GridControl.java,v 1.47 2010/09/17 10:59:45 wfro Exp $
+ * Name:        $Id: GridControl.java,v 1.50 2011/08/15 08:42:43 wfro Exp $
  * Description: GridControlDef
- * Revision:    $Revision: 1.47 $
+ * Revision:    $Revision: 1.50 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/17 10:59:45 $
+ * Date:        $Date: 2011/08/15 08:42:43 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -71,6 +71,8 @@ import org.openmdx.base.naming.Path;
 import org.openmdx.portal.servlet.Action;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.action.GridAddColumnFilterAction;
+import org.openmdx.portal.servlet.action.GridSetColumnFilterAction;
 import org.openmdx.portal.servlet.attribute.AttributeValueFactory;
 import org.openmdx.portal.servlet.view.Grid;
 import org.openmdx.ui1.jmi1.CheckBox;
@@ -103,12 +105,12 @@ public class GridControl
         this.objectContainer = objectContainer;
         
         // column filters
-        List<Action> columnFilterSetActions = new ArrayList<Action>();
-        List<Action> columnFilterAddActions = new ArrayList<Action>();
+        List<Action> columnOrderActions = new ArrayList<Action>();
+        List<Action> columnSearchActions = new ArrayList<Action>();
         List<Integer> columnTypes = new ArrayList<Integer>();
         this.columnDefs = new ArrayList<org.openmdx.ui1.jmi1.ValuedField>();
         // first column contains object icon
-        columnFilterSetActions.add(
+        columnOrderActions.add(
           new Action(
             Action.EVENT_NONE,
             null,
@@ -116,7 +118,7 @@ public class GridControl
             true
           )
         );
-        columnFilterAddActions.add(
+        columnSearchActions.add(
           new Action(
             Action.EVENT_NONE,
             null,
@@ -146,10 +148,10 @@ public class GridControl
               this.localeAsIndex < columnDef.getToolTip().size() ? 
             	  columnDef.getToolTip().get(this.localeAsIndex) : 
             	  !columnDef.getToolTip().isEmpty() ? columnDef.getToolTip().get(0) : "N/A";
-          columnFilterSetActions.add(
+          columnOrderActions.add(
               new Action(
-                  columnDef.isFilterable() && !objectContainer.isReferenceIsStoredAsAttribute() ? 
-                	  Action.EVENT_SET_COLUMN_FILTER : 
+                  columnDef.isSortable() && !objectContainer.isReferenceIsStoredAsAttribute() ? 
+                	  GridSetColumnFilterAction.EVENT_ID : 
                 	  Action.EVENT_NONE,
                   new Action.Parameter[]{
                       new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(paneIndex)),
@@ -162,10 +164,10 @@ public class GridControl
                   true
               )
           );
-          columnFilterAddActions.add(
+          columnSearchActions.add(
               new Action(
                   columnDef.isFilterable() && !objectContainer.isReferenceIsStoredAsAttribute() ? 
-                	  Action.EVENT_ADD_COLUMN_FILTER : 
+                	  GridAddColumnFilterAction.EVENT_ID : 
                 	  Action.EVENT_NONE,
                   new Action.Parameter[]{
                       new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(paneIndex)),
@@ -207,8 +209,8 @@ public class GridControl
         for(int i = 0; i < columnTypes.size(); i++) {
             this.columnTypes[i] = ((Number)columnTypes.get(i)).intValue();
         }        
-        this.columnFilterSetActions = (Action[])columnFilterSetActions.toArray(new Action[columnFilterSetActions.size()]);
-        this.columnFilterAddActions = (Action[])columnFilterAddActions.toArray(new Action[columnFilterAddActions.size()]);        
+        this.columnOrderActions = (Action[])columnOrderActions.toArray(new Action[columnOrderActions.size()]);
+        this.columnSearchActions = (Action[])columnSearchActions.toArray(new Action[columnSearchActions.size()]);        
         
     }
     
@@ -238,18 +240,20 @@ public class GridControl
 
     //-----------------------------------------------------------------------
     /**
-     * @return Returns the columnFilterAddActions.
+     * @return Returns columnSearchActions.
      */
-    public Action[] getColumnFilterAddActions() {
-        return columnFilterAddActions;
+    public Action[] getColumnSearchActions(
+    ) {
+        return this.columnSearchActions;
     }
 
     //-----------------------------------------------------------------------
     /**
-     * @return Returns the columnFilterSetActions.
+     * @return Returns columnOrderActions.
      */
-    public Action[] getColumnFilterSetActions() {
-        return columnFilterSetActions;
+    public Action[] getColumnOrderActions(
+    ) {
+        return this.columnOrderActions;
     }
 
     //-----------------------------------------------------------------------
@@ -318,11 +322,29 @@ public class GridControl
     //-------------------------------------------------------------------------
     public String getQualifiedReferenceName(
     ) {
-        return this.containerClass == null
-            ? this.getObjectContainer().getReferenceName()
-            : this.containerClass + ":" + this.getObjectContainer().getReferenceName();      
+    	if(this.qualifiedReferenceName == null) {
+    		this.qualifiedReferenceName = this.containerClass == null ? 
+    			this.getObjectContainer().getReferenceName() : 
+    				this.containerClass + ":" + this.getObjectContainer().getReferenceName();
+    	}
+    	return this.qualifiedReferenceName;
     }
   
+    //-------------------------------------------------------------------------
+    public String getQualifiedReferenceTypeName(
+    ) {
+    	if(this.qualifiedReferenceTypeName == null) {
+    		String qualifiedName = this.getObjectContainer().refGetPath().getBase();
+    		int pos = qualifiedName.indexOf(":Ref:");
+    		if(pos > 0) {
+    			this.qualifiedReferenceTypeName = qualifiedName.substring(0, pos) + ":" + this.objectContainer.getReferenceName();
+    		} else {
+    			this.qualifiedReferenceTypeName = this.getQualifiedReferenceName();
+    		}
+    	}
+    	return this.qualifiedReferenceTypeName;
+    }
+    
     //-------------------------------------------------------------------------
     public String getContainerClass(
     ) {
@@ -348,14 +370,16 @@ public class GridControl
     private static final long serialVersionUID = 4049361894123256118L;
     
     private final org.openmdx.ui1.jmi1.ObjectContainer objectContainer;
-    private final Action[] columnFilterSetActions;
-    private final Action[] columnFilterAddActions;
+    private final Action[] columnOrderActions;
+    private final Action[] columnSearchActions;
     private final Map<String,Short> initialColumnSortOrders;
     private final int[] columnTypes;
     private final List<org.openmdx.ui1.jmi1.ValuedField> columnDefs;
     private final String containerClass;
     private final String containerId;
-    private final int paneIndex;      
+    private final int paneIndex;
+    private String qualifiedReferenceName = null;
+    private String qualifiedReferenceTypeName = null;
 
 }
 

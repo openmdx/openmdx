@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReferenceValue.java,v 1.71 2010/09/08 09:41:09 wfro Exp $
+ * Name:        $Id: ObjectReferenceValue.java,v 1.73 2011/08/11 15:08:58 wfro Exp $
  * Description: ObjectReferenceValue 
- * Revision:    $Revision: 1.71 $
+ * Revision:    $Revision: 1.73 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/09/08 09:41:09 $
+ * Date:        $Date: 2011/08/11 15:08:58 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -160,13 +160,13 @@ implements Serializable {
         if(value == null) {
             return new ObjectReference(
                 (RefObject_1_0)null,
-                this.application
+                this.app
             );
         }
         else if(value instanceof Exception) {
             return new ObjectReference(
                 new ServiceException((Exception)value),
-                this.application
+                this.app
             );        
         }
         else if(value instanceof Collection) {
@@ -178,15 +178,15 @@ implements Serializable {
         else if(value instanceof RefObject_1_0) {
             return new ObjectReference(
                 (RefObject_1_0)value,
-                this.application
+                this.app
             );
         }
         else {
         	SysLog.warning("Reference is of type String instead RefObject or Collection. Retrieving object with new persistence manager");
             Path objectIdentity = new Path(value.toString());
             return new ObjectReference(
-                (RefObject_1_0)this.application.getNewPmData().getObjectById(objectIdentity),
-                this.application
+                (RefObject_1_0)this.app.getNewPmData().getObjectById(objectIdentity),
+                this.app
             );
         }
     }
@@ -263,7 +263,7 @@ implements Serializable {
             Action action = ((ObjectReference)v).getSelectObjectAction();
             String encodedTitle = (action.getTitle().startsWith("<") ? 
             	action.getTitle() : 
-            	this.application.getHtmlEncoder().encode(action.getTitle(), false));
+            	this.app.getHtmlEncoder().encode(action.getTitle(), false));
             return action.getEvent() == Action.EVENT_NONE ? 
             	encodedTitle : 
             	"<a href=\"\" onmouseover=\"javascript:this.href=" + p.getEvalHRef(action) + ";onmouseover=function(){};\">" + encodedTitle + "</a>";
@@ -331,7 +331,6 @@ implements Serializable {
         String widthModifier,
         String rowSpanModifier,
         String readonlyModifier,
-        String disabledModifier,
         String lockedModifier,
         String stringifiedValue,
         boolean forEditing
@@ -340,7 +339,7 @@ implements Serializable {
         View view = p.getView();
         label = this.getLabel(attribute, p, label);
         String title = this.getTitle(attribute, label);
-        if(forEditing && this.isSingleValued()) {
+        if(forEditing && this.isSingleValued() && readonlyModifier.isEmpty()) {
             String feature = this.getName();
             ObjectReference objectReference = (ObjectReference)this.getValue(false);
             id = (id == null) || (id.length() == 0) ? 
@@ -350,14 +349,14 @@ implements Serializable {
             p.write("<td ", rowSpanModifier, ">");
             // Predefined, selectable values only allowed for single-valued attributes with spanRow == 1
             // Show drop-down instead of input field
-            Autocompleter_1_0 autocompleter = this.isChangeable() ? 
+            Autocompleter_1_0 autocompleter = readonlyModifier.isEmpty() ? 
                 this.getAutocompleter(lookupObject) : 
-                null;
+                	null;
             if(autocompleter == null) {
                 String classModifier = this.isMandatory() ?
                     "valueL mandatory" :
                     "valueL";
-                p.write("  <input id=\"", id, ".Title\" name=\"", id, ".Title\" type=\"text\" class=\"", classModifier, "\"", lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", (objectReference == null ? "" : objectReference.getTitle()), "\"");
+                p.write("  <input id=\"", id, ".Title\" name=\"", id, ".Title\" type=\"text\" class=\"", classModifier, lockedModifier, "\" ", readonlyModifier, " tabindex=\"" + tabIndex, "\" value=\"", (objectReference == null ? "" : objectReference.getTitle()), "\"");
                 p.writeEventHandlers("    ", attribute.getEventHandler());
                 p.write("  >");
                 p.write("  <input id=\"", id, "\" name=\"", id, "\" type=\"hidden\" class=\"valueLLocked\" readonly value=\"", (objectReference == null ? "" : objectReference.refMofId()), "\">");
@@ -380,7 +379,7 @@ implements Serializable {
             }
             p.write("</td>");
             p.write("<td class=\"addon\" ", rowSpanModifier, ">");
-            if(this.isChangeable()) {
+            if(readonlyModifier.isEmpty()) {
                 if(
                     (autocompleter == null) || 
                     !autocompleter.hasFixedSelectableValues()
@@ -409,7 +408,6 @@ implements Serializable {
                 widthModifier,
                 rowSpanModifier,
                 readonlyModifier,
-                disabledModifier,
                 lockedModifier,
                 stringifiedValue,
                 forEditing

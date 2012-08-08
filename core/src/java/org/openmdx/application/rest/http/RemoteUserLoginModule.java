@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: RemoteUserLoginModule.java,v 1.1 2010/10/24 21:41:03 hburger Exp $
+ * Name:        $Id: RemoteUserLoginModule.java,v 1.2 2011/04/27 06:20:08 hburger Exp $
  * Description: Remote User Login Module 
- * Revision:    $Revision: 1.1 $
+ * Revision:    $Revision: 1.2 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/24 21:41:03 $
+ * Date:        $Date: 2011/04/27 06:20:08 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2010, OMEX AG, Switzerland
+ * Copyright (c) 2010-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -62,16 +62,24 @@ import org.openmdx.base.rest.cci.RestConnectionSpec;
  */
 public class RemoteUserLoginModule extends AbstractLoginModule {
 
-//	@Override
+    /**
+     * The default value for the <code>RefInitializeOnCreate</code> property
+     */
+    private static Boolean REF_INITIALIZE_ON_CREATE_DEFAULT = Boolean.TRUE;
+    
+    //	@Override
 	public boolean login() throws LoginException {
 		NameCallback nameCallback = new NameCallback(CallbackPrompts.REMOTE_USER);
 		PasswordCallback passwordCallback = new PasswordCallback(CallbackPrompts.SESSION_ID, false);
-		this.handle(nameCallback, passwordCallback);
+		BooleanCallback refInitializeOnCreate = new BooleanCallback(CallbackPrompts.REF_INITIALIZE_ON_CREATE, REF_INITIALIZE_ON_CREATE_DEFAULT);
+		this.handle(nameCallback, passwordCallback, refInitializeOnCreate);
 		char[] password = passwordCallback.getPassword();
 		this.setPublicCredential(
 			new RestConnectionSpec(
 				nameCallback.getName(),
-				password == null ? null : new String(password)
+				password == null ? null : new String(password),
+				null,
+				Boolean.TRUE.equals(refInitializeOnCreate.getValue())
 			)
 		);
 		return true;

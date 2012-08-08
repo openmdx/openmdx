@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Core, http://www.openmdx.org/
- * Name:        $Id: PlugIn_1.java,v 1.2 2010/01/26 15:44:08 hburger Exp $
+ * Name:        $Id: PlugIn_1.java,v 1.7 2011/09/09 17:35:19 hburger Exp $
  * Description: StandardPlugIn 
- * Revision:    $Revision: 1.2 $
+ * Revision:    $Revision: 1.7 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/01/26 15:44:08 $
+ * Date:        $Date: 2011/09/09 17:35:19 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -61,9 +61,11 @@ import org.openmdx.base.aop1.Segment_1;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
 import org.openmdx.base.mof.cci.Model_1_0;
+import org.openmdx.base.naming.Path;
+import org.openmdx.base.persistence.spi.SharedObjects;
 import org.openmdx.state2.cci.DateStateContext;
 import org.openmdx.state2.cci.DateTimeStateContext;
-import org.openmdx.state2.cci.StateContext;
+import org.openmdx.state2.spi.Configuration;
 
 /**
  * Standard Plug-In
@@ -78,39 +80,50 @@ public class PlugIn_1 implements PlugIn_1_0 {
         Interceptor_1 next
     ) throws ServiceException {
         Interceptor_1 interceptor = next;
+        InteractionSpec interactionSpec = view.getInteractionSpec();
         Model_1_0 model = view.getModel();
         ModelElement_1_0 dataObjectType = model.getElement(view.objGetDelegate().objGetClass());
-        InteractionSpec interactionSpec = view.getInteractionSpec();
-        if(interactionSpec instanceof StateContext<?>) {
-            interceptor = new org.openmdx.state2.aop1.Object_1(
-                view,
-                interceptor
-            );
+        boolean stateCapable = model.isSubtypeOf(dataObjectType, "org:openmdx:state2:StateCapable");
+        Path objectId = view.jdoGetObjectId();
+        Boolean validTimeUnique;
+        if(objectId != null) {
+            validTimeUnique = Boolean.valueOf(SharedObjects.getPlugInObject(view.jdoGetPersistenceManager(), Configuration.class).isValidTimeUnique(objectId));
+        } else if (stateCapable) {
+            validTimeUnique = (Boolean) interceptor.objGetValue("validTimeUnique");
+        } else {
+            validTimeUnique = Boolean.valueOf(SharedObjects.getPlugInObject(view.jdoGetPersistenceManager(), Configuration.class).isTheChildrensValidTimeUnique(dataObjectType));
         }
-        if(model.isSubtypeOf(dataObjectType, "org:openmdx:base:Segment")) {
-            interceptor = new Segment_1(
-                view,
-                interceptor
-            ){
-
-                @Override
-                protected Container_1_0 newExtent(
-                    ObjectView_1_0 parent,
-                    Container_1_0 container
-                ) throws ServiceException {
-                    return new Extent_1(parent, container);
-                }
-               
-            };
-        }
-        if(model.isSubtypeOf(dataObjectType, "org:openmdx:state2:StateCapable")) {
-            //
-            // State Capability
-            //
-            if(interactionSpec == null) {
-                interceptor = new org.openmdx.state2.aop1.StateCapable_1(
+        if(!Boolean.TRUE.equals(validTimeUnique)){
+	        interceptor = new org.openmdx.state2.aop1.Object_1(
+	            view,
+	            interceptor
+	        );
+            if(model.isSubtypeOf(dataObjectType, "org:openmdx:base:Segment")) {
+                interceptor = new Segment_1(
                     view,
                     interceptor
+                ){
+    
+                    @Override
+                    protected Container_1_0 newExtent(
+                        ObjectView_1_0 parent,
+                        Container_1_0 container
+                    ) throws ServiceException {
+                        return new Extent_1(parent, container);
+                    }
+                   
+                };
+            }
+        }
+        if(stateCapable) {
+            if(Boolean.TRUE.equals(validTimeUnique) || interactionSpec == null) {
+                //
+                // State Capability
+                //
+                interceptor = new org.openmdx.state2.aop1.StateCapable_1(
+                    view,
+                    interceptor, 
+                    validTimeUnique
                 );
             } else if(interactionSpec instanceof DateStateContext) {
                 //

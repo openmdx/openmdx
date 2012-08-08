@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: BasicState_1.java,v 1.27 2010/11/16 07:25:14 hburger Exp $
+ * Name:        $Id: BasicState_1.java,v 1.37 2011/11/03 07:17:07 hburger Exp $
  * Description: Basic State Plug-In
- * Revision:    $Revision: 1.27 $
+ * Revision:    $Revision: 1.37 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/11/16 07:25:14 $
+ * Date:        $Date: 2011/11/03 07:17:07 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2008-2010, OMEX AG, Switzerland
+ * Copyright (c) 2008-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -53,9 +53,10 @@ package org.openmdx.state2.aop1;
 import static org.openmdx.base.accessor.cci.SystemAttributes.CREATED_AT;
 import static org.openmdx.base.accessor.cci.SystemAttributes.REMOVED_AT;
 import static org.openmdx.base.persistence.cci.Queries.ASPECT_QUERY;
-import static org.openmdx.state2.cci.ViewKind.TIME_POINT_VIEW;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -80,8 +81,9 @@ import org.openmdx.base.aop1.Removable_1;
 import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.mof.cci.ModelElement_1_0;
+import org.openmdx.base.mof.cci.ModelHelper;
 import org.openmdx.base.mof.cci.Model_1_0;
-import org.openmdx.base.mof.cci.Multiplicities;
+import org.openmdx.base.mof.cci.Multiplicity;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.state2.cci.StateContext;
 import org.openmdx.state2.cci.ViewKind;
@@ -133,6 +135,26 @@ public abstract class BasicState_1<C extends StateContext<?>>
     private transient Map<?,?> coreFeatures;
 
     /**
+     * Lazily initalized for TIME_POINT access mode FOR_QUERY
+     */
+    private transient Iterable<DataObject_1_0> forTimePointQuery;
+
+    /**
+     * Lazily initalized for TIME_RANGE access mode FOR_QUERY
+     */
+    private transient Iterable<DataObject_1_0> forTimeRangeQuery;
+
+    /**
+     * Lazily initalized for TIME_RANGE access mode UNDERLYING_STATE
+     */
+    private transient Iterable<DataObject_1_0> forUnderlyingState;
+
+    /**
+     * Lazily initalized for TIME_RANGE access mode FOR_UPDATE
+     */
+    private transient Iterable<DataObject_1_0> forUpdate;
+
+    /**
      * Tells whether this instances handles a state view, a transient state or an object
      * with unique valid time.
      * 
@@ -168,27 +190,11 @@ public abstract class BasicState_1<C extends StateContext<?>>
     }
     
     /**
-     * Tests whether the context describes a history view
-     * 
-     * @param context
-     * 
-     * @return <code>true</code> if the context describes a history view
-     */
-    protected static boolean isHistoryView(
-        StateContext<?> context
-    ){
-        return
-            context.getViewKind() == TIME_POINT_VIEW &&
-            context.getExistsAt() != null;
-    }
-
-    /**
      * Tests whether a given state is involved in the given context
      * 
      * @param candidate
      * @param context
-     * @param exact <code>true</code> if the state must exactly match the context
-     * @param includeRemoved
+     * @param accessMode 
      * @return <code>true</code> if the candidate is involved
      * 
      * @throws ServiceException
@@ -196,23 +202,34 @@ public abstract class BasicState_1<C extends StateContext<?>>
     protected boolean isInvolved(
         DataObject_1_0 candidate, 
         C context, 
-        boolean exact, 
-        boolean removed
+        AccessMode accessMode
     ) throws ServiceException {
         if(!candidate.jdoIsDeleted() && getModel().isInstanceof(candidate, getStateClass())) {
-            //
-            // Transaction Time Test
-            // 
-            if(BasicState_1.isHistoryView(context)) {
-                return candidate.jdoIsPersistent() && !candidate.jdoIsNew() && StateViewContext.compareTransactionTime(
-                    context.getExistsAt(),
-                    (Date)candidate.objGetValue(CREATED_AT),
-                    (Date)candidate.objGetValue(REMOVED_AT)
-                );
-            } else {
-                Object removedAt = candidate.objGetValue(REMOVED_AT);
-                return removed ? IN_THE_FUTURE.equals(removedAt) : removedAt == null;
-            }
+    		Date removedAt = (Date) candidate.objGetValue(REMOVED_AT); 
+        	switch(context.getViewKind()) {
+	        	case TIME_POINT_VIEW:
+	        		if(context.getExistsAt() == null) {
+		        		return removedAt == null;
+	        		} else {
+	                    return 
+	                    	candidate.jdoIsPersistent() && 
+	                    	!candidate.jdoIsNew() &&
+	                    	StateViewContext.compareTransactionTime(
+	                    		context.getExistsAt(), 
+	                    		((Date)candidate.objGetValue(CREATED_AT)), 
+	                    		removedAt
+	                    	);
+	        		}
+	        	case TIME_RANGE_VIEW:
+	        		return removedAt == null;
+        		default:
+        			throw new RuntimeServiceException(
+        				BasicException.Code.DEFAULT_DOMAIN,
+        				BasicException.Code.ASSERTION_FAILURE,
+        				"Unexpected view kind",
+        				new BasicException.Parameter("context",context)
+        			);
+        	}
         } else {
             return false;
         }
@@ -313,69 +330,47 @@ public abstract class BasicState_1<C extends StateContext<?>>
     public Iterable<DataObject_1_0> getInvolved(
         final AccessMode accessMode
     ){
-        return new Iterable<DataObject_1_0>(){
-
-            public Iterator<DataObject_1_0> iterator() {
-                try {
-                    Collection<DataObject_1_0> states = getStates();
-                    if(accessMode == null) {
-                        return new InvolvedStates(states, false, true);
-                    } else switch (accessMode) {
-                        case UNDERLYING_STATE: 
-                            return new InvolvedStates(states, true, false);
-                        case FOR_QUERY: 
-                            return new InvolvedStates(states, false, false);
-                        case FOR_UPDATE:
-                            C context = getContext();
-                            switch(getContext().getViewKind()) {
-                                case TIME_POINT_VIEW :
-                                    throw new ServiceException(
-                                        BasicException.Code.DEFAULT_DOMAIN,
-                                        BasicException.Code.NOT_SUPPORTED,
-                                        "A time-point view is read-only",
-                                        new BasicException.Parameter("xri", BasicState_1.this.jdoGetObjectId()),
-                                        new BasicException.Parameter("viewKind", TIME_POINT_VIEW),
-                                        new BasicException.Parameter("access", accessMode)
-                                    );
-                                case TIME_RANGE_VIEW: 
-                                    Map<DataObject_1_0,BoundaryCrossing> pending = new HashMap<DataObject_1_0,BoundaryCrossing>();
-                                    for(DataObject_1_0 state : states){
-                                        //
-                                        // Enable Updates
-                                        //
-                                        if(isInvolved(state, context, false, false)) {
-                                            BoundaryCrossing boundaryCrossing = getBoundaryCrossing(state);
-                                            if(!state.jdoIsNew() || boundaryCrossing != BoundaryCrossing.NONE) {
-                                                pending.put(state, boundaryCrossing);
-                                            }
-                                        }
-                                    }
-                                    if(!pending.isEmpty()) {
-                                        enableUpdate(
-                                            pending
-                                        );
-                                    }
-                                    break;
-                            }
-                            return new InvolvedStates(states, false, false);
-                        default:
-                            throw new RuntimeServiceException(
-                                BasicException.Code.DEFAULT_DOMAIN,
-                                BasicException.Code.ASSERTION_FAILURE,
-                                "Unexpected access mode",
-                                new BasicException.Parameter("accessMode", accessMode)
-                            );
-                    }
-                } catch (ServiceException exception) {
-                    throw new RuntimeServiceException(exception);
-                }
-            }
-
-        };
-
-    }
-
-    /* (non-Javadoc)
+    	ViewKind viewKind = getContext().getViewKind();
+		switch(viewKind) {
+	    	case TIME_RANGE_VIEW:
+	    		switch(accessMode) {
+		    		case FOR_QUERY:
+			    		if(this.forTimeRangeQuery == null) {
+			    			this.forTimeRangeQuery = new MultiStateCache(accessMode);
+			    		}
+			    		return this.forTimeRangeQuery;
+		    		case UNDERLYING_STATE:
+			    		if(this.forUnderlyingState == null) {
+			    			this.forUnderlyingState = new SingleStateCache(accessMode);
+			    		}
+			    		return this.forUnderlyingState;
+		    		case FOR_UPDATE:
+			    		if(this.forUpdate == null) {
+			    			this.forUpdate = new InvolvedStatesForUpdate();
+			    		}
+			    		return this.forUpdate;
+	    		}
+	    	case TIME_POINT_VIEW:
+	    		switch(accessMode) {
+		    		case FOR_QUERY:
+			    		if(this.forTimePointQuery == null) {
+			    			this.forTimePointQuery = new SingleStateCache(accessMode);
+			    		}
+			    		return this.forTimePointQuery;
+				}
+    	}
+        throw new RuntimeServiceException(
+            BasicException.Code.DEFAULT_DOMAIN,
+            BasicException.Code.BAD_PARAMETER,
+            "Illegal access mode for the given view kind",
+            ExceptionHelper.newObjectIdParameter("id", this),
+            new BasicException.Parameter("viewKind", viewKind),
+            ExceptionHelper.newObjectIdParameter("accessMode", accessMode)
+        );
+    } 	
+    
+    	
+	/* (non-Javadoc)
      * @see org.openmdx.base.accessor.generic.spi.StaticallyDelegatingObject_1#objGetList(java.lang.String)
      */
     @SuppressWarnings("unchecked")
@@ -518,8 +513,14 @@ public abstract class BasicState_1<C extends StateContext<?>>
                     DataObject_1_0 core = (DataObject_1_0) to;
                     DataObject_1_0 delegate = this.self.objGetDelegate();
                     if(core == delegate) {
-                        core.objSetValue("validTimeUnique", Boolean.TRUE);
-                        core.objSetValue("transactionTimeUnique", Boolean.TRUE);
+                        throw new ServiceException(
+                            BasicException.Code.DEFAULT_DOMAIN,
+                            BasicException.Code.NOT_SUPPORTED,
+                            "Use setValidTimeUnique(true) instead",
+                            ExceptionHelper.newObjectIdParameter("id", this),
+                            new BasicException.Parameter("feature", feature),
+                            new BasicException.Parameter("value", "<self>")
+                        );
                     } else {
                         for(DataObject_1_0 state : this.getStates(core)) {
                             if(isActive(state) && interfersWith(state)) {
@@ -540,25 +541,40 @@ public abstract class BasicState_1<C extends StateContext<?>>
                                     true // includeSubtypes
                                 );
                                 if(model.isAttributeType(featureDef)) {
-                                    String multiplicity = (String)featureDef.objGetValue("multiplicity");
-                                    if(Multiplicities.LIST.equals(multiplicity)) {
-                                        List<Object> target = delegate.objGetList(coreFeature);
-                                        target.clear();
-                                        target.addAll(core.objGetList(coreFeature));
-                                    } else if (Multiplicities.SET.equals(multiplicity)) {
-                                        Set<Object> target = delegate.objGetSet(coreFeature);
-                                        target.clear();
-                                        target.addAll(core.objGetSet(coreFeature));
-                                    } else if (Multiplicities.SPARSEARRAY.equals(multiplicity)) {
-                                        SortedMap<Integer,Object> target = delegate.objGetSparseArray(coreFeature);
-                                        target.clear();
-                                        target.putAll(core.objGetSparseArray(coreFeature));
-                                    } else {
-                                        delegate.objSetValue(
-                                            coreFeature, 
-                                            core.objGetValue(coreFeature)
+                                	Multiplicity multiplicity = ModelHelper.getMultiplicity(featureDef);
+                                    switch(multiplicity){
+                                	    case OPTIONAL: case SINGLE_VALUE: {
+                                            delegate.objSetValue(
+                                                coreFeature, 
+                                                core.objGetValue(coreFeature)
+                                            );
+                                	    } break;
+	                                	case LIST: {
+	                                        List<Object> target = delegate.objGetList(coreFeature);
+	                                        target.clear();
+	                                        target.addAll(core.objGetList(coreFeature));
+	                                	} break;
+	                                	case SET: {
+	                                        Set<Object> target = delegate.objGetSet(coreFeature);
+	                                        target.clear();
+	                                        target.addAll(core.objGetSet(coreFeature));
+	                                	} break;
+	                                	case SPARSEARRAY: {
+	                                        SortedMap<Integer,Object> target = delegate.objGetSparseArray(coreFeature);
+	                                        target.clear();
+	                                        target.putAll(core.objGetSparseArray(coreFeature));
+	                                	} break;
+	                                	case STREAM:
+	                                	    // Streams are not replicated to their code attributes
+	                                	break;	
+                                        default: throw new ServiceException(
+                                            BasicException.Code.DEFAULT_DOMAIN,
+                                            BasicException.Code.NOT_SUPPORTED,
+                                            "The given multiplicity is not supported for core atttributes",
+                                            new BasicException.Parameter("multiplicity", multiplicity),
+                                            new BasicException.Parameter("attribute", coreFeature)
                                         );
-                                    }
+                                	}
                                 }
                             }
                         }
@@ -762,43 +778,66 @@ public abstract class BasicState_1<C extends StateContext<?>>
         return this.self.jdoGetPersistenceManager();
     }
 
+    /**
+     * Merge similar adjacent states
+     */
+    protected abstract void reduceStates(
+    ) throws ServiceException;
 
+    /* (non-Javadoc)
+     * @see org.openmdx.base.accessor.view.PlugIn_1#jdoPreStore()
+     */
+    @Override
+    public void jdoPreStore() {
+        try {
+            reduceStates();
+        } catch (ServiceException exception) {
+            throw new RuntimeServiceException(exception);
+        }
+        super.jdoPreStore();
+    }
+
+    /**
+     * Retrieve the actual state version
+     * 
+     * @return the actual state version
+     * 
+     * @throws ServiceException  
+     */
+	int getStateVersion(
+	) throws ServiceException {
+		Number stateVersion = (Number)self.objGetDelegate().objGetValue("stateVersion");
+		return stateVersion == null ? Integer.MIN_VALUE : stateVersion.intValue();
+	}
+
+	
     //------------------------------------------------------------------------
-    // Class InvolvedStates
+    // Class InvolvedStatesIterator
     //------------------------------------------------------------------------    
 
     /**
      * Involved States
      */
-    final class InvolvedStates implements Iterator<DataObject_1_0> {
+    class InvolvedStatesIterator implements Iterator<DataObject_1_0> {
 
         /**
          * Constructor 
          *
-         * @param states
-         * @param exact <code>true</code> if the state must exactly match the context
-         * @param removed 
+         * @param states         * 
+         * @param testPersistency 
+         * @param accessMode, or <code>null</code> if filtering is not required
+         *  
          * @throws ServiceException
          */
-        InvolvedStates(
-            Collection<DataObject_1_0> states, 
-            boolean exact, 
-            boolean removed
+        InvolvedStatesIterator(
+        	Iterable<DataObject_1_0> states, 
+            AccessMode accessMode, 
+            boolean testPersistency
         ) throws ServiceException{
             this.candidates = states.iterator();
-            this.exact = exact;
-            this.removed = removed;
+            this.accessMode = accessMode;
+            this.testPersistency = testPersistency;
         }
-
-        /**
-         * <code>true</code> if the state must exactly match the context
-         */
-        private final boolean exact;
-
-        /**
-         * 
-         */
-        private final boolean removed;
 
         /**
          * 
@@ -815,19 +854,41 @@ public abstract class BasicState_1<C extends StateContext<?>>
          */
         private DataObject_1_0 lastInvolved = null;
 
+        /**
+         * The access mode
+         */
+        private final AccessMode accessMode;
+
+        /**
+         * 
+         */
+        private final boolean testPersistency;
+        
+        /**
+         * The iterator is invoked in a given context
+         */
+        private final C context = getContext();
+        
+		protected boolean isAcceptable(DataObject_1_0 candidate) throws ServiceException {
+			return (
+				!testPersistency || candidate.jdoIsPersistent()
+			) && (			
+				accessMode == null || isInvolved(candidate, context, accessMode)
+			);
+		}
+
         /* (non-Javadoc)
          * @see java.util.Iterator#hasNext()
          */
         public boolean hasNext(
         ) {
             try {
-                C context = getContext();
                 while(
                     this.nextInvolved == null && 
                     this.candidates.hasNext()
                 ) {
                     DataObject_1_0 candidate = this.candidates.next();
-                    if(isInvolved(candidate, context, this.exact, this.removed)) {
+                    if(isAcceptable(candidate)) {
                         this.nextInvolved = candidate;
                     }
                 }
@@ -875,23 +936,266 @@ public abstract class BasicState_1<C extends StateContext<?>>
 
     }
 
-    /**
-     * Merge similar adjacent states
-     */
-    protected abstract void reduceStates(
-    ) throws ServiceException;
+	//------------------------------------------------------------------------
+    // Class StateCache
+    //------------------------------------------------------------------------    
 
-    /* (non-Javadoc)
-     * @see org.openmdx.base.accessor.view.PlugIn_1#jdoPreStore()
+    /**
+     * The involved states may be cached if they are persistent
      */
-    @Override
-    public void jdoPreStore() {
-        try {
-            reduceStates();
-        } catch (ServiceException exception) {
-            throw new RuntimeServiceException(exception);
+    abstract class StateCache implements Iterable<DataObject_1_0> {
+
+    	/**
+    	 * Constructor
+    	 * 
+    	 * @param accessMode
+    	 * @param cacheRequiresFiltering 
+    	 */
+    	StateCache(
+			AccessMode accessMode, 
+			boolean cacheRequiresFiltering
+		) {
+			this.accessMode = accessMode;
+			this.cacheRequiresFiltering = cacheRequiresFiltering;
+		}
+		
+    	/**
+    	 * Remembers for which access mode the cache is used
+    	 */
+		protected final AccessMode accessMode;
+		
+		/**
+		 * Tells whether the cache content requires filtering
+		 */
+		private final boolean cacheRequiresFiltering;
+		
+    	/**
+    	 * The cache version is updated when the cache is refreshed.
+    	 */
+		private int cacheVersion;
+		
+		/**
+		 * The cached states
+		 */
+    	private Iterable<DataObject_1_0> cachedStates;
+
+    	/**
+    	 * Tells whether the values may be cached
+    	 * 
+    	 * @return <code>true</code> if the values may be cached
+    	 */
+    	protected boolean isCacheable(){
+    		return jdoIsPersistent();
+    	}
+    	
+    	/**
+    	 * Tells whether the cache can be used or must be (re-)built
+    	 * 
+    	 * @return <code>true</code> if the cache may be used without rebuilding
+    	 * 
+    	 * @throws ServiceException
+    	 */
+    	protected boolean isWarm() throws ServiceException{
+    		return 
+    			this.cachedStates != null && 
+    			this.cacheVersion == getStateVersion(); 
+    	}
+    	
+    	/**
+    	 * Create a new cache based on the underlying iterator
+    	 * 
+    	 * @param delegate the underlying iterator
+    	 * 
+    	 * @return an up-to-date cache
+    	 * 
+    	 * @throws ServiceException
+    	 */
+    	protected abstract Iterable<DataObject_1_0> newCache(
+    		Iterator<DataObject_1_0> delegate	
+    	) throws ServiceException;
+    	
+        /**
+         * Retrieve the underlying iterator
+         * 
+         * @param states
+         * @param testInvolvement <code>true</code> if the states must be filtered 
+         * @param testPersistency
+         * @return a new Iterator
+         * @throws ServiceException
+         */
+        protected final Iterator<DataObject_1_0> iterator(
+        	Iterable<DataObject_1_0> states, 
+    		boolean testInvolvement, 
+    		boolean testPersistency
+        ) throws ServiceException {
+        	return testInvolvement ? new InvolvedStatesIterator(states, accessMode, testPersistency) : states.iterator();
         }
-        super.jdoPreStore();
+
+        /* (non-Javadoc)
+		 * @see org.openmdx.state2.aop1.BasicState_1.InvolvedStates#iterator()
+		 */
+		public Iterator<DataObject_1_0> iterator() {
+			try {
+				if(isCacheable()){
+					if(isWarm()) {
+						return iterator(this.cachedStates, cacheRequiresFiltering, cacheRequiresFiltering);
+					} else {
+						this.cachedStates = newCache(iterator(getStates(), true, false));
+						this.cacheVersion = getStateVersion();
+						return iterator(this.cachedStates, false, false);
+					} 
+				} else {
+					return iterator(getStates(), true, false);
+				}
+			} catch (ServiceException exception) {
+				throw new RuntimeServiceException(exception);
+			}
+		}    	
+    	
+    }
+    
+    
+    //------------------------------------------------------------------------
+    // Class SingleStateCache
+    //------------------------------------------------------------------------    
+    
+    /**
+     * Use for<ul>
+     * <li>access mode FOR_QUERY in TIME_POINT views 
+     * <li>access mode UNDERLYING_STTAE in TIME_RAMGE views 
+     * </ul>
+     */
+    class SingleStateCache extends StateCache {
+
+    	/**
+    	 * Constructor
+    	 * 
+    	 * @param accessMode
+    	 */
+		SingleStateCache(AccessMode accessMode) {
+			super(accessMode, false);
+			
+		}
+    	
+    	private DataObject_1_0 cachedState;
+    	private boolean invalidState;
+
+    	@Override
+    	protected boolean isWarm() throws ServiceException{
+    		return super.isWarm() && (
+    			this.invalidState || (
+					this.cachedState.jdoIsPersistent() &&
+					!this.cachedState.jdoIsDeleted() &&
+					this.cachedState.objGetValue(REMOVED_AT) == null
+    			)
+    		);
+    	}
+    	
+		/* (non-Javadoc)
+		 * @see org.openmdx.state2.aop1.BasicState_1.StateCache#newCache(java.util.Iterator)
+		 */
+		@Override
+		protected Iterable<DataObject_1_0> newCache(
+			Iterator<DataObject_1_0> delegate
+		) throws ServiceException {
+			if(delegate.hasNext()) {
+				this.cachedState = delegate.next();
+				this.invalidState = this.cachedState.objGetValue(REMOVED_AT) != null;
+				return Collections.singleton(this.cachedState);
+			} else {
+				this.invalidState = true;
+				return Collections.emptySet();
+			}
+		}
+
     }
 
+
+    //------------------------------------------------------------------------
+    // Class MultiStateCache
+    //------------------------------------------------------------------------    
+    
+    /**
+     * Use <ul>
+     * <li>directly for access mode FOR_QUERY in TIME_RAMGE views 
+     * <li>indirectly access mode For_UPDATE in TIME_RAMGE views 
+     * </ul>
+     */
+    class MultiStateCache extends StateCache {
+
+    	/**
+    	 * Constructor
+    	 * 
+    	 * @param accessMode
+    	 */
+    	MultiStateCache(AccessMode accessMode) {
+			super(accessMode, true);
+		}
+    	
+		/* (non-Javadoc)
+		 * @see org.openmdx.state2.aop1.BasicState_1.StateCache#newCache(java.util.Iterator)
+		 */
+		@Override
+		protected Iterable<DataObject_1_0> newCache(
+			Iterator<DataObject_1_0> delegate
+		) throws ServiceException {
+			final List<DataObject_1_0> cachedStates = new ArrayList<DataObject_1_0>();
+			while(delegate.hasNext()) {
+				cachedStates.add(delegate.next());
+			}
+			return cachedStates;
+		}
+
+    }
+    
+    //------------------------------------------------------------------------
+    // Class InvolvedStatesForUpdate
+    //------------------------------------------------------------------------    
+    
+    /**
+     * The involved states for updates
+     */
+    class InvolvedStatesForUpdate extends MultiStateCache {
+    	
+    	/**
+    	 * Constructor
+    	 * 
+    	 * @param accessMode
+    	 */
+    	InvolvedStatesForUpdate() {
+    		super(AccessMode.FOR_UPDATE);
+		}
+    	
+        private final C context = getContext();    	
+
+
+		@Override
+		protected boolean isCacheable() {
+			return false;
+		}
+
+		@Override
+		public Iterator<DataObject_1_0> iterator() {
+			try {
+		       	Map<DataObject_1_0,BoundaryCrossing> pending = new HashMap<DataObject_1_0,BoundaryCrossing>();	       	
+	            for(DataObject_1_0 state : getStates()){
+	                if(isInvolved(state, context, accessMode)) {
+	                    BoundaryCrossing boundaryCrossing = getBoundaryCrossing(state);
+	                    if(!state.jdoIsNew() || boundaryCrossing != BoundaryCrossing.NONE) {
+	                        pending.put(state, boundaryCrossing);
+	                    }
+	                }
+	            }
+	            if(!pending.isEmpty()) {
+	                enableUpdate(
+	                    pending
+	                );
+	            }
+			} catch (ServiceException exception) {
+				throw new RuntimeServiceException(exception);
+			}
+ 			return super.iterator();
+		}
+
+    }
 }

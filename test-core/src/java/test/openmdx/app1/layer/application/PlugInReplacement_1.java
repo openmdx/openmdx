@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: PlugInReplacement_1.java,v 1.9 2010/06/03 15:57:09 hburger Exp $
+ * Name:        $Id: PlugInReplacement_1.java,v 1.10 2011/12/02 10:34:10 hburger Exp $
  * Description: TestApp_1's standard stack
- * Revision:    $Revision: 1.9 $
+ * Revision:    $Revision: 1.10 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/03 15:57:09 $
+ * Date:        $Date: 2011/12/02 10:34:10 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -59,6 +59,7 @@ import org.openmdx.application.dataprovider.cci.DataproviderRequest;
 import org.openmdx.base.exception.ServiceException;
 import org.openmdx.base.naming.Path;
 import org.openmdx.base.resource.spi.RestInteractionSpec;
+import org.openmdx.base.rest.spi.Facades;
 import org.openmdx.base.rest.spi.Object_2Facade;
 import org.openmdx.kernel.exception.BasicException;
 
@@ -97,8 +98,8 @@ public class PlugInReplacement_1 extends VirtualObjects_1 {
         ) throws ServiceException {
             DataproviderRequest request = this.newDataproviderRequest(ispec, input);
             Path objectId = request.path();
-            if(objectId.isLike(MESSAGE_TEMPLATE_PATTERN)) try {
-                Object_2Facade facade = Object_2Facade.newInstance(request.object());
+            if(objectId.isLike(MESSAGE_TEMPLATE_PATTERN)) {
+				Object_2Facade facade = Facades.asObject(request.object());
                 String text = (String) facade.attributeValuesAsList("text").get(0);
                 if(text == null || text.length() == 0) {
                     throw new ServiceException(
@@ -109,9 +110,7 @@ public class PlugInReplacement_1 extends VirtualObjects_1 {
                         new BasicException.Parameter("text", text)
                     );
                 }
-            } catch (ResourceException exception) {
-                throw new ServiceException(exception);
-            }
+			}
             super.create(
                 ispec,
                 input,

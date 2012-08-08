@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ObjectReference.java,v 1.38 2009/10/13 13:14:41 wfro Exp $
+ * Name:        $Id: ObjectReference.java,v 1.42 2011/08/19 22:50:47 wfro Exp $
  * Description: ObjectReference 
- * Revision:    $Revision: 1.38 $
+ * Revision:    $Revision: 1.42 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/10/13 13:14:41 $
+ * Date:        $Date: 2011/08/19 22:50:47 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -67,6 +67,12 @@ import org.openmdx.base.mof.cci.Model_1_0;
 import org.openmdx.base.naming.Path;
 import org.openmdx.kernel.exception.BasicException;
 import org.openmdx.kernel.log.SysLog;
+import org.openmdx.portal.servlet.action.DeleteAction;
+import org.openmdx.portal.servlet.action.EditAction;
+import org.openmdx.portal.servlet.action.ObjectGetAttributesAction;
+import org.openmdx.portal.servlet.action.ReloadAction;
+import org.openmdx.portal.servlet.action.SelectAndEditObjectAction;
+import org.openmdx.portal.servlet.action.SelectObjectAction;
 import org.openmdx.portal.servlet.view.ViewMode;
 import org.openmdx.ui1.layer.application.Ui_1;
 
@@ -80,7 +86,7 @@ public class ObjectReference
     ) {
 	    this.object = object;
 	    this.exception = null;
-	    this.application = application;
+	    this.app = application;
     }
 
     //-------------------------------------------------------------------------
@@ -90,7 +96,7 @@ public class ObjectReference
     ) {
 	    this.object = null;
 	    this.exception = exception;
-	    this.application = application;
+	    this.app = application;
     }
 
     //-------------------------------------------------------------------------
@@ -141,12 +147,12 @@ public class ObjectReference
     		String title = "";
     		try {
     			RefObject_1_0 refObj = this.object;
-    			title = this.application.getPortalExtension().getTitle(
+    			title = this.app.getPortalExtension().getTitle(
     				refObj,
-    				this.application.getCurrentLocaleAsIndex(),
-    				this.application.getCurrentLocaleAsString(),
+    				this.app.getCurrentLocaleAsIndex(),
+    				this.app.getCurrentLocaleAsString(),
     				asShortTitle,
-    				this.application
+    				this.app
     			);
     			// Replace newlines by blank
     			title = title.replace('\n', ' ');
@@ -177,7 +183,7 @@ public class ObjectReference
         try {
             return this.object == null ?
                 "-" :
-                this.application.getLabel(this.object.refClass().refMofId());
+                this.app.getLabel(this.object.refClass().refMofId());
         }
         catch(ServiceException e) {
         	SysLog.warning(e.getMessage(), e.getCause());
@@ -191,7 +197,7 @@ public class ObjectReference
         try {
             return this.object == null ? 
                 WebKeys.ICON_MISSING : 
-                this.application.getIconKey(this.object.refClass().refMofId());
+                this.app.getIconKey(this.object.refClass().refMofId());
         }
         catch(ServiceException e) {
         	SysLog.warning(e.getMessage(), e.getCause());
@@ -209,7 +215,7 @@ public class ObjectReference
         try {
             return this.object == null ?
                 null :
-                this.application.getBackColor(this.object.refClass().refMofId());
+                this.app.getBackColor(this.object.refClass().refMofId());
         }
         catch(ServiceException e) {
         	SysLog.warning(e.getMessage(), e.getCause());
@@ -227,7 +233,7 @@ public class ObjectReference
         try {
             return this.object == null ?
                 null :
-                this.application.getColor(this.object.refClass().refMofId());
+                this.app.getColor(this.object.refClass().refMofId());
         }
         catch(ServiceException e) {
         	SysLog.warning(e.getMessage(), e.getCause());
@@ -241,7 +247,7 @@ public class ObjectReference
         String title = this.getTitle();
         Path retrievalPath = (this.object == null) || (this.exception != null) ? 
             null : 
-            this.application.getObjectRetrievalIdentity(this.object);
+            this.app.getObjectRetrievalIdentity(this.object);
         if(retrievalPath == null) {
             return new Action(
                 Action.EVENT_NONE,
@@ -252,14 +258,14 @@ public class ObjectReference
             );
         }
         return new Action(
-            Action.EVENT_SELECT_OBJECT,
+            SelectObjectAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(
                     Action.PARAMETER_OBJECTXRI, 
                     retrievalPath.toXri()
                 ),
             },
-            title.trim().length() > 0 ? 
+            !title.trim().isEmpty() ? 
                 title : 
                 this.getLabel(),
             this.getIconKey(),
@@ -280,7 +286,7 @@ public class ObjectReference
             );
         }
         return new Action(
-            Action.EVENT_SELECT_AND_EDIT_OBJECT,
+            SelectAndEditObjectAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object.refMofId()),
             },
@@ -303,7 +309,7 @@ public class ObjectReference
             );
         }
       return new Action(
-          Action.EVENT_RELOAD,
+          ReloadAction.EVENT_ID,
           new Action.Parameter[]{
               new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object.refMofId())
           },
@@ -317,11 +323,11 @@ public class ObjectReference
     public Action getObjectGetAttributesAction(
     ) {
         return new Action(
-            Action.EVENT_OBJECT_GET_ATTRIBUTES, 
+            ObjectGetAttributesAction.EVENT_ID, 
             new Action.Parameter[]{ 
                new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object.refMofId())
             }, 
-            this.application.getTexts().getShowDetailsTitle(), 
+            this.app.getTexts().getShowDetailsTitle(), 
             true
         );
     }
@@ -339,19 +345,20 @@ public class ObjectReference
         ViewMode mode
     ) throws ServiceException {
         return new Action(
-            Action.EVENT_EDIT,  
+            EditAction.EVENT_ID,  
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object == null ? "" : this.object.refMofId()),
                 new Action.Parameter(Action.PARAMETER_MODE, mode.toString())
             },
-            this.application.getTexts().getEditTitle(),
-            this.application.getTexts().getEditTitle(),
+            this.app.getTexts().getEditTitle(),
+            this.app.getTexts().getEditTitle(),
             WebKeys.ICON_EDIT,
-            this.application.getInspector(this.object.refClass().refMofId()).isChangeable() &&
-            this.application.getPortalExtension().isEnabled(
+            this.app.getInspector(this.object.refClass().refMofId()).isChangeable() &&
+            !this.app.getPortalExtension().hasPermission(
                 Ui_1.EDIT_OBJECT_OPERATION_NAME,
                 this.getObject(),
-                this.application
+                this.app,
+                WebKeys.PERMISSION_REVOKE_SHOW
             )          
         );
     }
@@ -360,19 +367,20 @@ public class ObjectReference
     public Action getDeleteObjectAction(
     ) throws ServiceException {
         return new Action(
-            Action.EVENT_DELETE,
+            DeleteAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_OBJECTXRI, this.object == null ? "" : this.object.refMofId())
             },
-            this.application.getTexts().getDeleteTitle(),
-            this.application.getTexts().getDeleteTitle(),
+            this.app.getTexts().getDeleteTitle(),
+            this.app.getTexts().getDeleteTitle(),
             WebKeys.ICON_DELETE,
-            this.application.getInspector(this.object.refClass().refMofId()).isChangeable() &&
-            this.application.getPortalExtension().isEnabled(
+            this.app.getInspector(this.object.refClass().refMofId()).isChangeable() &&
+            !this.app.getPortalExtension().hasPermission(
                 Ui_1.DELETE_OBJECT_OPERATION_NAME,
                 this.getObject(),
-                this.application
-            )        
+                this.app,
+                WebKeys.PERMISSION_REVOKE_SHOW
+            )
         );
     }
   
@@ -394,7 +402,7 @@ public class ObjectReference
             return new Action(
                 Action.EVENT_NONE,
                 null,
-                this.application.getTexts().getNavigateToParentText(),
+                this.app.getTexts().getNavigateToParentText(),
                 WebKeys.ICON_UP,
                 false
             );
@@ -402,14 +410,14 @@ public class ObjectReference
         else {
             Path identity = this.object.refGetPath();
             return new Action(
-                Action.EVENT_SELECT_OBJECT,
+                SelectObjectAction.EVENT_ID,
                 new Action.Parameter[]{
                     new Action.Parameter(Action.PARAMETER_OBJECTXRI, identity.getParent().getParent().toXri()),
                     new Action.Parameter(Action.PARAMETER_REFERENCE_NAME, identity.getParent().getBase())
                 },
                 parentTitle != null
                     ? parentTitle
-                    : this.application.getTexts().getNavigateToParentText(),
+                    : this.app.getTexts().getNavigateToParentText(),
                 WebKeys.ICON_UP,
                 true
             );
@@ -460,7 +468,7 @@ public class ObjectReference
 
     private RefObject_1_0 object;
     private ServiceException exception;
-    private final ApplicationContext application;
+    private final ApplicationContext app;
 }
 
 //--- End of File -----------------------------------------------------------

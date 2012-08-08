@@ -2,7 +2,7 @@ package javax.jmi.model;
 
 import javax.jmi.reflect.*;
 
-@SuppressWarnings({"unchecked","unused"})
+@SuppressWarnings({"rawtypes","unused"})
 public interface GeneralizableElement extends Namespace {
     public java.util.List allSupertypes();
     public ModelElement lookupElementExtended(String name) throws NameNotFoundException;

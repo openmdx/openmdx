@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--
 =======================================================================
-= Name:        $Id: build.xml,v 1.66 2010/10/27 14:36:32 wfro Exp $
+= Name:        $Id: build.xml,v 1.68 2011/11/02 14:26:07 wfro Exp $
 = Description: openMDX/Test Core
-= Revision:    $Revision: 1.66 $
-= Date:        $Date: 2010/10/27 14:36:32 $
+= Revision:    $Revision: 1.68 $
+= Date:        $Date: 2011/11/02 14:26:07 $
 = Copyright:   (c) 2003-2010 OMEX AG
 =======================================================================
  *

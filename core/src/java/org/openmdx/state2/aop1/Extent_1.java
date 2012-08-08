@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: Extent_1.java,v 1.3 2010/06/01 08:57:59 hburger Exp $
+ * Name:        $Id: Extent_1.java,v 1.4 2011/02/24 16:34:20 hburger Exp $
  * Description: State Object Container
- * Revision:    $Revision: 1.3 $
+ * Revision:    $Revision: 1.4 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/01 08:57:59 $
+ * Date:        $Date: 2011/02/24 16:34:20 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
@@ -96,7 +96,8 @@ public class Extent_1 extends org.openmdx.base.aop1.Extent_1 {
         if(this.stateCapableContainer == null) {
             this.stateCapableContainer = new StateCapableContainer_1(
                 this.parent,
-                this.container
+                this.container, 
+                null
             );
         }
         return this.stateCapableContainer;

@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: ReferencePaneControl.java,v 1.198 2010/10/25 08:58:47 wfro Exp $
+ * Name:        $Id: ReferencePaneControl.java,v 1.214 2011/11/28 13:33:51 wfro Exp $
  * Description: ReferencePaneControl
- * Revision:    $Revision: 1.198 $
+ * Revision:    $Revision: 1.214 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/10/25 08:58:47 $
+ * Date:        $Date: 2011/11/28 13:33:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -80,6 +80,8 @@ import org.openmdx.portal.servlet.HtmlEncoder_1_0;
 import org.openmdx.portal.servlet.ObjectReference;
 import org.openmdx.portal.servlet.ViewPort;
 import org.openmdx.portal.servlet.WebKeys;
+import org.openmdx.portal.servlet.action.GridGetRowMenuAction;
+import org.openmdx.portal.servlet.action.GridSelectReferenceAction;
 import org.openmdx.portal.servlet.attribute.AttributeValue;
 import org.openmdx.portal.servlet.attribute.BooleanValue;
 import org.openmdx.portal.servlet.attribute.CodeValue;
@@ -138,7 +140,7 @@ public class ReferencePaneControl
             	  title;              
           references.add(
               new Action(
-                  Action.EVENT_SELECT_REFERENCE,
+                  GridSelectReferenceAction.EVENT_ID,
                   new Action.Parameter[]{
                       new Action.Parameter(Action.PARAMETER_PANE, Integer.toString(this.getPaneIndex())),
                       new Action.Parameter(Action.PARAMETER_REFERENCE, Integer.toString(i)),
@@ -170,7 +172,7 @@ public class ReferencePaneControl
         long rowId
     ) {
         return new Action(
-            Action.EVENT_GRID_GET_ROW_MENU,
+            GridGetRowMenuAction.EVENT_ID,
             new Action.Parameter[]{
                 new Action.Parameter(Action.PARAMETER_TARGETXRI, targetRowXri),
                 new Action.Parameter(Action.PARAMETER_ROW_ID, Long.toString(rowId))
@@ -244,24 +246,37 @@ public class ReferencePaneControl
                     p.write("        </li>");
                 }
                 filterGroupName = filter.getGroupName();
+                // Is selected filter member of this group?
+                boolean groupHasSelectedFilter = false;
+                int k = j;
+                while(k < filters.length && filterGroupName.equals(filters[k].getGroupName())) {
+                	boolean isSelected = grid.getCurrentFilter().getName().equals(filters[k].getName());
+                	if(isSelected) {
+                		groupHasSelectedFilter = true;
+                		break;
+                	}
+                	k++;
+                }
+                boolean hilite = groupHasSelectedFilter && !grid.hasFilterValues();
                 // Class filter group
                 if("1".equals(filterGroupName)) {
-              		p.write("      <li><a href=\"#\" style=\"", groupingStyle, "\", onclick=\"javascript:return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_FILTER_CLASS, "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getClassFilterTitle(), false), "\""), "</a>");
+              		p.write("      <li", (hilite ? " class=\"hilite\"": ""), "><a href=\"#\" style=\"", groupingStyle, "\", onclick=\"javascript:return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_FILTER_CLASS, "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(texts.getClassFilterTitle(), false), "\""), "</a>");
                 } 
                 // All other filter groups
                 else {
-               		p.write("      <li><a href=\"#\" style=\"", groupingStyle, "\" onclick=\"javascript:return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), "filter_", htmlEncoder.encode(filterGroupName, false), p.getImgType(), "\" border=\"0\" align=\"absmiddle\" style=\"margin-right: 2px;\" alt=\"o\" title=\"", htmlEncoder.encode(filterGroupName, false), "\""), "</a>");
+               		p.write("      <li", (hilite ? " class=\"hilite\"": ""), "><a href=\"#\" style=\"", groupingStyle, "\" onclick=\"javascript:return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), "filter_", htmlEncoder.encode(filterGroupName, false), p.getImgType(), "\" border=\"0\" align=\"absmiddle\" style=\"margin-right: 2px;\" alt=\"o\" title=\"", htmlEncoder.encode(filterGroupName, false), "\""), "</a>");
                 }
                 p.write("        <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
             } 
             filterGroupName = filter.getGroupName();
             if(!filter.hasParameter()) {
                 Action action = grid.getSelectFilterAction(filter);
+                boolean hilite = grid.getCurrentFilter().getName().equals(filter.getName()) && !grid.hasFilterValues();
                 if(filterGroupName.equals("0")) {
-                    p.write("        <li><a href=\"#\" style=\"", groupingStyle, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(action.getTitle(), false), "\""), "</a></li>");
+                    p.write("        <li", (hilite ? " class=\"sfhover\"": ""), "><a href=\"#\" style=\"", groupingStyle, "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"", htmlEncoder.encode(action.getTitle(), false), "\""), "</a></li>");
                 } 
                 else {
-                    p.write("        <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"\""), " ", htmlEncoder.encode(texts.getSelectAllText(), false), " ", htmlEncoder.encode(action.getTitle(), false), "</a></li>");
+                    p.write("        <li", (hilite ? " class=\"sfhover\"": ""), "><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(action), updateTabScriptletPost, "\">", p.getImg("src=\"", p.getResourcePath("images/"), action.getIconKey(), "\" border=\"0\" align=\"absmiddle\" alt=\"o\" title=\"\""), " ", htmlEncoder.encode(texts.getSelectAllText(), false), " ", htmlEncoder.encode(action.getTitle(), false), "</a></li>");
                 }
             }
         }
@@ -412,57 +427,68 @@ public class ReferencePaneControl
 	        	}
 	            boolean isGroupTabActive = false;
 	            boolean isFirstGroupTab = true;
+	            boolean hasTabs = false;
 	            for(int i = 0; i < nReferences; i++) {
 	                Action action = this.getSelectReferenceAction()[i];
-	                int tabIndex = 100*paneIndex + i;
-	                String tabId = view.getContainerElementId() == null ? 
-	                	Integer.toString(tabIndex) : 
-	                	view.getContainerElementId() + "-" + Integer.toString(tabIndex);                                    
-	                String tabLabel = action.getTitle();
-	                boolean isGroupTab = tabLabel.startsWith(WebKeys.TAB_GROUPING_CHARACTER);
-	                if(isGroupTab) tabLabel = tabLabel.substring(1);
-	                String encodedTabLabel = htmlEncoder.encode(tabLabel, false);
-	                String encodedTabTitle = action.getToolTip() == null ?
-	                	null :
-	                		htmlEncoder.encode(
-	                			action.getToolTip().startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? action.getToolTip().substring(1) : action.getToolTip(),   
-	                			false
-	                		);
-	                if(!isGroupTabActive && isGroupTab) {
-	                    isGroupTabActive = true;
-	                    if(isFirstGroupTab) {
-	                    	if(p.getViewPortType() == ViewPort.Type.MOBILE) {	 
-	                    		if(nReferences > 1) {
-					                p.write("    </ul>");
-					                p.write("    <ul id=\"gridHead", Integer.toString(paneIndex), "\" title=\"", encodedTabLabel, "\" selected=\"true\" style=\"position:relative;top:auto;min-height:0px;\" onclick=\"javascript:var e=document.getElementById('gridPanel", Integer.toString(paneIndex), "');if(e.style.display=='block'){e.style.display='none';}else{e.style.display='block';};\">");
-					                p.write("      <li class=\"group\" style=\"height:40px;\"><div style=\"padding-top:10px;\">", WebKeys.TAB_GROUPING_CHARACTER, "&nbsp;", encodedTabLabel, "...</div></li>");
-					                p.write("    </ul>");
-					                p.write("    <ul id=\"gridPanel", Integer.toString(paneIndex), "\" title=\"", encodedTabLabel, "\" selected=\"true\" style=\"display:none;position:relative;top:auto;min-height:0\">");
-	                    		}
-	                    	}
-			                isFirstGroupTab = false;
-	                    }
-	                	if(p.getViewPortType() != ViewPort.Type.MOBILE) {
-	                		p.write("  <a href=\"#\" onclick=\"javascript:gTabSelect(this, true);return false;\">", WebKeys.TAB_GROUPING_CHARACTER, "</a>");
-	                	}
-	                }
-	                if(isGroupTabActive && (!isGroupTab || (i == nReferences-1))) {
-	                    isGroupTabActive = false;
-	                }
-	                String tabClass = i == referencePane.getSelectedReference() ? 
-	                	"selected" : 
-	                	isGroupTabActive ? 
-	                		"hidden" : 
-	                		"";
-	            	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-	            		p.write("      <li>");
-	            		p.write("        <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:var c=$('gridContent", tabId, "');if(c.style.display=='block'){c.style.display='none';}else{c.style.display='block';new Ajax.Updater('gridContent", tabId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true});};return false;\" title=\"", (encodedTabTitle == null ? "" : encodedTabTitle), "\">", encodedTabLabel, "</a>");
-			            p.write("        <div id=\"gridContent", tabId, "\">");
-			            p.write("        </div>");                
-	            		p.write("      </li>");
-	            	}
-	            	else {
-	            		p.write("  <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:gTabSelect(this);new Ajax.Updater('", containerId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});return false;\" title=\"", (encodedTabTitle == null ? "" : encodedTabTitle), "\">", encodedTabLabel, "</a>");
+	                GridControl gridControl = this.getGridControl()[i];
+	            	boolean isRevokeShow = app.getPortalExtension().hasPermission(
+	            		gridControl.getQualifiedReferenceTypeName(), 
+	            		view.getRefObject(), 
+	            		app, 
+	            		WebKeys.PERMISSION_REVOKE_SHOW
+	            	);
+	            	if(!isRevokeShow) {
+	            		hasTabs = true;
+		                int tabIndex = 100*paneIndex + i;
+		                String tabId = view.getContainerElementId() == null ? 
+		                	Integer.toString(tabIndex) : 
+		                	view.getContainerElementId() + "-" + Integer.toString(tabIndex);                                    
+		                String tabLabel = action.getTitle();
+		                boolean isGroupTab = tabLabel.startsWith(WebKeys.TAB_GROUPING_CHARACTER);
+		                if(isGroupTab) tabLabel = tabLabel.substring(1);
+		                String encodedTabLabel = htmlEncoder.encode(tabLabel, false);
+		                String encodedTabTitle = action.getToolTip() == null ?
+		                	null :
+		                		htmlEncoder.encode(
+		                			action.getToolTip().startsWith(WebKeys.TAB_GROUPING_CHARACTER) ? action.getToolTip().substring(1) : action.getToolTip(),   
+		                			false
+		                		);
+		                if(!isGroupTabActive && isGroupTab) {
+		                    isGroupTabActive = true;
+		                    if(isFirstGroupTab) {
+		                    	if(p.getViewPortType() == ViewPort.Type.MOBILE) {	 
+		                    		if(nReferences > 1) {
+						                p.write("    </ul>");
+						                p.write("    <ul id=\"gridHead", Integer.toString(paneIndex), "\" title=\"", encodedTabLabel, "\" selected=\"true\" style=\"position:relative;top:auto;min-height:0px;\" onclick=\"javascript:var e=document.getElementById('gridPanel", Integer.toString(paneIndex), "');if(e.style.display=='block'){e.style.display='none';}else{e.style.display='block';};\">");
+						                p.write("      <li class=\"group\" style=\"height:40px;\"><div style=\"padding-top:10px;\">", WebKeys.TAB_GROUPING_CHARACTER, "&nbsp;", encodedTabLabel, "...</div></li>");
+						                p.write("    </ul>");
+						                p.write("    <ul id=\"gridPanel", Integer.toString(paneIndex), "\" title=\"", encodedTabLabel, "\" selected=\"true\" style=\"display:none;position:relative;top:auto;min-height:0\">");
+		                    		}
+		                    	}
+				                isFirstGroupTab = false;
+		                    }
+		                	if(p.getViewPortType() != ViewPort.Type.MOBILE) {
+		                		p.write("  <a href=\"#\" onclick=\"javascript:gTabSelect(this, true);return false;\">", WebKeys.TAB_GROUPING_CHARACTER, "</a>");
+		                	}
+		                }
+		                if(isGroupTabActive && (!isGroupTab || (i == nReferences-1))) {
+		                    isGroupTabActive = false;
+		                }
+		                String tabClass = i == referencePane.getSelectedReference() ? 
+		                	"selected" : 
+		                	isGroupTabActive ? 
+		                		"hidden" : 
+		                		"";
+		            	if(p.getViewPortType() == ViewPort.Type.MOBILE) {
+		            		p.write("      <li>");
+		            		p.write("        <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:var c=$('gridContent", tabId, "');if(c.style.display=='block'){c.style.display='none';}else{c.style.display='block';new Ajax.Updater('gridContent", tabId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true});};return false;\" title=\"", (encodedTabTitle == null ? "" : encodedTabTitle), "\">", encodedTabLabel, "</a>");
+				            p.write("        <div id=\"gridContent", tabId, "\">");
+				            p.write("        </div>");                
+		            		p.write("      </li>");
+		            	}
+		            	else {
+		            		p.write("  <a href=\"#\" class=\"", tabClass, "\" onclick=\"javascript:gTabSelect(this);new Ajax.Updater('", containerId, "', ", p.getEvalHRef(action), ", {asynchronous:true, evalScripts: true, onComplete: function(){try{makeZebraTable('gridTable", tabId, "',1);}catch(e){};}});return false;\" title=\"", (encodedTabTitle == null ? "" : encodedTabTitle), "\">", encodedTabLabel, "</a>");
+		            	}
 	            	}
 	            }
 	            if(p.getViewPortType() == ViewPort.Type.MOBILE) {
@@ -470,9 +496,11 @@ public class ReferencePaneControl
 	            }
 	            else {
 	        		p.write("</div>");
-		            p.write("<div id=\"", containerId, "\" class=\"gContent\" style=\"position:relative;z-index:", Integer.toString(zIndex), ";\">");
-		            p.write("  <div class=\"loading\" style=\"height:40px;\"></div>");
-		            p.write("</div>");                
+	        		if(hasTabs) {
+			            p.write("<div id=\"", containerId, "\" class=\"gContent\" style=\"position:relative;z-index:", Integer.toString(zIndex), ";\">");
+			            p.write("  <div class=\"loading\" style=\"height:40px;\"></div>");
+			            p.write("</div>");
+	        		}
 	        	}
             }
         }
@@ -494,6 +522,12 @@ public class ReferencePaneControl
 	            updateTabScriptletPre = "new Ajax.Updater('" + containerId + "', ";
 	            updateTabScriptletPost = ", {asynchronous:true, evalScripts:true, onComplete: function(){try{makeZebraTable('gridTable" + tabId + "',1);}catch(e){};}});loadingIndicator($('" + containerId + "'));return false;";
             }
+        	boolean isRevokeEdit = app.getPortalExtension().hasPermission(
+        		gridControl.getQualifiedReferenceTypeName(), 
+        		view.getRefObject(), 
+        		app, 
+        		WebKeys.PERMISSION_REVOKE_EDIT
+        	);	                    
             Action selectGridTabAction = referencePane.getSelectReferenceAction()[referencePane.getSelectedReference()];
             if(grid != null) {
                 
@@ -519,10 +553,20 @@ public class ReferencePaneControl
                 // Sortable columns
                 List<Action> sortableColumns = new ArrayList<Action>();
                 if(grid.isComposite()) {
-	                for(int j = 0; j < gridControl.getColumnFilterSetActions().length; j++) {
-	                    Action action = gridControl.getColumnFilterSetActions()[j];
+	                for(int j = 0; j < gridControl.getColumnOrderActions().length; j++) {
+	                    Action action = gridControl.getColumnOrderActions()[j];
 	                    if((action.getEvent() != Action.EVENT_NONE) && !action.getParameter(Action.PARAMETER_NAME).equals("identity")) {
 	                    	sortableColumns.add(action);
+	                    }
+	                }
+                }                
+                // Searchable columns
+                List<Action> searchableColumns = new ArrayList<Action>();
+                if(grid.isComposite()) {
+	                for(int j = 0; j < gridControl.getColumnSearchActions().length; j++) {
+	                    Action action = gridControl.getColumnSearchActions()[j];
+	                    if((action.getEvent() != Action.EVENT_NONE) && !action.getParameter(Action.PARAMETER_NAME).equals("identity")) {
+	                    	searchableColumns.add(action);
 	                    }
 	                }
                 }                
@@ -530,17 +574,19 @@ public class ReferencePaneControl
                 if(!grid.isComposite()) {
                     if(p.getViewPortType() != ViewPort.Type.MOBILE) {                	
 	                    // Grid operations only if changeable and not embedded
-	                    if(grid.isChangeable() && (view.getContainerElementId() == null)) {                    
+	                    if(!isRevokeEdit && grid.isChangeable() && (view.getContainerElementId() == null)) {                    
 	                        Action addObjectAction = grid.getAddObjectAction();
 	                        Action removeObjectAction = grid.getRemoveObjectAction();
+	                        Action moveUpObjectAction = grid.getMoveUpObjectAction();
+	                        Action moveDownObjectAction = grid.getMoveDownObjectAction();
 	                        String lookupId = org.openmdx.kernel.id.UUIDs.newUUID().toString();
 	                        String adderFieldId = "addObject[" + tabId + "]";
 	                        ObjectReference objectReference = view.getObjectReference();
 	                        Autocompleter_1_0 autocompleter = this.getAutocompleter(
 	                            objectReference.getObject(),
-	                            addObjectAction.getParameter("reference"),
+	                            addObjectAction.getParameter(Action.PARAMETER_REFERENCE),
 	                            app
-	                        );    
+	                        );
 	                        p.write("<div id=\"menuOpPanel\" class=\"menuOpPanel\">");
 	                        p.write("  <table cellspacing=\"0\" cellpadding=\"0\" id=\"menuOp\" width=\"100%\">");
 	                        p.write("    <tr>");
@@ -551,6 +597,8 @@ public class ReferencePaneControl
 	                        p.write("              <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
 	                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(addObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "=", Action.PARAMETER_OBJECTXRI, "*('+encodeURIComponent($F('", adderFieldId, "'))+')'", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getAddObjectTitle(), false), "</a></li>");
 	                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(removeObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "='+encodeURIComponent(getSelectedGridRows('gridTable", tabId, "',1))", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getRemoveObjectTitle(), false), "</a></li>");
+	                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(moveUpObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "='+encodeURIComponent(getSelectedGridRows('gridTable", tabId, "',1))", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getMoveUpObjectTitle(), false), "</a></li>");
+	                        p.write("                <li><a href=\"#\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(moveDownObjectAction), "+'&amp;", WebKeys.REQUEST_PARAMETER_LIST, "='+encodeURIComponent(getSelectedGridRows('gridTable", tabId, "',1))", updateTabScriptletPost, "\">", htmlEncoder.encode(texts.getMoveDownObjectTitle(), false), "</a></li>");
 	                        p.write("              </ul>");
 	                        p.write("            </li>");
 	                        p.write("          </ul>");
@@ -642,19 +690,22 @@ public class ReferencePaneControl
 		                    p.write("        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");	                    	
 	                    }
 	                    // Show/Hide search panel
-	                	Action firstSearchableColumn = null;
-	                	for(int i = 0; i < sortableColumns.size(); i++) {
-	                		Action action = sortableColumns.get(i);
-	                		if(action.getTitle() != null && action.getTitle().trim().length() > 0) {
-	                			firstSearchableColumn = action;
-	                			break;
-	                		}
-	                	}
-	                    if(firstSearchableColumn == null) {
-	                    	p.write("        <a href=\"#\" onclick=\"javascript:ft=$('", FILTER_AREA_NAME, tabId, "');if(ft.style.display!='block'){ft.style.display='block';}else{ft.style.display='none';};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");	                    	
-	                    }
-	                    else {
-	                    	p.write("        <a href=\"#\" onclick=\"javascript:ft=$('", FILTER_AREA_NAME, tabId, "');if(ft.style.display!='block'){ft.style.display='block';try{$('", this.getSearchFormFieldId(tabId, firstSearchableColumn), "').focus();}catch(e){};}else{ft.style.display='none';};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");
+	                    if(!searchableColumns.isEmpty()) {
+		                	Action firstSearchableColumn = null;
+		                	for(int i = 0; i < searchableColumns.size(); i++) {
+		                		Action action = searchableColumns.get(i);
+		                		if(action.getTitle() != null && action.getTitle().trim().length() > 0) {
+		                			firstSearchableColumn = action;
+		                			break;
+		                		}
+		                	}
+		                    if(firstSearchableColumn == null) {
+		                    	p.write("        <a href=\"#\" onclick=\"javascript:ft=$('", FILTER_AREA_NAME, tabId, "');if(ft.style.display!='block'){ft.style.display='block';}else{ft.style.display='none';};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");	                    	
+		                    }
+		                    else {
+		                    	boolean hilite = grid.hasFilterValues();
+		                    	p.write("        <a href=\"#\" onclick=\"javascript:ft=$('", FILTER_AREA_NAME, tabId, "');if(ft.style.display!='block'){ft.style.display='block';try{$('", this.getSearchFormFieldId(tabId, firstSearchableColumn), "').focus();}catch(e){};}else{ft.style.display='none';};return false;\">", p.getImg("src=\"", p.getResourcePath("images/"), WebKeys.ICON_SEARCH_PANEL, "\" ", (hilite ? " class=\"hilite\"" : ""), " border=\"0\" align=\"bottom\" alt=\"v\""), "</a>");
+		                    }
 	                    }
 	                    p.write("      </td>");
 	                    //
@@ -685,7 +736,8 @@ public class ReferencePaneControl
 	                    Action multiDeleteAction = grid.getMultiDeleteAction();
 	                    if(
 	                        (grid.getObjectCreator() != null) &&
-	                        (grid.getObjectCreator().length > 0)
+	                        (grid.getObjectCreator().length > 0) &&
+	                        !isRevokeEdit
 	                    ) {
 	                        //
 	                        // Menu New
@@ -712,13 +764,26 @@ public class ReferencePaneControl
 	                        }               
 	                        // Multi-delete
 	                        if(referencePane.getReferencePaneControl().getIsMultiDeleteEnabled() && (multiDeleteAction != null)) {
-	                            p.write("                  <li><a href=\"#\" onclick=\"javascript:var para=getSelectedGridRows('gridTable", tabId, "',1);if(para.length>1) {$('multideleteIDlist", tabId, "').value=para;};document.showForm", tabId, ".submit();\">", htmlEncoder.encode(multiDeleteAction.getTitle(), false), "</a></li>");
+	                            p.write("                  <li><a href=\"#\" onclick=\"javascript:var para=getSelectedGridRows('gridTable", tabId, "',1);if(para.length>1){$('parameter.list", tabId, "').value=para;};$('event.submit", tabId, "').value='", Integer.toString(multiDeleteAction.getEvent()), "';document.showForm", tabId, ".submit();\">", htmlEncoder.encode(multiDeleteAction.getTitle(), false), "</a></li>");
 	                        }
 	                        else {
 	                            p.write("                  <li><a href=\"#\" onclick=\"javascript:;\"><span>", htmlEncoder.encode(texts.getDeleteTitle(), false), "</span></a></li>");                    
 	                        }
 	                        p.write("                </ul>");
 	                        p.write("              </li>");
+	                    }
+	                    // Grid actions
+	                    {
+	                    	List<Action> gridActions = app.getPortalExtension().getGridActions(view, grid);
+	                    	if(gridActions != null && !gridActions.isEmpty()) {
+		                        p.write("              <li><a href=\"#\" onclick=\"javascript:return false;\">", htmlEncoder.encode(texts.getActionsTitle(), false), "&nbsp;&nbsp;&nbsp;</a>");
+		                        p.write("                <ul onclick=\"this.style.left='-999em';\" onmouseout=\"this.style.left='';\">");
+		                        for(Action action: gridActions) {
+		                            p.write("                  <li><a href=\"#\" onclick=\"javascript:var para=getSelectedGridRows('gridTable", tabId, "',1);if(para.length>1){$('parameter.list", tabId, "').value=para;};$('event.submit", tabId, "').value='", Integer.toString(action.getEvent()), "';document.showForm", tabId, ".submit();\">", htmlEncoder.encode(action.getTitle(), false), "</a></li>");		                        	
+		                        }
+		                        p.write("                </ul>");
+		                        p.write("              </li>");	                    		
+	                    	}
 	                    }
 	                    //
 	                    // Menu View
@@ -736,15 +801,17 @@ public class ReferencePaneControl
 	                    p.write("          </ul>");
 	                    p.write("        </div>");
 	                    //
-	                    // Form Multi-Delete
+	                    // Actions Form: multi-delete and user-defined actions
 	                    //
-	                    p.write("        <form id=\"showForm", tabId, "\" name=\"showForm", tabId, "\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"post\" action=\"\" style=\"padding:0px;\">");
-	                    if(multiDeleteAction != null) {
+	                    {
+	                    	p.write("        <form id=\"showForm", tabId, "\" name=\"showForm", tabId, "\" enctype=\"multipart/form-data\" accept-charset=\"utf-8\" method=\"post\" action=\"\" style=\"padding:0px;\">");
 	                        p.write("          <input type=\"hidden\" name=\"requestId.submit\" value=\"", view.getRequestId(), "\" />");
-	                        p.write("          <input type=\"hidden\" name=\"event.submit\" value=\"", Integer.toString(multiDeleteAction.getEvent()), "\" />");
-	                        p.write("          <input type=\"hidden\" name=\"parameter.list\" value=\"\" id=\"multideleteIDlist", tabId, "\" />");
+	                        p.write("          <input type=\"hidden\" name=\"", Action.PARAMETER_REFERENCE, "\" value=\"", Integer.toString(referencePane.getSelectedReference()), "\" />");
+	                        p.write("          <input type=\"hidden\" name=\"", Action.PARAMETER_PANE, "\" value=\"", Integer.toString(paneIndex), "\" />");
+	                        p.write("          <input id=\"event.submit", tabId, "\" type=\"hidden\" name=\"event.submit\" value=\"\" />");
+	                        p.write("          <input id=\"parameter.list", tabId, "\" type=\"hidden\" name=\"parameter.list\" value=\"\" />");
+		                    p.write("        </form>");                
 	                    }
-	                    p.write("        </form>");                
 	                    p.write("      </td>");
 	                    // 
 	                    // Info
@@ -765,7 +832,7 @@ public class ReferencePaneControl
                 // Filter menues and search form
                 //
                 if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-	                if(!sortableColumns.isEmpty()) {
+	                if(!searchableColumns.isEmpty()) {
 	                	String buttonStyle = "color:white;font-size:15px;padding:5px 5px 5px 5px;";
 	                	p.write("<div id=\"opSearch", tabId, "\" style=\"position:relative;top:0px;min-height:0px;\">");
 	                	p.write("  <div id=\"searchPanel", tabId, "\" class=\"dialog\">");
@@ -801,7 +868,7 @@ public class ReferencePaneControl
 	                    	"display:none;", // form style
 	                    	"font-size: 14px;color: #999999;", // label style
 	                    	buttonStyle, 
-	                    	sortableColumns, 
+	                    	searchableColumns, 
 	                    	updateTabScriptletPre, 
 	                    	updateTabScriptletPost
 	                    );
@@ -818,7 +885,7 @@ public class ReferencePaneControl
 	                    p.write("      <tr>");
                         p.write("        <td>");
 	                    // only show filter values input field if there is at least one sortable column
-	                    if(!sortableColumns.isEmpty()) {
+	                    if(!searchableColumns.isEmpty()) {
 	                        this.paintSearchForm(
 	                        	p, 
 	                        	grid, 
@@ -826,7 +893,7 @@ public class ReferencePaneControl
 	                        	"", // form style
 	                        	"", // label style
 	                        	"font-size:15px;padding:5px 5px 5px 5px;", // button style 
-	                        	sortableColumns, 
+	                        	searchableColumns, 
 	                        	updateTabScriptletPre, 
 	                        	updateTabScriptletPost
 	                        );
@@ -856,7 +923,7 @@ public class ReferencePaneControl
                 }
                 for(int j = 0; j < gridControl.getShowMaxMember(); j++) {
                     int columnType = gridControl.getColumnTypes()[j];
-                    Action columnFilterSetAction = gridControl.getColumnFilterSetActions()[j];
+                    Action columnOrderAction = gridControl.getColumnOrderActions()[j];
                     if(j == 0) {
                         if(p.getViewPortType() == ViewPort.Type.MOBILE) {
                     	    p.write("          <th />");                    	  
@@ -870,17 +937,17 @@ public class ReferencePaneControl
                         }
                     }
 	                else {
-                        CharSequence columnTitle = htmlEncoder.encode(columnFilterSetAction.getTitle(), false).trim();
+                        CharSequence columnTitle = htmlEncoder.encode(columnOrderAction.getTitle(), false).trim();
                         if(columnTitle.length() == 0) {
-                            columnTitle = p.getImg("src=\"", p.getResourcePath("images/") + columnFilterSetAction.getIconKey() + "\" border=\"0\" align=\"middle\" alt=\"o\" title=\"\"");
+                            columnTitle = p.getImg("src=\"", p.getResourcePath("images/") + columnOrderAction.getIconKey() + "\" border=\"0\" align=\"middle\" alt=\"o\" title=\"\"");
                         }
                         // column ordering 
-                        Action columnOrderSetAction = grid.getColumnOrderSetAction(
-                            columnFilterSetAction.getParameter(Action.PARAMETER_NAME).toString()
+                        Action togglingColumnOrderAction = grid.getTogglingColumnOrderAction(
+                            columnOrderAction.getParameter(Action.PARAMETER_NAME).toString()
                         );
 	                    if(p.getViewPortType() == ViewPort.Type.MOBILE) {
-	                        if(columnOrderSetAction.getEvent() != Action.EVENT_NONE) {
-	                        	p.write("          <th ", (j == gridControl.getShowMaxMember() - 1 ? "class=\"last\"" : ""), " style=\"cursor:pointer;\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(columnOrderSetAction), updateTabScriptletPost, ";\">", columnTitle, p.getImg("class=\"borderedimg\" src=\"", p.getResourcePath("images/"), columnOrderSetAction.getIconKey(), "\" title=\"", htmlEncoder.encode(columnOrderSetAction.getTitle(), false), "\" align=\"bottom\""), "</th>");
+	                        if(togglingColumnOrderAction.getEvent() != Action.EVENT_NONE) {
+	                        	p.write("          <th ", (j == gridControl.getShowMaxMember() - 1 ? "class=\"last\"" : ""), " style=\"cursor:pointer;\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(togglingColumnOrderAction), updateTabScriptletPost, ";\">", columnTitle, p.getImg("class=\"borderedimg\" src=\"", p.getResourcePath("images/"), togglingColumnOrderAction.getIconKey(), "\" title=\"", htmlEncoder.encode(togglingColumnOrderAction.getTitle(), false), "\" align=\"bottom\""), "</th>");
 	                        }
 	                        else {
 	                        	p.write("          <th ", (j == gridControl.getShowMaxMember() - 1 ? "class=\"last\"" : ""), ">", columnTitle, "</th>");	                        	
@@ -895,7 +962,7 @@ public class ReferencePaneControl
 	                    	    classModifier = "class=\"gridColTypeNormal\"";
 	                        }
 	                        else {
-		                        classModifier = (j < 3) && (j < gridControl.getColumnFilterSetActions().length-1)  ? 
+		                        classModifier = (j < 3) && (j < gridControl.getColumnOrderActions().length-1)  ? 
 		                    	    "class=\"gridColTypeNormal\"" : 
 		                    	    "class=\"gridColTypeWide\"";
 	                        }
@@ -903,11 +970,11 @@ public class ReferencePaneControl
 	                        p.write("  <table class=\"filterHeader\">");
 	                        p.write("    <tr>");	                                    
 	                        // Ordering
-	                        if(!grid.isComposite() || columnOrderSetAction.getEvent() == Action.EVENT_NONE) {
+	                        if(!grid.isComposite() || togglingColumnOrderAction.getEvent() == Action.EVENT_NONE) {
 	                            p.write("<td><div class=\"textfilter\">", columnTitle, "</div></td>");	                        	
 	                        }
 	                        else {
-	                            p.write("<td class=\"filterCell\" title=\"", htmlEncoder.encode(columnOrderSetAction.getToolTip(), false), "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(columnOrderSetAction), updateTabScriptletPost, ";\"", p.getOnMouseOver("javascript:this.className='filterCellhover';"), p.getOnMouseOut("javascript:this.className='filterCell';"), " ><div class=\"textfilter\">", columnTitle, "&nbsp;", p.getImg("src=\"", p.getResourcePath("images/"), columnOrderSetAction.getIconKey(), "\" title=\"", htmlEncoder.encode(columnOrderSetAction.getTitle(), false), "\" align=\"bottom\" alt=\"\""), "</div></td>");
+	                            p.write("<td class=\"filterCell\" title=\"", htmlEncoder.encode(togglingColumnOrderAction.getToolTip(), false), "\" onclick=\"javascript:", updateTabScriptletPre, p.getEvalHRef(togglingColumnOrderAction), updateTabScriptletPost, ";\"", p.getOnMouseOver("javascript:this.className='filterCellhover';"), p.getOnMouseOut("javascript:this.className='filterCell';"), " ><div class=\"textfilter\">", columnTitle, "&nbsp;", p.getImg("src=\"", p.getResourcePath("images/"), togglingColumnOrderAction.getIconKey(), "\" title=\"", htmlEncoder.encode(togglingColumnOrderAction.getTitle(), false), "\" align=\"bottom\" alt=\"\""), "</div></td>");
 	                        }                      
 	                        p.write("    </tr>");
 	                        p.write("  </table>");
@@ -921,7 +988,6 @@ public class ReferencePaneControl
                 p.write("</tr>");
                 // Show grid
                 for(int j = 0; j < rows.length; j++) {
-                	SysLog.detail("grid row", Integer.toString(j));
                     long rowId = ReferencePaneControl.currentRowId++;                    
                     Object[] row = (Object[])rows[j];    
                     ObjectReference objRow = (ObjectReference)((AttributeValue)row[0]).getValue(true);
@@ -1058,7 +1124,7 @@ public class ReferencePaneControl
                                         List<?> params = Arrays.asList(
                                             objRow.refMofId(), 
                                             valueHolder.getFieldDef().featureName, 
-                                            app.getLoginPrincipalId(), 
+                                            app.getLoginPrincipal(),
                                             e0.getMessage()
                                         );
                                         if(e1.getExceptionCode() == BasicException.Code.AUTHORIZATION_FAILURE) {
@@ -1441,7 +1507,7 @@ public class ReferencePaneControl
                   p.write("<table class=\"gridTableFullEdit\" id=\"editGridTable", tabId, "\">");
                   p.write("  <tr class=\"gridTableHeaderFullEdit\">");
                   for(int j = 0; j < gridControl.getShowMaxMember(); j++) {
-                    Action columnFilterSetAction = gridControl.getColumnFilterSetActions()[j];
+                    Action columnFilterSetAction = gridControl.getColumnOrderActions()[j];
                     if(j == 0) {
                       p.write("<td class=\"gridColTypeIconEdit-3\">");
                       p.write("  <table class=\"filterHeader\"><tr><td>", p.getImg("src=\"", p.getResourcePath("images/"), "spacer", p.getImgType(), "\" alt=\"\" width=\"46\" height=\"0\""), "</td></tr></table>");

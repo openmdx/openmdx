@@ -1,11 +1,11 @@
 /*
  * ====================================================================
  * Project:     openMDX/Portal, http://www.openmdx.org/
- * Name:        $Id: Attribute.java,v 1.18 2009/09/25 12:02:38 wfro Exp $
+ * Name:        $Id: Attribute.java,v 1.19 2011/08/11 11:37:51 wfro Exp $
  * Description: Attribute 
- * Revision:    $Revision: 1.18 $
+ * Revision:    $Revision: 1.19 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2009/09/25 12:02:38 $
+ * Date:        $Date: 2011/08/11 11:37:51 $
  * ====================================================================
  *
  * This software is published under the BSD license
@@ -267,7 +267,6 @@ public final class Attribute
             rowSpanModifier, 
             null, 
             null,
-            null, 
             stringifiedValue,
             false
         );
@@ -296,7 +295,6 @@ public final class Attribute
         int tabIndex,
         String rowSpanModifier,
         String readonlyModifier,
-        String disabledModifier,
         String lockedModifier,
         String stringifiedValue
     ) throws ServiceException {
@@ -309,7 +307,6 @@ public final class Attribute
             tabIndex, 
             rowSpanModifier, 
             readonlyModifier, 
-            disabledModifier, 
             lockedModifier, 
             stringifiedValue
         );
@@ -342,7 +339,6 @@ public final class Attribute
         int tabIndex,
         String rowSpanModifier,
         String readonlyModifier,
-        String disabledModifier,
         String lockedModifier,
         String stringifiedValue
     ) throws ServiceException { 
@@ -359,7 +355,6 @@ public final class Attribute
             null, 
             rowSpanModifier, 
             readonlyModifier, 
-            disabledModifier,
             lockedModifier, 
             stringifiedValue, 
             true

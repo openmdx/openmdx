@@ -1,16 +1,16 @@
 /*
  * ====================================================================
  * Project:     openMDX, http://www.openmdx.org/
- * Name:        $Id: OrderSpecifier.java,v 1.13 2010/06/21 17:33:10 hburger Exp $
+ * Name:        $Id: OrderSpecifier.java,v 1.15 2011/11/26 01:34:59 hburger Exp $
  * Description: Order Specifier
- * Revision:    $Revision: 1.13 $
+ * Revision:    $Revision: 1.15 $
  * Owner:       OMEX AG, Switzerland, http://www.omex.ch
- * Date:        $Date: 2010/06/21 17:33:10 $
+ * Date:        $Date: 2011/11/26 01:34:59 $
  * ====================================================================
  *
  * This software is published under the BSD license as listed below.
  * 
- * Copyright (c) 2004-2010, OMEX AG, Switzerland
+ * Copyright (c) 2004-2011, OMEX AG, Switzerland
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or
@@ -52,9 +52,6 @@ package org.openmdx.base.query;
 
 import java.io.Serializable;
 
-import javax.resource.ResourceException;
-
-import org.openmdx.base.exception.RuntimeServiceException;
 import org.openmdx.base.resource.Records;
 
 /**
@@ -196,7 +193,7 @@ public class OrderSpecifier
         if(this.order != null) {
             code ^= this.order.code();
         }
-        return super.hashCode();
+        return code;
     }
 
     /**
@@ -217,25 +214,21 @@ public class OrderSpecifier
     @Override
     public String toString(
     ) {
-        try {
-            StringBuilder description = new StringBuilder(
-            ).append(
-                this.order == null ? ' ' : order.symbol()
-            ).append(
-                this.feature
-            );
-            return Records.getRecordFactory().asMappedRecord(
-                getClass().getName(), 
-                description.toString(),
-                OrderSpecifier.TO_STRING_FIELDS,
-                new Object[]{
-                    feature,
-                    this.order
-                }
-            ).toString();
-        } catch (ResourceException exception) {
-            throw new RuntimeServiceException(exception);
-        }
+        StringBuilder description = new StringBuilder(
+		).append(
+		    this.order == null ? ' ' : order.symbol()
+		).append(
+		    this.feature
+		);
+		return Records.getRecordFactory().asMappedRecord(
+		    getClass().getName(), 
+		    description.toString(),
+		    OrderSpecifier.TO_STRING_FIELDS,
+		    new Object[]{
+		        feature,
+		        this.order
+		    }
+		).toString();
     }
 
 }
