@@ -2,3 +2,9 @@ ant/build/
 core/build/
 distribution/
 source-archive/
+/jre-1.6/
+portal/build/
+security/build/
+test-core/build/
+tomcat/build/
+
