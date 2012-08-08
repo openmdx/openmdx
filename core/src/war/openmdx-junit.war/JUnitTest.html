@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<!-- Written by Dave Robinson, based on the J2EEUnit test page --><!-- Remaining tasks: Make test list dynamic, provide option to clear test cache -->
+<HTML>
+  <HEAD>
+    <TITLE>
+      JUnit Servlet Testing Form
+    </TITLE>
+  </HEAD>
+  <BODY>
+    <P>
+       Welcome to the <EM> JUnit Servlet Testing Form</EM> . You
+      have two ways to choose which test suite(s) to run:
+    </P>
+    <HR>
+    <P>
+       You may type in the name of a test suite:<BR>
+    </P>
+    <FORM ACTION="TestRunnerServlet" METHOD="get" NAME="youTypeItForm">
+      <INPUT TYPE="text" NAME="classname" SIZE="60"> 
+      <INPUT TYPE="submit" VALUE="Run">
+    </FORM>
+    <BR>
+    <BR>
+     
+    <HR>
+    <P>You may pick one or more of the following tests:</P>
+    <FORM ACTION="TestRunnerServlet" METHOD="get" NAME="youPickItForm">
+      <SELECT NAME="classname" SIZE="8" MULTIPLE>
+        <OPTION VALUE="test.junit.servletui.HtmlScrubbingTests">
+          test.junit.servletui.HtmlScrubbingTests
+        </OPTION>
+      </SELECT> 
+      <INPUT TYPE="submit" VALUE="Run">
+    </FORM>
+  </BODY>
+</HTML>
+

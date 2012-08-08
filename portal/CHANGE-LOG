@@ -1,0 +1,999 @@
+﻿
+                    =====================================
+                           CHANGE LOG openMDX/Portal
+                    =====================================
+
+==============================================================================
+Version 2.0.0                                                       2008-02-20
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR20006379
+      Portal: data bindings for shared associations.	In addition to attributes 
+      and references, shared associations should be supported. This allows to 
+      add non-modeled reference panes to inspectors by customizing. In order
+      to mark a structural feature definition as reference, the tag isReference
+      must be set to true. Example:
+      
+			<featureDefinition>
+				<org.openmdx.ui1.StructuralFeatureDefinition qualifiedName="org:openmdx:portal:Segment:myReference">
+					<type>org:openmdx:base:BasicObject</type>
+					<multiplicity>0..n</multiplicity>
+					<changeable>false</changeable>
+					<isReference>true</isReference>
+				</org.openmdx.ui1.StructuralFeatureDefinition>
+			</featureDefinition>
+      
+      CR20006389
+      Portal: role switch. Perform an automatic role switch if the segment of 
+      the requested object does not match the currently selected role.
+      
+      CR20006375
+      Portal: TimeZone as user setting. The time zone is a user setting.
+      
+      CR20006363
+      Portal: script-based customizing of RootMenuControl. The RootMenuControl is 
+      now groovy based. The root menu can now be customized as groovy script. The 
+      default implementation looks as follows:
+
+				import org.openmdx.portal.servlet.*;
+				import org.openmdx.portal.servlet.texts.*;
+				import org.openmdx.portal.servlet.view.*;
+				import org.openmdx.portal.servlet.control.*;
+				ObjectView view = (ObjectView)p.getView();
+				ApplicationContext app = view.getApplicationContext();
+				Texts_1_0 texts = app.getTexts();
+				        
+				RootMenuControl.paintQuickAccessors(p);
+				RootMenuControl.paintRootObjects(p);
+				RootMenuControl.paintHistory(p);
+				
+		  The scripts are loaded dynamically from ./WEB-INF/config/control/rootmenu.
+		  The name of the default layout is Default.groovy. A groovy script can be
+		  configured for each model package, i.e. org.openmdx.ui1.groovy configures
+		  the root menu for the root menu entry org:openmdx:ui1.
+		  
+      CR10006511
+      Portal: queries in XML filters. Queries can be defined in XML filters
+      with the PiggyBackCondition. Here is an example:
+      
+			<object class="org.openmdx.base.query.PiggyBackCondition">
+				<void property="quantor">
+					<short>1</short>
+				</void>
+				<void property="feature">
+					<string>context:BP96MI-GEdu0Lr3K4tC9bQ:object_class</string>
+				</void>
+				<void property="fulfil">
+					<boolean>true</boolean>
+				</void>
+				<void property="value">
+					<array class="java.lang.String" length="1">
+						<void index="0">
+							<string>org:openmdx:compatibility:datastore1:QueryFilter</string>
+						</void>
+					</array>
+				</void>
+			</object>
+			<object class="org.openmdx.base.query.PiggyBackCondition">
+				<void property="quantor">
+					<short>1</short>
+				</void>
+				<void property="feature">
+					<string>context:BP96MI-GEdu0Lr3K4tC9bQ:clause</string>
+				</void>
+				<void property="fulfil">
+					<boolean>true</boolean>
+				</void>
+				<void property="value">
+					<array class="java.lang.String" length="1">
+						<void index="0">
+							<string>EXISTS (SELECT 0 FROM OOCKE1_ACCOUNT a WHERE v.sales_rep = a.object_id AND UPPER(a.full_name) LIKE '%MEIER%'</string>
+						</void>
+					</array>
+				</void>
+			</object>
+      
+      * The feature name 'context:$uuid:object_class' corresponds to the feature name
+        'object_class' with the context prefix context:$uuid. The value of the feature
+        must be 'org:openmdx:compatibility:datastore1:QueryFilter'. The value is
+        used by the database plugin and is used to trigger query filters.
+      * The feature 'context:$uuid:clause' allows to specify the filter clause as
+        SQL clause. The clause should be in ANSI SQL. This way the filter is database
+        independent. E.g. use the ANSI SQL function CURRENT_TIMESTAMP to get the current
+        date and not any DB-specific function.
+      * $uuid must be replaced by any UUID, e.g. BP96MI-GEdu0Lr3K4tC9bQ.
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20006359
+      Portal: Deprecate BIRT. BIRT should not be part of portal. A reporting 
+      engine should be added at application-level. 
+            
+2.1.  FIXED BUGS
+      
+      CR10006546
+      hasThousandsSeparator ignored. regardless of the setting of 
+      hasThousandsSeparator (i.e. true or false) there are no separators ever 
+      in the standard GUI.
+      
+      CR20006370
+      Non-filterable features must not appear in additional search fields menu.
+      
+      CR10006440
+      Missing tooltips for QuickAccessors.
+
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+      
+==============================================================================
+Version 1.18.2                                                      2007-08-26
+==============================================================================
+
+1.    NEW FEATURES
+      
+      SFSF1010664
+      Eclipse projects
+      
+      Versioned Eclipse projects are now included in the binary distribution.
+      
+			CR0003572
+			Navigate to created object. The operation			
+		    public RefObject_1_0 handleOperationResult(
+		        RefObject_1_0 target,
+		        String operationName,
+		        RefStruct params,
+		        RefStruct result
+		    ) throws ServiceException;
+		  of PortalExtension_1_0 allows to control the behaviour of the navigation
+		  after the execution of an operation. If an object is returned, a view  
+		  is rendered and shown to the user. If null is returned the current view
+		  is shown, i.e. no navigation is performed. E.g. if an operation creates a
+		  new object and returns it as operation result this feature allows to
+		  navigate to a newly created object.
+			
+      CR10006351
+      Portal: localized filters. Localize the auto-generated class filters. 
+      Locale-specific labels for customized filters are defined by setting
+      the label property in the filter definition file, e.g.
+      
+			<void property="label">
+				<array class="java.lang.String" length="5">
+					<void index="0">
+						<string>filter label for locale 0</string>
+					</void>
+					<void index="1">
+						<string>filter label for locale 1</string>
+					</void>
+					<void index="2">
+						<string>filter label for locale 2</string>
+					</void>
+					<void index="3">
+						<string>filter label for locale 3</string>
+					</void>
+					<void index="4">
+						<string>filter label for locale 4</string>
+					</void>
+				</array>
+			</void>
+      
+      If no labels are specified, label 0 is set to the filter name. 
+      
+      
+      CR10006350
+      Portal: wizards and reports in operation menu. Allow to customize wizard 
+      and report definitions so that they appear as menu entries in the operations 
+      menu. Only non-customized wizards and reports should appear in the menu 
+      'Wizards' and 'Reports'.
+      
+      Wizards and reports can be customized as operations as follows:
+      
+      1. Add an OperationDefinition to the ui customizing files, e.g.
+      
+         <featureDefinition>
+           <org.openmdx.ui1.OperationDefinition qualifiedName="org:openmdx:portal:Example:myOperation">
+             <_object>
+               <isQuery>true</isQuery>
+             </_object>
+             <_content/>
+           </org.openmdx.ui1.OperationDefinition>
+         </featureDefinition>
+        
+      2. Set order tag in wizard or report definition to the fully qualified operation name, e.g.
+      
+			   <meta name="order" content="org:openmdx:portal:Example:myOperation">
+			
+			The operation org:openmdx:portal:Example:myOperations can be customized
+			the same way as a modeled operation.
+      
+      
+      CR10006239
+      PageEpilogControl: height (125 pixels) and width (230 pixels) of the panels 
+      North and West should be customizable. PageEpilogControl offers the new public 
+      methods 
+      * setPanelSizeNorth(int newValue)
+      * setPanelSizeWest(int newValue)
+      which allow to set the panel sizes for the north and west pane. The panel
+      sizes can be set in the layout JSPs, e.g. show-Default.jsp for the default 
+      layout.
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR10007236
+      Resources relative to servlet path. Resources like images, css should be 
+      easily accessible from wizards, layout JSPs, reports, etc. currently, 
+      paint() is not aware of the servlet path and therefore renders bad paths 
+      to resources (e.g. autocompleter images, lookup images, etc.).
+      
+      CR10007235
+      Wizard Loading: issue warning if meta tags missing / not found. Meta tags 
+      label, forClass, and order are vital for displaying the wizard in the 
+      appropriate operations menu; currently, if these tags are not found, the 
+      wizard is not loaded but NO WARNING is issued. The while wizard file
+      is scanned now for tags (instead of the first 10K only) and the forClass
+      property is is logged after loading the wizard.
+            
+2.1.  FIXED BUGS
+
+      CR10007280
+      Rendering of multi-valued codes in edit mode broken. Settings of multi-
+      valued codes may be lost in a roundtrip even if they are not touched in the 
+      GUI because the backend receives trimmed longTexts (that potentially don't 
+      match the customized longTexts) and therefore comes to the conclusion that 
+      something has changed (but the new values do not match against anything).
+
+      CR10006316
+      Media attachments with single quote in name broken. The file name in the
+      download url is now url encoded. E.g. the file name Copy of crx_'pg.sql
+      results in the download file name Copy+of+crx_%27pg.sql. The filename
+      SOA_03_05.pdf remains unchanged.
+      
+      CR10007339
+      Layout JSP of subclass is invoked. The layout JSP edit-<class B>.jsp 
+      is invoked when creating/editing class A objects where B is a subclass
+      of A. 
+      With this version the layouts are loaded for class C with the priorities 
+      as follows:
+      1. layout show/edit-<class C>.jsp if it exists
+      2. layout show/edit-<class A>.jsp if it exists and C is a subclass of A
+      3. layout show/edit-default.jsp
+      
+      CR10006310
+      Editable Grids with binary data. Editable grids with binary data reset the
+      content to null when saving the grid. Because it is not possible to upload
+      binary data in editable grids the invalid content is ignored and the content
+      is not set to null.
+
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+      
+==============================================================================
+Version 1.18.1                                                      2007-06-14
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR10007395 
+      Redesign grids. Each grid row allows to open in-place the composites of 
+      the grid row object.
+
+      CR10007349
+      Data bindings allow to intercept the access to attribute values with
+      user-defined business logic. A data binding can be added as follows:
+      * Implement a subclass of DefaultDataBinding. Implement the methods
+        getValue(), setValue(). The object and the qualified name of the 
+        feature for which to retrieve / store the value are passed as
+        parameter. Intercept the request for the features for which you want
+        to add your own business logic.
+      * Implement a subclass of DefaultPortalExtension and override the method
+      	getDataBinding(binding name). Return an instance of the requested data
+      	binding.
+      * Finally customize the data bindings in the ui configuration as shown
+        in the following example with the tag 'dataBindingName':
+      
+				<org.openmdx.ui1.ElementDefinition name="org:openmdx:portal:Example:sampleField">
+					<_object>
+						<active>true</active>
+						<toolTip>
+							<_item>Sample field</_item>
+						</toolTip>
+						<label>
+							<_item>Sample field</_item>
+						</label>
+						<dataBindingName>MyDataBinding</dataBindingName>
+					</_object>
+					<_content/>
+				</org.openmdx.ui1.ElementDefinition>
+				
+      * Each time openMDX/Portal has to retrieve or store a value in the field
+        'sampleField' of an object instance of org:openmdx:portal:Example it does
+        the following:
+        1. Lookup data binding with name MyDataBinding by invoking getDataBinding()
+        2. Invoke binding.getValue(object, 'org:openmdx:portal:Example:sampleField') 
+           to retrieve the value for sampleField for the given object.
+        3. Invoke binding.setValue(object, 'org:openmdx:portal:Example:sampleField',
+           newValue) to set a new value for the sampleField for the given object.
+      	
+      CR10007347 
+      Feature definitions: The ui customizing allows to extend the model by
+      structural features and operations.
+      
+      Structural features are declared as follows:
+      
+			  <org.openmdx.ui1.StructuralFeatureDefinition qualifiedName="org:openmdx:portal:Example:mySampleField">
+				  <_object>
+					  <type>org:w3c:string</type>
+					  <multiplicity>0..1</multiplicity>
+					  <changeable>true</changeable>
+				  </_object>
+				  <_content/>
+			  </org.openmdx.ui1.StructuralFeatureDefinition>
+      
+      The effect is the same as if the attribute 'mySampleField' with type 'org:w3c:string',
+      multiplicity 0..1 and changeability=true was added to the model. The new feature can
+      be customized the same way as modeled fields, i.e. specifying labels, tool tips, field
+      ordering, etc. However, a data binding MUST be customized for customized features because
+      openMDX/Portal does not know by default where to retrieve and store values for
+      these features (also see CR10007349 for more information on data bindings).
+
+      Operations are declared as follows:
+      
+			  <org.openmdx.ui1.OperationDefinition qualifiedName="org:openmdx:portal:Example:myOperation">
+				  <_object>
+					  <isQuery>true</type>
+				  </_object>
+				  <_content/>
+			  </org.openmdx.ui1.OperationDefinition>
+
+      The effect is the same as if the operation 'myOperation' was added to the class
+      org:openmdx:portal:Example. The operation can be customized the same way as modeled
+      operations. Operations defined with an operation definition are typically implemented
+      by wizards or reports (see CR10006350 for more information).
+            
+      CR10007259
+      PortalExtension: allow to customize dateStyle, timeStyle. PortalExtension_1_0
+      offers the new methods getDateStyle() and getTimeStyle() which allow to 
+      configure the styles for date and time fields.Allowed style values are: 
+		  * java.text.DateFormat.SHORT 
+      * java.text.DateFormat.MEDIUM
+      * java.text.DateFormat.LONG
+      * java.text.DateFormat.FULL
+
+      CR10007261 
+      Allow to customize base filter for FIND_OBJECT action. Add 
+      PortalExtension_1_0.getFindObjectsBaseFilter() which allows to return a 
+      base filter for a given context and reference. E.g. this allows to customize 
+      filters which return active objects only.
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+            
+2.1.  FIXED BUGS
+      
+      CR10007238
+      Quotes " in Object Title. Quotes " in object titles are rendered as &quot; in 
+      grids instead of ".
+
+      CR10007271 
+      Bug with Grid-Actions (wide/narrow, sort). Reply is empty grid or wrong grid.
+      
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+      
+==============================================================================
+Version 1.16.4                                                      2007-02-23
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR10007144
+      Portal: inline object references. Allow to customize inline object reference 
+      tags. I.e. the tag 'activity:<activity number>' embedded in a TextValue field 
+      should be translated to the corresponding select object action. Extend 
+      PortalExtension_1_0 by the method renderTextValue(). The default implementation
+      renders email addresses and URLs to clickable anchors.
+      
+      CR10006321
+      Evaluator: show grid content on init should be customizable. Evaluator_1_0
+      defines the new method 
+      
+      public boolean showGridContentOnInit(
+        GridControl gridControl,
+        ApplicationContext application
+      );
+            
+      The method is invoked by org.openmdx.portal.servlet.view.Grid each time a
+      grid is initialized. The grid content is displayed the first time only
+      if showGridContentOnInit() returns true. DefaultEvalutor returns the
+      value defined in the user settings. The default behaviour can be 
+      overriden by user-specific evalutor implementations, e.g. 
+      showGridContentOnInit() can return false for 'slow' grids.
+      
+      CR0003811
+      Autocompletion: the default evaluator returns a default autocompleter
+      for most lookup fields. Included in the order by features are all
+      atttributes with names starting with 'name', 'description', 'title' or
+      'number' and ending with 'Name', 'Description', 'Title' or 'Number' and
+      the attribute type is org:w3c:string. This way an activated autocompleter
+      (Ajax.Autocompleter) issues a find request with one of the selected filter 
+      properties and the referenced type as object class. The autocommpletion
+      request is handled by org.openmdx.portal.servlet.FindObjectsAction. The
+      corresponding HTML code is generated by 
+      org.openmdx.portal.servlet.FindObjectsAutocompleter.
+      
+      CR0003619
+      ObjectInspectorServlet: multiplicity of multi-valued attributes can be
+      customized. Default value is the modeled multiplicity.
+      
+				<org.openmdx.ui1.ElementDefinition name="org:openmdx:portal:test:Address:postalAddressLine">
+					<_object>
+						<active>true</active>
+						<spanRow>2</spanRow>
+						<multiplicity>3</multiplicity>
+						<toolTip>
+							<_item>Address line(s)</_item>
+						</toolTip>
+						<label>
+							<_item>Address line(s)</_item>
+						</label>
+						<orderFieldGroup>
+							<_item>0</_item>
+							<_item>0</_item>
+							<_item>10</_item>
+						</orderFieldGroup>
+						<orderObjectContainer>
+							<_item>0</_item>
+							<_item>0</_item>
+							<_item>18</_item>
+						</orderObjectContainer>
+					</_object>
+					<_content/>
+				</org.openmdx.ui1.ElementDefinition>      
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR10007150
+      Portal: In case the application context can not be initialized properly
+      the user is sent back to the login page instead of throwing a ServletException
+      leaving the session and browser in an inconsistent state.
+      
+      CR10007145
+      Portal: rename Evaluator_1_0 to PortalExtension_1_0. The default implementation
+      DefaultEvaluator is renamed to DefaultPortalExtension.
+      
+      CR0003431
+      More user friendly entering of qualifiers. The new method 
+      Evaluator_1_0.hasUserDefineableQualifier(inspector) allows to customize 
+      for which inspectors qualifiers should be shown when creating new objects. 
+      DefaultEvaluator always returns true.
+
+      CR0003813
+      ObjectInspectorServlet: shortLabel fallback. If a shortLabel is defined for 
+      locale 0 the fallback for locales > 0 should be:
+      1. label of the same locale
+      2. shortLabel of fallback locale 
+      instead of 2 only
+            
+2.1.  FIXED BUGS
+      
+      CR10006020
+      Overloading of alternateElementDefinition buggy? The <active> property
+      of AlternateElementDefinition is ignored.
+      
+      CR0004057
+      Missing locale-specific information  
+      
+      Missing locale-specific configuration leads to a NullPointerException in 
+      UiLoader.  
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+      
+==============================================================================
+Version 1.15.4                                                      2006-12-04
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR10006316
+      ObjectInspectorServlet: Localize date and dateTime fields in edit mode.
+      
+      CR10006226
+      ObjectInspectorServlet: configurable wildcard search. The configuration
+      options filterValuePattern allows to configure the prefix and suffix
+      patterns used for completing filter values entered by the user. A filter
+      value in case of IS_LIKE search conditions is completed as follows:
+      filter value = <prefix 1><prefix 2><filter value><suffix> where
+      prefix 1 = filterValuePattern[0], prefix 2 = filterValuePattern[1] and
+      suffix = filterValuePattern[2]. The default values are:
+      * prefix 1: (?i) - case insensitive search
+      * prefix 2: % - wildcard
+      * suffix: % - wildcard
+      
+      CR10006298
+      ObjectInspectorServlet: parametrized lookup. The new method getLookupView()
+      on Evaluator_1_0 allows to customize the lookup object, i.e. the main
+      object which is shown when the user clicks to lookup object icon. The method
+      has the following signature. By default the getLookupView() of the 
+      DefaultEvalutor returns as lookup view the first object which is parent
+      of the selected object and has composite objects which are of the
+      requested lookup type. Below is an example which shows how to override
+      this behaviour:
+      
+	    //-------------------------------------------------------------------------
+	    public View getLookupView(
+	        String id, 
+	        ModelElement_1_0 lookupType, 
+	        RefObject_1_0 startFrom, 
+	        String filterValues,
+	        ControlFactory controlFactory,
+	        ApplicationContext application
+	    ) throws ServiceException {
+	        Model_1_0 model = application.getModel();
+	        // start from customer if the current object is a contract and the 
+	        // lookup type is AccountAddress
+	        if(startFrom instanceof org.opencrx.kernel.contract1.cci.AbstractContract) {
+	            org.opencrx.kernel.contract1.cci.AbstractContract contract = 
+	                (org.opencrx.kernel.contract1.cci.AbstractContract)startFrom;
+	            org.opencrx.kernel.account1.cci.Account customer = null;
+	            try {
+	                customer = contract.getCustomer();
+	            } catch(Exception e) {}
+	            if(
+	                (customer != null) &&
+	                model.isSubtypeOf("org:opencrx:kernel:account1:AccountAddress", lookupType)
+	            ) {
+	                startFrom = customer;
+	            }
+	            ShowObjectView view = (ShowObjectView)super.getLookupView(
+	                id, 
+	                lookupType, 
+	                startFrom, 
+	                controlFactory, 
+	                application
+	            );
+	            return view;
+	        }
+	        // Default lookup
+	        else {
+	            return super.getLookupView(
+	                id, 
+	                lookupType, 
+	                startFrom, 
+	                controlFactory, 
+	                application
+	            );
+	        }
+	    }
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR10006295
+      Upgrade to BIRT 2.1.1. The new version supports XML datasources which 
+      allows a better integration with openMDX/Portal. openMDX/Portal provides
+      the viewer servlet org.openmdx.portal.birt.BirtReportServlet which can be
+      configured in the web.xml as follows:
+      
+			<context-param>
+				<param-name>BIRT_VIEWER_LOG_LEVEL</param-name>
+				<param-value>FINEST</param-value>
+			</context-param>
+			<servlet id="ReportServlet">
+				<servlet-name>ReportServlet</servlet-name>
+				<servlet-class>org.openmdx.birt.servlet.BirtReportServlet</servlet-class>
+			</servlet>
+      ...
+			<servlet-mapping>
+				<servlet-name>ReportServlet</servlet-name>
+				<url-pattern>/run</url-pattern>
+			</servlet-mapping>
+      
+      Report definitions are must be registered under WEB-INF/config/report/<locale>. 
+      The following rules apply for report definitions:
+      * The name of a report definition file is 
+        <fully qualified class name>-<report name>.rptdesign. The report is
+        registered in the 'Reports' menu of the inspector rendering objects
+        of the class <fully qualified class name>.
+      * The report design version must be of version 3.2.6 (the version is set 
+        by the BIRT report designer).
+      * The title of the report is mapped to the 'Reports' menu label. If 
+        not defined, the name of the report is shown as menu label.
+      * The report must be based on an XML datasource (make sure to select the
+        DTP XML Data Source!). During report design, the URL of the datasource 
+        can be set to any local XML file, e.g.  c:/temp/reports/TopNCustomers.xml. 
+        During runtime the XML data must be supplied by a JSP. The JSP file name 
+        must be data-<fully qualified class name>-<report name>.jsp. The servlet 
+        must return as reply an XML stream with content type 'text/xml'. 
+        The structure of the XML must match the report definition.
+      For examples see the openCRX distributions.
+
+      Install the following BIRT packages for report design:
+      * BIRT 2.1.1 and all requirements as described on 
+        from http://download.eclipse.org/birt/downloads
+      * After installation you must upgrade to the latest stable build
+        of Eclipse/Datatools (DTP), version 1.0. See 
+        http://www.eclipse.org/datatools/
+        IMPORTANT: Make sure that you meet all installation requirememnts
+        of DTP (e.g. Eclipse 3.2.1 SDK, EMF 2.2.1 and GEF 3.2.1). Remove 
+        old versions of datatools, emf, and gef in eclipse/plugins.
+
+2.1.  FIXED BUGS
+      none
+
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+      
+==============================================================================
+Version 1.14.6                                                      2006-09-08
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR0003916 
+      How to configure views cache size? The views cache size is hard-coded
+      in class ObjectInspectorServlet$ViewsCache. The cache size can now be
+      configured in web.xml with the option viewsCacheSize. Default is 5.
+      
+      CR0003847
+      Code values in grids: use shortText. Currently longText is used for both 
+      the grid and the inspector view of code attributes; in order to gain 
+      flexibility in terms of combining icons with text in the grid the 
+      shortText should be used in the grid while the longText should be used 
+      in the inspector.
+      
+      CR0003850
+      Allow multi-valued references in grids. Currently, only single-valued 
+      are supported. Multi-valued references are customized as follows:
+      
+			<org.openmdx.ui1.ElementDefinition name="dot:net:Activity:contract">
+				<_object>
+					<active>true</active>
+					<toolTip>
+						<_item>Contracts</_item>
+					</toolTip>
+					<label>
+						<_item>Contracts</_item>
+					</label>
+					<!-- order in inspector -->
+					<order>
+						<_item>15</_item>
+						<_item>0</_item>
+						<_item>10</_item>
+					</order>
+					<!-- column order in grid / object container -->
+					<orderObjectContainer>
+						<_item>0</_item>
+						<_item>0</_item>
+						<_item>13</_item>
+					</orderObjectContainer>
+					<maxMember>5</maxMember>
+				</_object>
+				<_content></_content>
+			</org.openmdx.ui1.ElementDefinition>      
+
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR0003900 
+      View.getSelectParentAction() inefficient. For each user request 
+      getSelectParentAction() is invoked which results in reading all parent 
+      objects (including the segments). Because they are not cached, all parent 
+      objects are retrieved for each Http request which in turn results in reading 
+      all segments by OpenCrxKernel_1.completeSegment(). 
+
+      CR0003920 
+      Grid: references to objects. 
+      * CompositeGrid should not have a reference to filteredObjects 
+      * Grid should not have a reference to allObjects 
+      Objects are already referenced by object manager. Removing the members makes 
+      life for gc easier. 
+      
+      CR0003918 
+      Logoff.jsp: Remove System.gc().      
+      
+2.1.  FIXED BUGS
+      
+      CR0003891 
+      Concurrent access during control setup throws ConcurrentModificationException.
+      org.openmdx.test.portal.servlet.TestThreadSafety added to test thread-
+      safety of ObjectInspectorServlet. TestThreadSafety reads a config file
+      with format:      
+				http://localhost:9090
+				<logon user name>
+				<logon user password>
+				<object XRI 1>
+				<object XRI 2>
+			TestThreadSafety issues SELECT_OBJECT actions with the configured object
+			XRIs.
+            
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
+Version 1.14.1                                                     2006-08-06
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR0003634
+      Ui_1: event handler. Add the multi-valued attribute eventHandler to 
+      ValuedField (and ElementDefinition). An event handler has the format 
+      event:handler. The rendering of an event handler is engine-specific. 
+      HTML-rendering would result typically in <input .... 
+      event="javascript:handler();" ... >
+      
+      CR0003636
+      ObjectInspectorServlet: event FIND_OBJECTS. Add an event which allows to 
+      issue of find request on a reference. The result is returned as HTML 
+      unordered list. The event should support the following parameters: 
+      xri, referenceName, position, size, filterFeature, filterValue, 
+      filterOperator, orderByFeature. E.g. the HTTP request 
+      ObjectInspectorServlet?event=40&parameter=xri=«xri:@openmdx:org.opencrx.
+      kernel.account1/provider/CRX/segment/Standard»;referenceName=«account»;
+      position=«0»;size=«50»;orderByFeature=«fullName»;filterFeature=«fullName»;
+      filterValue=«A%»;filterOperator=«IS_LIKE» allows to retrieve all accounts 
+      from segment 'Standard' where full name is like A%. This function is
+      e.g. useful to implement AJAX-based auto-completion.
+
+      CR0003639
+      ObjectInspectorServlet: auto completion. Replace Evaluator_1_0.
+      getSelectableValues() by Evaluator_1_0.getAutocompleter(). The method 
+      returns an object which implements Autocompleter_1_0. A concrete 
+      implementations are ListAutocompleter and LookupAutocompleter. 
+      ListAutocompleter renders a list of values as HTML select field. 
+      LookupAutocompleter renders an Ajax.Autocompleter.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR0003589
+      Lighten up code and replace Javascript with CSS. Implement ideas based 
+      on article at http://www.htmldog.com/articles/suckerfish/dropdowns/.
+      
+2.1.  FIXED BUGS
+      none
+            
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+==============================================================================
+Version 1.14.0                                                      2006-07-17
+==============================================================================
+
+1.    NEW FEATURES
+      
+      CR0003617
+      ObjectInspectorServlet: locale as user setting.
+      
+      CR0003632
+      Add JSP reports. Report JSPs can be registered in directory WEB-INF/config/
+      report/<locale>. Report JSPs must define the report parameters in comment
+      as in the following example:
+      
+			<!--
+			<report>
+				<property name="label">Contacts Report</property>
+				<property name="description">Contacts Report</property>
+				<parameters>
+					<scalar-parameter name="nameFrom">
+						<property name="displayName">Start with name</property>
+						<property name="dataType">String</property>
+						<property name="defaultValue"> </property>
+					</scalar-parameter>
+					<scalar-parameter name="nameTo">
+						<property name="displayName">End with name</property>
+						<property name="dataType">String</property>
+						<property name="defaultValue"> </property>
+					</scalar-parameter>
+					<scalar-parameter name="maxNumber">
+						<property name="displayName">Export max.</property>
+						<property name="dataType">String</property>
+						<property name="defaultValue">1000</property>
+					</scalar-parameter>
+				</parameters>
+			</report>
+			-->
+      
+      The ObjectInspectorServlet loads the reports on init and shows them
+      in the corresponding Report menu. A JSP report typically does the
+      following:
+      1. Retrieve objects using the configured JMI APIs of the data provider
+      2. Create a temporary file and dump the report data into this file. 
+         Recommended is Apache POI to generate Excel compliant reports.
+      3. Create a response which includes the file download link:
+
+			<%
+			   String location = UUIDs.getGenerator().next().toString();
+			   File f = new File(
+			       app.getTempFileName(location, "")
+			   );
+			   FileOutputStream os = new FileOutputStream(f);			
+			   ...
+			   os.close();   
+			   Action downloadAction = 
+			      new Action(
+			          Action.EVENT_DOWNLOAD_FROM_LOCATION,
+			          new Action.Parameter[]{
+			              new Action.Parameter(Action.PARAMETER_LOCATION, location),
+			              new Action.Parameter(Action.PARAMETER_NAME, "<file name>.xls"),
+			              new Action.Parameter(Action.PARAMETER_MIME_TYPE, "application/vnd.ms-excel")
+			          },
+			          app.getTexts().getClickToDownloadText() + " " + "<file name>.xls",
+			          true
+			      );
+			%>
+			<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+			<html>
+			<head>
+			  <title>Contacts Report</title>
+			  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+			  <link href="../../_style/default.css" rel="stylesheet" type="text/css">
+			  <link href="../../_style/header.css" rel="stylesheet" type="text/css">
+			  <link href="../../_style/colors.css" rel="stylesheet" type="text/css">
+			</head>
+			<body>
+			Download report from <a href="../<%= view.getEncodedHRef(downloadAction) %>">here</a>
+			</body>
+			</html>
+      
+      CR0003581
+      Evaluator: customizable updateObject. The mapping of form fields to 
+      the editable object should be customizable by the evaluator implementation.
+      org.openmdx.portal.servlet.DefaultEvaluator implements a default mapping
+      which maps all form fields 1:1 to the corresponding object attributes.
+      
+      CR0003579
+      EditObject: disable elements. As with operations it should be possible 
+      to disable elements for editing. Evaluator_1_0.isEnabled() should be 
+      invoked for all features.
+      
+      CR0003580
+      Split EditObject.jsp into a user-definable layout JSP and programmed
+      controls.
+      
+      CR0003577
+      Mime type for all attribute values. User-defineable attribute value 
+      classes can only be defined for binary values. It should be possible 
+      to customize mime types for all fields supported by the Ui plugin. 
+      This allows to customize renderers for all attribute values.
+      
+      CR0003578
+      shortLabel. In addition to labels, ui elements should have short labels. 
+      If defined, short labels can be used e.g. in table headers.
+      
+      CR0003526
+      Make page size a user setting.
+      
+      CR0003560
+      UTF8 Encoding. Assert UTF-8 character encoding with 
+      request.setCharacterEncoding("UTF-8").
+      
+      CR0003552
+      Ui_1: take label as tooltip if no tooltip is defined in ui element 
+      definition.
+      
+      CR0003456
+      Split ShowObject.jsp: Rendering code moved to controls in package
+      org.openmdx.portal.servlet.control. All controls implement the
+      method public void paint(HtmlPage p, String frame). Controls can
+      be composed in user-definable layout definitions which are located
+      in WEB-INF/config/layout/<locale>. Layouts can be specified per
+      inspector to be rendered. The default layout is Default.jsp. Layout
+      names are of the form <dot separated class name>.jsp, e.g.
+      org.opencrx.kernel.account1.Contact.jsp.
+      
+      CR0003509
+      Wizard reusability. JSP-based wizards support the following new
+      configuration options:
+      
+		  <meta name="forClass" content="<class name>">, 
+		  e.g. org:opencrx:kernel:activity1:Resource
+		  The wizard is added to the class <class name> and all its subclasses. This
+		  allows to reuse a wizard for multiple classes.
+		  
+		  <meta name="order" content="<order in wizards menu>">
+      The wizard is positioned at the specified position in the wizards menu.
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR0003584 	
+      Split controls from org.openmdx.portal.servlet.control into classes
+      which hold the control state and the control structure. 
+      
+      CR0003534
+			The following scenario is the reason for most of the reported problems:			
+			1. Page is sent to the browser
+		  2. In the meantime uiRefresh is scheduled
+		  3. When clicking any action on the browser (i.e. select a tab), 
+		     ObjectInspectorServlet refreshes the ui and removes all cached views.
+		  4. ObjectInspectorServlet then tries to get the cached view requested 
+		     by the action. However, because the cache is empty it tries to 
+		     reload the target object. Unfortunately most of the actions to not 
+		     supply the target object as XRI. The servlet falls back to root 
+		     object 0 and applies the event to this object. This may result in 
+		     very undesired results, i.e. removal of root object 0 in case the 
+		     action was delete.
+			Fixed as follows:
+			* Many actions do supply the XRI now (i.e. select reference, delete,
+			  edit). This allows ObjectInspectorServlet to reload the target object
+			  apply the action to the correct object.
+			* In case of fallback to root object 0 the event is reset to 
+			  Action.EVENT_NONE.      
+
+      CR0003538
+      Wrong grid selected after executing operation / createObject. 
+      
+2.1.  FIXED BUGS
+      
+      CR0003665 
+      ShowObject.jsp and EditObject.jsp do not work with weblogic-8.1
+      because of a compilation error: the class weblogic.servlet.jsp.JspBase 
+      do not have a getServletContext() method. Solution : replace 
+      getServletContext() with getServletConfig().getServletContext().
+      
+      CR0003588
+      remove leading / from BIRT report path. the leading / causes problems 
+      on Unix/Linux systems. 
+      Source of bug report: Sourceforge:
+      Bugs item #1483128, was opened at 2006-05-06 23:02
+      
+      CR0003540
+      Login.jsp: fixed illegal URL to logoRight.gif.
+      
+      CR0003576
+      Filter bug. Illegal numeric filter values and empty filter values result
+      in corrupt filter properties. This typically crashes a grid if stored
+      as default filter.
+      
+      CR0003557
+      html code generated for URLs in text are not correct if the URL as at the 
+      end of a line.
+      
+      
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none

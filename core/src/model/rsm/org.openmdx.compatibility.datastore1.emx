@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--xtools2_universal_type_manager-->
+<uml:Model xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.ibm.com/xtools/1.5.0/Notation" xmlns:uml="http://www.eclipse.org/uml2/1.0.0/UML" xmlns:umlnotation="http://www.ibm.com/xtools/1.5.0/Umlnotation" xmi:id="_onrIQB1_EdyPsfP_gjYckQ" name="datastore1" appliedProfile="_onrIRB1_EdyPsfP_gjYckQ _onrIRx1_EdyPsfP_gjYckQ _on0SMB1_EdyPsfP_gjYckQ _on0SMx1_EdyPsfP_gjYckQ _on0SNh1_EdyPsfP_gjYckQ">
+  <eAnnotations xmi:id="_onrIQR1_EdyPsfP_gjYckQ" source="uml2.diagrams"/>
+  <packageImport xmi:type="uml:ProfileApplication" xmi:id="_onrIRB1_EdyPsfP_gjYckQ">
+    <eAnnotations xmi:id="_onrIRR1_EdyPsfP_gjYckQ" source="attributes">
+      <details xmi:id="_onrIRh1_EdyPsfP_gjYckQ" key="version" value="0"/>
+    </eAnnotations>
+    <importedPackage xmi:type="uml:Profile" href="pathmap://UML2_PROFILES/Basic.profile.uml2#_6mFRgK86Edih9-GG5afQ0g"/>
+    <importedProfile href="pathmap://UML2_PROFILES/Basic.profile.uml2#_6mFRgK86Edih9-GG5afQ0g"/>
+  </packageImport>
+  <packageImport xmi:type="uml:ProfileApplication" xmi:id="_onrIRx1_EdyPsfP_gjYckQ">
+    <eAnnotations xmi:id="_onrISB1_EdyPsfP_gjYckQ" source="attributes">
+      <details xmi:id="_onrISR1_EdyPsfP_gjYckQ" key="version" value="0"/>
+    </eAnnotations>
+    <importedPackage xmi:type="uml:Profile" href="pathmap://UML2_PROFILES/Intermediate.profile.uml2#_Cz7csK87Edih9-GG5afQ0g"/>
+    <importedProfile href="pathmap://UML2_PROFILES/Intermediate.profile.uml2#_Cz7csK87Edih9-GG5afQ0g"/>
+  </packageImport>
+  <packageImport xmi:type="uml:ProfileApplication" xmi:id="_on0SMB1_EdyPsfP_gjYckQ">
+    <eAnnotations xmi:id="_on0SMR1_EdyPsfP_gjYckQ" source="attributes">
+      <details xmi:id="_on0SMh1_EdyPsfP_gjYckQ" key="version" value="0"/>
+    </eAnnotations>
+    <importedPackage xmi:type="uml:Profile" href="pathmap://UML2_PROFILES/Complete.profile.uml2#_M7pTkK87Edih9-GG5afQ0g"/>
+    <importedProfile href="pathmap://UML2_PROFILES/Complete.profile.uml2#_M7pTkK87Edih9-GG5afQ0g"/>
+  </packageImport>
+  <packageImport xmi:type="uml:ProfileApplication" xmi:id="_on0SMx1_EdyPsfP_gjYckQ">
+    <eAnnotations xmi:id="_on0SNB1_EdyPsfP_gjYckQ" source="attributes">
+      <details xmi:id="_on0SNR1_EdyPsfP_gjYckQ" key="version" value="0"/>
+    </eAnnotations>
+    <importedPackage xmi:type="uml:Profile" href="pathmap://UML2_MSL_PROFILES/Default.epx#_a_S3wNWLEdiy4IqP8whjFA?Default"/>
+    <importedProfile href="pathmap://UML2_MSL_PROFILES/Default.epx#_a_S3wNWLEdiy4IqP8whjFA?Default"/>
+  </packageImport>
+  <packageImport xmi:type="uml:ProfileApplication" xmi:id="_on0SNh1_EdyPsfP_gjYckQ">
+    <eAnnotations xmi:id="_on0SNx1_EdyPsfP_gjYckQ" source="attributes">
+      <details xmi:id="_on0SOB1_EdyPsfP_gjYckQ" key="version" value="0"/>
+    </eAnnotations>
+    <importedPackage xmi:type="uml:Profile" href="pathmap://UML2_MSL_PROFILES/Deployment.epx#_vjbuwOvHEdiDX5bji0iVSA?Deployment"/>
+    <importedProfile href="pathmap://UML2_MSL_PROFILES/Deployment.epx#_vjbuwOvHEdiDX5bji0iVSA?Deployment"/>
+  </packageImport>
+  <packageImport xmi:id="_on0SOR1_EdyPsfP_gjYckQ">
+    <importedPackage xmi:type="uml:Model" href="pathmap://UML2_LIBRARIES/UML2PrimitiveTypes.library.uml2#_EfRZoK86EdieaYgxtVWN8Q"/>
+  </packageImport>
+  <ownedMember xmi:type="uml:Package" xmi:id="_SeNosB19EdyPsfP_gjYckQ" name="datastore1">
+    <eAnnotations xmi:id="_SeNosR19EdyPsfP_gjYckQ" source="uml2.diagrams">
+      <contents xmi:type="notation:Diagram" xmi:id="_V8r6sB19EdyPsfP_gjYckQ" type="Class" name="Main">
+        <children xmi:id="_n9JPcB19EdyPsfP_gjYckQ" targetEdges="_TSP4QR1-EdyPsfP_gjYckQ">
+          <children xmi:id="_n9SZYB19EdyPsfP_gjYckQ" type="ImageCompartment">
+            <element xmi:type="uml:Class" href="org.openmdx.base.emx#_3C7B8A60016D403F322B0061?base/base/Context"/>
+            <layoutConstraint xmi:type="notation:Size" xmi:id="_n9SZYR19EdyPsfP_gjYckQ" width="1320" height="1320"/>
+          </children>
+          <children xmi:id="_n9SZYh19EdyPsfP_gjYckQ" type="Stereotype">
+            <element xmi:type="uml:Class" href="org.openmdx.base.emx#_3C7B8A60016D403F322B0061?base/base/Context"/>
+          </children>
+          <children xmi:id="_n9SZYx19EdyPsfP_gjYckQ" type="Name">
+            <element xmi:type="uml:Class" href="org.openmdx.base.emx#_3C7B8A60016D403F322B0061?base/base/Context"/>
+          </children>
+          <children xmi:id="_n9SZZB19EdyPsfP_gjYckQ" visible="false" type="AttributeCompartment">
+            <styles xmi:type="umlnotation:UMLListCompartmentStyle" xmi:id="_n9SZZR19EdyPsfP_gjYckQ"/>
+            <element xmi:type="uml:Class" href="org.openmdx.base.emx#_3C7B8A60016D403F322B0061?base/base/Context"/>
+          </children>
+          <children xmi:id="_n9SZZh19EdyPsfP_gjYckQ" visible="false" type="OperationCompartment">
+            <styles xmi:type="umlnotation:UMLListCompartmentStyle" xmi:id="_n9SZZx19EdyPsfP_gjYckQ"/>
+            <element xmi:type="uml:Class" href="org.openmdx.base.emx#_3C7B8A60016D403F322B0061?base/base/Context"/>
+          </children>
+          <children xmi:id="_n9SZaB19EdyPsfP_gjYckQ" visible="false" type="SignalCompartment">
+            <styles xmi:type="umlnotation:UMLListCompartmentStyle" xmi:id="_n9SZaR19EdyPsfP_gjYckQ"/>
+            <element xmi:type="uml:Class" href="org.openmdx.base.emx#_3C7B8A60016D403F322B0061?base/base/Context"/>
+          </children>
+          <children xmi:id="_n9SZah19EdyPsfP_gjYckQ" visible="false" type="StructureCompartment">
+            <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_n9SZax19EdyPsfP_gjYckQ"/>
+            <element xmi:type="uml:Class" href="org.openmdx.base.emx#_3C7B8A60016D403F322B0061?base/base/Context"/>
+          </children>
+          <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_n9JPcR19EdyPsfP_gjYckQ" fontName="Arial" fontHeight="11" showListStereotype="Text" showListVisibility="Text" showListSignature="true" fillColor="10337791" lineColor="3342489" showStereotype="Text"/>
+          <element xmi:type="uml:Class" href="org.openmdx.base.emx#_3C7B8A60016D403F322B0061?base/base/Context"/>
+          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_n9JPch19EdyPsfP_gjYckQ" x="2327" y="766" width="3783"/>
+        </children>
+        <children xmi:id="_wTM7cB19EdyPsfP_gjYckQ" sourceEdges="_TSP4QR1-EdyPsfP_gjYckQ _g3SKkB1-EdyPsfP_gjYckQ" element="_wS5ZcB19EdyPsfP_gjYckQ">
+          <children xmi:id="_wTM7cx19EdyPsfP_gjYckQ" type="ImageCompartment" element="_wS5ZcB19EdyPsfP_gjYckQ">
+            <layoutConstraint xmi:type="notation:Size" xmi:id="_wTM7dB19EdyPsfP_gjYckQ" width="1320" height="1320"/>
+          </children>
+          <children xmi:id="_wTM7dR19EdyPsfP_gjYckQ" type="Stereotype" element="_wS5ZcB19EdyPsfP_gjYckQ"/>
+          <children xmi:id="_wTM7dh19EdyPsfP_gjYckQ" type="Name" element="_wS5ZcB19EdyPsfP_gjYckQ"/>
+          <children xmi:id="_wTM7dx19EdyPsfP_gjYckQ" type="AttributeCompartment" element="_wS5ZcB19EdyPsfP_gjYckQ">
+            <styles xmi:type="umlnotation:UMLListCompartmentStyle" xmi:id="_wTM7eB19EdyPsfP_gjYckQ"/>
+          </children>
+          <children xmi:id="_wTM7eR19EdyPsfP_gjYckQ" type="OperationCompartment" element="_wS5ZcB19EdyPsfP_gjYckQ">
+            <styles xmi:type="umlnotation:UMLListCompartmentStyle" xmi:id="_wTM7eh19EdyPsfP_gjYckQ"/>
+          </children>
+          <children xmi:id="_wTM7ex19EdyPsfP_gjYckQ" visible="false" type="SignalCompartment" element="_wS5ZcB19EdyPsfP_gjYckQ">
+            <styles xmi:type="umlnotation:UMLListCompartmentStyle" xmi:id="_wTM7fB19EdyPsfP_gjYckQ"/>
+          </children>
+          <children xmi:id="_wTM7fR19EdyPsfP_gjYckQ" visible="false" type="StructureCompartment" element="_wS5ZcB19EdyPsfP_gjYckQ">
+            <styles xmi:type="umlnotation:UMLShapeCompartmentStyle" xmi:id="_wTM7fh19EdyPsfP_gjYckQ"/>
+          </children>
+          <styles xmi:type="umlnotation:UMLShapeStyle" xmi:id="_wTM7cR19EdyPsfP_gjYckQ" fontName="Arial" fontHeight="11" showListStereotype="Text" showListVisibility="Text" showListSignature="true" fillColor="13369343" lineColor="3342489" showStereotype="Text"/>
+          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_wTM7ch19EdyPsfP_gjYckQ" x="881" y="2444" width="7089" height="4292"/>
+        </children>
+        <children xmi:id="_b3zY0B1-EdyPsfP_gjYckQ" type="Note" targetEdges="_g3SKkB1-EdyPsfP_gjYckQ">
+          <children xmi:id="_b3zY0R1-EdyPsfP_gjYckQ" type="DiagramName"/>
+          <children xmi:id="_b3zY0h1-EdyPsfP_gjYckQ" type="Description"/>
+          <styles xmi:type="notation:ShapeStyle" xmi:id="_b3zY0x1-EdyPsfP_gjYckQ" fontName="Arial" fontHeight="8" description="A query filter allows to specify a complex sql filter clause in addition to attribute filters. If a query filter context is supplied, the resulting SELECT statement is of the form SELECT .. WHERE &lt;query filter clause> AND &lt;attribute filter clauses> AND &lt;other criteria>. &#xD;&#xA;&#xD;&#xA;The clause may have place holders for parameters which are of the form ?s&lt;index> for string, ?i&lt;index> for integer, ?n&lt;index> for decimal, ?d&lt;index> for date, ?t&lt;index> for dateTime and ?b&lt;index> for boolean parameters.&#xD;&#xA;&#xD;&#xA;" fillColor="16775658" lineColor="3342489"/>
+          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_b3zY1B1-EdyPsfP_gjYckQ" x="8801" y="2374" width="10788" height="3631"/>
+        </children>
+        <styles xmi:type="umlnotation:UMLDiagramStyle" xmi:id="_V8r6sR19EdyPsfP_gjYckQ"/>
+        <edges xmi:id="_TSP4QR1-EdyPsfP_gjYckQ" element="_TSP4QB1-EdyPsfP_gjYckQ" source="_wTM7cB19EdyPsfP_gjYckQ" target="_n9JPcB19EdyPsfP_gjYckQ">
+          <children xmi:id="_TSP4RB1-EdyPsfP_gjYckQ" type="NameLabel" element="_TSP4QB1-EdyPsfP_gjYckQ">
+            <children xmi:id="_TSP4Rh1-EdyPsfP_gjYckQ" type="Stereotype" element="_TSP4QB1-EdyPsfP_gjYckQ"/>
+            <children xmi:id="_TSZCMB1-EdyPsfP_gjYckQ" type="Name" element="_TSP4QB1-EdyPsfP_gjYckQ"/>
+            <layoutConstraint xmi:type="notation:Bounds" xmi:id="_TSP4RR1-EdyPsfP_gjYckQ" y="-185"/>
+          </children>
+          <styles xmi:type="umlnotation:UMLConnectorStyle" xmi:id="_TSP4Qh1-EdyPsfP_gjYckQ" fontName="Arial" fontHeight="11" routing="Rectilinear" lineColor="3342489" showStereotype="Text"/>
+          <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_TSP4Qx1-EdyPsfP_gjYckQ" points="[3, -70, 5, 53]$[3, -101, 5, 22]"/>
+        </edges>
+        <edges xmi:id="_g3SKkB1-EdyPsfP_gjYckQ" type="NoteAttachment" source="_wTM7cB19EdyPsfP_gjYckQ" target="_b3zY0B1-EdyPsfP_gjYckQ">
+          <styles xmi:type="notation:ConnectorStyle" xmi:id="_g3SKkR1-EdyPsfP_gjYckQ" lineColor="3342489"/>
+          <bendpoints xmi:type="notation:RelativeBendpoints" xmi:id="_g3SKkh1-EdyPsfP_gjYckQ" points="[133, -14, -228, 8]$[167, -28, -194, -6]"/>
+        </edges>
+      </contents>
+      <contents xmi:type="notation:Diagram" xmi:id="_YK10UB19EdyPsfP_gjYckQ" type="Class" name="_LICENSE">
+        <children xmi:id="_baHMsB19EdyPsfP_gjYckQ" type="Note">
+          <children xmi:id="_baHMsR19EdyPsfP_gjYckQ" type="DiagramName"/>
+          <children xmi:id="_baHMsh19EdyPsfP_gjYckQ" type="Description"/>
+          <styles xmi:type="notation:ShapeStyle" xmi:id="_baHMsx19EdyPsfP_gjYckQ" fontName="Arial" fontHeight="8" description="This software is published under the BSD license&#xD;&#xA;as listed below.&#xD;&#xA;&#xD;&#xA;Copyright (c) 2004-2007, OMEX AG, Switzerland&#xD;&#xA;All rights reserved.&#xD;&#xA;&#xD;&#xA;Redistribution and use in source and binary forms, with or without &#xD;&#xA;modification, are permitted provided that the following conditions &#xD;&#xA;are met:&#xD;&#xA;&#xD;&#xA;Redistribution and use in source and binary forms, with or&#xD;&#xA;without modification, are permitted provided that the following&#xD;&#xA;conditions are met:&#xD;&#xA;&#xD;&#xA;* Redistributions of source code must retain the above copyright&#xD;&#xA;notice, this list of conditions and the following disclaimer.&#xD;&#xA;&#xD;&#xA;* Redistributions in binary form must reproduce the above copyright&#xD;&#xA;notice, this list of conditions and the following disclaimer in&#xD;&#xA;the documentation and/or other materials provided with the&#xD;&#xA;distribution.&#xD;&#xA;&#xD;&#xA;* Neither the name of OMEX AG nor the names of the contributors&#xD;&#xA;to openMDX may be used to endorse or promote products derived&#xD;&#xA;from this software without specific prior written permission&#xD;&#xA;&#xD;&#xA;&#xD;&#xA;THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND&#xD;&#xA;CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES,&#xD;&#xA;INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF&#xD;&#xA;MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE&#xD;&#xA;DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS&#xD;&#xA;BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,&#xD;&#xA;EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED&#xD;&#xA;TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,&#xD;&#xA;DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON&#xD;&#xA;ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,&#xD;&#xA;OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY&#xD;&#xA;OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE&#xD;&#xA;POSSIBILITY OF SUCH DAMAGE.&#xD;&#xA;&#xD;&#xA;------------------&#xD;&#xA;&#xD;&#xA;This product includes software developed by the Apache Software&#xD;&#xA;Foundation (http://www.apache.org/).&#xD;&#xA;" fillColor="16775658" lineColor="3342489"/>
+          <layoutConstraint xmi:type="notation:Bounds" xmi:id="_baHMtB19EdyPsfP_gjYckQ" x="679" y="789" width="12271" height="17471"/>
+        </children>
+        <styles xmi:type="umlnotation:UMLDiagramStyle" xmi:id="_YK10UR19EdyPsfP_gjYckQ"/>
+      </contents>
+    </eAnnotations>
+    <ownedMember xmi:type="uml:Class" xmi:id="_wS5ZcB19EdyPsfP_gjYckQ" name="QueryFilter">
+      <generalization xmi:id="_TSP4QB1-EdyPsfP_gjYckQ">
+        <general xmi:type="uml:Class" href="org.openmdx.base.emx#_3C7B8A60016D403F322B0061?base/base/Context"/>
+      </generalization>
+      <ownedAttribute xmi:id="_46_QoB19EdyPsfP_gjYckQ" name="clause">
+        <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_3C7B8A60016D3C8B62E40010?w3c/w3c/string"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_B9J0sB1-EdyPsfP_gjYckQ" name="booleanParam">
+        <eAnnotations xmi:id="_GhEEwB1-EdyPsfP_gjYckQ" source="keywords">
+          <details xmi:id="_GhEEwR1-EdyPsfP_gjYckQ" key="list"/>
+        </eAnnotations>
+        <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_3C7B8A60016D3C8B63180083?w3c/w3c/boolean"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_-DQyAB19EdyPsfP_gjYckQ" name="stringParam">
+        <eAnnotations xmi:id="_EfufIB1-EdyPsfP_gjYckQ" source="keywords">
+          <details xmi:id="_EfufIR1-EdyPsfP_gjYckQ" key="list"/>
+        </eAnnotations>
+        <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_3C7B8A60016D3C8B62E40010?w3c/w3c/string"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="__g1jQB19EdyPsfP_gjYckQ" name="integerParam">
+        <eAnnotations xmi:id="_FCvsoB1-EdyPsfP_gjYckQ" source="keywords">
+          <details xmi:id="_FCvsoR1-EdyPsfP_gjYckQ" key="list"/>
+        </eAnnotations>
+        <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_3C7B8A60016D3CC6A34B0011?w3c/w3c/integer"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_vfZ1EB1_EdyPsfP_gjYckQ" name="decimalParam">
+        <eAnnotations xmi:id="_y24HMB1_EdyPsfP_gjYckQ" source="keywords">
+          <details xmi:id="_y24HMR1_EdyPsfP_gjYckQ" key="list"/>
+        </eAnnotations>
+        <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_3C7B8A60016D3C8B631E003C?w3c/w3c/decimal"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_AYuNgB1-EdyPsfP_gjYckQ" name="dateParam">
+        <eAnnotations xmi:id="_Fi7okB1-EdyPsfP_gjYckQ" source="keywords">
+          <details xmi:id="_Fi7okR1-EdyPsfP_gjYckQ" key="list"/>
+        </eAnnotations>
+        <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_3C7B8A60016D3C8B63230061?w3c/w3c/date"/>
+      </ownedAttribute>
+      <ownedAttribute xmi:id="_BL-2cB1-EdyPsfP_gjYckQ" name="dateTimeParam">
+        <eAnnotations xmi:id="_GBnvsB1-EdyPsfP_gjYckQ" source="keywords">
+          <details xmi:id="_GBnvsR1-EdyPsfP_gjYckQ" key="list"/>
+        </eAnnotations>
+        <type xmi:type="uml:PrimitiveType" href="org.w3c.emx#_3C7B8A60016D3C8B630802BB?w3c/w3c/dateTime"/>
+      </ownedAttribute>
+    </ownedMember>
+  </ownedMember>
+</uml:Model>

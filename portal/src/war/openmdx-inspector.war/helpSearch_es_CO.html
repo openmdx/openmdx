@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>openCRX - Búsquedas avanzadas</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
+<table class="objectTitle">
+  <tr>
+    <td>Búsquedas avanzadas</td>
+ <td>
+  <script>
+    <!--
+    document.write('<td align="right"><a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+    -->
+  </script>
+ </td>
+  </tr>
+</table>
+
+ <div class="hh2">Búsquedas avanzadas de manera fácil</div>
+ <div class="normal">Se puede aumentar la exactitud de las búsquedas adicionando
+     operadores que afinen las palabras clave y números. Todas las opciones
+     enumeradas en esta página se pueden escribir directamente en la caja de búsqueda.</div>
+ <div class="hh2">Las bases</div>
+ <div class="normal">Se puede escribir una palabra/número o una expresión, ejem. <strong>'Miller'</strong>, <strong>'> 500'</strong> or <strong>'>=
+   Smith'</strong>, y entonces</div>
+ <table cellpadding="0" cellspacing="10">
+   <tr valign="top">
+     <td>&#8226; dar click en el <strong>encabezado de la columna</strong> para buscar objetos
+       cuyos valores correspondan con un atributo en particular (Se buscará en <strong>todos los objetos</strong>
+       sin importar si se tienen filtros configurados y los resultados de una búsqueda previa
+       se perderan)</td>
+  <td bgcolor="#CCCCCC"><strong>Búsqueda nueva</strong><br />
+  <img src="images/helpSearchTut0.gif" width="129" height="51" /></td>
+   </tr>
+   <tr valign="top">
+     <td>&#8226; dar click en el <strong>botón [+]</strong> para buscar los objetos con
+       valores correspondientes con ése atributo en particular (<strong>solo se buscará en los objetos contenidos
+       en los resultados de la búsqueda o filtro previos</strong>
+       , ejem. 'agregar' esta busqueda retornará un conjunto de resutlados más restringido)</td>
+  <td bgcolor="#CCCCCC"><strong>Agregar condición</strong><br />
+  <img src="images/helpSearchTut1.gif" width="129" height="51" /></td>
+   </tr>
+</table>
+ <div class="hh2">Operadores</div>
+ <div class="normal">Los siguientes operadores están soportados (notese, sinembargo,
+   que algunos motores de bases de datos no soportan todos los operadores):</div>
+ <ul>
+ <li>sounds like (<strong>*</strong>)</li>
+ <li>like (<strong>%</strong>), operador predeterminado para búsquedas textuales</li>
+ <li>equal (<strong>=</strong>), operador predeterminado para búsquedas booleanas, de números y de códigos</li>
+ <li>not equal (<strong><></strong>, <strong>!</strong>=)</li>
+ <li>less (<strong><</strong>)</li>
+ <li>less or equal (<strong><=</strong>)</li>
+ <li>greater (<strong>></strong>)</li>
+ <li>greater or equal <strong>(>=</strong>)</li>
+ </ul>
+ <div class="hh2">&quot;AND&quot; Búsquedas</div>
+ <div class="normal">Para traer objetos que corresponden con una o mas condiciones al mismo tiempo,
+   usese el signo ampersand &quot;<strong>&amp;</strong>&quot; entre las condiciones. Por ejemplo, para buscar los objetos
+   con valores entre 500 y 1000 (ejem. mayores que 500 y menores que 1000), tan solo se escribe: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
+ <div class="hh2">&quot;OR&quot; Búsquedas</div>
+<div class="normal">Para traer los objetos que inlcuyen
+       ya sea la palabra A o la palabra B, usar el "punto y coma" &quot;<strong>;</strong>&quot; entre las condiciones. Por ejemplo,
+     para buscar los contactos llamados 'Smith' ó 'Miller', escribir: <strong>'= Smith; Miller'</strong></div>
+ <div class="hh2">Búsquedas combinadas</div>
+ <div class="normal">Se pueden combinar las busquedas de manera casi ilimitada. Por ejemplo, para buscar
+   los objetos con
+   valores menores a '1000', pero diferentes de '500' y diferentes de '600',
+   se escribe: <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
+ <div class="normal">Las reglas de análisis de busquedas combinadas son las siguientes:</div>
+ <ul>
+   <li>expresión de búsqueda ::= valor de filtro { & valor de filtro }<br />
+   (--> analizador de cadenas con <strong>&</strong> como separador)</li>
+   <li>valor del filtro ::= [operador] valor { ; valor }<br />
+   (--> analizador de cadenas con <strong>;</strong> como separador)</li>
+ </ul>
+ <div class="hh2">Búsquedas con comodines</div>
+ <div class="normal">
+   <p>Algunas bases de datos permiten hacer búsquedas con comodines. Si estas búsquedas están soportadas entonces se pueden, por ejemplo, buscar todos los contactos con nombres que contienen 'ller' (ejem. Miller, Mueller, etc.) escribiendo: <strong>'%%ller'<br />
+   ADVERTENCIA:</strong> las búsquedas con comodines pueden tardar bastante tiempo en ejecutarse si la base de datos no está bien afinada para ello (búsquedas en la tabla completa)! </p>
+ </div>
+</body>
+</html>

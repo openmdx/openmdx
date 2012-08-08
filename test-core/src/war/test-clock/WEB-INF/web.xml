@@ -1,0 +1,44 @@
+<?xml 
+	version="1.0" 
+	encoding="ISO-8859-1"
+?>
+<!DOCTYPE 
+	web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd"
+>
+<web-app>
+
+	<display-name>openMDX/Test Clock</display-name>
+	<description>openMDX Clock Test</description>
+
+	<servlet>
+	    <servlet-name>clock</servlet-name>
+	    <servlet-class>org.openmdx.test.clock1.servlet.Clock_1Servlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+	    <servlet-name>clock</servlet-name>
+	    <url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+	<ejb-ref>
+		<description>EJB Reference to the clock provider</description>
+		<ejb-ref-name>ejb/clock</ejb-ref-name>
+		<ejb-ref-type>Session</ejb-ref-type>
+		<home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+		<remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+	</ejb-ref>
+	<!--resource-env-ref>
+		<description>EJB Reference to the clock provider</description>
+	  	<resource-env-ref-name>ejb/clock</resource-env-ref-name>
+	  	<resource-env-ref-type>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</resource-env-ref-type>
+	</resource-env-ref-->
+	<!--resource-ref>
+		<description>EJB Reference to the clock provider</description>
+	  	<res-ref-name>ejb/clock</res-ref-name>
+	  	<res-type>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</res-type>
+	  	<res-auth>Container</res-auth>
+	</resource-ref-->
+
+</web-app>

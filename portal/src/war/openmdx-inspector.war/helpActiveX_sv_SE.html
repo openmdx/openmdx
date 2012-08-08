@@ -1,0 +1,91 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>Funktioner baserade på AktivX-kontroller</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body onLoad="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(50, 50);">
+<table class="objectTitle">
+<tr>
+  <td>ActiveX</td>
+  <td align="right">
+	<script>
+	  <!--
+	  document.write('<a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+	  -->
+	</script>
+  </td>
+</tr>
+</table>
+<p>För att använda funktioner baserade på ActiveX-kontroller krävs att<br />
+<ul>
+  <li>din webbläsare har <strong>capable stöd för att hantera ActiveX-kontroller</strong> (t.ex. Internet Explorer på MS Windows) och</li>
+  <li>att säkerhetsinställningarna <strong>tillåter att ActiveX-kontroller laddas/körs</strong></p></li>
+</ul>
+<p>För vissa funktioner kan även tredjepartsmjukvara krävas:</p>
+<table class="browserHints">
+  <tbody>
+  <tr>
+    <td><b>Funktion</b></td>
+	<td><b>Krav</b></td>
+  <td><strong>Tilläggsinformation</strong></td>
+  </tr>
+  <tr>
+    <td>MS Word XML Merge</td>
+    <td>klientbaserad installation av MS Word 2000 eller senare</td>
+  <td><a href="#trustedsites">Tillförlitliga platser</a>, <a href="#activexsettings">ActiveX Tillstånd</a></td>
+  </tr>
+  <tr>
+    <td>MS Excel XML Merge </td>
+    <td>klientbaserad installation av MS Excel 2000 eller senare</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>XML Export till MS Outlook</td>
+    <td>klientbaserad installation av MS Outlook 2000 eller senarer</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>XML Import från MS Outlook</td>
+    <td>klientbaserad installation av MS Outlook 2000 eller senare </td>
+  <td>&nbsp;</td>
+  </tr>
+  </tbody>
+</table>
+<a name="trustedsites"></a><p class="hh1">Tillförlitliga platser (Internet Explorer)</p>
+<p>Av säkerhetsskäl rekommenderar vi inte att du aktiverar ActiveX-kontroller för zonen <strong>Internet</strong>. Det är bättre att lägga till sidan som kör openCRX i zonen <strong>Tillförlitliga platser</strong> eller till zonen <strong>Lokalt intranät</strong> (endast om sidan verkligen finns på ditt intranät) och därefter <a href="#activexsettings">tillåta ActiveX-kontroller</a> för respektive zon. Nedan visas hur du lägger till openCRX demoserver (<strong><font color="#FF0000">demo.opencrx.org</font></strong>) till zonen Tillförlitliga platser och  lägger till en lokal openCRX server (<strong><font color="#FF0000">10.1.1.20</font></strong>) till zonen Lokalt intranät. </p>
+<p><img src="images/ie_trusted_sites.png" width="384" height="342"> <img src="images/ie_local_intranet_zone.png" width="384" height="342"></p>
+<a name="activexsettings"></a>
+<p class="hh1">ActiveX Tillstånd  (Internet Explorer)</p>
+<p>Av säkerhetsskäl rekommenderar vi inte att du aktiverar ActiveX-kontroller för zonen <strong>Internet</strong>. Det är bättre att lägga till sidan som kör openCRX i zonen <strong><a href="#trustedsites">Tillförlitliga platser</a></strong> eller till zonen <strong><a href="#trustedsites">Lokalt intranät</a></strong> (endast om sidan verkligen finns på ditt intranät) och därefter tillåta ActiveX-kontroller för respektive zon enligt följande:</p>
+<p class="hh1">Var du hittar dina säkerhetsinställningar för ActiveX:</p>
+
+<table class="activeXHints">
+  <tr>
+    <td><b>Plattform</b></td>
+    <td colSpan=2><b>Webbläsare</b> &amp; <b>Version</b></td>
+    <td><b>Du finner ActiveX inställningarna i ...</b></td>
+    <td><strong>Tillåt ActiveX (med pop-up varningar)</strong></td>
+    <td><strong>Tillåt ActiveX (utan pop-up varningar)</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img height=38 src="images/icon-windows.gif" width=38 /><br />
+	  <strong>Microsoft<br />
+	  Windows</strong>	</td>
+    <td align="center">
+	  <img height=38 src="images/icon-ie.gif" width=38><br />
+	  <FONT size=-1>Internet<br />Explorer</FONT>
+	</td>
+    <td>6.x</td>
+    <td>Verktyg &gt; Internet-alternativ &gt; Säkerhet ...<br />
+      ... Anpassad nivå &gt; ActiveX-kontroller och plugin-program</td>
+    <td><img src="images/ie_activex_settings_secure.png" width="352" height="666"></td>
+    <td><img src="images/ie_activex_settings_convenient.png" width="352" height="666"></td>
+  </tr>
+</table>
+</body>
+</html>

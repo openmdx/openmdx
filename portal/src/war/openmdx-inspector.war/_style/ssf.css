@@ -1,0 +1,227 @@
+/* horizontal --------------------------------------------------------------------------- */
+#nav, #nav ul { /* all lists */
+	padding: 0;
+	margin: 0;
+	list-style:none;
+  list-style-position:outside;
+ 	line-height: 1;
+	overflow: visible;
+}
+
+#nav a {
+	display: block;
+	width: auto;
+}
+
+#nav li { /* all list items */
+  float: left;
+	width: auto; /* width needed or else Opera goes nuts */
+	margin-left: 1px;
+	/*
+	border-left: solid 1px #FFFFFF;
+	*/
+  padding: 4px 6px 4px 2px;
+}
+
+#nav li:hover, #nav li.sfhover {
+  color: black;
+	background: #ddd;
+	margin-left: 1px;
+	/*
+	border-left: solid 1px black;
+	*/
+}
+
+#nav li ul { /* second-level lists */
+	position: absolute;
+	margin-left: -3px;
+	margin-top: 4px;
+	border-top: none 0px black;
+	border-right: solid 1px black;
+	border-bottom: solid 1px black;
+	border-left: solid 1px black;
+	background-color: #FFFFFF;
+	padding: 0px;
+	width: auto;
+	left: -999em; /* using left instead of display to hide menus because display: none isn't read by screen readers */
+  z-index: 10010;
+}
+
+#nav li a {
+	text-decoration: none;
+ 	font-size:8pt;
+ 	font-weight:bold;
+}
+
+#nav li ul ul {
+}
+
+#nav li:hover ul, #nav li.sfhover ul { /* lists nested under hovered list items */
+	left: auto;
+}
+
+#nav li:hover ul ul, #nav li.sfhover ul ul {
+  left: -999em;
+}
+#nav li:hover ul, #nav li li:hover ul, #nav li.sfhover ul, #nav li li.sfhover ul {
+  left: auto;
+}
+
+#nav li:hover ul ul, #nav li:hover ul ul ul, #nav li.sfhover ul ul, #nav li.sfhover ul ul ul {
+  left: -999em;
+}
+#nav li:hover ul, #nav li li:hover ul, #nav li li li:hover ul, #nav li.sfhover ul, #nav li li.sfhover ul, #nav li li li.sfhover ul {
+  left: auto;
+}
+
+#nav li:hover ul ul, #nav li:hover ul ul ul, #nav li:hover ul ul ul ul, #nav li.sfhover ul ul, #nav li.sfhover ul ul ul, #nav li.sfhover ul ul ul ul {
+  left: -999em;
+}
+#nav li:hover ul, #nav li li:hover ul, #nav li li li:hover ul, #nav li li li li:hover ul, #nav li.sfhover ul, #nav li li.sfhover ul, #nav li li li.sfhover ul, #nav li li li li.sfhover ul {
+  left: auto;
+}
+
+#nav li ul li { /* second-level entries */
+  float: none;
+	padding: 2px 8px 2px 2px;
+	background-color: #FFFFFF;
+	border-left: none 0px #FFFFFF;
+}
+
+#nav li ul li a { /* second-level entries */
+  width: auto;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+#nav li ul li a span { /* disabled second-level entries */
+  color: #bbb;
+ 	font-size:8pt;
+ 	font-weight:bold;
+}
+
+#nav li ul li:hover, #nav li ul li.sfhover {
+  color: black;
+	background: #ddd;
+	border-left: none 0px #FFFFFF;
+}
+
+
+/* Support for the "iehover-fix.js" */
+* html ul.nav iframe {
+	position: absolute;
+	float: left;
+	/* account for the border */
+	left: -0.25em;
+	top: -0.25em;
+	z-index: 0;
+	filter: progid:DXImageTransform.Microsoft.Alpha(style=0,opacity=0);
+}
+
+/* this is for IE 5.0
+select.hide { visibility: hidden; }
+
+/* End Support for the "iehover-fix.js" */
+
+/* vertical --------------------------------------------------------------------------- */
+#navv, #navv ul { /* all lists */
+	padding: 0;
+	margin: 0;
+	list-style: none;
+  list-style-position:outside;
+	line-height: 1;
+	overflow: visible;
+}
+
+#navv a {
+	display: block;
+  width: auto;
+  color: #888;
+}
+
+#navv li { /* all list items */
+	float : left;
+	width: auto; /* width needed or else Opera goes nuts */
+	line-height: 1.15em;
+}
+
+#navv li a {
+	text-decoration : none;
+	padding-top: 2px;
+	padding-bottom: 2px;
+  display : block;
+	white-space: nowrap;
+  overflow: hidden;
+}
+
+#navv li ul { /* second-level lists */
+	position : absolute;
+	border: solid 1px black;
+	background-color: #FFFFFF;
+	padding: 0;
+	width: auto;
+	left: -999em; /* using left instead of display to hide menus because display: none isn't read by screen readers */
+	margin-left : 190px;
+	margin-top : -1.7em;
+  z-index: 10010;
+}
+
+#navv li a {
+	width: 190px;
+}
+
+#navv li:hover, #navv li.sfhover {
+  color: black;
+	background: #ddd;
+}
+
+#navv li ul ul { /* third-and-above-level lists */
+	left: -999em;
+}
+
+#navv li ul li { /* second-level entries */
+	width: auto;
+  float: none;
+  display: inline;
+}
+
+#navv li ul li a { /* second-level entries */
+  width: auto;
+	padding: 2px 8px 2px 2px;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+#navv li a:hover {
+	color : black;
+	background-color: #ddd;
+	text-decoration: none;
+}
+
+#navv li:hover ul, #navv li.sfhover ul { /* lists nested under hovered list items */
+	left: auto;
+}
+
+#navv li:hover ul ul, #navv li:hover ul ul ul, #navv li.sfHover ul ul, #navv li.sfHover ul ul ul {
+	left: -999em;
+}
+
+#navv li:hover ul, #navv li li:hover ul, #navv li li li:hover ul, #navv li.sfHover ul, #navv li li.sfHover ul, #navv li li li.sfHover ul { /* lists nested under hovered list items */
+	left: auto;
+}
+
+/* Support for the "iehover-fix.js" */
+* html ul.navv iframe {
+	position: absolute;
+	float: left;
+	/* account for the border */
+	left: -0.25em;
+	top: -0.25em;
+	z-index: 0;
+	filter: progid:DXImageTransform.Microsoft.Alpha(style=0,opacity=0);
+}
+
+/* this is for IE 5.0
+select.hide { visibility: hidden; }
+
+/* End Support for the "iehover-fix.js" */

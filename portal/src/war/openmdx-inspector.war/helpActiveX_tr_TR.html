@@ -1,0 +1,91 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>ActiveX Denetimleri Üzerine İnşa Edilmiş Özellikler</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body onLoad="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(50, 50);">
+<table class="objectTitle">
+<tr>
+  <td>ActiveX</td>
+  <td align="right">
+	<script>
+	  <!--
+	  document.write('<a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+	  -->
+	</script>
+  </td>
+</tr>
+</table>
+<p>ActiveX denetimleri üzerine inşa edilmiş özelliklerin kullanımı için<br />
+<ul>
+  <li>tarayıcınızın <strong>ActiveX denetimlerini eldelemeye yetenekli olması</strong> (örn. Internet Explorer ve MS Windows) ve</li>
+  <li>güvenlik ayarlarınızın <strong>ActiveX denetimlerini yükleme/çalıştırma işlemlerine izin vermesi</strong> gereklidir.</p></li>
+</ul>
+<p>Özelliğe bağlı olarak kimi diğer yazılımların da yüklenmiş ya da çalışıyor olması gerekir.</p>
+<table class="browserHints">
+  <tbody>
+  <tr>
+    <td><b>Özellik</b></td>
+	<td><b>Gereksinim</b></td>
+  <td><strong>Ek bilgiler </strong></td>
+  </tr>
+  <tr>
+    <td>MS Word XML Merge</td>
+    <td>MS Word 2000 yada üstü istemci kurulumu</td>
+  <td><a href="#trustedsites">Güvenli Siteler</a>, <a href="#activexsettings">ActiveX İzinleri</a></td>
+  </tr>
+  <tr>
+    <td>MS Excel XML Merge </td>
+    <td>MS Excel 2000 yada üstü istemci kurulumu</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>XML Export - MS Outlook</td>
+    <td>MS Outlook 2000 yada üstü istemci kurulumu</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>XML Import - MS Outlook</td>
+    <td>MS Outlook 2000 yada üstü istemci kurulumu</td>
+  <td>&nbsp;</td>
+  </tr>
+  </tbody>
+</table>
+<a name="trustedsites"></a><p class="hh1">Güvenilen Siteler (Internet Explorer)</p>
+<p>Güvenlik nedenleriyle <strong>Internet Bölgesi</strong> üzerinde ActiveX izinlerinin kaldırılmasını öneririz. openCRX çalışan sitenin <strong>Güvenilen Siteler Bölgesine</strong> ya da sizin <strong>Yerel Intranet Bölgenize</strong> (yalnızca eğer gerçekten yerel Intranet üzerinde ise) <a href="#activexsettings">ActiveX izinlerinin tanınmasını</a> öneririz. Aşağıda openCRX demo sunucusunun (<strong><font color="#FF0000">demo.opencrx.org</font></strong>) sizin güvenilen internet siteleri bölgesine eklenmesi ve yerel bir openCRX sunucusunun  (<strong><font color="#FF0000">10.1.1.20</font></strong>) yerel Intranet bölgesine eklenmesi örnekleri yer almaktadır </p>
+<p><img src="images/ie_trusted_sites.png" width="384" height="342"> <img src="images/ie_local_intranet_zone.png" width="384" height="342"></p>
+<a name="activexsettings"></a>
+<p class="hh1">ActiveX İzinleri  (Internet Explorer)</p>
+<p>Güvenlik nedenleriyle <strong>Internet Bölgesi</strong> üzerinde ActiveX izinlerinin kaldırılmasını öneririz. openCRX çalışan sitenin <strong>Güvenilen Siteler Bölgesine</strong> ya da sizin <strong>Yerel Intranet Bölgenize</strong> (yalnızca eğer gerçekten yerel Intranet üzerinde ise) <a href="#activexsettings">ActiveX izinlerinin tanınmasını</a> öneririz.</p>
+<p class="hh1">Where to find your ActiveX security settings:</p>
+
+<table class="activeXHints">
+  <tr>
+    <td><b>Platform</b></td>
+    <td colSpan=2><b>Tarayıcı</b> &amp; <b>Sürüm</b></td>
+    <td><b>ActiveX ayarlarını bul ...</b></td>
+    <td><strong>ActiveX pop-up ile izinli</strong></td>
+    <td><strong>ActiveX pop-up olmadan izinli</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img height=38 src="images/icon-windows.gif" width=38 /><br />
+	  <strong>Microsoft<br />
+	  Windows</strong>	</td>
+    <td align="center">
+	  <img height=38 src="images/icon-ie.gif" width=38><br />
+	  <FONT size=-1>Internet<br />Explorer</FONT>
+	</td>
+    <td>6.x</td>
+    <td>Araçlar &gt; Internet Seçenekleri &gt; Güvenlik ...<br />
+      ... Kullanıcı tanımlı &gt; ActiveX denetimleri ve eklentiler</td>
+    <td><img src="images/ie_activex_settings_secure.png" width="352" height="666"></td>
+    <td><img src="images/ie_activex_settings_convenient.png" width="352" height="666"></td>
+  </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE connector PUBLIC "-//Sun Microsystems, Inc.//DTD Connector 1.0//EN" "http://java.sun.com/dtd/connector_1_0.dtd">
+<connector>
+	<display-name>oracle-8</display-name>
+	<description>openCRX/Core Oracle 8 Connector</description>
+	<vendor-name>CRIXP AG</vendor-name>
+	<spec-version>1.0</spec-version>
+	<eis-type>JDBC</eis-type>
+	<version>2.0</version>
+	<resourceadapter>
+		<managedconnectionfactory-class>org.openmdx.kernel.application.container.spi.sql.ManagedDatabaseConnectionFactory</managedconnectionfactory-class>
+		<connectionfactory-interface>javax.sql.DataSource</connectionfactory-interface>
+		<connectionfactory-impl-class>org.openmdx.kernel.application.container.spi.sql.ContainerAuthenticatedDatabaseConnectionFactory</connectionfactory-impl-class>
+		<connection-interface>java.sql.Connection</connection-interface>
+		<connection-impl-class>org.openmdx.kernel.application.container.spi.sql.DatabaseConnection</connection-impl-class>
+		<transaction-support>XATransaction</transaction-support>
+		<config-property>
+			<config-property-name>Driver</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>oracle.jdbc.xa.client.OracleXADataSource</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>URL</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>jdbc:oracle:thin:@10.1.1.73:1521:OMEX</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>User</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>OPENMDX_TEST</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>Password</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>manager</config-property-value>
+		</config-property>
+		<reauthentication-support>false</reauthentication-support>
+	</resourceadapter>
+</connector>

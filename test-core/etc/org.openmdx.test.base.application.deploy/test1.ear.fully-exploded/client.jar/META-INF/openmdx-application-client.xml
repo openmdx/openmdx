@@ -1,0 +1,18 @@
+<!DOCTYPE openmdx-application-client PUBLIC 
+  "-//openMDX//DTD J2EE Application Client Extension 1.1//EN" 
+  "http://www.openmdx.org/dtd/openmdx-application-client_1_1.dtd">     
+<openmdx-application-client>
+  <jndi-name>org/openmdx/test/Client</jndi-name>
+  <ejb-ref>
+    <ejb-ref-name>ejb/Roger</ejb-ref-name>
+    <jndi-name>org/openmdx/test/Roger</jndi-name>
+  </ejb-ref>
+  <resource-ref>
+    <res-ref-name>resource/foo</res-ref-name>
+    <jndi-name>org/openmdx/test/foo</jndi-name>
+  </resource-ref>
+  <resource-ref>
+    <res-ref-name>resource/bar</res-ref-name>
+    <jndi-name>org/openmdx/test/bar</jndi-name>
+  </resource-ref>
+</openmdx-application-client>

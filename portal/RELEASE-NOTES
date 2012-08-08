@@ -1,0 +1,184 @@
+Release Name: openMDX/Portal 2.0.0
+Release Date: 2008-02-20
+
+---------------------------------------------------------------------
+Notes:
+
+  This software is published under the BSD license
+  as listed below.
+  
+  Copyright (c) 2006-2008, OMEX AG, Switzerland
+  All rights reserved.
+  
+  Redistribution and use in source and binary forms, with or without 
+  modification, are permitted provided that the following conditions 
+  are met:
+  
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+  
+  * Neither the name of OMEX AG nor the names of the contributors
+    to openMDX may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+  
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+  TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+  ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.
+  
+  ------------------
+  
+  This product includes software developed by the Apache Software
+  Foundation (http://www.apache.org/). 
+
+---------------------------------------------------------------------
+Changes:
+
+0.    SUMMARY
+      * Script-based customizing
+      * Data bindings for shared associations
+      * Queries in XML filters
+      * Bugs fixed
+                        
+1.    NEW FEATURES
+
+      CR20006379
+      Portal: data bindings for shared associations.	In addition to attributes 
+      and references, shared associations should be supported. This allows to 
+      add non-modeled reference panes to inspectors by customizing. In order
+      to mark a structural feature definition as reference, the tag isReference
+      must be set to true. Example:
+      
+			<featureDefinition>
+				<org.openmdx.ui1.StructuralFeatureDefinition qualifiedName="org:openmdx:portal:Segment:myReference">
+					<type>org:openmdx:base:BasicObject</type>
+					<multiplicity>0..n</multiplicity>
+					<changeable>false</changeable>
+					<isReference>true</isReference>
+				</org.openmdx.ui1.StructuralFeatureDefinition>
+			</featureDefinition>
+      
+      CR20006389
+      Portal: role switch. Perform an automatic role switch if the segment of 
+      the requested object does not match the currently selected role.
+      
+      CR20006375
+      Portal: TimeZone as user setting. The time zone is a user setting.
+      
+      CR20006363
+      Portal: script-based customizing of RootMenuControl. The RootMenuControl is 
+      now groovy based. The root menu can now be customized as groovy script. The 
+      default implementation looks as follows:
+
+				import org.openmdx.portal.servlet.*;
+				import org.openmdx.portal.servlet.texts.*;
+				import org.openmdx.portal.servlet.view.*;
+				import org.openmdx.portal.servlet.control.*;
+				ObjectView view = (ObjectView)p.getView();
+				ApplicationContext app = view.getApplicationContext();
+				Texts_1_0 texts = app.getTexts();
+				        
+				RootMenuControl.paintQuickAccessors(p);
+				RootMenuControl.paintRootObjects(p);
+				RootMenuControl.paintHistory(p);
+				
+		  The scripts are loaded dynamically from ./WEB-INF/config/control/rootmenu.
+		  The name of the default layout is Default.groovy. A groovy script can be
+		  configured for each model package, i.e. org.openmdx.ui1.groovy configures
+		  the root menu for the root menu entry org:openmdx:ui1.
+		  
+      CR10006511
+      Portal: queries in XML filters. Queries can be defined in XML filters
+      with the PiggyBackCondition. Here is an example:
+      
+			<object class="org.openmdx.base.query.PiggyBackCondition">
+				<void property="quantor">
+					<short>1</short>
+				</void>
+				<void property="feature">
+					<string>context:BP96MI-GEdu0Lr3K4tC9bQ:object_class</string>
+				</void>
+				<void property="fulfil">
+					<boolean>true</boolean>
+				</void>
+				<void property="value">
+					<array class="java.lang.String" length="1">
+						<void index="0">
+							<string>org:openmdx:compatibility:datastore1:QueryFilter</string>
+						</void>
+					</array>
+				</void>
+			</object>
+			<object class="org.openmdx.base.query.PiggyBackCondition">
+				<void property="quantor">
+					<short>1</short>
+				</void>
+				<void property="feature">
+					<string>context:BP96MI-GEdu0Lr3K4tC9bQ:clause</string>
+				</void>
+				<void property="fulfil">
+					<boolean>true</boolean>
+				</void>
+				<void property="value">
+					<array class="java.lang.String" length="1">
+						<void index="0">
+							<string>EXISTS (SELECT 0 FROM OOCKE1_ACCOUNT a WHERE v.sales_rep = a.object_id AND UPPER(a.full_name) LIKE '%MEIER%'</string>
+						</void>
+					</array>
+				</void>
+			</object>
+      
+      * The feature name 'context:$uuid:object_class' corresponds to the feature name
+        'object_class' with the context prefix context:$uuid. The value of the feature
+        must be 'org:openmdx:compatibility:datastore1:QueryFilter'. The value is
+        used by the database plugin and is used to trigger query filters.
+      * The feature 'context:$uuid:clause' allows to specify the filter clause as
+        SQL clause. The clause should be in ANSI SQL. This way the filter is database
+        independent. E.g. use the ANSI SQL function CURRENT_TIMESTAMP to get the current
+        date and not any DB-specific function.
+      * $uuid must be replaced by any UUID, e.g. BP96MI-GEdu0Lr3K4tC9bQ.
+
+      
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+
+      CR20006359
+      Portal: Deprecate BIRT. BIRT should not be part of portal. A reporting 
+      engine should be added at application-level. 
+      
+2.1.  FIXED BUGS
+
+      CR10006546
+      hasThousandsSeparator ignored. regardless of the setting of 
+      hasThousandsSeparator (i.e. true or false) there are no separators ever 
+      in the standard GUI.
+      
+      CR20006370
+      Non-filterable features must not appear in additional search fields menu.
+      
+      CR10006440
+      Missing tooltips for QuickAccessors.
+
+      
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+
+---------------------------------------------------------------------

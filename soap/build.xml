@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+=======================================================================
+= Name:        $Id: build.xml,v 1.4 2007/03/16 13:55:23 wfro Exp $
+= Description: ant build for openMDX/SOAP
+= Revision:    $Revision: 1.4 $
+= Date:        $Date: 2007/03/16 13:55:23 $
+= Copyright:   (c) 2004-2007 OMEX AG
+=======================================================================
+ *
+ * This software is published under the BSD license
+ * as listed below.
+ * 
+ * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions 
+ * are met:
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+-->
+<project 
+  name="openmdx-soap" 
+	default="-projecthelp"
+	xmlns:openmdx="xri://(antlib:org.openmdx.tools.ant)"
+	xmlns:antcontrib="antlib:net.sf.antcontrib"
+	xmlns:ivy="xri://(antlib:fr.jayasoft.ivy.ant)"
+>
+	<description>Builds the openMDX/SOAP component</description>
+	<property name="project.specification.title" value="openMDX/SOAP"/>
+	<!-- Slash separated platform list, the last entry being the default -->
+	<property name="project.platform.list" value="jre-1.5"/>
+	<!-- Included Ant Projects -->
+	<import file="../ant/etc/ant/build-properties.xml"/>
+	<import file="../ant/etc/ant/build-library.xml"/>
+	<path id="project.lib.classpath">
+		<path refid="java2.enterprise.lib"/>
+		<path refid="java2.extension.lib"/>
+		<path refid="java2.endorsed.lib"/>
+		<path refid="openmdx.core.lib"/>
+		<pathelement location="../thoughtworks/${build.target.platform}/xstream/lib/xstream.jar"/>
+	</path>
+	<path id="project.bin.classpath">
+		<path refid="project.lib.classpath"/>
+		<pathelement location="${build.dir}/bin"/>
+	</path>
+
+	<!-- ******************************************************************* -->
+	<!-- * Generate -->
+	<!-- ******************************************************************* -->
+	<target 
+	  name="generate" 
+	  description="Generate version, jt and model dependend files" 
+	  depends="build-init"
+	>
+		<antcall target="-preprocess-model-files-"/>
+	</target>
+	
+	<!-- ******************************************************************* -->
+	<!-- * Test -->
+	<!-- ******************************************************************* -->
+	<target name="test"/>
+	
+	<!-- ******************************************************************* -->
+	<!-- * Deliverables -->
+	<!-- ******************************************************************* -->
+	<target 
+	  name="deliverables" 
+	  description="Populate the project's deliverables directory" 
+	  depends="deliverables-init,java-archives,source-archives"
+	/>
+
+	<!-- ******************************************************************* -->
+	<!-- * Distribution -->
+	<!-- ******************************************************************* -->
+	<target name="distribution" description="Creates a distribution" depends="distribution-init,deliverables">
+		<openmdx:archive 
+			destfile="${distribution.dir}/openmdx-${openmdx.implementation.version}-${base.dir.name}.${build.target.platform}."
+			format="${distribution.format}"
+			checksum="MD5"
+		>
+			<openmdx:archivefileset 
+				dir="${basedir}" 
+				prefix="${project.implementation.prefix}-${openmdx.implementation.version}/${base.dir.name}"
+			>
+				<include name="build.*"/>
+				<include name="*LICENSE"/>
+				<include name="README"/>
+				<include name="RELEASE-NOTES"/>
+				<include name="project.properties"/>
+				<include name=".cvsignore"/>
+				<include name="etc/**"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset 
+				dir="${project.home}" 
+				prefix="${project.implementation.prefix}-${openmdx.implementation.version}"
+			>
+				<include name="source-archive/soap/**"/>
+				<include name="${build.target.platform}/soap/**"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+	</target>
+	
+	<!-- ******************************************************************* -->
+	<!-- * Java archives -->
+	<!-- ******************************************************************* -->
+	<target name="java-archives" depends="deliverables-init,build">
+	  <!-- openmdx-soap.jar -->
+		<openmdx:archive
+			destfile="${deliver.dir}/lib/openmdx-soap.jar"
+			format="jar"
+		>
+			<openmdx:archivemanifest refid="project.manifest"/>
+			<manifest>
+				<attribute name="Specification-Title" value="${project.specification.title} Library SOAP"/>
+				<attribute name="Implementation-Title" value="openmdx-soap for ${build.target.platform}"/>
+			</manifest>
+			<openmdx:archivefileset dir="${build.dir}/bin">
+				<patternset id="openmdx-soap.jar.content">
+					<include name="org/openmdx/**"/>
+				</patternset>
+			</openmdx:archivefileset>
+		</openmdx:archive>		
+	</target>
+
+	<!-- ******************************************************************* -->
+	<!-- * Java API Documentation -->
+	<!-- ******************************************************************* -->
+	<target name="api-doc" description="Generate the Java API documentation" depends="api-doc-init" unless="api-doc.is.up-to-date">
+		<mkdir dir="${build.dir}/doc/api"/>
+		<javadoc 
+			destdir="${build.dir}/doc/api" 
+			author="true" 
+			version="true" 
+			locale="en" 
+			use="true" 
+			windowtitle="${project.specification.title} API" 
+			doctitle="${project.specification.title} API ${project.specification.version}" 
+			maxmemory="512m"
+			excludepackagenames="org.openmdx.test.*"
+		>
+			<packageset dir="${basedir}/src/java"/>
+			<packageset dir="${build.dir}/src/java"/>
+			<classpath refid="project.bin.classpath"/>
+			<link href="http://java.sun.com/j2se/1.5.0/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2se/"/>
+			<link href="http://java.sun.com/j2se/1.5.0/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2ee/"/>
+			<link href="http://www.openmdx.org/openmdx/core/1.16/java-jre-1.4/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/openmdx/"/>
+			<bottom>This software is published under the BSD license. Copyright &#169; 2006-${build.year}, OMEX AG, Switzerland, All rights reserved. Use is subject to &lt;a href="http://www.openmdx.org/license.htm"&gt;license terms&lt;/a&gt;.</bottom>
+		</javadoc>
+		<echo>
+------------------------------------------------------------------------------------------------
+The Java API documentation for ${project.specification.title} has been generated at 
+${build.dir}/doc/api/index.html
+------------------------------------------------------------------------------------------------
+	    </echo>
+	</target>
+	
+</project>

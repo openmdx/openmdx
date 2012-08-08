@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Main-Class: org.openmdx.kernel.Version
+Class-Path: openmdx-application.jar openmdx-base.jar

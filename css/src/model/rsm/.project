@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>openMDX 1 ~ CSS (RSM)</name>
+	<comment></comment>
+	<projects>
+		<project>openMDX 1 ~ Portal (RSM)</project>
+		<project>openMDX 1 ~ Security (RSM)</project>
+		<project>openMDX 1 ~ Core (RSM)</project>
+	</projects>
+	<buildSpec>
+	</buildSpec>
+	<natures>
+	</natures>
+</projectDescription>

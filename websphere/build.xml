@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+=======================================================================
+= Name:        $Id: build.xml,v 1.17 2008/02/12 18:06:18 wfro Exp $
+= Description: openMDX WebSphere Platform
+= Revision:    $Revision: 1.17 $
+= Date:        $Date: 2008/02/12 18:06:18 $
+= Copyright:   (c) 2003-2004 OMEX AG
+=======================================================================
+ *
+ * This software is published under the BSD license
+ * as listed below.
+ * 
+ * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions 
+ * are met:
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+-->
+<project 
+	name="openmdx-websphere" 
+	default="-projecthelp"
+	xmlns:openmdx="xri://(antlib:org.openmdx.tools.ant)"
+	xmlns:antcontrib="antlib:net.sf.antcontrib"
+>
+	<description>Builds the openMDX/Platform.WebSphere component</description>
+	<property name="project.specification.title" value="openMDX/Platform.WebSphere"/>
+
+	<!-- Slash separated platform list, the last entry being the default -->
+	<property name="project.platform.list" value="websphere-6"/>
+
+	<!-- Included Ant Projects -->
+	<import file="../ant/etc/ant/build-properties.xml"/>
+	<import file="../ant/etc/ant/build-library.xml"/>
+    
+	<path id="project.lib.classpath">
+		<path refid="openmdx.core.bin"/>
+	</path>
+	<path id="project.bin.classpath">
+		<path refid="project.lib.classpath"/>
+		<!-- pathelement location="${basedir}/src/resource"/ -->
+		<pathelement location="${build.dir}/bin"/>
+	</path>
+	<patternset id="openmdx-websphere.iiop-client.jar.content">
+		<include name="org/openmdx/compatibility/application/dataprovider/transport/ejb/cci/*"/>
+	</patternset>
+
+	<!-- ******************************************************************* -->
+	<!-- * generate -->
+	<!-- ******************************************************************* -->
+	<target name="generate" description="Generate version, jt and model dependend files" depends="build-init">
+		<ant dir="${openmdx.home}/core" inheritAll="false" target="build">
+			<property name="build.target.platform" value="${build.java.platform}"/>
+		</ant> 
+	</target>
+
+	<!-- ******************************************************************* -->
+	<!-- * deliverables -->
+	<!-- ******************************************************************* -->
+	<target 
+		name="deliverables" 
+		description="Populate the project's distribution directory" 
+		depends="deliverables-init,java-archives,source-archives"
+	/>
+
+	<!-- ******************************************************************* -->
+	<!-- * java-archives -->
+	<!-- ******************************************************************* -->
+	<target name="java-archives" depends="deliverables-init,build">
+		<openmdx:archive
+			destfile="${deliver.dir}/lib/openmdx-websphere.iiop-client.jar"
+			format="jar"
+		>
+			<openmdx:archivemanifest refid="project.manifest"/>
+			<openmdx:archivemanifest>
+				<attribute name="Specification-Title" value="${project.specification.title} Library websphere.iiop-client"/>
+				<attribute name="Implementation-Title" value="openmdx-websphere.iiop-client for ${build.target.platform}"/>
+			</openmdx:archivemanifest>
+			<openmdx:archivefileset dir="${build.dir}/bin">
+				<patternset refid="openmdx-websphere.iiop-client.jar.content"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+	</target>
+
+	<!-- ******************************************************************* -->
+	<!-- * distribution -->
+	<!-- ******************************************************************* -->
+	<target name="distribution" description="Creates a distribution" depends="distribution-init,deliverables">
+		<openmdx:archive 
+			destfile="${distribution.dir}/openmdx-${project.implementation.version}-websphere.${build.target.platform}."
+			format="${distribution.format}"
+			checksum="MD5"
+		>
+			<openmdx:archivefileset 
+				dir="${basedir}" 
+				prefix="${project.implementation.prefix}-${project.implementation.version}/${base.dir.name}"
+			>
+				<include name="LICENSE"/>
+				<include name="README"/>
+				<include name="RELEASE-NOTES"/>
+				<include name="build.xml"/>
+				<include name="*.properties"/>
+				<include name="*-properties.xml"/>
+				<include name=".cvsignore"/>
+				<include name="etc/**"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset 
+				dir="${project.home}" 
+				prefix="${project.implementation.prefix}-${project.implementation.version}"
+			>
+				<include name="${build.target.platform}/websphere/**"/>
+				<include name="source-archive/websphere/**"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset 
+				dir="${project.home}/${base.dir.name}" 
+				prefix="${project.implementation.prefix}-${project.implementation.version}/${base.dir.name}/"
+			>
+				<include name=".classpath"/>
+				<include name=".project"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefilterchain>
+				<patternset>
+					<include name="**/.project"/>
+					<include name="**/.classpath"/>
+				</patternset>
+				<tokenfilter>
+				    <replaceregex pattern="( \(.*\))? ~ " replace=" (${project.implementation.version}) ~ "/>
+				</tokenfilter>
+			</openmdx:archivefilterchain>									
+		</openmdx:archive>
+	</target>
+		
+</project>
+

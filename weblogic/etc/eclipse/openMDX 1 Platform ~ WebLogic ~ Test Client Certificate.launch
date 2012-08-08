@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launchConfiguration type="org.eclipse.jdt.junit.launchconfig">
+<booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.openmdx.test.weblogic.security.ssl.TestKeyStore"/>
+<stringAttribute key="org.eclipse.jdt.junit.TESTNAME" value=""/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="openMDX 1 Platform ~ BEA WebLogic 9"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Djava.protocol.handler.pkgs=org.openmdx.kernel.url.protocol&#13;&#10;-Dbuild.java.platform=jre-1.5&#13;&#10;-Dbuild.target.platform=weblogic-9"/>
+<stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
+<booleanAttribute key="org.eclipse.debug.core.appendEnvironmentVariables" value="true"/>
+<stringAttribute key="org.eclipse.jdt.junit.TEST_KIND" value="org.eclipse.jdt.junit.loader.junit3"/>
+</launchConfiguration>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.openmdx.base.Authority 
+	name="org:openmdx:compatibility:audit1" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:noNamespaceSchemaLocation="xri://+resource/org/openmdx/compatibility/audit1/xmi/audit1_edit.xsd"
+>
+	<_object/>
+	<_content>
+		<provider>
+			<org.openmdx.base.Provider qualifiedName="Audit" _operation="null">
+				<_object/>
+				<_content>
+					<segment>
+						<org.openmdx.compatibility.audit1.Segment qualifiedName="Standard">
+							<_object/>
+							<_content/>
+						</org.openmdx.compatibility.audit1.Segment>
+					</segment>
+				</_content>
+			</org.openmdx.base.Provider>
+		</provider>
+	</_content>
+</org.openmdx.base.Authority>

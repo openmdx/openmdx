@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>openMDX 2 ~ Security (RSM)</name>
+	<comment></comment>
+	<projects>
+		<project>openMDX 2 ~ Core (RSM)</project>
+	</projects>
+	<buildSpec>
+	</buildSpec>
+	<natures>
+	</natures>
+</projectDescription>

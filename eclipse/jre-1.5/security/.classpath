@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="lib/openmdx-ldap.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openmdx-radius.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openmdx-security.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

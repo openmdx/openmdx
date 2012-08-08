@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>openMDX 2 ~ Test Core (RSM)</name>
+	<comment></comment>
+	<projects>
+		<project>openMDX 2 ~ Core (RSM)</project>
+		<project>openMDX 2 ~ Core_profiles (RSM)</project>
+	</projects>
+	<buildSpec>
+	</buildSpec>
+	<natures>
+	</natures>
+</projectDescription>

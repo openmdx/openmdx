@@ -1,0 +1,50 @@
+### Eclipse Workspace Patch 1.0
+#P Core
+Index: src/java/org/jpox/store/rdbms/RDBMSManager.java
+===================================================================
+RCS file: /cvsroot/jpox/JPOX/Core/src/java/org/jpox/store/rdbms/RDBMSManager.java,v
+retrieving revision 1.314
+diff -u -r1.314 RDBMSManager.java
+--- src/java/org/jpox/store/rdbms/RDBMSManager.java	13 May 2007 08:23:34 -0000	1.314
++++ src/java/org/jpox/store/rdbms/RDBMSManager.java	24 May 2007 15:14:26 -0000
+@@ -814,7 +814,7 @@
+      */
+     public void addClasses(String[] classNames, ClassLoaderResolver clr)
+     {
+-        addClasses(classNames, clr, (Writer)null, false);
++        addClasses(classNames, clr, (Writer)null, null, false);
+     }
+     
+     /**
+@@ -824,14 +824,18 @@
+      * <b>This is used by SchemaTool</b>
+      * @param classNames Name of the class(es) to be added.
+      * @param clr The ClassLoaderResolver
+-     * @param writer Optional writer when you just want the DDL for persisting the specified classes
++     * @param ddlWriter Optional writer when you just want the DDL for persisting the specified classes
+      * @param completeDdl whether complete DDL will be created when writing DDL to a file, or only for missing elements
+      */
+-    public void addClasses(String[] classNames, ClassLoaderResolver clr, Writer writer, boolean completeDdl)
++    public void addClasses(String[] classNames, ClassLoaderResolver clr, Writer ddlWriter, Writer sqlWriter, boolean completeDdl)
+     {
+-        if (writer != null)
++        if (ddlWriter != null)
+         {
+-            AbstractTable.setDdlWriter(writer);
++            AbstractTable.setDdlWriter(ddlWriter);
++        }
++        if (sqlWriter != null)
++        {
++            AbstractTable.setSqlWriter(sqlWriter);
+         }
+         AbstractTable.setCompleteDdl(completeDdl);
+ 
+@@ -847,7 +851,7 @@
+         }
+         if (classNames != null && classNames.length > 0)
+         {
+-            new ClassAdder(classNames, writer).execute(clr);
++            new ClassAdder(classNames, ddlWriter).execute(clr);
+         }
+     }
+ 

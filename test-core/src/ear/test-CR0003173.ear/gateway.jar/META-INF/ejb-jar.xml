@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!DOCTYPE ejb-jar PUBLIC '-//Sun Microsystems, Inc.//DTD Enterprise JavaBeans 2.0//EN' 'http://java.sun.com/dtd/ejb-jar_2_0.dtd'>
+<ejb-jar id="ejb-jar_ID">
+	<enterprise-beans>
+		<session id="explorer_Dataprovider_1ManagingTransaction">
+			<ejb-name>explorer_Dataprovider_1ManagingTransaction</ejb-name>
+			<home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+			<remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+			<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction.Hub_1Bean</ejb-class>
+			<session-type>Stateless</session-type>
+			<transaction-type>Bean</transaction-type>
+			<ejb-local-ref id="ejb_param_JoiningTransaction">
+				<ejb-ref-name>ejb/JoiningTransaction</ejb-ref-name>
+				<ejb-ref-type>Session</ejb-ref-type>
+				<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+				<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			</ejb-local-ref>
+			<ejb-local-ref id="ejb_param_NoOrNewTransaction">
+				<ejb-ref-name>ejb/NoOrNewTransaction</ejb-ref-name>
+				<ejb-ref-type>Session</ejb-ref-type>
+				<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+				<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			</ejb-local-ref>
+		</session>
+	</enterprise-beans>
+	<assembly-descriptor>
+		<security-role>
+			<description>Administrator Role of Calc Model</description>
+			<role-name>calc_doall</role-name>
+		</security-role>
+		<method-permission>
+			<description>Generated unchecked method permission</description>
+			<role-name>calc_doall</role-name>
+			<method>
+				<ejb-name>explorer_Dataprovider_1ManagingTransaction</ejb-name>
+				<method-intf>Home</method-intf>
+				<method-name>*</method-name>
+			</method>
+			<method>
+				<ejb-name>explorer_Dataprovider_1ManagingTransaction</ejb-name>
+				<method-intf>Remote</method-intf>
+				<method-name>*</method-name>
+			</method>
+			<method>
+				<ejb-name>explorer_Dataprovider_1ManagingTransaction</ejb-name>
+				<method-intf>LocalHome</method-intf>
+				<method-name>*</method-name>
+			</method>
+			<method>
+				<ejb-name>explorer_Dataprovider_1ManagingTransaction</ejb-name>
+				<method-intf>Local</method-intf>
+				<method-name>*</method-name>
+			</method>
+		</method-permission>
+	</assembly-descriptor>	
+</ejb-jar>

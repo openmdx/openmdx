@@ -1,0 +1,157 @@
+
+                    =====================================
+                           CHANGE LOG openMDX/Tomcat
+                    =====================================
+                    
+==============================================================================
+Version 1.14.4                                                      2007-02-23
+==============================================================================
+
+1.    NEW FEATURES
+      none
+                               
+2.    CHANGES
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      none
+
+                  
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3   REMOVED FEATURES
+      none
+      
+      
+==============================================================================
+Version 1.14.4                                                      2006-08-22
+==============================================================================
+
+1.    NEW FEATURES
+      none
+                               
+2.    CHANGES
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+
+      CR0003839
+      ClassLoader problem
+      
+      java.lang.NoClassDefFoundError: org/openmdx/base/text/conversion/Base64 
+                  
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3   REMOVED FEATURES
+      none
+      
+      
+==============================================================================
+Version 1.14.2                                                      2006-08-11
+==============================================================================
+
+1.    NEW FEATURES
+      none
+                               
+2.    CHANGES
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      none
+                  
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3   REMOVED FEATURES
+
+      CR0002539
+      Removal of deprecated classes
+      
+      The following deprecated classes have been removed:
+      * org.openmdx.tomcat.security.auth.IdentityAssertionValve.TokenAuthenticator
+      * org.openmdx.tomcat.security.realm.TokenRealm 
+      
+      
+==============================================================================
+Version 1.11.5                                                      2005-08-14
+==============================================================================
+
+1.    NEW FEATURES
+      none
+                               
+2.    CHANGES
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      none
+                  
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3   REMOVED FEATURES
+      none
+
+      
+==============================================================================
+Version 1.10.0                                                      2005-08-14
+==============================================================================
+
+1.    NEW FEATURES
+      none
+                               
+2.    CHANGES
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      
+      CR0003352
+      NullPointer in TokenAuthenticator.authenticate() 
+                  
+2.2.  DEPRECATED FEATURES
+      none
+
+2.3   REMOVED FEATURES
+      none
+
+      
+==============================================================================
+Version 1.9.5                                                       2005-07-15
+==============================================================================
+
+1.    NEW FEATURES
+      none
+                               
+2.    CHANGES
+     
+2.0.  CHANGED FEATURES
+      none
+      
+2.1.  FIXED BUGS
+      none
+      
+2.2.  DEPRECATED FEATURES
+
+      CR0002539
+      Class replacements
+      
+      * org.openmdx.tomcat.security.auth.IdentityAssertionValve.
+        TokenAuthenticator has been deprecated in favour of
+        org.openmdx.tomcat.security.authentication.IdentityAssertionValve
+      * org.openmdx.tomcat.security.realm.TokenRealm has been deprecated
+        in favour of 
+        org.openmdx.tomcat.security.authentication.IdentityAssertionRealm
+
+2.3   REMOVED FEATURES
+      none

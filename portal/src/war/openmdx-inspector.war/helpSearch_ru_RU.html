@@ -1,0 +1,92 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>openCRX - Advanced Search</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
+<table class="objectTitle">
+  <tr>
+    <td>Advanced Search</td>
+	<td>
+		<script>
+		  <!--
+		  document.write('<td align="right"><a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+		  -->
+		</script>
+	</td>
+  </tr>
+</table>
+
+ <div class="hh2">Advanced Search Made Easy</div>
+ <div class="normal">You can increase the accuracy of your searches by adding
+     operators that fine-tune your keywords and numbers. All the options
+     listed on this page can be entered directly into the  search box.</div>
+ <div class="hh2">The basics</div> 
+ <div class="normal">You can enter a word/number or an expression, e.g. <strong>'Miller'</strong>, <strong>'> 500'</strong> or <strong>'>=
+   Smith'</strong>, and then</div>
+ <table cellpadding="0" cellspacing="10">
+   <tr valign="top">
+     <td>&#8226; click on a <strong>column header</strong> to search objects
+       with matching value(s) in that particular attribute (<strong>all objects</strong> are
+       searched regardless of currently set filters and already existing search
+       results will be lost)</td>
+	 <td bgcolor="#CCCCCC"><strong>New Search</strong><br />
+	 <img src="images/helpSearchTut0.gif" width="129" height="51" /></td>
+   </tr>
+   <tr valign="top">
+     <td>&#8226; click on the <strong>[+] button</strong> to search objects with
+       matching value(s) in that particular attribute (<strong>only objects contained
+       in the previous search or filter</strong> are
+       searched, i.e. 'adding' this search will return a more restricted result
+       set)</td>
+	 <td bgcolor="#CCCCCC"><strong>Add Condition</strong><br />
+	 <img src="images/helpSearchTut1.gif" width="129" height="51" /></td>
+   </tr>
+</table>
+ <div class="hh2">Operators</div>
+ <div class="normal">The following operators are supported (please note, however,
+   that some database systems do not support all operators):</div>
+ <ul>
+ <li>sounds like (<strong>*</strong>)</li>
+ <li>like (<strong>%</strong>), default operator for string searches</li>
+ <li>equal (<strong>=</strong>), default operator for boolean, number, and code
+   searches</li>
+ <li>not equal (<strong><></strong>, <strong>!</strong>=)</li>
+ <li>less (<strong><</strong>)</li>
+ <li>less or equal (<strong><=</strong>)</li>
+ <li>greater (<strong>></strong>)</li>
+ <li>greater or equal <strong>(>=</strong>)</li>
+ </ul>
+ <div class="hh2">&quot;AND&quot; Searches</div>
+ <div class="normal">To retrieve objects that match more than one condition at the same time,
+   use an ampersand &quot;<strong>&amp;</strong>&quot; between conditions. For example, to search for objects
+   with values between 500 and 1000 (i.e. greater than 500 and less than 1000), just type: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
+ <div class="hh2">&quot;OR&quot; Searches</div>
+<div class="normal">To retrieve objects that include
+       either word A or word B, use a semicolon &quot;<strong>;</strong>&quot; between terms. For example,
+     to search for contacts named 'Smith' OR 'Miller', just type: <strong>'= Smith; Miller'</strong></div>
+ <div class="hh2">Combining Searches</div>
+ <div class="normal">You can combine searches virtually without limits. For example, to search
+   for objects with
+   values less than '1000', but different from '500' and different from '600',
+   just
+   type: <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
+ <div class="normal">The parsing rules for combined searches are as follows:</div>
+ <ul>
+   <li>searchExpr ::= filterValue { & filterValue }<br />
+   (--> string tokenizer with <strong>&</strong> as separator)</li>
+   <li>filterValue ::= [operator] value { ; value }<br />
+   (--> string tokenizer with <strong>;</strong> as separator)</li>
+ </ul>
+ <div class="hh2">Wildcard Searches</div>
+ <div class="normal">
+   <p>Some DBs allow you to initiate wildcard searches. If supported, you can for example search for all contacts with names containing 'ller' (e.g. Miller, Mueller, etc.) by typing: <strong>'%%ller'<br />
+   WARNING:</strong> wildcard searches can be very time-consuming if the DB is not tuned (full table scans)! </p>
+ </div>
+</body>
+</html>

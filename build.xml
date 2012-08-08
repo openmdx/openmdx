@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+ *
+ * ====================================================================
+ * Project:     openmdx, http://www.openmdx.org/
+ * Name:        $Id: build.xml,v 1.101 2007/09/27 09:52:12 hburger Exp $
+ * Description: Ant master build file for openMDX
+ * Revision:    $Revision: 1.101 $
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Date:        $Date: 2007/09/27 09:52:12 $
+ * ====================================================================
+ *
+ * This software is published under the BSD license
+ * as listed below.
+ * 
+ * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions 
+ * are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+-->
+<project name="openmdx" default="-projecthelp">
+	<description>Builds the openMDX projects</description>
+	
+	<target name="all" depends="-all,prolog,platforms,extensions,plugins,examples,documentation,epilog" description="Cleans, builds and makes distributions for all projects"/>	
+	<target name="generate" depends="-generate,platforms,extensions,plugins,examples" description="Generates the projects for their default platform"/>	
+	<target name="prolog" depends="-ant" description="Create the Ant environment"/>	
+	<target name="platforms" depends="-core,-weblogic,-websphere,-tomcat,-test-core" description="Create the JRE and application server platforms"/>
+	<target name="extensions" depends="-security,-document" description="Create the security and document extensions"/>
+	<target name="plugins" depends="-poseidon,-together" description="Create the model tool plugins"/>
+	<target name="examples" depends="-example-lab,-example-petstore" description="Create the lab and pestore examples"/>
+	<target name="documentation" depends="-doc" description="Create the openMDX documentation"/>
+	<target name="epilog" depends="-installer" description="Create the openMDX installer"/>
+	
+	<!-- ******************************************************************* -->
+	<!-- * -projecthelp -->
+	<!-- ******************************************************************* -->
+	<target name="-projecthelp" description="Print project help information">
+		<java classname="org.apache.tools.ant.launch.Launcher">
+			<arg value="-projecthelp" />
+			<arg path="${ant.file}" />
+		</java>
+	</target>	
+
+	<!-- ******************************************************************* -->
+	<!-- * Initialization -->
+	<!-- ******************************************************************* -->
+	<target name="-all">
+		<property name="ant.target" value="all"/>
+	</target>
+	<target name="-generate">
+		<property name="ant.target" value="generate"/>
+	</target>
+	<target name="-init" >
+		<property name="ant.target" value="all"/>
+		<condition property="include.ant">
+			<available file="build.xml" filepath="ant"/>
+		</condition>
+		<condition property="include.core">
+			<available file="build.xml" filepath="core"/>
+		</condition>
+		<condition property="include.doc">
+			<available file="build.xml" filepath="doc"/>
+		</condition>
+		<condition property="include.document">
+			<available file="build.xml" filepath="document"/>
+		</condition>
+		<condition property="include.example-lab">
+			<available file="build.xml" filepath="example-lab"/>
+		</condition>
+		<condition property="include.example-petstore">
+			<available file="build.xml" filepath="example-petstore"/>
+		</condition>
+		<condition property="include.poseidon">
+			<available file="build.xml" filepath="poseidon"/>
+		</condition>
+		<condition property="include.security">
+			<available file="build.xml" filepath="security"/>
+		</condition>
+		<condition property="include.test-core">
+			<available file="build.xml" filepath="test-core"/>
+		</condition>
+		<condition property="include.together">
+			<available file="build.xml" filepath="together"/>
+		</condition>
+		<condition property="include.tomcat">
+			<available file="build.xml" filepath="tomcat"/>
+		</condition>
+		<condition property="include.weblogic">
+			<available file="build.xml" filepath="weblogic"/>
+		</condition>
+		<condition property="include.websphere">
+			<available file="build.xml" filepath="websphere"/>
+		</condition>
+		<condition property="include.installer">
+			<available file="build.xml" filepath="installer"/>
+		</condition>
+	</target>
+	
+	<!-- ******************************************************************* -->
+	<!-- * Projects -->
+	<!-- ******************************************************************* -->
+	<target name="-ant" depends="-init" if="include.ant">
+		<ant inheritAll="false" dir="ant" target="${ant.target}"/>
+	</target>
+	<target name="-core" depends="-init" if="include.core">
+		<ant inheritAll="false" dir="core" target="${ant.target}"/>
+	</target>
+	<target name="-doc" depends="-init" if="include.doc">
+		<ant inheritAll="false" dir="doc" target="${ant.target}"/>
+	</target>
+	<target name="-document" depends="-init" if="include.document">
+		<ant inheritAll="false" dir="document" target="${ant.target}"/>
+	</target>
+	<target name="-example-lab" depends="-init" if="include.example-lab">
+		<ant inheritAll="false" dir="example-lab" target="${ant.target}"/>
+	</target>
+	<target name="-example-petstore" depends="-init" if="include.example-petstore">
+		<ant inheritAll="false" dir="example-petstore" target="${ant.target}"/>
+	</target>
+	<target name="-installer" depends="-init" if="include.installer">
+		<ant inheritAll="false" dir="installer" target="${ant.target}"/>
+	</target>
+	<target name="-poseidon" depends="-init" if="include.poseidon">
+		<ant inheritAll="false" dir="poseidon" target="${ant.target}"/>
+	</target>
+	<target name="-security" depends="-init" if="include.security">
+		<ant inheritAll="false" dir="security" target="${ant.target}"/>
+	</target>
+	<target name="-test-core" depends="-init" if="include.test-core">
+		<ant inheritAll="false" dir="test-core">
+			<target name="clean"/>
+			<target name="distribution"/>		
+		</ant>
+	</target>
+	<target name="-together" depends="-init" if="include.together">
+		<ant inheritAll="false" dir="together" target="${ant.target}"/>
+	</target>
+	<target name="-tomcat" depends="-init" if="include.tomcat">
+		<ant inheritAll="false" dir="tomcat" target="${ant.target}"/>
+	</target>
+	<target name="-weblogic" depends="-init" if="include.weblogic">
+		<ant inheritAll="false" dir="weblogic" target="${ant.target}"/>
+	</target>
+	<target name="-websphere" depends="-init" if="include.websphere">
+		<ant inheritAll="false" dir="websphere" target="${ant.target}"/>
+	</target>
+    
+</project>

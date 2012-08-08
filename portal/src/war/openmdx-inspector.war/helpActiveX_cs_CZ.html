@@ -1,0 +1,98 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>Features based on ActiveX Control</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body onLoad="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(50, 50);">
+<table class="objectTitle">
+<tr>
+  <td>ActiveX</td>
+  <td align="right">
+	<script>
+	  <!--
+	  document.write('<a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+	  -->
+	</script>
+  </td>
+</tr>
+</table>
+<p>Použití funkcí založených na ActiveX komponentách vyžaduje aby<br />
+<ul>
+  <li>váš prohlížeč<strong> byl schopnýzacházet s ActiveX komponentymi</strong> (např. Internet Explorer 
+	v MS Windows) a</li>
+  <li>nastavené bezpečnostní volby jako např. <strong>permission is granted to load/execute ActiveX controls</strong></p></li>
+</ul>
+<p>Dále podle funkcí, různý third-party software může být také vyžadován:</p>
+<table class="browserHints">
+  <tbody>
+  <tr>
+    <td><b>Funkce</b></td>
+	<td><b>Požadavek</b></td>
+  <td><strong>Další rady</strong></td>
+  </tr>
+  <tr>
+    <td>MS Word XML Merge</td>
+    <td>client-based instalace MS Word 2000 nebo novější</td>
+  <td><a href="#trustedsites">Trusted Sites</a>, <a href="#activexsettings">ActiveX Permissions</a></td>
+  </tr>
+  <tr>
+    <td>MS Excel XML Merge </td>
+    <td>client-based instalace MS Excel 2000 nebo novější</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>XML Export to MS Outlook</td>
+    <td>client-based instalace MS Outlook 2000 nebo novější</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>XML Import from MS Outlook</td>
+    <td>client-based instalace MS Outlook 2000 nebo novější</td>
+  <td>&nbsp;</td>
+  </tr>
+  </tbody>
+</table>
+<a name="trustedsites"></a><p class="hh1">Trusted Sites (Internet Explorer)</p>
+<p>Z bezpečnostních důvodů nedoporučujeme povolit ActiveX controls pro <strong>Internet Zone</strong>. 
+Je lepší přidat síť na které běží openCRX do <strong>Trusted sites zone</strong> 
+nebo do <strong>Local intranet zone</strong> (pouze pokud je tato síť opravdu na 
+vašem Intranetu) a pak <a href="#activexsettings">
+<span style="text-decoration: none">povolit</span> ActiveX controls</a> pro tuto 
+zónu. Níže jsou příklady jak přidat openCRX demo server (<strong><font color="#FF0000">demo.opencrx.org</font></strong>) do Trusted sites zone 
+a přidání lokálního openCRX serveru (<strong><font color="#FF0000">10.1.1.20</font></strong>) 
+do Local intranet zone. </p>
+<p><img src="images/ie_trusted_sites.png" width="384" height="342"> <img src="images/ie_local_intranet_zone.png" width="384" height="342"></p>
+<a name="activexsettings"></a>
+<p class="hh1">ActiveX Permissions  (Internet Explorer)</p>
+<p class="hh1">Kde nalézt bezpečnostní volby ActiveX:</p>
+
+<table class="activeXHints">
+  <tr>
+    <td><b>Platform</b></td>
+    <td colSpan=2><b>Browser</b> &amp; <b>Version</b></td>
+    <td><b>Find ActiveX Settings in ...</b></td>
+    <td><strong>ActiveX enabled (with pop-up warnings)</strong></td>
+    <td><strong>ActiveX enabled (without pop-up warnings)</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img height=38 src="images/icon-windows.gif" width=38 /><br />
+	  <strong>Microsoft<br />
+	  Windows</strong>	</td>
+    <td align="center">
+	  <img height=38 src="images/icon-ie.gif" width=38><br />
+	  <FONT size=-1>Internet<br />Explorer</FONT>
+	</td>
+    <td>6.x</td>
+    <td>Tools &gt; Internet Options &gt; Security ...<br />
+      ... Custom Levels &gt; ActiveX controls and plug-ins</td>
+    <td><img src="images/ie_activex_settings_secure.png" width="352" height="666"></td>
+    <td><img src="images/ie_activex_settings_convenient.png" width="352" height="666"></td>
+  </tr>
+</table>
+</body>
+</html>

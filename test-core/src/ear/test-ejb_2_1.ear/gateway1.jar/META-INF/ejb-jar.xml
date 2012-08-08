@@ -1,0 +1,218 @@
+<!--
+ * ====================================================================
+ * Project:     openmdx, http://www.openmdx.org/
+ * Name:        $Id: ejb-jar.xml,v 1.4 2007/05/31 08:40:09 hburger Exp $
+ * Description: Enterprise JavaBeans 2.1 Descriptor
+ * Revision:    $Revision: 1.4 $
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Date:        $Date: 2007/05/31 08:40:09 $
+ * ====================================================================
+ *
+ * This software is published under the BSD license as listed below.
+ * 
+ * Copyright (c) 2007, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * __________
+ * 
+ * This product includes software developed by other organizations as
+ * listed in the NOTICE file.
+-->
+<ejb-jar 
+	xmlns="http://java.sun.com/xml/ns/j2ee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/ejb-jar_2_1.xsd"
+	version="2.1"
+	id="ejb-jar_ID"
+>
+  <enterprise-beans>
+    <!-- deployment settings for gateway_NoOrNew -->
+    <session>
+      <ejb-name>gateway1-NoOrNew</ejb-name>
+		<home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+		<remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+		<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+		<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+        <ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.transaction.Hub_1Bean</ejb-class>
+      <session-type>Stateless</session-type>
+      <transaction-type>Bean</transaction-type>
+      <!-- local ejb reference to gateway gateway_Mandatory -->
+      <ejb-local-ref>
+        <ejb-ref-name>ejb/Mandatory</ejb-ref-name>
+        <ejb-ref-type>Session</ejb-ref-type>
+        <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+        <ejb-link>gateway1-Mandatory</ejb-link>
+      </ejb-local-ref>
+      <!-- local ejb reference to gateway gateway_Never -->
+      <ejb-local-ref>
+        <ejb-ref-name>ejb/Never</ejb-ref-name>
+        <ejb-ref-type>Session</ejb-ref-type>
+        <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+        <ejb-link>gateway1-Never</ejb-link>
+      </ejb-local-ref>
+    </session>
+    <!-- deployment settings for gateway_Mandatory-->
+    <session>
+      <ejb-name>gateway1-Mandatory</ejb-name>
+			<home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+			<remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+			<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
+      <session-type>Stateless</session-type>
+      <transaction-type>Container</transaction-type>
+      <env-entry>
+        <env-entry-name>KERNEL/exposedPath[0]</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>xri:@openmdx:org.openmdx.test.app1/provider/ch:omex:test:junit/segment</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>KERNEL/namespaceId</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>explorer</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>KERNEL/TYPE</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>KERNEL/APPLICATION</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>org.openmdx.compatibility.runtime1.layer.application.Explorer_1</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>KERNEL/MODEL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.persistence.delegation.Delegation_1</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>APPLICATION/runtimeSegment</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>xri:@openmdx:org.openmdx.compatibility.runtime1/provider/org:openmdx/segment/app</env-entry-value>
+      </env-entry>
+      <ejb-local-ref>
+        <ejb-ref-name>ejb/dataprovider[0]</ejb-ref-name>
+        <ejb-ref-type>Session</ejb-ref-type>
+        <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+        <ejb-link>transaction-Persistent</ejb-link>
+      </ejb-local-ref>
+    </session>
+    <!-- deployment settings for gateway-Never-->
+    <session>
+      <ejb-name>gateway1-Never</ejb-name>
+			<home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1Home</home>
+			<remote>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Remote</remote>
+			<local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+			<local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+			<ejb-class>org.openmdx.compatibility.application.dataprovider.transport.ejb.server.Dataprovider_1Bean</ejb-class>
+      <session-type>Stateless</session-type>
+      <transaction-type>Container</transaction-type>
+      <env-entry>
+        <env-entry-name>KERNEL/exposedPath[0]</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>xri:@openmdx:org.openmdx.test.app1/provider/ch:omex:test:junit/segment</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>KERNEL/namespaceId</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>explorer</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>KERNEL/INTERCEPTION</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>KERNEL/TYPE</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>KERNEL/APPLICATION</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>org.openmdx.compatibility.runtime1.layer.application.Explorer_1</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>KERNEL/MODEL</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>org.openmdx.compatibility.base.dataprovider.spi.DelegatingLayer_0</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>KERNEL/PERSISTENCE</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>org.openmdx.compatibility.base.dataprovider.layer.persistence.delegation.Delegation_1</env-entry-value>
+      </env-entry>
+      <env-entry>
+        <env-entry-name>APPLICATION/runtimeSegment</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>xri:@openmdx:org.openmdx.compatibility.runtime1/provider/org:openmdx/segment/app</env-entry-value>
+      </env-entry>
+      <ejb-local-ref>
+        <ejb-ref-name>ejb/dataprovider[0]</ejb-ref-name>
+        <ejb-ref-type>Session</ejb-ref-type>
+        <local-home>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1LocalHome</local-home>
+        <local>org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1_0Local</local>
+        <ejb-link>transaction-Persistent</ejb-link>
+      </ejb-local-ref>
+    </session>
+  </enterprise-beans>
+  <assembly-descriptor>
+    <container-transaction>
+      <method>
+        <ejb-name>gateway1-Mandatory</ejb-name>
+        <method-name>*</method-name>
+      </method>
+      <trans-attribute>Mandatory</trans-attribute>
+    </container-transaction>
+    <container-transaction>
+      <method>
+        <ejb-name>gateway1-Never</ejb-name>
+        <method-name>*</method-name>
+      </method>
+      <trans-attribute>Never</trans-attribute>
+    </container-transaction>
+  </assembly-descriptor>
+</ejb-jar>

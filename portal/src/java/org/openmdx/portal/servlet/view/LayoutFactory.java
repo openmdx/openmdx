@@ -1,0 +1,172 @@
+/*
+ * ====================================================================
+ * Project:     openMDX/Portal, http://www.openmdx.org/
+ * Name:        $Id: LayoutFactory.java,v 1.6 2007/08/07 22:59:58 wfro Exp $
+ * Description: TextsFactory
+ * Revision:    $Revision: 1.6 $
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Date:        $Date: 2007/08/07 22:59:58 $
+ * ====================================================================
+ *
+ * This software is published under the BSD license
+ * as listed below.
+ * 
+ * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in
+ * the documentation and/or other materials provided with the
+ * distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ * contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * ------------------
+ * 
+ * This product includes software developed by the Apache Software
+ * Foundation (http://www.apache.org/).
+ *
+ * This product includes yui, the Yahoo! UI Library
+ * (License - based on BSD).
+ *
+ * This product includes yui-ext, the yui extension
+ * developed by Jack Slocum (License - based on BSD).
+ * 
+ */
+package org.openmdx.portal.servlet.view;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.openmdx.application.log.AppLog;
+import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+
+public class LayoutFactory
+  implements Serializable {
+  
+  //-------------------------------------------------------------------------
+  public LayoutFactory(
+      String[] locales,
+      List[] layoutNames,
+      Model_1_0 model
+  ) {
+      this.layouts = new HashMap();
+      this.locales = Arrays.asList(locales);
+      for(int i = 0; i < locales.length; i++) {
+          this.layouts.put(
+              locales[i],
+              layoutNames[i]
+          );
+      }
+      this.model = model;
+      AppLog.info("loaded layouts=" + this.layouts.keySet());
+  }
+  
+  //-------------------------------------------------------------------------
+  public String[] getLocale(
+  ) {
+    return (String[])this.locales.toArray(new String[this.locales.size()]);    
+  }
+  
+  //-------------------------------------------------------------------------
+  public String getLayout(
+     String locale,
+     String forClass,
+     boolean forEditing
+  ) {
+      try {
+          int localeAsIndex = this.locales.indexOf(locale);
+          int currentLocale = localeAsIndex;
+          // Lookup layout for currentLocale. If not found perform
+          // locale fallback back to locale 0
+          while(true) {
+              List layouts = (List)this.layouts.get(this.locales.get(currentLocale));
+              List candidates = new ArrayList();
+              for(
+                  Iterator j = layouts.iterator();
+                  j.hasNext();
+              ) {
+                  String layout = (String)j.next();
+                  if(!DEFAULT_SHOW_LAYOUT.equals(layout) && !DEFAULT_EDIT_LAYOUT.equals(layout)) {
+                      String showEditPrefix = (forEditing ? "edit" : "show") + "-";
+                      if(layout.indexOf(showEditPrefix) >= 0) {
+                          String layoutClass = layout.substring(
+                              layout.lastIndexOf(showEditPrefix) + showEditPrefix.length(),
+                              layout.lastIndexOf(".")
+                          ).replace('.', ':');
+                          if(forClass.equals(layoutClass)) {
+                              candidates.add(0, layout);
+                          }
+                          else if(model.isSubtypeOf(forClass, layoutClass)) {
+                              candidates.add(layout);
+                          }
+                      }
+                  }
+              }
+              if(!candidates.isEmpty()) {
+                  return (String)candidates.get(0);
+              }
+              // Locale fallback
+              if(currentLocale == 0) break;
+              int fallbackLocaleIndex = 0;
+              for(int j = currentLocale-1; j >= 0; j--) {
+                  if((this.locales.get(j) != null) && ((String)this.locales.get(currentLocale)).substring(0,2).equals(((String)this.locales.get(j)).substring(0,2))) {
+                      fallbackLocaleIndex = j;
+                      break;
+                  }
+              }
+              currentLocale = fallbackLocaleIndex;
+          }
+      }
+      catch(Exception e) {
+          AppLog.warning("Can not get layout", e.getMessage());
+          AppLog.detail(e.getMessage(), e.getCause(), 1);
+      }
+      return forEditing 
+         ? DEFAULT_EDIT_LAYOUT
+         : DEFAULT_SHOW_LAYOUT;      
+  }
+  
+  //-------------------------------------------------------------------------
+  // Variables
+  //-------------------------------------------------------------------------
+  private static final long serialVersionUID = -2868782788454716240L;
+
+  private final static String DEFAULT_SHOW_LAYOUT = "/WEB-INF/config/layout/en_US/show-Default.jsp";
+  private final static String DEFAULT_EDIT_LAYOUT = "/WEB-INF/config/layout/en_US/edit-Default.jsp";
+  
+  private final Map layouts;
+  private final List locales;
+  private final Model_1_0 model;
+  
+}
+
+//--- End of File -----------------------------------------------------------

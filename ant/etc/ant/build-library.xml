@@ -1,0 +1,1543 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+=======================================================================
+= Name:        $Id: build-library.xml,v 1.131 2008/02/15 23:28:01 wfro Exp $
+= Description: openMDX Build Library
+= Revision:    $Revision: 1.131 $
+= Date:        $Date: 2008/02/15 23:28:01 $
+= Copyright:   (c) 2003-2008 OMEX AG
+=======================================================================
+=
+= This software is published under the BSD license
+= as listed below.
+= 
+= Copyright (c) 2004-2008, OMEX AG, Switzerland
+= All rights reserved.
+= 
+= Redistribution and use in source and binary forms, with or without 
+= modification, are permitted provided that the following conditions 
+= are met:
+= 
+= * Redistributions of source code must retain the above copyright
+=   notice, this list of conditions and the following disclaimer.
+= 
+= * Redistributions in binary form must reproduce the above copyright
+=   notice, this list of conditions and the following disclaimer in
+=   the documentation and/or other materials provided with the
+=   distribution.
+= 
+= * Neither the name of the openMDX team nor the names of its
+=   contributors may be used to endorse or promote products derived
+=   from this software without specific prior written permission.
+= 
+= THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+= CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+= INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+= MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+= DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+= BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+= EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+= TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+= DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+= ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+= OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+= OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+= POSSIBILITY OF SUCH DAMAGE.
+= 
+-->
+<project 
+	name="openmdx-build-library" 
+	xmlns:openmdx="xri://(antlib:org.openmdx.tools.ant)" 
+	xmlns:antcontrib="antlib:net.sf.antcontrib"
+>
+
+	<!--*******************************************************************
+	* Ant contrib tasks (http://ant-contrib.sourceforge.net/)
+	********************************************************************-->
+	<!-- Namespace Mode -->
+	<taskdef resource="net/sf/antcontrib/antlib.xml" uri="antlib:net.sf.antcontrib">
+		<classpath>
+			<pathelement location="${openmdx.home}/apache/jre-1.2/contribution/lib/ant-contrib.jar"/>
+		</classpath>
+	</taskdef>
+	<!--*******************************************************************
+	* openMDX Ant tasks
+	********************************************************************-->
+	<antcontrib:if>
+		<equals arg1="${ant.project.name}" arg2="openmdx-ant"/>
+		<antcontrib:then>
+			<antcontrib:if>
+				<available file="${build.dir}/bin/org/openmdx/tools/ant/types/ManifestType.class"/>
+				<antcontrib:then>
+					<taskdef resource="org/openmdx/tools/ant/antlib.xml" uri="xri://(antlib:org.openmdx.tools.ant)">
+						<classpath>
+							<path refid="project.lib.classpath"/>
+						</classpath>
+					</taskdef>
+					<property name="org.openmdx.tools.ant.is.available" value="true"/>
+				</antcontrib:then>
+			</antcontrib:if>
+		</antcontrib:then>
+		<antcontrib:else>
+			<taskdef resource="org/openmdx/tools/ant/antlib.xml" uri="xri://(antlib:org.openmdx.tools.ant)">
+				<classpath>
+					<pathelement location="${openmdx.home}/jre-1.3/ant/lib/openmdx-ant.jar"/>
+				</classpath>
+			</taskdef>
+			<property name="org.openmdx.tools.ant.is.available" value="true"/>
+		</antcontrib:else>
+	</antcontrib:if>
+	<!--*******************************************************************
+	* Project Help
+	********************************************************************-->
+	<target name="-projecthelp" description="Print project help information">
+		<condition property="ant.since1_7" value="">
+		  <contains string="${ant.version}" substring="Apache Ant version 1.7."/>
+		</condition>
+		<property name="ant.since1_7" value="-Dignore=" />
+		<java classname="org.apache.tools.ant.launch.Launcher">
+			<arg value="${ant.since1_7}-lib"/>
+				<arg value="${ant.since1_7}${openmdx.home}/jre-1.3/ant/lib/openmdx-ant.jar"/>
+			<arg value="${ant.since1_7}-main"/>
+				<arg value="${ant.since1_7}org.openmdx.tools.ant.Main"/>
+			<arg value="-projecthelp"/>
+			<arg value="${ant.file}"/>
+		</java>
+	</target>
+	<!--*******************************************************************
+	* Configuration
+	********************************************************************-->
+	<target name="config" description="Print project configuration information" depends="init">
+		<available file="${user.build.properties}" type="file" value="+" property="user.build.properties.are.present"/>
+		<property name="user.build.properties.are.present" value="-"/>
+		<available file="${target.platform.properties}" type="file" value="+" property="target.platform.properties.are.present"/>
+		<property name="target.platform.properties.are.present" value="-"/>
+		<available file="${java.platform.properties}" type="file" value="+" property="java.platform.properties.are.present"/>
+		<property name="java.platform.properties.are.present" value="-"/>
+		<available file="${project.build.properties}" type="file" value="+" property="project.build.properties.are.present"/>
+		<property name="project.build.properties.are.present" value="-"/>
+		<available file="${project.version.properties}" type="file" value="+" property="project.version.properties.are.present"/>
+		<property name="project.version.properties.are.present" value="-"/>
+		<available file="${build.target.jre}" type="dir" value="+" property="build.target.jre.is.present"/>
+		<property name="build.target.jre.is.present" value="-"/>
+		<condition property="build.target.platform.is.included" value="-">
+			<isset property="build.exclude.platform"/>
+		</condition>
+		<property name="build.target.platform.is.included" value="+"/>
+		<condition property="JRE_12.info" value="[-]">
+			<not>
+				<isset property="env.JRE_12"/>
+			</not>
+		</condition>
+		<available file="${env.JRE_12}" type="dir" value="[+] ${env.JRE_12}" property="JRE_12.info"/>
+		<property name="JRE_12.info" value="[-] ${env.JRE_12}"/>
+		<condition property="JRE_13.info" value="[-]">
+			<not>
+				<isset property="env.JRE_13"/>
+			</not>
+		</condition>
+		<available file="${env.JRE_13}" type="dir" value="[+] ${env.JRE_13}" property="JRE_13.info"/>
+		<property name="JRE_13.info" value="[-] ${env.JRE_13}"/>
+		<condition property="JRE_14.info" value="[-]">
+			<not>
+				<isset property="env.JRE_14"/>
+			</not>
+		</condition>
+		<available file="${env.JRE_14}" type="dir" value="[+] ${env.JRE_14}" property="JRE_14.info"/>
+		<property name="JRE_14.info" value="[-] ${env.JRE_14}"/>
+		<condition property="JRE_15.info" value="[-]">
+			<not>
+				<isset property="env.JRE_15"/>
+			</not>
+		</condition>
+		<available file="${env.JRE_15}" type="dir" value="[+] ${env.JRE_15}" property="JRE_15.info"/>
+		<property name="JRE_15.info" value="[-] ${env.JRE_15}"/>
+		<condition property="unix.distribution.is-set">
+			<isset property="unix.distribution"/>
+		</condition>
+		<property name="unix.distribution.is-set" value="not set"/>
+		<condition property="source.distribution.is-set">
+			<isset property="source.distribution"/>
+		</condition>
+		<property name="source.distribution.is-set" value="not set"/>
+		<echo message="user.build.properties          = [${user.build.properties.are.present}] ${user.build.properties}"/>
+		<echo message="target.platform.properties     = [${target.platform.properties.are.present}] ${target.platform.properties}"/>
+		<echo message="java.platform.properties       = [${java.platform.properties.are.present}] ${java.platform.properties}"/>
+		<echo message="project.build.properties       = [${project.build.properties.are.present}] ${project.build.properties}"/>
+		<echo message="project.version.properties     = [${project.version.properties.are.present}] ${project.version.properties}"/>
+		<echo/>
+		<echo message="ant.home                       = ${ant.home}"/>
+		<echo message="openmdx.home                   = ${openmdx.home}"/>
+		<echo message="java.home                      = ${java.home}"/>
+		<echo message="project.home                   = ${project.home}"/>
+		<echo/>
+		<echo message="build.target.jre               = [${build.target.jre.is.present}] ${build.target.jre}"/>
+		<echo message="JRE_12                         = ${JRE_12.info}"/>
+		<echo message="JRE_13                         = ${JRE_13.info}"/>
+		<echo message="JRE_14                         = ${JRE_14.info}"/>
+		<echo message="JRE_15                         = ${JRE_15.info}"/>
+		<echo/>
+		<echo message="ant.version                    = ${ant.version}"/>
+		<echo message="ant.java.version               = ${ant.java.version}"/>
+		<echo message="ant.project.name               = ${ant.project.name}"/>
+		<echo/>
+		<echo message="basedir                        = ${basedir}"/>
+		<echo message="base.dir.name                  = ${base.dir.name}"/>
+		<echo message="build.dir                      = ${build.dir}"/>
+		<echo message="tmp.dir                        = ${tmp.dir}"/>
+		<echo message="log.dir                        = ${log.dir}"/>
+		<echo message="deliver.dir                    = ${deliver.dir}"/>
+		<echo message="distribution.dir               = ${distribution.dir}"/>
+		<echo/>
+		<echo message="project.vendor.name            = ${project.vendor.name}"/>
+		<echo message="project.vendor.id              = ${project.vendor.id}"/>
+		<echo message="project.specification.title    = ${project.specification.title}"/>
+		<echo message="project.specification.version  = ${project.specification.version}"/>
+		<echo message="project.implementation.version = ${project.implementation.version}"/>
+		<echo message="project.implementation.prefix  = ${project.implementation.prefix}"/>
+		<echo message="project.platform.list          = ${project.platform.list}"/>
+		<echo/>
+		<echo message="build.target.platform          = [${build.target.platform.is.included}] ${build.target.platform}"/>
+		<echo message="build.java.platform            = ${build.java.platform}"/>
+		<echo message="build.target.version           = ${build.target.version}"/>
+		<echo message="build.source.version           = ${build.source.version}"/>
+		<echo message="build.debug                    = ${build.debug}"/>
+		<echo message="build.optimize                 = ${build.optimize}"/>
+		<echo/>
+		<echo message="unix.distribution              = ${unix.distribution.is-set}"/>
+		<echo message="source.distribution            = ${source.distribution.is-set}"/>
+		<echo message="distribution.format            = ${distribution.format}"/>
+	</target>
+	<!--*******************************************************************
+	* Initialization
+	********************************************************************-->
+	<target name="init">
+		<antcontrib:propertyregex 
+			property="project.implementation.prefix" 
+			input="${ant.project.name}" 
+			regexp="(.+)\-([^\-]+)" 
+			select="\1"
+		/>
+		<tstamp>
+			<format property="build.year" pattern="yyyy"/>
+			<format property="build.starttime" pattern="${datetime.data.pattern}" timezone="UTC"/>
+		</tstamp>
+		<available property="source.distribution" file="${basedir}/src/java" type="dir"/>
+		<condition property="unix.distribution">
+			<or>
+				<available file="${deliver.dir}/unix.distribution"/>
+				<os family="unix"/>
+			</or>
+		</condition>
+		<condition property="distribution.format" value="tar">
+			<isset property="unix.distribution"/>
+		</condition>
+		<property name="distribution.format" value="zip"/>
+		<available property="build.target.jre.found" file="${build.target.jre}" type="dir"/>
+	</target>
+	<target name="-ant-init" unless="org.openmdx.tools.ant.is.available">
+		<taskdef resource="org/openmdx/tools/ant/antlib.xml" uri="xri://(antlib:org.openmdx.tools.ant)">
+			<classpath>
+				<pathelement location="${openmdx.home}/apache/jre-1.2/ant/lib/ant.jar"/>
+				<pathelement location="${openmdx.home}/apache/jre-1.2/contribution/lib/ant-contrib.jar"/>
+				<pathelement location="${build.dir}/bin"/>
+				<pathelement location="${basedir}/src/resource"/>
+			</classpath>
+		</taskdef>
+		<property name="org.openmdx.tools.ant.is.available" value="true"/>
+	</target>
+	<target name="deliverables-init" depends="init,-ant-init">
+		<openmdx:archivemanifest id="project.manifest">
+			<attribute name="Specification-Vendor" value="${project.vendor.name}"/>
+			<attribute name="Specification-Version" value="${project.specification.version}"/>
+			<attribute name="Implementation-Vendor" value="${project.vendor.name}"/>
+			<attribute name="Implementation-Vendor-Id" value="${project.vendor.id}"/>
+			<attribute name="Implementation-Version" value="${project.implementation.version}-${build.starttime}"/>
+		</openmdx:archivemanifest>
+		<mkdir dir="${deliver.dir}/deployment-unit"/>
+		<mkdir dir="${deliver.dir}/lib"/>
+		<mkdir dir="${deliver.dir}/src"/>
+		<mkdir dir="${src.archive.dir}"/>
+		<antcontrib:if>
+			<isset property="unix.distribution"/>
+			<antcontrib:then>
+				<touch file="${deliver.dir}/unix.distribution"/>
+			</antcontrib:then>
+		</antcontrib:if>
+		<condition property="deliver.poseidon.source">
+			<equals arg1="${model.transformation.source}" arg2="poseidon"/>
+		</condition>
+		<condition property="deliver.together.source">
+			<equals arg1="${model.transformation.source}" arg2="together"/>
+		</condition>
+		<condition property="deliver.magicdraw.source">
+			<equals arg1="${model.transformation.source}" arg2="magicdraw"/>
+		</condition>
+	</target>
+	<target name="distribution-init" depends="init">
+		<mkdir dir="${distribution.dir}"/>
+	</target>
+	<target name="build-init" depends="init">
+		<fail 
+			message="The project can't be built unless the sources are installed by 'ant install-src'" 
+			unless="source.distribution"
+		/>
+		<fail 
+			message="No build target version has been set" 
+			unless="build.target.version"
+		/>
+		<fail 
+			message="No build target edition has been set" 
+			unless="build.target.platform"
+		/>
+		<mkdir dir="${build.dir}/bin"/>
+		<mkdir dir="${build.dir}/doc/api"/>
+		<mkdir dir="${build.dir}/lib"/>
+		<mkdir dir="${build.dir}/model"/>
+		<mkdir dir="${build.dir}/module"/>
+		<mkdir dir="${build.dir}/src/resource"/>
+		<mkdir dir="${build.dir}/src/sql"/>
+		<property name="build.requires.jre13" value="true"/>
+		<condition property="build.supports.jre13">
+			<or>
+				<equals arg1="${ant.java.version}" arg2="1.3"/>
+				<equals arg1="${ant.java.version}" arg2="1.4"/>
+				<equals arg1="${ant.java.version}" arg2="1.5"/>
+				<equals arg1="${ant.java.version}" arg2="1.6"/>
+			</or>
+		</condition>
+		<fail 
+			message="Building for source version ${build.source.version} and target version ${build.target.version} requires Ant running under JRE 1.3 or later" 
+			if="build.requires.jre13" 
+			unless="build.supports.jre13"
+		/>
+		<condition property="build.requires.jre14">
+			<or>
+				<equals arg1="${build.source.version}" arg2="1.4"/>
+				<equals arg1="${build.target.version}" arg2="1.4"/>
+			</or>
+		</condition>
+		<condition property="build.supports.jre14">
+			<or>
+				<equals arg1="${ant.java.version}" arg2="1.4"/>
+				<equals arg1="${ant.java.version}" arg2="1.5"/>
+				<equals arg1="${ant.java.version}" arg2="1.6"/>
+			</or>
+		</condition>
+		<fail 
+			message="Building for source version ${build.source.version} and target version ${build.target.version} requires Ant running under JRE 1.4 or later" 
+			if="build.requires.jre14" 
+			unless="build.supports.jre14"
+		/>
+		<condition property="build.requires.jre15">
+			<or>
+				<equals arg1="${build.source.version}" arg2="1.5"/>
+				<equals arg1="${build.target.version}" arg2="1.5"/>
+			</or>
+		</condition>
+		<condition property="build.supports.jre15">
+			<or>
+				<equals arg1="${ant.java.version}" arg2="1.5"/>
+				<equals arg1="${ant.java.version}" arg2="1.6"/>
+			</or>
+		</condition>
+		<fail 
+			message="Building for source version ${build.source.version} and target version ${build.target.version} requires Ant running under JRE 5 or later" 
+			if="build.requires.jre15" 
+			unless="build.supports.jre15"
+		/>
+		<condition property="build.requires.jre16">
+			<or>
+				<equals arg1="${build.source.version}" arg2="1.6"/>
+				<equals arg1="${build.target.version}" arg2="1.6"/>
+			</or>
+		</condition>
+		<condition property="build.supports.jre16">
+			<equals arg1="${ant.java.version}" arg2="1.6"/>
+		</condition>
+		<fail 
+			message="Building for source version ${build.source.version} and target version ${build.target.version} requires Ant running under JRE 6 or later" 
+			if="build.requires.jre15" 
+			unless="build.supports.jre15"
+		/>
+		<condition property="build.requires.rmi.compiler">
+			<or>
+				<isreference refid="project.rmi.jrmp.classes"/>
+				<isreference refid="project.rmi.iiop.classes"/>
+			</or>
+		</condition>
+	</target>
+	
+	<!--*******************************************************************
+	* Preprocess JT files
+	********************************************************************-->
+	<target name="-preprocess-jt-files-" depends="-preprocess-jt-init" unless="preprocess-jt.target.is.up-to-date">
+		<fail message="Preprocessor gcc not available. Check the PATH environment variable" unless="preprocess-jt.is.supported"/>
+		<echo>Preprocessing Java Templates: ${basedir}/src/jt</echo>
+		<mkdir dir="${log.dir}/gcc"/>
+		<!-- Establish the directory structure because gcc does not create -->
+		<!-- directories itself :-( and fails otherwise                    -->
+		<copy todir="${build.dir}/src/${preprocess-jt.target}">
+			<fileset dir="${basedir}/src/jt">
+				<exclude name="**/*.jt"/>
+			</fileset>
+		</copy>
+		<apply executable="gcc" dest="${build.dir}/src/${preprocess-jt.target}" parallel="false" output="${log.dir}/gcc/jt-to-${preprocess-jt.target}.out" error="${log.dir}/gcc/jt-to-${preprocess-jt.target}.err">
+			<arg value="-P"/>
+			<arg value="-E"/>
+			<arg value="-C"/>
+			<arg value="-I"/>
+			<arg value="${basedir}/src/jt/org/openmdx/base/accessor/jmi/spi"/>
+			<arg value="-D"/>
+			<arg value="${preprocess-jt.tag1}"/>
+			<arg value="-D"/>
+			<arg value="${preprocess-jt.tag2}"/>
+			<arg value="-D"/>
+			<arg value="${preprocess-jt.tag3}"/>
+			<arg value="-D"/>
+			<arg value="${preprocess-jt.tag4}"/>
+			<arg value="-D"/>
+			<arg value="${preprocess-jt.tag5}"/>
+			<arg value="-D"/>
+			<arg value="${project.build.preprocess.tag1}"/>
+			<arg value="-D"/>
+			<arg value="${project.build.preprocess.tag2}"/>
+			<arg value="-x"/>
+			<arg value="c"/>
+			<arg value="-o"/>
+			<targetfile/>
+			<srcfile/>
+			<fileset dir="${basedir}/src/jt">
+				<patternset refid="preprocess-jt.source.pattern"/>
+			</fileset>
+			<mapper type="glob" from="*.jt" to="*.${preprocess-jt.target}"/>
+		</apply>
+	</target>
+	<target name="-preprocess-jt-init">
+		<condition property="preprocess-jt.is.supported">
+			<or>
+				<available file="gcc.exe" filepath="${env.Path}"/>
+				<!-- Windows        -->
+				<available file="gcc.exe" filepath="${env.PATH}"/>
+				<!-- Windows/CygWin -->
+				<available file="gcc" filepath="${env.PATH}"/>
+				<!-- Unix           -->
+			</or>
+		</condition>
+		<antcontrib:if>
+			<equals arg1="${preprocess-jt.target}" arg2="java"/>
+			<antcontrib:then>
+				<antcontrib:if>
+					<equals arg1="${build.source.version}" arg2="1.3"/>
+					<antcontrib:then>
+						<property name="preprocess-jt.tag1" value="SINCE13"/>
+						<property name="preprocess-jt.tag2" value="BEFORE14"/>
+						<property name="preprocess-jt.tag3" value="BEFORE15"/>
+						<property name="preprocess-jt.tag4" value="BEFORE16"/>
+						<property name="preprocess-jt.tag5" value="OPENMDX1"/>
+					</antcontrib:then>
+				</antcontrib:if>
+				<antcontrib:if>
+					<equals arg1="${build.source.version}" arg2="1.4"/>
+					<antcontrib:then>
+						<property name="preprocess-jt.tag1" value="SINCE13"/>
+						<property name="preprocess-jt.tag2" value="SINCE14"/>
+						<property name="preprocess-jt.tag3" value="BEFORE15"/>
+						<property name="preprocess-jt.tag4" value="BEFORE16"/>
+						<property name="preprocess-jt.tag5" value="OPENMDX1"/>
+					</antcontrib:then>
+				</antcontrib:if>
+				<antcontrib:if>
+					<equals arg1="${build.source.version}" arg2="1.5"/>
+					<antcontrib:then>
+						<property name="preprocess-jt.tag1" value="SINCE13"/>
+						<property name="preprocess-jt.tag2" value="SINCE14"/>
+						<property name="preprocess-jt.tag3" value="SINCE15"/>
+						<property name="preprocess-jt.tag4" value="BEFORE16"/>
+						<property name="preprocess-jt.tag5" value="OPENMDX1"/>
+					</antcontrib:then>
+				</antcontrib:if>
+				<antcontrib:if>
+					<equals arg1="${build.source.version}" arg2="1.6"/>
+					<antcontrib:then>
+						<property name="preprocess-jt.tag1" value="SINCE13"/>
+						<property name="preprocess-jt.tag2" value="SINCE14"/>
+						<property name="preprocess-jt.tag3" value="SINCE15"/>
+						<property name="preprocess-jt.tag4" value="SINCE16"/>
+						<property name="preprocess-jt.tag5" value="OPENMDX2"/>
+					</antcontrib:then>
+				</antcontrib:if>
+			</antcontrib:then>
+			<antcontrib:else>
+				<antcontrib:if>
+					<equals arg1="${preprocess-jt.target}" arg2="jsl"/>
+					<antcontrib:then>
+						<property name="preprocess-jt.tag1" value="DOTNET"/>
+						<property name="preprocess-jt.tag2" value="BEFORE14"/>
+						<property name="preprocess-jt.tag3" value="BEFORE15"/>
+						<property name="preprocess-jt.tag4" value="BEFORE16"/>
+						<property name="preprocess-jt.tag5" value="OPENMDX1"/>
+					</antcontrib:then>
+				</antcontrib:if>
+			</antcontrib:else>
+		</antcontrib:if>		
+		<patternset id="preprocess-jt.source.pattern">
+			<include name="**/*.jt"/>
+			<exclude name="org/openmdx/base/accessor/jmi/spi/portability-macros.jt"/>
+			<patternset refid="build.exclude"/>
+		</patternset>
+		<uptodate property="preprocess-jt.target.is.up-to-date">
+			<srcfiles dir="${basedir}/src/jt">
+				<patternset refid="preprocess-jt.source.pattern"/>
+			</srcfiles>
+			<mapper type="glob" from="*.jt" to="${build.dir}/src/${preprocess-jt.target}/*.${preprocess-jt.target}"/>
+		</uptodate>
+	</target>
+	<!--*******************************************************************
+	* Preprocess Model Files
+	********************************************************************-->
+	<target name="-preprocess-model-files-" depends="-preprocess-model-init,-preprocess-rose-models,-preprocess-poseidon-models,-preprocess-magicdraw-models,-preprocess-together-models,-preprocess-rsm-models" unless="model-files.are.up-to-date">
+		<!-- Distributing the ZIP content -->
+		<unzip dest="${build.dir}/src/java" src="${build.dir}/model/models.zip">
+			<patternset>
+				<include name="**/*.java"/>
+			</patternset>
+		</unzip>
+		<unzip dest="${build.dir}/src/resource" src="${build.dir}/model/models.zip">
+			<patternset>
+				<include name="**/*.jdo"/>
+				<include name="**/*.orm"/>
+			</patternset>
+		</unzip>
+		<openmdx:archive destfile="${build.dir}/model/${ant.project.name}.together-model.zip">
+			<openmdx:archivefileset src="${build.dir}/model/models.zip" includes="**/*.h"/>
+			<openmdx:archivefilterchain>
+				<mapper type="regexp" from="^(.*).model.together.(.*)$$" to="\1/\2"/>
+			</openmdx:archivefilterchain>
+		</openmdx:archive>
+		<openmdx:archive destfile="${build.dir}/model/${ant.project.name}.poseidon-xmi.zip">
+			<openmdx:archivefileset src="${build.dir}/model/models.zip" includes="poseidon.xmi" fullpath="models.xmi"/>
+		</openmdx:archive>
+		<openmdx:archive destfile="${build.dir}/model/${ant.project.name}.magicdraw-xmi.zip">
+			<openmdx:archivefileset src="${build.dir}/model/models.zip" includes="magicdraw.xmi" fullpath="models.xmi"/>
+		</openmdx:archive>
+		<openmdx:archive destfile="${build.dir}/model/${ant.project.name}.rsm6-xmi.zip">
+			<openmdx:archivefileset src="${build.dir}/model/models.zip" includes="rsm6.xmi" fullpath="models.xmi"/>
+		</openmdx:archive>
+		<openmdx:archive destfile="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
+			<openmdx:archivefileset src="${build.dir}/model/models.zip" includes="**/*.xsd,**/*.xml"/>
+		</openmdx:archive>
+	</target>
+	<target name="-preprocess-together-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-together">
+		<fail message="Please use the Together-Plugin to transform together models ${basedir}/src/model/together to ${build.dir}/model/models.zip"/>
+	</target>
+	<target name="-preprocess-poseidon-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-poseidon">
+		<echo>Transforming Poseidon models ${basedir}/src/model/poseidon/models.xmi to ${build.dir}/model/models.zip...</echo>
+		<antcontrib:if>
+			<not>
+				<available file="archive-model.log.properties" filepath="${log.dir}/model"/>
+			</not>
+			<antcontrib:then>
+				<mkdir dir="${log.dir}/model"/>
+				<echo>Creating ${log.dir}/model/archive-model.log.properties</echo>
+				<echo file="${log.dir}/model/archive-model.log.properties" append="false"># Model Externalization Log Properties
+	ApplicationId         = openMDX-model
+	LogFileExtension      = log
+	LogFilePath           = build/${build.target.platform}/log/model
+	LogLevel              = ${model.transformation.log.level}
+	LogFormat             = ${openmdx.log.format}
+	java.LoggingMechanism = SharedDatedFileLoggingMechanism
+			    </echo>
+			</antcontrib:then>
+		</antcontrib:if>
+		<java 
+			classname="org.openmdx.model1.exporter.xmi.XMIExporterMain" 
+			fork="true" 
+			failonerror="true" 
+			maxmemory="${build.memory.limit}" 
+			classpathref="${model.transformation.class.path}"
+		>
+			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
+			<sysproperty key="user.language" value="en"/>
+			<sysproperty key="user.region" value="US"/>
+			<sysproperty key="file.encoding" value="Cp1252"/>
+			<sysproperty key="org.openmdx.log.config.filename" value="build/${build.target.platform}/log/model/archive-model.log.properties"/>
+			<arg value="--url=file:src/model/poseidon/models.xmi"/>
+			<arg value="--xmi=poseidon"/>
+			<arg value="--out=${build.dir}/model/models.zip"/>
+			<arg value="--openmdxjdo=${basedir}/src/resource"/>
+			<arg line="${model.build.formats}"/>
+			<arg value="%"/>
+		</java>
+	</target>
+	<target name="-preprocess-magicdraw-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-magicdraw">
+		<echo>Transforming Magicdraw models ${basedir}/src/model/magicdraw/models.xmi to ${build.dir}/model/models.zip...</echo>
+		<antcontrib:if>
+			<not>
+				<available file="archive-model.log.properties" filepath="${log.dir}/model"/>
+			</not>
+			<antcontrib:then>
+				<mkdir dir="${log.dir}/model"/>
+				<echo>Creating ${log.dir}/model/archive-model.log.properties</echo>
+				<echo file="${log.dir}/model/archive-model.log.properties" append="false"># Model Externalization Log Properties
+	ApplicationId         = openMDX-model
+	LogFileExtension      = log
+	LogFilePath           = build/${build.target.platform}/log/model
+	LogLevel              = ${model.transformation.log.level}
+	LogFormat             = ${openmdx.log.format}
+	java.LoggingMechanism = SharedDatedFileLoggingMechanism
+			    </echo>
+			</antcontrib:then>
+		</antcontrib:if>
+		<java 
+			classname="org.openmdx.model1.exporter.xmi.XMIExporterMain" 
+			fork="true" 
+			failonerror="true" 
+			maxmemory="${build.memory.limit}" 
+			classpathref="${model.transformation.class.path}"
+		>
+			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
+			<sysproperty key="user.language" value="en"/>
+			<sysproperty key="user.region" value="US"/>
+			<sysproperty key="file.encoding" value="Cp1252"/>
+			<sysproperty key="org.openmdx.log.config.filename" value="build/${build.target.platform}/log/model/archive-model.log.properties"/>
+			<arg value="--url=file:src/model/magicdraw/models.xmi"/>
+			<arg value="--xmi=magicdraw"/>
+			<arg value="--out=${build.dir}/model/models.zip"/>
+			<arg value="--openmdxjdo=${basedir}/src/resource"/>
+			<arg line="${model.build.formats}"/>
+			<arg value="%"/>
+		</java>
+	</target>
+	<target name="-preprocess-rose-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-rose">
+		<echo>Transforming Rose models ${basedir}/src/model/rose/models.mdl to ${build.dir}/model/models.zip...</echo>
+		<antcontrib:if>
+			<not>
+				<available file="archive-model.log.properties" filepath="${log.dir}/model"/>
+			</not>
+			<antcontrib:then>
+				<mkdir dir="${log.dir}/model"/>
+				<echo>Creating ${log.dir}/model/archive-model.log.properties</echo>
+				<echo file="${log.dir}/model/archive-model.log.properties" append="false"># Model Externalization Log Properties
+	ApplicationId         = openMDX-model
+	LogFileExtension      = log
+	LogFilePath           = build/${build.target.platform}/log/model
+	LogLevel              = ${model.transformation.log.level}
+	LogFormat             = ${openmdx.log.format}
+	java.LoggingMechanism = SharedDatedFileLoggingMechanism
+			    </echo>
+			</antcontrib:then>
+		</antcontrib:if>
+		<!-- Externalizes the model metadata from a rose model file -->
+		<echo/>
+		<echo>Externalizing Rose models to ${build.dir}/model/models.zip ...</echo>
+		<java 
+			classname="org.openmdx.model1.exporter.rose.RoseExporterMain" 
+			fork="true" 
+			failonerror="true" 
+			maxmemory="${build.memory.limit}" 
+			classpathref="${model.transformation.class.path}"
+		>
+			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
+			<sysproperty key="user.language" value="en"/>
+			<sysproperty key="user.region" value="US"/>
+			<sysproperty key="file.encoding" value="Cp1252"/>
+			<sysproperty key="org.openmdx.log.config.filename" value="build/${build.target.platform}/log/model/archive-model.log.properties"/>
+			<arg value="--pathMapSymbol=$$curdir"/>
+			<arg value="--pathMapPath=&amp;"/>
+			<arg value="--pathMapSymbol=$$${project.implementation.prefix}_opt_openmdx"/>
+			<arg value="--pathMapPath=${openmdx.home}"/>
+			<arg value="--mdlDir=${basedir}/src/model/rose"/>
+			<arg value="--mdlFile=models.mdl"/>
+			<arg value="--out=${build.dir}/model/models.zip"/>
+			<arg value="--openmdxjdoDir=${basedir}/src/resource"/>
+			<arg line="${model.build.formats}"/>
+			<arg value="%"/>
+		</java>
+	</target>
+	<target name="-preprocess-rsm-models" depends="-preprocess-model-init" unless="model-files.are.up-to-date" if="model.transformation.source.is-rsm">
+		<echo>Transforming RSM models ${basedir}/src/model/rsm/models.emx to ${build.dir}/model/models.zip...</echo>
+		<antcontrib:if>
+			<not>
+				<available file="archive-model.log.properties" filepath="${log.dir}/model"/>
+			</not>
+			<antcontrib:then>
+				<mkdir dir="${log.dir}/model"/>
+				<echo>Creating ${log.dir}/model/archive-model.log.properties</echo>
+				<echo file="${log.dir}/model/archive-model.log.properties" append="false"># Model Externalization Log Properties
+	ApplicationId         = openMDX-model
+	LogFileExtension      = log
+	LogFilePath           = build/${build.target.platform}/log/model
+	LogLevel              = ${model.transformation.log.level}
+	LogFormat             = ${openmdx.log.format}
+	java.LoggingMechanism = SharedDatedFileLoggingMechanism
+			    </echo>
+			</antcontrib:then>
+		</antcontrib:if>
+		<!-- Externalizes the model metadata from a rose model file -->
+		<echo/>
+		<echo>Externalizing RSM models to ${build.dir}/model/models.zip ...</echo>
+		<java 
+			classname="org.openmdx.model1.exporter.xmi.XMIExporterMain" 
+			fork="true" 
+			failonerror="true" 
+			maxmemory="${build.memory.limit}" 
+			classpathref="${model.transformation.class.path}"
+		>
+			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
+			<sysproperty key="user.language" value="en"/>
+			<sysproperty key="user.region" value="US"/>
+			<sysproperty key="file.encoding" value="Cp1252"/>
+			<sysproperty key="org.openmdx.log.config.filename" value="build/${build.target.platform}/log/model/archive-model.log.properties"/>
+			<arg value="--pathMapSymbol=openMDX 2 ~ Core (RSM)"/>
+			<arg value="--pathMapPath=file:${openmdx.home}/core/src/model/rsm/"/>
+			<arg value="--pathMapSymbol=openMDX 2 ~ Security (RSM)"/>
+			<arg value="--pathMapPath=file:${openmdx.home}/security/src/model/rsm/"/>
+			<arg value="--pathMapSymbol=${thirdparty.model.name}"/>
+			<arg value="--pathMapPath=file:${thirdparty.model.home}"/>
+			<arg value="--url=file:src/model/rsm/models.emx"/>
+			<arg value="--xmi=rsm"/>
+			<arg value="--out=${build.dir}/model/models.zip"/>
+			<arg value="--openmdxjdo=${basedir}/src/resource"/>
+			<arg line="${model.build.formats}"/>
+			<arg value="%"/>
+		</java>
+	</target>
+	<target name="-preprocess-model-init">
+		<uptodate property="model-files.are.up-to-date" targetfile="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
+			<srcfiles dir="${basedir}/src/model"/>
+		</uptodate>
+		<condition property="model.transformation.source.is-magicdraw">
+			<equals arg1="${model.transformation.source}" arg2="magicdraw"/>
+		</condition>
+		<condition property="model.transformation.source.is-poseidon">
+			<equals arg1="${model.transformation.source}" arg2="poseidon"/>
+		</condition>
+		<condition property="model.transformation.source.is-rose">
+			<equals arg1="${model.transformation.source}" arg2="rose"/>
+		</condition>
+		<condition property="model.transformation.source.is-together">
+			<equals arg1="${model.transformation.source}" arg2="together"/>
+		</condition>
+		<condition property="model.transformation.source.is-rsm">
+			<equals arg1="${model.transformation.source}" arg2="rsm"/>
+		</condition>
+		<mkdir dir="${log.dir}/model"/>
+		<mkdir dir="${build.dir}/model"/>
+		<mkdir dir="${build.dir}/src/java"/>
+		<mkdir dir="${build.dir}/src/jsl"/>
+	</target>
+	<!--*******************************************************************
+	* Version Class
+	********************************************************************-->
+	<target name="-preprocess-version-files-">
+		<mkdir dir="${build.dir}/src/java"/>
+		<antcontrib:foreach list="${version-file.packages}" target="-version-file-" param="version-file.package-name" inheritall="true"/>
+	</target>
+	<target name="-version-file-" depends="-version-file-init-" unless="version-file.is.up-to-date">
+		<echo>Preprocessing Version file: ${version-file.file-name}</echo>
+		<copy file="${version-file.template-file}" tofile="${version-file.file-name}" overwrite="true">
+			<filterset>
+				<filter token="PACKAGE" value="${version-file.package-name}"/>
+				<filtersfile file="${version-file.property-file}"/>
+			</filterset>
+		</copy>
+	</target>
+	<target name="-version-file-init-">
+		<antcontrib:propertyregex property="version-file.package-dir" input="${version-file.package-name}" regexp="[.]" replace="/" global="true"/>
+		<property name="version-file.file-name" location="${build.dir}/src/java/${version-file.package-dir}/Version.java"/>
+		<uptodate property="version-file.is.up-to-date" targetfile="${version-file.file-name}">
+			<srcfiles file="${version-file.template-file}"/>
+			<srcfiles file="${version-file.property-file}"/>
+		</uptodate>
+	</target>
+	<!--*******************************************************************
+	* Test
+	********************************************************************-->
+	<target 
+		name="test" 
+		description="Run JUnit tests, e.g. 'ant test' or 'ant -Djunit.test.case=Test*ProtocolHandler test'" 
+		depends="-junit-test-log-properties,-ant-lib-junit,build" 
+		if="junit.has.test.case"
+	>
+		<junit 
+			printsummary="yes" 
+			fork="yes" 
+			haltonfailure="${junit.test.halt.on-failure}" 
+			haltonerror="${junit.test.halt.on-error}" 
+			failureproperty="junit-test.failed" 
+			jvm="${build.target.jre}/bin/java" 
+			maxmemory="${build.memory.limit}" 
+			tempdir="${tmp.dir}"
+		>
+			<jvmarg value="-Djava.endorsed.dirs=${openmdx.home}/java2/${build.java.platform}/endorsed/lib"/>
+			<classpath>
+				<path refid="project.bin.classpath"/>
+				<path refid="microsoft.sql-server.lib"/>
+			</classpath>
+			<formatter type="xml"/>
+			<sysproperty key="org.openmdx.log.debug" value="${junit.test.log.debug}"/>
+			<sysproperty key="org.openmdx.log.path" value="${log.dir}/junit"/>
+			<sysproperty key="org.openmdx.log.config.filename" value="${log.dir}/junit/test.log.properties"/>
+			<sysproperty key="java.protocol.handler.pkgs" value="org.openmdx.kernel.url.protocol"/>
+			<sysproperty key="build.java.platform" value="${build.java.platform}"/>
+			<sysproperty key="build.target.platform" value="${build.target.platform}"/>
+			<sysproperty key="junit.test.tmp" value="${tmp.dir}"/>
+			<batchtest todir="${log.dir}/junit/xml" unless="junit.test.case">
+				<fileset dir="${basedir}/src/java">
+					<patternset refid="project.junit.test.case"/>
+				</fileset>
+			</batchtest>
+			<batchtest todir="${log.dir}/junit/xml" if="junit.test.case">
+				<fileset dir="${basedir}/src/java">
+					<patternset>
+						<include name="**/${junit.test.case}.java"/>
+						<patternset refid="build.exclude"/>
+					</patternset>
+				</fileset>
+			</batchtest>
+		</junit>
+		<antcontrib:if>
+			<istrue value="${junit.test.report}"/>
+			<antcontrib:then>
+				<junitreport todir="${log.dir}/junit/xml">
+					<fileset dir="${log.dir}/junit/xml">
+						<include name="TEST-*.xml"/>
+					</fileset>
+					<report format="frames" todir="${log.dir}/junit/html"/>
+				</junitreport>
+				<echo>
+	------------------------------------------------------------------------------------------------
+	* The JUnit test report for ${ant.project.name} has been generated at 
+	  ${log.dir}/junit/html/index.html
+	* The JUnit log file for ${ant.project.name} can be found at 
+	  ${log.dir}/junit/JUnit.shared.log
+	------------------------------------------------------------------------------------------------
+			    </echo>
+			</antcontrib:then>
+		</antcontrib:if>
+	</target>
+
+	<target name="-junit-test-init">
+		<mkdir dir="${log.dir}/junit/xml"/>
+		<condition property="junit.test.has.log.properties">
+			<available file="test.log.properties" filepath="${log.dir}/junit"/>
+		</condition>
+		<condition property="junit.has.test.case">
+			<or>
+				<isset property="junit.test.case"/>
+				<isreference refid="project.junit.test.case"/>
+			</or>
+		</condition>
+		<condition property="ant.lib.has.junit">
+			<available classname="junit.framework.Test"/>
+		</condition>
+	</target>
+	
+	<target 
+		name="-ant-lib-junit" 
+		depends="-junit-test-init" 
+		unless="ant.lib.has.junit" 
+		if="junit.has.test.case"
+	>
+		<mkdir dir="${user.home}/.ant/lib" />
+		<copy 
+			file="${openmdx.home}/java2/${build.java.platform}/extension/lib/junit.jar"
+			todir="${user.home}/.ant/lib"
+		/>
+		<fail> 
+junit.jar was missing in your Ant library.
+It has been copied to '${user.home}/.ant/lib'.
+Now you may restart Ant. 
+		</fail>
+	</target>
+
+	<target 
+		name="-junit-test-log-properties" 
+		depends="-junit-test-init" 
+		unless="junit.test.has.log.properties" 
+		if="junit.has.test.case"
+	>
+		<echo>Setting JUnit Test Log Properties: ${log.dir}/junit/test.log.properties</echo>
+		<mkdir dir="${tmp.dir}"/>
+		<mkdir dir="${log.dir}/junit"/>
+		<echo file="${log.dir}/junit/test.log.properties" append="false"># Log properties
+	ApplicationId         = JUnit
+	LogFileExtension      = log
+	LogFilePath           = ${log.dir}/junit
+	LogLevel              = ${junit.test.log.level}
+	LogFormat             = ${openmdx.log.format}
+	java.LoggingMechanism = SharedFileLoggingMechanism
+	    </echo>
+	</target>
+	<!--*******************************************************************
+	* Clean
+	********************************************************************-->
+	<target name="clean" description="Cleans the project's tree" depends="init">
+		<fail message="The project can't be cleaned unless the sources are installed by 'ant install-src'" unless="source.distribution"/>
+		<delete includeEmptyDirs="true">
+			<fileset dir="${basedir}">
+				<patternset refid="clear.project.pattern"/>
+			</fileset>
+		</delete>
+		<antcontrib:foreach list="${project.platform.list}" target="-clean-" param="build.target.platform" delimiter="/"/>
+	</target>
+	<target name="-clean-">
+		<delete includeEmptyDirs="true">
+			<fileset dir="${project.home}">
+				<patternset refid="clear.platform.pattern"/>
+			</fileset>
+		</delete>
+	</target>
+	<!--*******************************************************************
+	* Build
+	********************************************************************-->
+	<target name="build" description="Compiles the classes" depends="compile-java,enhance,compile-rmi"/>
+	<target name="compile-rmi" description="Invokes the RMI compiler" depends="compile-java,build-init" if="build.requires.rmi.compiler">
+		<rmic 
+			base="${build.dir}/bin" 
+			stubversion="compat" 
+			includeAntRuntime="false" 
+			extdirs="${build.target.jre}/ext" 
+			classpathref="project.bin.classpath" 
+			verify="true">
+			<patternset refid="project.rmi.jrmp.classes"
+		/>
+			<compilerarg value="-bootclasspath"/>
+			<compilerarg file="${build.target.jre}/lib/rt.jar"/>
+		</rmic>
+		<rmic 
+			iiop="true" 
+			base="${build.dir}/bin" 
+			stubversion="compat" 
+			includeAntRuntime="false" 
+			extdirs="${build.target.jre}/ext" 
+			classpathref="project.bin.classpath" 
+			verify="true"
+		>
+			<patternset refid="project.rmi.iiop.classes"/>
+			<compilerarg value="-bootclasspath"/>
+			<compilerarg file="${build.target.jre}/lib/rt.jar"/>
+		</rmic>
+		<property name="eclipse.rmi" location="${basedir}/build/${build.target.platform}/eclipse/bin"/>
+		<mkdir dir="${build.dir}/lib"/>
+		<jar destfile="${build.dir}/lib/${ant.project.name}.rmi.jar">
+			<zipfileset dir="${build.dir}/bin">
+				<include name="**/*_Stub.class"/>
+				<include name="**/*_Tie.class"/>
+				<include name="**/*_Skel.class"/>
+			</zipfileset>
+		</jar>
+	</target>
+	<target name="compile-java" description="Compiles the classes" depends="generate">
+		<antcontrib:if>
+			<isset property="build.emulate.platform"/>
+			<antcontrib:then>
+				<echo message="Cross compile for JRE ${build.source.version} under JRE ${ant.java.version}"/>
+				<antcontrib:if>
+					<available file="java" filepath="${build.dir}/src" type="dir"/>
+					<antcontrib:then>
+						<javac destdir="${build.dir}/bin" debug="${build.debug}" optimize="${build.optimize}" fork="true" memoryMaximumSize="${build.memory.limit}" classpathref="project.lib.classpath" source="${build.source.version}" target="${build.target.version}">
+							<src>
+								<pathelement location="${build.dir}/src/java"/>
+								<pathelement location="${basedir}/src/java"/>
+							</src>
+							<patternset refid="build.exclude"/>
+						</javac>
+					</antcontrib:then>
+					<antcontrib:else>
+						<javac destdir="${build.dir}/bin" debug="${build.debug}" optimize="${build.optimize}" fork="true" memoryMaximumSize="${build.memory.limit}" classpathref="project.lib.classpath" source="${build.source.version}" target="${build.target.version}">
+							<src>
+								<pathelement location="${basedir}/src/java"/>
+							</src>
+							<patternset refid="build.exclude"/>
+						</javac>
+					</antcontrib:else>
+				</antcontrib:if>
+			</antcontrib:then>
+			<antcontrib:else>
+				<fail message="JRE ${build.target.jre} not found" unless="build.target.jre.found"/>
+				<antcontrib:if>
+					<available file="java" filepath="${build.dir}/src" type="dir"/>
+					<antcontrib:then>
+						<javac 
+							destdir="${build.dir}/bin" 
+							debug="${build.debug}" 
+							optimize="${build.optimize}" 
+							fork="true" memoryMaximumSize="${build.memory.limit}" 
+							classpathref="project.lib.classpath" 
+							source="${build.source.version}" 
+							target="${build.target.version}" 
+							bootclasspath="${build.target.jre}/lib/rt.jar" 
+							extdirs="${build.target.jre}/ext"
+						>
+							<src>
+								<pathelement location="${build.dir}/src/java"/>
+								<pathelement location="${basedir}/src/java"/>
+							</src>
+							<patternset refid="build.exclude"/>
+						</javac>
+					</antcontrib:then>
+					<antcontrib:else>
+						<javac 
+							destdir="${build.dir}/bin" 
+							debug="${build.debug}" 
+							optimize="${build.optimize}" 
+							fork="true" 
+							memoryMaximumSize="${build.memory.limit}" 
+							classpathref="project.lib.classpath" 
+							source="${build.source.version}" 
+							target="${build.target.version}" 
+							bootclasspath="${build.target.jre}/lib/rt.jar" 
+							extdirs="${build.target.jre}/ext"
+						>
+							<src>
+								<pathelement location="${basedir}/src/java"/>
+							</src>
+							<patternset refid="build.exclude"/>
+						</javac>
+					</antcontrib:else>
+				</antcontrib:if>
+			</antcontrib:else>
+		</antcontrib:if>
+	</target>
+	<target 
+		name="enhance" 
+		unless="build.ignore.jdo"
+		depends="build-init"
+  >
+	    <openmdx:enhance 
+    	  classpathref="jpox.ant.bin"
+	      verbose="true"
+	      maxmemory="${build.memory.limit}"
+	    >
+   				<fileset dir="${build.dir}/src/resource">
+     					<include name="**/*.jdo"/>
+	  					<patternset refid="build.exclude"/>
+       		</fileset>
+	        <sysproperty key="log4j.configuration" value="file:${basedir}/etc/jpox/log4j.properties"/>
+	   	</openmdx:enhance>
+	</target>
+	<target 
+		name="create-schema" 
+		unless="build.ignore.jdo"
+		depends="build-init"
+  >
+	    <openmdx:database 
+    	  classpathref="jpox.ant.bin"
+	      verbose="true"
+	      maxmemory="${build.memory.limit}"
+	      command="create-schema"
+	    >
+	    		<fileset dir="${build.dir}/src/resource">
+        			<include name="**/*.jdo"/>
+			  			<patternset refid="build.exclude"/>
+        	</fileset>
+	        <sysproperty key="log4j.configuration" value="file:${basedir}/etc/jpox/log4j.properties"/>
+	        <arg value="-props"/><arg file="${basedir}/etc/jpox/${database.name}-jpox.properties"/>
+	        <arg value="-sqlFile"/><arg file="${build.dir}/src/sql/${database.name}.sql"/>
+	    </openmdx:database>
+	</target>
+	<!--*******************************************************************
+	* Distribution Archives
+	********************************************************************-->
+	<target name="source-archives" depends="deliverables-init">
+		<property name="src-archive.prefix" value="${src.archive.dir}/${ant.project.name}."/>
+		<property name="built-src-archive.prefix" value="${deliver.dir}/src/${ant.project.name}."/>
+		<condition property="src-deliverable.pattern.id" value="all.pattern">
+			<not>
+				<isset property="src-deliverable.pattern.id"/>
+			</not>
+		</condition>
+		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+			<path>
+				<dirset dir="${basedir}/src">
+					<include name="*"/>
+					<exclude name="model"/>
+					<exclude name="data"/>
+					<exclude name="sql"/>
+					<exclude name="connector"/>
+					<exclude name="?ar"/>
+				</dirset>
+			</path>
+			<param name="deliverable.prefix" value="${src-archive.prefix}"/>
+			<param name="deliverable.suffix" value=""/>
+			<param name="deliverable.pattern" value="${src-deliverable.pattern.id}"/>
+		</antcontrib:foreach>
+		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+			<path>
+				<dirset dir="${basedir}/src">
+					<include name="?ar"/>
+				</dirset>
+			</path>
+			<param name="deliverable.prefix" value="${src-archive.prefix}"/>
+			<param name="deliverable.suffix" value=""/>
+			<param name="deliverable.pattern" value="standard.edition.pattern"/>
+		</antcontrib:foreach>
+		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+			<path>
+				<dirset dir="${basedir}/src">
+					<include name="?ar"/>
+				</dirset>
+			</path>
+			<param name="deliverable.prefix" value="${src-archive.prefix}openmdx-1-"/>
+			<param name="deliverable.suffix" value=""/>
+			<param name="deliverable.pattern" value="openmdx-1.edition.pattern"/>
+		</antcontrib:foreach>
+		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+			<path>
+				<dirset dir="${basedir}/src">
+					<include name="?ar"/>
+				</dirset>
+			</path>
+			<param name="deliverable.prefix" value="${src-archive.prefix}jboss-3-"/>
+			<param name="deliverable.suffix" value=""/>
+			<param name="deliverable.pattern" value="jboss-3.edition.pattern"/>
+		</antcontrib:foreach>
+		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+			<path>
+				<dirset dir="${basedir}/src">
+					<include name="?ar"/>
+				</dirset>
+			</path>
+			<param name="deliverable.prefix" value="${src-archive.prefix}weblogic-7-"/>
+			<param name="deliverable.suffix" value=""/>
+			<param name="deliverable.pattern" value="weblogic-7.edition.pattern"/>
+		</antcontrib:foreach>
+		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+			<path>
+				<dirset dir="${basedir}/src">
+					<include name="?ar"/>
+				</dirset>
+			</path>
+			<param name="deliverable.prefix" value="${src-archive.prefix}websphere-5-"/>
+			<param name="deliverable.suffix" value=""/>
+			<param name="deliverable.pattern" value="websphere-5.edition.pattern"/>
+		</antcontrib:foreach>
+		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+			<path>
+				<dirset dir="${basedir}/src">
+					<include name="?ar"/>
+				</dirset>
+			</path>
+			<param name="deliverable.prefix" value="${src-archive.prefix}orion-9-"/>
+			<param name="deliverable.suffix" value=""/>
+			<param name="deliverable.pattern" value="orion-9.edition.pattern"/>
+		</antcontrib:foreach>
+		<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+			<path>
+				<dirset dir="${basedir}/src">
+					<include name="?ar"/>
+				</dirset>
+			</path>
+			<param name="deliverable.prefix" value="${src-archive.prefix}tomcat-6-"/>
+			<param name="deliverable.suffix" value=""/>
+			<param name="deliverable.pattern" value="tomcat-6.edition.pattern"/>
+		</antcontrib:foreach>
+		<antcontrib:if>
+			<available file="${build.dir}/src" type="dir"/>
+			<antcontrib:then>
+				<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+					<path>
+						<dirset dir="${build.dir}/src" includes="*"/>
+					</path>
+					<param name="deliverable.prefix" value="${built-src-archive.prefix}"/>
+					<param name="deliverable.suffix" value=""/>
+					<param name="deliverable.pattern" value="all.pattern"/>
+				</antcontrib:foreach>
+			</antcontrib:then>
+		</antcontrib:if>
+		<antcontrib:if>
+			<available file="${basedir}/src/model" type="dir"/>
+			<antcontrib:then>
+				<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+					<path>
+						<dirset dir="${basedir}/src/model" includes="*"/>
+					</path>
+					<param name="deliverable.prefix" value="${src-archive.prefix}"/>
+					<param name="deliverable.suffix" value="-model"/>
+					<param name="deliverable.pattern" value="all.pattern"/>
+				</antcontrib:foreach>
+			</antcontrib:then>
+		</antcontrib:if>
+		<antcontrib:if>
+			<available file="${basedir}/src/data" type="dir"/>
+			<antcontrib:then>
+				<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+					<path>
+						<dirset dir="${basedir}/src/data" includes="*"/>
+					</path>
+					<param name="deliverable.prefix" value="${src-archive.prefix}"/>
+					<param name="deliverable.suffix" value="-data"/>
+					<param name="deliverable.pattern" value="all.pattern"/>
+				</antcontrib:foreach>
+			</antcontrib:then>
+		</antcontrib:if>
+		<antcontrib:if>
+			<available file="${basedir}/src/sql" type="dir"/>
+			<antcontrib:then>
+				<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+					<path>
+						<dirset dir="${basedir}/src/sql" includes="*"/>
+					</path>
+					<param name="deliverable.prefix" value="${src-archive.prefix}"/>
+					<param name="deliverable.suffix" value="-sql"/>
+					<param name="deliverable.pattern" value="all.pattern"/>
+				</antcontrib:foreach>
+			</antcontrib:then>
+		</antcontrib:if>
+		<antcontrib:if>
+			<available file="${basedir}/src/connector" type="dir"/>
+			<antcontrib:then>
+				<antcontrib:foreach target="-deliverable-" param="deliverable.source">
+					<path>
+						<dirset dir="${basedir}/src/connector" includes="*"/>
+					</path>
+					<param name="deliverable.prefix" value="${src-archive.prefix}"/>
+					<param name="deliverable.suffix" value="-connector"/>
+					<param name="deliverable.pattern" value="all.pattern"/>
+				</antcontrib:foreach>
+			</antcontrib:then>
+		</antcontrib:if>
+		<antcontrib:if>
+			<available file="${basedir}/src/model" type="dir"/>
+			<antcontrib:then>
+				<copy todir="${src.archive.dir}">
+					<fileset dir="${build.dir}/model">
+						<include name="${ant.project.name}.poseidon-xmi.zip" unless="deliver.poseidon.source"/>
+						<include name="${ant.project.name}.magicdraw-xmi.zip" unless="deliver.magicdraw.source"/>
+					</fileset>
+					<mapper type="glob" from="*-xmi.zip" to="*-model.zip"/>
+				</copy>
+				<copy todir="${src.archive.dir}">
+					<fileset dir="${build.dir}/model">
+						<include name="${ant.project.name}.together-model.zip" unless="deliver.together.source"/>
+					</fileset>
+				</copy>
+			</antcontrib:then>
+		</antcontrib:if>
+	</target>
+	<target name="doc-archives" depends="distribution-init">
+		<antcall target="-deliverable-">
+			<param name="deliverable.source" value="${build.dir}/doc/api"/>
+			<param name="deliverable.prefix" value="${basedir}/deliverables/doc/${ant.project.name}.doc-"/>
+			<param name="deliverable.suffix" value=""/>
+			<param name="deliverable.pattern" value="all.pattern"/>
+		</antcall>
+	</target>
+	<target name="-deliverable-" depends="init">
+		<basename property="deliverable.tag" file="${deliverable.source}"/>
+		<property name="deliverable.target" value="${deliverable.prefix}${deliverable.tag}${deliverable.suffix}"/>
+		<zip destfile="${deliverable.target}.zip" basedir="${deliverable.source}">
+			<patternset refid="${deliverable.pattern}"/>
+		</zip>
+	</target>
+	<!--*******************************************************************
+	* Java API Documentation
+	********************************************************************-->
+	<target name="api-doc-init" depends="build">
+		<tstamp>
+			<format property="build.year" pattern="yyyy"/>
+			<format property="build.starttime" pattern="${datetime.data.pattern}" timezone="UTC"/>
+		</tstamp>
+		<antcontrib:if>
+			<available file="java" filepath="${build.dir}/src" type="dir"/>
+			<antcontrib:then>
+				<uptodate property="api-doc.is.up-to-date">
+					<srcfiles dir="${basedir}/src/java"/>
+					<srcfiles dir="${build.dir}/src/java"/>
+					<mapper type="glob" from="*.java" to="${build.dir}/doc/api/*.html"/>
+				</uptodate>
+			</antcontrib:then>
+			<antcontrib:else>
+				<uptodate property="api-doc.is.up-to-date">
+					<srcfiles dir="${basedir}/src/java"/>
+					<mapper type="glob" from="*.java" to="${build.dir}/doc/api/*.html"/>
+				</uptodate>
+			</antcontrib:else>
+		</antcontrib:if>
+	</target>
+	<!--*******************************************************************
+	* Prepare
+	********************************************************************-->
+	<target name="prepare" description="Installs a binary distribution or builds a source distribution" depends="init">
+		<antcontrib:if>
+			<isset property="source.distribution"/>
+			<antcontrib:then>
+				<antcall target="deliverables"/>
+			</antcontrib:then>
+			<antcontrib:else>
+				<antcall target="install-bin"/>
+			</antcontrib:else>
+		</antcontrib:if>
+	</target>
+	<!--*******************************************************************
+	* Install
+	********************************************************************-->
+	<target 
+		name="install-src" 
+		description="Converts a generic distribution to a source distribution" 
+		unless="source.distribution" 
+		depends="init,install-model,install-data,install-sql,install-connector,eclipse-src-project,install-war,install-ear">
+		<antcontrib:foreach target="-install-" param="install.source">
+			<path>
+				<fileset dir="${src.archive.dir}">
+					<include name="${ant.project.name}.*.zip"/>
+					<exclude name="*-connector.*"/>
+					<exclude name="*-data.*"/>
+					<exclude name="*-ear.*"/>
+					<exclude name="*-model.*"/>
+					<exclude name="*-sql.*"/>
+					<exclude name="*-war.*"/>
+				</fileset>
+			</path>
+			<param name="install.target" value="${basedir}/src"/>
+			<param name="install.suffix" value=""/>
+		</antcontrib:foreach>
+	</target>
+	<target 
+		name="install-bin" 
+		description="Converts a generic distribution to a binary distribution" 
+		depends="install-model,install-sql,install-source-archive,eclipse-bin-project"
+	>
+		<antcontrib:if>
+			<isset property="install-bin.callback"/>
+			<antcontrib:then>
+				<antcall 
+					target="${install-bin.callback}"
+					inheritrefs="true"
+				/>
+			</antcontrib:then>
+		</antcontrib:if>
+	</target>
+	<target name="install-source-archive" depends="init">
+		<antcontrib:foreach 
+			list="${project.platform.list}" 
+			target="-src-for-platform-" 
+			param="build.target.platform" 
+			delimiter="/"
+		>
+			<param name="project.implementation.prefix" value="${project.implementation.prefix}"/>
+		</antcontrib:foreach>
+	</target>
+	<target name="-src-for-platform-" unless="build.exclude.${build.target.platform}">
+		<antcall target="-src-for-platform" inheritAll="false">
+			<param name="build.target.platform" value="${build.target.platform}"/>
+		</antcall>
+	</target>
+	<target name="-src-for-platform" depends="-exclude-platform-" unless="build.exclude.platform">
+		<antcontrib:foreach target="-src-for-jar-" param="jar.file">
+			<path>
+				<fileset dir="${deliver.dir}/lib">
+					<include name="*.jar"/>
+				</fileset>
+			</path>
+			<param name="java-archive.platform-independent" value="${project.home}/source-archive/${base.dir.name}/${ant.project.name}.java.zip"/>
+			<param name="java-archive.platform-dependent" value="${deliver.dir}/src/${ant.project.name}.java.zip"/>
+		</antcontrib:foreach>
+	</target>
+	<target name="-src-for-jar-">
+		<basename property="jar.name" file="${jar.file}"/>
+		<antcontrib:if>
+			<isreference refid="${jar.name}.content"/>
+			<antcontrib:then>
+				<antcontrib:propertyregex property="zip.name" input="${jar.name}" override="true" regexp="(.*)\.jar" select="\1.java.zip"/>
+				<mkdir dir="${deliver.dir}/src"/>				
+				<antcall target="-src-for-jar" inheritAll="false">
+					<param name="java-archive.platform-independent" value="${java-archive.platform-independent}"/>
+					<param name="java-archive.platform-dependent" value="${java-archive.platform-dependent}"/>
+					<param name="java-archive.target" value="${deliver.dir}/src/${zip.name}"/>
+					<reference refid="${jar.name}.content" torefid="java-archive.classes"/>
+				</antcall>
+			</antcontrib:then>
+		</antcontrib:if>
+	</target>
+	<target name="-src-for-jar">
+		<openmdx:archive format="zip" destfile="${java-archive.target}">
+			<openmdx:archivefileset 
+				src="${java-archive.platform-independent}" 
+				format="zip"
+				whenmissing="skip"
+			>
+				<patternset refid="java-archive.classes"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset 
+				src="${java-archive.platform-dependent}" 
+				format="zip"
+				whenmissing="skip"
+			>
+				<patternset refid="java-archive.classes"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+	</target>
+	<target name="install-model" unless="source.distribution" depends="init">
+		<antcontrib:foreach target="-install-" param="install.source">
+			<path>
+				<fileset dir="${src.archive.dir}">
+					<include name="${ant.project.name}.*-model.zip"/>
+				</fileset>
+			</path>
+			<param name="install.target" value="${basedir}/src/model"/>
+			<param name="install.suffix" value="-model"/>
+		</antcontrib:foreach>
+	</target>
+	<target name="install-data" unless="source.distribution" depends="init">
+		<antcontrib:foreach target="-install-" param="install.source">
+			<path>
+				<fileset dir="${src.archive.dir}">
+					<include name="${ant.project.name}.*-data.zip"/>
+				</fileset>
+			</path>
+			<param name="install.target" value="${basedir}/src/data"/>
+			<param name="install.suffix" value="-data"/>
+		</antcontrib:foreach>
+	</target>
+	<target name="install-sql" unless="source.distribution" depends="init">
+		<antcontrib:foreach target="-install-" param="install.source">
+			<path>
+				<fileset dir="${src.archive.dir}">
+					<include name="${ant.project.name}.*-sql.zip"/>
+				</fileset>
+			</path>
+			<param name="install.target" value="${basedir}/src/sql"/>
+			<param name="install.suffix" value="-sql"/>
+		</antcontrib:foreach>
+	</target>
+	<target name="install-connector" unless="source.distribution" depends="init">
+		<antcontrib:foreach target="-install-" param="install.source">
+			<path>
+				<fileset dir="${src.archive.dir}">
+					<include name="${ant.project.name}.*-connector.zip"/>
+				</fileset>
+			</path>
+			<param name="install.target" value="${basedir}/src/connector"/>
+			<param name="install.suffix" value="-connector"/>
+		</antcontrib:foreach>
+	</target>
+	<target 
+		name="eclipse-bin-project" 
+		unless="source.distribution" 
+		depends="init"
+	>
+		<antcontrib:if>
+			<available file="${basedir}/etc/eclipse/bin.project.zip"/>
+			<antcontrib:then>
+				<unzip
+					src="${basedir}/etc/eclipse/bin.project.zip"
+					dest="${project.home}"
+				/>
+			</antcontrib:then>
+		</antcontrib:if>
+	</target>
+	<target 
+		name="eclipse-src-project" 
+		unless="source.distribution" 
+		depends="init"
+	>
+		<antcontrib:if>
+			<available file="${basedir}/etc/eclipse/src.project.zip"/>
+			<antcontrib:then>
+				<unzip
+					src="${basedir}/etc/eclipse/src.project.zip"
+					dest="${project.home}"
+				/>
+			</antcontrib:then>
+		</antcontrib:if>
+	</target>
+	<target name="install-war" unless="source.distribution" depends="init">
+		<antcontrib:foreach target="-install-" param="install.source">
+			<path>
+				<fileset dir="${src.archive.dir}">
+					<include name="${ant.project.name}.*-war.zip"/>
+				</fileset>
+			</path>
+			<param name="install.target" value="${basedir}/src"/>
+			<param name="install.suffix" value="-war"/>
+			<param name="install.tag" value="war"/>
+		</antcontrib:foreach>
+	</target>
+	<target name="install-ear" unless="source.distribution" depends="init">
+		<antcontrib:foreach target="-install-" param="install.source">
+			<path>
+				<fileset dir="${src.archive.dir}">
+					<include name="${ant.project.name}.*-ear.zip"/>
+				</fileset>
+			</path>
+			<param name="install.target" value="${basedir}/src"/>
+			<param name="install.suffix" value="-ear"/>
+			<param name="install.tag" value="ear"/>
+		</antcontrib:foreach>
+	</target>
+	<target name="-install-" depends="init">
+		<antcontrib:propertyregex property="install.tag" input="${install.source}" regexp="${ant.project.name}\.(.+)${install.suffix}\.zip" select="\1"/>
+		<echo>Installing ${install.source} to ${install.target}/${install.tag}...</echo>
+		<mkdir dir="${install.target}/${install.tag}"/>
+		<unzip src="${install.source}" dest="${install.target}/${install.tag}"/>
+	</target>
+	<!--*******************************************************************
+	* All
+	********************************************************************-->
+	<target name="all" description="Processes all the project's platforms" depends="clean">
+		<antcontrib:foreach list="${project.platform.list}" target="-platform-" param="build.target.platform" delimiter="/"/>
+	</target>
+	<target name="-platform-" unless="build.exclude.${build.target.platform}">
+		<antcall target="platform" inheritAll="false">
+			<param name="build.target.platform" value="${build.target.platform}"/>
+		</antcall>
+	</target>
+	<target name="platform" description="Builds, tests and distributes the platform specified by -Dbuild.target.platform" depends="-exclude-platform-" unless="build.exclude.platform">
+		<antcall target="-include-platform-"/>
+	</target>
+	<target name="-include-platform-" depends="init,test,distribution"/>
+	<target name="-exclude-platform-" if="build.exclude.platform">
+		<echo>Platform ${build.target.platform} is excluded from the build process because some prerequites are missing!</echo>
+	</target>
+	<!-- ******************************************************************* -->
+	<!-- * -validate-war- -->
+	<!-- ******************************************************************* -->
+  <target name="-validate-war-">
+    <taskdef classname="org.apache.jasper.JspC" name="jasper2" >
+      <classpath id="jspc.classpath"> 
+        <pathelement location="${java.home}/../lib/tools.jar"/> 
+        <fileset dir="${tomcat.home}/bin"> 
+          <include name="*.jar"/> 
+        </fileset> 
+        <fileset dir="${tomcat.home}/lib"> 
+          <include name="*.jar"/> 
+        </fileset> 
+      </classpath> 
+    </taskdef>
+    <unzip 
+		  src="${build.dir}/module/${module.name}"
+		  dest="${build.dir}/tmp/jspc/webapp"
+	  />
+    <jasper2 
+		  validateXml="false" 
+		  uriroot="${build.dir}/tmp/jspc/webapp" 
+		  outputDir="${build.dir}/tmp/jspc/src" 
+    />
+	  <!-- compile JSPs -->
+    <mkdir dir="${build.dir}/tmp/jspc/classes"/>
+    <mkdir dir="${build.dir}/tmp/jspc/lib"/>
+    <javac destdir="${build.dir}/tmp/jspc/classes"
+		  optimize="off"
+		  encoding="UTF-8"
+		  debug="on" failonerror="false"
+		  classpathref="project.bin.classpath"
+		  srcdir="${build.dir}/tmp/jspc/src" 
+		  excludes="**/*.smap"
+	  >
+	    <classpath>
+        <fileset dir="${tomcat.home}/lib">
+          <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${tomcat.home}/bin"> 
+          <include name="*.jar"/> 
+        </fileset> 
+      </classpath>
+      <include name="**" />
+      <exclude name="tags/**" />
+    </javac>	  
+  </target>	
+	
+</project>

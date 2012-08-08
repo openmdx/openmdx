@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+=======================================================================
+= Name:        $Id: build.xml,v 1.34 2005/12/23 11:30:11 hburger Exp $
+= Description: openmdx project raw
+= Revision:    $Revision: 1.34 $
+= Date:        $Date: 2005/12/23 11:30:11 $
+= Copyright:   (c) 2003-2004 OMEX AG
+=======================================================================
+ *
+ * This software is published under the BSD license
+ * as listed below.
+ * 
+ * Copyright (c) 2004, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions 
+ * are met:
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in
+ * the documentation and/or other materials provided with the
+ * distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ * contributors may be used to endorse or promote products derived
+ * from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+-->
+<project 
+	name="openmdx-poseidon" 
+	default="-projecthelp"
+	xmlns:openmdx="xri://(antlib:org.openmdx.tools.ant)"
+	xmlns:antcontrib="antlib:net.sf.antcontrib"
+	xmlns:ivy="xri://(antlib:fr.jayasoft.ivy.ant)"
+>
+	<description>Builds the openMDX/Poseidon-Plugin</description>
+
+	<!-- Slash separated platform list, the last entry being the default -->
+	<property name="project.platform.list" value="poseidon-2"/>
+
+	<!-- Included Ant Projects -->
+	<import file="../ant/etc/ant/build-properties.xml"/>
+	<import file="../ant/etc/ant/build-library.xml"/>
+
+	<property name="gentleware.lib" location="${openmdx.home}/opt/gentleware/poseidon/lib" />
+
+	<path id="gentleware.poseidon.lib">
+		<pathelement location="${gentleware.lib}/jboogie.jar"/>
+		<pathelement location="${gentleware.lib}/jmi.jar"/>
+		<pathelement location="${gentleware.lib}/jmiuml14di.jar"/>
+		<pathelement location="${gentleware.lib}/openide.jar"/>
+		<pathelement location="${gentleware.lib}/poseidonCore.jar"/>
+		<pathelement location="${gentleware.lib}/services.jar"/>
+		<pathelement location="${gentleware.lib}/umlplugin.jar"/>
+		<pathelement location="${gentleware.lib}/codeGen.jar"/>
+	</path>
+	
+	<path id="project.lib.classpath">
+	    <path refid="java2.enterprise.lib"/>
+	    <path refid="java2.extension.lib"/>
+		<path refid="openmdx.core.lib"/>
+		<path refid="gentleware.poseidon.lib"/>
+	</path>
+	<path id="project.bin.classpath">
+		<path refid="project.lib.classpath"/>
+		<pathelement location="${basedir}/src/resource"/>
+		<pathelement location="${build.dir}/bin"/>
+	</path>
+
+	<!-- ******************************************************************* -->
+	<!-- * generate -->
+	<!-- ******************************************************************* -->
+	<target 
+		name="generate" 
+		description="Generates the the files needed for this project" 
+		depends="build-init"
+	>
+		<antcall target="-preprocess-version-files-">
+			<param name="version-file.packages" value="org.openmdx.model1.poseidon.plugin"/>
+			<param name="version-file.property-file" location="${basedir}/version.properties"/>
+			<param name="version-file.template-file" location="${basedir}/etc/ant/Version.java.template"/>
+		</antcall>
+		<ant dir="${openmdx.home}/core" inheritAll="false" target="prepare">
+			<property name="build.target.platform" value="${build.java.platform}"/>
+		</ant>
+	</target>	
+	
+	<!-- ******************************************************************* -->
+	<!-- * build -->
+	<!-- ******************************************************************* -->
+	<path id="build.classpath">
+	    <path refid="reference.classpath"/>
+	</path>
+
+	<!-- ******************************************************************* -->
+	<!-- * deliverables -->
+	<!-- ******************************************************************* -->
+	<target 
+		name="deliverables" 
+		description="Populate the project's deliverables directory" 
+		depends="deliverables-init,java-archives,source-archives"
+	/>
+
+	<!-- ******************************************************************* -->
+	<!-- * distribution -->
+	<!-- ******************************************************************* -->
+	<target 
+		name="distribution" 
+		description="Create the project's distribution archives" 
+		depends="distribution-init,deliverables"
+	>
+		<openmdx:archive 
+			destfile="${distribution.dir}/openmdx-${openmdx.implementation.version}-plugin.${build.target.platform}-exporter-${project.implementation.version}."
+			format="${distribution.format}"
+			checksum="MD5"
+		>
+			<openmdx:archivefileset 
+				dir="${basedir}" 
+				prefix="${project.implementation.prefix}-${project.implementation.version}/${base.dir.name}"
+			>
+				<include name="LICENSE"/>
+				<include name="README"/>
+				<include name="RELEASE-NOTES"/>
+				<include name="build.xml"/>
+				<include name="project.properties"/>
+				<include name="version.properties"/>
+				<include name="poseidon-2-properties.xml"/>
+				<include name="etc/**"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset 
+				dir="${project.home}" 
+				prefix="${project.implementation.prefix}-${project.implementation.version}"
+			>
+				<include name="${build.target.platform}/poseidon/**"/>
+				<include name="source-archive/poseidon/**"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+	</target>
+
+	<!-- =================================================================== -->
+	<!-- - JavaDoc -->
+	<!-- =================================================================== -->
+	<target name="api-doc" description="Create the Java API documentation" depends="api-doc-init" unless="api-doc.is.up-to-date">
+		<javadoc 
+			destdir="${build.dir}/doc/api" 
+			author="true" 
+			version="true" 
+			locale="en" 
+			use="true" 
+			windowtitle="${project.specification.title} API" 
+			doctitle="${project.specification.title} API ${project.specification.version}" 
+			Public="true" 
+			maxmemory="256m"
+		>
+			<packageset dir="${basedir}/src/java" />
+			<classpath refid="project.bin.classpath"/>
+			<tag name="todo" description="To do:" scope="all"/>
+			<link href="http://java.sun.com/j2se/1.3/docs/api/" offline="true" packagelistLoc="${openmdx.core.etc}/javadoc/j2se-1.3/"/>
+			<link href="http://java.sun.com/j2ee/sdk_1.3/techdocs/api/" offline="true" packagelistLoc="${openmdx.core.etc}/javadoc/j2ee-1.3/"/>
+			<link href="http://www.openmdx.org/openmdx/1.2/java/" offline="true" packagelistLoc="${openmdx.core.etc}/javadoc/openmdx-1.2/"/>
+			<group title="openMDX/Poseidon" packages="org.openmdx.model1.poseidon.*"/>
+			<bottom>This software is published under the BSD license. Copyright &#169; 2003-${build.year}, OMEX AG, Switzerland, All rights reserved. Use is subject to &lt;a href="http://www.openmdx.org/license.htm"&gt;license terms&lt;/a&gt;.</bottom>
+		</javadoc>
+	<echo>
+------------------------------------------------------------------------------------------------
+The Java API documentation for ${project.specification.title} has been generated at 
+${build.dir}/doc/api/index.html
+------------------------------------------------------------------------------------------------
+    </echo>
+	</target>
+
+	<!-- =================================================================== -->
+	<!-- - Java Archives -->
+	<!-- =================================================================== -->
+	<target name="java-archives" depends="deliverables-init,plugin-archive">
+		<copy todir="${deliver.dir}/lib">
+			<fileset dir="${openmdx.home}/${build.java.platform}/core/lib">
+				<include name="openmdx-kernel.jar" />
+				<include name="openmdx-base.jar" />
+			</fileset>
+			<fileset dir="${openmdx.home}/java2/${build.java.platform}/enterprise/lib">
+				<include name="j2ee.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target 
+		name="plugin-archive" 
+		description="Creates jar archive with Poseidon plugin" 
+		depends="deliverables-init,build"
+	>
+		<patternset id="poseidon-plugin.classes">
+			<include name="org/openmdx/**"/>
+		</patternset>
+		<jar destfile="${deliver.dir}/lib/openmdx-poseidon.jar">
+			<manifest>
+				<!-- exporter specific values values -->
+				<attribute name="OpenIDE-Module" value="${project.implementation.title}"/>
+				<attribute name="OpenIDE-Module-Name" value="${project.specification.title}"/>
+				<attribute name="OpenIDE-Module-Display-Category" value="Poseidon"/>
+				<attribute name="Poseidon-Module-Install" value="org/openmdx/model1/poseidon/plugin/ExporterPlugin.class"/>
+				<attribute name="OpenIDE-Module-Specification-Version" value="${project.specification.version}"/>
+				<attribute name="OpenIDE-Module-Implementation-Version" value="${project.implementation.version}"/>
+				<attribute name="OpenIDE-Module-Module-Dependencies" value="com.gentleware.poseidon.uml14"/>
+				<attribute name="Poseidon-Module-Module-Dependencies" value="com.gentleware.poseidon.uml14"/>
+				<attribute name="OpenIDE-Module-Short-Description" value="Plugin that exports a Poseidon model as externalized MOF model in a jar file"/>
+				<attribute name="OpenIDE-Module-Long-Description" value="Plugin that exports a Poseidon model as externalized MOF model in a jar file"/>
+				<attribute name="Class-Path" value="openmdx-base.jar openmdx-kernel.jar j2ee.jar"/>
+				<!-- archive specific values values -->
+				<attribute name="Specification-Title" value="${project.specification.title}"/>
+				<attribute name="Implementation-Title" value="${project.implementation.title}"/>
+				<!-- followed by standard values -->
+				<attribute name="Specification-Vendor" value="${project.vendor.name}"/>
+				<attribute name="Specification-Version" value="${project.specification.version}"/>
+				<attribute name="Implementation-Vendor" value="${project.vendor.name}"/>
+				<attribute name="Implementation-Vendor-Id" value="${project.vendor.id}"/>
+				<attribute name="Implementation-Version" value="${project.implementation.version} (Build ${build.starttime})"/>
+			</manifest>
+			<fileset dir="${build.dir}/bin">
+				<patternset refid="poseidon-plugin.classes"/>
+			</fileset>
+			<fileset dir="${basedir}/src/resource">
+				<patternset refid="poseidon-plugin.classes"/>
+			</fileset>
+		</jar>
+	</target>
+
+</project>
+

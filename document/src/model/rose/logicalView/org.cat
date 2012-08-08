@@ -1,0 +1,172 @@
+
+(object Petal
+    version    	45
+    _written   	"Rose 7.6.0109.2314"
+    charSet    	0)
+
+(object Class_Category "org"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"3C6168960294"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class_Category "openmdx"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\org\\openmdx.cat"
+	    quid       	"3FB3D59203B1")
+	(object Class_Category "w3c"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\..\\..\\..\\..\\..\\core\\src\\model\\rose\\logicalView\\org\\w3c.cat"
+	    quid       	"3C8B62D700DA")
+	(object Class_Category "un"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\..\\..\\..\\..\\..\\core\\src\\model\\rose\\logicalView\\org\\un.cat"
+	    quid       	"3C8B7F380249")
+	(object Class_Category "iso"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\..\\..\\..\\..\\..\\core\\src\\model\\rose\\logicalView\\org\\iso.cat"
+	    quid       	"3C8B7F0E0072")
+	(object Class_Category "oasis-open"
+	    is_unit    	TRUE
+	    is_loaded  	FALSE
+	    file_name  	"$curdir\\..\\..\\..\\..\\..\\core\\src\\model\\rose\\logicalView\\org\\oasis-open.cat"
+	    quid       	"4022002100C9"))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "org Packages"
+	    quid       	"403B94F0011F"
+	    title      	"org Packages"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object CategoryView "Logical View::org::openmdx" @1
+		    location   	(225, 550)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(81, 466)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"openmdx")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3FB3D59203B1"
+		    width      	300
+		    height     	180)
+		(object CategoryView "Logical View::org::w3c" @2
+		    location   	(1894, 218)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(1750, 134)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"w3c")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B62D700DA"
+		    width      	300
+		    height     	180)
+		(object CategoryView "Logical View::org::un" @3
+		    location   	(1460, 215)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(1316, 131)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"un")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B7F380249"
+		    width      	300
+		    height     	180)
+		(object CategoryView "Logical View::org::iso" @4
+		    location   	(231, 197)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@4
+			location   	(87, 113)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"iso")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"3C8B7F0E0072"
+		    width      	300
+		    height     	180)
+		(object CategoryView "Logical View::org::oasis_open" @5
+		    location   	(650, 203)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@5
+			location   	(506, 119)
+			fill_color 	13434879
+			nlines     	2
+			max_width  	288
+			justify    	0
+			label      	"oasis_open")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"4022002100C9"
+		    width      	300
+		    height     	180)))))

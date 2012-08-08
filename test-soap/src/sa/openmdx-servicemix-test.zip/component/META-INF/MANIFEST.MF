@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: gnodet
+Build-Jdk: 1.5.0_06
+Extension-Name: wsdl-first-http-su
+Specification-Title: ServiceMix is an open source ESB based on the Jav
+ a Business
+     Integration framework - JSR-208
+Specification-Vendor: Apache Software Foundation
+Implementation-Vendor: Apache Software Foundation
+Implementation-Title: wsdl-first-http-su
+Implementation-Version: 3.0-incubating
+

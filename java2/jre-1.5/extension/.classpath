@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="lib/commons-collections-extendedproperties.jar" sourcepath="/openMDX Thirdparty ~ Apache Commons (jre-1.3)/src/commons-collections.java.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="http://jakarta.apache.org/commons/collections/api-release/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/junit.jar" sourcepath="src/junit.java.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="http://www.junit.org/junit/javadoc/3.8.1/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/xmlunit.jar" sourcepath="/openMDX Thirdparty ~ Java2 Extension (jre-1.4)/src/xmlunit.java.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="http://xmlunit.sourceforge.net/doc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/imap.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/pop3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jcl104-over-slf4j.jar" sourcepath="src/jcl104-over-slf4j.java.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/log4j-over-slf4j.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/bcel.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jdo2-api.jar" sourcepath="src/jdo2-api.java.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="http://db.apache.org/jdo/api20/apidocs/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/smtp.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jpox.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jpox-enhancer.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 5.0"/>
+	<classpathentry kind="lib" path="lib/icu4j.jar" sourcepath="src/icu4j.java.zip"/>
+	<classpathentry kind="lib" path="lib/icu4j-charsets.jar" sourcepath="src/icu4j-charsets.java.zip"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

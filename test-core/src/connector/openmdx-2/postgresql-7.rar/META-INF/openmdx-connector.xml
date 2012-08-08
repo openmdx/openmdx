@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSPY v5 rel. 4 U (http://www.xmlspy.com) by Harald Burger (private) -->
+<!DOCTYPE openmdx-connector SYSTEM "xri:+resource/org/openmdx/kernel/application/deploy/openmdx-connector_1_0.dtd">
+<openmdx-connector>
+	<resourceadapter>
+		<connectionfactory-jndi-name>jdbc/dataproviders</connectionfactory-jndi-name>
+	</resourceadapter>
+</openmdx-connector>

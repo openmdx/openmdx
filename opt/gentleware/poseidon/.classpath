@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="lib/codeGen.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jboogie.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jmi.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jmiuml14di.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/openide.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/poseidonCore.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/services.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/umlplugin.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 1.4"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

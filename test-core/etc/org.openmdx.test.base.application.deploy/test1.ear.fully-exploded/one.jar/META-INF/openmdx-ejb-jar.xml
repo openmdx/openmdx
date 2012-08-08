@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE openmdx-ejb-jar PUBLIC "-//openMDX//DTD Enterprise JavaBeans Extension 1.0//EN" "http://www.openmdx.org/dtd/openmdx-ejb-jar_1_0.dtd">
+<openmdx-ejb-jar>
+  <enterprise-beans>
+    <session>
+      <ejb-name>Roger</ejb-name>
+      <ejb-ref>
+        <ejb-ref-name>ejb/Daniel</ejb-ref-name>
+        <jndi-name>org/openmdx/test/Daniel</jndi-name>
+      </ejb-ref>
+      <ejb-local-ref>
+        <ejb-ref-name>ejb/Markus</ejb-ref-name>
+        <local-jndi-name>org/openmdx/test/Markus</local-jndi-name>
+      </ejb-local-ref>
+      <resource-ref>
+        <res-ref-name>resource/TestResourceRef</res-ref-name>
+        <jndi-name>org/openmdx/test/resource/TestResourceRef</jndi-name>
+      </resource-ref>
+      <resource-env-ref>
+        <resource-env-ref-name>resource-env/TestResourceEnvRef</resource-env-ref-name>
+        <jndi-name>org/openmdx/test/resource-env/TestResourceEnvRef</jndi-name>
+      </resource-env-ref>
+      <pool>
+        <initial-capacity>1</initial-capacity>
+        <maximum-capacity>100</maximum-capacity>
+        <maximum-wait>1000000</maximum-wait>
+      </pool>
+    </session>
+  </enterprise-beans>
+</openmdx-ejb-jar>

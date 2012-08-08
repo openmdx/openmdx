@@ -1,0 +1,52 @@
+-------------------------------------------------------------------
+     
+                        openMDX/WebLogic
+
+-------------------------------------------------------------------
+
+1/ What this guide is for
+   ----------------------
+
+   This distribution contains WebLogic-specific extensions for openMDX.
+
+
+2/ Java Archives
+   -------------
+
+   * WebLogic ClassPath
+     openmdx-kernel.jar 
+     openmdx-weblogic.security.jar
+   * Alternate WebLogic MBean Directory  
+     openmdx-weblogic.mbean.jar  
+
+     
+3/ System Properties
+   -----------------
+   
+   * java.protocol.handler.pkgs
+     org.openmdx.kernel.url.protocol     
+   * weblogic.alternateTypesDirectory
+     ...
+   * org.openmdx.log.path
+     ...
+   * org.openmdx.log.config.filename
+     ...
+
+
+4/ Authentication Providers
+   ------------------------
+
+   AirLock
+   * Insert an AirLockIdentityAsserter instance at the first position.
+   
+   
+5/ Secure Web Applications
+   -----------------------
+   
+    <login-config>
+      <auth-method>CLIENT-CERT</auth-method>
+      <realm-name>...</realm-name>
+    </login-config>
+
+---
+End of README

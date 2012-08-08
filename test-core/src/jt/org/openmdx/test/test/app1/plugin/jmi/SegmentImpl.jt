@@ -1,0 +1,256 @@
+/*
+ * ====================================================================
+ * Project:     openmdx, http://www.openmdx.org/
+ * Name:        $Id: SegmentImpl.jt,v 1.5 2008/02/18 14:18:22 hburger Exp $
+ * Description: SegmentImpl class
+ * Revision:    $Revision: 1.5 $
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Date:        $Date: 2008/02/18 14:18:22 $
+ * ====================================================================
+ *
+ * This software is published under the BSD license
+ * as listed below.
+ * 
+ * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * ------------------
+ * 
+ * This product includes or is based on software developed by other 
+ * organizations as listed in the NOTICE file.
+ */
+package org.openmdx.test.test.app1.plugin.jmi;
+
+import java.util.AbstractCollection;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import org.openmdx.base.accessor.jmi.cci.RefContainer_1_0;
+import org.openmdx.base.accessor.jmi.cci.RefObject_1_0;
+import org.openmdx.base.accessor.jmi.spi.RefObject_1;
+import org.openmdx.base.collection.FetchSize;
+import org.openmdx.base.exception.InvalidCardinalityException;
+import org.openmdx.compatibility.base.collection.Container;
+
+#if defined(BEFORE16)
+import org.openmdx.test.app1.jmi.App1Package;
+import org.openmdx.test.app1.query.PersonQuery;
+import org.openmdx.test.app1.cci.Person;
+import org.openmdx.test.app1.cci.Segment;
+#else
+import org.openmdx.test.app1.jmi1.App1Package;
+import org.openmdx.test.app1.cci2.PersonQuery;
+import org.openmdx.test.app1.jmi1.Person;
+import org.openmdx.test.app1.jmi1.Segment;
+#endif    
+
+//---------------------------------------------------------------------------
+/**
+ * 
+ */
+public class SegmentImpl
+  extends RefObject_1
+{
+          
+
+    /**
+     * Implements <code>Serializable</code>
+     */
+    private static final long serialVersionUID = 668279216331332901L;
+
+    /**
+     * Constructor 
+     *
+     * @param delegate
+     */
+    public SegmentImpl(
+        Segment delegate
+    ) {
+        super(
+            ((RefObject_1_0)delegate).refDelegate(), // TODO
+            delegate.refClass()
+        );
+        this.delegate = delegate;
+    }
+
+    /**
+     * 
+     */
+    final Segment delegate;
+    
+    //-------------------------------------------------------------------------
+    // Segment
+    //-------------------------------------------------------------------------
+    public Person getForeignPerson(
+      String foreignId
+    ) {
+      return (Person)((Container)this.getForeignPerson()).get(
+        foreignId
+      );
+    }
+
+    //-------------------------------------------------------------------------
+    public Collection getForeignPerson(
+    ) {
+      return new SegmentReferencesForeignPerson_PersonImpl();
+    }
+
+    //---------------------------------------------------------------------------
+    // Reference SegmentReferencesForeignPerson:Person
+    //---------------------------------------------------------------------------
+    class SegmentReferencesForeignPerson_PersonImpl
+      extends AbstractCollection<RefObject_1_0>
+      implements RefContainer_1_0, FetchSize {
+        
+      //------------------------------------------------------------------------- 
+      public SegmentReferencesForeignPerson_PersonImpl(
+      ) {
+      }
+      
+      //-------------------------------------------------------------------------
+      // Container 
+      //------------------------------------------------------------------------- 
+      public List toList(
+        Object criteria
+      ) {
+        return ((Container)delegate.getPerson()).toList(
+          criteria
+        );
+      }
+       
+      //------------------------------------------------------------------------- 
+      public Container subSet(
+        Object filter
+      ) {
+        return ((Container)delegate.getPerson()).subSet(
+          filter
+        );     
+      }
+    
+      //-------------------------------------------------------------------------
+      // RefContainer_1_0 
+      //------------------------------------------------------------------------- 
+
+      //------------------------------------------------------------------------- 
+      public void refAddValue(
+        String qualifier,
+        RefObject_1_0 value
+      ) {
+        delegate.addPerson(
+          qualifier,
+          (Person)value
+        );
+      }
+    
+      //-------------------------------------------------------------------------
+      // AbstractCollection 
+      //------------------------------------------------------------------------- 
+
+      //------------------------------------------------------------------------- 
+      public boolean add(
+        RefObject_1_0 value
+      ) {
+        delegate.addPerson(
+          (Person)value
+        );
+        return true;
+      }
+    
+      //------------------------------------------------------------------------- 
+      public RefObject_1_0 get(
+        Object filter
+      ) {
+        String foreignId = (String)filter;
+        App1Package pkg = (App1Package)delegate.refImmediatePackage();
+        PersonQuery personFilter = pkg.createPersonQuery();
+        personFilter.foreignId().equalTo(foreignId);
+        Collection persons = ((Container)delegate.getPerson()).subSet(personFilter);
+        if(persons.size() == 0) return null;
+        else if(persons.size() == 1) {
+          return (Person)persons.iterator().next();
+        }
+        else {
+          throw new InvalidCardinalityException(
+            "more than one person with foreignId \"" + foreignId + '"'
+          );
+        }
+      }
+       
+      //------------------------------------------------------------------------- 
+      public Iterator iterator(
+      ) {
+        return delegate.getPerson().iterator();     
+      }
+    
+      //------------------------------------------------------------------------- 
+      public int size(
+      ) { 
+        return delegate.getPerson().size();     
+      }
+
+      /* (non-Javadoc)
+       */
+      public int getFetchSize() {
+          System.out.println("Use fetch size " + fetchSize);
+          return fetchSize;
+      }
+
+      /* (non-Javadoc)
+       */
+      public void setFetchSize(int fetchSize) {
+          this.fetchSize = fetchSize;
+      }
+
+      /**
+       * 
+       */
+      private int fetchSize = SEGMENT_REFERENCES_FOREIGN_PERSON_FETCH_SIZE;
+      
+    }
+      
+      /* (non-Javadoc)
+       */
+      public Set refDefaultFetchGroup() {
+          Set defaultFetchGroup = super.refDefaultFetchGroup();
+          defaultFetchGroup.add("nameFormat");
+          return defaultFetchGroup;
+      }
+
+      /**
+       * 
+       */
+      final static int SEGMENT_REFERENCES_FOREIGN_PERSON_FETCH_SIZE = 3;
+      
+}

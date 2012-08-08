@@ -1,0 +1,1963 @@
+/*
+ * ====================================================================
+ * Project:     openmdx, http://www.openmdx.org/
+ * Name:        $Id: AbstractTestApp_1Jmi.jt,v 1.10 2008/02/14 13:07:05 wfro Exp $
+ * Description: Unit test for model app1
+ * Revision:    $Revision: 1.10 $
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Date:        $Date: 2008/02/14 13:07:05 $
+ * ====================================================================
+ *
+ * This software is published under the BSD license as listed below.
+ * 
+ * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * ------------------
+ * 
+ * This product includes software developed by the Apache Software
+ * Foundation (http://www.apache.org/).
+ */
+package org.openmdx.test.test.app1;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+
+import javax.jdo.JDOFatalDataStoreException;
+import javax.jdo.JDOHelper;
+import javax.jdo.JDOOptimisticVerificationException;
+import javax.jdo.PersistenceManager;
+import javax.jmi.reflect.RefException;
+import javax.jmi.reflect.RefObject;
+import javax.jmi.reflect.RefPackage;
+import javax.xml.datatype.DatatypeConstants;
+
+import junit.framework.TestCase;
+
+import org.openmdx.application.log.AppLog;
+import org.openmdx.base.accessor.generic.cci.ObjectFactory_1_0;
+import org.openmdx.base.accessor.generic.cci.Object_1_0;
+import org.openmdx.base.accessor.generic.view.Manager_1;
+import org.openmdx.base.accessor.jmi.cci.JmiServiceException;
+import org.openmdx.base.accessor.jmi.cci.RefObjectFactory_1;
+import org.openmdx.base.accessor.jmi.spi.RefMetaObject_1;
+import org.openmdx.base.accessor.jmi.spi.RefRootPackage_1;
+import org.openmdx.base.exception.BadParameterException;
+import org.openmdx.base.exception.RuntimeServiceException;
+import org.openmdx.base.exception.ServiceException;
+import org.openmdx.base.text.conversion.SQLWildcards;
+import org.openmdx.compatibility.application.dataprovider.transport.ejb.cci.Dataprovider_1ConnectionFactoryImpl;
+import org.openmdx.compatibility.base.application.container.LightweightContainer_1;
+import org.openmdx.compatibility.base.application.container.SimpleServiceLocator;
+import org.openmdx.compatibility.base.collection.Container;
+import org.openmdx.compatibility.base.dataprovider.cci.AttributeSelectors;
+import org.openmdx.compatibility.base.dataprovider.cci.DataproviderObject;
+import org.openmdx.compatibility.base.dataprovider.cci.Directions;
+import org.openmdx.compatibility.base.dataprovider.cci.RequestCollection;
+import org.openmdx.compatibility.base.dataprovider.cci.ServiceHeader;
+import org.openmdx.compatibility.base.dataprovider.cci.SystemAttributes;
+import org.openmdx.compatibility.base.dataprovider.importer.xml.XmlImporter;
+import org.openmdx.compatibility.base.dataprovider.transport.adapter.Provider_1;
+import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_0Connection;
+import org.openmdx.compatibility.base.dataprovider.transport.cci.Dataprovider_1_1Connection;
+import org.openmdx.compatibility.base.dataprovider.transport.cci.Provider_1_1;
+import org.openmdx.compatibility.base.dataprovider.transport.delegation.Connection_1;
+import org.openmdx.compatibility.base.dataprovider.transport.webservices.Dataprovider_1Connection;
+import org.openmdx.compatibility.base.naming.Path;
+import org.openmdx.compatibility.base.naming.PathComponent;
+import org.openmdx.deployment1.accessor.basic.DeploymentConfiguration_1;
+import org.openmdx.kernel.exception.BasicException;
+import org.openmdx.model1.accessor.basic.cci.ModelElement_1_0;
+import org.openmdx.model1.accessor.basic.cci.Model_1_0;
+import org.openmdx.model1.accessor.basic.spi.Model_1;
+import org.w3c.cci2.StringTypePredicate;
+
+#if defined(BEFORE16)
+import org.openmdx.datastore1.cci.Database;
+import org.openmdx.datastore1.cci.Datastore;
+import org.openmdx.test.app1.cci.Address;
+import org.openmdx.test.app1.cci.AddressFormatAsResult;
+import org.openmdx.test.app1.cci.CanNotFormatNameException;
+import org.openmdx.test.app1.cci.Citizenship;
+import org.openmdx.test.app1.cci.CycleMember1;
+import org.openmdx.test.app1.cci.CycleMember1Class;
+import org.openmdx.test.app1.cci.CycleMember2;
+import org.openmdx.test.app1.cci.CycleMember2Class;
+import org.openmdx.test.app1.cci.Document;
+import org.openmdx.test.app1.cci.DocumentClass;
+import org.openmdx.test.app1.cci.EMailAddress;
+import org.openmdx.test.app1.cci.EMailAddressClass;
+import org.openmdx.test.app1.cci.InternationalPostalAddress;
+import org.openmdx.test.app1.cci.InternationalPostalAddressClass;
+import org.openmdx.test.app1.cci.Invoice;
+import org.openmdx.test.app1.cci.InvoiceClass;
+import org.openmdx.test.app1.cci.InvoicePosition;
+import org.openmdx.test.app1.cci.InvoicePositionClass;
+import org.openmdx.test.app1.cci.MessageTemplate;
+import org.openmdx.test.app1.cci.MessageTemplateClass;
+import org.openmdx.test.app1.cci.NameFormat;
+import org.openmdx.test.app1.cci.Person;
+import org.openmdx.test.app1.cci.PersonClass;
+import org.openmdx.test.app1.cci.PersonDateOpResult;
+import org.openmdx.test.app1.cci.PersonFormatNameAsResult;
+import org.openmdx.test.app1.cci.PersonGroup;
+import org.openmdx.test.app1.cci.PersonGroupClass;
+import org.openmdx.test.app1.cci.PostalAddress;
+import org.openmdx.test.app1.cci.Product;
+import org.openmdx.test.app1.cci.RoleCapablePerson;
+import org.openmdx.test.app1.cci.Segment;
+import org.openmdx.test.app1.cci.SegmentClass;
+import org.openmdx.test.app1.cci.SwissCitizenship;
+import org.openmdx.test.app1.jmi.App1Package;
+import org.openmdx.test.app1.query.InvoicePositionQuery;
+import org.openmdx.test.app1.query.PersonQuery;
+#else
+import org.openmdx.datastore1.jmi1.Database;
+import org.openmdx.datastore1.jmi1.Datastore;
+import org.openmdx.test.app1.jmi1.Address;
+import org.openmdx.test.app1.jmi1.AddressFormatAsResult;
+import org.openmdx.test.app1.jmi1.CanNotFormatNameException;
+import org.openmdx.test.app1.jmi1.Citizenship;
+import org.openmdx.test.app1.jmi1.CycleMember1;
+import org.openmdx.test.app1.jmi1.CycleMember1Class;
+import org.openmdx.test.app1.jmi1.CycleMember2;
+import org.openmdx.test.app1.jmi1.CycleMember2Class;
+import org.openmdx.test.app1.jmi1.Document;
+import org.openmdx.test.app1.jmi1.DocumentClass;
+import org.openmdx.test.app1.jmi1.EMailAddress;
+import org.openmdx.test.app1.jmi1.EMailAddressClass;
+import org.openmdx.test.app1.jmi1.InternationalPostalAddress;
+import org.openmdx.test.app1.jmi1.InternationalPostalAddressClass;
+import org.openmdx.test.app1.jmi1.Invoice;
+import org.openmdx.test.app1.jmi1.InvoiceClass;
+import org.openmdx.test.app1.jmi1.InvoicePosition;
+import org.openmdx.test.app1.jmi1.InvoicePositionClass;
+import org.openmdx.test.app1.jmi1.MessageTemplate;
+import org.openmdx.test.app1.jmi1.MessageTemplateClass;
+import org.openmdx.test.app1.jmi1.NameFormat;
+import org.openmdx.test.app1.jmi1.Person;
+import org.openmdx.test.app1.jmi1.PersonClass;
+import org.openmdx.test.app1.jmi1.PersonDateOpResult;
+import org.openmdx.test.app1.jmi1.PersonFormatNameAsResult;
+import org.openmdx.test.app1.jmi1.PersonGroup;
+import org.openmdx.test.app1.jmi1.PersonGroupClass;
+import org.openmdx.test.app1.jmi1.PostalAddress;
+import org.openmdx.test.app1.jmi1.Product;
+import org.openmdx.test.app1.jmi1.RoleCapablePerson;
+import org.openmdx.test.app1.jmi1.Segment;
+import org.openmdx.test.app1.jmi1.SegmentClass;
+import org.openmdx.test.app1.jmi1.SwissCitizenship;
+import org.openmdx.test.app1.jmi1.App1Package;
+import org.openmdx.test.app1.cci2.InvoicePositionQuery;
+import org.openmdx.test.app1.cci2.PersonQuery;
+#endif
+
+//---------------------------------------------------------------------------  
+abstract class AbstractTestApp_1Jmi
+  extends TestCase {
+
+  //---------------------------------------------------------------------------  
+  protected AbstractTestApp_1Jmi(
+    String name
+  ) {
+    super(name);
+  }
+
+  /**
+   * A Datatype Factory Instance
+   */
+  protected XMLDatatypeFactory xmlDatatypeFactory;
+
+  //---------------------------------------------------------------------------  
+  protected void setUp(
+  ) throws Exception {
+      if(xmlDatatypeFactory == null) xmlDatatypeFactory = new XMLDatatypeFactory();
+    try {
+      if(! deployed){
+          System.out.println("Deploying...");
+          DeploymentConfiguration_1.createInstance(
+              new String[]{
+                  "xri:+resource/org/openmdx/test/deployment.configuration.xml",
+                  "xri:+resource/org/openmdx/test/test/app1/deployment.configuration.xml"
+              }
+          );
+          new LightweightContainer_1(
+              "testapp",
+              CONNECTOR_DEPLOYMENT_UNITS,
+              PROVIDER_DEPLOYMENT_UNITS
+          );
+          deployed = true;
+      }
+      System.out.println(">>>> **** Start Test: " + this.getName());
+      AppLog.info("Start Test", this.getName());
+
+      this.model = new Model_1();
+
+      Dataprovider_1_1Connection remoteConnection = Dataprovider_1ConnectionFactoryImpl.createGenericConnection(
+        SimpleServiceLocator.getInitialContext().lookup("org/openmdx/test/managing/explorer")
+      );
+
+      Dataprovider_1_0Connection connection = TEST_WEBSERVICES_TRANSPORT ?
+        // intercept webservice transport for testing
+//      new Dataprovider_1_0ConnectionImpl("http://localhost:8080/dataproviders/junits") :
+        new Dataprovider_1Connection(remoteConnection) :
+        remoteConnection;
+
+      this.channel = new RequestCollection(
+          new ServiceHeader(),
+          connection
+      );
+
+      // remove segment and contained objects
+        Path segmentPath = new Path("xri:@openmdx:org.openmdx.test.app1/provider/" + this.getName() + "/segment/Standard");
+      try {
+        channel.addGetRequest(
+          segmentPath,
+          AttributeSelectors.ALL_ATTRIBUTES,
+          null
+        );
+        channel.addRemoveRequest(segmentPath);
+      }
+      catch(ServiceException exception) {
+        switch (exception.getExceptionCode()){
+          case BasicException.Code.NOT_FOUND:
+          case BasicException.Code.NOT_SUPPORTED:
+            break;
+          default:
+            throw exception;
+        }
+      }
+      DataproviderObject segment = new DataproviderObject(segmentPath);
+      segment.values(SystemAttributes.OBJECT_CLASS).add("org:openmdx:test:app1:Segment");
+      channel.addCreateRequest(segment);
+
+      // get initial data from resource (segment, etc.)
+      try {
+              new XmlImporter(
+                new ServiceHeader(),
+                connection
+              ).process(
+                new String[]{"xri:+resource/org/openmdx/test/test/app1/data.xml"}
+              );
+      }
+      catch(Exception e) {
+          System.out.println("XMLImporter reported: " + e.getMessage());
+      }
+
+      // get layer.provider.dataprovider 
+      Provider_1_1 provider = new Provider_1(
+        channel,
+        false, // getName().endsWith("Jdbc")
+        true
+      );
+      AbstractTestApp_1Jmi.manager = new Manager_1(
+        new Connection_1(
+          provider,
+          false
+        )
+      );
+    }
+    catch (ServiceException e) {
+      e.printStackTrace();
+      throw e.log();
+    }
+
+    if(scratchFile == null) scratchFile = File.createTempFile(getClass().getName(), null);
+    System.out.println ("Scratch File = " + scratchFile);
+
+  }
+
+  //---------------------------------------------------------------------------  
+  protected void tearDown(
+  ) {
+    try {
+      System.out.println("<<<< **** End Test: " + this.getName());
+      AppLog.info("End test",this.getName());
+    }
+    catch(Exception e) {
+      System.out.println("error in tearDown");
+    }
+  }
+
+  //---------------------------------------------------------------------------
+  public void runTest(
+  ) throws Throwable {
+    testProvider();
+  }
+
+  //---------------------------------------------------------------------------
+  static class ReadModels
+    implements Runnable {
+
+    public void run(
+    ) {
+      try {
+        Model_1_0 model = new Model_1();
+        for(
+          int i = 0; i < 5000000;
+          i++
+        ) {
+          model.getElement("org:openmdx:base:BasicObject");
+        }
+      }
+      catch(ServiceException e) {
+        System.out.println("ReadModels catched Exception. Terminating");
+        System.out.println(e);
+      }
+      System.out.println("ReadModels terminated");
+    }
+  }
+
+  //---------------------------------------------------------------------------
+  static class UpdateModels
+    implements Runnable {
+
+    public void run(
+    ) {
+      try {
+        Model_1_0 model = new Model_1();
+        model.addModels(
+          Arrays.asList(
+            new String[]{
+              "org:un",
+              "org:iso",
+              "org:openmdx:base",
+              "org:openmdx:compatibility:document1",
+              "org:openmdx:compatibility:role1",
+              "org:openmdx:compatibility:state1",
+              "org:openmdx:compatibility:sequence1",
+              "org:openmdx:deployment1",
+              "org:openmdx:test:app1",
+              "org:openmdx:test:compatibility:role1",
+              "org:openmdx:test:compatibility:state1",
+              "org:omg:model1"
+            }
+          )
+        );
+      }
+      catch(ServiceException e) {
+        System.out.println("UpdateModels catched Exception. Terminating");
+        System.out.println(e);
+      }
+      System.out.println("UpdateModels terminated");
+    }
+  }
+
+  //---------------------------------------------------------------------------
+  public void testProvider(
+  ) throws Exception {
+
+    try {
+      System.out.println("getting root package...");
+      RefPackage rootPkg = new RefRootPackage_1(
+        manager,
+        null, // impls
+        null, // context
+        "cci",
+        THROW_NOT_FOUND_IF_NULL
+      );
+      App1Package app1Pkg = (App1Package)rootPkg.refPackage(
+        "org:openmdx:test:app1"
+      );
+
+      // test thread-safety
+//      Thread r1 = new Thread(new ReadModels());
+//      Thread r2 = new Thread(new ReadModels());
+//      Thread r3 = new Thread(new ReadModels());
+//      Thread r4 = new Thread(new ReadModels());
+//      Thread r5 = new Thread(new ReadModels());
+//      Thread w1 = new Thread(new UpdateModels());
+//      Thread w2 = new Thread(new UpdateModels());
+//      Thread w3 = new Thread(new UpdateModels());
+////      // start
+//      r1.start();
+//      r2.start();
+//      r3.start();
+//      r4.start();
+//      r5.start();
+//      w1.start();
+//      w2.start();
+//      w3.start();
+//      // join
+//      r1.join();
+//      r2.join();
+//      r3.join();
+//      r4.join();
+//      r5.join();
+//      w1.join();
+//      w2.join();
+//      w3.join();
+
+      // END test model functions
+
+      new UpdateModels().run();
+
+      // BEGIN test model functions
+      Model_1_0 model = ((RefRootPackage_1)rootPkg).refModel();
+      rootPkg.refPackage(
+        "org:openmdx:test:compatibility:state1"
+      );
+      System.out.println(
+        "org:openmdx:compatibility:role1:Role:roleType is attribute or stored as attribute=" +
+        (model.isAttributeType("org:openmdx:compatibility:role1:Role:roleType") || model.referenceIsStoredAsAttribute("org:openmdx:compatibility:role1:Role:roleType"))
+      );
+
+      // classes
+      SegmentClass segmentClass = app1Pkg.getSegment();
+      PersonClass personClass = app1Pkg.getPerson();
+      InternationalPostalAddressClass postalAddressClass = app1Pkg.getInternationalPostalAddress();
+      EMailAddressClass eMailAddressClass = app1Pkg.getEMailAddress();
+      CycleMember1Class cycleMember1Class = app1Pkg.getCycleMember1();
+      CycleMember2Class cycleMember2Class = app1Pkg.getCycleMember2();
+      MessageTemplateClass messageTemplateClass = app1Pkg.getMessageTemplate();
+      DocumentClass documentClass = app1Pkg.getDocument();
+      PersonGroupClass personGroupClass = app1Pkg.getPersonGroup();
+
+      // segment
+      Segment segment = segmentClass.getSegment(
+        new Path("xri:@openmdx:org.openmdx.test.app1/provider/" + this.getName() + "/segment/Standard")
+      );
+      PersistenceManager persistenceManager = JDOHelper.getPersistenceManager(segment);
+
+      long startedAt = 0;
+
+#if defined(BEFORE16)
+      /**
+       * Test Role
+       */
+      if("Generic".equals(this.getName())) { // TODO: Enable roles for JMI Plugins
+          persistenceManager.currentTransaction().begin();
+          RoleCapablePerson person = app1Pkg.getRoleCapablePerson().createRoleCapablePerson(
+               xmlDatatypeFactory.newXMLGregorianCalendarDate(1956, 12, 2, DatatypeConstants.FIELD_UNDEFINED),
+               "Vienna (AUT)"
+          );
+          //
+          // TODO: use JMI to populate roles soon as the mapping is available
+          // 
+          Object_1_0 noJMI = person.refDelegate();
+          noJMI.objSetValue("role:DEU:object_class", "org:openmdx:test:app1:Citizenship");
+          noJMI.objSetValue("role:DEU:nationality", "German");
+          noJMI.objSetValue("role:CHE:object_class", "org:openmdx:test:app1:SwissCitizenship");
+          noJMI.objSetValue("role:CHE:nationality", "Swiss");
+          noJMI.objGetSet("role:CHE:placeOfCitizenship").add("Olten (SO)");
+          //
+          // TODO: Use JMI to retrieve the role collection as soon as the mapping is correct
+          //
+//        assertEquals("Citizenships", 2, person.getRole().size()); 
+          //
+          // Use JMI to retrieve individual roles 
+          //
+          Citizenship german = (Citizenship) person.getRole("DEU");
+          assertNotNull("German Citizenship", german);
+          assertEquals("Place Of Birth", "Vienna (AUT)", german.getPlaceOfBirth());
+          assertEquals("Date Of Birth", "1956-12-02", german.getBirthdate().toXMLFormat());
+          assertEquals("German Nationality", "German", german.getNationality());
+          SwissCitizenship swiss = (SwissCitizenship) person.getRole("CHE");
+          assertNotNull("Swiss Citizenship", swiss);
+          assertEquals("Place Of Birth", "Vienna (AUT)", swiss.getPlaceOfBirth());
+          assertEquals("Date Of Birth", "1956-12-02", swiss.getBirthdate().toXMLFormat());
+          assertEquals("Swiss Nationality", "Swiss", swiss.getNationality());
+          assertEquals("Place Of Citizenship", Collections.singleton("Olten (SO)"), swiss.getPlaceOfCitizenship());
+          Citizenship austrian = (Citizenship) person.getRole("AUT");
+          assertNull("Austrian Citizenship", austrian);
+          segment.addCitizen(person);
+          persistenceManager.currentTransaction().commit();
+      }
+#endif
+
+      /**
+       * Test Invoice
+       */
+      if(!"Generic".equals(this.getName())) { // currently not implemented with 'Generic' plugin
+        InvoiceClass invoiceClass = app1Pkg.getInvoice();
+        InvoicePositionClass invoicePositionClass = app1Pkg.getInvoicePosition();
+
+        persistenceManager.currentTransaction().begin();
+        Invoice invoice = invoiceClass.createInvoice();
+        invoice.setDescription("this is an invoice for PG0");
+        invoice.setProductGroupId("PG0");
+        assertNull("CR0003551", refGetPath(invoice));
+        segment.addInvoice(invoice);
+        assertNotNull("CR0003551", refGetPath(invoice));
+        for(int i = 0; i < 10; i++) {
+          InvoicePosition invoicePosition = invoicePositionClass.createInvoicePosition();
+          invoicePosition.setDescription("this is invoice position for P" + i);
+          invoicePosition.setProductId("P" + i);
+          assertNull("CR0003551", refGetPath(invoicePosition));
+          invoice.addInvoicePosition(invoicePosition);
+          assertNotNull("CR0003551", refGetPath(invoicePosition));
+        }
+        persistenceManager.currentTransaction().commit();
+
+        //
+        // Read via extent
+        //
+        InvoicePositionQuery invoicePositionQuery = null;
+        invoicePositionQuery = app1Pkg.createInvoicePositionQuery();
+        invoicePositionQuery.identity().like(
+           sqlWildcards.toJDO(
+          	  segment.refMofId() + "/invoice/:*/invoicePosition/%"
+           )
+        );
+        List invoicePositions = ((Container)segment.getExtent()).toList(invoicePositionQuery);
+        assertTrue("Invoice Positions: Second Last", invoicePositions.listIterator(9).hasNext());
+        assertFalse("Invoice Positions: Second Last", invoicePositions.listIterator(10).hasNext());
+        assertEquals("Invoice Positions: Size", 10,invoicePositions.size());
+        invoicePositionQuery = app1Pkg.createInvoicePositionQuery();
+
+        // get products without price. price is an expensive derived
+        // atttribute. Therefore this iteration should be much faster
+        // than the next one
+        startedAt = System.currentTimeMillis();
+        persistenceManager.refresh(invoice);
+        for(
+          Iterator i = (invoicePositionQuery == null ?
+            invoice.getInvoicePosition() : // Standard find request
+            ((Container)invoice.getInvoicePosition()).subSet(invoicePositionQuery) // Use cache
+          ).iterator();
+          i.hasNext();
+        ) {
+          InvoicePosition invoicePosition = (InvoicePosition)i.next();
+          Product product = invoicePosition.getProduct();
+          product.getDescription();
+//          System.out.println("product[" + i + "]");
+//          System.out.println("  description=" + product.getDescription());
+        }
+        System.out.println("time for retrieving 10 invoice positions (without price)=" + (System.currentTimeMillis() - startedAt));
+
+        startedAt = System.currentTimeMillis();
+        persistenceManager.refresh(invoice);
+        for(
+          Iterator i = invoice.getInvoicePosition().iterator();
+          i.hasNext();
+        ) {
+          InvoicePosition invoicePosition = (InvoicePosition)i.next();
+          Product product = invoicePosition.getProduct();
+          product.getDescription();
+          product.getPrice();
+//          System.out.println("product[" + i + "]");
+//          System.out.println("  description=" + product.getDescription());
+//          System.out.println("  price=" + product.getPrice());
+        }
+        System.out.println("time for retrieving 10 invoice positions (with price)=" + (System.currentTimeMillis() - startedAt));
+      }
+
+      /**
+       * Test JdbcPersistent view
+       */
+      // invoke JdbcPersistent operations on segment level
+      Datastore datastore = (Datastore)segment.getContext("Datastore");
+      System.out.println("Datastore="+datastore);
+      if(datastore instanceof Database) try {
+        ((Database)datastore).updatePathComponents();
+      }
+      catch(JmiServiceException e) {
+        assertEquals("exception raised", BasicException.Code.NOT_SUPPORTED, e.getExceptionStack().getExceptionCode());
+        System.out.println(e.getMessage());
+      }
+#if defined(BEFORE16)      
+      catch(RefException e) {
+#else
+      catch(Exception e) {
+#endif
+        System.out.println(e.getMessage());
+      }
+      if(datastore instanceof Database) try {
+        ((Database)datastore).updateNormalizedPaths();
+      }
+      catch(JmiServiceException e) {
+        assertEquals("exception raised", BasicException.Code.NOT_SUPPORTED, e.getExceptionStack().getExceptionCode());
+        System.out.println(e.getMessage());
+      }
+#if defined(BEFORE16)      
+      catch(RefException e) {
+#else
+      catch(Exception e) {
+#endif
+        System.out.println(e.getMessage());
+      }
+
+      /**
+       * Test Address
+       */
+      // get AddressFormat
+      Collection addressFormats = segment.getAddressFormat();
+      for(Iterator i = addressFormats.iterator(); i.hasNext(); ) {
+        System.out.println("addressFormat=" + i.next());
+      }
+
+      // get NameFormat
+      Collection nameFormats = segment.getNameFormat();
+      for(Iterator i = nameFormats.iterator(); i.hasNext(); ) {
+      NameFormat nameFormat = (NameFormat)i.next();
+        System.out.println("nameFormat=" + nameFormat);
+      }
+
+      // reference nameFormat has multiplicity 1..1. Test for NOT_FOUND exception
+      try {
+        segment.getNameFormat("unknown");
+//        fail("NOT_FOUND expected"); // TODO: make NOT_FOUND exception to be thrown
+      } catch(JmiServiceException e) {
+        assertEquals("NOT_FOUND expected", BasicException.Code.NOT_FOUND, e.getExceptionCode());
+      }
+      // reference addressFormat has multiplicity 0..1. Test for null
+      assertNull("addressFormat must be null", segment.getAddressFormat("unknown"));
+
+#if defined(BEFORE16)       
+      // modify feature with object accessor
+      nameFormats = segment.refDelegate().objGetContainer("nameFormat").values();
+      for(Iterator i = nameFormats.iterator(); i.hasNext(); ) {
+        Object_1_0 nameFormat = (Object_1_0)i.next();
+        try {
+          persistenceManager.currentTransaction().begin();
+          nameFormat.objSetValue(
+            "description",
+            "modified description"
+          );
+          persistenceManager.currentTransaction().commit();
+          fail("all attributes are non changeable --> object can not be updated");
+        } catch(JDOFatalDataStoreException e) {
+          System.out.println("all attributes are non changeable --> object can not be updated");
+//        e.printStackTrace();
+        }
+      }
+
+      // test whether reference isFrozen
+      Object_1_0 nameFormat = AbstractTestApp_1Jmi.manager.createObject("org:openmdx:test:app1:NameFormat");
+      try {
+        persistenceManager.currentTransaction().begin();
+        nameFormat.objSetValue(
+          "description",
+          "modified description"
+        );
+        segment.refDelegate().objGetContainer("nameFormat").put(
+          PathComponent.createPlaceHolder().toString(),
+          nameFormat
+        );
+        persistenceManager.currentTransaction().commit();
+        fail("constraint isFrozen --> object can not be updated");
+      } catch(JDOFatalDataStoreException e) {
+        System.out.println("constraint isFrozen --> object can not be updated");
+//      e.printStackTrace();
+      }
+#endif
+
+      InternationalPostalAddress postalAddress = null;
+      EMailAddress eMailAddress = null;
+      assertEquals("Initial address count", 0, segment.getAddress().size());
+      for(
+        int i = 0;
+        i < 4;
+        i++
+      ){
+        System.out.println(
+          new String[]{
+            "Rollback address addition",
+            "Clear persistent address collection",
+            "Clear transient address collection",
+            "Commit address addition"
+          }[i]
+        );
+        persistenceManager.currentTransaction().begin();
+        postalAddress = postalAddressClass.createInternationalPostalAddress(
+          "Switzerland",
+          "Zurich", "57", "8005", "Bahnhofstr."
+        );
+        postalAddress.setAddressLine(new String[]{"Familie", "Muster"});
+        segment.addAddress("0001", postalAddress);
+
+        // create a EMailAddress
+        eMailAddress = eMailAddressClass.createEMailAddress(
+          "hans.muster@app1.ch"
+        );
+        segment.addAddress("0002", eMailAddress);
+        assertEquals(
+          "Transient added address count",
+          2,
+          segment.getAddress().size()
+        );
+        switch(i){
+          case 0:
+            persistenceManager.currentTransaction().rollback();
+            assertEquals(
+              "Rolled back address count",
+              0,
+              segment.getAddress().size()
+            );
+          break;
+          case 1:
+            persistenceManager.currentTransaction().commit();
+            assertEquals(
+              "Commited address count",
+              2,
+              segment.getAddress().size()
+            );
+            persistenceManager.currentTransaction().begin();
+            segment.getAddress().clear();
+            assertEquals(
+              "Transient cleared address count",
+              0,
+              segment.getAddress().size()
+            );
+            persistenceManager.currentTransaction().commit();
+            assertEquals(
+              "Cleared persistent address count",
+              0,
+              segment.getAddress().size()
+            );
+          break;
+          case 2:
+            segment.getAddress().clear();
+            assertEquals(
+              "Cleared transient address count",
+              0,
+              segment.getAddress().size()
+            );
+            persistenceManager.currentTransaction().commit();
+            assertEquals(
+              "Cleared commited address count",
+              0,
+              segment.getAddress().size()
+            );
+          break;
+          case 3:
+            EMailAddress transientAddress = eMailAddressClass.createEMailAddress(
+              "john.player@games.net"
+            );
+            segment.addAddress("0003", transientAddress);
+            assertEquals(
+              "Transient added address count",
+              3,
+              segment.getAddress().size()
+            );
+            segment.getAddress().remove(transientAddress);
+            persistenceManager.currentTransaction().commit();
+            assertEquals(
+              "Commited address count",
+              2,
+              segment.getAddress().size()
+            );
+          break;
+          default:
+            fail("No more instructions");
+        }
+        assertTrue(
+          "Identity should be available outside the unit of work",
+          Arrays.equals(
+            refGetPath(segment).getSuffix(
+              refGetPath(segment).size() - 2
+            ),
+            new String[]{"segment","Standard"}
+          )
+        );
+      }
+
+      try {
+        persistenceManager.currentTransaction().begin();
+          InternationalPostalAddress duplicateAddress = postalAddressClass.createInternationalPostalAddress(
+              "Switzerland",
+            "Zurich", "57", "8005", "Bahnhofstr."
+          );
+          duplicateAddress.setAddressLine(new String[]{"Familie", "Muster"});
+          segment.addAddress("0001", duplicateAddress);
+          eMailAddress.setAddress("hans.muster@app1.int");
+          assertEquals(
+            "Transient E-Mail-Address should have changed",
+            "hans.muster@app1.int",
+            eMailAddress.getAddress()
+          );
+        persistenceManager.currentTransaction().commit();
+        fail("DUPLICATE expected");
+      }
+      catch (JmiServiceException exception) {
+        if(persistenceManager.currentTransaction().isActive()) {
+          assertEquals(
+            "Duplicate exception expected",
+            BasicException.Code.DUPLICATE,
+            exception.getExceptionCode()
+          );
+          persistenceManager.currentTransaction().rollback();
+        }
+        else {
+          assertTrue(
+            "Unit of work failure",
+            exception.getExceptionCode() == BasicException.Code.ABORT ||
+            exception.getExceptionCode() == BasicException.Code.ROLLBACK
+          );
+        }
+      }
+      assertEquals(
+        "Persistent E-Mail-Address shouldn't have changed",
+        "hans.muster@app1.ch",
+        eMailAddress.getAddress()
+      );
+      assertTrue(
+        "Identity should be available after unit of work failure",
+        eMailAddress.getIdentity().endsWith("/segment/Standard/address/0002")
+      );
+
+      // invoke sendMessageTemplate (struct with object reference field)
+      try {
+        persistenceManager.currentTransaction().begin();
+        MessageTemplate messageTemplate = messageTemplateClass.createMessageTemplate();
+        messageTemplate.setText("hello world");
+        segment.addMessageTemplate(
+          "template0",
+          messageTemplate
+        );
+        persistenceManager.currentTransaction().commit();
+        persistenceManager.currentTransaction().begin();
+        /* EMailAddressSendMessageTemplateResult sendResult = */ eMailAddress.sendMessageTemplate(
+          messageTemplate,
+          0,
+          "hello world"
+        );
+        persistenceManager.currentTransaction().commit();
+      }
+      catch(Exception e) {
+        System.out.println(e.getMessage());
+      }
+
+      // create a person without qualifier
+      Person person;
+
+	 
+      //
+      // CR0003390 Code Accessor
+      //
+      {
+          person = segment.getPerson("DOE");
+          Runtime runtime = Runtime.getRuntime();
+          long initialMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
+          for(
+              int i = 1, limit = 1000000;
+              i < 1000;
+              i++
+          ){
+              person = segment.getPerson("DOE");
+              long currentMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
+              long additionalMemoryUsage = currentMemoryUsage - initialMemoryUsage;
+              if(additionalMemoryUsage > limit) {
+                  runtime.gc();
+                  currentMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
+                  additionalMemoryUsage = currentMemoryUsage - initialMemoryUsage;
+                  assertFalse(
+                      "Memory used up after " + i + " failed retrievals: " + additionalMemoryUsage,
+                      additionalMemoryUsage > limit
+                  );
+              }
+          }
+      }
+
+      //
+      // CR0003686 
+      //
+      try {
+          persistenceManager.currentTransaction().begin();
+          person = personClass.createPerson();
+          person.setBirthdate(xmlDatatypeFactory.newXMLGregorianCalendar("1963-01-01"));
+          person.setLastName("Rossi");
+          person.setSalutation("Signor");
+          person.setSex((short)0);
+          person.getGivenName().add("Alfonso");
+          segment.addPerson(person);
+          persistenceManager.currentTransaction().commit();
+          fail("'Signor' was expected not to be supported");
+      } catch(JDOFatalDataStoreException exception) {
+          // Unsupported language prevents commit 
+      }
+
+      persistenceManager.currentTransaction().begin();
+      person = personClass.createPerson();
+      person.setForeignId("FX");
+      person.setBirthdate(xmlDatatypeFactory.newXMLGregorianCalendar("1960-01-01"));
+      person.setBirthdateAsDateTime(new Date(System.currentTimeMillis()));
+      /* d = */ person.getBirthdateAsDateTime();
+      person.setLastName("MusterX");
+      person.setSalutation("Herr");
+      person.setSex((short)0);
+      person.getGivenName().add("Hans");
+      person.getGivenName().add("Heiri");
+      person.setGivenName(new String[]{"Hans", "Heiri"});
+      person.addAssignedAddress(postalAddress);
+      person.addAssignedAddress(eMailAddress);
+      segment.addPerson(person);
+      persistenceManager.currentTransaction().commit();
+
+      if(TEST_REF_MOF_ID_AFTER_COMMIT) assertEquals("person.refMofId() must be object path", 1, new Path(person.refMofId()).size() % 2);
+      assertEquals("person's path must be object path", 1, refGetPath(person).size() % 2);
+      assertEquals("person.refIdentity() must corrspond to its path", refGetPath(person).toXri(), person.getIdentity());
+      assertEquals("person.refMofId() must corrspond to its path", refGetPath(person).toXri(), person.refMofId());
+
+      assertEquals(
+        "Initial postal code without country code",
+        "8005",
+        postalAddress.getPostalCode()
+      );
+
+       // Add country code to postal code
+      persistenceManager.currentTransaction().begin();
+       person.voidOp();
+      persistenceManager.currentTransaction().commit();
+
+      try {
+        persistenceManager.currentTransaction().begin();
+          postalAddress.setPostalCode("D-S-8005");
+        persistenceManager.currentTransaction().commit();
+        fail("CONCURRENT_ACCESS_FAILURE expected");
+      } catch (JDOOptimisticVerificationException exception){
+        assertEquals(
+          "CONCURRENT_ACCESS_FAILURE expected",
+          BasicException.Code.CONCURRENT_ACCESS_FAILURE,
+          BasicException.toStackedException(exception).getCause(null).getExceptionCode()
+        );
+      }
+
+      assertEquals(
+        "voidOp should have updated the postal codes",
+        "CH-8005",
+        postalAddress.getPostalCode()
+      );
+
+      // get assigned addresses by index
+      for(
+        int i = 0;
+        i < 2;
+        i++
+      ) {
+        // postal code not yet refreshed
+        Address address = person.getAssignedAddress(i);
+        System.out.println("assigned address=" + refGetPath(address));
+      }
+
+      PostalAddress additionalAddress = app1Pkg.getPostalAddress().createPostalAddress(
+          "Zurich",
+          "1",
+          "8050",
+          "Technoparkstrasse"
+      );
+      // get assigned addresses by iterator
+      System.out.println("adding three more addresses");
+      persistenceManager.currentTransaction().begin();
+        segment.addAddress("CR0002096", additionalAddress);
+        person.addAssignedAddress(postalAddress);
+        person.addAssignedAddress(additionalAddress);
+        person.addAssignedAddress(eMailAddress);
+      persistenceManager.currentTransaction().commit();
+
+#if defined(BEFORE16)       
+      for(
+        Iterator i = person.getAssignedAddress().iterator();
+        i.hasNext();
+      ) {
+        // postal code refreshed
+        Address address = (Address)i.next();
+        if(refGetPath(address).equals(refGetPath(postalAddress))) assertSame(
+            "created and retrieved object should be the same",
+            address.refDelegate(),
+            postalAddress.refDelegate()
+        );
+        System.out.println("assigned address=" + refGetPath(address));
+      }
+#endif      
+      assertEquals("number of assigned addresses", 5, person.getAssignedAddress().size());
+
+      // assignAddress by operation. This operation does not really
+      // perform an assign. It is just there to see whether the operation
+      // invocation works.
+      persistenceManager.currentTransaction().begin();
+      person.assignAddress(
+        app1Pkg.createPersonAssignAddressParams(
+          Arrays.asList(
+            new Address[]{
+              postalAddress,
+              eMailAddress
+            }
+          )
+        )
+      );
+      persistenceManager.currentTransaction().commit();
+
+      //
+      // CR0002096
+      // 
+      persistenceManager.currentTransaction().begin();
+      additionalAddress.refDelete();
+      persistenceManager.currentTransaction().commit();
+      persistenceManager.currentTransaction().begin();
+      int j = 0;
+      for(
+          Iterator i = person.getAssignedAddress().iterator();
+          i.hasNext();
+      ) {
+          // postal code refreshed
+          Address address = (Address)i.next();
+          if(j++ == 3) {
+              assertNull("Additional address", address);
+              i.remove();
+          } else {
+              if(refGetPath(address).equals(refGetPath(postalAddress))) {
+#if defined(BEFORE16)          
+                  assertSame(
+                      "created and retrieved object should be the same",
+                      address.refDelegate(),
+                      postalAddress.refDelegate()
+                  );
+#endif
+              }
+              System.out.println("assigned address=" + refGetPath(address));
+          }
+      }
+      persistenceManager.currentTransaction().commit();
+      assertEquals("number of assigned addresses", 4, person.getAssignedAddress().size());
+
+      //
+      // CR0002987
+      // 
+      System.out.println("Explicit rollback test");
+      persistenceManager.currentTransaction().begin();
+      additionalAddress = app1Pkg.getPostalAddress().createPostalAddress(
+          "Seldwyla",
+          "0",
+          "0000",
+          "Kirchgasse"
+      );
+      assertFalse("Additional address not yet persistent", JDOHelper.isPersistent(additionalAddress));
+      assertFalse("Additional address not yet new", JDOHelper.isNew(additionalAddress));
+      segment.addAddress("9001", additionalAddress);
+      assertTrue("Additional address now persistent", JDOHelper.isPersistent(additionalAddress));
+      assertTrue("Additional address now new", JDOHelper.isNew(additionalAddress));
+      persistenceManager.currentTransaction().rollback();
+      assertFalse("Additional address no longer persistent", JDOHelper.isPersistent(additionalAddress));
+      assertFalse("Additional address no longer new", JDOHelper.isNew(additionalAddress));
+      try {
+          System.out.println("Implicit rollback test");
+          persistenceManager.currentTransaction().begin();
+          additionalAddress = app1Pkg.getPostalAddress().createPostalAddress(
+              "Seldwyla",
+              "0",
+              "0000",
+              "Kirchgasse"
+          );
+          assertFalse("Additional address not yet persistent", JDOHelper.isPersistent(additionalAddress));
+          assertFalse("Additional address not yet new", JDOHelper.isNew(additionalAddress));
+          segment.addAddress("CR0002987", additionalAddress);
+          assertTrue("Additional address now persistent", JDOHelper.isPersistent(additionalAddress));
+          assertTrue("Additional address now new", JDOHelper.isNew(additionalAddress));
+          NameFormat jmiNameFormat = app1Pkg.getNameFormat().createNameFormat();
+          jmiNameFormat.setDescription("modified description");
+          segment.addNameFormat(jmiNameFormat);
+          persistenceManager.currentTransaction().commit();
+          fail("constraint isFrozen --> object can not be updated");
+      } catch(JDOFatalDataStoreException e) {
+          assertFalse("Additional address no longer new", JDOHelper.isNew(additionalAddress));
+          assertFalse("Additional address no longer persistent", JDOHelper.isPersistent(additionalAddress));
+      }
+
+      for(
+        int i = 0;
+        i < 2;
+        i++
+      ){
+        assertNull("No TRANSIENT person expected", segment.getPerson("TRANSIENT"));
+        if(i==0) persistenceManager.currentTransaction().begin();
+      }
+      // create and remove in same unit of work
+      person = personClass.createPerson(
+        xmlDatatypeFactory.newXMLGregorianCalendar("1960-01-01"),
+        new Date(System.currentTimeMillis()),
+        "FX",
+        "MusterX",
+        "Herr",
+        (short)0
+      );
+      person.getMemberOfGroup().addAll(
+        Arrays.asList(new String[]{"group A", "group B"})
+      );
+      person.getGivenName().addAll(
+        Arrays.asList(new String[]{"Hans", "Heiri"})
+      );
+      person.getAdditionalInfo().put(
+        new Integer(0),
+        "additional info 1"
+      );
+      person.getAdditionalInfo().put(
+        new Integer(1),
+        "additional info 2"
+      );
+      person.getAssignedAddress().addAll(
+        Arrays.asList(new Address[]{postalAddress, eMailAddress})
+      );
+
+      segment.addPerson("TRANSIENT", person);
+      segment.getPerson("TRANSIENT"); // get it in same unit of work
+      segment.removePerson("TRANSIENT"); // remove it in same unit of work
+      persistenceManager.currentTransaction().commit();
+
+      // create some PersonGroups
+      persistenceManager.currentTransaction().begin();
+      PersonGroup g0 = personGroupClass.createPersonGroup();
+      g0.setName("Group 0");
+      segment.addPersonGroup(
+        "g0",
+        g0
+      );
+      PersonGroup g1 = personGroupClass.createPersonGroup();
+      g1.setName("Group 1");
+      segment.addPersonGroup(
+        "g1",
+        g1
+      );
+      PersonGroup g2 = personGroupClass.createPersonGroup();
+      g2.setName("Group 2");
+      segment.addPersonGroup(
+        "g2",
+        g2
+      );
+      persistenceManager.currentTransaction().commit();
+
+      // create some Persons
+      persistenceManager.currentTransaction().begin();
+      for(
+        int i = 0;
+        i <= N_PERSONS;
+        i++
+      ) {
+        person = personClass.createPerson();
+        person.setForeignId("F" + i);
+        person.setBirthdate(xmlDatatypeFactory.newXMLGregorianCalendar("1960-01-01"));
+        person.setBirthdateAsDateTime(new Date(System.currentTimeMillis()));
+        person.setLastName("Muster" + i);
+        person.setSalutation("Herr");
+        person.setSex((short)0);
+        person.getGivenName().add("Hans");
+        person.getGivenName().add("Heiri");
+        person.setGivenName(new String[]{"Hans", "Heiri"});
+        person.addAssignedAddress(postalAddress);
+        person.getPersonGroup().add(g0);
+        person.getPersonGroup().add(g1);
+        person.getPersonGroup().add(g2);
+        if(i == N_PERSONS) {
+          try {
+            segment.addForeignPerson("F" + N_PERSONS, person);
+          }
+          catch(JmiServiceException e) {
+            System.out.println("exception=" + e);
+            //assertEquals("excepted exception NOT_SUPPORTED", CommonExceptions.NOT_SUPPORTED, e.getExceptionCode());
+          }
+        }
+        else {
+          segment.addPerson("000" + i, person);
+        }
+      }
+      persistenceManager.currentTransaction().commit();
+
+      // get person on 'composite' association 'SegmentHasPerson'
+      person = segment.getPerson("0001");
+      System.out.println("person.age=" + person.getAge());
+      System.out.println("person givenName=" + person.getGivenName(0));
+      System.out.println("person.identity=" + person.getIdentity());
+      System.out.println("person.creationDateTime=" + person.getCreationDateTime());
+      System.out.println("person.createdAt=" + person.getCreatedAt());
+
+      // test unqualified feature retrieval
+      assertTrue("postalAddress.address must be instance of String", eMailAddress.refGetValue("address") instanceof String);
+      assertTrue("segment.address must be instance of Container", segment.refGetValue("address") instanceof Container);
+      assertTrue("postalAddress.address must be instance of String", eMailAddress.refGetValue("address") instanceof String);
+
+#if defined(BEFORE16)
+      // test performance of native reading all attributes of person 1000 times
+      startedAt = System.currentTimeMillis();
+      for(
+        int i = 0;
+        i < 1000;
+        i++
+      ) {
+        Object_1_0 p = person.refDelegate();
+        p.objGetValue("lastName");
+        p.objGetValue("foreignId");
+        p.objGetList("givenName");
+        p.objGetValue("sex");
+        p.objGetValue("salutation");
+        p.objGetValue("birthdate");
+        p.objGetValue("birthdateAsDateTime");
+        p.objGetSparseArray("additionalInfo");
+        p.objGetSet("memberOfGroup");
+        p.objGetValue("age");
+        p.objGetValue("creationDateTime");
+      }
+      System.out.println("time for inspecting person 1000 times [native]=" + (System.currentTimeMillis() - startedAt));
+#endif
+
+      // test performance of accessor.jmi of reading all attributes of person 1000 times
+      startedAt = System.currentTimeMillis();
+      for(
+        int i = 0;
+        i < 1000;
+        i++
+      ) {
+        person.getLastName();
+        person.getForeignId();
+        person.getGivenName();
+        person.getSex();
+        person.getSalutation();
+        person.getBirthdate();
+        person.getBirthdateAsDateTime();
+        person.getAdditionalInfo();
+        person.getMemberOfGroup();
+        person.getAge();
+        person.getCreationDateTime();
+      }
+      System.out.println("time for inspecting person 1000 times [jmi]=" + (System.currentTimeMillis() - startedAt));
+
+#if defined(BEFORE16)
+      // test performance of RefObjectFactory. RefDelegatingObject implements Object_1_0 which
+      // delegates to an embedded RefObject which in turn delegates to an embedded Object_1_0
+      // RefObjectFactory is used for server-side JMI feature request dispatching
+      RefObjectFactory_1 f = new RefObjectFactory_1((RefRootPackage_1)rootPkg);
+      Object_1_0 p = f.getObject(
+        person.refDelegate().objGetPath()
+      );
+      startedAt = System.currentTimeMillis();
+      for(
+        int i = 0;
+        i < 1000;
+        i++
+      ) {
+        p.objGetValue("lastName");
+        p.objGetValue("foreignId");
+        p.objGetList("givenName");
+        p.objGetValue("sex");
+        p.objGetValue("salutation");
+        p.objGetValue("birthdate");
+        p.objGetValue("birthdateAsDateTime");
+        p.objGetSparseArray("additionalInfo");
+        p.objGetSet("memberOfGroup");
+        p.objGetValue("age");
+        p.objGetValue("creationDateTime");
+      }
+      System.out.println("time for inspecting person 1000 times [jmi delegation]=" + (System.currentTimeMillis() - startedAt));
+#endif
+
+      // test refMetaObject      
+      ModelElement_1_0 personDef = ((RefMetaObject_1)person.refMetaObject()).getElementDef();
+      /* ModelElement_1_0 salutationDef = */ this.model.getFeatureDef(
+        personDef,
+        "salutation",
+        false
+      );
+      /* salutationDef = */ this.model.getFeatureDef(
+        personDef,
+        "blabla",
+        false
+      );
+      Map attributes = (Map)personDef.values("attribute").get(0);
+      /* salutationDef = (ModelElement_1_0) */ attributes.get("salutation");
+
+      // get person on 'none', derived assocation 'SegmentReferencesForeignPerson'
+      person = segment.getForeignPerson("F1");
+      System.out.println("person.age=" + person.getAge());
+      System.out.println("person givenName=" + person.getGivenName(0));
+
+      int people = segment.getForeignPerson().size();
+      System.out.println("Number of people: " + people);
+
+      // get persons with filter 1
+      PersonQuery personQuery = app1Pkg.createPersonQuery();
+      personQuery.lastName().like(
+		sqlWildcards.toJDO("Muster1%")
+      );
+      personQuery.birthdateAsDateTime().lessThanOrEqualTo(
+        new Date(System.currentTimeMillis())
+      );
+      personQuery.orderByCreatedAt().ascending();
+      Collection personCollection = segment.getPerson();
+      List personList = ((Container)personCollection).toList(personQuery);
+      boolean nobodyOutThere = personList.isEmpty();
+      System.out.println("There are " + (nobodyOutThere ? "no" : "some") + " people");
+      for(
+        Iterator i = personList.iterator();
+        i.hasNext();
+      ) {
+        AppLog.trace("person", (Person)i.next());
+      }
+
+      // get persons with SOUNDS like filter
+      personQuery = app1Pkg.createPersonQuery();
+      personQuery.lastName().like(
+          StringTypePredicate.SOUNDS,
+          "Maasteer"
+      );
+
+      people = ((Container)segment.getPerson()).size();
+      // 1 added by XmlImporter, 1 added with addPerson(), N_PERSONS added by addPerson()
+      Collection maasteer = ((Container)segment.getPerson()).subSet(personQuery);
+      int numberOfPersons = maasteer.size();
+      assertEquals(
+        "number of persons found with SOUNDS_LIKE",
+        N_PERSONS + 3,
+        numberOfPersons
+      );
+      persistenceManager.currentTransaction().begin();
+       maasteer.clear();
+       assertEquals(
+         "number of persons found with SOUNDS_LIKE",
+         people - N_PERSONS - 3,
+        ((Container)segment.getPerson()).size()
+       );
+      persistenceManager.currentTransaction().rollback();
+
+      maasteer = ((Container)segment.getPerson()).toList(personQuery);
+      {
+        List mList = (List) maasteer;
+        assertTrue("People found with SOUNDS_LIKE: Second Last",mList.listIterator(N_PERSONS + 2).hasNext());
+        assertFalse("People found with SOUNDS_LIKE: Second Last",mList.listIterator(N_PERSONS + 3).hasNext());
+      }
+      numberOfPersons = maasteer.size();
+      assertEquals(
+        "number of persons found with SOUNDS_LIKE",
+        N_PERSONS + 3,
+        numberOfPersons
+      );
+      persistenceManager.currentTransaction().begin();
+       maasteer.clear();
+       assertEquals(
+         "number of persons found with SOUNDS_LIKE",
+         people - N_PERSONS - 3,
+        ((Container)segment.getPerson()).size()
+       );
+      persistenceManager.currentTransaction().rollback();
+
+      // find persons with assigned address
+      personQuery = app1Pkg.createPersonQuery();
+      personQuery.thereExistsAssignedAddress().equalTo(postalAddress);
+      personCollection = segment.getPerson();
+      for(
+        Iterator i = ((Container)personCollection).subSet(personQuery).iterator(); //§
+        i.hasNext();
+      ) {
+        AppLog.trace("person", (Person)i.next());
+      }
+
+      // find persons with empty filter
+      personQuery = app1Pkg.createPersonQuery();
+      personCollection = segment.getPerson();
+      for(
+        Iterator i = ((Container)personCollection).subSet(personQuery).iterator();
+        i.hasNext();
+      ) {
+        AppLog.trace("person", (Person)i.next());
+      }
+
+      // 
+      // Test CR0003454
+      // 
+      personQuery = app1Pkg.createPersonQuery();
+      personQuery.foreignId().like(
+        sqlWildcards.toJDO("F_")
+      );
+      personQuery.orderByForeignId().ascending();
+      ListIterator pi = segment.getPerson(personQuery).listIterator();
+      for(
+          int i = 0;
+          i < 6;
+          i++
+      ) {
+          assertEquals("ListIterator.nextIndex()", i, pi.nextIndex());
+          Person pp = (Person) pi.next();
+          System.out.println("person["+i+"] "+pp.getForeignId());
+      }
+      for(
+          int i = 5;
+          i >= 0;
+          i--
+      ) {
+          assertEquals("ListIterator.previousIndex()", i, pi.previousIndex());
+          Person pp = (Person) pi.previous();
+          assertEquals("Person["+i+"].foreignId", "F"+i, pp.getForeignId());
+      }
+
+      // modify given name
+      persistenceManager.currentTransaction().begin();
+      person.setGivenName(new String[]{"Heiri"});
+      System.out.println("person modified givenName=" + person.getGivenName(0));
+      persistenceManager.currentTransaction().commit();
+      persistenceManager.refresh(person);
+      assertEquals("giveName", "Heiri", person.getGivenName(0));
+
+      persistenceManager.currentTransaction().begin();
+      person.getGivenName().clear();
+      persistenceManager.currentTransaction().commit();
+      persistenceManager.refresh(person);
+      assertEquals("size givenName", person.getGivenName().size(), 0);
+
+      // person.formatAs
+      persistenceManager.currentTransaction().begin(); // isQuery() is false      
+      PersonFormatNameAsResult formattedName = person.formatNameAs(
+        app1Pkg.createPersonFormatNameAsParams("Standard")
+      );
+      persistenceManager.currentTransaction().commit(); // result available after commit only               
+      System.out.println("formatted name=" + formattedName.getFormattedName());
+      System.out.println("formatted name as set=" + formattedName.getFormattedNameAsSet());
+      System.out.println("formatted name as list=" + formattedName.getFormattedNameAsList());
+      System.out.println("formatted name as sparsearray=" + formattedName.getFormattedNameAsSparseArray());
+
+      // test optional argument
+      persistenceManager.currentTransaction().begin(); // isQuery() is false               
+      formattedName = person.formatNameAs(
+        app1Pkg.createPersonFormatNameAsParams(
+          null // default value is Standard
+        )
+      );
+      persistenceManager.currentTransaction().commit(); // result available after commit only               
+      System.out.println("formatted name=" + formattedName.getFormattedName());
+
+      // test exceptions
+      try {
+        person.formatNameAs(
+          app1Pkg.createPersonFormatNameAsParams(
+            "InvalidFormat"
+          )
+        );
+      }
+#if defined(BEFORE16)      
+      catch(CanNotFormatNameException e) {
+        System.out.println("formatNameAs() raised exception as expected \n" + e.getMessage());
+      }
+      catch(RefException e) {
+        System.out.println("formatNameAs() raised exception as expected\n" + e.getMessage());
+      }
+#endif
+      catch(Exception e) {
+        fail("exception thrown by an operation must be either user-defined or RefException but is " + e.getClass().getName());
+      }
+
+      // test dateOp (date and dateTime in operation parameter)
+      // Test for non-query operation with result 
+      persistenceManager.currentTransaction().begin();
+      GregorianCalendar calendarNow = new GregorianCalendar();
+      Date dateTimeNow = new Date();
+      PersonDateOpResult dateOpResult = person.dateOp(
+          xmlDatatypeFactory.newXMLGregorianCalendar(calendarNow),
+          dateTimeNow
+      );
+      persistenceManager.currentTransaction().commit();
+      System.out.println("dateOp.dateResult=" + dateOpResult.getDateResult());
+      System.out.println("dateOp.dateTimeResult=" + dateOpResult.getDateTimeResult());
+
+      // no more NOT_FOUND exceptions
+      assertNull("Not existing person", segment.getPerson("alskdjflaksdjf"));
+
+      // remove some persons
+      System.out.println("removing person=" + segment.getPerson("0001").getLastName());
+      System.out.println("removing person=" + segment.getPerson("00053").getLastName());
+      System.out.println("removing person=" + segment.getPerson("00082").getLastName());
+
+      int initialPersonCount = segment.getPerson().size();
+      persistenceManager.currentTransaction().begin();
+      segment.removePerson("0001");
+      segment.removePerson("00053");
+      segment.removePerson("00082");
+      int finalPersonCount = segment.getPerson().size();
+      assertEquals(
+        "Transient person count",
+        initialPersonCount - 3,
+        finalPersonCount
+      );
+      persistenceManager.currentTransaction().rollback();
+      finalPersonCount = segment.getPerson().size();
+      assertEquals(
+        "Rollback person count",
+        initialPersonCount,
+        finalPersonCount
+      );
+      persistenceManager.currentTransaction().begin();
+        segment.removePerson("0001");
+        segment.removePerson("00053");
+        segment.removePerson("00082");
+        finalPersonCount = segment.getPerson().size();
+        assertEquals(
+          "Transient person count",
+          initialPersonCount - 3,
+          finalPersonCount
+        );
+      persistenceManager.currentTransaction().commit();
+      finalPersonCount = segment.getPerson().size();
+      assertEquals(
+        "Commit person count",
+        initialPersonCount - 3,
+        finalPersonCount
+      );
+
+      // ... and test whether they are removed
+      try {
+        segment.getPerson("0001").getAge();
+        fail("person 0001 not removed");
+      }
+      catch(Exception e) {
+        System.out.println("object 0001 removed");
+      }
+
+      // CR0003390 Code Accessor
+      if(!THROW_NOT_FOUND_IF_NULL) {
+          persistenceManager.currentTransaction().begin();
+          person = segment.getPerson("DOE");
+          assertNull("DOE does not exist", person);
+          person = personClass.createPerson();
+          segment.addPerson("DOE", person);
+          assertTrue("DOE is persistent-new", JDOHelper.isNew(person));
+          assertFalse("DOE is persistent-new", JDOHelper.isDeleted(person));
+          person.refDelete();
+          person = segment.getPerson("DOE");
+          assertTrue("DOE is persistent-new-deleted", JDOHelper.isNew(person));
+          assertTrue("DOE is persistent-new-deleted", JDOHelper.isDeleted(person));
+          persistenceManager.currentTransaction().rollback();
+      }
+
+      // Add after failed get
+      try {
+        if(
+           segment.getPerson("NO1") != null || THROW_NOT_FOUND_IF_NULL
+        ) fail("person NO1 exists");
+      }
+      catch(Exception e) {
+        System.out.println("object NO1 does not exist");
+      }
+      persistenceManager.currentTransaction().begin();
+        person = personClass.createPerson();
+        person.setForeignId("X1");
+        person.setBirthdate(xmlDatatypeFactory.newXMLGregorianCalendar("1961-11-11"));
+        person.setBirthdateAsDateTime(new Date(System.currentTimeMillis()));
+        person.setLastName("Muster1");
+        person.setSalutation("Herr");
+        person.setSex((short)0);
+        person.getGivenName().add("Hans");
+        person.getGivenName().add("Heiri");
+        person.setGivenName(new String[]{"Hans", "Heiri"});
+        person.addAssignedAddress(postalAddress);
+        segment.addPerson("NO1", person);
+      persistenceManager.currentTransaction().rollback();
+
+      // ... and test whether they are removed
+      try {
+        segment.removePerson("NO2");
+        fail("person NO2 removed");
+      }
+      catch(Exception e) {
+        System.out.println("object NO2 did not exist");
+      }
+
+      // Add after failed removal
+      persistenceManager.currentTransaction().begin();
+        person = personClass.createPerson();
+        person.setForeignId("X2");
+        person.setBirthdate(xmlDatatypeFactory.newXMLGregorianCalendar("1961-11-11"));
+        person.setBirthdateAsDateTime(new Date(System.currentTimeMillis()));
+        person.setLastName("Muster1");
+        person.setSalutation("Herr");
+        person.setSex((short)0);
+        person.getGivenName().add("Hans");
+        person.getGivenName().add("Heiri");
+        person.setGivenName(new String[]{"Hans", "Heiri"});
+        person.addAssignedAddress(postalAddress);
+        segment.addPerson("NO2", person);
+        persistenceManager.currentTransaction().rollback();
+
+      try {
+        segment.getPerson("00053").getAge();
+        fail("person 00053 not removed");
+      }
+      catch(Exception e) {
+        System.out.println("object 00053 removed");
+      }
+
+      try {
+        segment.getPerson("00082").getAge();
+        fail("person 00082 not removed");
+      }
+      catch(Exception e) {
+        System.out.println("object 00082 removed");
+      }
+
+      // postalAddress.formatAs
+      AddressFormatAsResult formattedAddress = null;
+      try {
+        formattedAddress = postalAddress.formatAs(
+          app1Pkg.createAddressFormatAsParams(
+            "Standard"
+          )
+        );
+        System.out.println("formatted address=" + formattedAddress.getFormattedAddress());
+      }
+#if defined(BEFORE16)      
+      catch(RefException e) {
+        System.out.println("RefException thrown by operation: " + e.getMessage());
+#else
+      catch(Exception e) {
+        System.out.println("Exception thrown by operation: " + e.getMessage());
+#endif
+      }
+
+      // eMailAddress.formatAs
+      formattedAddress = eMailAddress.formatAs(
+        app1Pkg.createAddressFormatAsParams(
+          "Standard"
+        )
+      );
+      System.out.println("formatted address=" + formattedAddress.getFormattedAddress());
+
+      // get addresses by iterator
+      Collection addresses = segment.getAddress();
+      for(
+        Iterator i = addresses.iterator();
+        i.hasNext();
+      ) {
+        Address address = (Address)i.next();
+        System.out.println("address.id=" + address.getId());
+        System.out.println("address=" + address);
+
+        // invoke sendMessage on PostalAddress
+        if(address instanceof PostalAddress) {
+          persistenceManager.currentTransaction().begin(); // isQuery() is false               
+          ((PostalAddress)address).sendMessage(
+            app1Pkg.createPostalAddressSendMessageParams(
+              new byte[]{'h', 'e', 'l', 'l', 'o'}
+            )
+          );
+          persistenceManager.currentTransaction().commit();
+        }
+        else if(address instanceof EMailAddress) {
+          persistenceManager.currentTransaction().begin(); // isQuery() is false               
+          ((EMailAddress)address).sendMessage(
+            app1Pkg.createEMailAddressSendMessageParams(
+              "hello"
+            )
+          );
+          persistenceManager.currentTransaction().commit();
+        }
+        else {
+          fail("address format " + address.getClass().getName() + " unknown");
+        }
+      }
+
+      // Create and retrieve large amount of Persons to find memory leaks
+      if("JmiNone".equals(this.getName())) {
+
+          // Create persons
+          for(
+              int i = 0;
+              i <= LARGE_N_PERSONS;
+              i++
+          ) {
+              if(i % 100 == 0) {
+                  System.out.println(i + " persons created. Free memory " + Runtime.getRuntime().freeMemory());
+              }
+              persistenceManager.currentTransaction().begin();
+              person = personClass.createPerson();
+              person.setForeignId("F" + i);
+              person.setBirthdate(xmlDatatypeFactory.newXMLGregorianCalendar("1960-01-01"));
+              person.setBirthdateAsDateTime(new Date(System.currentTimeMillis()));
+              person.setLastName("Muster" + i);
+              person.setSalutation("Herr");
+              person.setSex((short)0);
+              person.getGivenName().add("Hans");
+              person.getGivenName().add("Heiri");
+              person.setGivenName(new String[]{"Hans", "Heiri"});
+              person.addAssignedAddress(postalAddress);
+              person.getPersonGroup().add(g0);
+              person.getPersonGroup().add(g1);
+              person.getPersonGroup().add(g2);
+              segment.addPerson("L000" + i, person);
+              persistenceManager.currentTransaction().commit();
+          }
+
+          // Retrieve persons
+          int ii = 0;
+          int limit = 1000000;
+          Runtime runtime = Runtime.getRuntime();
+          long initialMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
+          System.out.println("initial memory usage " + initialMemoryUsage);
+          for(
+              Iterator i = segment.getPerson().iterator();
+              i.hasNext();
+              ii++
+          ) {
+              if(ii % 100 == 0) {
+                  long currentMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
+                  System.out.println(ii + " persons retrieved. Current memory usage " + currentMemoryUsage);
+                  long additionalMemoryUsage = currentMemoryUsage - initialMemoryUsage;
+                  if(additionalMemoryUsage > limit) {
+                      runtime.gc();
+                      currentMemoryUsage = runtime.totalMemory() - runtime.freeMemory();
+                      additionalMemoryUsage = currentMemoryUsage - initialMemoryUsage;
+                      assertFalse(
+                          "Memory used up after " + ii + " failed retrievals: " + additionalMemoryUsage,
+                          additionalMemoryUsage > limit
+                      );
+                  }
+              }
+              Person pers = (Person)i.next();
+              limit += 3500;
+              persistenceManager.refresh(pers);
+          }
+      }
+	  //
+	  // For CR10006272
+	  //
+      List findReply = channel.addFindRequest(
+          segment.refGetPath().getChild("person"),
+          null, // attributeFilter, 
+          AttributeSelectors.SPECIFIED_AND_TYPICAL_ATTRIBUTES, 
+          null, // attributeSpecifier, 
+          0, // position
+          1, // size
+          Directions.ASCENDING
+      );
+      //
+      // TODO validate whether the following statement is necessary
+      //
+      /* Object firstEntry = */ findReply.get(0); 
+	  //
+      // test cycles
+      //
+      persistenceManager.currentTransaction().begin();
+      CycleMember1 member1 = cycleMember1Class.createCycleMember1();
+      member1.setDescription("this is member1");
+      CycleMember2 member2 = cycleMember2Class.createCycleMember2();
+      member2.setDescription("this is member2");
+      member1.setM2(member2);
+      member2.setM1(member1);
+      segment.addCycleMember1(new BigDecimal(1), member1);
+      segment.addCycleMember2("member2", member2);
+      persistenceManager.currentTransaction().commit();
+
+      // verify member1, member2
+      member1 = segment.getCycleMember1(new BigDecimal(1));
+      member2 = member1.getM2();
+      System.out.println("member1" + member1);
+      System.out.println("member2" + member2);
+
+      // test streams
+      persistenceManager.currentTransaction().begin();
+
+      final int contentLength = 1000;
+      byte[] content = new byte[contentLength];
+      for(
+        int i = 0;
+        i < contentLength;
+        i++
+      ) {
+        content[i] = (byte)((short)(i % 256));
+      }
+
+      Document document = documentClass.createDocument();
+      document.setContent(
+        new ByteArrayInputStream(content)
+      );
+      document.setDescription(
+        "a random document"
+      );
+      document.setKeyword(
+        new HashSet(
+          Arrays.asList(new String[]{"random", "document", "junit"})
+        )
+      );
+      segment.addDocument("myDoc", document);
+      persistenceManager.currentTransaction().commit();
+
+      // verify returned document
+      document = segment.getDocument("myDoc");
+      persistenceManager.refresh(document);
+      System.out.println("document.description=" + document.getDescription());
+      System.out.println("document.keyword=" + document.getKeyword());
+
+      // test with deprecated method
+      System.out.println("verifying content (with InputStream)");
+      InputStream contentIs = document.getContent();
+      for(
+        int i = 0;
+        i < contentLength;
+        i += 10
+      ) {
+        assertEquals("content at position " + i, i % 256, contentIs.read());
+        contentIs.skip(9);
+      }
+      contentIs.close();
+      System.out.println("OK");
+
+      // test with OutputStream
+      System.out.println("verifying content (with OutputStream)");
+      ByteArrayOutputStream contentOs = new ByteArrayOutputStream();
+      long documentSize = document.getContent(contentOs, 0L);
+      assertEquals("document size", contentLength, documentSize);
+      contentOs.close();
+      contentIs = new ByteArrayInputStream(contentOs.toByteArray());
+      for(
+        int i = 0;
+        i < contentLength;
+        i += 10
+      ) {
+        assertEquals("content at position " + i, i % 256, contentIs.read());
+        contentIs.skip(9);
+      }
+      contentIs.close();
+      System.out.println("OK");
+
+      // test serialize
+      FileOutputStream ostream = new FileOutputStream(scratchFile);
+      ObjectOutputStream s = new ObjectOutputStream(ostream);
+      s.writeObject(segment.getPerson());
+      s.flush();
+      ostream.close();
+    }
+    catch(ServiceException e) {
+      e.printStackTrace();
+      throw e.log();
+    }
+    catch(BadParameterException e) {
+      e.printStackTrace();
+    }
+    catch(RuntimeServiceException e) {
+      AppLog.error("exception", e.getExceptionStack());
+      throw e;
+    }
+    catch(JmiServiceException e) {
+      AppLog.error("exception", e.getExceptionStack());
+      throw e;
+    }
+
+    // test deserialize
+    try {
+      FileInputStream istream = new FileInputStream(scratchFile);
+      ObjectInputStream p = new ObjectInputStream(istream);
+      Collection persons = (Collection)p.readObject();
+      for(
+        Iterator i = persons.iterator();
+        i.hasNext();
+      ) {
+        System.out.println("person[" + i + "]=" + i.next());
+      }
+      istream.close();
+    } catch(JmiServiceException e) {
+      System.out.println(e.getExceptionStack());
+      throw e;
+    }
+  }
+
+  /**
+   * Object id accessor
+   * 
+   * @param refObject
+   * 
+   * @return the object id as path
+   */
+  static Path refGetPath(
+      RefObject refObject
+  ){
+      Object objectId = JDOHelper.getObjectId(refObject);
+      return 
+          objectId instanceof Path ? (Path) objectId : 
+          objectId == null ? null :
+          new Path(objectId.toString());
+  }
+
+
+  //---------------------------------------------------------------------------
+  // Variables    
+  //---------------------------------------------------------------------------    
+
+  /**
+   * 
+   */
+  static private boolean deployed = false;
+
+  /**
+   * 
+   */
+  static private int N_PERSONS = 100;
+  static private int LARGE_N_PERSONS = 1000;
+
+  /**
+   * 
+   */
+  static final boolean TEST_WEBSERVICES_TRANSPORT = false;
+
+  /**
+   * 
+   */
+  static final boolean THROW_NOT_FOUND_IF_NULL = false;
+
+  /**
+   * See CR0003334 
+   */
+  static final boolean TEST_REF_MOF_ID_AFTER_COMMIT = true;
+
+  /**
+   * For CR10006272
+   */
+  private RequestCollection channel;
+
+  static private ObjectFactory_1_0 manager = null;
+  static private Path[] PROVIDER_DEPLOYMENT_UNITS = new Path[]{
+    new Path("xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:test/configuration/junit/domain/apps/deploymentUnit/testapp")
+  };
+  static private Path[] CONNECTOR_DEPLOYMENT_UNITS = new Path[]{
+    new Path("xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:test/configuration/junit/domain/apps/deploymentUnit/connectors")
+  };
+
+  private Model_1_0 model = null;
+
+  protected File scratchFile = null;
+
+  protected final static SQLWildcards sqlWildcards = new SQLWildcards('\\');
+
+}
+
+//--- End of File -----------------------------------------------------------

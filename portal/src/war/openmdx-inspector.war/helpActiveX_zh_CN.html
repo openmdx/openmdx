@@ -1,0 +1,91 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>Features based on ActiveX Control</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body onLoad="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(50, 50);">
+<table class="objectTitle">
+<tr>
+  <td>ActiveX</td>
+  <td align="right">
+	<script>
+	  <!--
+	  document.write('<a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+	  -->
+	</script>
+  </td>
+</tr>
+</table>
+<p>基于ActiveX 控件特性的使用需求<br />
+<ul>
+  <li>你的浏览器是 <strong>能够支持 ActiveX 控件的</strong> (例如， MS Windows的Internet Explorer ) 并且</li>
+  <li>安全设置是 <strong>权限允许引导/执行 ActiveX 控件</strong></p></li>
+</ul>
+<p>依赖于这个特性, 某些第三方软件包可能是需要的:</p>
+<table class="browserHints">
+  <tbody>
+  <tr>
+    <td><b>特性</b></td>
+	<td><b>需求</b></td>
+  <td><strong>额外的提示 </strong></td>
+  </tr>
+  <tr>
+    <td>MS Word XML 合并</td>
+    <td>MS Word 2000 或更新版本基于客户端的安装</td>
+  <td><a href="#trustedsites">被信任的站点</a>, <a href="#activexsettings">ActiveX 权限</a></td>
+  </tr>
+  <tr>
+    <td>MS Excel XML 合并</td>
+    <td>MS Excel 2000 或更新版本基于客户端的安装</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>XML 导出到 MS Outlook</td>
+    <td>MS Outlook 2000 或更新版本基于客户端的安装</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>XML Import from MS Outlook</td>
+    <td>client-based installation of MS Outlook 2000 or newer </td>
+  <td>&nbsp;</td>
+  </tr>
+  </tbody>
+</table>
+<a name="trustedsites"></a><p class="hh1">被信任的站点 (Internet Explorer)</p>
+<p>由于安全原因我们不建议你设置 ActiveX 控件 <strong>Internet 区域</strong>可用. 较好的做法是加入运行 openCRX 的站点到你的 <strong>被信任的站点区域</strong> 或者你的 <strong>局域网区域</strong> (仅仅是站点确实在你的局域网中) 然后 <a href="#activexsettings">使能 ActiveX 控件</a> 在相应的区域. 下面是加入 openCRX demo 服务器的例子： 加入(<strong><font color="#FF0000">demo.opencrx.org</font></strong>)到你的被信任站点区域然后加一个本地的 openCRX 服务器 (<strong><font color="#FF0000">10.1.1.20</font></strong>)到局域网区域. </p>
+<p><img src="images/ie_trusted_sites.png" width="384" height="342"> <img src="images/ie_local_intranet_zone.png" width="384" height="342"></p>
+<a name="activexsettings"></a>
+<p class="hh1">ActiveX 权限  (Internet Explorer)</p>
+<p>由于安全原因我们不建议你设置  ActiveX 控件在<strong>Internet 区域</strong>. 较好的做法是加入运行openCRX 的服务器到你的<strong><a href="#trustedsites">被信任的站点区域</a></strong> 或者<strong><a href="#trustedsites">局域网区域</a></strong> (仅仅是站点确实在你的局域网中) 然后使能 ActiveX 控件在相应的区域如下所示 :</p>
+<p class="hh1">在哪里设置你的 ActiveX 安全设定:</p>
+
+<table class="activeXHints">
+  <tr>
+    <td><b>平台</b></td>
+    <td colSpan=2><b>浏览器与版本</b><b></b></td>
+    <td><b>寻找 ActiveX 设置在 ...</b></td>
+    <td><strong>ActiveX 使能 (带有弹出警告)</strong></td>
+    <td><strong>ActiveX 使能 (没有弹出警告)</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img height=38 src="images/icon-windows.gif" width=38 /><br />
+	  <strong>Microsoft<br />
+	  Windows</strong>	</td>
+    <td align="center">
+	  <img height=38 src="images/icon-ie.gif" width=38><br />
+	  <FONT size=-1>Internet<br />Explorer</FONT>
+	</td>
+    <td>6.x</td>
+    <td>工具&gt; Internet 选项&gt; 安全 ...<br />
+      ... 自定义级别&gt; ActiveX 控件和插件</td>
+    <td><img src="images/ie_activex_settings_secure.png" width="352" height="666"></td>
+    <td><img src="images/ie_activex_settings_convenient.png" width="352" height="666"></td>
+  </tr>
+</table>
+</body>
+</html>

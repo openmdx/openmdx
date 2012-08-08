@@ -1,0 +1,126 @@
+-------------------------------------------------------------------
+     
+                        openMDX/Security
+
+-------------------------------------------------------------------
+
+1/ What this guide is for
+   ----------------------
+
+   This README describes how to setup openMDX/Security for Ant 
+   and Eclipse. If you do not intend to build and debug the project 
+   you can skip this README and proceed to the openMDX/Security
+   installation guide.
+
+
+2/ Download openMDX/Security
+   -----------------------
+
+   First you need to get the distribution of openMDX/Core
+   (e.g. openmdx-1.18.2-core.jre-1.5.zip) from 
+   http://www.openmdx.org/downloads.htm.
+
+   Second you need to get the distribution of openMDX/Security
+   (e.g. openmdx-1.18.2-security.jre-1.5.zip) from 
+   http://www.openmdx.org/downloads.htm.
+
+   IMPORTANT
+   It is strongly recommended to use JDK 1.5 or JDK 6 to build 
+   openMDX/Core.
+   
+
+3/ Setting up for Ant
+   ------------------
+   
+   Setting up openMDX/Core
+   -----------------------
+   Unzip the openMDX/Core distribution to your project directory. 
+   
+   The top level structure of the unzipped folder should look 
+   something like:
+   
+   The top level structure of the unzipped folder should look like:
+   
+   openmdx-1.18.2
+     ant
+     core
+       build.xml
+       LICENSE
+       README
+       RELEASE-NOTES
+       version.properties
+     java2
+       [jre-1.5]
+     [jre-1.5]
+       core
+         deployment-unit
+         lib
+         src
+     source-archive
+       core
+   
+
+   Setting up openMDX/Security
+   -------------------------------------
+   Unzip the openMDX/Security distribution to the same project directory
+   as openMDX/Core. This adds the directory 'security' to openmdx-1.18.2.
+   The top level structure of the unzipped folder should look like:
+   
+   openmdx-1.18.2
+     ant
+     core
+       build.xml
+       LICENSE
+       README
+       RELEASE-NOTES
+       version.properties
+     security
+       build.xml
+       LICENSE
+       README
+       RELEASE-NOTES
+       version.properties
+     java2
+       [jre-1.5]
+     [jre-1.5]
+       core
+         deployment-unit
+         lib
+         src
+       security
+         deployment-unit
+         lib
+         src
+     source-archive
+       core
+       security
+
+   Now open a shell and cd to the directory 'security'. Expand and 
+   install the openMDX/Security sources with the command:
+   
+   > ant install-src
+   
+   You are now ready to build openMDX/Security. You can use the 
+   following targets:
+   
+   > ant all
+   
+   Builds the distributions for jre-1.5 and/or jre-1.5.
+   
+   > ant -Dproject.platform.list="jre-1.5" distribution
+             
+
+4/ Setting up for Eclipse
+   ----------------------
+   Setting up an Eclipse project for openMDX/Security is straight-forward.
+   If you create a new Eclipse project consider the following:
+   
+   - Make sure that you first install and build openMDX/Security for 
+     Ant as described in section 3/.
+   - Create the Eclipse project in the directory 'security'. Either add
+     an Eclipse project dependency to Eclipse project in 'core' or add the
+     required openMDX libraries to the openMDX 1 ~ Security classpath.
+
+
+---
+End of README

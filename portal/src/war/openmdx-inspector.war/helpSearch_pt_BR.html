@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>openCRX - Pesquisa Avançada</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/default.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
+<table class="objectTitle">
+  <tr>
+    <td>Pesquisa Avan&ccedil;ada</td>
+	<td>
+		<script>
+		  <!--
+		  document.write('<td align="right"><a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+		  -->
+		</script>
+	</td>
+  </tr>
+</table>
+
+ <div class="hh2">Pesquisa Avan&ccedil;ada de maneira f&aacute;cil</div>
+ <div class="normal">Voc&ecirc; pdoe incrementar a acuracidade de suas pesquisas adicionando operadores que refinam suas palavras-chaves e n&uacute;meros. Todas as op&ccedil;&otilde;es listadas nesta p&aacute;gina pode ser entrado diretamente dentro da caixa de pesquisa.</div>
+ <div class="hh2">As b&aacute;sicas</div> 
+ <div class="normal">Voc&ecirc; pode entrar com uma palavra/n&uacute;mero ou uma express&atilde;o, e.g. <strong>'Miller'</strong>, <strong>'> 500'</strong> ou<strong>'>=
+   Smith'</strong>, e ent&atilde;o</div>
+ <table cellpadding="0" cellspacing="10">
+   <tr valign="top">
+     <td>&#8226; clique no<strong> topo da coluna</strong> para pesquisar objetos com valores compat&iacute;veis a este atributo em particular (<strong>todos os objetos</strong> s&atilde;o pesquisados e lembrando que os filtros configurados anteriormente ser&atilde;o perdidos)</td>
+	 <td bgcolor="#CCCCCC"><strong>Nova Pesquisa</strong><br />
+	 <img src="images/helpSearchTut0.gif" width="129" height="51" /></td>
+   </tr>
+   <tr valign="top">
+     <td>&#8226; clique no <strong>bot&atilde;o</strong> <strong>[+] </strong> para pesquisar objetos com valores pr&oacute;ximos a um atributo em particular (<strong>somente objetos contidos numa pesquisa anterior ou filtro</strong> s&atilde;o pesquisados, i.e. 'adicionando' esta pesquisa, ir&aacute; retornar um conjunto/resultado mais restrito)</td>
+	 <td bgcolor="#CCCCCC"><strong>Adicionar Condi&ccedil;&atilde;o</strong><br />
+	 <img src="images/helpSearchTut1.gif" width="129" height="51" /></td>
+   </tr>
+</table>
+ <div class="hh2">Operadores</div>
+ <div class="normal">Os seguintes operadores s&atilde;o suportados (entretanto, nem todos os banco de dados suportam todos os operadores):</div>
+ <ul>
+ <li>parecido com (<strong>*</strong>)</li>
+ <li>igual (<strong>%</strong>), operador default pra pesquisa de strings</li>
+ <li>igual (<strong>=</strong>), operador default para boleano, n&uacute;mero, e pesquisa de c&oacute;digos</li>
+ <li>diferente (<strong><></strong>, <strong>!</strong>=)</li>
+ <li>menor que (<strong><</strong>)</li>
+ <li>menor que ou igual (<strong><=</strong>)</li>
+ <li>maior que (<strong>></strong>)</li>
+ <li>maior que ou igual<strong>(>=</strong>)</li>
+ </ul>
+ <div class="hh2">Pesquisas com &quot;AND&quot;</div>
+ <div class="normal">Para recuperar objetos que atendam uma e outra ao mesmo tempo,
+   use um E comercial &quot;<strong>&amp;</strong>&quot; entre condi&ccedil;&otilde;es. Por exemplo, para pesquisar objetos com valores entre 500 e 1000 (i.e. maior que 500 e menor que 1000), simplesmente escreva: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
+ <div class="hh2">Pesquisas com &quot;OR&quot;</div>
+<div class="normal">Para recuperar objetos que inclui a palavra A ou palavra B, use um ponto-e-v&iacute;rgula &quot;<strong>;</strong>&quot; entre os termos. Por exemplo,
+     para pesquisar por contatos com nomes 'Smith' OU 'Miller', simplesmente escreva: <strong>'= Smith; Miller'</strong></div>
+ <div class="hh2">Pesquisas combinadas</div>
+ <div class="normal">Voc&ecirc; pode combinar pesquisas virtualmente sem limites. Por exemplo, para pesquisar objetos com valores menor que  '1000', mas diferente de '500' e diferente de '600',
+   simplesmente escreva: <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
+ <div class="normal">As regras de parsing para pesquisas combinadas s&atilde;o as que seguem:</div>
+ <ul>
+   <li>express&atilde;oDePesquisa ::= valorDoFiltro { & valorDoFiltro }<br />
+   (--> divis&atilde;o de strings com&nbsp;<strong>&</strong> como separador)</li>
+   <li>valorDoFiltro ::= [operador] valor { ; valor }<br />
+   (--> divis&atilde;o de strings com&nbsp;<strong>;</strong> como separador)</li>
+ </ul>
+ <div class="hh2">Pesquisas por 'curingas'</div>
+ <div class="normal">
+   <p>Alguns bancos de dados permitem voc&ecirc; iniciar pesquisas usando 'curingas' . Se suportado, voc&ecirc; pode por exemplo procurar por todos os contatos com nomes que contenham 'ller' (e.g. Miller, Mueller, etc.) escrevendo: <strong>'%ller'<br />
+   ATEN&Ccedil;&Atilde;O:</strong> pesquisas com 'curingas' pode consumir muito tempo do banco de dados se ele n&atilde;o estiver bem ajustado (pesquisa completa da tabela)! </p>
+ </div>
+</body>
+</html>

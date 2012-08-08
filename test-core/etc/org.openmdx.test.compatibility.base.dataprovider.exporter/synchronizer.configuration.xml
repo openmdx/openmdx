@@ -1,0 +1,367 @@
+﻿<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- edited with XML Spy v4.4 U (http://www.xmlspy.com) by Burger (OMEX AG) -->
+<ch.omex.generic.Authority name="org:openmdx:deployment1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="xri:+resource/org/openmdx/deployment1/xmi/deployment1_edit.xsd">
+	<_object/>
+	<_content>
+		<provider>
+			<ch.omex.generic.Provider name="org:openmdx">
+				<_object/>
+				<_content>
+					<segment>
+						<ch.omex.deployment1.Segment name="org:openmdx:spice_test">
+							<_object/>
+							<_content>
+								<configuration>
+									<ch.omex.deployment1.Configuration name="runtime1">
+										<_object/>
+										<_content>
+											<dataproviderType>
+												<ch.omex.deployment1.DataproviderType id="provider">
+													<_object/>
+													<_content>
+														<property>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="KERNEL:INTERCEPTION">
+																<_object>
+																	<value>
+																		<_item>ch.omex.model.generic.plugin.interception.Standard_1</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="KERNEL:TYPE">
+																<_object>
+																	<value>
+																		<_item>ch.omex.model.generic.plugin.type.Strict_1</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="KERNEL:APPLICATION">
+																<_object>
+																	<value>
+																		<_item>ch.omex.test.generic.plugin.model.TestRoleApplication_1</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="KERNEL:MODEL">
+																<_object>
+																	<value>
+																		<_item>ch.omex.model.generic.plugin.model.RoleObject_1</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="KERNEL:PERSISTENCE">
+																<_object>
+																	<value>
+																		<_item>ch.omex.model.generic.plugin.persistence.jdbc.Database_1</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="KERNEL:modelPackage">
+																<_object>
+																	<value>
+																		<_item>org:w3c</_item>
+																		<_item>org:openmdx:base</_item>
+																	    <_item>org:openmdx:datastore1</_item>
+																		<_item>org:openmdx:test:compatibility:state1</_item>
+																		<_item>org:openmdx:compatibility:view1</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															
+															<ch.omex.deployment1.DataproviderTypeIntegerProperty qualifiedName="PERSISTENCE:batchSize">
+																<_object>
+																	<value>
+																		<_item>100</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeIntegerProperty>
+														</property>
+													</_content>
+												</ch.omex.deployment1.DataproviderType>
+												<ch.omex.deployment1.DataproviderType id="explorer">
+													<_object/>
+													<_content>
+														<property>
+															<ch.omex.deployment1.DataproviderTypeIntegerProperty qualifiedName="PERSISTENCE:batchSize">
+																<_object>
+																	<value>
+																		<_item>100</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeIntegerProperty>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="KERNEL:namespaceId">
+																<_object>
+																	<value>
+																		<_item>explorer</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="KERNEL:INTERCEPTION">
+																<_object>
+																	<value>
+																		<_item>ch.omex.spice.dataprovider.generic.DelegatingLayer_0</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="KERNEL:TYPE">
+																<_object>
+																	<value>
+																		<_item>ch.omex.spice.dataprovider.generic.DelegatingLayer_0</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="KERNEL:APPLICATION">
+																<_object>
+																	<value>
+																		<_item>ch.omex.model.runtime1.plugin.application.Explorer_1</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="KERNEL:MODEL">
+																<_object>
+																	<value>
+																		<_item>ch.omex.spice.dataprovider.generic.DelegatingLayer_0</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="KERNEL:PERSISTENCE">
+																<_object>
+																	<value>
+																		<_item>ch.omex.model.generic.plugin.persistence.delegation.Delegation_1</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															<!-- set the providers the explorer knows about either through the jndiContext or serviceLocatorContext -->
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="APPLICATION:serviceLocatorContext">
+																<_object>
+																	<value>
+																		<_item>org:openmdx:JUnit:JoiningTransaction</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+															<ch.omex.deployment1.DataproviderTypeStringProperty qualifiedName="APPLICATION:runtimeSegment">
+																<_object>
+																	<value>
+																		<_item>xri:@openmdx:org.openmdx.runtime1/provider/org:openmdx/segment/org:openmdx:model_test</_item>
+																	</value>
+																</_object>
+																<_content/>
+															</ch.omex.deployment1.DataproviderTypeStringProperty>
+														</property>
+													</_content>
+												</ch.omex.deployment1.DataproviderType>
+											</dataproviderType>
+											<domain>
+												<ch.omex.deployment1.Domain name="JUnit">
+													<_object/>
+													<_content>
+														<deploymentUnit>
+															<ch.omex.deployment1.DeploymentUnit name="TestSynchronizer_1">
+																<_object/>
+																<_content>
+																	<module>
+																		<ch.omex.deployment1.Module name="provider">
+																			<_object/>
+																			<_content>
+																				<component>
+																					<ch.omex.deployment1.Dataprovider name="A_Provider_1JoiningTransaction">
+																						<_object>
+																							<deploymentOrder>1001</deploymentOrder>
+																							<registrationId>org:openmdx:JUnit:JoiningTransaction:A</registrationId>
+																							<initialCapacity>1</initialCapacity>
+																							<dataproviderType>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:spice_test/configuration/runtime1/dataproviderType/provider</dataproviderType>
+																							<transactionPolicy/>
+																						</_object>
+																						<_content>
+																							<property>
+																								<ch.omex.deployment1.DataproviderStringProperty qualifiedName="KERNEL:exposedPath">
+																									<_object>
+																										<value>
+																											<_item>xri:@openmdx:org.openmdx.test.state1/provider/TestSource/segment</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</ch.omex.deployment1.DataproviderStringProperty>
+																								<ch.omex.deployment1.DataproviderStringProperty qualifiedName="KERNEL:namespaceId">
+																									<_object>
+																										<value>
+																											<_item>testRole1</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</ch.omex.deployment1.DataproviderStringProperty>
+																							</property>
+																							<resource>
+																								<ch.omex.deployment1.Connection qualifiedName="datasource:0">
+																									<_object>
+																										<registrationId>jdbc:mssql_dataproviders</registrationId>
+																									</_object>
+																									<_content/>
+																								</ch.omex.deployment1.Connection>
+																							</resource>
+																						</_content>
+																					</ch.omex.deployment1.Dataprovider>
+																					<!--********************-->
+																					<ch.omex.deployment1.Dataprovider name="B_Provider_1JoiningTransaction">
+																						<_object>
+																							<deploymentOrder>1002</deploymentOrder>
+																							<registrationId>org:openmdx:JUnit:JoiningTransaction:B</registrationId>
+																							<dataproviderType>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:spice_test/configuration/runtime1/dataproviderType/provider</dataproviderType>
+																							<transactionPolicy/>
+																							<initialCapacity>1</initialCapacity>
+																						</_object>
+																						<_content>
+																							<property>
+																								<ch.omex.deployment1.DataproviderStringProperty qualifiedName="KERNEL:exposedPath">
+																									<_object>
+																										<value>
+																											<_item>xri:@openmdx:org.openmdx.test.state1/provider/TestTarget/segment</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</ch.omex.deployment1.DataproviderStringProperty>
+																								<ch.omex.deployment1.DataproviderStringProperty qualifiedName="KERNEL:namespaceId">
+																									<_object>
+																										<value>
+																											<_item>testRole2</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</ch.omex.deployment1.DataproviderStringProperty>
+																								<ch.omex.deployment1.DataproviderBooleanProperty qualifiedName="INTERCEPTION:propagateSet">
+																									<_object>
+																										<value>
+																											<_item>true</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</ch.omex.deployment1.DataproviderBooleanProperty>
+
+																							</property>
+																							<resource>
+																								<ch.omex.deployment1.Connection qualifiedName="datasource:0">
+																									<_object>
+																										<registrationId>jdbc:mssql_dataproviders</registrationId>
+																									</_object>
+																									<_content/>
+																								</ch.omex.deployment1.Connection>
+																							</resource>
+																						</_content>
+																					</ch.omex.deployment1.Dataprovider>
+																				</component>
+																			</_content>
+																		</ch.omex.deployment1.Module>
+																		<!--********************-->
+																		<!--********************-->
+																		<ch.omex.deployment1.Module name="explorer">
+																			<_object>
+																				<description>The JUnit test can use the default access to connect to a provider with the registration id org:openmdx:dataprovider-1:NoOrNewTransaction:access.</description>
+																			</_object>
+																			<_content>
+																				<component>
+																					<ch.omex.deployment1.Dataprovider name="explorer_Provider_1NoOrNewTransaction">
+																						<_object>
+																							<deploymentOrder>2000</deploymentOrder>
+																							<registrationId>org:openmdx:JUnit:NoOrNewTransaction:explorer</registrationId>
+																							<dataproviderType>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:spice_test/configuration/runtime1/dataproviderType/explorer</dataproviderType>
+																							<transactionPolicy/>
+																							<initialCapacity>1</initialCapacity>
+																						</_object>
+																						<_content/>
+																					</ch.omex.deployment1.Dataprovider>
+																				</component>
+																				<resourceAdapter>
+																					<ch.omex.deployment1.DataproviderResource name="explorer_Provider_1NoOrNewTransaction">
+																						<_object>
+																							<registrationId>org:openmdx:dataprovider-1:NoOrNewTransaction:access</registrationId>
+																						</_object>
+																						<_content/>
+																					</ch.omex.deployment1.DataproviderResource>
+																				</resourceAdapter>
+																			</_content>
+																		</ch.omex.deployment1.Module>
+																	</module>
+																</_content>
+															</ch.omex.deployment1.DeploymentUnit>
+															<ch.omex.deployment1.DeploymentUnit name="DataBase">
+																<_object/>
+																<_content>
+																	<module>
+																		<ch.omex.deployment1.Module name="provider">
+																			<_object/>
+																			<_content>
+																				<resourceAdapter>
+																					<ch.omex.deployment1.DatabaseConnector name="BEA_SqlServerConnector">
+																						<_object>
+																							<driver>com.microsoft.jdbc.sqlserver.SQLServerDriver</driver>
+																							<registrationId>jdbc:mssql_dataproviders</registrationId>
+																							<connectionFactoryImplementation>ch.omex.spice.application.generic.DbConnectionManagerSimple_1</connectionFactoryImplementation>
+																							<uri>
+																								<_item>jdbc:microsoft:sqlserver://localhost:1433;databasename=dataproviders;selectmethod=cursor</_item>
+																							</uri>
+																						</_object>
+																						<!-- _object>
+																							<driver>oracle.jdbc.driver.OracleDriver</driver>
+																							<registrationId>jdbc:mssql_dataproviders</registrationId>
+																							<connectionFactoryImplementation>ch.omex.spice.application.generic.DbConnectionManagerSimple_1</connectionFactoryImplementation>
+																							<uri>
+																								<_item>@localhost:1521:efw2001</_item>
+																								<!- - _item>jdbc:oracle:thin: @localhost:1521:code</_item - - >
+																							</uri>
+																						</_object -->
+																						<_content>
+																							<property>
+																								<ch.omex.deployment1.ResourceAdapterStringProperty qualifiedName="BasicPassword:UserName">
+																									<_object>
+																										<value>
+																											<_item>system</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</ch.omex.deployment1.ResourceAdapterStringProperty>
+																								<ch.omex.deployment1.ResourceAdapterStringProperty qualifiedName="BasicPassword:Password">
+																									<_object>
+																										<value>
+																											<_item>manager</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</ch.omex.deployment1.ResourceAdapterStringProperty>
+																							</property>
+																						</_content>
+																					</ch.omex.deployment1.DatabaseConnector>
+																				</resourceAdapter>
+																			</_content>
+																		</ch.omex.deployment1.Module>
+																	</module>
+																</_content>
+															</ch.omex.deployment1.DeploymentUnit>
+														</deploymentUnit>
+													</_content>
+												</ch.omex.deployment1.Domain>
+											</domain>
+										</_content>
+									</ch.omex.deployment1.Configuration>
+								</configuration>
+							</_content>
+						</ch.omex.deployment1.Segment>
+					</segment>
+				</_content>
+			</ch.omex.generic.Provider>
+		</provider>
+	</_content>
+</ch.omex.generic.Authority>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSPY v5 rel. 3 U (http://www.xmlspy.com) by Werner Froidevaux (private) -->
+<org.openmdx.base.Authority name="org:openmdx:test:app1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="xri:+resource/org/openmdx/test/app1/xmi/app1_edit.xsd">
+	<_object/>
+	<_content>
+		<provider>
+			<org.openmdx.base.Provider qualifiedName="JmiNone" _operation="null">
+				<_object/>
+				<_content>
+					<segment>
+						<org.openmdx.test.app1.Segment qualifiedName="Standard">
+							<_object/>
+							<_content/>
+						</org.openmdx.test.app1.Segment>
+						<org.openmdx.test.app1.Segment qualifiedName="Standard" _operation="null">
+							<_object/>
+							<_content>
+								<person>
+									<!-- create request -->
+									<org.openmdx.test.app1.Person id="10000" _operation="set">
+										<_object>
+											<birthdate>2001-01-01</birthdate>
+											<birthdateAsDateTime>2001-01-01T13:00:00.000Z</birthdateAsDateTime>
+											<foreignId>10000</foreignId>
+											<lastName>Muster</lastName>
+											<salutation>Mister</salutation>
+											<sex>0</sex>
+										</_object>
+										<_content/>
+									</org.openmdx.test.app1.Person>
+									<!-- set request -->
+									<org.openmdx.test.app1.Person id="10000" _operation="update">
+										<_object>
+											<birthdate>2001-01-01</birthdate>
+											<birthdateAsDateTime>2001-01-01T13:00:00.000Z</birthdateAsDateTime>
+											<foreignId>10000</foreignId>
+											<lastName>Muster</lastName>
+											<salutation>Mister</salutation>
+											<sex>0</sex>
+										</_object>
+										<_content/>
+									</org.openmdx.test.app1.Person>
+								</person>
+							</_content>
+						</org.openmdx.test.app1.Segment>
+					</segment>
+				</_content>
+			</org.openmdx.base.Provider>
+			<org.openmdx.base.Provider qualifiedName="JmiJdbc" _operation="null">
+				<_object/>
+				<_content>
+					<segment>
+						<org.openmdx.test.app1.Segment qualifiedName="Standard">
+							<_object/>
+							<_content/>
+						</org.openmdx.test.app1.Segment>
+						<org.openmdx.test.app1.Segment qualifiedName="Standard" _operation="null">
+							<_object/>
+							<_content>
+								<person>
+									<!-- create request -->
+									<org.openmdx.test.app1.Person id="10000" _operation="set">
+										<_object>
+											<birthdate>2001-01-01</birthdate>
+											<birthdateAsDateTime>2001-01-01T13:00:00.000Z</birthdateAsDateTime>
+											<foreignId>10000</foreignId>
+											<lastName>Muster</lastName>
+											<salutation>Mister</salutation>
+											<sex>0</sex>
+										</_object>
+										<_content/>
+									</org.openmdx.test.app1.Person>
+									<!-- set request -->
+									<org.openmdx.test.app1.Person id="10000" _operation="update">
+										<_object>
+											<birthdate>2001-01-01</birthdate>
+											<birthdateAsDateTime>2001-01-01T13:00:00.000Z</birthdateAsDateTime>
+											<foreignId>10000</foreignId>
+											<lastName>Muster</lastName>
+											<salutation>Mister</salutation>
+											<sex>0</sex>
+										</_object>
+										<_content/>
+									</org.openmdx.test.app1.Person>
+								</person>
+							</_content>
+						</org.openmdx.test.app1.Segment>
+					</segment>
+				</_content>
+			</org.openmdx.base.Provider>
+			<org.openmdx.base.Provider qualifiedName="Generic" _operation="null">
+				<_object/>
+				<_content>
+					<segment>
+						<org.openmdx.test.app1.Segment qualifiedName="Standard">
+							<_object/>
+							<_content/>
+						</org.openmdx.test.app1.Segment>
+						<org.openmdx.test.app1.Segment qualifiedName="Standard" _operation="null">
+							<_object/>
+							<_content>
+								<person>
+									<org.openmdx.test.app1.Person id="10000" _operation="set">
+										<_object>
+											<birthdate>2001-01-01</birthdate>
+											<birthdateAsDateTime>2001-01-01T13:00:00.000Z</birthdateAsDateTime>
+											<foreignId>10000</foreignId>
+											<lastName>Muster</lastName>
+											<salutation>Mister</salutation>
+											<sex>0</sex>
+										</_object>
+										<_content/>
+									</org.openmdx.test.app1.Person>
+								</person>
+							</_content>
+						</org.openmdx.test.app1.Segment>
+					</segment>
+				</_content>
+			</org.openmdx.base.Provider>
+		</provider>
+	</_content>
+</org.openmdx.base.Authority>

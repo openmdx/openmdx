@@ -1,0 +1,1382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/*******************************************************************
+
+Copyright (c) 2004 Open Mobile Alliance, Ltd.  All Rights Reserved.
+
+This software is made available under the usage and distribution terms 
+covered by the Common Public License 1.0 and by using this software you
+are bound by the terms and conditions of the same.
+
+EXCEPT AS EXPRESSLY SET FORTH IN THE COMMON PUBLIC LICENSE,
+THIS PROGRAM IS PROVIDED ON AN "AS IS" BASIS, 
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+EITHER EXPRESS OR IMPLIED INCLUDING, WITHOUT LIMITATION, 
+ANY WARRANTIES OR CONDITIONS OF TITLE, NON-INFRINGEMENT, 
+MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+   
+Each recipient is solely responsible for determining the 
+appropriateness of using and distributing this program and assumes 
+all risks associated with its exercise of rights under the Common 
+Public License, including but not limited to the risks and 
+costs of program errors, compliance with applicable laws, 
+damage to or loss of data, programs or equipment, and 
+unavailability or interruption of operations.
+
+********************************************************************/
+ -->
+<!--SCTSClient can handle the packages recvd across multiple messages -->
+<TestCase Id="DS-V1.2-server-con-0502">
+    <!--To check if the Test Object sends a valid replace on a Data Item added by it -->
+    <!--Set the MaxMssg size and MaxObject Size to zero  -->
+    <SCTSSession>
+        <SCTSSet attrib="SCTSMaxMsgSize" param1="5000"/>
+        <SCTSSet attrib="TOMaxMsgSize" param1="5000"/>
+        <SCTSSet attrib="executionResult" param1="Success"/>
+        <SCTSSet attrib="MaxObjSize" param1="0"/>
+        <SCTSSet attrib="sessionID" param1="1"/>
+        <SCTSSet attrib="msgID" param1="0"/>
+        <SCTSOP OP="SCTSDatabase.generateNextAnchor()" return="localNextAnchor"/>
+        <SCTSSet attrib="DBIndex" param1="1"/>
+        <SCTSOP OP="SCTSContext.getNumOfLocalDatabases()" return="NumOfLocalDBs"/>
+        <SCTSIf param1="SCTSObject.NumOfLocalDBs" param2="0" OP="GT">
+            <SCTSLoop>
+                <!--Get the current DB Node -->
+                <SCTSOP OP="SCTSContext.getLocalDBLocURI_onIndex()" param1="SCTSObject.DBIndex" return="CurrDBLocURI"/>
+                <!--Fetch the Mime Type for the above source -->
+                <SCTSOP OP="SCTSContext.getLocalMimeType()" param1="SCTSObject.CurrDBLocURI" return="locMime"/>
+                <!--create the Database -->
+                <SCTSOP OP="SCTSDatabase.createDB()" param1="SCTSObject.CurrDBLocURI"
+                    param2="SCTSObject.locMime" return="CreateStatus"/>
+                <SCTSIf param1="SCTSObject.DBIndex" param2="SCTSObject.NumOfLocalDBs" OP="EQ">
+                    <!--If v added for all the dbsthen break from the loop -->
+                    <SCTSBreak/>
+                </SCTSIf>
+                <SCTSExpr param1="SCTSObject.DBIndex" param2="1" return="DBIndex" OP="PLUS"/>
+            </SCTSLoop>
+        </SCTSIf>
+        <!--In this send v check.....V ll nt send the credentails-->
+        <SCTSLoop>
+            <SCTSSend>
+                <SyncML xmlns="SYNCML:SYNCML1.2">
+                    <SyncHdr>
+                        <VerDTD>1.2</VerDTD>
+                        <VerProto>SyncML/1.2</VerProto>
+                        <SessionID>
+                            <SCTSContent>SCTSObject.sessionID</SCTSContent>
+                        </SessionID>
+                        <MsgID>
+                            <SCTSExpr param1="msgID" param2="1" return="msgID" OP="PLUS"/>
+                            <SCTSContent>SCTSObject.msgID</SCTSContent>
+                        </MsgID>
+                        <SCTSOP OP="SCTSContext.getRemoteDeviceAddress()" return="targetID"/>
+                        <Target>
+                            <LocURI>
+                                <SCTSContent>SCTSObject.targetID</SCTSContent>
+                            </LocURI>
+                        </Target>
+                        <Source>
+                            <LocURI>
+                                <SCTSOP OP="SCTSContext.getLocalDeviceAddress()" return="sourceID"/>
+                                <SCTSContent> SCTSObject.sourceID</SCTSContent>
+                            </LocURI>
+                            <LocName>
+                                <SCTSOP OP="SCTSContext.getRemoteDeviceName()" return="sourceName"/>
+                                <SCTSContent>SCTSObject.sourceName</SCTSContent>
+                            </LocName>
+                        </Source>
+                        <SCTSExecutePath xpath="/SyncML/SyncBody/Status[CmdID='1']/Chal"
+                            return="Chal" target="CurrRecv"/>
+                        <!--If there is chal in the curr recv -->
+                        <SCTSIf param1="SCTSObject.Chal" param2="SCTSNULL" OP="NE">
+                            <!--Send the credentails -->
+                            <Cred>
+                                <Meta>
+                                    <SCTSExecutePath
+                                        xpath="/SyncML/SyncBody/Status[CmdID='1']/Chal//Format"
+                                        return="authFormat" target="CurrRecv"/>
+                                    <SCTSExecutePath
+                                        xpath="/SyncML/SyncBody/Status[CmdID='1']/Chal//Type"
+                                        return="authType" target="CurrRecv"/>
+                                    <SCTSExecutePath
+                                        xpath="/SyncML/SyncBody/Status[CmdID='1']/Chal//NextNonce"
+                                        return="NextNonce" target="CurrRecv"/>
+                                    <SCTSIf param1="SCTSObject.authFormat" param2="SCTSNULL" OP="EQ">
+                                        <SCTSSet attrib="authFormat" param1="b64"/>
+                                    </SCTSIf>
+                                    <Format xmlns="syncml:metinf">
+                                        <SCTSContent>SCTSObject.authFormat</SCTSContent>
+                                    </Format>
+                                    <Type xmlns="syncml:metinf">
+                                        <SCTSContent>SCTSObject.authType</SCTSContent>
+                                    </Type>
+                                </Meta>
+                                <SCTSOP OP="SCTSContext.getRemoteCredentials()"
+                                    param1="SCTSObject.authType" param2="SCTSObject.NextNonce" return="SCTSCredentials"/>
+                                <Data>
+                                    <SCTSContent>SCTSObject.SCTSCredentials</SCTSContent>
+                                </Data>
+                            </Cred>
+                        </SCTSIf>
+                        <!--Send the Max Mxg size the client can handle -->
+                        <SCTSOP OP="SCTSContext.getLocalMaxMsgSize()" return="MaxMsgSize"/>
+                        <Meta>
+                            <MaxMsgSize xmlns="syncml:metinf">
+                                <SCTSContent> SCTSObject.MaxMsgSize </SCTSContent>
+                            </MaxMsgSize>
+                        </Meta>
+                    </SyncHdr>
+                    <SyncBody>
+                        <SCTSSet attrib="cmdIDNo" param1="1"/>
+                        <SCTSIf param1="SCTSObject.CurrRecv" param2="SCTSNULL" OP="NE">
+                            <!--If this is not a first send ..then build the status for curr Recv -->
+                            <Status>
+                                <CmdID>
+                                    <SCTSContent> SCTSObject.cmdIDNo </SCTSContent>
+                                </CmdID>
+                                <SCTSExecutePath xpath="/SyncML/SyncHdr/MsgID" return="TOMsgID" target="CurrRecv"/>
+                                <MsgRef>
+                                    <SCTSContent>SCTSObject.TOMsgID</SCTSContent>
+                                </MsgRef>
+                                <CmdRef>0</CmdRef>
+                                <Cmd>SyncHdr</Cmd>
+                                <SCTSExecutePath xpath="/SyncML/SyncHdr/Target/LocURI"
+                                    return="targetID" target="CurrRecv"/>
+                                <TargetRef>
+                                    <SCTSContent>SCTSObject.targetID</SCTSContent>
+                                </TargetRef>
+                                <SCTSExecutePath xpath="/SyncML/SyncHdr/Source/LocURI"
+                                    return="sourceID" target="CurrRecv"/>
+                                <SourceRef>
+                                    <SCTSContent> SCTSObject.sourceID </SCTSContent>
+                                </SourceRef>
+                                <SCTSExecutePath xpath="/SyncML/SyncHdr/Cred" return="Cred" target="CurrRecv"/>
+                                <SCTSIf param1="SCTSObject.Cred" param2="SCTSNULL" OP="NE">
+                                    <Data>
+                                        <SCTSContent> 212 </SCTSContent>
+                                    </Data>
+                                </SCTSIf>
+                                <SCTSIf param1="SCTSObject.Cred" param2="SCTSNULL" OP="EQ">
+                                    <Data>
+                                        <SCTSContent> 200 </SCTSContent>
+                                    </Data>
+                                </SCTSIf>
+                            </Status>
+                        </SCTSIf>
+                        <!--Build the alerts for each Database,the Client wants to Sync -->
+                        <SCTSSet attrib="DBIndex" param1="0"/>
+                        <SCTSOP OP="SCTSContext.getNumOfLocalDatabases()" return="NumOfLocalDBs"/>
+                        <SCTSIf param1="SCTSObject.NumOfLocalDBs" param2="0" OP="GT">
+                            <SCTSLoop>
+                                <SCTSExpr param1="SCTSObject.DBIndex" param2="1" return="DBIndex" OP="PLUS"/>
+                                <!--Get the current DB Node -->
+                                <SCTSOP OP="SCTSContext.getLocalDBLocURI_onIndex()"
+                                    param1="SCTSObject.DBIndex" return="CurrDBLocURI"/>
+                                <!--Fetch the matching target for the above source -->
+                                <SCTSOP OP="SCTSContext.getLocalMimeType()"
+                                    param1="SCTSObject.CurrDBLocURI" return="locMime"/>
+                                <SCTSOP OP="SCTSContext.getRemoteDBLocURI_onMime()"
+                                    param1="SCTSObject.locMime" return="targetDBLocURI"/>
+                                <Alert>
+                                    <SCTSExpr param1="cmdIDNo" param2="1" return="cmdIDNo" OP="PLUS"/>
+                                    <CmdID>
+                                        <SCTSContent>SCTSObject.cmdIDNo</SCTSContent>
+                                    </CmdID>
+                                    <!--what ever may b force the slow sync -->
+                                    <Data> 201</Data>
+                                    <Item>
+                                        <Source>
+                                            <LocURI>
+                                                <SCTSContent>SCTSObject.CurrDBLocURI</SCTSContent>
+                                            </LocURI>
+                                        </Source>
+                                        <Target>
+                                            <LocURI>
+                                                <SCTSContent> SCTSObject.targetDBLocURI</SCTSContent>
+                                            </LocURI>
+                                        </Target>
+                                        <Meta>
+                                            <Anchor xmlns="syncml:metinf">
+                                                <Next>
+                                                  <SCTSContent>SCTSObject.localNextAnchor</SCTSContent>
+                                                </Next>
+                                            </Anchor>
+                                        </Meta>
+                                    </Item>
+                                </Alert>
+                                <SCTSIf param1="SCTSObject.DBIndex"
+                                    param2="SCTSObject.NumOfLocalDBs" OP="EQ">
+                                    <!--If v built sync for all the dbsthen break from the loop -->
+                                    <SCTSBreak/>
+                                </SCTSIf>
+                            </SCTSLoop>
+                        </SCTSIf>
+                        <Final/>
+                    </SyncBody>
+                </SyncML>
+            </SCTSSend>
+            <!--Get the response  -->
+            <SCTSRecv/>
+            <SCTSExecutePath xpath="/SyncML/SyncHdr/RespURI" return="responseURI" target="CurrRecv"/>
+            <SCTSIf param1="SCTSObject.responseURI" param2="SCTSNULL" OP="NE">
+                <SCTSOP OP="SCTSContext.setResponseURI()" param1="SCTSObject.responseURI" return="retVal"/>
+            </SCTSIf>
+            <!--If the status for syncHdr v sent is 212(Authentication accepted) -->
+            <SCTSExecutePath xpath="/SyncML/SyncBody/Status[CmdRef='0']/Data" return="AuthStatus" target="CurrRecv"/>
+            <SCTSIf param1="SCTSObject.AuthStatus" param2="212" OP="EQ">
+                <SCTSBreak/>
+            </SCTSIf>
+            <SCTSIf param1="SCTSObject.AuthStatus" param2="200" OP="EQ">
+                <!-- If the auth status is 200 then v need to send credentials ,if the auth type is md5, then use the recvd nonce for next message credentails -->
+                <SCTSIf param1="SCTSObject.authType" param2="syncml:auth-md5" OP="EQ">
+                    <SCTSExecutePath xpath="/SyncML/SyncBody/Status[CmdRef='0']//NextNonce"
+                        return="NextNonce" target="CurrRecv"/>
+                </SCTSIf>
+                <SCTSBreak/>
+            </SCTSIf>
+            <!--Check whether v sent credentials allready -->
+            <SCTSExecutePath xpath="//Cred" return="Cred" target="CurrSend"/>
+            <SCTSIf param1="SCTSObject.Cred" param2="SCTSNULL" OP="NE">
+                <!--status for synchdr is not 212/200 and if v have sent credentials , then it is authentication fail-->
+                <SCTSSet attrib="executionResult" param1="AuthenticationFailed"/>
+                <SCTSSet attrib="FailureReason" param1="AuthenticationFailed"/>
+                <!--So abort the current session -->
+                <SCTSExit/>
+            </SCTSIf>
+        </SCTSLoop>
+        <!--Client Sync send -->
+        <!--In the below send v ll send the modifications from client and v ll assume that since server can handle large messges and large objects..
+        all modifiacations ll fit in one package, But since server side control is not with us..server may send modifications across multiple messages
+        or data by chunking , V shud in a postion to handle that-->
+        <SCTSSend>
+            <!--Say v ll assume that client sends all modifications in one messgae  -->
+            <SyncML xmlns="SYNCML:SYNCML1.2">
+                <SyncHdr>
+                    <VerDTD>1.2</VerDTD>
+                    <VerProto>SyncML/1.2</VerProto>
+                    <SessionID>
+                        <SCTSContent>SCTSObject.sessionID</SCTSContent>
+                    </SessionID>
+                    <MsgID>
+                        <SCTSExpr param1="msgID" param2="1" return="msgID" OP="PLUS"/>
+                        <SCTSContent>SCTSObject.msgID</SCTSContent>
+                    </MsgID>
+                    <SCTSOP OP="SCTSContext.getRemoteDeviceAddress()" return="targetID"/>
+                    <Target>
+                        <LocURI>
+                            <SCTSContent>SCTSObject.targetID</SCTSContent>
+                        </LocURI>
+                    </Target>
+                    <Source>
+                        <LocURI>
+                            <SCTSOP OP="SCTSContext.getLocalDeviceAddress()" return="sourceID"/>
+                            <SCTSContent> SCTSObject.sourceID</SCTSContent>
+                        </LocURI>
+                        <LocName>
+                            <SCTSOP OP="SCTSContext.getRemoteDeviceName()" return="sourceName"/>
+                            <SCTSContent>SCTSObject.sourceName</SCTSContent>
+                        </LocName>
+                    </Source>
+                    <SCTSIf param1="SCTSObject.AuthStatus" param2="200" OP="EQ">
+                        <Cred>
+                            <Meta>
+                                <Format xmlns="syncml:metinf">
+                                    <SCTSContent>SCTSObject.authFormat</SCTSContent>
+                                </Format>
+                                <Type xmlns="syncml:metinf">
+                                    <SCTSContent>SCTSObject.authType</SCTSContent>
+                                </Type>
+                            </Meta>
+                            <SCTSOP OP="SCTSContext.getRemoteCredentials()"
+                                param1="SCTSObject.authType" param2="SCTSObject.NextNonce" return="SCTSCredentials"/>
+                            <Data>
+                                <SCTSContent>SCTSObject.SCTSCredentials</SCTSContent>
+                            </Data>
+                        </Cred>
+                    </SCTSIf>
+                </SyncHdr>
+                <SyncBody>
+                    <Status>
+                        <SCTSSet attrib="cmdIDNo" param1="1"/>
+                        <CmdID>
+                            <SCTSContent> SCTSObject.cmdIDNo </SCTSContent>
+                        </CmdID>
+                        <SCTSExecutePath xpath="/SyncML/SyncHdr/MsgID" return="TOMsgID" target="CurrRecv"/>
+                        <MsgRef>
+                            <SCTSContent>SCTSObject.TOMsgID</SCTSContent>
+                        </MsgRef>
+                        <CmdRef>0</CmdRef>
+                        <Cmd>SyncHdr</Cmd>
+                        <SCTSExecutePath xpath="/SyncML/SyncHdr/Target/LocURI" return="targetID" target="CurrRecv"/>
+                        <TargetRef>
+                            <SCTSContent>SCTSObject.targetID</SCTSContent>
+                        </TargetRef>
+                        <SCTSExecutePath xpath="/SyncML/SyncHdr/Source/LocURI" return="sourceID" target="CurrRecv"/>
+                        <SourceRef>
+                            <SCTSContent> SCTSObject.sourceID </SCTSContent>
+                        </SourceRef>
+                        <Data>
+                            <SCTSContent> 200 </SCTSContent>
+                        </Data>
+                    </Status>
+                    <!--Build the status for alerts recvd -->
+                    <SCTSSet attrib="LoopIndex" param1="1"/>
+                    <!--Get the number of alerts in the CurrRecv -->
+                    <SCTSExecutePath xpath="count(/SyncML/SyncBody/Alert)" return="NumOfAlerts" target="CurrRecv"/>
+                    <SCTSIf param1="SCTSObject.NumOfAlerts" param2="0" OP="GT">
+                        <SCTSLoop>
+                            <SCTSExpr param1="/SyncML/SyncBody/Alert[" param2="SCTSObject.LoopIndex"
+                                return="xPathQuerry" OP="PLUS"/>
+                            <SCTSExpr param1="SCTSObject.xPathQuerry" param2="]"
+                                return="xPathQuerry" OP="PLUS"/>
+                            <SCTSExecutePath xpath="SCTSObject.xPathQuerry" return="CurrAlert" target="CurrRecv"/>
+                            <!--Fetch the anchors in the recvd alert,since it is slow sync just fetch the Next anchor -->
+                            <SCTSExecutePath xpath="Item/Meta/Anchor/Next" return="recvdNext" target="CurrAlert"/>
+                            <SCTSExecutePath xpath="Item/Source/LocURI" return="targetID" target="CurrAlert"/>
+                            <SCTSOP OP="SCTSDatabase.setRemoteNextAnchor()"
+                                param1="SCTSObject.targetID" param2="SCTSObject.recvdNext" return="status"/>
+                            <Status>
+                                <SCTSExpr param1="cmdIDNo" param2="1" return="cmdIDNo" OP="PLUS"/>
+                                <CmdID>
+                                    <SCTSContent> SCTSObject.cmdIDNo </SCTSContent>
+                                </CmdID>
+                                <MsgRef>
+                                    <SCTSContent>SCTSObject.TOMsgID</SCTSContent>
+                                </MsgRef>
+                                <SCTSExecutePath xpath="CmdID" return="cmdRef" target="CurrAlert"/>
+                                <CmdRef>
+                                    <SCTSContent> SCTSObject.cmdRef </SCTSContent>
+                                </CmdRef>
+                                <Cmd>Alert</Cmd>
+                                <SCTSExecutePath xpath="Item/Target/LocURI" return="targetID" target="CurrAlert"/>
+                                <TargetRef>
+                                    <SCTSContent>SCTSObject.targetID</SCTSContent>
+                                </TargetRef>
+                                <SCTSExecutePath xpath="Item/Source/LocURI" return="sourceID" target="CurrAlert"/>
+                                <SourceRef>
+                                    <SCTSContent> SCTSObject.sourceID </SCTSContent>
+                                </SourceRef>
+                                <Data>
+                                    <SCTSContent>200</SCTSContent>
+                                </Data>
+                                <Item>
+                                    <Data>
+                                        <Anchor xmlns="syncml:metinf">
+                                            <Next>
+                                                <SCTSContent> SCTSObject.recvdNext </SCTSContent>
+                                            </Next>
+                                        </Anchor>
+                                    </Data>
+                                </Item>
+                            </Status>
+                            <SCTSIf param1="SCTSObject.LoopIndex" param2="SCTSObject.NumOfAlerts" OP="EQ">
+                                <SCTSBreak/>
+                            </SCTSIf>
+                            <SCTSExpr param1="SCTSObject.LoopIndex" param2="1" OP="PLUS" return="LoopIndex"/>
+                        </SCTSLoop>
+                    </SCTSIf>
+                    <!--Send the sync -->
+                    <!-- For each database we have ..send the sync-->
+                    <!--Build the sync for each database the SCTS supports -->
+                    <SCTSSet attrib="DBIndex" param1="0"/>
+                    <SCTSOP OP="SCTSContext.getNumOfLocalDatabases()" return="NumOfLocalDBs"/>
+                    <SCTSIf param1="SCTSObject.NumOfLocalDBs" param2="0" OP="GT">
+                        <SCTSLoop>
+                            <SCTSExpr param1="SCTSObject.DBIndex" param2="1" return="DBIndex" OP="PLUS"/>
+                            <!--Get the current DB Node -->
+                            <SCTSOP OP="SCTSContext.getLocalDBLocURI_onIndex()"
+                                param1="SCTSObject.DBIndex" return="CurrDBLocURI"/>
+                            <Sync>
+                                <SCTSExpr param1="cmdIDNo" param2="1" return="cmdIDNo" OP="PLUS"/>
+                                <CmdID>
+                                    <SCTSContent>SCTSObject.cmdIDNo</SCTSContent>
+                                </CmdID>
+                                <Source>
+                                    <LocURI>
+                                        <SCTSContent>SCTSObject.CurrDBLocURI</SCTSContent>
+                                    </LocURI>
+                                </Source>
+                                <!--Fetch the matching target for the above source -->
+                                <SCTSOP OP="SCTSContext.getLocalMimeType()"
+                                    param1="SCTSObject.CurrDBLocURI" return="locMime"/>
+                                <SCTSOP OP="SCTSContext.getRemoteDBLocURI_onMime()"
+                                    param1="SCTSObject.locMime" return="targetID"/>
+                                <Target>
+                                    <LocURI>
+                                        <SCTSContent>SCTSObject.targetID</SCTSContent>
+                                    </LocURI>
+                                </Target>
+                            </Sync>
+                            <SCTSIf param1="SCTSObject.DBIndex" param2="SCTSObject.NumOfLocalDBs" OP="EQ">
+                                <!--If v built sync for all the dbsthen break from the loop -->
+                                <SCTSBreak/>
+                            </SCTSIf>
+                        </SCTSLoop>
+                    </SCTSIf>
+                    <Final/>
+                </SyncBody>
+            </SyncML>
+        </SCTSSend>
+        <!--ServerSync Send -->
+        <SCTSLoop>
+            <!--The below recv(package #4) ...ll have status for modificatins sent in prev send(package #3) ...and modifications from server(Modifications may run across multiple messges) -->
+            <SCTSRecv/>
+            <SCTSExecutePath xpath="/SyncML/SyncHdr/RespURI" return="responseURI" target="CurrRecv"/>
+            <SCTSIf param1="SCTSObject.responseURI" param2="SCTSNULL" OP="NE">
+                <SCTSOP OP="SCTSContext.setResponseURI()" param1="SCTSObject.responseURI" return="retVal"/>
+            </SCTSIf>
+            <SCTSIf param1="SCTSObject.AuthStatus" param2="200" OP="EQ">
+                <!-- If the auth status is 200 then v need to send credentials ,if the auth type is md5, then use the recvd nonce for next message credentails -->
+                <SCTSIf param1="SCTSObject.authType" param2="syncml:auth-md5" OP="EQ">
+                    <SCTSExecutePath xpath="/SyncML/SyncBody/Status[CmdRef='0']//NextNonce"
+                        return="NextNonce" target="CurrRecv"/>
+                </SCTSIf>
+            </SCTSIf>
+            <!--In the next send Build the status for adds and send Maps for adds(TestObject shud nt send large objects) -->
+            <SCTSSend>
+                <SyncML xmlns="SYNCML:SYNCML1.2">
+                    <SyncHdr>
+                        <VerDTD>1.2</VerDTD>
+                        <VerProto>SyncML/1.2</VerProto>
+                        <SessionID>
+                            <SCTSContent>SCTSObject.sessionID</SCTSContent>
+                        </SessionID>
+                        <MsgID>
+                            <SCTSExpr param1="msgID" param2="1" return="msgID" OP="PLUS"/>
+                            <SCTSContent>SCTSObject.msgID</SCTSContent>
+                        </MsgID>
+                        <SCTSOP OP="SCTSContext.getRemoteDeviceAddress()" return="targetID"/>
+                        <Target>
+                            <LocURI>
+                                <SCTSContent>SCTSObject.targetID</SCTSContent>
+                            </LocURI>
+                        </Target>
+                        <Source>
+                            <LocURI>
+                                <SCTSOP OP="SCTSContext.getLocalDeviceAddress()" return="sourceID"/>
+                                <SCTSContent> SCTSObject.sourceID</SCTSContent>
+                            </LocURI>
+                            <LocName>
+                                <SCTSOP OP="SCTSContext.getRemoteDeviceName()" return="sourceName"/>
+                                <SCTSContent>SCTSObject.sourceName</SCTSContent>
+                            </LocName>
+                        </Source>
+                        <SCTSIf param1="SCTSObject.AuthStatus" param2="200" OP="EQ">
+                            <Cred>
+                                <Meta>
+                                    <Format xmlns="syncml:metinf">
+                                        <SCTSContent>SCTSObject.authFormat</SCTSContent>
+                                    </Format>
+                                    <Type xmlns="syncml:metinf">
+                                        <SCTSContent>SCTSObject.authType</SCTSContent>
+                                    </Type>
+                                </Meta>
+                                <SCTSOP OP="SCTSContext.getRemoteCredentials()"
+                                    param1="SCTSObject.authType" param2="SCTSObject.NextNonce" return="SCTSCredentials"/>
+                                <Data>
+                                    <SCTSContent>SCTSObject.SCTSCredentials</SCTSContent>
+                                </Data>
+                            </Cred>
+                        </SCTSIf>
+                    </SyncHdr>
+                    <SyncBody>
+                        <Status>
+                            <SCTSSet attrib="cmdIDNo" param1="1"/>
+                            <CmdID>
+                                <SCTSContent> SCTSObject.cmdIDNo </SCTSContent>
+                            </CmdID>
+                            <SCTSExecutePath xpath="/SyncML/SyncHdr/MsgID" return="TOMsgID" target="CurrRecv"/>
+                            <MsgRef>
+                                <SCTSContent>SCTSObject.TOMsgID</SCTSContent>
+                            </MsgRef>
+                            <CmdRef>0</CmdRef>
+                            <Cmd>SyncHdr</Cmd>
+                            <SCTSExecutePath xpath="/SyncML/SyncHdr/Target/LocURI" return="targetID" target="CurrRecv"/>
+                            <TargetRef>
+                                <SCTSContent>SCTSObject.targetID</SCTSContent>
+                            </TargetRef>
+                            <SCTSExecutePath xpath="/SyncML/SyncHdr/Source/LocURI" return="sourceID" target="CurrRecv"/>
+                            <SourceRef>
+                                <SCTSContent> SCTSObject.sourceID </SCTSContent>
+                            </SourceRef>
+                            <Data>
+                                <SCTSContent> 200 </SCTSContent>
+                            </Data>
+                        </Status>
+                        <!-- If package #4 is run into multiple messages then v might have sent some Maps in the prev send -->
+                        <!-- In this recv check for the status of the Map commands v sent  -->
+                        <SCTSSet attrib="MapLoopIndex" param1="1"/>
+                        <SCTSExecutePath xpath="count(/SyncML/SyncBody/Map)" return="NumOfMaps" target="PrevSend"/>
+                        <SCTSIf param1="SCTSObject.NumOfMaps" param2="0" OP="GT">
+                            <SCTSLoop>
+                                <!--Get the cuurrent SyncNode -->
+                                <SCTSExpr param1="/SyncML/SyncBody/Map["
+                                    param2="SCTSObject.MapLoopIndex" return="xPathQuerry" OP="PLUS"/>
+                                <SCTSExpr param1="SCTSObject.xPathQuerry" param2="]"
+                                    return="xPathQuerry" OP="PLUS"/>
+                                <SCTSExecutePath xpath="SCTSObject.xPathQuerry" return="CurrMap" target="PrevSend"/>
+                                <SCTSExecutePath xpath="CmdID" target="CurrMap" return="CommandRef"/>
+                                <SCTSExpr param1="/SyncML/SyncBody/Status[CmdRef="
+                                    param2="SCTSObject.CommandRef" OP="PLUS" return="xpathString"/>
+                                <SCTSExpr param1="SCTSObject.xpathString" param2="]/Data" OP="PLUS" return="xpathString"/>
+                                <SCTSExecutePath xpath="SCTSObject.xpathString" target="CurrRecv" return="statusVal"/>
+                                <SCTSIf param1="SCTSObject.statusVal" param2="200" OP="NE">
+                                    <SCTSSet attrib="executionResult" param1="Failed"/>
+                                    <SCTSSet attrib="FailureReason" param1="Status for Map failed"/>
+                                </SCTSIf>
+                                <SCTSIf param1="SCTSObject.NumOfMaps"
+                                    param2="SCTSObject.MapLoopIndex" OP="EQ">
+                                    <SCTSBreak/>
+                                </SCTSIf>
+                                <SCTSExpr param1="SCTSObject.MapLoopIndex" param2="1" OP="PLUS" return="MapLoopIndex"/>
+                            </SCTSLoop>
+                        </SCTSIf>
+                        <!--  ****************************************************************************** -->
+                        <SCTSSet attrib="LoopIndex" param1="1"/>
+                        <SCTSExecutePath xpath="count(/SyncML/SyncBody/Sync)" return="NumOfSyncs" target="CurrRecv"/>
+                        <SCTSIf param1="SCTSObject.NumOfSyncs" param2="0" OP="GT">
+                            <SCTSLoop>
+                                <!--Get the cuurrent SyncNode -->
+                                <SCTSExpr param1="/SyncML/SyncBody/Sync["
+                                    param2="SCTSObject.LoopIndex" return="xPathQuerry" OP="PLUS"/>
+                                <SCTSExpr param1="SCTSObject.xPathQuerry" param2="]"
+                                    return="xPathQuerry" OP="PLUS"/>
+                                <SCTSExecutePath xpath="SCTSObject.xPathQuerry" return="CurrSync" target="CurrRecv"/>
+                                <Status>
+                                    <SCTSExpr param1="cmdIDNo" param2="1" return="cmdIDNo" OP="PLUS"/>
+                                    <CmdID>
+                                        <SCTSContent>SCTSObject.cmdIDNo</SCTSContent>
+                                    </CmdID>
+                                    <MsgRef>
+                                        <SCTSContent>SCTSObject.TOMsgID</SCTSContent>
+                                    </MsgRef>
+                                    <SCTSExecutePath xpath="CmdID" return="cmdRef" target="CurrSync"/>
+                                    <CmdRef>
+                                        <SCTSContent>SCTSObject.cmdRef</SCTSContent>
+                                    </CmdRef>
+                                    <Cmd>Sync</Cmd>
+                                    <SCTSExecutePath xpath="Target/LocURI" return="TargetDB" target="CurrSync"/>
+                                    <SCTSExecutePath xpath="Source/LocURI" return="SourceDB" target="CurrSync"/>
+                                    <TargetRef>
+                                        <SCTSContent>SCTSObject.TargetDB</SCTSContent>
+                                    </TargetRef>
+                                    <SourceRef>
+                                        <SCTSContent>SCTSObject.SourceDB</SCTSContent>
+                                    </SourceRef>
+                                    <Data>200</Data>
+                                </Status>
+                                <SCTSExecutePath xpath="Target/LocURI" return="TargetDB" target="CurrSync"/>
+                                <!--build the status for adds recvd in this syncNode -->
+                                <SCTSExecutePath xpath="count(Add)" return="NumOfAdds" target="CurrSync"/>
+                                <SCTSIf param1="SCTSObject.NumOfAdds" param2="0" OP="GT">
+                                    <SCTSSet attrib="AddLoopIndex" param1="1"/>
+                                    <SCTSLoop>
+                                        <!--Get the cuurrent AddNode -->
+                                        <SCTSExpr param1="Add[" param2="SCTSObject.AddLoopIndex"
+                                            return="xPathQuerry" OP="PLUS"/>
+                                        <SCTSExpr param1="SCTSObject.xPathQuerry" param2="]"
+                                            return="xPathQuerry" OP="PLUS"/>
+                                        <SCTSExecutePath xpath="SCTSObject.xPathQuerry"
+                                            return="CurrAdd" target="CurrSync"/>
+                                        <!--Build the status for the add recvd  -->
+                                        <Status>
+                                            <SCTSExpr param1="cmdIDNo" param2="1" return="cmdIDNo" OP="PLUS"/>
+                                            <CmdID>
+                                                <SCTSContent>SCTSObject.cmdIDNo</SCTSContent>
+                                            </CmdID>
+                                            <MsgRef>
+                                                <SCTSContent>SCTSObject.TOMsgID</SCTSContent>
+                                            </MsgRef>
+                                            <!--Fetch the command id of the add v recvd from testobject -->
+                                            <SCTSExecutePath xpath="CmdID" return="CmdRef" target="CurrAdd"/>
+                                            <CmdRef>
+                                                <SCTSContent>SCTSObject.CmdRef</SCTSContent>
+                                            </CmdRef>
+                                            <Cmd>Add</Cmd>
+                                            <SCTSExecutePath xpath="Item/Source/LocURI"
+                                                return="GUID" target="CurrAdd"/>
+                                            <SourceRef>
+                                                <SCTSContent>SCTSObject.GUID</SCTSContent>
+                                            </SourceRef>
+                                            <!--Fetch the Data  -->
+                                            <SCTSExecutePath xpath="Item/Data" return="Data" target="CurrAdd"/>
+                                            <!--Generate guid for the add recvd -->
+                                            <SCTSOP OP="SCTSDatabase.generateLUID()" return="LUID"/>
+                                            <!--Insert the data -->
+                                            <SCTSOP OP="SCTSDatabase.insertRawItem()"
+                                                param1="SCTSObject.TargetDB"
+                                                param2="SCTSobject.Data" param3="TestObject"
+                                                param4="SCTSObject.LUID" param5="SCTSObject.GUID" return="AddStatus"/>
+                                            <!--If the add is succeess -->
+                                            <SCTSIf param1="SCTSObject.AddStatus" param2="1" OP="EQ">
+                                                <Data>201</Data>
+                                            </SCTSIf>
+                                            <SCTSIf param1="SCTSObject.AddStatus" param2="1" OP="NE">
+                                                <!--Add failed -->
+                                                <SCTSSet attrib="executionResult" param1="Failed"/>
+                                                <Data>500</Data>
+                                            </SCTSIf>
+                                        </Status>
+                                        <SCTSIf param1="SCTSObject.AddLoopIndex"
+                                            param2="SCTSObject.NumOfAdds" OP="EQ">
+                                            <SCTSBreak/>
+                                        </SCTSIf>
+                                        <SCTSExpr param1="SCTSObject.AddLoopIndex" param2="1"
+                                            return="AddLoopIndex" OP="PLUS"/>
+                                    </SCTSLoop>
+                                </SCTSIf>
+                                <SCTSIf param1="SCTSObject.LoopIndex" param2="SCTSObject.NumOfSyncs" OP="EQ">
+                                    <SCTSBreak/>
+                                </SCTSIf>
+                                <SCTSExpr param1="SCTSObject.LoopIndex" param2="1"
+                                    return="LoopIndex" OP="PLUS"/>
+                            </SCTSLoop>
+                        </SCTSIf>
+                        <!-- Send the Map command for each Item , which is sussessfuly added -->
+                        <SCTSSet attrib="LoopIndex" param1="1"/>
+                        <SCTSExecutePath xpath="count(/SyncML/SyncBody/Sync)" return="NumOfSyncs" target="CurrRecv"/>
+                        <SCTSIf param1="SCTSObject.NumOfSyncs" param2="0" OP="GT">
+                            <SCTSLoop>
+                                <!--Get the cuurrent SyncNode -->
+                                <SCTSExpr param1="/SyncML/SyncBody/Sync["
+                                    param2="SCTSObject.LoopIndex" return="xPathQuerry" OP="PLUS"/>
+                                <SCTSExpr param1="SCTSObject.xPathQuerry" param2="]"
+                                    return="xPathQuerry" OP="PLUS"/>
+                                <SCTSExecutePath xpath="SCTSObject.xPathQuerry" return="CurrSync" target="CurrRecv"/>
+                                <SCTSExecutePath xpath="Target/LocURI" return="TargetDB" target="CurrSync"/>
+                                <SCTSExecutePath xpath="Source/LocURI" return="SourceDB" target="CurrSync"/>
+                                <!--build the status for adds recvd in this syncNode -->
+                                <SCTSExecutePath xpath="count(Add)" return="NumOfAdds" target="CurrSync"/>
+                                <SCTSIf param1="SCTSObject.NumOfAdds" param2="0" OP="GT">
+                                    <SCTSSet attrib="AddLoopIndex" param1="1"/>
+                                    <SCTSLoop>
+                                        <!--Get the cuurrent AddNode -->
+                                        <SCTSExpr param1="Add[" param2="SCTSObject.AddLoopIndex"
+                                            return="xPathQuerry" OP="PLUS"/>
+                                        <SCTSExpr param1="SCTSObject.xPathQuerry" param2="]"
+                                            return="xPathQuerry" OP="PLUS"/>
+                                        <SCTSExecutePath xpath="SCTSObject.xPathQuerry"
+                                            return="CurrAdd" target="CurrSync"/>
+                                        <SCTSExecutePath xpath="Item/Source/LocURI" return="GUID" target="CurrAdd"/>
+                                        <SCTSOP OP="SCTSDatabase.getRecordOnGUID()"
+                                            param1="SCTSObject.TargetDB" param2="SCTSObject.GUID" return="CurrRecord"/>
+                                        <SCTSIf param1="SCTSObject.CurrRecord" param2="SCTSNULL" OP="NE">
+                                            <!-- If the add is success  then send the Map -->
+                                            <Map>
+                                                <SCTSExpr param1="cmdIDNo" param2="1"
+                                                  return="cmdIDNo" OP="PLUS"/>
+                                                <CmdID>
+                                                  <SCTSContent>SCTSObject.cmdIDNo</SCTSContent>
+                                                </CmdID>
+                                                <Target>
+                                                  <LocURI>
+                                                  <SCTSContent>SCTSObject.SourceDB</SCTSContent>
+                                                  </LocURI>
+                                                </Target>
+                                                <Source>
+                                                  <LocURI>
+                                                  <SCTSContent>SCTSObject.TargetDB</SCTSContent>
+                                                  </LocURI>
+                                                </Source>
+                                                <MapItem>
+                                                  <Target>
+                                                  <LocURI>
+                                                  <SCTSContent>SCTSObject.GUID</SCTSContent>
+                                                  </LocURI>
+                                                  </Target>
+                                                  <SCTSExecutePath xpath="DBLUID" return="LUID" target="CurrRecord"/>
+                                                  <Source>
+                                                  <LocURI>
+                                                  <SCTSContent>SCTSObject.LUID</SCTSContent>
+                                                  </LocURI>
+                                                  </Source>
+                                                </MapItem>
+                                            </Map>
+                                        </SCTSIf>
+                                        <SCTSIf param1="SCTSObject.AddLoopIndex"
+                                            param2="SCTSObject.NumOfAdds" OP="EQ">
+                                            <SCTSBreak/>
+                                        </SCTSIf>
+                                        <SCTSExpr param1="SCTSObject.AddLoopIndex" param2="1"
+                                            return="AddLoopIndex" OP="PLUS"/>
+                                    </SCTSLoop>
+                                </SCTSIf>
+                                <SCTSIf param1="SCTSObject.LoopIndex" param2="SCTSObject.NumOfSyncs" OP="EQ">
+                                    <SCTSBreak/>
+                                </SCTSIf>
+                                <SCTSExpr param1="SCTSObject.LoopIndex" param2="1"
+                                    return="LoopIndex" OP="PLUS"/>
+                            </SCTSLoop>
+                        </SCTSIf>
+                        <!--Check whether v recvd Final in the prev recv. If there is Final ...it shows the end of package #4...ao v can end this current package #6 -->
+                        <SCTSExecutePath xpath="/SyncML/SyncBody/Final" return="Final" target="CurrRecv"/>
+                        <SCTSIf param1="SCTSObject.Final" param2="SCTSNULL" OP="NE">
+                            <!--If there if Final end the package#5 -->
+                            <Final/>
+                        </SCTSIf>
+                    </SyncBody>
+                </SyncML>
+            </SCTSSend>
+            <!-- here v have to decide whether goto recieving package #6 or loop bk to another message of package #5:Itz ll depends on final in the prev Recv-->
+            <SCTSExecutePath xpath="/SyncML/SyncBody/Final" return="Final" target="CurrRecv"/>
+            <SCTSIf param1="SCTSObject.Final" param2="SCTSNULL" OP="NE">
+                <!--If there is  if Final in the package#5 then break-->
+                <SCTSBreak/>
+            </SCTSIf>
+        </SCTSLoop>
+        <!--So if there is final(or end of package #4 and hence #5) recv the next package #6 -; package #6 ll have status for Maps sent in package #5 -->
+        <SCTSRecv/>
+        <SCTSExecutePath xpath="/SyncML/SyncHdr/RespURI" return="responseURI" target="CurrRecv"/>
+        <SCTSIf param1="SCTSObject.responseURI" param2="SCTSNULL" OP="NE">
+            <SCTSOP OP="SCTSContext.setResponseURI()" param1="SCTSObject.responseURI" return="retVal"/>
+        </SCTSIf>
+        <!-- In this recv check for the status of the Map commands v sent  -->
+        <SCTSSet attrib="MapLoopIndex" param1="1"/>
+        <SCTSExecutePath xpath="count(/SyncML/SyncBody/Map)" return="NumOfMaps" target="PrevSend"/>
+        <SCTSIf param1="SCTSObject.NumOfMaps" param2="0" OP="GT">
+            <SCTSLoop>
+                <!--Get the cuurrent SyncNode -->
+                <SCTSExpr param1="/SyncML/SyncBody/Map[" param2="SCTSObject.MapLoopIndex"
+                    return="xPathQuerry" OP="PLUS"/>
+                <SCTSExpr param1="SCTSObject.xPathQuerry" param2="]" return="xPathQuerry" OP="PLUS"/>
+                <SCTSExecutePath xpath="SCTSObject.xPathQuerry" return="CurrMap" target="PrevSend"/>
+                <SCTSExecutePath xpath="CmdID" target="CurrMap" return="CommandRef"/>
+                <SCTSExpr param1="/SyncML/SyncBody/Status[CmdRef=" param2="SCTSObject.CommandRef"
+                    OP="PLUS" return="xpathString"/>
+                <SCTSExpr param1="SCTSObject.xpathString" param2="]/Data" OP="PLUS" return="xpathString"/>
+                <SCTSExecutePath xpath="SCTSObject.xpathString" target="CurrRecv" return="statusVal"/>
+                <SCTSIf param1="SCTSObject.statusVal" param2="200" OP="NE">
+                    <SCTSSet attrib="executionResult" param1="Failed"/>
+                    <SCTSSet attrib="FailureReason" param1="Status for Map failed"/>
+                </SCTSIf>
+                <SCTSIf param1="SCTSObject.NumOfMaps" param2="SCTSObject.MapLoopIndex" OP="EQ">
+                    <SCTSBreak/>
+                </SCTSIf>
+                <SCTSExpr param1="SCTSObject.MapLoopIndex" param2="1" OP="PLUS" return="MapLoopIndex"/>
+            </SCTSLoop>
+        </SCTSIf>
+        <!-- So update the anchors after the sync  before statring new session-->
+        <!--Replace the remote Last anchor by  remote Next Anchor -->
+        <SCTSOP OP="SCTSContext.getNumOfLocalDatabases()" return="NumOfLocalDBs"/>
+        <SCTSIf param1="SCTSObject.NumOfLocalDBs" param2="SCTSNULL" OP="NE">
+            <SCTSSet attrib="LoopIndex" param1="1"/>
+            <SCTSLoop>
+                <!--Get the current DB Node -->
+                <SCTSOP OP="SCTSContext.getLocalDBLocURI_onIndex()" param1="SCTSObject.LoopIndex" return="CurrDBLocURI"/>
+                <SCTSOP OP="SCTSDatabase.getRemoteNextAnchor()" param1="SCTSObject.CurrDBLocURI" return="remoteNextAnchor"/>
+                <SCTSOP OP="SCTSDatabase.setRemoteLastAnchor()" param1="SCTSObject.CurrDBLocURI"
+                    param2="SCTSObject.remoteNextAnchor" return="status"/>
+                <!--Repalce local last anchor by localnext anchor -->
+                <SCTSOP OP="SCTSDatabase.setLocalLastAnchor()" param1="SCTSObject.CurrDBLocURI"
+                    param2="SCTSObject.localNextAnchor" return="status"/>
+                <SCTSIf param1="SCTSObject.LoopIndex" param2="SCTSObject.NumOfLocalDBs" OP="EQ">
+                    <!--If v built sync for all the dbsthen break from the loop -->
+                    <SCTSBreak/>
+                </SCTSIf>
+                <SCTSExpr param1="SCTSObject.LoopIndex" param2="1" OP="PLUS" return="LoopIndex"/>
+            </SCTSLoop>
+        </SCTSIf>
+    </SCTSSession>
+    <SCTSIf param1="SCTSObject.executionResult" param2="Failed" OP="EQ">
+        <SCTSExit/>
+    </SCTSIf>
+    <SCTSUIAlert param1="Replace Some/All records at Test Object End which were added by it in previous Session. Then Press Ok to Continue "/>
+    <SCTSSession>
+        <!--Here v ll run the normal test case....to test weather anchors excahnged properly in the previuos test case -->
+        <!--To do Normal sync Add only one record in any one of the database the the TestObject supports -->
+        <SCTSSet attrib="MaxMsgSize" param1="5000"/>
+        <SCTSSet attrib="executionResult" param1="Success"/>
+        <SCTSSet attrib="MaxObjSize" param1="0"/>
+        <SCTSSet attrib="sessionID" param1="2"/>
+        <SCTSSet attrib="msgID" param1="0"/>
+        <SCTSSet attrib="FirstSend" param1="1"/>
+        <SCTSOP OP="SCTSDatabase.generateNextAnchor()" return="localNextAnchor"/>
+        <SCTSLoop>
+            <SCTSSend>
+                <SyncML xmlns="SYNCML:SYNCML1.2">
+                    <SyncHdr>
+                        <VerDTD>1.2</VerDTD>
+                        <VerProto>SyncML/1.2</VerProto>
+                        <SessionID>
+                            <SCTSContent>SCTSObject.sessionID</SCTSContent>
+                        </SessionID>
+                        <MsgID>
+                            <SCTSExpr param1="msgID" param2="1" return="msgID" OP="PLUS"/>
+                            <SCTSContent>SCTSObject.msgID</SCTSContent>
+                        </MsgID>
+                        <SCTSOP OP="SCTSContext.getRemoteDeviceAddress()" return="targetID"/>
+                        <Target>
+                            <LocURI>
+                                <SCTSContent>SCTSObject.targetID</SCTSContent>
+                            </LocURI>
+                        </Target>
+                        <Source>
+                            <LocURI>
+                                <SCTSOP OP="SCTSContext.getLocalDeviceAddress()" return="sourceID"/>
+                                <SCTSContent> SCTSObject.sourceID</SCTSContent>
+                            </LocURI>
+                            <LocName>
+                                <SCTSOP OP="SCTSContext.getRemoteDeviceName()" return="sourceName"/>
+                                <SCTSContent>SCTSObject.sourceName</SCTSContent>
+                            </LocName>
+                        </Source>
+                        <SCTSIf param1="SCTSObject.FirstSend" param2="1" OP="NE">
+                            <SCTSExecutePath xpath="/SyncML/SyncBody/Status[CmdID='1']/Chal"
+                                return="Chal" target="CurrRecv"/>
+                            <!--If there is chal in the curr recv -->
+                            <SCTSIf param1="SCTSObject.Chal" param2="SCTSNULL" OP="NE">
+                                <!--Send the credentails -->
+                                <Cred>
+                                    <Meta>
+                                        <SCTSExecutePath
+                                            xpath="/SyncML/SyncBody/Status[CmdID='1']/Chal//Format"
+                                            return="authFormat" target="CurrRecv"/>
+                                        <SCTSExecutePath
+                                            xpath="/SyncML/SyncBody/Status[CmdID='1']/Chal//Type"
+                                            return="authType" target="CurrRecv"/>
+                                        <SCTSExecutePath
+                                            xpath="/SyncML/SyncBody/Status[CmdID='1']/Chal//NextNonce"
+                                            return="NextNonce" target="CurrRecv"/>
+                                        <SCTSIf param1="SCTSObject.authFormat" param2="SCTSNULL" OP="EQ">
+                                            <SCTSSet attrib="authFormat" param1="b64"/>
+                                        </SCTSIf>
+                                        <Format xmlns="syncml:metinf">
+                                            <SCTSContent>SCTSObject.authFormat</SCTSContent>
+                                        </Format>
+                                        <Type xmlns="syncml:metinf">
+                                            <SCTSContent>SCTSObject.authType</SCTSContent>
+                                        </Type>
+                                    </Meta>
+                                    <SCTSOP OP="SCTSContext.getRemoteCredentials()"
+                                        param1="SCTSObject.authType" param2="SCTSObject.NextNonce" return="SCTSCredentials"/>
+                                    <Data>
+                                        <SCTSContent>SCTSObject.SCTSCredentials</SCTSContent>
+                                    </Data>
+                                </Cred>
+                            </SCTSIf>
+                        </SCTSIf>
+                        <!--Send the Max Mxg size the client can handle -->
+                        <SCTSOP OP="SCTSContext.getLocalMaxMsgSize()" return="MaxMsgSize"/>
+                        <Meta>
+                            <MaxMsgSize xmlns="syncml:metinf">
+                                <SCTSContent> SCTSObject.MaxMsgSize </SCTSContent>
+                            </MaxMsgSize>
+                        </Meta>
+                    </SyncHdr>
+                    <SyncBody>
+                        <SCTSSet attrib="cmdIDNo" param1="1"/>
+                        <SCTSIf param1="SCTSObject.FirstSend" param2="1" OP="NE">
+                            <!--If this is not a first send ..then build the status for curr Recv -->
+                            <Status>
+                                <CmdID>
+                                    <SCTSContent> SCTSObject.cmdIDNo </SCTSContent>
+                                </CmdID>
+                                <SCTSExecutePath xpath="/SyncML/SyncHdr/MsgID" return="TOMsgID" target="CurrRecv"/>
+                                <MsgRef>
+                                    <SCTSContent>SCTSObject.TOMsgID</SCTSContent>
+                                </MsgRef>
+                                <CmdRef>0</CmdRef>
+                                <Cmd>SyncHdr</Cmd>
+                                <SCTSExecutePath xpath="/SyncML/SyncHdr/Target/LocURI"
+                                    return="targetID" target="CurrRecv"/>
+                                <TargetRef>
+                                    <SCTSContent>SCTSObject.targetID</SCTSContent>
+                                </TargetRef>
+                                <SCTSExecutePath xpath="/SyncML/SyncHdr/Source/LocURI"
+                                    return="sourceID" target="CurrRecv"/>
+                                <SourceRef>
+                                    <SCTSContent> SCTSObject.sourceID </SCTSContent>
+                                </SourceRef>
+                                <SCTSExecutePath xpath="/SyncML/SyncHdr/Cred" return="Cred" target="CurrRecv"/>
+                                <SCTSIf param1="SCTSObject.Cred" param2="SCTSNULL" OP="NE">
+                                    <Data>
+                                        <SCTSContent> 212 </SCTSContent>
+                                    </Data>
+                                </SCTSIf>
+                                <SCTSIf param1="SCTSObject.Cred" param2="SCTSNULL" OP="EQ">
+                                    <Data>
+                                        <SCTSContent> 200 </SCTSContent>
+                                    </Data>
+                                </SCTSIf>
+                            </Status>
+                        </SCTSIf>
+                        <!--Build the alerts for each Database,the Client wants to Sync -->
+                        <SCTSSet attrib="DBIndex" param1="0"/>
+                        <SCTSOP OP="SCTSContext.getNumOfLocalDatabases()" return="NumOfLocalDBs"/>
+                        <SCTSIf param1="SCTSObject.NumOfLocalDBs" param2="0" OP="GT">
+                            <SCTSLoop>
+                                <SCTSExpr param1="SCTSObject.DBIndex" param2="1" return="DBIndex" OP="PLUS"/>
+                                <!--Get the current DB Node -->
+                                <SCTSOP OP="SCTSContext.getLocalDBLocURI_onIndex()"
+                                    param1="SCTSObject.DBIndex" return="CurrDBLocURI"/>
+                                <!--Fetch the matching target for the above source -->
+                                <SCTSOP OP="SCTSContext.getLocalMimeType()"
+                                    param1="SCTSObject.CurrDBLocURI" return="locMime"/>
+                                <SCTSOP OP="SCTSContext.getRemoteDBLocURI_onMime()"
+                                    param1="SCTSObject.locMime" return="targetDBLocURI"/>
+                                <Alert>
+                                    <SCTSExpr param1="cmdIDNo" param2="1" return="cmdIDNo" OP="PLUS"/>
+                                    <CmdID>
+                                        <SCTSContent>SCTSObject.cmdIDNo</SCTSContent>
+                                    </CmdID>
+                                    <Data> 200</Data>
+                                    <Item>
+                                        <Source>
+                                            <LocURI>
+                                                <SCTSContent>SCTSObject.CurrDBLocURI</SCTSContent>
+                                            </LocURI>
+                                        </Source>
+                                        <Target>
+                                            <LocURI>
+                                                <SCTSContent> SCTSObject.targetDBLocURI</SCTSContent>
+                                            </LocURI>
+                                        </Target>
+                                        <SCTSOP OP="SCTSDatabase.getLocalLastAnchor()"
+                                            param1="SCTSObject.CurrDBLocURI" return="localLastAnchor"/>
+                                        <Meta>
+                                            <Anchor xmlns="syncml:metinf">
+                                                <Last>
+                                                  <SCTSContent> SCTSObject.localLastAnchor </SCTSContent>
+                                                </Last>
+                                                <Next>
+                                                  <SCTSContent>SCTSObject.localNextAnchor</SCTSContent>
+                                                </Next>
+                                            </Anchor>
+                                        </Meta>
+                                    </Item>
+                                </Alert>
+                                <SCTSIf param1="SCTSObject.DBIndex"
+                                    param2="SCTSObject.NumOfLocalDBs" OP="EQ">
+                                    <!--If v built sync for all the dbsthen break from the loop -->
+                                    <SCTSBreak/>
+                                </SCTSIf>
+                            </SCTSLoop>
+                        </SCTSIf>
+                        <Final/>
+                    </SyncBody>
+                </SyncML>
+            </SCTSSend>
+            <SCTSIf param1="SCTSObject.FirstSend" param2="1" OP="EQ">
+                <SCTSSet attrib="FirstSend" param1="0"/>
+            </SCTSIf>
+            <!--Get the response  -->
+            <SCTSRecv/>
+            <SCTSExecutePath xpath="/SyncML/SyncHdr/RespURI" return="responseURI" target="CurrRecv"/>
+            <SCTSIf param1="SCTSObject.responseURI" param2="SCTSNULL" OP="NE">
+                <SCTSOP OP="SCTSContext.setResponseURI()" param1="SCTSObject.responseURI" return="retVal"/>
+            </SCTSIf>
+            <!--If the status for syncHdr v sent is 212(Authentication accepted) -->
+            <SCTSExecutePath xpath="/SyncML/SyncBody/Status[CmdRef='0']/Data" return="AuthStatus" target="CurrRecv"/>
+            <SCTSIf param1="SCTSObject.AuthStatus" param2="212" OP="EQ">
+                <SCTSBreak/>
+            </SCTSIf>
+            <SCTSIf param1="SCTSObject.AuthStatus" param2="200" OP="EQ">
+                <!-- If the auth status is 200 then v need to send credentials ,if the auth type is md5, then use the recvd nonce for next message credentails -->
+                <SCTSIf param1="SCTSObject.authType" param2="syncml:auth-md5" OP="EQ">
+                    <SCTSExecutePath xpath="/SyncML/SyncBody/Status[CmdRef='0']//NextNonce"
+                        return="NextNonce" target="CurrRecv"/>
+                </SCTSIf>
+                <SCTSBreak/>
+            </SCTSIf>
+            <!--Check whether v sent credentials allready -->
+            <SCTSExecutePath xpath="//Cred" return="Cred" target="CurrSend"/>
+            <SCTSIf param1="SCTSObject.Cred" param2="SCTSNULL" OP="NE">
+                <!--status for synchdr is not 212/200 and if v have sent credentials , then it is authentication fail-->
+                <SCTSSet attrib="executionResult" param1="AuthenticationFailed"/>
+                <SCTSSet attrib="FailureReason" param1="AuthenticationFailed"/>
+                <!--So abort the current session -->
+                <SCTSExit/>
+            </SCTSIf>
+        </SCTSLoop>
+        <!--Client Sync send -->
+        <!--In the below send v ll send the modifications from client and v ll assume that since server can handle large messges and large objects..
+        all modifiacations ll fit in one package, But since server side control is not with us..server may send modifications across multiple messages
+        or data by chunking , V shud in a postion to handle that-->
+        <!--Client Sync send -->
+        <SCTSSet attrib="ClientDBsIndex" param1="0"/>
+        <SCTSSet attrib="ModIndex" param1="1"/>
+        <SCTSLoop>
+            <SCTSSend>
+                <!--Say v ll assume that client sends all modifications in one messgae  -->
+                <SyncML xmlns="SYNCML:SYNCML1.2">
+                    <SyncHdr>
+                        <VerDTD>1.2</VerDTD>
+                        <VerProto>SyncML/1.2</VerProto>
+                        <SessionID>
+                            <SCTSContent>SCTSObject.sessionID</SCTSContent>
+                        </SessionID>
+                        <MsgID>
+                            <SCTSExpr param1="msgID" param2="1" return="msgID" OP="PLUS"/>
+                            <SCTSContent>SCTSObject.msgID</SCTSContent>
+                        </MsgID>
+                        <SCTSOP OP="SCTSContext.getRemoteDeviceAddress()" return="targetID"/>
+                        <Target>
+                            <LocURI>
+                                <SCTSContent>SCTSObject.targetID</SCTSContent>
+                            </LocURI>
+                        </Target>
+                        <Source>
+                            <LocURI>
+                                <SCTSOP OP="SCTSContext.getLocalDeviceAddress()" return="sourceID"/>
+                                <SCTSContent> SCTSObject.sourceID</SCTSContent>
+                            </LocURI>
+                            <LocName>
+                                <SCTSOP OP="SCTSContext.getRemoteDeviceName()" return="sourceName"/>
+                                <SCTSContent>SCTSObject.sourceName</SCTSContent>
+                            </LocName>
+                        </Source>
+                        <SCTSIf param1="SCTSObject.AuthStatus" param2="200" OP="EQ">
+                            <Cred>
+                                <Meta>
+                                    <Format xmlns="syncml:metinf">
+                                        <SCTSContent>SCTSObject.authFormat</SCTSContent>
+                                    </Format>
+                                    <Type xmlns="syncml:metinf">
+                                        <SCTSContent>SCTSObject.authType</SCTSContent>
+                                    </Type>
+                                </Meta>
+                                <SCTSOP OP="SCTSContext.getRemoteCredentials()"
+                                    param1="SCTSObject.authType" param2="SCTSObject.NextNonce" return="SCTSCredentials"/>
+                                <Data>
+                                    <SCTSContent>SCTSObject.SCTSCredentials</SCTSContent>
+                                </Data>
+                            </Cred>
+                        </SCTSIf>
+                    </SyncHdr>
+                    <SyncBody>
+                        <Status>
+                            <SCTSSet attrib="cmdIDNo" param1="1"/>
+                            <CmdID>
+                                <SCTSContent> SCTSObject.cmdIDNo </SCTSContent>
+                            </CmdID>
+                            <SCTSExecutePath xpath="/SyncML/SyncHdr/MsgID" return="TOMsgID" target="CurrRecv"/>
+                            <MsgRef>
+                                <SCTSContent>SCTSObject.TOMsgID</SCTSContent>
+                            </MsgRef>
+                            <CmdRef>0</CmdRef>
+                            <Cmd>SyncHdr</Cmd>
+                            <SCTSExecutePath xpath="/SyncML/SyncHdr/Target/LocURI" return="targetID" target="CurrRecv"/>
+                            <TargetRef>
+                                <SCTSContent>SCTSObject.targetID</SCTSContent>
+                            </TargetRef>
+                            <SCTSExecutePath xpath="/SyncML/SyncHdr/Source/LocURI" return="sourceID" target="CurrRecv"/>
+                            <SourceRef>
+                                <SCTSContent> SCTSObject.sourceID </SCTSContent>
+                            </SourceRef>
+                            <Data>
+                                <SCTSContent> 200 </SCTSContent>
+                            </Data>
+                        </Status>
+                        <!--Build the status for alerts recvd -->
+                        <SCTSSet attrib="LoopIndex" param1="1"/>
+                        <!--Get the number of alerts in the CurrRecv -->
+                        <SCTSExecutePath xpath="count(/SyncML/SyncBody/Alert)" return="NumOfAlerts" target="CurrRecv"/>
+                        <SCTSIf param1="SCTSObject.NumOfAlerts" param2="0" OP="GT">
+                            <SCTSLoop>
+                                <SCTSExpr param1="/SyncML/SyncBody/Alert["
+                                    param2="SCTSObject.LoopIndex" return="xPathQuerry" OP="PLUS"/>
+                                <SCTSExpr param1="SCTSObject.xPathQuerry" param2="]"
+                                    return="xPathQuerry" OP="PLUS"/>
+                                <SCTSExecutePath xpath="SCTSObject.xPathQuerry" return="CurrAlert" target="CurrRecv"/>
+                                <!--Fetch the anchors in the recvd alert,since it is slow sync just fetch the Next anchor -->
+                                <SCTSExecutePath xpath="Item/Meta/Anchor/Next" return="recvdNext" target="CurrAlert"/>
+                                <SCTSExecutePath xpath="Item/Source/LocURI" return="targetID" target="CurrAlert"/>
+                                <SCTSOP OP="SCTSDatabase.setRemoteNextAnchor()"
+                                    param1="SCTSObject.targetID" param2="SCTSObject.recvdNext" return="status"/>
+                                <Status>
+                                    <SCTSExpr param1="cmdIDNo" param2="1" return="cmdIDNo" OP="PLUS"/>
+                                    <CmdID>
+                                        <SCTSContent> SCTSObject.cmdIDNo </SCTSContent>
+                                    </CmdID>
+                                    <MsgRef>
+                                        <SCTSContent>SCTSObject.TOMsgID</SCTSContent>
+                                    </MsgRef>
+                                    <SCTSExecutePath xpath="CmdID" return="cmdRef" target="CurrAlert"/>
+                                    <CmdRef>
+                                        <SCTSContent> SCTSObject.cmdRef </SCTSContent>
+                                    </CmdRef>
+                                    <Cmd>Alert</Cmd>
+                                    <SCTSExecutePath xpath="Item/Target/LocURI" return="targetID" target="CurrAlert"/>
+                                    <TargetRef>
+                                        <SCTSContent>SCTSObject.targetID</SCTSContent>
+                                    </TargetRef>
+                                    <SCTSExecutePath xpath="Item/Source/LocURI" return="sourceID" target="CurrAlert"/>
+                                    <SourceRef>
+                                        <SCTSContent> SCTSObject.sourceID </SCTSContent>
+                                    </SourceRef>
+                                    <Data>
+                                        <SCTSContent>200</SCTSContent>
+                                    </Data>
+                                    <Item>
+                                        <Data>
+                                            <Anchor xmlns="syncml:metinf">
+                                                <Next>
+                                                  <SCTSContent> SCTSObject.recvdNext </SCTSContent>
+                                                </Next>
+                                            </Anchor>
+                                        </Data>
+                                    </Item>
+                                </Status>
+                                <SCTSIf param1="SCTSObject.LoopIndex"
+                                    param2="SCTSObject.NumOfAlerts" OP="EQ">
+                                    <SCTSBreak/>
+                                </SCTSIf>
+                                <SCTSExpr param1="SCTSObject.LoopIndex" param2="1" OP="PLUS" return="LoopIndex"/>
+                            </SCTSLoop>
+                        </SCTSIf>
+                        <!--#################################################################### -->
+                        <!--Send the sync -->
+                        <!-- For each database we have ..send the sync-->
+                        <!--Build the sync for each database the SCTS supports -->
+                        <SCTSSet attrib="DBIndex" param1="0"/>
+                        <SCTSOP OP="SCTSContext.getNumOfLocalDatabases()" return="NumOfLocalDBs"/>
+                        <SCTSIf param1="SCTSObject.NumOfLocalDBs" param2="0" OP="GT">
+                            <SCTSLoop>
+                                <SCTSExpr param1="SCTSObject.DBIndex" param2="1" return="DBIndex" OP="PLUS"/>
+                                <!--Get the current DB Node -->
+                                <SCTSOP OP="SCTSContext.getLocalDBLocURI_onIndex()"
+                                    param1="SCTSObject.DBIndex" return="CurrDBLocURI"/>
+                                <Sync>
+                                    <SCTSExpr param1="cmdIDNo" param2="1" return="cmdIDNo" OP="PLUS"/>
+                                    <CmdID>
+                                        <SCTSContent>SCTSObject.cmdIDNo</SCTSContent>
+                                    </CmdID>
+                                    <Source>
+                                        <LocURI>
+                                            <SCTSContent>SCTSObject.CurrDBLocURI</SCTSContent>
+                                        </LocURI>
+                                    </Source>
+                                    <!--Fetch the matching target for the above source -->
+                                    <SCTSOP OP="SCTSContext.getLocalMimeType()"
+                                        param1="SCTSObject.CurrDBLocURI" return="locMime"/>
+                                    <SCTSOP OP="SCTSContext.getRemoteDBLocURI_onMime()"
+                                        param1="SCTSObject.locMime" return="targetID"/>
+                                    <Target>
+                                        <LocURI>
+                                            <SCTSContent>SCTSObject.targetID</SCTSContent>
+                                        </LocURI>
+                                    </Target>
+                                </Sync>
+                                <SCTSIf param1="SCTSObject.DBIndex"
+                                    param2="SCTSObject.NumOfLocalDBs" OP="EQ">
+                                    <!--If v built sync for all the dbsthen break from the loop -->
+                                    <SCTSBreak/>
+                                </SCTSIf>
+                            </SCTSLoop>
+                        </SCTSIf>
+                        <Final/>
+                    </SyncBody>
+                </SyncML>
+            </SCTSSend>
+            <SCTSExecutePath xpath="/SyncML/SyncBody/Final" return="Final" target="PrevSend"/>
+            <SCTSBreak/>
+        </SCTSLoop>
+        <!--ServerSync Send -->
+        <SCTSLoop>
+            <!--The below recv(package #4) ...ll have status for modificatins sent in prev send(package #3) ...and modifications from server(Modifications may run across multiple messges) -->
+            <SCTSRecv/>
+            <SCTSExecutePath xpath="/SyncML/SyncHdr/RespURI" return="responseURI" target="CurrRecv"/>
+            <SCTSIf param1="SCTSObject.responseURI" param2="SCTSNULL" OP="NE">
+                <SCTSOP OP="SCTSContext.setResponseURI()" param1="SCTSObject.responseURI" return="retVal"/>
+            </SCTSIf>
+            <SCTSIf param1="SCTSObject.AuthStatus" param2="200" OP="EQ">
+                <!-- If the auth status is 200 then v need to send credentials ,if the auth type is md5, then use the recvd nonce for next message credentails -->
+                <SCTSIf param1="SCTSObject.authType" param2="syncml:auth-md5" OP="EQ">
+                    <SCTSExecutePath xpath="/SyncML/SyncBody/Status[CmdRef='0']//NextNonce"
+                        return="NextNonce" target="CurrRecv"/>
+                </SCTSIf>
+            </SCTSIf>
+            <!--In the next send Build the status for adds and send Maps for completly recvd adds -->
+            <SCTSSend>
+                <SyncML xmlns="SYNCML:SYNCML1.2">
+                    <SyncHdr>
+                        <VerDTD>1.2</VerDTD>
+                        <VerProto>SyncML/1.2</VerProto>
+                        <SessionID>
+                            <SCTSContent>SCTSObject.sessionID</SCTSContent>
+                        </SessionID>
+                        <MsgID>
+                            <SCTSExpr param1="msgID" param2="1" return="msgID" OP="PLUS"/>
+                            <SCTSContent>SCTSObject.msgID</SCTSContent>
+                        </MsgID>
+                        <SCTSOP OP="SCTSContext.getRemoteDeviceAddress()" return="targetID"/>
+                        <Target>
+                            <LocURI>
+                                <SCTSContent>SCTSObject.targetID</SCTSContent>
+                            </LocURI>
+                        </Target>
+                        <Source>
+                            <LocURI>
+                                <SCTSOP OP="SCTSContext.getLocalDeviceAddress()" return="sourceID"/>
+                                <SCTSContent> SCTSObject.sourceID</SCTSContent>
+                            </LocURI>
+                            <LocName>
+                                <SCTSOP OP="SCTSContext.getRemoteDeviceName()" return="sourceName"/>
+                                <SCTSContent>SCTSObject.sourceName</SCTSContent>
+                            </LocName>
+                        </Source>
+                        <SCTSIf param1="SCTSObject.AuthStatus" param2="200" OP="EQ">
+                            <Cred>
+                                <Meta>
+                                    <Format xmlns="syncml:metinf">
+                                        <SCTSContent>SCTSObject.authFormat</SCTSContent>
+                                    </Format>
+                                    <Type xmlns="syncml:metinf">
+                                        <SCTSContent>SCTSObject.authType</SCTSContent>
+                                    </Type>
+                                </Meta>
+                                <SCTSOP OP="SCTSContext.getRemoteCredentials()"
+                                    param1="SCTSObject.authType" param2="SCTSObject.NextNonce" return="SCTSCredentials"/>
+                                <Data>
+                                    <SCTSContent>SCTSObject.SCTSCredentials</SCTSContent>
+                                </Data>
+                            </Cred>
+                        </SCTSIf>
+                    </SyncHdr>
+                    <SyncBody>
+                        <Status>
+                            <SCTSSet attrib="cmdIDNo" param1="1"/>
+                            <CmdID>
+                                <SCTSContent> SCTSObject.cmdIDNo </SCTSContent>
+                            </CmdID>
+                            <SCTSExecutePath xpath="/SyncML/SyncHdr/MsgID" return="TOMsgID" target="CurrRecv"/>
+                            <MsgRef>
+                                <SCTSContent>SCTSObject.TOMsgID</SCTSContent>
+                            </MsgRef>
+                            <CmdRef>0</CmdRef>
+                            <Cmd>SyncHdr</Cmd>
+                            <SCTSExecutePath xpath="/SyncML/SyncHdr/Target/LocURI" return="targetID" target="CurrRecv"/>
+                            <TargetRef>
+                                <SCTSContent>SCTSObject.targetID</SCTSContent>
+                            </TargetRef>
+                            <SCTSExecutePath xpath="/SyncML/SyncHdr/Source/LocURI" return="sourceID" target="CurrRecv"/>
+                            <SourceRef>
+                                <SCTSContent> SCTSObject.sourceID </SCTSContent>
+                            </SourceRef>
+                            <Data>
+                                <SCTSContent> 200 </SCTSContent>
+                            </Data>
+                        </Status>
+                        <!--Build the status for each sync recvd from server  -->
+                        <SCTSSet attrib="LoopIndex" param1="1"/>
+                        <SCTSExecutePath xpath="count(/SyncML/SyncBody/Sync)" return="NumOfSyncs" target="CurrRecv"/>
+                        <SCTSIf param1="SCTSObject.NumOfSyncs" param2="0" OP="GT">
+                            <SCTSLoop>
+                                <!--Get the cuurrent SyncNode -->
+                                <SCTSExpr param1="/SyncML/SyncBody/Sync["
+                                    param2="SCTSObject.LoopIndex" return="xPathQuerry" OP="PLUS"/>
+                                <SCTSExpr param1="SCTSObject.xPathQuerry" param2="]"
+                                    return="xPathQuerry" OP="PLUS"/>
+                                <SCTSExecutePath xpath="SCTSObject.xPathQuerry" return="CurrSync" target="CurrRecv"/>
+                                <Status>
+                                    <SCTSExpr param1="cmdIDNo" param2="1" return="cmdIDNo" OP="PLUS"/>
+                                    <CmdID>
+                                        <SCTSContent> SCTSObject.cmdIDNo </SCTSContent>
+                                    </CmdID>
+                                    <MsgRef>
+                                        <SCTSContent>SCTSObject.TOMsgID</SCTSContent>
+                                    </MsgRef>
+                                    <SCTSExecutePath xpath="CmdID" return="cmdRef" target="CurrSync"/>
+                                    <CmdRef>
+                                        <SCTSContent> SCTSObject.cmdRef </SCTSContent>
+                                    </CmdRef>
+                                    <Cmd>Sync</Cmd>
+                                    <SCTSExecutePath xpath="Target/LocURI" return="TargetDB" target="CurrSync"/>
+                                    <SCTSExecutePath xpath="Source/LocURI" return="SourceDB" target="CurrSync"/>
+                                    <TargetRef>
+                                        <SCTSContent>SCTSObject.TargetDB</SCTSContent>
+                                    </TargetRef>
+                                    <SourceRef>
+                                        <SCTSContent>SCTSObject.SourceDB</SCTSContent>
+                                    </SourceRef>
+                                    <Data>200</Data>
+                                </Status>
+                                <SCTSExecutePath xpath="count(Replace)" return="NumOfReplaces" target="CurrSync"/>
+                                <SCTSIf param1="SCTSObject.NumOfReplaces" param2="0" OP="GT">
+                                    <SCTSSet attrib="ReplaceLoopIndex" param1="1"/>
+                                    <SCTSLoop>
+                                        <!--Get the cuurrent AddNode -->
+                                        <SCTSExpr param1="Replace["
+                                            param2="SCTSObject.ReplaceLoopIndex"
+                                            return="xPathQuerry" OP="PLUS"/>
+                                        <SCTSExpr param1="SCTSObject.xPathQuerry" param2="]"
+                                            return="xPathQuerry" OP="PLUS"/>
+                                        <SCTSExecutePath xpath="SCTSObject.xPathQuerry"
+                                            return="CurrReplace" target="CurrSync"/>
+                                        <!--Build the status for the Replace recvd  -->
+                                        <Status>
+                                            <SCTSExpr param1="cmdIDNo" param2="1" return="cmdIDNo" OP="PLUS"/>
+                                            <CmdID>
+                                                <SCTSContent>SCTSObject.cmdIDNo</SCTSContent>
+                                            </CmdID>
+                                            <MsgRef>
+                                                <SCTSContent>SCTSObject.TOMsgID</SCTSContent>
+                                            </MsgRef>
+                                            <!--Fetch the command id of the add v recvd from testobject -->
+                                            <SCTSExecutePath xpath="CmdID" return="CmdRef" target="CurrReplace"/>
+                                            <CmdRef>
+                                                <SCTSContent>SCTSObject.CmdRef</SCTSContent>
+                                            </CmdRef>
+                                            <Cmd>Replace</Cmd>
+                                            <SCTSExecutePath xpath="Item/Target/LocURI"
+                                                return="LUID" target="CurrReplace"/>
+                                            <TargetRef>
+                                                <SCTSContent>SCTSObject.LUID</SCTSContent>
+                                            </TargetRef>
+                                            <!--Fetch the Data  -->
+                                            <SCTSExecutePath xpath="Item/Data" return="Data" target="CurrReplace"/>
+                                            <!--Generate guid for the add recvd -->
+                                            <!--Insert the data -->
+                                            <SCTSOP OP="SCTSDatabase.replaceRawItem()"
+                                                param1="SCTSObject.TargetDB"
+                                                param2="SCTSobject.Data" param3="SCTSObject.LUID" return="ReplaceStatus"/>
+                                            <!--If the add is succeess -->
+                                            <SCTSIf param1="SCTSObject.ReplaceStatus" param2="1" OP="EQ">
+                                                <Data>200</Data>
+                                            </SCTSIf>
+                                            <SCTSIf param1="SCTSObject.ReplaceStatus" param2="1" OP="NE">
+                                                <!--Add failed -->
+                                                <SCTSSet attrib="executionResult" param1="Failed"/>
+                                                <SCTSSet attrib="FailureReason" param1="Replace failed"/>
+                                                <Data>500</Data>
+                                            </SCTSIf>
+                                        </Status>
+                                        <SCTSIf param1="SCTSObject.ReplaceLoopIndex"
+                                            param2="SCTSObject.NumOfReplaces" OP="EQ">
+                                            <SCTSBreak/>
+                                        </SCTSIf>
+                                        <SCTSExpr param1="SCTSObject.ReplaceLoopIndex" param2="1"
+                                            return="ReplaceLoopIndex" OP="PLUS"/>
+                                    </SCTSLoop>
+                                </SCTSIf>
+                                <SCTSIf param1="SCTSObject.LoopIndex" param2="SCTSObject.NumOfSyncs" OP="EQ">
+                                    <SCTSBreak/>
+                                </SCTSIf>
+                                <SCTSExpr param1="SCTSObject.LoopIndex" param2="1"
+                                    return="LoopIndex" OP="PLUS"/>
+                            </SCTSLoop>
+                        </SCTSIf>
+                        <!--Check whether v recvd Final in the prev recv. If there is Final ...it shows the end of package #4...ao v can end this current package #6 -->
+                        <SCTSExecutePath xpath="/SyncML/SyncBody/Final" return="Final" target="CurrRecv"/>
+                        <SCTSIf param1="SCTSObject.Final" param2="SCTSNULL" OP="NE">
+                            <!--If there if Final end the package#5 -->
+                            <Final/>
+                        </SCTSIf>
+                    </SyncBody>
+                </SyncML>
+            </SCTSSend>
+            <!-- here v have to decide whether goto recieving package #6 or loop bk to another message of package #5:Itz ll depends on final in the prev Recv-->
+            <SCTSExecutePath xpath="/SyncML/SyncBody/Final" return="Final" target="CurrRecv"/>
+            <SCTSIf param1="SCTSObject.Final" param2="SCTSNULL" OP="NE">
+                <!--If there is  if Final in the package#5 then break-->
+                <SCTSBreak/>
+            </SCTSIf>
+        </SCTSLoop>
+        <!--So if there is final(or end of package #4 and hence #5) recv the next package #6 -; package #6 ll have status for Maps sent in package #5 -->
+        <SCTSRecv/>
+        <SCTSExecutePath xpath="/SyncML/SyncHdr/RespURI" return="responseURI" target="CurrRecv"/>
+        <SCTSIf param1="SCTSObject.responseURI" param2="SCTSNULL" OP="NE">
+            <SCTSOP OP="SCTSContext.setResponseURI()" param1="SCTSObject.responseURI" return="retVal"/>
+        </SCTSIf>
+    </SCTSSession>
+</TestCase>

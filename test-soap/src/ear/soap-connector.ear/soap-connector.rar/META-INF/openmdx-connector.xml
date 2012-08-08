@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE openmdx-connector PUBLIC "-//openMDX//DTD Connector Extension 1.0//EN" "http://www.openmdx.org/dtd/openmdx-connector_1_0.dtd">
+<openmdx-connector>
+	<resourceadapter>
+		<connectionfactory-jndi-name>
+			connector/soap
+		</connectionfactory-jndi-name>
+		<pool>
+			<initial-capacity>1</initial-capacity>
+			<maximum-capacity>100</maximum-capacity>
+			<maximum-wait>1000000</maximum-wait>
+		</pool>
+	</resourceadapter>
+</openmdx-connector>

@@ -1,0 +1,264 @@
+/*
+ * This software is published under the BSD license
+ * as listed below.
+ * 
+ * Copyright (c) 2004-2006, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * ------------------
+ * 
+ * This product includes software developed by the Apache Software
+ * Foundation (http://www.apache.org/).
+ */
+
+Contents
+--------
+1. Installation/Configuration of Model Exporter for Together 6.2
+2. Why add openMDX extensions to the Together installation
+3. How to start Model Exporter from within Together
+4. How to start Model Exporter in batch mode
+5. openMDX base classes and primitive type classes for modeling
+6. Using environment variables as project root paths
+7. Troubleshooting
+
+
+1. Installation/Configuration of Model Exporter for Together 6.2
+   -------------------------------------------------------------
+
+1) In order to add the configuration changes you have to exit Together Solo/
+   ControlCenter.
+
+2) Select an installation directory for the Model Exporter (e.g. 
+   d:\pgm\Together6.2\ModelExporter). 
+   * Its subdirectory openmdx-<openmdx.implementation.version>\together is called 
+     %MODEL_EXPORTER_HOME%.
+   * Its subdirectory openmdx-<openmdx.implementation.version>\together-6\together\lib 
+     is called %MODEL_EXPORTER_LIB.
+
+3) Unzip the file together-model-exporter.zip to the installation directory. 
+
+   %MODEL_EXPORTER_HOME% should now contain these files:
+   * LICENSE
+   * README
+   * etc\together\log.properties 
+   * etc\together\zzz.openMDX_model_exporter.config
+
+   %MODEL_EXPORTER_LIB% should now contain these files:
+   * MANIFEST.MF
+   * commons-collections-extendedproperties.jar
+   * jakarta-oro.jar
+   * j2ee-apis.jar
+   * openmdx-base.jar
+   * openmdx-kernel.jar
+   * openmdx-together-plugin.jar
+   * xml-apis.jar
+   * velocity.jar
+
+4) Copy zzz.openMDX_model_exporter.config file from 
+   %MODEL_EXPORTER_HOME%\etc\together\ to %TGH%\config\.
+   (%TGH% stands for the path of your Together installation directory).
+   This should add the openMDX extensions to your Together installation 
+   (for details please refer to the next chapter).
+
+5) Change the following lines in the unzipped file zzz.openmdx_model_exporter.config
+
+	 # path to find manifest file for Together Model Exporter
+	 scriptloader.root.4 = file("%MODEL_EXPORTER_LIB%")
+	 scriptloader.root.4.name = "openMDX"
+
+6) Start Together Solo/ControlCenter. The new features should be available by 
+   now.
+
+
+2. Why add openMDX extensions to the Together installation
+   -----------------------------------------------------
+
+The UML modelling capabilities of Together Solo/ControlCenter 6.2 are limited to
+the features that the user defined project language supports. Unfortunately it is
+not possible to model independently of your programming language. Each chosen 
+programming language limits the use of UML somehow. For example if you use Java
+as a project language, you have no modelling support for multiple inheritance. 
+If you use C++, you cannot define abstract classes (btw: in C++ classes are 
+abstract if they have at least one pure virtual operation). Each language brings
+its own set of UML restrictions.
+
+In a future version Together will support a design mode which is independent of
+a predefined programming language. Meanwhile we have decided to you use C++ as 
+project language to create and edit the models that we need for openMDX. Some 
+features are not supported in Together anyway. To get full MOF compliancy we 
+have added a couple of properties for UML classes, attributes and associations 
+to the default Together inspector.
+
+Fortunately it is relatively easy to configure Together and add the missing 
+features. This can be done manually by executing the steps that are described in
+chapter 1. After this  you will notice that the Properties Inspector has a new 
+tab "openMDX" that contains all the added properties for e.g. an attribute. Please
+note that you only get this tab, if you inspect the properties for classes, 
+attributes, operations and associations. For all other UML features the 
+Together Properties Inspector remains unchanged.
+
+
+3. How to start Model Exporter from within Together
+   ------------------------------------------------
+   
+Start Together and load your project. Click on the Modules tab in the
+explorer window. Open the modules tree so that you can see
+"org.openmdx" -> "Model Exporter". Run the Model Exporter by means of a right 
+mouse click. You are then asked to enter the desired model and a few seconds 
+later to select the name for the generated jar file. This jar file should 
+contain all the JMI class and XMI files.
+
+
+4. How to start Model Exporter in batch mode
+   -----------------------------------------
+
+It is possible to start the Model Exporter outside of Together in order to
+include the whole generation mechanism in external scripts (e.g. Ant). Because
+the Model Exporter needs to know which model you would like to export and
+which name you would like to choose for the generated jar file, you have
+to specify the following four Java system properties (the last four are optional):
+
+org.openmdx.model1.exporter.together.modelName 
+  (e.g. org.openmdx.model1.exporter.together.modelName=org:omg:model1)
+
+org.openmdx.model1.exporter.together.jarFileName 
+  (e.g. org.openmdx.model1.exporter.together.jarFileName=c:\tmp\test.jar)
+
+org.openmdx.model1.exporter.together.autoCorrection  => optional, default setting is "true"
+  (e.g. org.openmdx.model1.exporter.together.autoCorrection=true) 
+
+org.openmdx.model1.exporter.together.showWarnings  => optional, default setting is "true" 
+  (e.g. org.openmdx.model1.exporter.together.showWarnings=false)
+
+org.openmdx.model1.exporter.together.exitOnFailure  => optional, per default this flag
+  is not set
+  This indicates whether the Together Model Exporter should exit or not 
+	whenever an exception occurs. If this java system property is set, the
+	Together Model Exporter exits with exit code CommonExceptions.EXECUTION_FAILURE.
+  
+org.openmdx.model1.exporter.together.openmdxjdo => optional, per default this directory is unspecified
+  This is the base directory of the .openmdxjdo configuration files
+
+Use %TGH%\bin\Together.bat as template to show you how you can start Together
+from command line. However to start Model Exporter you have to modify the 
+start command:
+
+  "%JDK%\bin\java" 
+  -noverify 
+  -Dorg.openmdx.model1.exporter.together.modelName=org:omg:model1
+  -Dorg.openmdx.model1.exporter.together.jarFileName=c:\tmp\test.jar
+  -Dorg.openmdx.model1.exporter.together.formats="jmi.openmdx-1,xmi.openmdx-1,uml.openmdx-1,together.openmdx-1"
+  -Dorg.openmdx.log.config.filename=c:/temp/model-export.log.properties
+  -Djava.protocol.handler.pkgs=org.openmdx.kernel.url.protocol
+  -cp 
+    %OPENMDX_LIB_DIR%\commons-collections-extendedproperties.jar;%OPENMDX_LIB_DIR%\openmdx-base.jar;%OPENMDX_LIB_DIR%\openmdx-kernel.jar;%OPENMDX_LIB_DIR%\openmdx-together-plugin.jar;
+    %TGH%\lib\together.jar;%TGH%\lib\tgscilib.jar;%TGH%\lib\openapi.jar;%TGH%\modules;%TGH%\lib\gifs.zip;%TGH%\out\classes;%TGH%\lib\i18n;%TGH%\lib\jgl.zip;%TGH%\lib\jacl.jar;%TGH%\lib\coroutine;%TGH%\lib\Java2COM;%TGH%\lib\uddi4j.jar;%TGH%\lib\mail.jar;%TGH%\lib\xalan.jar;%TGH%\lib\xerces.jar;%TGH%\lib\jndi.jar;%TGH%\lib\tcljava.jar;%TGH%\lib\jcvs\jars\jcvsii.jar;%TGH%\lib\jcpagelayout.jar;%TGH%\lib\misclib.zip;%TGH%\lib\javax.jar;%JDK_TOOLS_JAR%;%TGH%\lib\jhall.jar;%TGH%\help\together-help.jar;%TGH%\bundled\tomcat\lib\servlet.jar;%TGH%\lib\soap.jar;%TGH%\bundled\j2ee\lib\j2ee.jar;%TGH%\lib\guiBuilderBeanInfo.jar;
+    %TG_CLASSPATH%;%JDK_RT_JAR%
+  com.togethersoft.together.Main
+  -script:org.openmdx.model1.together.plugin.ExporterPlugin
+  c:\temp\my_project.tpr
+
+
+5. openMDX base classes and primitive type classes for modeling
+   ------------------------------------------------------------
+
+This distribution also contains a set of openMDX base classes and primitive type
+classes which are necessary for openMDX compliant modeling. To use these classes
+you have to do the following:
+
+1) Select a directory for these modeling base classes (e.g. d:\openmdx\classes).
+   In the following this directory is called %MODELING_BASE_CLASSES%.
+
+2) Unzip the file together-models.zip to the directory %MODELING_BASE_CLASSES%.
+
+3) To use these modeling base classes in your Together project, you have to add
+   a project path which points to the directory %MODELING_BASE_CLASSES%. In 
+   Together this can be done by selecting the menu entry 
+   "Project/Project Properties...". By means of "Add Path, Library, or Archive..."
+   you can enter the path to the directory %MODELING_BASE_CLASSES%.
+   
+   Note: To avoid any unwanted changes to the modeling base classes you can set 
+         the flag "Read-only" for the chosen path.
+
+
+6. Using environment variables as project root paths
+   -------------------------------------------------
+
+By means of Project/Project Properties/Project Paths you can specify project 
+root paths. Together round-trip engineers any source code and model information
+it finds in these project root paths and any subdirectories of them. This is a
+very useful feature if you want to separate e.g. your models from the openMDX
+base models.
+
+Unfortunately it is at the moment NOT possible to use environment variables in
+the specification of these additional project paths. For more information please
+refer to:
+
+http://www.togethercommunity.com/thread.jsp?forum=76&thread=1318&message=51970&redirect=true&hilite=true&q=environment
+
+This means for our environment that you cannot specify environment variables 
+like $THIRDPARTY, etc. (e.g. similar to path maps in Rational Rose) that you
+can use as anchor points for project paths in Together.
+
+At the moment we have the following two alternatives:
+
+- either use Java VM properties (for details please refer to the link above), 
+  the problem is that ypu have to modify the call in Together.bat, or
+- by means of the specification of absolute paths as project root paths; please
+  keep in mind that you have to adapt these paths for every user to his 
+  specific environment (if the directory structure is the same for all users,
+  this problem can be avoided at all!).
+
+
+7. Troubleshooting
+   ---------------
+If you can not export models as JAR Files you can generate an error log as follows:
+
+1) Open log.properties (in directory %MODEL_EXPORTER_HOME%\etc\together) and 
+   configure the entry LogFilePath according to your demands
+
+3) Add the system property org.openmdx.log.config.filename=
+   %MODEL_EXPORTER_HOME%\etc\together\log.properties to the Together Java VM 
+   startup command, e.g. for Windows:
+	
+	 3.1) Open Together.bat (in directory %TGH%\bin\) and extend the start command
+	      with the -DLOG_PROPERTY_FILE option:
+
+        :AFTER_PATH
+        if .%1.==.-recursive. shift 1
+        "%JDK%\bin\java" -noverify -DLOG_PROPERTY_FILE=%MODEL_EXPORTER_HOME%\etc\together\log.properties ...
+
+   3.2) Run Together.bat (not Together.exe!!!)
+
+   3.3) When running the Model Exporter a log file should be generated in the 
+        chosen location.

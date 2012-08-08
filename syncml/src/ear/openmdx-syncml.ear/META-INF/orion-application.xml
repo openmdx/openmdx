@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<!DOCTYPE orion-application PUBLIC "-//ORACLE//DTD OC4J Application runtime 9.04//EN" "http://xmlns.oracle.com/ias/dtds/orion-application-9_04.dtd">
+<orion-application deployment-version="10.1.2.0.0">
+	<web-module id="opencrx-syncml" path="openmdx-syncml.war"/>
+</orion-application>

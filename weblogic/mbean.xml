@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<!--
+=======================================================================
+= Name:        $Id: mbean.xml,v 1.9 2006/08/20 21:57:07 hburger Exp $
+= Description: openMDX MBean Maker fot WebLogic
+= Revision:    $Revision: 1.9 $
+= Date:        $Date: 2006/08/20 21:57:07 $
+= Copyright:   (c) 2003-2004 OMEX AG
+=======================================================================
+=
+= Copyright (c) 2004-2006, OMEX AG, Switzerland
+= All rights reserved.
+= 
+= THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+= CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+= INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+= MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+= DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+= BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+= EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+= TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+= DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+= ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+= OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+= OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+= POSSIBILITY OF SUCH DAMAGE.
+= 
+-->
+
+<project name="openmdx-weblogic.mbean" default="all" basedir=".">
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Build The WebLogic Security Provider                              -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+	  <!-- global properties -->
+	  <property name="bin"                 			location="${bea.weblogic.home}\server\bin"/>
+	  <property name="lib"                 			location="${bea.weblogic.home}\server\lib"/>
+	  <property name="mbeantypes"         			location="../${build.target.platform}/weblogic/deployment-unit"/>
+	  <property name="security_provider.name"  	value="openmdx-weblogic.mbean.jar"/>
+	  <property name="java_src_dir"        			location="src/java"/>
+	  <property name="mdf_src_dir"         			location="src/mdf"/>
+	  <property name="build_dir"           			location="build/${build.target.platform}/mbean"/>
+	  <property name="namespace"           			value="http://xml.openmdx.org/weblogic/security/authentication"/>
+
+	  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+	  <!-- Build These Samples                                               -->
+	  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+	  <target name="all" depends="source-file,source-directory,clean">
+<echo>
+	lib=${lib}
+	source.property.name=${source.property.name}
+	source.property.value=${source.property.value}
+</echo>
+	    <!-- Set up the build directories -->
+	    <mkdir dir="${build_dir}"/>
+
+	    <!-- Only copy over the commo dtd and sample provider xml files for now -->
+	    <copy todir="${build_dir}" flatten="true">
+	      <fileset dir="${lib}">
+	        <include name="commo.dtd"/>
+	      </fileset>
+	    </copy>
+	    <copy todir="${build_dir}" flatten="true">
+	      <fileset dir="${mdf_src_dir}">
+	        <include name="org/openmdx/weblogic/security/authentication/*"/>
+	      </fileset>
+	      <fileset dir="${java_src_dir}">
+	        <include name="org/openmdx/weblogic/security/authentication/*"/>
+	        <include name="org/openmdx/weblogic/security/realm/*"/>
+	      </fileset>
+	    </copy>
+
+	    <!-- Build the sample security providers' jar file -->
+	    <java classname="weblogic.management.commo.WebLogicMBeanMaker" fork="true" failonerror="true">
+	    	<sysproperty key="files" value="${build_dir}"/>
+	    	<sysproperty key="${source.property.name}" value="${source.property.value}"/>
+		    <sysproperty key="MJF" value="${build_dir}/${security_provider.name}"/>
+				<sysproperty key="targetNameSpace" value="${namespace}"/>
+				<sysproperty key="preserveStubs" value="true"/>
+				<sysproperty key="createStubs" value="true"/>
+	    </java>
+
+	    <!-- Deploy the sample security providers -->
+	    <copy todir="${mbeantypes}" flatten="true">
+	      <fileset dir="${build_dir}">
+	        <include name="${security_provider.name}"/>
+	      </fileset>
+	    </copy>
+	  </target>
+
+	  <target name="clean">
+	    <delete quiet="true" dir="${build_dir}"/>
+	    <delete quiet="true" file="${mbeantypes}/${security_provider.name}"/>
+	  </target>
+
+		<target name="source-file" if="mdf.name">
+			<property name="source.property.name" value="MDF"/>
+			<property name="source.property.value" location="${build_dir}/${mdf.name}"/>
+		</target>
+
+		<target name="source-directory" unless="mdf.name">
+			<property name="source.property.name" value="MDFDIR"/>
+			<property name="source.property.value" location="${build_dir}"/>
+		</target>
+		
+</project>

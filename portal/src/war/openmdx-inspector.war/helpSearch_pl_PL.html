@@ -1,0 +1,104 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>openCRX - Wyszukiwanie zaawansowane</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
+<table class="objectTitle">
+  <tr>
+    <td>Wyszukiwanie zaawansowane</td>
+	<td>
+		<script>
+		  <!--
+		  document.write('<td align="right"><a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+		  -->
+		</script>
+	</td>
+  </tr>
+</table>
+
+ <div class="hh2">Wyszukiwanie zaawansowane w kilku krokach</div>
+ <div class="normal">Możesz poprawić dokładność wyszukiwania dodając operatory, 
+ które dokładniej określą znaczenie użytych słów i wartości. Poniżej opisano 
+ opcje, które mogą być zastosowane bezpośrednio w okienku wyszukiwania. </div>
+ <div class="hh2">Podstawy</div> 
+ <div class="normal">Możesz wprowadzić słowo, liczbę lub wyrażenie, np.: 
+ <strong>'Nowak'</strong>, <strong>'> 500'</strong> or <strong>'>=
+   Kowal'</strong>, a następnie</div>
+ <table cellpadding="0" cellspacing="10">
+   <tr valign="top">
+     <td>&#8226; kliknąć w <strong>nagłówek kolumny</strong> , aby wyszukiwać 
+	 wyłącznie obiekty, gdzie wartość w wybranej kolumnie zgadza się z 
+	 wyrażeniem w okienku wyszukiwania. (<strong>wszystkie obiekty</strong> są 
+	 przeszukiwane, niezależnie od aktualnie ustawionego filtra, a wszystkie 
+	 wcześniej ustawione warunki wyszukiwania zostaną utracone)</td>
+	 <td bgcolor="#CCCCCC"><strong>Nowe wyszukiwanie</strong><br />
+	 <img src="images/helpSearchTut0.gif" width="129" height="51" /></td>
+   </tr>
+   <tr valign="top">
+     <td>&#8226; kliknąć na  <strong>przycisku [+]</strong> [+], żeby 
+	 wyszukiwać obiekty, gdzie wartość w wybranej kolumnie zgadza się z 
+	 wyrażeniem w okienku wyszukiwania, przy czym przeszukiwane są tylko te 
+	 <strong>obiekty, które zgadzają się z wcześniej ustawionymi warunkami lub 
+	 filtrami </strong> (tzn. dodanie tego warunku spowoduje ograniczenie 
+	 zbioru wyników).</td>
+	 <td bgcolor="#CCCCCC"><strong>Dodawanie warunków</strong><br />
+	 <img src="images/helpSearchTut1.gif" width="129" height="51" /></td>
+   </tr>
+</table>
+ <div class="hh2">Operatory</div>
+ <div class="normal">Następujące operatory mogą być używane (zauważ, że niektóre 
+ z nich mogą nie być dostępne we wszystkich bazach danych):</div>
+ <ul>
+ <li>brzmi jak (<strong>*</strong>) (ang.: sounds like)</li>
+ <li>podobny do (<strong>%</strong>) (ang.: like), domyślny operator dla wartości 
+ tekstowych</li>
+ <li>równy  (<strong>=</strong>), domyślny operator dla wartości logicznych, 
+ liczbowych i kodów </li>
+ <li>różny od (<strong><></strong>, <strong>!</strong>=)</li>
+ <li>mniejszy (<strong><</strong>)</li>
+ <li>mniejszy lub równy (<strong><=</strong>)</li>
+ <li>większy (<strong>></strong>)</li>
+ <li>większy lub równy <strong>(>=</strong>)</li>
+ </ul>
+ <div class="hh2">Operator &quot;I&quot;</div>
+ <div class="normal">Aby wyszukiwać obiekty spełniające jednocześnie kilka 
+ warunków, użyj znaku  &quot;<strong>&amp;</strong>&quot; pomiędzy kolejnymi 
+ warunkami. Na przykład, jeżeli chcesz wyszukać obiekty, które o wartości 
+ pomiędzy 500 i 1000 (tzn. większe niż 500 i mniejsze niż 1000), wystarczy 
+ wpisać:  <strong>'&gt;500 &amp; &lt;1000'</strong></div>
+ <div class="hh2">Operator &quot;LUB&quot; (listy wartości)</div>
+<div class="normal">Żeby odnaleźć obiekty, które zawierają jedno ze słów A lub 
+B, użyj średnika &quot;<strong>;</strong>&quot; pomiędzy wartościami. Na 
+przykład, żeby wyszukać osoby o nazwisku ?Kowal? lub ?Nowak?, wystarczy wpisać: 
+<strong>'= Kowal; Nowak'</strong></div>
+ <div class="hh2">Warunki złożone</div>
+ <div class="normal">Warunki można łączyć ze sobą praktycznie bez ograniczeń. Na 
+ przykład, aby znaleźć obiekty o wartości mniejszej od 1000 i jednocześnie różne 
+ od ?500? i różne od ?600?, wystarczy wpisać: 
+ <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
+ <div class="normal">Zasady przetwarzania złożonych warunków wyglądają 
+ następująco:</div>
+ <ul>
+   <li>searchExpr ::= filterValue { & filterValue }<br />
+   (--> podział łańcuchów znakowych z  <strong>&</strong> jako separatorem)</li>
+   <li>filterValue ::= [operator] value { ; value }<br />
+   (--> podział łańcuchów znakowych z <strong>;</strong> jako separatorem)</li>
+ </ul>
+ <div class="hh2">Znaki wieloznaczne</div>
+ <div class="normal">
+   <p>Niektóre bazy danych pozwalają na użycie znaków wieloznacznych na początku 
+   warunku wyszukiwania. Wtedy, możliwe jest znalezienie na przykład wszystkich 
+   osób o nazwisku zawierającym ?arski? (np. Winiarski, Konarski, etc.) przez
+   wpisanie:  <strong>'%%ller'<br />
+   UWAGA:</strong> wyszukiwanie z użyciem znaków wieloznacznych może być bardzo 
+   czasochłonne, jeżeli baza danych nie została odpowiednio to tego celu 
+   dostrojona (przeszukiwanie całych tablic)!  </p>
+ </div>
+</body>
+</html>

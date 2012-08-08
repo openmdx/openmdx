@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://geronimo.apache.org/xml/ns/j2ee/application" xmlns:sec="http://geronimo.apache.org/xml/ns/security-1.1" configId="opencrx-sycml-Web_ear" parentId="opencrx-syncml-Web_ear">
+</application>

@@ -1,0 +1,2 @@
+Manifest-Version: 1.0
+Class-Path: APP-INF/lib/openmdx-base.jar APP-INF/lib/openmdx-application.jar APP-INF/lib/openmdx-weblogic.security.jar

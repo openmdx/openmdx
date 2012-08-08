@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE connector 
+	PUBLIC "-//Sun Microsystems, Inc.//DTD Connector 1.0//EN" 
+	"http://java.sun.com/dtd/connector_1_0.dtd"
+>
+<connector>
+	<display-name>Certifcate Provider</display-name>
+	<description>openMDX/Security Certificate Provider Test</description>
+	<vendor-name>OMEX AG</vendor-name>
+	<spec-version>1.0</spec-version>
+	<eis-type>JKS</eis-type>
+	<version>2.0</version>
+	<resourceadapter>
+		<managedconnectionfactory-class>org.openmdx.base.security.pki.ManagedKeyStoreConnectionFactory</managedconnectionfactory-class>
+		<connectionfactory-interface>org.openmdx.kernel.security.resource.ConnectionFactory</connectionfactory-interface>
+		<connectionfactory-impl-class>org.openmdx.base.security.pki.KeyStoreConnectionFactory</connectionfactory-impl-class>
+		<connection-interface>org.openmdx.kernel.security.pki.CertificateProvider</connection-interface>
+		<connection-impl-class>org.openmdx.base.security.pki.CertificateConnection</connection-impl-class>
+		<transaction-support>NoTransaction</transaction-support>
+		<config-property>
+			<config-property-name>KeyStoreType</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>jks</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>ConnectionURL</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>file:///c:/opt/bea/weblogic92/server/lib/DemoTrust.jks</config-property-value>
+		</config-property>
+		<!-- UserName/Password intended for LightweightContainer usage only -->
+		<config-property>
+			<config-property-name>UserName</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>certgenca</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>Password</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>DemoTrustKeyStorePassPhrase</config-property-value>
+		</config-property>
+		<authentication-mechanism>
+			<authentication-mechanism-type>BasicPassword</authentication-mechanism-type>
+			<credential-interface>javax.resource.spi.security.PasswordCredential</credential-interface>
+		</authentication-mechanism>
+		<reauthentication-support>false</reauthentication-support>
+	</resourceadapter>
+</connector>

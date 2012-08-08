@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE connector PUBLIC "-//Sun Microsystems, Inc.//DTD Connector 1.0//EN" "http://java.sun.com/dtd/connector_1_0.dtd">
+<connector>
+	<display-name>microsoft-sqlserver-2000</display-name>
+	<description>openMDX/Test.Core Microsoft SQL Server 2000 Connector</description>
+	<vendor-name>OMEX AG</vendor-name>
+	<spec-version>1.0</spec-version>
+	<eis-type>JDBC</eis-type>
+	<version>2.0</version>
+	<resourceadapter>
+		<managedconnectionfactory-class>org.openmdx.kernel.application.container.spi.sql.ManagedDatabaseConnectionFactory</managedconnectionfactory-class>
+		<connectionfactory-interface>javax.sql.DataSource</connectionfactory-interface>
+		<connectionfactory-impl-class>org.openmdx.kernel.application.container.spi.sql.DatabaseConnectionFactory</connectionfactory-impl-class>
+		<connection-interface>java.sql.Connection</connection-interface>
+		<connection-impl-class>org.openmdx.kernel.application.container.spi.sql.DatabaseConnection</connection-impl-class>
+		<transaction-support>XATransaction</transaction-support>
+		<config-property>
+			<config-property-name>User</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>system</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>Password</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>manager</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>Driver</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>com.microsoft.jdbcx.sqlserver.SQLServerDataSource</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>ServerName</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>localhost</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>PortNumber</config-property-name>
+			<config-property-type>java.lang.Integer</config-property-type>
+			<config-property-value>1433</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>DatabaseName</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>openMDX_test</config-property-value>
+		</config-property>
+		<config-property>
+			<config-property-name>SelectMethod</config-property-name>
+			<config-property-type>java.lang.String</config-property-type>
+			<config-property-value>cursor</config-property-value>
+		</config-property>
+		<reauthentication-support>false</reauthentication-support>
+	</resourceadapter>
+</connector>

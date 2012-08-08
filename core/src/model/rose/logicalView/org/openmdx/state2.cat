@@ -1,0 +1,1870 @@
+
+(object Petal
+    version    	50
+    _written   	"Rose 8.3.0407.2800"
+    charSet    	0)
+
+(object Class_Category "state2"
+    is_unit    	TRUE
+    is_loaded  	TRUE
+    quid       	"407170B300B4"
+    exportControl 	"Public"
+    logical_models 	(list unit_reference_list
+	(object Class "HistoryState"
+	    quid       	"407170D8032E"
+	    documentation 	
+|Stated objects are identified by their standard access path. Its state is selected by the InteractionSpec's 'requestedFor' and 'requestedAt' values which default to the current time point.
+|<p>
+|Another state may be accessed by overriding the InteractionSpec's values:<ul>
+|<li>xri:@openmdx:...;requestedAt=...</li>
+|<li>xri:@openmdx:...;requestedFor=...</li>
+|<li>xri:@openmdx:...;requestedAt=...;requestedFor=...</li>
+|</ul>
+	    
+	    stereotype 	"root"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"445B0E6901ED"
+		    supplier   	"Logical View::org::openmdx::state2::State"
+		    quidu      	"445B0CBA02C9"))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "stateCreatedAt"
+		    quid       	"43B2D2120382"
+		    type       	"org::w3c::dateTime"
+		    exportControl 	"Public"
+		    derived    	TRUE)
+		(object ClassAttribute "stateCreatedBy"
+		    quid       	"445B61B00166"
+		    stereotype 	"set"
+		    type       	"org::w3c::string"
+		    exportControl 	"Public"
+		    derived    	TRUE)
+		(object ClassAttribute "stateRemovedAt"
+		    attributes 	(list Attribute_Set
+			(object Attribute
+			    tool       	"SPICE"
+			    name       	"isChangeable"
+			    value      	(value Text "false")))
+		    quid       	"4071710B0010"
+		    stereotype 	"0..1"
+		    type       	"org::w3c::dateTime"
+		    exportControl 	"Public"
+		    derived    	TRUE)
+		(object ClassAttribute "stateRemovedBy"
+		    quid       	"445B61C603AC"
+		    stereotype 	"set"
+		    type       	"org::w3c::string"
+		    exportControl 	"Public"
+		    derived    	TRUE))
+	    abstract   	TRUE)
+	(object Class "DateStateCapable"
+	    quid       	"43B2B65F0231"
+	    stereotype 	"root"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"445B0E5901F4"
+		    supplier   	"Logical View::org::openmdx::state2::StateCapable"
+		    quidu      	"445B0C710075"))
+	    abstract   	TRUE)
+	(object Class "DateState"
+	    quid       	"43B2B69C033D"
+	    stereotype 	"root"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"445B0E65036E"
+		    supplier   	"Logical View::org::openmdx::state2::State"
+		    quidu      	"445B0CBA02C9"))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "stateValidFrom"
+		    quid       	"43B2B6F00168"
+		    stereotype 	"0..1"
+		    type       	"org::w3c::date"
+		    exportControl 	"Public")
+		(object ClassAttribute "stateValidTo"
+		    quid       	"43B2B70F02A3"
+		    stereotype 	"0..1"
+		    type       	"org::w3c::date"
+		    exportControl 	"Public"))
+	    abstract   	TRUE)
+	(object Class "DateTimeState"
+	    quid       	"43B2B7D703D7"
+	    stereotype 	"root"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"445B0E6B03A8"
+		    supplier   	"Logical View::org::openmdx::state2::State"
+		    quidu      	"445B0CBA02C9"))
+	    class_attributes 	(list class_attribute_list
+		(object ClassAttribute "stateValidFrom"
+		    quid       	"43B2B9FF0037"
+		    stereotype 	"0..1"
+		    type       	"org::w3c::dateTime"
+		    exportControl 	"Public")
+		(object ClassAttribute "stateInvalidFrom"
+		    quid       	"43B2B9FF004B"
+		    stereotype 	"0..1"
+		    type       	"org::w3c::dateTime"
+		    exportControl 	"Public"))
+	    abstract   	TRUE)
+	(object Class "DateTimeStateCapable"
+	    quid       	"43B2CA10004F"
+	    stereotype 	"root"
+	    superclasses 	(list inheritance_relationship_list
+		(object Inheritance_Relationship
+		    quid       	"445B0E6002DA"
+		    supplier   	"Logical View::org::openmdx::state2::StateCapable"
+		    quidu      	"445B0C710075"))
+	    abstract   	TRUE)
+	(object Class "StateCapable"
+	    quid       	"445B0C710075"
+	    stereotype 	"root"
+	    abstract   	TRUE)
+	(object Class "State"
+	    quid       	"445B0CBA02C9"
+	    stereotype 	"root"
+	    abstract   	TRUE)
+	(object Class "StateSelector"
+	    quid       	"4519940100BF"
+	    stereotype 	"enumeration")
+	(object Association "StateForDate"
+	    quid       	"43B2BA580216"
+	    roles      	(list role_list
+		(object Role "stateFor"
+		    quid       	"43B2BA59007C"
+		    label      	"stateFor"
+		    supplier   	"Logical View::org::openmdx::state2::DateState"
+		    quidu      	"43B2B69C033D"
+		    keys       	(list class_attribute_list
+			(object ClassAttribute "validFor"
+			    quid       	"43B2BF75018C"
+			    type       	"org::w3c::date"))
+		    client_cardinality 	(value cardinality "0..1")
+		    Constraints 	"isFrozen"
+		    is_navigable 	TRUE)
+		(object Role "stateCapable"
+		    quid       	"43B2BA590086"
+		    label      	"stateCapable"
+		    supplier   	"Logical View::org::openmdx::state2::DateStateCapable"
+		    quidu      	"43B2B65F0231"
+		    client_cardinality 	(value cardinality "1..1")))
+	    derived    	TRUE)
+	(object Association "ViewForDateRange"
+	    quid       	"43B2C0B0015D"
+	    roles      	(list role_list
+		(object Role "statesFor"
+		    quid       	"43B2C0B00397"
+		    label      	"statesFor"
+		    supplier   	"Logical View::org::openmdx::state2::DateState"
+		    quidu      	"43B2B69C033D"
+		    keys       	(list class_attribute_list
+			(object ClassAttribute "validFrom"
+			    quid       	"43B2C15D0300"
+			    type       	"org::w3c::date")
+			(object ClassAttribute "validTo"
+			    quid       	"445B10A90321"
+			    type       	"org::w3c::date"))
+		    client_cardinality 	(value cardinality "0..1")
+		    Constraints 	"isFrozen"
+		    is_navigable 	TRUE)
+		(object Role "stateCapable"
+		    quid       	"43B2C0B00399"
+		    label      	"stateCapable"
+		    supplier   	"Logical View::org::openmdx::state2::DateStateCapable"
+		    quidu      	"43B2B65F0231"
+		    client_cardinality 	(value cardinality "1..1")))
+	    derived    	TRUE)
+	(object Association "StateForDateTime"
+	    quid       	"43B2CA5F01ED"
+	    roles      	(list role_list
+		(object Role "stateFor"
+		    quid       	"43B2CA60009A"
+		    label      	"stateFor"
+		    supplier   	"Logical View::org::openmdx::state2::DateTimeState"
+		    quidu      	"43B2B7D703D7"
+		    keys       	(list class_attribute_list
+			(object ClassAttribute "validFor"
+			    quid       	"43B2CAAD01BD"
+			    type       	"org::w3c::dateTime"))
+		    client_cardinality 	(value cardinality "0..1")
+		    Constraints 	"isFrozen"
+		    is_navigable 	TRUE)
+		(object Role "stateCapable"
+		    quid       	"43B2CA6000A4"
+		    label      	"stateCapable"
+		    supplier   	"Logical View::org::openmdx::state2::DateTimeStateCapable"
+		    quidu      	"43B2CA10004F"
+		    client_cardinality 	(value cardinality "1..1")))
+	    derived    	TRUE)
+	(object Association "ViewForDateTimeRange"
+	    quid       	"43B2CBB00350"
+	    roles      	(list role_list
+		(object Role "statesFor"
+		    quid       	"43B2CBB101CB"
+		    label      	"statesFor"
+		    supplier   	"Logical View::org::openmdx::state2::DateTimeState"
+		    quidu      	"43B2B7D703D7"
+		    keys       	(list class_attribute_list
+			(object ClassAttribute "validFrom"
+			    quid       	"43B2CBCA0019"
+			    type       	"org::w3c::dateTime")
+			(object ClassAttribute "validTo"
+			    quid       	"445B10DB0391"
+			    type       	"org::w3c::dateTime"))
+		    client_cardinality 	(value cardinality "0..1")
+		    Constraints 	"isFrozen"
+		    is_navigable 	TRUE)
+		(object Role "stateCapable"
+		    quid       	"43B2CBB101D5"
+		    label      	"stateCapable"
+		    supplier   	"Logical View::org::openmdx::state2::DateTimeStateCapable"
+		    quidu      	"43B2CA10004F"
+		    client_cardinality 	(value cardinality "1..1")))
+	    derived    	TRUE)
+	(object Association "StateForSelection"
+	    quid       	"445B7F6C02A2"
+	    documentation 	
+|Selects a specific state:<ul>
+|<li>FIRST
+|<li>CURRENT
+|<li>LAST
+|</ul>
+	    
+	    roles      	(list role_list
+		(object Role "state"
+		    quid       	"445B7F6E004C"
+		    label      	"state"
+		    supplier   	"Logical View::org::openmdx::state2::State"
+		    quidu      	"445B0CBA02C9"
+		    keys       	(list class_attribute_list
+			(object ClassAttribute "selector"
+			    quid       	"445F0AD600D3"
+			    type       	"org::openmdx::state2::StateSelector"))
+		    client_cardinality 	(value cardinality "0..1")
+		    Constraints 	"isFrozen"
+		    is_navigable 	TRUE)
+		(object Role "stateCapable"
+		    quid       	"445B7F6E004E"
+		    label      	"stateCapable"
+		    supplier   	"Logical View::org::openmdx::state2::StateCapable"
+		    quidu      	"445B0C710075"
+		    client_cardinality 	(value cardinality "1..1")))
+	    derived    	TRUE)
+	(object Association "ViewExtendsViewCapable"
+	    quid       	"445B88E2029A"
+	    roles      	(list role_list
+		(object Role "extended"
+		    quid       	"445B88E30274"
+		    label      	"extended"
+		    supplier   	"Logical View::org::openmdx::compatibility::view1::ViewCapable"
+		    quidu      	"403DE1B4024A"
+		    client_cardinality 	(value cardinality "1..1")
+		    Constraints 	"isFrozen"
+		    is_navigable 	TRUE)
+		(object Role "view"
+		    quid       	"445B88E3027E"
+		    label      	"view"
+		    supplier   	"Logical View::org::openmdx::compatibility::view1::View"
+		    quidu      	"3FF988B30102"
+		    keys       	(list class_attribute_list
+			(object ClassAttribute "fragment"
+			    quid       	"445B8959013D"
+			    type       	"org::w3c::string"))
+		    client_cardinality 	(value cardinality "0..1")
+		    Constraints 	"isFrozen"
+		    is_navigable 	TRUE))))
+    logical_presentations 	(list unit_reference_list
+	(object ClassDiagram "Main"
+	    quid       	"407170C2023C"
+	    title      	"Main"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	284
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object ClassView "Class" "Logical View::org::openmdx::state2::HistoryState" @1
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1465, 1327)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@1
+			location   	(1065, 1213)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	800
+			justify    	0
+			label      	"HistoryState")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@1
+			location   	(1065, 1172)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	800
+			justify    	0
+			label      	"<<root>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"407170D8032E"
+		    compartment 	(object Compartment
+			Parent_View 	@1
+			location   	(1065, 1265)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	5
+			max_width  	796)
+		    width      	818
+		    height     	331
+		    annotation 	8)
+		(object ClassView "Class" "Logical View::org::openmdx::state2::DateState" @2
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(491, 1320)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@2
+			location   	(106, 1209)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	770
+			justify    	0
+			label      	"DateState")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@2
+			location   	(106, 1168)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	770
+			justify    	0
+			label      	"<<root>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"43B2B69C033D"
+		    compartment 	(object Compartment
+			Parent_View 	@2
+			location   	(106, 1261)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	3
+			max_width  	756)
+		    width      	788
+		    height     	325
+		    annotation 	8)
+		(object ClassView "Class" "Logical View::org::openmdx::state2::DateStateCapable" @3
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(487, 667)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@3
+			location   	(93, 634)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	789
+			justify    	0
+			label      	"DateStateCapable")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@3
+			location   	(93, 593)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	789
+			justify    	0
+			label      	"<<root>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"43B2B65F0231"
+		    width      	807
+		    height     	168
+		    annotation 	8)
+		(object AssociationViewNew "StateForDate" @4
+		    location   	(691, 954)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @5
+			Parent_View 	@4
+			location   	(710, 999)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	1
+			anchor_loc 	1
+			nlines     	1
+			max_width  	203
+			justify    	0
+			label      	"/StateForDate"
+			pctDist    	0.816667
+			height     	45
+			orientation 	1)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"43B2BA580216"
+		    roleview_list 	(list RoleViews
+			(object RoleView "stateFor" @6
+			    Parent_View 	@4
+			    location   	(116, 204)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @7
+				Parent_View 	@6
+				location   	(782, 1130)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	142
+				justify    	0
+				label      	"+stateFor"
+				pctDist    	0.865672
+				height     	91
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"43B2BA59007C"
+			    client     	@4
+			    supplier   	@2
+			    vertices   	(list Points
+				(691, 954)
+				(691, 1158))
+			    line_style 	3
+			    origin_attachment 	(691, 954)
+			    terminal_attachment 	(691, 1158)
+			    label      	(object SegLabel @8
+				Parent_View 	@6
+				location   	(641, 1134)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"0..1"
+				pctDist    	0.881773
+				height     	51
+				orientation 	1)
+			    label      	(object SegLabel @9
+				Parent_View 	@6
+				location   	(693, 1087)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	3
+				anchor_loc 	1
+				nlines     	1
+				max_width  	142
+				justify    	0
+				label      	"{isFrozen}"
+				pctDist    	0.651741
+				height     	2
+				orientation 	0))
+			(object RoleView "stateCapable" @10
+			    Parent_View 	@4
+			    location   	(116, 204)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @11
+				Parent_View 	@10
+				location   	(810, 837)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	210
+				justify    	0
+				label      	"+stateCapable"
+				pctDist    	0.580000
+				height     	119
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"43B2BA590086"
+			    client     	@4
+			    supplier   	@3
+			    vertices   	(list Points
+				(691, 954)
+				(691, 750))
+			    line_style 	3
+			    origin_attachment 	(691, 954)
+			    terminal_attachment 	(691, 750)
+			    label      	(object SegLabel @12
+				Parent_View 	@10
+				location   	(651, 836)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"1..1"
+				pctDist    	0.584158
+				height     	41
+				orientation 	0)
+			    label      	(object SegLabel @13
+				Parent_View 	@10
+				location   	(691, 779)
+				font       	(object Font
+				    size       	6
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	5
+				anchor_loc 	1
+				nlines     	1
+				max_width  	254
+				justify    	0
+				label      	"validFor : org::w3c::date"
+				pctDist    	0.900000
+				height     	12
+				orientation 	0))))
+		(object AssociationViewNew "ViewForDateRange" @14
+		    location   	(291, 954)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @15
+			Parent_View 	@14
+			location   	(310, 996)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	1
+			anchor_loc 	1
+			nlines     	1
+			max_width  	369
+			justify    	0
+			label      	"/ViewForDateRange"
+			pctDist    	0.833333
+			height     	42
+			orientation 	1)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"43B2C0B0015D"
+		    roleview_list 	(list RoleViews
+			(object RoleView "statesFor" @16
+			    Parent_View 	@14
+			    location   	(-284, 204)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @17
+				Parent_View 	@16
+				location   	(390, 1130)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	158
+				justify    	0
+				label      	"+statesFor"
+				pctDist    	0.861386
+				height     	99
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"43B2C0B00397"
+			    client     	@14
+			    supplier   	@2
+			    vertices   	(list Points
+				(291, 954)
+				(291, 1158))
+			    line_style 	3
+			    origin_attachment 	(291, 954)
+			    terminal_attachment 	(291, 1158)
+			    label      	(object SegLabel @18
+				Parent_View 	@16
+				location   	(243, 1130)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"0..1"
+				pctDist    	0.866995
+				height     	49
+				orientation 	1)
+			    label      	(object SegLabel @19
+				Parent_View 	@16
+				location   	(293, 1083)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	3
+				anchor_loc 	1
+				nlines     	1
+				max_width  	142
+				justify    	0
+				label      	"{isFrozen}"
+				pctDist    	0.630000
+				height     	2
+				orientation 	0))
+			(object RoleView "stateCapable" @20
+			    Parent_View 	@14
+			    location   	(-284, 204)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @21
+				Parent_View 	@20
+				location   	(416, 870)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	210
+				justify    	0
+				label      	"+stateCapable"
+				pctDist    	0.415000
+				height     	125
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"43B2C0B00399"
+			    client     	@14
+			    supplier   	@3
+			    vertices   	(list Points
+				(291, 954)
+				(291, 750))
+			    line_style 	3
+			    origin_attachment 	(291, 954)
+			    terminal_attachment 	(291, 750)
+			    label      	(object SegLabel @22
+				Parent_View 	@20
+				location   	(257, 868)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"1..1"
+				pctDist    	0.425743
+				height     	35
+				orientation 	0)
+			    label      	(object SegLabel @23
+				Parent_View 	@20
+				location   	(291, 795)
+				font       	(object Font
+				    size       	6
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	5
+				anchor_loc 	1
+				nlines     	2
+				max_width  	272
+				justify    	0
+				label      	
+|validFrom : org::w3c::date
+|validTo : org::w3c::date
+				
+				pctDist    	0.900000
+				height     	12
+				orientation 	0))))
+		(object ClassView "Class" "Logical View::org::openmdx::state2::DateTimeState" @24
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2372, 1326)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@24
+			location   	(1972, 1215)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	801
+			justify    	0
+			label      	"DateTimeState")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@24
+			location   	(1972, 1174)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	801
+			justify    	0
+			label      	"<<root>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"43B2B7D703D7"
+		    compartment 	(object Compartment
+			Parent_View 	@24
+			location   	(1972, 1267)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			icon_style 	"Icon"
+			fill_color 	13434879
+			anchor     	2
+			nlines     	3
+			max_width  	748)
+		    width      	819
+		    height     	325
+		    annotation 	8)
+		(object ClassView "Class" "Logical View::org::openmdx::state2::DateTimeStateCapable" @25
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(2363, 670)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@25
+			location   	(1950, 640)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	826
+			justify    	0
+			label      	"DateTimeStateCapable")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@25
+			location   	(1950, 599)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	826
+			justify    	0
+			label      	"<<root>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"43B2CA10004F"
+		    width      	844
+		    height     	162
+		    annotation 	8)
+		(object AssociationViewNew "StateForDateTime" @26
+		    location   	(2577, 956)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @27
+			Parent_View 	@26
+			location   	(2608, 995)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	1
+			anchor_loc 	1
+			nlines     	1
+			max_width  	271
+			justify    	0
+			label      	"/StateForDateTime"
+			pctDist    	1.033333
+			height     	39
+			orientation 	1)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"43B2CA5F01ED"
+		    roleview_list 	(list RoleViews
+			(object RoleView "stateFor" @28
+			    Parent_View 	@26
+			    location   	(581, 187)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @29
+				Parent_View 	@28
+				location   	(2668, 1139)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	142
+				justify    	0
+				label      	"+stateFor"
+				pctDist    	0.886139
+				height     	91
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"43B2CA60009A"
+			    client     	@26
+			    supplier   	@24
+			    vertices   	(list Points
+				(2577, 956)
+				(2577, 1163))
+			    line_style 	3
+			    origin_attachment 	(2577, 956)
+			    terminal_attachment 	(2577, 1163)
+			    label      	(object SegLabel @30
+				Parent_View 	@28
+				location   	(2530, 1137)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"0..1"
+				pctDist    	0.881188
+				height     	48
+				orientation 	1)
+			    label      	(object SegLabel @31
+				Parent_View 	@28
+				location   	(2587, 1088)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	3
+				anchor_loc 	1
+				nlines     	1
+				max_width  	142
+				justify    	0
+				label      	"{isFrozen}"
+				pctDist    	0.637681
+				height     	10
+				orientation 	0))
+			(object RoleView "stateCapable" @32
+			    Parent_View 	@26
+			    location   	(581, 187)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @33
+				Parent_View 	@32
+				location   	(2693, 836)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	210
+				justify    	0
+				label      	"+stateCapable"
+				pctDist    	0.584158
+				height     	116
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"43B2CA6000A4"
+			    client     	@26
+			    supplier   	@25
+			    vertices   	(list Points
+				(2577, 956)
+				(2577, 750))
+			    line_style 	3
+			    origin_attachment 	(2577, 956)
+			    terminal_attachment 	(2577, 750)
+			    label      	(object SegLabel @34
+				Parent_View 	@32
+				location   	(2541, 836)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"1..1"
+				pctDist    	0.584158
+				height     	37
+				orientation 	0)
+			    label      	(object SegLabel @35
+				Parent_View 	@32
+				location   	(2577, 779)
+				font       	(object Font
+				    size       	6
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	5
+				anchor_loc 	1
+				nlines     	1
+				max_width  	307
+				justify    	0
+				label      	"validFor : org::w3c::dateTime"
+				pctDist    	0.900000
+				height     	12
+				orientation 	0))))
+		(object AssociationViewNew "ViewForDateTimeRange" @36
+		    location   	(2171, 957)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @37
+			Parent_View 	@36
+			location   	(2182, 995)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	1
+			anchor_loc 	1
+			nlines     	1
+			max_width  	438
+			justify    	0
+			label      	"/ViewForDateTimeRange"
+			pctDist    	0.700000
+			height     	38
+			orientation 	1)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"43B2CBB00350"
+		    roleview_list 	(list RoleViews
+			(object RoleView "statesFor" @38
+			    Parent_View 	@36
+			    location   	(175, 210)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @39
+				Parent_View 	@38
+				location   	(2275, 1136)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	158
+				justify    	0
+				label      	"+statesFor"
+				pctDist    	0.871287
+				height     	104
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"43B2CBB101CB"
+			    client     	@36
+			    supplier   	@24
+			    vertices   	(list Points
+				(2171, 957)
+				(2171, 1163))
+			    line_style 	3
+			    origin_attachment 	(2171, 957)
+			    terminal_attachment 	(2171, 1163)
+			    label      	(object SegLabel @40
+				Parent_View 	@38
+				location   	(2117, 1140)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"0..1"
+				pctDist    	0.893805
+				height     	55
+				orientation 	1)
+			    label      	(object SegLabel @41
+				Parent_View 	@38
+				location   	(2175, 1082)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	3
+				anchor_loc 	1
+				nlines     	1
+				max_width  	142
+				justify    	0
+				label      	"{isFrozen}"
+				pctDist    	0.608696
+				height     	4
+				orientation 	0))
+			(object RoleView "stateCapable" @42
+			    Parent_View 	@36
+			    location   	(175, 210)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @43
+				Parent_View 	@42
+				location   	(2287, 868)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	210
+				justify    	0
+				label      	"+stateCapable"
+				pctDist    	0.430693
+				height     	116
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"43B2CBB101D5"
+			    client     	@36
+			    supplier   	@25
+			    vertices   	(list Points
+				(2171, 957)
+				(2171, 751))
+			    line_style 	3
+			    origin_attachment 	(2171, 957)
+			    terminal_attachment 	(2171, 751)
+			    label      	(object SegLabel @44
+				Parent_View 	@42
+				location   	(2132, 871)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"1..1"
+				pctDist    	0.415842
+				height     	40
+				orientation 	0)
+			    label      	(object SegLabel @45
+				Parent_View 	@42
+				location   	(2171, 796)
+				font       	(object Font
+				    size       	6
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	5
+				anchor_loc 	1
+				nlines     	2
+				max_width  	325
+				justify    	0
+				label      	
+|validFrom : org::w3c::dateTime
+|validTo : org::w3c::dateTime
+				
+				pctDist    	0.900000
+				height     	12
+				orientation 	0))))
+		(object ClassView "Class" "Logical View::org::openmdx::state2::State" @46
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1437, 1750)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@46
+			location   	(103, 1683)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	2668
+			justify    	0
+			label      	"State")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@46
+			location   	(103, 1642)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	2668
+			justify    	0
+			label      	"<<root>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"445B0CBA02C9"
+		    width      	2686
+		    height     	237
+		    annotation 	8)
+		(object InheritView "" @47
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"445B0E6B03A8"
+		    client     	@24
+		    supplier   	@46
+		    vertices   	(list Points
+			(2418, 1488)
+			(2418, 1632))
+		    line_style 	3
+		    origin_attachment 	(2418, 1488)
+		    terminal_attachment 	(2418, 1632))
+		(object ClassView "Class" "Logical View::org::openmdx::state2::StateCapable" @48
+		    ShowCompartmentStereotypes 	TRUE
+		    IncludeAttribute 	TRUE
+		    IncludeOperation 	TRUE
+		    location   	(1427, 335)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@48
+			location   	(81, 283)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	2693
+			justify    	0
+			label      	"StateCapable")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@48
+			location   	(81, 242)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	2693
+			justify    	0
+			label      	"<<root>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"445B0C710075"
+		    width      	2711
+		    height     	206
+		    annotation 	8)
+		(object AssociationViewNew "StateForSelection" @49
+		    location   	(962, 1034)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object SegLabel @50
+			Parent_View 	@49
+			location   	(1011, 1054)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	TRUE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			anchor     	1
+			anchor_loc 	1
+			nlines     	1
+			max_width  	277
+			justify    	0
+			label      	"/StateForSelection"
+			pctDist    	1.333333
+			height     	20
+			orientation 	1)
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"445B7F6C02A2"
+		    roleview_list 	(list RoleViews
+			(object RoleView "state" @51
+			    Parent_View 	@49
+			    location   	(-613, 853)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @52
+				Parent_View 	@51
+				location   	(1034, 1605)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	149
+				justify    	0
+				label      	"+state"
+				pctDist    	0.956522
+				height     	72
+				orientation 	0)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"445B7F6E004C"
+			    client     	@49
+			    supplier   	@46
+			    vertices   	(list Points
+				(962, 1034)
+				(962, 1631))
+			    line_style 	3
+			    origin_attachment 	(962, 1034)
+			    terminal_attachment 	(962, 1631)
+			    label      	(object SegLabel @53
+				Parent_View 	@51
+				location   	(907, 1605)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"0..1"
+				pctDist    	0.956376
+				height     	56
+				orientation 	1)
+			    label      	(object SegLabel @54
+				Parent_View 	@51
+				location   	(979, 1554)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	3
+				anchor_loc 	1
+				nlines     	1
+				max_width  	142
+				justify    	0
+				label      	"{isFrozen}"
+				pctDist    	0.872483
+				height     	17
+				orientation 	0))
+			(object RoleView "stateCapable" @55
+			    Parent_View 	@49
+			    location   	(-613, 853)
+			    font       	(object Font
+				size       	8
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    label      	(object SegLabel @56
+				Parent_View 	@55
+				location   	(1079, 525)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	1
+				anchor_loc 	1
+				nlines     	1
+				max_width  	210
+				justify    	0
+				label      	"+stateCapable"
+				pctDist    	0.852596
+				height     	117
+				orientation 	1)
+			    stereotype 	TRUE
+			    line_color 	3342489
+			    quidu      	"445B7F6E004E"
+			    client     	@49
+			    supplier   	@48
+			    vertices   	(list Points
+				(962, 1034)
+				(962, 437))
+			    line_style 	3
+			    origin_attachment 	(962, 1034)
+			    terminal_attachment 	(962, 437)
+			    label      	(object SegLabel @57
+				Parent_View 	@55
+				location   	(926, 525)
+				font       	(object Font
+				    size       	8
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	2
+				anchor_loc 	1
+				nlines     	1
+				max_width  	15
+				justify    	0
+				label      	"1..1"
+				pctDist    	0.852596
+				height     	37
+				orientation 	0)
+			    label      	(object SegLabel @58
+				Parent_View 	@55
+				location   	(962, 466)
+				font       	(object Font
+				    size       	6
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				anchor     	5
+				anchor_loc 	1
+				nlines     	1
+				max_width  	476
+				justify    	0
+				label      	"selector : org::openmdx::state2::StateSelector"
+				pctDist    	0.900000
+				height     	12
+				orientation 	0))))
+		(object InheritView "" @59
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"445B0E6002DA"
+		    client     	@25
+		    supplier   	@48
+		    vertices   	(list Points
+			(2600, 588)
+			(2600, 438))
+		    line_style 	3
+		    origin_attachment 	(2600, 588)
+		    terminal_attachment 	(2600, 438))
+		(object InheritView "" @60
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"445B0E65036E"
+		    client     	@2
+		    supplier   	@46
+		    vertices   	(list Points
+			(491, 1482)
+			(491, 1631))
+		    line_style 	3
+		    origin_attachment 	(491, 1482)
+		    terminal_attachment 	(491, 1631))
+		(object InheritView "" @61
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"445B0E5901F4"
+		    client     	@3
+		    supplier   	@48
+		    vertices   	(list Points
+			(488, 583)
+			(488, 437))
+		    line_style 	3
+		    origin_attachment 	(488, 583)
+		    terminal_attachment 	(488, 437))
+		(object InheritView "" @62
+		    stereotype 	TRUE
+		    line_color 	3342489
+		    quidu      	"445B0E6901ED"
+		    client     	@1
+		    supplier   	@46
+		    vertices   	(list Points
+			(1456, 1491)
+			(1456, 1631))
+		    line_style 	3
+		    origin_attachment 	(1456, 1491)
+		    terminal_attachment 	(1456, 1631))
+		(object NoteView @63
+		    location   	(1294, 87)
+		    font       	(object Font
+			size       	16
+			face       	"Arial"
+			bold       	TRUE
+			italics    	TRUE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@63
+			location   	(34, 28)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	2484
+			label      	"openMDX 2 Preview - Not to be used in an openMDX 1 environment!")
+		    line_color 	3342489
+		    fill_color 	4227327
+		    width      	2544
+		    height     	131)
+		(object NoteView @64
+		    location   	(284, 2041)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@64
+			location   	(102, 1925)
+			fill_color 	13434879
+			nlines     	5
+			max_width  	328
+			label      	
+|<<enumeration>>
+|StateSelector
+|FIRST
+|CURRENT
+|LAST
+			)
+		    line_color 	3342489
+		    fill_color 	10485663
+		    width      	388
+		    height     	244)
+		(object ClassView "Class" "Logical View::org::openmdx::state2::StateSelector" @65
+		    ShowCompartmentStereotypes 	TRUE
+		    location   	(718, 2035)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@65
+			location   	(540, 1974)
+			fill_color 	13434879
+			nlines     	1
+			max_width  	357
+			justify    	0
+			label      	"StateSelector")
+		    stereotype 	(object ItemLabel
+			Parent_View 	@65
+			location   	(540, 1933)
+			fill_color 	13434879
+			anchor     	10
+			nlines     	1
+			max_width  	357
+			justify    	0
+			label      	"<<enumeration>>")
+		    icon_style 	"Icon"
+		    line_color 	3342489
+		    fill_color 	13434879
+		    quidu      	"4519940100BF"
+		    width      	375
+		    height     	225
+		    annotation 	8)))
+	(object ClassDiagram "_LICENSE"
+	    quid       	"410408020067"
+	    title      	"_LICENSE"
+	    zoom       	100
+	    max_height 	28350
+	    max_width  	21600
+	    origin_x   	0
+	    origin_y   	0
+	    items      	(list diagram_item_list
+		(object NoteView @66
+		    location   	(742, 1022)
+		    font       	(object Font
+			size       	8
+			face       	"Arial"
+			bold       	FALSE
+			italics    	FALSE
+			underline  	FALSE
+			strike     	FALSE
+			color      	0
+			default_color 	TRUE)
+		    label      	(object ItemLabel
+			Parent_View 	@66
+			location   	(61, 68)
+			fill_color 	13434879
+			nlines     	46
+			max_width  	1327
+			label      	
+|This software is published under the BSD license
+|as listed below.
+|
+|Copyright (c) 2004, OMEX AG, Switzerland
+|All rights reserved.
+|
+|Redistribution and use in source and binary forms, with or without 
+|modification, are permitted provided that the following conditions 
+|are met:
+|
+|Redistribution and use in source and binary forms, with or
+|without modification, are permitted provided that the following
+|conditions are met:
+|
+|* Redistributions of source code must retain the above copyright
+|notice, this list of conditions and the following disclaimer.
+|
+|* Redistributions in binary form must reproduce the above copyright
+|notice, this list of conditions and the following disclaimer in
+|the documentation and/or other materials provided with the
+|distribution.
+|
+|* Neither the name of OMEX AG nor the names of the contributors
+|to openMDX may be used to endorse or promote products derived
+|from this software without specific prior written permission
+|
+|
+|THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+|CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+|INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+|MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+|DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+|BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+|EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+|TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+|DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+|ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+|OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+|OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+|POSSIBILITY OF SUCH DAMAGE.
+|
+|------------------
+|
+|This product includes software developed by the Apache Software
+|Foundation (http://www.apache.org/).
+			)
+		    line_color 	3342489
+		    fill_color 	16775658
+		    width      	1387
+		    height     	1920)))))

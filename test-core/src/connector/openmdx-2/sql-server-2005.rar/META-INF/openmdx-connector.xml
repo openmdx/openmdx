@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE openmdx-connector PUBLIC "-//openMDX//DTD Connector Extension 1.0//EN" "http://www.openmdx.org/dtd/openmdx-connector_1_0.dtd">
+<openmdx-connector>
+	<resourceadapter>
+		<connectionfactory-jndi-name>jdbc/dataproviders</connectionfactory-jndi-name>
+	</resourceadapter>
+</openmdx-connector>

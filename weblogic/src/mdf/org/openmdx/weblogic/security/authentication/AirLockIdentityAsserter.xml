@@ -1,0 +1,213 @@
+<?xml version="1.0" ?>
+<!DOCTYPE MBeanType SYSTEM "commo.dtd">
+
+<!-- 
+ * ====================================================================
+ * Project:     openMDX, http://www.openmdx.org/
+ * Name:        $Id: AirLockIdentityAsserter.xml,v 1.7 2006/08/24 16:11:49 hburger Exp $
+ * Description: MBean Definition File (MDF) for the AirLock Identity Asserter.
+ * Revision:    $Revision: 1.7 $
+ * Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ * Date:        $Date: 2006/08/24 16:11:49 $
+ * ====================================================================
+ *
+ * This software is published under the BSD license as listed below.
+ * 
+ * Copyright (c) 2005-2006, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+ * his product includes software developed by other organizations as
+ * listed in the NOTICE file.
+-->
+
+<!-- Declare your mbean.
+
+     Since it is for an identity asserter, it must extend the
+     weblogic.management.security.authentication.IdentityAsserter mbean.
+
+     The Name and DisplayName must be the same.
+     They specify the name that will appear on the
+     console for this provider.
+
+     Set the PeristPolicy to "OnUpdate" so that if an attribute
+     value is changed, the new value is written to disk immediately.
+     See the "Developing Security Services" manual for more info.
+
+     Note that since this is an xml document, you can't use double
+     quotes directly.  Instead you need to use &quot;
+
+     Note that setting "Writeable" to "false" on an attribute
+     makes the attribute read-only.  The default is read-write.
+-->
+<MBeanType
+ Name          = "AirLockIdentityAsserter"
+ DisplayName   = "AirLockIdentityAsserter"
+ Package       = "org.openmdx.weblogic.security.authentication"
+ Extends       = "weblogic.management.security.authentication.IdentityAsserter"
+ PersistPolicy = "OnUpdate"
+>
+
+ <!-- You must set the value of the ProviderClassName attribute
+      (inherited from the weblogic.management.security.Provider mbean)
+      to the name of the java class you wrote that implements the
+      weblogic.security.spi.AuthenticationProvider interface.
+
+      You can think of the provider's mbean as the factory
+      for your provider's runtime implementation.
+ -->
+ <MBeanAttribute
+  Name          = "ProviderClassName"
+  Type          = "java.lang.String"
+  Writeable     = "false"
+  Default       = "&quot;org.openmdx.weblogic.security.authentication.IdentityAssertionProvider&quot;"
+ />
+
+ <!-- You must set the value of the Description attribute
+      (inherited from the weblogic.management.security.Provider mbean)
+      to a brief description of your provider.
+      It is displayed in the console.
+ -->
+ <MBeanAttribute
+  Name          = "Description"
+  Type          = "java.lang.String"
+  Writeable     = "false"
+  Default       = "&quot;AirLock Identity Assertion Provider&quot;"
+ />
+
+ <!-- You must set the value of the Version attribute
+      (inherited from the weblogic.management.security.Provider mbean)
+      to your provider's version.  There is no required format.
+ -->
+ <MBeanAttribute
+  Name          = "Version"
+  Type          = "java.lang.String"
+  Writeable     = "false"
+  Default       = "&quot;1.1&quot;"
+ />
+
+ <!-- You must set the value of the SupportedTypes attribute
+      (inherited from the 
+       weblogic.management.security.authentication.IdentityAsserter mbean)
+      to the list of token types that your identity asserter supports.
+
+      Whoever is initiating the identity assertion (eg. a client sending
+      a perimeter authentication token via an HTTP request header), must
+      use the same token type.
+ -->
+ <MBeanAttribute  
+  Name 		= "SupportedTypes"
+  Type 		= "java.lang.String[]"
+  Writeable = "false"
+  Default 	= "new java.lang.String[]{org.openmdx.kernel.security.authentication.spi.GenericPrincipals.TOKEN}"
+ />
+ <!-- The ActiveTypes attribute (a settable attribute inherited from the
+      weblogic.management.security.authentication.IdentityAsserter mbean)
+      contains the subset of your mbean's SupportedTypes that are active
+      in the realm.
+
+      Which way you should default the active types attribute depends
+      on your token types.  The basic rule is that for any token
+      type, there must only be one identity asserter in the realm with
+      that token type as an active type.  In short, you can only have
+      one identity asserter turned on for a given type.
+
+      If your token types are commonly implemented by other identity
+      asserters (eg. X509 certificates), then you should not set them
+      as default active types.  Otherwise, it would be very easy for
+      an administrator to configure an invalid realm where more than
+      one identity asserter has the same type turned on.  Best
+      practice is that all the identity asserters turn off the type
+      by default then the administrator manually turns on the
+      type in one of the identity asserters that support it.
+      Look at the weblogic.security.spi.IdentityAsserter javadoc
+      for some standard token types.
+
+      On the other hand, if you have a custom token type that no
+      other identity asserter will ever implement, you may default the
+      active types attribute to include your token type.  If you do,
+      then the adminstrator doesn't have to manually turn on your token
+      type.
+
+      Since the AirLock identity asserter's token type is very specific
+      top openMDX (instead of a common type like X509), turn on the token 
+      type by default.
+ -->
+ <MBeanAttribute  
+  Name 		= "ActiveTypes"
+  Type 		= "java.lang.String[]"
+  Default 	= "new java.lang.String[]{org.openmdx.kernel.security.authentication.spi.GenericPrincipals.TOKEN}"
+ />
+
+ <!-- You must set the alias of the public key used to validate the tokens
+ -->
+
+ <MBeanAttribute
+  Name          = "TokenKeyStoreType"
+  Description   = "The token key store's pass phrase"
+  Type          = "java.lang.String"
+  Writeable     = "true"
+  LegalNull     = "false"
+  Default       = "java.security.KeyStore.getDefaultType()"
+  Encrypted     = "false"
+ />
+
+
+ <MBeanAttribute
+  Name          = "TokenKeyStoreURL"
+  Description   = "The token key store's URL"
+  Type          = "java.lang.String"
+  Writeable     = "true"
+  LegalNull     = "false"
+  Default       = "new java.io.File(weblogic.security.utils.KeyStoreConstants.getDemoIdentityKeyStoreFileName()).toURI().toString()"
+ />
+
+ <MBeanAttribute
+  Name          = "TokenKeyStorePassPhrase"
+  Description   = "The token key store's pass phrase"
+  Type          = "java.lang.String"
+  Writeable     = "true"
+  LegalNull     = "true"
+  Default       = "weblogic.security.utils.KeyStoreConstants.DEMO_IDENTITY_KEYSTORE_PASSPHRASE"
+  Encrypted     = "true"
+ />
+
+ <MBeanAttribute
+  Name          = "TokenKeyAlias"
+  Description   = "The alias of the certificate required to validate tokens"
+  Type          = "java.lang.String"
+  Writeable     = "true"
+  LegalNull     = "false"
+  Default       = "weblogic.security.utils.KeyStoreConstants.DEMO_IDENTITY_ALIAS"
+ />
+
+</MBeanType>

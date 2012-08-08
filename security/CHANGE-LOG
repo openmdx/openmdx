@@ -1,0 +1,108 @@
+
+                    =====================================
+                          CHANGE LOG openMDX/Security
+                    =====================================
+
+==============================================================================
+Version 1.19.10                                                     2007-12-10
+==============================================================================
+
+1.    NEW FEATURES
+      none
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20007506
+      User Defined Callback Handler
+      
+      Allow a user defined callback handler to be amended as well.
+      
+2.1.  FIXED BUGS
+      none
+
+      
+==============================================================================
+Version 1.19.9                                                      2007-12-03
+==============================================================================
+
+1.    NEW FEATURES
+
+      CR20006395
+      SecurID support added to openMDX/Security
+
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      
+      CR20006412
+      RadiusException mapping
+      
+      RadiusExceptions should be mapped to BasicExceptions.
+      This change will eliminate the need to include openmdx-radius.jar into 
+      the client's class path. 
+      
+2.1.  FIXED BUGS
+      
+      CR20007210
+      LDAP connections should have a close() method 
+      
+      The lack of a close() method leads to the following log entry in case of 
+      Weblogic 9:
+      * <03.12.2007 18.02 Uhr CET> <Error> <Connector> <BEA-190100> <A close() 
+        method was not found on the connection handle while testing for the 
+        viability for connection proxies : ...>
+      
+      
+==============================================================================
+Version 1.18.2                                                      2007-08-26
+==============================================================================
+
+1.    NEW FEATURES
+
+      SFSF1010664
+      Eclipse projects
+      
+      Versioned Eclipse projects are now included in the binary distribution.
+        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+
+2.1.  FIXED BUGS
+      none
+                  
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+      
+
+==============================================================================
+Version 1.18.1                                                      2007-06-14
+==============================================================================
+
+1.    NEW FEATURES
+      none
+        
+2.    CHANGES  
+     
+2.0.  CHANGED FEATURES
+      none
+
+2.1.  FIXED BUGS
+      
+      CR20006225
+      Illegal openmdx-kernel.jar Class-Path entry 
+      
+      openmdx-security.jar refers explicitely to openmdx-kernel.jar.	
+                  
+2.2.  DEPRECATED FEATURES
+      none
+            
+2.3   REMOVED FEATURES
+      none
+

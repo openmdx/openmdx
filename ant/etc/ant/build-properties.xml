@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+=======================================================================
+= Name:        $Id: build-properties.xml,v 1.29 2008/02/15 23:28:01 wfro Exp $
+= Description: openMDX Build Properties
+= Revision:    $Revision: 1.29 $
+= Date:        $Date: 2008/02/15 23:28:01 $
+= Copyright:   (c) 2003-2008 OMEX AG
+=======================================================================
+=
+= This software is published under the BSD license
+= as listed below.
+= 
+= Copyright (c) 2004-2008, OMEX AG, Switzerland
+= All rights reserved.
+= 
+= Redistribution and use in source and binary forms, with or without 
+= modification, are permitted provided that the following conditions 
+= are met:
+= 
+= * Redistributions of source code must retain the above copyright
+=   notice, this list of conditions and the following disclaimer.
+= 
+= * Redistributions in binary form must reproduce the above copyright
+=   notice, this list of conditions and the following disclaimer in
+=   the documentation and/or other materials provided with the
+=   distribution.
+= 
+= * Neither the name of the openMDX team nor the names of its
+=   contributors may be used to endorse or promote products derived
+=   from this software without specific prior written permission.
+= 
+= THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+= CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+= INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+= MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+= DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+= BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+= EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+= TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+= DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+= ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+= OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+= OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+= POSSIBILITY OF SUCH DAMAGE.
+= 
+-->
+<project name="openmdx-build-properties">
+
+	<!-- =================================================================== -->
+	<!-- = Operating System Environment                                    = -->
+	<!-- =================================================================== -->
+	
+	<property environment="env" />
+	
+	<!-- =================================================================== -->
+	<!-- = Shared Directories                                              = -->
+	<!-- =================================================================== -->
+	
+	<property name="openmdx.home" location="${ant.file.openmdx-build-properties}/../../../.."/>
+	<property name="project.home" location=".."/>
+	<property name="distribution.dir" location="${project.home}/distribution" />
+	
+	<!-- =================================================================== -->
+	<!-- = User, Build and Platform Properties                             = -->
+	<!-- =================================================================== -->
+	
+	<!-- load the user specific settings -->
+	<property name="user.build.properties" location="${user.home}/build.properties" />
+	<property file="${user.build.properties}" />
+	
+	<!-- load the project specific settings -->
+	<property name="project.build.properties" location="${basedir}/build.properties" />
+	<property file="${project.build.properties}" />
+	
+	<!-- load the platform specific settings -->
+	<basename property="build.target.platform" file="${project.platform.list}"/>
+	<property 
+		name="target.platform.properties" 
+		value="${basedir}/${build.target.platform}-properties.xml"
+	/>
+	<import file="${target.platform.properties}" optional="true"/>
+
+	<!-- load the Java 2 runtime environment specific settings -->
+	<property name="build.java.platform" value="${build.target.platform}"/>
+	<property 
+		name="java.platform.properties" 
+		value="${openmdx.home}/ant/etc/ant/${build.java.platform}-properties.xml"
+	/>
+	<import file="${java.platform.properties}" optional="false"/>
+	
+	<!-- default value in case the platform property file doesn't provide them -->
+	<property name="build.target.version" value="${ant.java.version}"/>
+	<property name="build.source.version" value="${build.target.version}"/>
+	
+	<!-- platform specific locations -->
+	<basename property="base.dir.name" file="${basedir}"/>
+	<property name="build.dir"       location="${basedir}/build/${build.target.platform}"/>
+	<property name="tmp.dir"         location="${build.dir}/tmp"/>
+	<property name="log.dir"         location="${build.dir}/log"/>
+	<property name="deliver.dir"     location="${project.home}/${build.target.platform}/${base.dir.name}"/>
+	<property name="src.archive.dir" location="${project.home}/source-archive/${base.dir.name}"/>
+
+	<!-- unused preprocess tags -->
+	<property name="project.build.preprocess.tag1" value="unusedProjectBuildPreprocessTag1"/>
+	<property name="project.build.preprocess.tag2" value="unusedProjectBuildPreprocessTag2"/>
+
+	<!-- =================================================================== -->
+	<!-- = Version Properties                                              = -->
+	<!-- =================================================================== -->
+	<!-- load the openMDX version properties -->
+	<property file="${openmdx.home}/openmdx.version.properties" />
+	
+	<!-- load the project specific version properties -->
+	<property name="project.version.properties" location="${basedir}/version.properties" />
+	<property file="${project.version.properties}" />
+	
+	<!-- Apply the project version default values -->
+	<property name="project.specification.version" value="${openmdx.specification.version}"/>
+	<property name="project.implementation.version" value="${openmdx.implementation.version}"/>
+		
+	<!-- =================================================================== -->
+	<!-- = Compile settings                                                = -->
+	<!-- =================================================================== -->
+	<property name="build.debug"               value="on" />
+	<property name="build.optimize"            value="off" />
+	
+	<!-- =================================================================== -->
+	<!-- = JUnit settings                                                  = -->
+	<!-- =================================================================== -->
+	<property name="junit.test.halt.on.error" value="no"/>
+	<property name="junit.test.halt.on.failure" value="no"/>
+	<property name="junit.test.log.level" value="info"/>
+	<property name="junit.test.log.debug" value="true"/>
+	<property name="junit.test.report" value="yes"/>
+	
+	<!-- =================================================================== -->
+	<!-- = Pattern sets                                                    = -->
+	<!-- =================================================================== -->
+	<patternset id="clear.project.pattern">
+		<include name="build/**"/>
+		<exclude name="build/*/eclipse/**"/>
+	    <include name="**/.#*"/>
+	    <include name="**/*.bak"/>
+	    <include name="**/*.tmp"/>
+	    <include name="**/~*"/>
+	    <include name="*.log"/>
+	</patternset>
+
+	<patternset id="clear.platform.pattern">
+		<include name="${build.target.platform}/${base.dir.name}/**"/>
+		<include name="source-archive/${base.dir.name}/**"/>
+	</patternset>
+	
+	<patternset id="null.pattern">
+		<include name="~"/>
+	</patternset>
+	<patternset id="all.pattern"/>
+	
+	<patternset id="java-2.edition.pattern">
+		<include name="**/application-client.xml"/>
+		<include name="**/ejb-jar.xml"/>
+		<include name="**/ra.xml"/>
+		<include name="**/web.xml"/>
+		<include name="**/application.xml"/>
+		<include name="**/MANIFEST.MF"/>
+	</patternset>	
+	<patternset id="openmdx-1.edition.pattern">
+		<include name="**/RESOURCE/**"/> <!-- openMDX 1 resources -->
+		<include name="**/*.properties"/> <!-- openCRX 1 resources -->
+	</patternset>	
+	<patternset id="openmdx-2.edition.pattern">
+		<patternset refid="java-2.edition.pattern"/>
+		<include name="**/openmdx-*.xml"/>
+		<include name="**/APP-INF/classes/**"/>
+	</patternset>	
+	<patternset id="jboss-3.edition.pattern">
+		<patternset refid="openmdx-2.edition.pattern"/>
+		<include name="**/jboss*.xml"/>
+	</patternset>	
+	<patternset id="weblogic-7.edition.pattern">
+		<patternset refid="openmdx-2.edition.pattern"/>
+		<include name="**/weblogic*.xml"/>
+	</patternset>	
+	<patternset id="websphere-5.edition.pattern">
+		<patternset refid="openmdx-2.edition.pattern"/>
+		<include name="**/ibm-*.xmi"/>
+	</patternset>	
+	<patternset id="orion-9.edition.pattern">
+		<patternset refid="openmdx-2.edition.pattern"/>
+		<include name="**/orion*.xml"/>
+	</patternset>	
+	<patternset id="sun-8.edition.pattern">
+		<patternset refid="openmdx-2.edition.pattern"/>
+		<include name="**/sun*.xml"/>
+	</patternset>
+	<patternset id="jonas-4.edition.pattern">
+		<patternset refid="openmdx-2.edition.pattern"/>
+		<include name="**/jonas*.xml"/>
+	</patternset>
+	<patternset id="tomcat-6.edition.pattern">
+		<patternset refid="openmdx-2.edition.pattern"/>
+		<include name="**/tomcat-6*.xml"/>
+	</patternset>
+	<patternset id="standard.edition.pattern">
+		<patternset refid="openmdx-1.edition.pattern"/>
+		<patternset refid="openmdx-2.edition.pattern"/>
+		<patternset refid="jboss-3.edition.pattern"/>
+		<patternset refid="weblogic-7.edition.pattern"/>
+		<patternset refid="websphere-5.edition.pattern"/>
+		<patternset refid="orion-9.edition.pattern"/>
+		<patternset refid="sun-8.edition.pattern"/>
+		<patternset refid="jonas-4.edition.pattern"/>
+		<patternset refid="tomcat-6.edition.pattern"/>
+	</patternset>	
+	
+	<!-- =================================================================== -->
+	<!-- = Formatting                                                      = -->
+	<!-- =================================================================== -->
+	<property name="datetime.data.pattern" value="yyyyMMdd'T'HHmmss'Z'" />
+	<property name="datetime.text.pattern" value="yyyy-MM-dd'T'HH:mm:ss'Z'" />
+	<property 
+		name="openmdx.log.format" 
+		value="$${logger}|$${time}|$${level}|$${logsource}|$${host}|$${thread}|$${class}|$${method}|$${line}|$${summary}|$${detail}"
+	/>
+	
+	<!-- =================================================================== -->
+	<!-- = Vendor Properties                                               = -->
+	<!-- =================================================================== -->
+	<property name="project.vendor.name" value="OMEX AG" />
+	<property name="project.vendor.id" value="ch.omex" />
+	
+	<!-- =================================================================== -->
+	<!-- = MOF Model Externalization                                       = -->
+	<!-- =================================================================== -->
+	<property name="model.transformation.log.level" value="info"/>
+	<property name="model.transformation.source" value="rose"/>
+	<property name="model.transformation.class.path" value="project.lib.classpath"/>
+	
+	<!-- =================================================================== -->
+	<!-- = Memory Allocation                                               = -->
+	<!-- =================================================================== -->
+	<property name="build.memory.limit" value="1000m"/>
+	
+</project>

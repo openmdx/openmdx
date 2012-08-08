@@ -1,0 +1,85 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>openCRX - Avancerad Sökning</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
+<table class="objectTitle">
+  <tr>
+    <td>Avancerad Sökning</td>
+	<td>
+		<script>
+		  <!--
+		  document.write('<td align="right"><a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+		  -->
+		</script>
+	</td>
+  </tr>
+</table>
+
+ <div class="hh2">Så här fungerar den avancerade sökfunktionen</div>
+ <div class="normal">För att öka träffsäkerheten i era sökningar, kan operatorer som finjusterar nyckelord och 
+ siffror användas. Samtliga sökfunktioner som presenteras på denna sida kan skrivas direkt i sökboxen.</div>
+ <div class="hh2">Grundläggande funktioner</div> 
+ <div class="normal">Ni kan skriva in ett ord/siffra eller ett uttryck, t.ex. <strong>'Svensson'</strong>, <strong>'> 500'</strong> eller <strong>'>=
+   Andersson'</strong>, och sedan</div>
+ <table cellpadding="0" cellspacing="10">
+   <tr valign="top">
+     <td>&#8226; klicka på en <strong>kolumns rubrik</strong> för att söka efter objekt
+       	som har matchande värde(n) för det attribut som rubriken beskriver(<strong>samtliga objekt</strong> genomsöks
+       	oberoende av preciserade sökfilter, och existerande sökresultat kommer förloras)</td>
+	 <td bgcolor="#CCCCCC"><strong>Ny Sökning</strong><br />
+	 <img src="images/helpSearchTut0.gif" width="129" height="51" /></td>
+   </tr>
+   <tr valign="top">
+     <td>&#8226; klicka på <strong>[+] knappen</strong> för att söka efter objekt med 
+       matchande värde(n) för just detta attribut (<strong>endast objekt som förekom i den föregående sökningen 
+       eller filtret </strong> kommer att sökas efter, dvs. att 'lägga till' denna sökning kommer att resultera 
+       i ett mer begränsat sökresultat)</td>
+	 <td bgcolor="#CCCCCC"><strong>Lägg till villkor</strong><br />
+	 <img src="images/helpSearchTut1.gif" width="129" height="51" /></td>
+   </tr>
+</table>
+ <div class="hh2">Sökoperatorer</div>
+ <div class="normal">Följande sökoperatorer stöds (var god och beakta att vissa databassystem ej har stöd 
+ för samtliga nedanstående sökoperatorer):</div>
+ <ul>
+ <li>låter som (<strong>*</strong>)</li>
+ <li>som (<strong>%</strong>), standard för söksträngar</li>
+ <li>lika med (<strong>=</strong>), standard för sökningar med Boolska (dvs. sant eller falskt), numeriska och kodvärden</li>
+ <li>ej lika med (<strong><></strong>, <strong>!</strong>=)</li>
+ <li>mindre än (<strong><</strong>)</li>
+ <li>mindre än eller lika med (<strong><=</strong>)</li>
+ <li>större än (<strong>></strong>)</li>
+ <li>större än eller lika med <strong>(>=</strong>)</li>
+ </ul>
+ <div class="hh2">&quot;OCH&quot; Sökningar</div>
+ <div class="normal">För att finna objekt som matchar mer än ett villkor, används ett et-tecken 
+   &quot;<strong>&amp;</strong>&quot; mellan villkoren. Till exempel, för att söka efter objekt med värden mellan 
+   500 och 1000 (dvs. större än 500 och mindre än 1000), skriver ni följande i sökboxen: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
+ <div class="hh2">&quot;ELLER&quot; Sökningar</div>
+<div class="normal">För att finna objekt, som inkluderar antingen ord A eller ord B, används ett semikolon &quot;<strong>;</strong>&quot; 
+mellan orden. Till exempel, för att söka efter kontakter som heter 'Svensson' ELLER 'Andersson', skriver ni följande i sökboxen: 
+<strong>'= Svensson; Andersson'</strong></div>
+ <div class="hh2">Kombinera Sökningar</div>
+ <div class="normal">Ni kan kombinera sökningar i princip utan begränsningar. Till exempel, för att söka efter objekt med värden mindre 
+ än '1000', men skilt från '500' och skilt från '600', skriver ni följande i sökboxen: <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
+ <div class="normal">Kombinerade sökningar används enligt följande regel:</div>
+ <ul>
+   <li>searchExpr ::= filterValue { & filterValue }<br />
+   (--> strängarna separeras med hjälp av tecknet<strong>&</strong>)</li>
+   <li>filterValue ::= [operator] value { ; value }<br />
+   (--> strängarna separeras med hjälp av tecknet<strong>;</strong>)</li>
+ </ul>
+ <div class="hh2">Wildcard Sökningar</div>
+ <div class="normal">
+   <p>Vissa databaser tillåter att wildcard sökningar görs. Om detta stöds, kan ni exempelvis söka efter alla kontakter som innehåller 'son' (dvs. Andersson, Svensson, etc.) genom att skriva: <strong>'%%son'<br />
+   VARNING:</strong> wildcard sökningar kan ta mycket lång tid om databasen ej är optimalt konfigurerad (full table scans)! </p>
+ </div>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.openmdx.base.Authority name="org:openmdx:deployment1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="xri:+resource/org/openmdx/deployment1/xmi/deployment1_edit.xsd">
+	<_object/>
+	<_content>
+		<provider>
+			<org.openmdx.base.Provider qualifiedName="org:openmdx">
+				<_object/>
+				<_content>
+					<segment>
+						<org.openmdx.deployment1.Segment qualifiedName="org:openmdx:test">
+							<_object/>
+							<_content>
+								<configuration>
+									<org.openmdx.deployment1.Configuration name="junit">
+										<_object/>
+										<_content>
+											<domain>
+												<org.openmdx.deployment1.Domain name="apps">
+													<_object/>
+													<_content>
+														<deploymentUnit>
+															<org.openmdx.deployment1.DeploymentUnit name="testexplorer">
+																<_object/>
+																<_content>
+																	<module>
+																		<org.openmdx.deployment1.Module name="provider">
+																			<_object/>
+																			<_content>
+																				<component>
+																					<org.openmdx.deployment1.Dataprovider name="A_Provider_1JoiningTransaction">
+																						<_object>
+																							<deploymentOrder>1001</deploymentOrder>
+																							<registrationId>org:openmdx:JUnit:JoiningTransaction:A</registrationId>
+																							<initialCapacity>1</initialCapacity>
+																							<transactionPolicy/>
+																							<dataproviderType>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:test/configuration/junit/dataproviderType/provider</dataproviderType>
+																						</_object>
+																						<_content>
+																							<property>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="KERNEL:exposedPath">
+																									<_object>
+																										<value>
+																											<_item>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:test/configuration/A</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="KERNEL:namespaceId">
+																									<_object>
+																										<value>
+																											<_item>A</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+																							</property>
+																						</_content>
+																					</org.openmdx.deployment1.Dataprovider>
+																					<org.openmdx.deployment1.Dataprovider name="B_Provider_1JoiningTransaction">
+																						<_object>
+																							<registrationId>org:openmdx:JUnit:JoiningTransaction:B</registrationId>
+																							<transactionPolicy/>
+																							<deploymentOrder>1002</deploymentOrder>
+																							<dataproviderType>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:test/configuration/junit/dataproviderType/provider</dataproviderType>
+																							<initialCapacity>1</initialCapacity>
+																						</_object>
+																						<_content>
+																							<property>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="KERNEL:exposedPath">
+																									<_object>
+																										<value>
+																											<_item>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:test/configuration/B</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="KERNEL:namespaceId">
+																									<_object>
+																										<value>
+																											<_item>B</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+																							</property>
+																						</_content>
+																					</org.openmdx.deployment1.Dataprovider>
+																					<org.openmdx.deployment1.Dataprovider name="C_Provider_1JoiningTransaction">
+																						<_object>
+																							<registrationId>org:openmdx:JUnit:JoiningTransaction:C</registrationId>
+																							<transactionPolicy/>
+																							<dataproviderType>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:test/configuration/junit/dataproviderType/provider</dataproviderType>
+																							<deploymentOrder>1003</deploymentOrder>
+																							<initialCapacity>1</initialCapacity>
+																						</_object>
+																						<_content>
+																							<property>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="KERNEL:exposedPath">
+																									<_object>
+																										<value>
+																											<_item>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:test/configuration/C</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="KERNEL:namespaceId">
+																									<_object>
+																										<value>
+																											<_item>C</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+																							</property>
+																						</_content>
+																					</org.openmdx.deployment1.Dataprovider>
+																				</component>
+																			</_content>
+																		</org.openmdx.deployment1.Module>
+																		<org.openmdx.deployment1.Module name="explorer">
+																			<_object>
+																				<description>The JUnit test can use the default access to connect to a provider with the registration id org:openmdx:dataprovider-1:NoOrNewTransaction:access.</description>
+																			</_object>
+																			<_content>
+																				<component>
+																					<org.openmdx.deployment1.Dataprovider name="explorer_Provider_1NoOrNewTransaction">
+																						<_object>
+																							<registrationId>org:openmdx:JUnit:NoOrNewTransaction:explorer</registrationId>
+																							<transactionPolicy/>
+																							<dataproviderType>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:test/configuration/junit/dataproviderType/explorer</dataproviderType>
+																							<initialCapacity>1</initialCapacity>
+																							<deploymentOrder>2000</deploymentOrder>
+																						</_object>
+																						<_content>
+																							<property>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="APPLICATION:serviceLocatorContext">
+																									<_object>
+																										<value>
+																											<_item>org:openmdx:JUnit:JoiningTransaction</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="APPLICATION:runtimeSegment">
+																									<_object>
+																										<value>
+																											<_item>xri:@openmdx:org.openmdx.compatibility.runtime1/provider/any/segment/any</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+																							</property>
+																						</_content>
+																					</org.openmdx.deployment1.Dataprovider>
+																				</component>
+																				<resourceAdapter>
+																					<org.openmdx.deployment1.DataproviderResource name="explorer_Provider_1NoOrNewTransaction">
+																						<_object>
+																							<registrationId>org:openmdx:JUnit:NoOrNewTransaction:access</registrationId>
+																						</_object>
+																						<_content/>
+																					</org.openmdx.deployment1.DataproviderResource>
+																				</resourceAdapter>
+																			</_content>
+																		</org.openmdx.deployment1.Module>
+																	</module>
+																</_content>
+															</org.openmdx.deployment1.DeploymentUnit>
+														</deploymentUnit>
+													</_content>
+												</org.openmdx.deployment1.Domain>
+											</domain>
+										</_content>
+									</org.openmdx.deployment1.Configuration>
+								</configuration>
+							</_content>
+						</org.openmdx.deployment1.Segment>
+					</segment>
+				</_content>
+			</org.openmdx.base.Provider>
+		</provider>
+	</_content>
+</org.openmdx.base.Authority>

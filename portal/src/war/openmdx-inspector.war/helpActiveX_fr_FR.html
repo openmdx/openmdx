@@ -1,0 +1,90 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>Fonctionnalités utilisant des contrôles ActiveX</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body onLoad="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(50, 50);">
+<table class="objectTitle">
+<tr>
+  <td>ActiveX</td>
+  <td align="right">
+	<script>
+	  <!--
+	  document.write('<a href="" class="backButton" title="Fermer" onClick="javascript:window.close();">X</a>');
+	  -->
+	</script>
+  </td>
+</tr>
+</table>
+<p>L'utilisation des fonctionnalités à base de contrôles ActiveX nécessite que<br />
+<ul>
+  <li>votre navigateur soit <strong>capable de gérer les contrôles ActiveX</strong> (par exemple, Internet Explorer sous Windows) et que</li>
+  <li>les réglages de sécurité <strong>autorisent le chargement et l'exécution de contrôles ActiveX</strong></p></li>
+</ul>
+<p>En fonction des fonctionnalités, certains logiciels tiers peuvent aussi être nécessaires&nbsp;:</p>
+<table class="browserHints">
+  <tbody>
+  <tr>
+    <td><b>Fonctionnalité</b></td>
+	<td><b>Pré-requis</b></td>
+  <td><strong>Informations complémentaires</strong></td>
+  </tr>
+  <tr>
+    <td>Fusion Word XML</td>
+    <td>Installation client de Word 2000 ou plus récent</td>
+  <td><a href="#trustedsites">Sites de confiance</a>, <a href="#activexsettings">Permissions ActiveX</a></td>
+  </tr>
+  <tr>
+    <td>Fusion Excel XML</td>
+    <td>Installation cliente deExcel 2000 ou plus récent</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Export d'XML vers Outlook</td>
+    <td>Installation cliente d'Outlook 2000 ou plus récent</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Import d'XML depuis Outlook</td>
+    <td>Installation cliente d'Outlook 2000 ou plus récent</td>
+  <td>&nbsp;</td>
+  </tr>
+  </tbody>
+</table>
+<a name="trustedsites"></a><p class="hh1">Sites de confiance (Internet Explorer)</p>
+<p>Pour des raisons de sécurité, nous ne recommandons pas que vous autorisiez les contrôles ActiveX pour la <strong>Zone Internet</strong>. Il est préférable d'ajouter le site exécutant openCRX à vos <strong>Sites de confiance</strong> ou à votre <strong>Intranet local</strong> (uniquement si ce site est vraiment dans votre intranet), puis <a href="#activexsettings">d'activer les contrôles ActiveX</a> pour la zone en question. Vous trouverez ci-dessous des exemples pour ajouter le serveur de démonstration d'openCRX (<strong><font color="#FF0000">demo.opencrx.org</font></strong>) à vos sites de confiance, pour ajouter un serveur openCRX local (<strong><font color="#FF0000">10.1.1.20</font></strong>) à votre zone intranet locale. </p>
+<p><img src="images/ie_trusted_sites.png" width="384" height="342"> <img src="images/ie_local_intranet_zone.png" width="384" height="342"></p>
+<a name="activexsettings"></a>
+<p class="hh1">Permissions ActiveX (Internet Explorer)</p>
+<p>Pour des raisons de sécurité, nous ne recommandons pas que vous autorisiez les contrôles ActiveX pour la <strong>Zone Internet</strong>. Il est préférable d'ajouter le site exécutant openCRX à vos <strong>Sites de confiance</strong> ou à votre <strong>Intranet local</strong> (uniquement si ce site est vraiment dans votre intranet), puis <a href="#activexsettings">d'activer les contrôles ActiveX</a> pour la zone en question de la façon suivante&nbsp;:<p class="hh1">Où trouver les réglages de sécurité ActiveX&nbsp;:</p>
+
+<table class="activeXHints">
+  <tr>
+    <td><b>Plate-forme</b></td>
+    <td colSpan=2><b>Navigateur</b> &amp; <b>Version</b></td>
+    <td><b>Où trouver les réglages ActiveX</b></td>
+    <td><strong>ActiveX autorisé (avec mise en garde par pop-up)</strong></td>
+    <td><strong>ActiveX autorisé (sans mise en garde)</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img height=38 src="images/icon-windows.gif" width=38 /><br />
+	  <strong>Microsoft<br />
+	  Windows</strong>	</td>
+    <td align="center">
+	  <img height=38 src="images/icon-ie.gif" width=38><br />
+	  <FONT size=-1>Internet<br />Explorer</FONT>
+	</td>
+    <td>6.x</td>
+    <td>Outils &gt; Options Internet &gt; Securité ...<br />
+     ... Personnaliser le niveau &gt; Contrôles ActiveX et plugins</td>
+    <td><img src="images/ie_activex_settings_secure.png" width="352" height="666"></td>
+    <td><img src="images/ie_activex_settings_convenient.png" width="352" height="666"></td>
+  </tr>
+</table>
+</body>
+</html>

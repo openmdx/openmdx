@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>openCRX - Recherche avancée</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
+<table class="objectTitle">
+  <tr>
+    <td>Advanced Search</td>
+	<td>
+		<script>
+		  <!--
+		  document.write('<td align="right"><a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+		  -->
+		</script>
+	</td>
+  </tr>
+</table>
+
+ <div class="hh2">Comment effectuer facilement des recherches avancées&nbsp;?</div>
+ <div class="normal">Vous pouvez améliorer la finesse de vos recherches en ajoutant
+ des opérateurs qui portent sur des nombres ou des mots-clefs. Toutes les options
+ présentées ci-dessous peuvent être entrées directement dans le champ de recherche.
+ </div>
+ <div class="hh2">Les bases</div> 
+ <div class="normal">Vous pouvez entrer un mot/nombre ou une expression, par exemple&nbsp; <strong>'Dupont'</strong>, <strong>'> 500'</strong> ou <strong>'>=
+   Martin'</strong>, puis</div>
+ <table cellpadding="0" cellspacing="10">
+   <tr valign="top">
+     <td>&#8226; cliquer sur une <strong>entête de colonne</strong> pour rechercher des objets dont la valeur de cet attribut particulier (représenté par le colonne) satisfait la condition (<strong>Tous les objets</strong> sont testés, indépendamment de filtres existants, et les résultats des recherches précédentes seront perdus)</td>
+	 <td bgcolor="#CCCCCC"><strong>Nouvelle Recherche</strong><br />
+	 <img src="images/helpSearchTut0.gif" width="129" height="51" /></td>
+   </tr>
+   <tr valign="top">
+     <td>&#8226; cliquer sur le bouton <strong>[+]</strong> pour rechercher des objets dont la valeur de cet attribut particulier (représenté par le colonne) satisfait la condition (<strong>Seuls les objets déjà filtrés par la recherche ou le filtre précédent</strong> sont testés&nbsp;: "ajouter" cette recherche va donc retourner un ensemble de résultats plus restreint)</td>
+	 <td bgcolor="#CCCCCC"><strong>Ajouter une condition</strong><br />
+	 <img src="images/helpSearchTut1.gif" width="129" height="51" /></td>
+   </tr>
+</table>
+ <div class="hh2">Opérateurs</div>
+ <div class="normal">Les opérateurs suivants sont normalement utilisables (certaines bases de données peuvent ne pas supporter tous ces opérateurs, en cas de doute, consultez l'administrateur de l'application)&nbsp;:</div>
+ <ul>
+ <li>phonétiquement équivalent (<strong>*</strong>) (attention, cet opérateur suppose que la langue utilisée est l'anglais)</li>
+ <li>comme (<strong>%</strong>), opérateur par défaut pour les recherches sur les chaînes de caractères</li>
+ <li>égal (<strong>=</strong>), opérateur par défaut pour les booléens (vrai/faux), les nombres et les codes</li>
+ <li>différent (<strong><></strong>, <strong>!</strong>=)</li>
+ <li>strictement plus petit (<strong><</strong>)</li>
+ <li>plus petit ou égal (<strong><=</strong>)</li>
+ <li>strictement plus grand (<strong>></strong>)</li>
+ <li>plus grand ou égal <strong>(>=</strong>)</li>
+ </ul>
+ <div class="hh2">Conjonctions de conditions</div>
+ <div class="normal">Pour rechercher des objets qui vérifient en même temps plus d'une condition, utilisez une esperluette &quot;<strong>&amp;</strong>&quot; entre les conditions. Par exemple, pour rechercher des objets dont un certain attribut a une valeur strictement comprise entre 500 et 1000, il faut simplement taper&nbsp;: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
+ <div class="hh2">Conditions portant sur plusieurs valeurs</div>
+<div class="normal">Pour rechercher des objets qui vérifient une condition donnée sur une valeur ou sur une autre, utilisez un point-virgule &quot;<strong>;</strong>&quot; entre les valeurs. Par exemple, pour rechercher des contacts s'appelant 'Dupont' ou bien 'Martin', il suffit de taper&nbsp;: <strong>'= Dupont; Martin'</strong></div>
+ <div class="hh2">Combiner des recherches</div>
+ <div class="normal">Vous pouvez combiner des recherches autant que vous le souhaitez. Par exemple, pour recherche des objets dont un attribut à une valeur plus petite que mille, différente de '500' et de '600', tapez simplement&nbsp;: <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
+ <div class="normal">La syntaxe des règles pour les recherches combinées est la suivante&nbsp;:</div>
+ <ul>
+   <li>expressionRecherche ::= valeurFiltre { & valeurFiltre }</li>
+   <li>valeurFiltre ::= [operateur] valeur { ; valeur }</li>
+ </ul>
+</body>
+</html>

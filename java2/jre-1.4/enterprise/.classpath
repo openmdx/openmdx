@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry exported="true" kind="lib" path="lib/connector-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/ejb-2_1-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jaxrpc-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jms.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jsp-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jta.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/servlet-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/activation.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/mailapi.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/mx4j-jmx.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/deployment-api.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jacc-api.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 1.4"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

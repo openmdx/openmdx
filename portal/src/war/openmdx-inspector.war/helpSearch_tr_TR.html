@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>openCRX - Gelişkin Arama</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
+<table class="objectTitle">
+  <tr>
+    <td>Gelişkin Arama</td>
+	<td>
+		<script>
+		  <!--
+		  document.write('<td align="right"><a href="" class="backButton" title="Kapa" onClick="javascript:window.close();">X</a>');
+		  -->
+		</script>
+	</td>
+  </tr>
+</table>
+
+ <div class="hh2">Kolaylaştırılmış Gelişkin Arama</div>
+ <div class="normal">Anahtar kelime ve rakamlarınızın arama hassaslığını
+     işlem operatörleri ekleyerek arttırabilirsiniz. Bu sayfada listelenen tüm
+     seçenekler doğrudan arama kutusuna girilebilirler</div>
+ <div class="hh2">Temeller</div> 
+ <div class="normal">Bir kelime/numara veya bir ifade girebilirsiniz. Örn.: <strong>'Ahmet'</strong>, <strong>'> 500'</strong> or <strong>'>=
+   Ayşe'</strong></div>
+ <table cellpadding="0" cellspacing="10">
+   <tr valign="top">
+     <td>&#8226; bir <strong>sütun başlığı</strong> üzerine fare ile 
+       klikleyerek bu özel alanın uyumlu değerlerini arayabilirsiniz (
+       Arama filtreleriyle bulunmuş <strong>tüm nesneler</strong> kaybolacaklardır)
+       </td>
+	 <td bgcolor="#CCCCCC"><strong>Yeni Arama</strong><br />
+	 <img src="images/helpSearchTut0.gif" width="129" height="51" /></td>
+   </tr>
+   <tr valign="top">
+     <td>&#8226; <strong>[+] düğmesi</strong> üzerine klikleyerek uyumlu değerleri bulmak 
+       üzere aramanıza yeni kısıtlar ekleyebilirsiniz
+       </td>
+	 <td bgcolor="#CCCCCC"><strong>Koşul Ekle</strong><br />
+	 <img src="images/helpSearchTut1.gif" width="129" height="51" /></td>
+   </tr>
+</table>
+ <div class="hh2">Operatörler</div>
+ <div class="normal">İzleyen operatörler desteklenmektedir (lütfen not ediniz ki, bazı veri
+  tabanı sistemleri tüm operatörleri desteklemeyeceklerdir :</div>
+ <ul>
+ <li>gibi duyulur (<strong>*</strong>)</li>
+ <li>gibi (<strong>%</strong>), string için öntanımlı operatör</li>
+ <li>eşit (<strong>=</strong>), mantıksal, sayı ve kod aramları için öntanımlı operatör</li>
+ <li>eşit değil (<strong><></strong>, <strong>!</strong>=)</li>
+ <li>küçük (<strong><</strong>)</li>
+ <li>küçük veya eşit (<strong><=</strong>)</li>
+ <li>büyük (<strong>></strong>)</li>
+ <li>büyük veya eşit <strong>(>=</strong>)</li>
+ </ul>
+ <div class="hh2">&quot;VE&quot; Aramaları</div>
+ <div class="normal">Aynı zamanda birden çok koşulu gerçekleştiren aramalar için
+   koşulların arasında bir ampersand &quot;<strong>&amp;</strong>&quot; kullanını. Örneğin, 500 ile 1000 arasında kalan
+   değerler için <strong>'&gt;500 &amp; &lt;1000'</strong> yazmanız yeterli olacaktır</div>
+ <div class="hh2">&quot;VEYA&quot; Aramaları</div>
+<div class="normal">Birden çok koşuldan birini gerçekleştiren aramalar için
+   koşulların arasında bir noktalı virgül &quot;<strong>;</strong>&quot; kullanınız. Örneğin, 500 veya 1000 eşit olan
+   değerler için <strong>'500 ; 1000'</strong> yazmanız yeterli olacaktır</div>
+ <div class="hh2">Kombine Aramalar</div>
+ <div class="normal">Aramaları sınırsız olarak kombine edebilirsiniz. Örneğin,
+   '500' den ve '600' den farklı ve '1000' den de küçük değerleri aramak için
+   <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong> yazmanız yeterlidir.</div>
+ <div class="normal">Kombine aramlar için işlem sırası aşağıdadır</div>
+ <ul>
+   <li>searchExpr ::= filterValue { & filterValue }<br />
+   (--> string tokenizer with <strong>&</strong> as separator)</li>
+   <li>filterValue ::= [operator] value { ; value }<br />
+   (--> string tokenizer with <strong>;</strong> as separator)</li>
+ </ul>
+</body>
+</html>

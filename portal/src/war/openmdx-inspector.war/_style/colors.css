@@ -1,0 +1,153 @@
+/*------------------------------------------------------------------------------
+|  yui-ext
++ ----------------------------------------------------------------------------*/
+
+
+/* openCRX */
+/* ShowObject general ----------------------------------------------*/
+/* COLOR definitions */
+                             .attributeTitle, .cellHistory a, a.backButton, a.noIcon, .noIcon, input.flatsubmit, input.classsubmit, .imgsubmit, a.error {
+color: white;}
+                             .cellErrorLeft, .cellErrorRight {
+color: white;}
+                             .gridTableHeader, .gridTableHeaderFull, .gridTableHeaderFullEdit {
+color: black;}
+                             a.tab, a.groupTab {
+color: #000000;}
+                             a.opTab {
+color: #000000;}
+                             .objectTitle {
+color: #000000;}
+                             .filterHeader {
+color: #444444;}
+                             .filterCellhover {
+color: #000000;}
+                             .cellInfo, .cellUserInfo, .cellUserInfo a, .cellUserInfo a:hover, .cellLogo, .cellHistory, .cellHistory a:hover {
+color: #F6D66D;}
+                             a {
+color: #444444;}
+                             a.language:hover, a.ophover, input.ophover, a.new:hover, a.backButton:hover, a.noIcon:hover, a.noIconhover, .noIcon:hover, .noIconhover, input.flatsubmit:hover, input.flatsubmithover, input.selflatsubmit:hover, input.selflatsubmithover, input.classsubmit:hover, input.classsubmithover, input.imgsubmithover, input.selimgsubmit:hover, input.selimgsubmithover, a.backButton:hover, a.backButtonhover {
+color: #000000;}
+                             a.opTabhover, a.SopTab, a.tabhover, a.Stab, a.groupTab:hover, a.groupTabhover, a.SgroupTab {
+color: #000000;}
+                             a.language, .langselector, .roleselector, input.selflatsubmit, input.selimgsubmit {
+color: #000000;}
+                             a.op, input.op, a.new  {
+color: #000000;}
+                             .opFieldGroupName, .fieldGroupName, qualifierText {
+color: #444444;}
+                             .panelJSWarning, .panelCookieWarning, a.error:hover {
+color: red;}
+                             .cellHeader, .cellFooter {
+}
+
+/* BACKGROUND-COLOR defintions */
+                             body, .divImgPopUp, .panelJSWarning, .panelCookieWarning, a.error:hover, input.valueL, input.valueLG, input.valueR, input.valueRG, select.valueL {
+background-color: white;}
+                             a.opTab {
+background-color: white;}
+                             a.language, .langselector, .roleselector, input.selimgsubmit {
+background-color: white;}
+                             .popUpButton {
+background-color: white;}
+                             .popUpButtonhover {
+background-color: #CCCCFF;}
+                             .menuOpPanel a:hover img {
+background-color: #DDDDDD;}
+                             a.language:hover, a.opTabhover, a.new:hover, a.noIcon:hover, a.noIconhover, .imgfilterhover, input.flatsubmit:hover, input.flatsubmithover, input.selflatsubmit:hover, input.selflatsubmithover, input.classsubmithover, input.imgsubmithover, input.selimgsubmit:hover, input.selimgsubmithover, .panelResult, a.backButton:hover, a.backButton:hover, a.backButtonhover, .gridColTypeCheck, .dragable {
+background-color: #F6D66D;}
+                             a.tabhover, a.opTab:hover, a.ophover, input.ophover, a.groupTab:hover, a.groupTabhover, .borderedimg:hover, .borderedimghover {
+background-color: #F6D66D;}
+                             .borderedimg:hover, .borderedimghover, .filterCellhover {
+background-color: #CCCCCC;}
+                             .cellHistory, a.backButton, input.selflatsubmit {
+background-color: #222222;}
+                             a.noIcon, .noIcon, input.flatsubmit {
+background-color: #777777;}
+                             a.tab, a.groupTab {
+background-color: #DDDDDD;}
+/*
+                             .gridTableHeader, .gridTableHeaderFull, .gridTableHeaderFullEdit {
+background-color: #EEEEEE;}
+*/
+                             .imgsubmit {
+background-color: #F4F4F4;}
+                             .objectTitle {
+background-color: #FFFFFF;}
+                             .cellErrorLeft, .cellErrorRight, a.error {
+background-color: red;}
+                             a.op, input.op, a.new, .panel, .opPanel, .gridBlock, .qualifierPanel, .cellLogin {
+background-color: #FAFAFA;}
+                             a.Stab, a.SopTab, a.SgroupTab {
+background-color: #FAFAFA;}
+                             .locked {
+background-color: #EEEEEE;}
+                             input.valueLLocked, select.valueLLocked, input.valueRLocked, select.valueRLocked, textarea.stringLocked, textarea.multiStringLocked {
+background-color: #FAFAFA;}
+                             .valuePicture, .valueMulti, valueString, .valueL, .valueLG, .valueLLocked, .valueR, .valueRG, .valueRLocked {
+background-color: #FAFAFA;}
+                             .attributeTitle, input.classsubmit {
+background-color: #FAFAFA;}
+                             .popUp {
+background-color: #F8F8F8;}
+                             .fieldGroupName {
+background-color: #F4F4F4;}
+                             .gridTablehover, .gridTableFullhover, .gridTableFullEdithover {
+background-color: #F8F8F8;}
+                             .gridTableselected, .gridTableFullselected, .gridTableFullEditselected {
+background-color: #E8E8E8;}
+                             .cellInfo, .cellLogo {
+background-color: black;}
+                             .menuRootPanel {
+background-color: white;}
+                             .cellHeader, .cellFooter {
+background-color: #CCCCCC;}
+
+
+/* BORDER-COLOR defintions */
+                             .popUpFrame {
+border-color: white;}
+                             a.language, a.backButton, a.noIcon, .noIcon, input.flatsubmit, input.flatsubmit:hover, input.flatsubmithover, input.selflatsubmit, input.selflatsubmit:hover, input.selflatsubmithover, .opPanel, .panelResult, a.tab, div.SgroupTab, a.groupTab, .popUp, .qualifierPanel, .divImgPopUp {
+border-color: #555555;}
+                             .cellLogin {
+border-color: #CCCCCC;}
+                             a.op, input.op {
+border-color: #CCCCCC;}
+                             a.Stab, a.SopTab, a.SgroupTab {
+border-color: #888888;}
+                             a.tabhover, a.ophover, input.ophover, a.groupTab:hover, a.groupTabhover {
+border-color: #888888;}
+                             .imgsubmit, .imgsubmit:hover, input.imgsubmithover, input.selimgsubmit:hover, input.selimgsubmithover, input.selimgsubmit {
+border-color: #888888;}
+                             .objectTitle, .attributeTitle, .tableBreadCrum, .tableOpMenu {
+border-color: #DDDDDD;}
+                             .gridTable, .gridTableFull, .gridTableFullEdit {
+border-color: #AAAAAA;}
+                             input.classsubmit {
+border-color: #333344;}
+                             textarea, input.valueL, input.valueR, select.valueL, select.valueR {
+border-color: #DDDDDD;}
+                             .cellInfo, .cellLogo, .menuRootPanel, .cellHeader, .cellFooter, .opFieldGroup, .fieldGroup, .buttonimg {
+border-color: #DDDDDD;}
+                             .borderedimg {
+border-color: #EEEEEE;}
+                             .gridTableHeader td, .gridTableHeaderFull td, .gridTableHeaderFullEdit td {
+border-color: #CCCCCC;}
+                             .gridTableRow td, .gridTableRowFull td, .gridTableRowFullEdit td {
+border-color: #CCCCCC;}
+                             .borderedimg:hover, .borderedimghover, .buttonimg:hover, .buttonimghover {
+border-color: black;}
+                             a.new, a.opTab {
+border-color: #FAFAFA;}
+                             a.new:hover, a.opTab:hover, a.opTabhover {
+border-color: #DDDDDD;}
+                             .valueL, .valueLG, .valueR, .valueRG, .qualifier, input.valueLLocked, input.valueRLocked, select.valueLLocked, select.valueRLocked {
+border-color: #FAFAFA;}
+                             .fieldGroup {
+border-color: #FAFAFA;}
+                             .fieldGroupName {
+border-color: #DDDDDD;}
+                             .panelJSWarning, a.error {
+border-color: red;}
+                             .panel, .gridBlock {
+border-color: #888888;}

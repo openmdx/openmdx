@@ -1,0 +1,98 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>openCRX - Advanced Search</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
+<table class="objectTitle">
+  <tr>
+    <td><b>Rozšířené hledání</b></td>
+	<td>
+		<b>
+		<script>
+		  <!--
+		  document.write('<td align="right"><a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+		  -->
+		</script>
+		</b>
+	</td>
+  </tr>
+</table>
+
+ <div class="hh2">Rozšířené hledání jednoduše:</div>
+ <div class="normal">Můžete zvýšit přesnost vyhledávání přidáním operátorů které 
+	jemně doladí vaše klíčová slova a čísla. Všechny volby vypsané na této 
+	stránce mohou být vloženy přímo do vyhledávacího boxu.</div>
+ <div class="hh2">Základy</div> 
+ <div class="normal">Můžete vložit slovo/číslo nebo výraz, např. <strong>'Miller'</strong>, <strong>'> 500'</strong> 
+	nebo <strong>'>=
+   Smith'</strong>, a pak</div>
+ <table cellpadding="0" cellspacing="10">
+   <tr valign="top">
+     <td>&#8226; kliknout na <strong>hlavičku sloupce</strong> k vyhledání 
+		objektu s odpovídající hodnotou v dílčím atributu (<strong>všechny 
+		objekty</strong> jsou prohledány bez ohledu na nastavený filtr a 
+		výsledky předchozího hledání jsou ztraceny)</td>
+	 <td bgcolor="#CCCCCC"><strong>New Search</strong><br />
+	 <img src="images/helpSearchTut0.gif" width="129" height="51" /></td>
+   </tr>
+   <tr valign="top">
+     <td>&#8226; kliknout na <strong>[+] tlačítko</strong> pro vyhledání objektů 
+		s odpovídající hodnotou v dílčím atributu (<strong>pouze objekty 
+		obsažené v přechozím vyhledávání nebo filtru</strong> budou prohledány, 
+		tj. 'přidáním' tohoto kritéria bude vyhledáván dále upřesněno ( omezeno 
+		na menší skupinu)</td>
+	 <td bgcolor="#CCCCCC"><strong>Add Condition</strong><br />
+	 <img src="images/helpSearchTut1.gif" width="129" height="51" /></td>
+   </tr>
+</table>
+ <div class="hh2"><b>Operátory</b></div>
+ <div class="normal">Jsou podporovány následující operátory (některé databázové 
+	systémy všechny ovšem podporovat nemusí):</div>
+ <ul>
+ <li>zní jako (<strong>*</strong>)</li>
+ <li>jako (<strong>%</strong>), výchozí operátor pro hledání řetězců</li>
+ <li>rovno (<strong>=</strong>), výchozí operátor pro logické, číselné, a kódové 
+	vyhledávání</li>
+ <li>není rovno (<strong><></strong>, <strong>!</strong>=)</li>
+ <li>méně (<strong><</strong>)</li>
+ <li>méně nebo rovno (<strong><=</strong>)</li>
+ <li>větší (<strong>></strong>)</li>
+ <li>vetší nebo rovno <strong>(>=</strong>)</li>
+ </ul>
+ <div class="hh2"><b>&quot;A&quot; Vyhledávání</b></div>
+ <div class="normal">Pro získání objektů, které odpovídají více než jedné 
+	podmínce,použijte&nbsp; &quot;<strong>&amp;</strong>&quot; mezi podmínkami. 
+	Např.pro vyhledání objektů s hodnotami 500 a 1000 (tj. větších než 500 a 
+	menších než 1000), napiště: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
+ <div class="hh2">&nbsp;<p><b>&quot;NEBO&quot; Searches</b></div>
+<div class="normal">Pro získání objektů, které obsahují slovo A nebo slovo B, 
+	použijte středník &quot;<strong>;</strong>&quot; mezi podmínkami. Např. pro 
+	vyhledání kontaktů se jmény 'Smith' NEBO 'Miller', napište: <strong>'= Smith; Miller'</strong></div>
+ <div class="hh2">&nbsp;<p><b>Kombinované hlednání ...</b></div>
+ <div class="normal">Můžete libovolně kombinovat různé způsoby vyhledávání. 
+	Např. pro vyhledání objektů hodnot menších než '1000', ale jiných než '500' 
+	a různých od '600',
+   	napište: <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
+ <div class="normal">Syntaxe pravidel pro kombinovaná hledání jsou:</div>
+ <ul>
+   <li>searchExpr ::= filterValue { & filterValue }<br />
+   (--> string tokenizer with <strong>&</strong> as separator)</li>
+   <li>filterValue ::= [operator] value { ; value }<br />
+   (--> string tokenizer with <strong>;</strong> as separator)</li>
+ </ul>
+ <div class="hh2"><b>Značky pro výběr ... </b></div>
+ <div class="normal">
+   <p>Některé DBs umožňují použít vyhledávání pomocí značek výběru. pokud jsou 
+	podporovány,&nbsp; můžete např. vyhledat všechny kontakty se jménem 
+	obsahujícím 'ller' (např. Miller, Mueller, atd.) zadáním: <strong>'%%ller'<br />
+   Varování:</strong> vyhledávání za použití značek pro výběr může být velice 
+	časově náročná operace. </p>
+ </div>
+</body>
+</html>

@@ -1,0 +1,238 @@
+### Eclipse Workspace Patch 1.0
+#P Core
+Index: src/java/org/jpox/SchemaTool.java
+===================================================================
+RCS file: /cvsroot/jpox/JPOX/Core/src/java/org/jpox/SchemaTool.java,v
+retrieving revision 1.84
+diff -u -r1.84 SchemaTool.java
+--- src/java/org/jpox/SchemaTool.java	2 May 2007 08:24:16 -0000	1.84
++++ src/java/org/jpox/SchemaTool.java	24 May 2007 15:06:08 -0000
+@@ -85,6 +85,9 @@
+     /** DDL file **/
+     private String ddlFile;
+ 
++    /** SQL statement file **/
++    private String sqlFile;
++
+     /** create complete DDL when outputting ddl, not only for missing elements */
+     private boolean completeDdl = false;
+ 
+@@ -121,6 +124,9 @@
+     /** Property specifying the name of a DDL file**/
+     public static final String SCHEMATOOL_OPTION_DDLFILE = "org.jpox.schemaTool.ddlFile";
+ 
++    /** Property specifying the name of a SQL statement file**/
++    public static final String SCHEMATOOL_OPTION_SQLFILE = "org.jpox.schemaTool.sqlFile";
++
+     /** Property specifying the name of a DDL file (deprecated). **/
+     public static final String SCHEMATOOL_OPTION_DUMPDDL = "org.jpox.schemaTool.dumpDdl";
+ 
+@@ -223,6 +229,8 @@
+                 System.out.println();
+             }
+         }
++        // SQL file
++        String sqlFilename = tool.getSqlFile();
+ 
+         // Create a PMF for use with this mode
+         PersistenceManagerFactory pmf = getPMFForMode(mode, tool.getPropertiesFile(), ddlFilename, tool.verbose);
+@@ -255,7 +263,7 @@
+         {
+             if (mode == SCHEMATOOL_CREATE_MODE)
+             {
+-                createSchema(pmf, classNames, ddlFilename, tool.completeDdl);
++                createSchema(pmf, classNames, ddlFilename, sqlFilename, tool.completeDdl);
+             }
+             else if (mode == SCHEMATOOL_DELETE_MODE)
+             {
+@@ -304,6 +312,7 @@
+         cmd.addOption("schemainfo", "schemainfo", null, LOCALISER.msg("SchemaTool.HelpOption.SchemaInfo"));
+         cmd.addOption("ddlFile", "ddlFile", "ddlFile", LOCALISER.msg("SchemaTool.HelpOption.DDLFile"));
+         cmd.addOption("dumpDdl", "dumpDdl", "dumpDdl", LOCALISER.msg("SchemaTool.HelpOption.DDLFile"));
++        cmd.addOption("sqlFile", "sqlFile", "sqlFile", LOCALISER.msg("SchemaTool.HelpOption.DDLFile"));
+         cmd.addOption("completeDdl", "completeDdl", null, LOCALISER.msg("SchemaTool.HelpOption.CompleteDDL"));
+         cmd.addOption("api", "api", "<adapter-name>", "API Adapter (JDO, JPA, etc)");
+         cmd.addOption("help", "help", null, LOCALISER.msg("SchemaTool.HelpOption.Help"));
+@@ -431,8 +440,8 @@
+                 addProperty(props, PersistenceConfiguration.VALIDATE_TABLES_PROPERTY, "false", verbose);
+             }
+             addProperty(props, PersistenceConfiguration.AUTO_CREATE_SCHEMA_PROPERTY, "true", verbose);
+-            addProperty(props, PersistenceConfiguration.AUTO_CREATE_TABLES_PROPERTY, "true", verbose);
+-            addProperty(props, PersistenceConfiguration.AUTO_CREATE_CONSTRAINTS_PROPERTY, "true", verbose);
++//            addProperty(props, PersistenceConfiguration.AUTO_CREATE_TABLES_PROPERTY, "true", verbose);
++//            addProperty(props, PersistenceConfiguration.AUTO_CREATE_CONSTRAINTS_PROPERTY, "true", verbose);
+             addProperty(props, PersistenceConfiguration.FIXED_DATASTORE_PROPERTY, "false", verbose);
+             addProperty(props, PersistenceConfiguration.READ_ONLY_DATASTORE_PROPERTY, "false", verbose);
+         }
+@@ -596,6 +605,35 @@
+         return filemds;
+     }
+ 
++    private static void writeProlog(
++        FileWriter writer,
++        List classNames,
++        PersistenceManagerFactory pmf,
++        boolean completeDdl
++    ) throws IOException {
++        SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
++        writer.write("------------------------------------------------------------------\n");
++        writer.write("-- JPOX SchemaTool " + 
++            "(version " + ObjectManagerFactoryImpl.getVersionNumber() + ")" +
++            " ran at " + fmt.format(new java.util.Date()) +
++            "\n");
++        writer.write("------------------------------------------------------------------\n");
++        if (completeDdl)
++        {
++        	writer.write("-- Complete schema required for the following classes:-\n");
++        }
++        else  
++        {
++        	writer.write("-- Schema diff for " + pmf.getConnectionURL()+ " and the following classes:-\n");
++        }
++        Iterator classNameIter = classNames.iterator();
++        while (classNameIter.hasNext())
++        {
++        	writer.write("--     " + classNameIter.next() + "\n");
++        }
++        writer.write("--\n");    	
++    }
++    
+     /**
+      * Method to handle the creation of the schema for a set of classes
+      * @param pmf PersistenceManagerFactory to use when generating the schema
+@@ -603,7 +641,7 @@
+      * @param ddlFilename Name of the DDL file (optional)
+      * @throws Exception Thrown when either an error occurs parsing the MetaData, or the DB definition is not defined.
+      */
+-    public static void createSchema(PersistenceManagerFactory pmf, List classNames, String ddlFilename,
++    public static void createSchema(PersistenceManagerFactory pmf, List classNames, String ddlFilename, String sqlFilename,
+             boolean completeDdl)
+     throws Exception
+     {
+@@ -624,34 +662,36 @@
+                 }
+                 ddlFile.createNewFile();
+                 ddlFileWriter = new FileWriter(ddlFile);
+-
+-                SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+-                ddlFileWriter.write("------------------------------------------------------------------\n");
+-                ddlFileWriter.write("-- JPOX SchemaTool " + 
+-                    "(version " + ObjectManagerFactoryImpl.getVersionNumber() + ")" +
+-                    " ran at " + fmt.format(new java.util.Date()) +
+-                    "\n");
+-                ddlFileWriter.write("------------------------------------------------------------------\n");
+-                if (completeDdl)
+-                {
+-                    ddlFileWriter.write("-- Complete schema required for the following classes:-\n");
+-                }
+-                else  
+-                {
+-                    ddlFileWriter.write("-- Schema diff for " + pmf.getConnectionURL()+ " and the following classes:-\n");
+-                }
+-                Iterator classNameIter = classNames.iterator();
+-                while (classNameIter.hasNext())
+-                {
+-                    ddlFileWriter.write("--     " + classNameIter.next() + "\n");
+-                }
+-                ddlFileWriter.write("--\n");
++                writeProlog(
++                    ddlFileWriter,
++                    classNames,
++                    pmf,
++                    completeDdl
++                );
++            }
++            FileWriter sqlFileWriter = null;
++            if (sqlFilename != null)
++            {
++                // Open the SQL file for writing
++                File sqlFile = StringUtils.getFileForFilename(sqlFilename);
++                if (sqlFile.exists())
++                {
++                    sqlFile.delete();
++                }
++                sqlFile.createNewFile();
++                sqlFileWriter = new FileWriter(sqlFile);
++                writeProlog(
++                	sqlFileWriter,
++                    classNames,
++                    pmf,
++                    completeDdl
++                );
+             }
+ 
+             try
+             {
+                 String[] classNameArray = (String[])classNames.toArray(new String[classNames.size()]);
+-                storeMgr.addClasses(classNameArray, om.getClassLoaderResolver(), ddlFileWriter, completeDdl);
++                storeMgr.addClasses(classNameArray, om.getClassLoaderResolver(), ddlFileWriter, sqlFileWriter, completeDdl);
+             }
+             finally
+             {
+@@ -659,6 +699,10 @@
+                 {
+                     ddlFileWriter.close();
+                 }
++                if (sqlFileWriter != null)
++                {
++                	sqlFileWriter.close();
++                }
+             }
+         }
+         else
+@@ -778,6 +822,10 @@
+             // Deprecated. Present for backwards compatibility only (use "ddlFile" instead)
+             map.put(SCHEMATOOL_OPTION_DUMPDDL, cmd.getOptionArg("dumpDdl"));
+         }
++        if (cmd.hasOption("sqlFile"))
++        {
++            map.put(SCHEMATOOL_OPTION_SQLFILE, cmd.getOptionArg("sqlFile"));
++        }
+         if (cmd.hasOption("completeDdl"))
+         {
+             map.put(SCHEMATOOL_OPTION_COMPLETEDDL, Boolean.TRUE.toString());
+@@ -898,6 +946,14 @@
+     }
+ 
+     /**
++     * Accessor for the SQL statement filename
++     */
++    public String getSqlFile()
++    {
++        return sqlFile;
++    }
++
++    /**
+      * Mutator for the DDL file
+      * @param file the file to use when outputting the DDL
+      */
+@@ -907,6 +963,15 @@
+     }
+ 
+     /**
++     * Mutator for the DDL file
++     * @param file the file to use when outputting the DDL
++     */
++    public void setSqlFile(String file)
++    {
++        this.sqlFile = file;
++    }
++
++    /**
+      * Initialize the PROPERTY_SETTERS Map.
+      * @return  The PROPERTY_SETTERS Map.
+      */
+@@ -928,6 +993,13 @@
+                 ((SchemaTool) configuration).setDdlFile(s);
+             }
+         });
++        map.put(SchemaTool.SCHEMATOOL_OPTION_SQLFILE, new StringPropertySetter()
++        {
++            public void set(PersistenceConfiguration configuration, String s)
++            {
++                ((SchemaTool) configuration).setSqlFile(s);
++            }
++        });
+         map.put(SchemaTool.SCHEMATOOL_OPTION_HELP, new StringPropertySetter()
+         {
+             public void set(PersistenceConfiguration configuration, String s)

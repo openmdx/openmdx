@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+=======================================================================
+= Name:        $Id: build.xml,v 1.46 2008/02/12 18:03:27 wfro Exp $
+= Description: openMDX/Security Ant Build File
+= Revision:    $Revision: 1.46 $
+= Date:        $Date: 2008/02/12 18:03:27 $
+= Copyright:   (c) 2003-2005 OMEX AG
+=======================================================================
+ *
+ * This software is published under the BSD license as listed below.
+ * 
+ * Copyright (c) 2003-2007, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions 
+ * are met:
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+-->
+<project 
+	name="openmdx-security" 
+	default="-projecthelp"
+	xmlns:openmdx="xri://(antlib:org.openmdx.tools.ant)"
+	xmlns:antcontrib="antlib:net.sf.antcontrib"
+>
+	<description>Builds the openMDX/Security component</description>
+	<property name="project.specification.title" value="openMDX/Security"/>
+
+	<!-- Slash separated platform list, the last entry being the default -->
+	<property name="project.platform.list" value="jre-1.5"/>
+
+  <!-- Slash separated app server list, may be overridden by build properties -->
+  <property name="project.app-server.list" value="jboss-3"/>
+
+	<!-- Included Ant Projects -->
+	<import file="../ant/etc/ant/build-properties.xml"/>
+	<import file="../ant/etc/ant/build-library.xml"/>
+
+	<path id="project.lib.classpath">
+		<path refid="openmdx.core.lib"/>
+		<path refid="openmdx.core.bin"/>
+	</path>
+	<path id="project.bin.classpath">
+		<path refid="project.lib.classpath"/>
+		<path refid="oracle.jdbc.lib"/>		
+		<path refid="microsoft.sql-server.lib"/>		
+		<pathelement location="${basedir}/src/resource"/>
+		<pathelement location="${build.dir}/bin"/>
+		<pathelement location="${build.dir}/src/resource"/>
+		<pathelement location="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip"/>
+	</path>
+	<patternset id="project.junit.test.case">
+		<include name="org/openmdx/test/**/Test*.java"/>
+	</patternset>
+	<patternset id="openmdx-ldap.jar.content">
+		<include name="org/openmdx/resource/ldap/**"/>
+	</patternset>
+	<patternset id="openmdx-security.jar.content">
+		<include name="org/openmdx/application/exception/**"/>
+		<include name="org/openmdx/security/**"/>
+		<include name="org/openmdx/uses/javax/security/**"/> <!-- before jre-1.5 only! -->
+		<include name="org/openmdx/uses/layout/**"/>
+		<exclude name="org/openmdx/security/radius/**"/>
+	</patternset>
+	<patternset id="openmdx-radius.jar.content">
+		<include name="org/openmdx/security/radius/**"/>
+		<include name="org/openmdx/uses/net/sourceforge/jradiusclient/**"/>
+	</patternset>
+
+	<!-- ******************************************************************* -->
+	<!-- * generate -->
+	<!-- ******************************************************************* -->
+	<target name="generate" description="Generate version, jt and model dependend files" depends="build-init">
+		<ant dir="${openmdx.home}/core" inheritAll="false" target="prepare"> 
+			<property name="build.target.platform" value="${build.java.platform}"/>
+		</ant>
+		<antcall target="-preprocess-jt-files-">
+			<param name="preprocess-jt.target" value="java"/>
+		</antcall>
+		<antcall target="-preprocess-model-files-"/>
+	</target>
+
+	<!-- ******************************************************************* -->
+	<!-- * test -->
+	<!-- ******************************************************************* -->
+	<target name="test"/>
+
+	<!-- ******************************************************************* -->
+	<!-- * deliverables -->
+	<!-- ******************************************************************* -->
+	<target 
+		name="deliverables" 
+		description="Populate the project's deliverables directory" 
+		depends="deliverables-init,java-archives,source-archives"
+	/>
+
+	<!-- ******************************************************************* -->
+	<!-- * distribution -->
+	<!-- ******************************************************************* -->
+	<target name="distribution" description="Creates a distribution" depends="distribution-init,deliverables">
+		<openmdx:archive 
+			destfile="${distribution.dir}/openmdx-${openmdx.implementation.version}-${base.dir.name}.${build.target.platform}."
+			format="${distribution.format}"
+			checksum="MD5"
+		>
+			<openmdx:archivefileset 
+				dir="${basedir}" 
+				prefix="${project.implementation.prefix}-${project.implementation.version}/${base.dir.name}"
+			>
+				<include name="*LICENSE"/>
+				<include name="README"/>
+				<include name="RELEASE-NOTES"/>
+				<include name="build.xml"/>
+				<include name="*.properties"/>
+				<include name="*.xml"/>
+				<include name=".cvsignore"/>
+				<include name="etc/**"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset 
+				dir="${project.home}" 
+				prefix="${project.implementation.prefix}-${project.implementation.version}"
+			>
+				<include name="${build.target.platform}/security/**"/>
+				<include name="source-archive/security/**"/>
+				<include name="eclipse/${build.target.platform}/${base.dir.name}/**"/>				
+			</openmdx:archivefileset>
+			<openmdx:archivefileset 
+				dir="${project.home}/eclipse" 
+				prefix="${project.implementation.prefix}-${project.implementation.version}"
+			>
+				<include name="${build.target.platform}/${base.dir.name}/**"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset 
+				dir="${project.home}/${base.dir.name}" 
+				prefix="${project.implementation.prefix}-${project.implementation.version}/${base.dir.name}/"
+			>
+				<include name=".classpath"/>
+				<include name=".project"/>
+			</openmdx:archivefileset>			
+			<openmdx:archivefilterchain>
+				<patternset>
+					<include name="**/.project"/>
+					<include name="**/.classpath"/>
+				</patternset>
+				<tokenfilter>
+				    <replaceregex pattern="( \(.*\))? ~ " replace=" (${project.implementation.version}) ~ "/>
+				</tokenfilter>
+			</openmdx:archivefilterchain>
+		</openmdx:archive>
+	</target>
+		
+	<!-- ******************************************************************* -->
+	<!-- * java-archives -->
+	<!-- ******************************************************************* -->
+	<target name="java-archive-ldap" depends="deliverables-init,build" unless="build.exclude.ldap">
+		<openmdx:archive
+			destfile="${deliver.dir}/lib/openmdx-ldap.jar"
+			format="jar"
+		>
+			<openmdx:archivemanifest refid="project.manifest"/>
+			<openmdx:archivemanifest>
+				<attribute name="Specification-Title" value="${project.specification.title} Library LDAP"/>
+				<attribute name="Implementation-Title" value="openmdx-ldap for ${build.target.platform}"/>
+			</openmdx:archivemanifest>
+			<openmdx:archivefileset dir="${build.dir}/bin">
+				<patternset refid="openmdx-ldap.jar.content"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${basedir}/src/resource" whenmissing="skip">
+				<patternset refid="openmdx-ldap.jar.content"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/resource" whenmissing="skip">
+				<patternset refid="openmdx-ldap.jar.content"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+	</target>
+	<target name="java-archives" depends="deliverables-init,build,java-archive-ldap">
+		<openmdx:archive
+			destfile="${deliver.dir}/lib/openmdx-security.jar"
+			format="jar"
+		>
+			<openmdx:archivemanifest refid="project.manifest"/>
+			<openmdx:archivemanifest>
+				<attribute name="Specification-Title" value="${project.specification.title} Library security"/>
+				<attribute name="Implementation-Title" value="openmdx-security for ${build.target.platform}"/>
+				<attribute name="Class-Path" value="openmdx-base.jar"/>
+			</openmdx:archivemanifest>
+			<openmdx:archivefileset dir="${build.dir}/bin">
+				<patternset refid="openmdx-security.jar.content"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset src="${build.dir}/model/${ant.project.name}.openmdx-xmi.zip">
+				<patternset refid="openmdx-security.jar.content"/>
+			</openmdx:archivefileset>			
+			<openmdx:archivefileset dir="${basedir}/src/resource">
+				<patternset refid="openmdx-security.jar.content"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset dir="${build.dir}/src/resource" whenmissing="skip">
+				<patternset refid="openmdx-security.jar.content"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+		<openmdx:archive
+			destfile="${deliver.dir}/lib/openmdx-radius.jar"
+			format="jar"
+		>
+			<openmdx:archivemanifest refid="project.manifest"/>
+			<openmdx:archivemanifest>
+				<attribute name="Specification-Title" value="${project.specification.title} Library radius"/>
+				<attribute name="Implementation-Title" value="openmdx-radius for ${build.target.platform}"/>
+			</openmdx:archivemanifest>
+			<openmdx:archivefileset dir="${build.dir}/bin">
+				<patternset refid="openmdx-radius.jar.content"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+	</target>
+
+	<!-- ******************************************************************* -->
+	<!-- * Java API Documentation -->
+	<!-- ******************************************************************* -->
+	<target 
+		name="api-doc" 
+		description="Generate the Java API documentation" 
+		depends="api-doc-init" 
+		unless="api-doc.is.up-to-date"
+	>
+		<mkdir dir="${build.dir}/doc/api"/>
+		<javadoc 
+			destdir="${build.dir}/doc/api" 
+			author="true" 
+			version="true" 
+			locale="en" 
+			use="true" 
+			windowtitle="${project.specification.title} API" 
+			doctitle="${project.specification.title} API ${project.specification.version}" 
+			maxmemory="512m"
+			excludepackagenames="org.openmdx.test.*"
+		>
+			<packageset dir="${basedir}/src/java"/>
+			<packageset dir="${build.dir}/src/java"/>
+			<classpath refid="project.bin.classpath"/>
+			<link href="http://java.sun.com/j2se/1.4/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2se/"/>
+			<link href="http://java.sun.com/j2ee/1.4/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2ee/"/>
+			<link href="http://www.openmdx.org/openmdx/core/1.16/java-jre-1.4/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/openmdx/"/>
+			<group>
+				<title>${project.specification.title} Radius</title>
+				<package name="org.openmdx.security.radius.client"/>
+				<package name="org.openmdx.uses.net.sourceforge.jradiusclient"/>
+				<package name="org.openmdx.uses.net.sourceforge.jradiusclient.*"/>
+			</group>
+			<bottom>This software is published under the BSD license. Copyright &#169; 2003-${build.year}, OMEX AG, Switzerland, All rights reserved. Use is subject to &lt;a href="http://www.openmdx.org/license.htm"&gt;license terms&lt;/a&gt;.</bottom>
+		</javadoc>
+		<echo>
+------------------------------------------------------------------------------------------------
+The Java API documentation for ${project.specification.title} has been generated at 
+${build.dir}/doc/api/index.html
+------------------------------------------------------------------------------------------------
+	    </echo>
+		<mkdir dir="${deliver.dir}/doc"/>
+	    <openmdx:archive
+			destfile="${deliver.dir}/doc/${ant.project.name}.javadoc.zip"
+			format="zip"
+		>
+			<openmdx:archivefileset dir="${build.dir}/doc/api">
+				<include name="**"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+	</target>
+
+</project>

@@ -1,0 +1,11 @@
+<!DOCTYPE application PUBLIC "-//Sun Microsystems, Inc.//DTD J2EE Application 1.2//EN" "http://java.sun.com/j2ee/dtds/application_1_2.dtd">
+<application>
+	<display-name>
+		openMDX/Test.Core Test-ObjectView
+	</display-name>
+	<module>
+		<ejb>
+			test-calendar-1.jar
+		</ejb>
+	</module>
+</application>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ENTITY % jdo PUBLIC "-//Sun Microsystems, Inc.//DTD Java Data Objects Metadata 2.0//EN" "http://java.sun.com/dtd/jdo_2_0.dtd">
+<!--===================================================================
+ ! Project:     openmdx, http://www.openmdx.org/
+ ! Name:        $Id: openmdx-jdo_2_0.dtd,v 1.10 2007/07/31 16:59:43 hburger Exp $
+ ! Description: DTD Java Data Objects Metadata Extension 2.0
+ ! Revision:    $Revision: 1.10 $
+ ! Owner:       OMEX AG, Switzerland, http://www.omex.ch
+ ! Date:        $Date: 2007/07/31 16:59:43 $
+ ! ====================================================================
+ ! 
+ ! This software is published under the BSD license as listed below.
+ ! 
+ ! Copyright (c) 2007, OMEX AG, Switzerland
+ ! All rights reserved.
+ ! 
+ ! Redistribution and use in source and binary forms, with or
+ ! without modification, are permitted provided that the following
+ ! conditions are met:
+ !  
+ ! * Redistributions of source code must retain the above copyright
+ !   notice, this list of conditions and the following disclaimer.
+ ! 
+ ! * Redistributions in binary form must reproduce the above copyright
+ !   notice, this list of conditions and the following disclaimer in
+ !   the documentation and/or other materials provided with the
+ !   distribution.
+ ! 
+ ! * Neither the name of the openMDX team nor the names of its
+ !   contributors may be used to endorse or promote products derived
+ !   from this software without specific prior written permission.
+ ! 
+ ! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ ! CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ ! INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ ! MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ ! DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ ! BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ ! EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ ! TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ ! DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ ! ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ ! OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ ! OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ ! POSSIBILITY OF SUCH DAMAGE.
+ !_________________ 
+ ! 
+ ! This product includes or is based on software developed by other 
+ ! organizations as listed in the NOTICE file.
+ !
+ !
+ The DOCTYPE should be as follows for metadata documents:
+ 
+<!DOCTYPE openmdxjdo
+    PUBLIC "-//openMDX//DTD Java Data Objects Metadata Extension 2.0//EN"
+    "http://www.openmdx.org/dtd/openmdx-jdo_2_0.dtd"
+>
+	
+ !-->
+<!ELEMENT openmdxjdo (package)>
+
+<!ELEMENT package (extension*, class, extension*)>
+<!ATTLIST package name CDATA #REQUIRED>
+<!ATTLIST package table-prefix CDATA #IMPLIED>
+
+<!ELEMENT class (extension*, inheritance?, field*, extension*)>
+<!ATTLIST class name CDATA #REQUIRED>
+<!ATTLIST class requires-extent (true|false) 'true'>
+<!ATTLIST class requires-slices (true|false) 'true'>
+<!ATTLIST class persistence-modifier (persistence-capable|persistence-aware|non-persistent) 'persistence-capable'>
+<!ATTLIST class table CDATA #IMPLIED>
+
+<!ELEMENT join (extension*)>
+<!ATTLIST join table CDATA #IMPLIED>
+
+<!ELEMENT inheritance (extension*)>	
+<!ATTLIST inheritance strategy CDATA #IMPLIED>
+
+<!ELEMENT field (extension*, (column|join)?, extension*)>
+<!ATTLIST field name CDATA #REQUIRED>
+<!ATTLIST field persistence-modifier (persistent|transactional|version|none) #IMPLIED>
+<!ATTLIST field visibility (cci|spi|none) #REQUIRED>
+<!ATTLIST field field-type CDATA #IMPLIED>
+<!ATTLIST field embedded CDATA #IMPLIED>
+
+<!ELEMENT column (extension*)>
+<!ATTLIST column name CDATA #IMPLIED>
+<!ATTLIST column length CDATA #IMPLIED>
+<!ATTLIST column scale CDATA #IMPLIED>
+<!ATTLIST column jdbc-type CDATA #IMPLIED>
+
+<!ELEMENT extension ANY>
+<!ATTLIST extension vendor-name CDATA #REQUIRED>
+<!ATTLIST extension key CDATA #IMPLIED>
+<!ATTLIST extension value CDATA #IMPLIED>
+<!ATTLIST extension target (jdo|orm|none) 'none'>

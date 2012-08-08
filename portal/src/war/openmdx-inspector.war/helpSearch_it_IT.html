@@ -1,0 +1,111 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>openCRX - Advanced Search</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="file:///G|/forinst/opencrx/opencrx1.7.1/italiano/Italiano%20Aggiunto/_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="file:///G|/forinst/opencrx/opencrx1.7.1/italiano/Italiano%20Aggiunto/_style/default.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body onLoad="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
+<table class="objectTitle">
+  <tr>
+    <td>Ricerca Avanzata</td>
+	<td>
+		<script>
+		  <!--
+		  document.write('<td align="right"><a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+		  -->
+		</script>
+	</td>
+  </tr>
+</table>
+
+ 
+<div class="hh2">Ricerca Avanzata rende più facile incrementare l'accuratezza 
+  delle vostre ricerche aggiungendo degli operatori che affinano le parole chiave 
+  ed i numeri. Tutte le opzioni elencate in qesta pagina possono essere immesse 
+  nella casella di immissione delle ricerche..</div>
+ 
+<div class="hh2">Le Basi:</div> 
+ 
+<div class="normal">Si può inserire una parola ,un numero od un'espressione . 
+  P. es.. <strong>'Miller'</strong>, <strong>'> 500'</strong> or <strong>'>= Smith'</strong>, 
+  e poi</div>
+ <table cellpadding="0" cellspacing="10">
+   <tr valign="top">
+     
+    <td>&#8226; premere sull'intestazione di una colonna per cercare gli oggetti 
+      che coincidono in quel particolare attributo (<strong>Tutti gli Oggetti</strong> 
+      sono cercati senza riguardo per impostazioni correnti dei filtri ed iun 
+      risultato di ricerca esistente viene perso)</td>
+	 
+    <td bgcolor="#CCCCCC"><strong>Nuova ricerca</strong><br />
+	 <img src="file:///G|/forinst/opencrx/opencrx1.7.1/italiano/Italiano%20Aggiunto/images/helpSearchTut0.gif" width="129" height="51" /></td>
+   </tr>
+   <tr valign="top">
+     
+    <td>&#8226; Premere sul pulsante <strong>[+] </strong> per cercare oggetti 
+      che contengono il valore(i) in quel particolare attributo (<strong>sono 
+      considerati solo oggetti contenuti in una precedente ricerca o compresi 
+      nel filtro esistente </strong>, p.es. 'aggiungere'questa ricerca affinerà 
+      i risultati già ottenuti)</td>
+    <td bgcolor="#CCCCCC"><strong>Aggiungi Condizione</strong><br />
+	 <img src="file:///G|/forinst/opencrx/opencrx1.7.1/italiano/Italiano%20Aggiunto/images/helpSearchTut1.gif" width="129" height="51" /></td>
+   </tr>
+</table>
+ 
+<div class="hh2">Operatori</div>
+ 
+<div class="normal">Sono supportati i seguenti operatori (Nota bene: Molti database 
+  non ne supportano comunque alcuni):</div>
+ <ul>
+ <li>sounds like (<strong>*</strong>)</li>
+  <li>like (<strong>%</strong>), jolly per stringhe</li>
+  <li>uguale (<strong>=</strong>), jolly per booleani, numeri e ricerche codice</li>
+  <li>non uguale (<strong><></strong>, <strong>!</strong>=)</li>
+  <li>minore (<strong><</strong>)</li>
+  <li>lminore o uguale(<strong><=</strong>)</li>
+  <li>maggiore (<strong>></strong>)</li>
+  <li>maggiore o uguale <strong>(>=</strong>)</li>
+ </ul>
+ 
+<div class="hh2"><strong>Ricerche &quot;AND&quot; </strong></div>
+<div class="normal">Per trovare oggetti che hanno condizioni diverse con una sola 
+  ricerca, si usa inserire &quot;<strong>&amp;</strong>&quot; tra le due condizioni.. 
+  Per esempio,per cercare oggetti con valori compresi tra 500 e 1000 (i.e.maggiori 
+  di 500 e minori di 1000), inserire: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
+ 
+<div class="hh2"><strong>Ricerche &quot;OR&quot; </strong></div>
+<div class="normal">Per trovare oggetti che contengano o la parola A o la parola 
+  B utilizzare il punto e virgola &quot;<strong>;</strong>&quot; tra i due termini. 
+  Per esempio, per cercare contatti di nome 'Smith' Oppure 'Miller', inserire: 
+  <strong>'= Smith; Miller'</strong></div>
+<div class="hh2"><strong>Ricerche combinate</strong></div>
+ 
+<div class="normal">
+  <p>Si possono combinare le ricerche in modo virtualmente illimitato. Per esempio, 
+    per cercare oggetti con valore inferiore a '1000', ma divero da '500' e differente 
+    da '600',inserire: <strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></p>
+</div>
+ <div class="normal">The parsing rules for combined searches are as follows:</div>
+ <ul>
+   <li>searchExpr ::= filterValue { & filterValue }<br />
+   (--> string tokenizer with <strong>&</strong> as separator)</li>
+   <li>filterValue ::= [operator] value { ; value }<br />
+   (--> string tokenizer with <strong>;</strong> as separator)</li>
+ </ul>
+ 
+<div class="hh2">Ricerche con Valori jolly</div>
+ 
+<div class="normal"> 
+  <p>Molti DBs permettono di inserire ricerche con valori jolly . Se supportato,si 
+    possono per esempio trovare tutti i contatti che contengono la stringa 'ller' 
+    (p.es.. Miller, Mueller, etc.) inserendo: <strong>'%%ller'<br />
+    WARNING:</strong> Le ricerche con caratteri Jolly possono comportare, se non 
+    ben filtrate,un abbattimento delle prestazioni dei DB (full table scans)! 
+  </p>
+ </div>
+</body>
+</html>

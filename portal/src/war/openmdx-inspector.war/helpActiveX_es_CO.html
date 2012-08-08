@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>Características basadas en el Control ActiveX</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body onLoad="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(50, 50);">
+<table class="objectTitle">
+<tr>
+  <td>ActiveX</td>
+  <td align="right">
+ <script>
+   <!--
+   document.write('<a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+   -->
+ </script>
+  </td>
+</tr>
+</table>
+<p>El uso de caracteristicas basadas en el Control ActiveX necesitan que:<br />
+<ul>
+  <li>Tu navegador sea <strong>capaz de utilizar controles ActiveX</strong> (ej. Internet Explorer sobre MS Windows) y</li>
+  <li>la configuración de seguridad sea tal que <strong>se permita cargar/ejecutar controles ActiveX</strong></p></li>
+</ul>
+<p>Dependiendo de la caracteristica, algunos paquetes de software adicionales no requeridos:</p>
+<table class="browserHints">
+  <tbody>
+  <tr>
+    <td><b>Característica</b></td>
+ <td><b>Requerimiento</b></td>
+  <td><strong>Consideraciones adicionales</strong></td>
+  </tr>
+  <tr>
+    <td>MS Word XML Merge</td>
+    <td>Instalación en el cliente de MS Word 2000 ó superior</td>
+  <td><a href="#trustedsites">Sitios Confiables</a>, <a href="#activexsettings">Permisos ActiveX</a></td>
+  </tr>
+  <tr>
+    <td>MS Excel XML Merge</td>
+    <td>Instalación en el cliente de MS Excel 2000 ó superior</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Exportación de XML a MS Outlook</td>
+    <td>Instalación en el cliente de MS Outlook 2000 ó superior</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Importación de XML desde MS Outlook</td>
+    <td>Instalación en el cliente de MS Outlook 2000 ó superior</td>
+  <td>&nbsp;</td>
+  </tr>
+  </tbody>
+</table>
+<a name="trustedsites"></a><p class="hh1">Sitios Confiables (Internet Explorer)</p>
+<p>Por razones de seguridad no se recomenda habilitar los controles de ActiveX en la <strong>Zona de Internet</strong>. 
+Es preferible agregar el sitio que ejecuta openCRX a su<strong><a href="#trustedsites">Zona de Sitios Confiables</strong></a> o a su 
+<strong>Zona Local de Intranet</strong> (solo si el sítio está ubicado en su Intranet) y entonces <a href="#activexsettings">habilitar los controles 
+ActiveX</a> para la zona repectiva. A continuación hay ejemplos de la adición del servidor de demostración de openCRX (<strong><font color=
+"#FF0000">demo.opencrx.org</font></strong>) a su zona de sitios confiables y de la adición de su servidor local de openCRX 
+(<strong><font color="#FF0000">10.1.1.20</font></strong>) a la Zona Local de Intranet.</p>
+<p><img src="images/ie_trusted_sites.png" width="384" height="342"> <img src="images/ie_local_intranet_zone.png" width="384" height="342"></p>
+<a name="activexsettings"></a>
+<p class="hh1">Permisos ActiveX  (Internet Explorer)</p>
+<p>Por razones de seguridad no se recomenda habilar los controles de ActiveX en la <strong>Zona de Internet</strong>. 
+Es preferible agregar el sitio que ejecuta openCRX a su<strong><a href="#trustedsites">Zona de Sitios Confiables</a> 
+o a su <strong><a href="#trustedsites">Zona Local de Intranet</a></strong> (solo si el sitio realmente está en su intranet) y a continuación 
+<a href="#activexsettings">habilitar los controles ActiveX</a> en la zona correspondiente, como se muestra a continuación:</p>
+<p class="hh1">Dónde encontrar su configuración de seguridad de ActiveX:</p>
+
+<table class="activeXHints">
+  <tr>
+    <td><b>Platforma</b></td>
+    <td colSpan=2><b>Navegador</b> &amp; <b>Versión</b></td>
+    <td><b>Encontrar la configuración de ActiveX en ...</b></td>
+    <td><strong>ActiveX habilitado (con advertencias de pop ups)</strong></td>
+    <td><strong>ActiveX habilitado (sin advertencias de pop ups)</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img height=38 src="images/icon-windows.gif" width=38 /><br />
+   <strong>Microsoft<br />
+   Windows</strong>	</td>
+    <td align="center">
+   <img height=38 src="images/icon-ie.gif" width=38><br />
+   <FONT size=-1>Internet<br />Explorer</FONT>
+ </td>
+    <td>6.x</td>
+    <td>Herramientas &gt; Opciones de Internet&gt; Seguridad ...<br />
+      ... Niveles Personalizados &gt; <br/>
+      Controles y complementos de ActiveX</td>
+    <td><img src="images/ie_activex_settings_secure.png" width="352" height="666"></td>
+    <td><img src="images/ie_activex_settings_convenient.png" width="352" height="666"></td>
+  </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSPY v5 rel. 4 U (http://www.xmlspy.com) by Harald Burger (private) -->
+<!DOCTYPE openmdx-ejb-jar PUBLIC "-//openMDX//DTD Enterprise JavaBeans Extension 1.0//EN" "http://www.openmdx.org/dtd/openmdx-ejb-jar_1_0.dtd">
+<openmdx-ejb-jar>
+	<enterprise-beans>
+		<session>
+			<ejb-name>calendar</ejb-name>
+			<jndi-name>org/openmdx/test/joining/calendar</jndi-name>
+		</session>
+		<session>
+			<ejb-name>explorer</ejb-name>
+			<jndi-name>org/openmdx/test/joining/explorer</jndi-name>
+		</session>
+	</enterprise-beans>
+</openmdx-ejb-jar>

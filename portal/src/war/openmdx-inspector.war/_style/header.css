@@ -1,0 +1,104 @@
+.tableInfo {
+  direction: ltr;
+  border-collapse: separate; 
+  width: 100%;
+  border-spacing: 0px;
+  vertical-align: middle;
+}
+td.logoLeft {
+  vertical-align: middle;
+  padding: 4px;
+}
+td.logoLeftSpacer {
+  padding-left: 20px;
+}
+td.logoRight {
+  vertical-align: middle;
+  padding: 4px;
+  display: none;
+}
+td.logoRightSpacer {
+  padding-right: 20px;
+  display: none;
+}
+td.info {
+  width: 100%;
+  text-align: right;
+}
+td.cellLanguage {
+  border-collapse: collapse; 
+  width: 100%;
+  vertical-align: bottom;
+  padding-bottom: 1px;
+  text-align: right;
+}
+.roleselform {
+  display: inline;
+  border-style: none;
+  font-weight: normal;
+  padding: 0px;
+}
+.roleselector {
+  border-style: solid;
+  margin: 0px;
+  padding: 0px;
+}
+.langselform {
+  display: inline;
+  border-style: none;
+  padding: 0px;
+}
+.langselector {
+  border-style: solid;
+  margin: 0px;
+  padding: 0px;
+}
+a.language { 
+  text-decoration: none;
+  border-style: solid solid solid solid;  
+  border-width: 1px 1px 1px 1px; 
+  line-height: 15px;
+  padding: 2px 0.5em 2px 0.5em; 
+  white-space: nowrap;
+  font-size: 10px;
+  text-align: center;
+  width: 50px;
+}
+a.language:hover { 
+  text-decoration: none;
+}
+.cellHeader {
+  border-width: 2px;
+  border-style: solid;
+}
+.cellHeader p {
+  padding: 4px;
+  margin: 0px;
+}
+.cellInfo {
+  border-width: 2px;
+  border-style: solid;
+}
+.cellFooter {
+  border-width: 2px;
+  border-style: solid;
+}
+.cellFooter p {
+  padding: 4px;
+  margin: 0px;
+}
+.headerActions {
+  white-space: nowrap;
+  overflow: hidden;
+  text-decoration: none;
+}
+.user {
+  margin-top: 4px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.role {
+  font-weight: normal;
+}
+.lastread {
+}

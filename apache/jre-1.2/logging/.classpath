@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 1.2"/>
+	<classpathentry exported="true" sourcepath="src/log4j.java.zip" kind="lib" path="lib/log4j.jar">
+		<attributes>
+			<attribute value="http://logging.apache.org/log4j/docs/api/" name="javadoc_location"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

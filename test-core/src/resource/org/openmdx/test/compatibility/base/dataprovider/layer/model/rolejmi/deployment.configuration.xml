@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<org.openmdx.base.Authority name="org:openmdx:deployment1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="xri:+resource/org/openmdx/deployment1/xmi/deployment1_edit.xsd">
+	<_object/>
+	<_content>
+		<provider>
+			<org.openmdx.base.Provider qualifiedName="org:openmdx">
+				<_object/>
+				<_content>
+					<segment>
+						<org.openmdx.deployment1.Segment qualifiedName="org:openmdx:test">
+							<_object/>
+							<_content>
+								<configuration>
+									<org.openmdx.deployment1.Configuration name="junit">
+										<_object/>
+										<_content>
+											<!-- domain apps -->
+											<domain>
+												<org.openmdx.deployment1.Domain name="apps">
+													<_object/>
+													<_content>
+														<deploymentUnit>
+															<!-- DeploymentUnit testrolejmi -->
+															<org.openmdx.deployment1.DeploymentUnit name="testrolejmi">
+																<_object/>
+																<_content>
+																	<module>
+																		<org.openmdx.deployment1.Module name="rolenone">
+																			<_object/>
+																			<_content>
+																				<component>
+																					<org.openmdx.deployment1.Dataprovider name="joining">
+																						<_object>
+																							<deploymentOrder>100</deploymentOrder>
+																							<registrationId>org:openmdx:test:managing:none</registrationId>
+																							<dataproviderType>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:test/configuration/junit/dataproviderType/rolenone</dataproviderType>
+																							<initialCapacity>1</initialCapacity>
+																							<transactionPolicy/>
+																						</_object>
+																						<_content>
+																							<property>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="KERNEL:exposedPath">
+																									<_object>
+																										<value>
+																											<_item>xri:@openmdx:org.openmdx.test.compatibility.role1/provider/None/segment/Standard</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="KERNEL:namespaceId">
+																									<_object>
+																										<value>
+																											<_item>role1</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+ 																								<org.openmdx.deployment1.DataproviderIntegerProperty qualifiedName="PERSISTENCE:batchSize">
+																									<_object>
+																										<value>
+																											<_item>10</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderIntegerProperty>
+																							</property>
+																						</_content>
+																					</org.openmdx.deployment1.Dataprovider>
+																				</component>
+																			</_content>
+																		</org.openmdx.deployment1.Module>
+																		<org.openmdx.deployment1.Module name="rolejdbc">
+																			<_object/>
+																			<_content>
+																				<component>
+																					<org.openmdx.deployment1.Dataprovider name="joining">
+																						<_object>
+																							<deploymentOrder>100</deploymentOrder>
+																							<registrationId>org:openmdx:test:managing:jdbc</registrationId>
+																							<dataproviderType>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:test/configuration/junit/dataproviderType/rolejdbc</dataproviderType>
+																							<initialCapacity>1</initialCapacity>
+																							<transactionPolicy/>
+																						</_object>
+																						<_content>
+																							<property>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="KERNEL:exposedPath">
+																									<_object>
+																										<value>
+																											<_item>xri:@openmdx:org.openmdx.test.compatibility.role1/provider/Jdbc/segment/Standard</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="KERNEL:namespaceId">
+																									<_object>
+																										<value>
+																											<_item>role1</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+ 																								<org.openmdx.deployment1.DataproviderIntegerProperty qualifiedName="PERSISTENCE:batchSize">
+																									<_object>
+																										<value>
+																											<_item>10</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderIntegerProperty>
+																							</property>
+																							<resource>
+																								<org.openmdx.deployment1.Connection qualifiedName="datasource:0">
+																									<_object>
+																										<registrationId>jdbc:dataproviders</registrationId>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.Connection>
+																							</resource>
+																						</_content>
+																					</org.openmdx.deployment1.Dataprovider>
+																				</component>
+																			</_content>
+																		</org.openmdx.deployment1.Module>
+																		<org.openmdx.deployment1.Module name="explorer">
+																			<_object/>
+																			<_content>
+																				<component>
+																					<org.openmdx.deployment1.Dataprovider name="managing">
+																						<_object>
+																							<deploymentOrder>2000</deploymentOrder>
+																							<registrationId>org/openmdx/test/managing/explorer</registrationId>
+																							<dataproviderType>xri:@openmdx:org.openmdx.deployment1/provider/org:openmdx/segment/org:openmdx:test/configuration/junit/dataproviderType/explorer</dataproviderType>
+																							<initialCapacity>1</initialCapacity>
+																							<transactionPolicy/>
+																						</_object>
+																						<_content>
+																							<property>
+																								<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="KERNEL:namespaceId">
+																									<_object>
+																										<value>
+																											<_item>explorer</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.DataproviderStringProperty>
+                  															<org.openmdx.deployment1.DataproviderStringProperty qualifiedName="APPLICATION:serviceLocatorContext">
+                  																<_object>
+                  																	<value>
+                  																		<_item>org:openmdx:test:managing</_item>
+                  																	</value>
+                  																</_object>
+                  																<_content/>
+                  															</org.openmdx.deployment1.DataproviderStringProperty>
+                  															<org.openmdx.deployment1.DataproviderTypeStringProperty qualifiedName="APPLICATION:runtimeSegment">
+                  																<_object>
+                  																	<value>
+                  																		<_item>xri:@openmdx:org.openmdx.compatibility.runtime1/provider/any/segment/any</_item>
+                  																	</value>
+                  																</_object>
+                  																<_content/>
+                  															</org.openmdx.deployment1.DataproviderTypeStringProperty>
+                  															<org.openmdx.deployment1.DataproviderIntegerProperty qualifiedName="PERSISTENCE:batchSize">
+                  																<_object>
+                  																	<value>
+                  																		<_item>100</_item>
+                  																	</value>
+                  																</_object>
+                  																<_content/>
+                  															</org.openmdx.deployment1.DataproviderIntegerProperty>
+																							</property>
+																						</_content>
+																					</org.openmdx.deployment1.Dataprovider>
+																				</component>
+																			</_content>
+																		</org.openmdx.deployment1.Module>
+																	</module>
+																</_content>
+															</org.openmdx.deployment1.DeploymentUnit>
+															<!-- DeploymentUnit connectors-->
+															<org.openmdx.deployment1.DeploymentUnit name="connectors">
+																<_object/>
+																<_content>
+																	<module>
+																		<org.openmdx.deployment1.Module name="datasource">
+																			<_object/>
+																			<_content>
+																			  <!--
+																				<resourceAdapter>
+																					<org.openmdx.deployment1.DatabaseConnector name="datasource:0">
+																						<_object>
+																							<driver>oracle.jdbc.driver.OracleDriver</driver>
+																							<registrationId>jdbc:dataproviders</registrationId>
+																							<connectionFactoryImplementation>org.openmdx.compatibility.kernel.application.spi.DbConnectionManagerSimple_1</connectionFactoryImplementation>
+																							<uri>
+																								<_item>jdbc:oracle:oci8:@OPENMDX_TEST</_item>
+																							</uri>
+																						</_object>
+																						<_content>
+																							<property>
+																								<org.openmdx.deployment1.ResourceAdapterStringProperty qualifiedName="BasicPassword:UserName">
+																									<_object>
+																										<value>
+																											<_item>system</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.ResourceAdapterStringProperty>
+																								<org.openmdx.deployment1.ResourceAdapterStringProperty qualifiedName="BasicPassword:Password">
+																									<_object>
+																										<value>
+																											<_item>manager</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.ResourceAdapterStringProperty>
+																							</property>
+																						</_content>
+																					</org.openmdx.deployment1.DatabaseConnector>
+																				</resourceAdapter>
+																				<resourceAdapter>
+																					<org.openmdx.deployment1.DatabaseConnector name="datasource:0">
+																						<_object>
+																							<driver>com.microsoft.jdbc.sqlserver.SQLServerDriver</driver>
+																							<registrationId>jdbc:dataproviders</registrationId>
+																							<connectionFactoryImplementation>org.openmdx.compatibility.kernel.application.spi.DbConnectionManagerSimple_1</connectionFactoryImplementation>
+																							<uri>
+																								<_item>jdbc:microsoft:sqlserver://localhost:1433;databasename=openMDX_test;selectmethod=cursor</_item>
+																							</uri>
+																						</_object>
+																						<_content>
+																							<property>
+																								<org.openmdx.deployment1.ResourceAdapterStringProperty qualifiedName="BasicPassword:UserName">
+																									<_object>
+																										<value>
+																											<_item>system</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.ResourceAdapterStringProperty>
+																								<org.openmdx.deployment1.ResourceAdapterStringProperty qualifiedName="BasicPassword:Password">
+																									<_object>
+																										<value>
+																											<_item>manager</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.ResourceAdapterStringProperty>
+																							</property>
+																						</_content>
+																					</org.openmdx.deployment1.DatabaseConnector>
+																				</resourceAdapter>
+																			  -->
+																				<resourceAdapter>
+																					<org.openmdx.deployment1.DatabaseConnector name="datasource:0">
+																						<_object>
+																							<driver>com.microsoft.sqlserver.jdbc.SQLServerDriver</driver>
+																							<registrationId>jdbc:dataproviders</registrationId>
+																							<connectionFactoryImplementation>org.openmdx.compatibility.kernel.application.spi.DbConnectionManagerSimple_1</connectionFactoryImplementation>
+																							<uri>
+																								<_item>jdbc:sqlserver://localhost:1433;databaseName=openMDX_test;forwardReadOnlyMethod=serverCursor</_item>
+																							</uri>
+																						</_object>
+																						<_content>
+																							<property>
+																								<org.openmdx.deployment1.ResourceAdapterStringProperty qualifiedName="BasicPassword:UserName">
+																									<_object>
+																										<value>
+																											<_item>system</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.ResourceAdapterStringProperty>
+																								<org.openmdx.deployment1.ResourceAdapterStringProperty qualifiedName="BasicPassword:Password">
+																									<_object>
+																										<value>
+																											<_item>manager</_item>
+																										</value>
+																									</_object>
+																									<_content/>
+																								</org.openmdx.deployment1.ResourceAdapterStringProperty>
+																							</property>
+																						</_content>
+																					</org.openmdx.deployment1.DatabaseConnector>
+																				</resourceAdapter>
+																			</_content>
+																		</org.openmdx.deployment1.Module>
+																	</module>
+																</_content>
+															</org.openmdx.deployment1.DeploymentUnit>
+														</deploymentUnit>
+													</_content>
+												</org.openmdx.deployment1.Domain>
+											</domain>
+										</_content>
+									</org.openmdx.deployment1.Configuration>
+								</configuration>
+							</_content>
+						</org.openmdx.deployment1.Segment>
+					</segment>
+				</_content>
+			</org.openmdx.base.Provider>
+		</provider>
+	</_content>
+</org.openmdx.base.Authority>

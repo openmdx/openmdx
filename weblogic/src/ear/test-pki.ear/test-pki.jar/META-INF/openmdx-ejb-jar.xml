@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSPY v5 rel. 4 U (http://www.xmlspy.com) by Harald Burger (private) -->
+<!DOCTYPE openmdx-ejb-jar PUBLIC "-//openMDX//DTD Enterprise JavaBeans Extension 1.0//EN" "http://www.openmdx.org/dtd/openmdx-ejb-jar_1_0.dtd">
+<openmdx-ejb-jar>
+	<enterprise-beans>
+		<session>
+			<ejb-name>pki-preferences1</ejb-name>
+			<jndi-name>org/openmdx/test/resource/security/pki/preferences1</jndi-name>
+			<resource-ref>
+				<res-ref-name>pki/client-certificate</res-ref-name>
+				<jndi-name>pki/ClientCertificateConnection</jndi-name>
+			</resource-ref>
+			<resource-ref>
+				<res-ref-name>pki/principal-credentials</res-ref-name>
+				<jndi-name>pki/PrincipalCredentialsConnection</jndi-name>
+			</resource-ref>
+		</session>
+	</enterprise-beans>
+</openmdx-ejb-jar>

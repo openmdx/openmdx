@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="**/CVS/**|**/jre/before1_4/**|**/jre/before1_5/**|org/openmdx/uses/java/**|org/openmdx/uses/javax/**" kind="src" path="src/java"/>
+	<classpathentry kind="src" path="build/jre-1.5/src/java"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JRE 5.0"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openMDX 2 ~ Core (jre-1.5)"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Java2 Enterprise (jre-1.5)"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/openMDX Thirdparty ~ Java2 Extension (jre-1.5)"/>
+	<classpathentry exported="true" kind="lib" path="build/jre-1.5/src/resource"/>
+	<classpathentry exported="true" kind="lib" path="src/resource"/>
+	<classpathentry kind="lib" path="build/jre-1.5/model/openmdx-security.openmdx-xmi.zip"/>
+	<classpathentry kind="output" path="build/jre-1.5/eclipse"/>
+</classpath>

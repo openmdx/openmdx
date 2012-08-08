@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+=======================================================================
+= Name:        $Id: build.xml,v 1.3 2007/03/26 16:55:02 wfro Exp $
+= Description: ant build for openMDX/SOAP
+= Revision:    $Revision: 1.3 $
+= Date:        $Date: 2007/03/26 16:55:02 $
+= Copyright:   (c) 2004-2007 OMEX AG
+=======================================================================
+ *
+ * This software is published under the BSD license
+ * as listed below.
+ * 
+ * Copyright (c) 2004-2007, OMEX AG, Switzerland
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without 
+ * modification, are permitted provided that the following conditions 
+ * are met:
+ * 
+ * Redistribution and use in source and binary forms, with or
+ * without modification, are permitted provided that the following
+ * conditions are met:
+ * 
+ * * Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * 
+ * * Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in
+ *   the documentation and/or other materials provided with the
+ *   distribution.
+ * 
+ * * Neither the name of the openMDX team nor the names of its
+ *   contributors may be used to endorse or promote products derived
+ *   from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+ * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * 
+-->
+<project 
+  name="openmdx-syncml" 
+	default="-projecthelp"
+	xmlns:openmdx="xri://(antlib:org.openmdx.tools.ant)"
+	xmlns:antcontrib="antlib:net.sf.antcontrib"
+	xmlns:ivy="xri://(antlib:fr.jayasoft.ivy.ant)"
+>
+	<description>Builds the openMDX/SOAP component</description>
+	<property name="project.specification.title" value="openMDX/SOAP"/>
+	<!-- Slash separated platform list, the last entry being the default -->
+	<property name="project.platform.list" value="jre-1.5"/>
+	<!-- Included Ant Projects -->
+	<import file="../ant/etc/ant/build-properties.xml"/>
+	<import file="../ant/etc/ant/build-library.xml"/>
+	<path id="project.lib.classpath">
+		<path refid="java2.enterprise.lib"/>
+		<path refid="java2.extension.lib"/>
+		<path refid="java2.endorsed.lib"/>
+		<path refid="openmdx.core.lib"/>
+		<pathelement location="../thoughtworks/${build.target.platform}/xstream/lib/xstream.jar"/>
+	</path>
+	<path id="project.bin.classpath">
+		<path refid="project.lib.classpath"/>
+		<pathelement location="${build.dir}/bin"/>
+	</path>
+	<patternset id="sun-8.edition.pattern">
+		<patternset refid="jboss-3.edition.pattern"/>
+		<include name="**/sun*.xml"/>
+	</patternset>
+	<!-- Filter used for creating archives (EARs, WARs, JARs) -->
+	<openmdx:archivefilterchain id="archive.filter">
+		<patternset id="archive.include.pattern" excludes="${poi.library.files} ${srw.library.files}">
+			<include name="*.html"/>
+			<include name="**/*.xml"/>
+			<include name="**/*.html"/>
+			<exclude name="openmdx-base.jar"/>
+			<exclude name="openmdx-base.weblogic.jar"/>
+			<exclude name="openmdx-websphere.iiop-client.jar"/>
+			<exclude name="openmdx-application.jar"/>
+			<exclude name="openmdx-security.jar"/>
+			<exclude name="openmdx-base.jar"/>
+			<exclude name="openmdx-kernel.jar"/>
+			<exclude name="WEB-INF/lib/*.jar"/>
+			<patternset refid="jboss-3.edition.pattern"/>
+			<patternset refid="weblogic-7.edition.pattern"/>
+			<patternset refid="websphere-5.edition.pattern"/>
+			<patternset refid="sun-8.edition.pattern"/>
+		</patternset>
+		<tokenfilter>
+			<replacestring from="%IMPLEMENTATION_VERSION%" to="${project.implementation.version}"/>
+			<replacestring from="%IMPLEMENTATION_VERSION%" to="${project.implementation.version}"/>
+		</tokenfilter>
+	</openmdx:archivefilterchain>	
+
+	<!-- ******************************************************************* -->
+	<!-- * Generate -->
+	<!-- ******************************************************************* -->
+	<target 
+	  name="generate" 
+	  description="Generate version, jt and model dependend files" 
+	  depends="build-init"
+	>
+		<antcall target="-preprocess-model-files-"/>
+	</target>
+	
+	<!-- ******************************************************************* -->
+	<!-- * Test -->
+	<!-- ******************************************************************* -->
+	<target name="test"/>
+	
+	<!-- ******************************************************************* -->
+	<!-- * Deliverables -->
+	<!-- ******************************************************************* -->
+	<target 
+	  name="deliverables" 
+	  description="Populate the project's deliverables directory" 
+	  depends="deliverables-init,java-archives,source-archives"
+	/>
+
+	<!-- ******************************************************************* -->
+	<!-- * Distribution -->
+	<!-- ******************************************************************* -->
+	<target name="distribution" description="Creates a distribution" depends="distribution-init,deliverables">
+		<openmdx:archive 
+			destfile="${distribution.dir}/openmdx-${openmdx.implementation.version}-${base.dir.name}.${build.target.platform}."
+			format="${distribution.format}"
+			checksum="MD5"
+		>
+			<openmdx:archivefileset 
+				dir="${basedir}" 
+				prefix="${project.implementation.prefix}-${openmdx.implementation.version}/${base.dir.name}"
+			>
+				<include name="build.*"/>
+				<include name="*LICENSE"/>
+				<include name="README"/>
+				<include name="RELEASE-NOTES"/>
+				<include name="project.properties"/>
+				<include name=".cvsignore"/>
+				<include name="etc/**"/>
+			</openmdx:archivefileset>
+			<openmdx:archivefileset 
+				dir="${project.home}" 
+				prefix="${project.implementation.prefix}-${openmdx.implementation.version}"
+			>
+				<include name="source-archive/syncml/**"/>
+				<include name="${build.target.platform}/syncml/**"/>
+			</openmdx:archivefileset>
+		</openmdx:archive>
+	</target>
+	
+	<!-- ******************************************************************* -->
+	<!-- * Java archives -->
+	<!-- ******************************************************************* -->
+	<target name="java-archives" depends="deliverables-init,build">
+	  <!-- openmdx-syncml.jar -->
+		<openmdx:archive
+			destfile="${deliver.dir}/lib/openmdx-syncml.jar"
+			format="jar"
+		>
+			<openmdx:archivemanifest refid="project.manifest"/>
+			<manifest>
+				<attribute name="Specification-Title" value="${project.specification.title} Library SOAP"/>
+				<attribute name="Implementation-Title" value="openmdx-syncml for ${build.target.platform}"/>
+			</manifest>
+			<openmdx:archivefileset dir="${build.dir}/bin">
+				<patternset id="openmdx-syncml.jar.content">
+					<include name="org/openmdx/**"/>
+				</patternset>
+			</openmdx:archivefileset>
+		</openmdx:archive>		
+	</target>
+
+	<!-- ******************************************************************* -->
+	<!-- * assemble -->
+	<!-- ******************************************************************* -->
+	<target name="assemble" description="Builds the openMDX/SyncML EAR" depends="build-init,-openmdx-syncml-ear-"/>
+
+	<!-- ******************************************************************* -->
+	<!-- * -opencrx-syncml-ear- -->
+	<!-- ******************************************************************* -->
+	<target name="-openmdx-syncml-ear-">
+		<antcall target="-custom-openmdx-syncml-ear-">
+			<param name="app.source.name" value="openmdx-syncml"/>
+			<param name="app.target.name" value="openmdx-syncml"/>
+		</antcall>
+	</target>
+	<!-- ******************************************************************* -->
+	<!-- * -opencrx-syncml-ear- -->
+	<!-- ******************************************************************* -->
+	<target name="-custom-openmdx-syncml-ear-" unless="ear.is.up-to-date">
+		<mkdir dir="${tmp.dir}"/>
+		<mkdir dir="${build.dir}/module/${app.target.name}"/>
+		<mkdir dir="${deliver.dir}/deployment-unit"/>
+		<!-- opencrx-syncml.war -->
+		<openmdx:archive format="war" destfile="${build.dir}/module/${app.target.name}/${app.target.name}.war" duplicate="preserve">
+			<openmdx:archivemanifest refid="project.manifest"/>
+			<manifest>
+				<attribute name="Specification-Title" value="${project.specification.title} WAR"/>
+				<attribute name="Implementation-Title" value="WAR for ${build.target.platform}"/>
+				<attribute name="Class-Path" value="openmdx-syncml.jar openmdx-application.jar openmdx-base.jar openmdx-websphere.iiop-client.jar application-resources.jar"/>
+			</manifest>
+			<zipfileset dir="src/ear/${app.source.name}.ear/${app.source.name}.war/WEB-INF" prefix="WEB-INF">
+				<include name="web.xml"/>
+				<patternset refid="jboss-3.edition.pattern"/>
+				<patternset refid="weblogic-7.edition.pattern"/>
+				<patternset refid="websphere-5.edition.pattern"/>
+				<patternset refid="sun-8.edition.pattern"/>
+				<exclude name="*/*"/> <!-- no subdirs -->
+			</zipfileset>
+			<openmdx:archivefilterchain refid="archive.filter"/>
+		</openmdx:archive>
+		<!-- application-resources.jar -->
+		<openmdx:archive format="jar" destfile="${tmp.dir}/application-resources.jar">
+			<zipfileset dir="src/ear/${app.source.name}.ear/application-resources.jar"/>
+			<fileset dir="src/resource">
+				<include name="**"/>
+			</fileset>
+		</openmdx:archive>
+		<!-- openmdx-syncml.ear -->
+		<openmdx:archive format="ear" destfile="${deliver.dir}/deployment-unit/${app.target.name}.ear">
+			<openmdx:archivemanifest refid="project.manifest"/>
+			<manifest>
+				<attribute name="Specification-Title" value="${project.specification.title} Web WAR"/>
+				<attribute name="Implementation-Title" value="Web WAR for ${build.target.platform}"/>
+			</manifest>
+			<fileset dir="${build.dir}/module/${app.target.name}">
+				<include name="${app.target.name}.war"/>
+			</fileset>
+			<zipfileset dir="../${build.target.platform}/syncml/lib">
+				<include name="openmdx-syncml.jar"/>
+			</zipfileset>
+			<zipfileset dir="${openmdx.home}/${build.target.platform}/core/lib">
+				<include name="openmdx-application.jar"/>
+			</zipfileset>
+			<zipfileset dir="${openmdx.home}/${build.target.platform}/core/lib">
+				<include name="openmdx-base.jar"/>
+			</zipfileset>
+			<!-- openMDX Extensions for IBM Websphere 6 -->
+			<zipfileset dir="${openmdx.home}/websphere-6/websphere/lib">
+				<include name="openmdx-websphere.iiop-client.jar"/>
+			</zipfileset>
+			<zipfileset dir="${tmp.dir}">
+				<include name="application-resources.jar"/>
+			</zipfileset>
+			<zipfileset dir="src/ear/${app.source.name}.ear/META-INF" prefix="META-INF">
+				<include name="application.xml"/>
+				<patternset refid="jboss-3.edition.pattern"/>
+				<patternset refid="websphere-5.edition.pattern"/>
+				<patternset refid="weblogic-7.edition.pattern"/>
+				<patternset refid="sun-8.edition.pattern"/>
+				<include name="*.policy"/>
+			</zipfileset>
+			<openmdx:archivefilterchain refid="archive.filter"/>
+		</openmdx:archive>
+	</target>
+
+	<!-- ******************************************************************* -->
+	<!-- * Java API Documentation -->
+	<!-- ******************************************************************* -->
+	<target name="api-doc" description="Generate the Java API documentation" depends="api-doc-init" unless="api-doc.is.up-to-date">
+		<mkdir dir="${build.dir}/doc/api"/>
+		<javadoc 
+			destdir="${build.dir}/doc/api" 
+			author="true" 
+			version="true" 
+			locale="en" 
+			use="true" 
+			windowtitle="${project.specification.title} API" 
+			doctitle="${project.specification.title} API ${project.specification.version}" 
+			maxmemory="512m"
+			excludepackagenames="org.openmdx.test.*"
+		>
+			<packageset dir="${basedir}/src/java"/>
+			<packageset dir="${build.dir}/src/java"/>
+			<classpath refid="project.bin.classpath"/>
+			<link href="http://java.sun.com/j2se/1.5.0/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2se/"/>
+			<link href="http://java.sun.com/j2se/1.5.0/docs/api/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/j2ee/"/>
+			<link href="http://www.openmdx.org/openmdx/core/1.16/java-jre-1.4/" offline="true" packagelistLoc="${openmdx.home}/core/etc/javadoc/openmdx/"/>
+			<bottom>This software is published under the BSD license. Copyright &#169; 2006-${build.year}, OMEX AG, Switzerland, All rights reserved. Use is subject to &lt;a href="http://www.openmdx.org/license.htm"&gt;license terms&lt;/a&gt;.</bottom>
+		</javadoc>
+		<echo>
+------------------------------------------------------------------------------------------------
+The Java API documentation for ${project.specification.title} has been generated at 
+${build.dir}/doc/api/index.html
+------------------------------------------------------------------------------------------------
+	    </echo>
+	</target>
+	
+</project>

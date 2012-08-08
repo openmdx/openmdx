@@ -1,0 +1,108 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>Caratteristiche basate sul controllo activex</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="file:///G|/forinst/opencrx/opencrx1.7.1/italiano/Italiano%20Aggiunto/_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="file:///G|/forinst/opencrx/opencrx1.7.1/italiano/Italiano%20Aggiunto/_style/default.css" rel="stylesheet" type="text/css">
+</head>
+
+<body onLoad="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(50, 50);">
+<table class="objectTitle">
+<tr>
+  <td>ActiveX</td>
+  <td align="right">
+	<script>
+	  <!--
+	  document.write('<a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+	  -->
+	</script>
+  </td>
+</tr>
+</table>
+<p>L'utilizzo delle funzioni basate sui controlli ActiveX richiede chet<br />
+<ul>
+  <li>il tuo browser sia in grado di <strong>gestire i controlli ActiveX</strong> 
+    (p.es.. Internet Explorer on MS Windows) e</li>
+  <li>le impostazioni di sicurezza siano tali da <strong>permettere di scaricare 
+    ed eseguire i controlli ActivX</strong></p></li>
+</ul>
+<p>A seconda dei casi, possono anche essere richiesti pacchetti software di terze 
+  parti quali per esempio::</p>
+<table class="browserHints">
+  <tbody>
+  <tr>
+      <td width="217"><b>Funzione</b></td>
+	  <td width="343"><b>Requisiti</b></td>
+      <td width="203"><strong>Ulteriori Suggerimenti</strong></td>
+  </tr>
+  <tr>
+      <td>Stampa Unione MS Word XML</td>
+      <td>presenza di client MS Word 2000 o pi&uacute; recente</td>
+      <td><a href="#trustedsites">Siti Attendibili</a>, <a href="#activexsettings">Autorizzazioni 
+        ActiveX</a></td>
+  </tr>
+  <tr>
+      <td>Stampa Unione MS Excel XML </td>
+      <td>presenza di client MS Exel 2000 o pi&uacute; recente</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+      <td>Esportazione XML in MS Outlook</td>
+      <td>presenza di client MSOutlook 2000 o pi&uacute; recente</td>
+  <td>&nbsp;</td>
+  </tr>
+  <tr>
+      <td>Importazione XML da MS Outlook</td>
+      <td>presenza di client MSOutlook 2000 o pi&uacute; recente</td>
+  <td>&nbsp;</td>
+  </tr>
+  </tbody>
+</table>
+<a name="trustedsites"></a>
+<p class="hh1">Siti Attendibili (Internet Explorer)</p>
+<p>Per motivi di sicurezza si sconsiglia di abilitare i controlli ActiveX per 
+  l'Area <strong>Internet</strong>. &Egrave; aggiungere il sito con openCRX alla 
+  propria Area <strong>Siti Attendibili</strong> oppure all&acute; area <strong>Intranet 
+  </strong> (solo se &egrave; effettivamente in Intranet) e poi attivare <a href="#activexsettings">Controlli 
+  ActiveX</a> per la rispettiva area. Sotto viene illustrato come aggiungere openCRX 
+  demo server (<strong><font color="#FF0000">demo.opencrx.org</font></strong>) 
+  all&acute;area Siti Attendibili ed aggiungere un sever locale openCRX (<strong><font color="#FF0000">10.1.1.20</font></strong>) 
+  all&acute;area Intranet locale. </p>
+<p><img src="file:///G|/forinst/opencrx/opencrx1.7.1/italiano/Italiano%20Aggiunto/images/ie_trusted_sites.png" width="384" height="342"> <img src="file:///G|/forinst/opencrx/opencrx1.7.1/italiano/Italiano%20Aggiunto/images/ie_local_intranet_zone.png" width="384" height="342"></p>
+<a name="activexsettings"></a>
+<p class="hh1">Permessi AciveX (Internet Explorer)</p>
+<p>Per Ragioni di sicurezza si sconsiglia vivamentedi attivare l'utilizzo di Active 
+  X per la<strong> Internet Zone</strong>. E' meglio inserire il sito(Indirizzo) 
+  di opencrx <strong>tra i siti della <a href="#trustedsites">Trusted sites zone</a></strong> 
+  <strong>oppure nella <a href="#trustedsites">Local intranet zone</a></strong> 
+  (only if the site really is in your Intranet) and then enable ActiveX controls 
+  for the respective zone as follows:</p>
+<p class="hh1">Dove trovare le impostazioni della sicurezza relative ad ActiveX:</p>
+
+<table class="activeXHints">
+  <tr>
+    <td><b>Piattaforma</b></td>
+    <td colSpan=2><b>Versione e Browser</b> </td>
+    <td><b>Trovi impostazioni ActiveX in ...</b></td>
+    <td><strong>ActiveX abilitati (con avvertimenti in popup)</strong></td>
+    <td><strong>ActiveX abilitati (senxza avvertimenti in popup)</strong></td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img height=38 src="file:///G|/forinst/opencrx/opencrx1.7.1/italiano/Italiano%20Aggiunto/images/icon-windows.gif" width=38 /><br />
+	  <strong>Microsoft<br />
+	  Windows</strong>	</td>
+    <td align="center">
+	  <img height=38 src="file:///G|/forinst/opencrx/opencrx1.7.1/italiano/Italiano%20Aggiunto/images/icon-ie.gif" width=38><br />
+	  <FONT size=-1>Internet<br />Explorer</FONT>
+	</td>
+    <td>6.x</td>
+    <td>Strumenti &gt; Opzioni Internet &gt; Sicurezza ...<br />
+      ... Livelli Personalizzati &gt; Controlli ActiveX e plug-ins</td>
+    <td><img src="file:///G|/forinst/opencrx/opencrx1.7.1/italiano/Italiano%20Aggiunto/images/ie_activex_settings_secure.png" width="352" height="666"></td>
+    <td><img src="file:///G|/forinst/opencrx/opencrx1.7.1/italiano/Italiano%20Aggiunto/images/ie_activex_settings_convenient.png" width="352" height="666"></td>
+  </tr>
+</table>
+</body>
+</html>

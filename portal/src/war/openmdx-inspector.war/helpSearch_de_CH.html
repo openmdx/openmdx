@@ -1,0 +1,97 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html dir="ltr">
+<head>
+  <title>openCRX - Advanced Search</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <link href="_style/colors.css" rel="stylesheet" type="text/css">
+  <link href="_style/default.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body onload="javascript:window.resizeTo(document.body.scrollWidth, document.body.scrollHeight); window.resizeBy(0, 70);">
+<table class="objectTitle">
+  <tr>
+    <td>Erweiterte Suche</td>
+	<td>
+		<script>
+		  <!--
+		  document.write('<td align="right"><a href="" class="backButton" title="Close" onClick="javascript:window.close();">X</a>');
+		  -->
+		</script>
+	</td>
+  </tr>
+</table>
+
+ <div class="hh2">So funktioniert die erweiterte Suche</div>
+ <div class="normal">Mit der Angabe von Operatoren k&ouml;nnen Sie die Suche besser
+   kontrollieren und erhalten dadurch bessere Antworten. Die folgenden Suchoptionen
+   k&ouml;nnen jeweils direkt in das Suchfeld eingegeben werden.</div>
+ <div class="hh2">Die Grundlagen</div> 
+ <div class="normal">In das Suchfeld k&ouml;nnen Sie Zahlen und/oder Buchstaben
+   sowie Ausdr&uuml;cke eingeben, z.B. <strong>'M&uuml;ller'</strong>, <strong>'> 500'</strong> or <strong>'>=
+   Meier'</strong> und dann</div>
+  <table cellpadding="0" cellspacing="10">
+   <tr valign="top">
+     <td>&#8226; auf den <strong>Text der Tabellenspalte</strong> klicken,
+       um Objekte zu finden, die f&uuml;r das entsprechende Attribut passende Werte
+       aufweisen
+       (bei dieser Suche werden <strong>alle
+       Objekte</strong> durchsucht, unabh&auml;ngig von evtl. vorherigen Suchen oder
+       gesetzten Filtern; bestehende Suchresultate gehen verloren</td>
+	 <td bgcolor="#CCCCCC"><strong>Neue Suche</strong><br />
+	 <img src="images/helpSearchTut0.gif" width="129" height="51" /></td>
+   </tr>
+   <tr valign="top">
+     <td>&#8226; auf den <strong>[+] Knopf</strong> klicken, um Objekte zu finden,
+       die f&uuml;r das entsprechende Attribut passende Werte aufweisen (<strong>nur
+       diejenigen Objekte werden durchsucht, welche sich im aktuellen Filter
+       oder im vorherigen Suchresultat befinden</strong>, d.h. diese Suche 'hinzuf&uuml;gen'
+       bewirkt, dass das neue Resultatset eingeschr&auml;nkter sein wird)</td>
+	 <td bgcolor="#CCCCCC"><strong>Suche hinzufügen</strong><br />
+	 <img src="images/helpSearchTut1.gif" width="129" height="51" /></td>
+   </tr>
+</table>
+<div class="hh2">Operatoren</div>
+ <div class="normal">Die folgenden Operatoren werden unterst&uuml;tzt (sofern
+   das eingesetzte Datenbanksystem die entsprechende Operation ebenfalls unterst&uuml;tzt):</div>
+ <ul>
+ <li>t&ouml;nt &auml;hnlich wie (<strong>*</strong>)</li>
+ <li>ist &auml;hnlich wie (<strong>%</strong>), voreingestellte Suche (Default)
+   f&uuml;r Zeichenketten</li>
+ <li>gleich (<strong>=</strong>), voreingestellte Suche (Default) f&uuml;r boolesche
+   Werte, Zahlen und Codes</li>
+ <li>nicht gleich (<strong><></strong>, <strong>!</strong>=)</li>
+ <li>kleiner als (<strong><</strong>)</li>
+ <li>kleiner als oder gleich wie (<strong><=</strong>)</li>
+ <li>gr&ouml;sser als (<strong>></strong>)</li>
+ <li>gr&ouml;sser als oder gleich wie <strong>(>=</strong>)</li>
+ </ul>
+ <div class="hh2">&quot;UND&quot; Suchen</div>
+ <div class="normal">Um Objekte zu finden, die gleichzeitig mehr als eine Bedingung
+   erf&uuml;llen, k&ouml;nnen Bedingungen mit dem Zeichen &quot;<strong>&amp;</strong>&quot; verkn&uuml;pft
+   werden. Um zum Beispiel Objekte mit Werten zwischen 500 und 1000 zu finden
+   (d.h. gr&ouml;sser als 500 und kleiner als 1000), wird in das Suchfeld folgendes
+   eingegeben: <strong>'&gt;500 &amp; &lt;1000'</strong></div>
+ <div class="hh2">&quot;ODER&quot; Searches</div>
+ <div class="normal">Um Objekte zu finden, die entweder das Wort A oder das Wort
+   B enthalten, werden die beiden Worte mit einem Strichpunkt &quot;<strong>;</strong>&quot; getrennt.
+   Um zum Beispiel Kontakte mit dem Namen 'Meier' ODER 'M&uuml;ller' zu finden, wird
+   in das Suchfeld folgendes eingegeben: <strong>'= Meier; M&uuml;ller'</strong></div>
+ <div class="hh2">Suchen kombinieren</div>
+ <div class="normal">Suchen k&ouml;nnen fast ohne Einschr&auml;nkungen kombiniert werde.
+   Um zum Beispiel Objekte mit einem Wert kleiner als 1000,
+   aber verschieden von 500 und verschieden von 600 zu finden, geben Sie folgendes
+   ein in das
+   Suchfeld:<strong>'&lt;&gt;500; 600 &amp; &lt;1000'</strong></div>
+ <div class="normal">Kombinierte Suchen werden nach den folgenden Regeln angewendet:</div>
+ <ul>
+   <li>searchExpr ::= filterValue { & filterValue }<br />
+   (--> die Zeichenkette wird jeweils bei einem <strong>&</strong> aufgeteilt)</li>
+   <li>filterValue ::= [operator] value { ; value }<br />
+   (--> die Zeichenkette wird jeweils bei einem <strong>;</strong> aufgeteilt)</li>
+ </ul>
+ <div class="hh2">Suche mit Platzhalter (Wildcard)</div>
+ <div class="normal">Gewisse Datenbanken unterst&uuml;tzen die Suche mit Platzhaltern. Um z.B. alle Kontakte zu finden, deren Name 'ller' enth&auml;lt, geben Sie folgendes ein in das Suchfeld: <strong>'%%ller'<br />
+ ACHTUNG:</strong> Suchbefehle mit Platzhalter k&ouml;nnen sehr lange dauern, wenn die DB nicht optimiert ist (full table scans)! </div>
+</body>
+</html>

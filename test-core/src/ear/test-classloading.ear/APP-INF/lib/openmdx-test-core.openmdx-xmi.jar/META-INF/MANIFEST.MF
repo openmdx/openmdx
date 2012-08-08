@@ -1,0 +1,2 @@
+Manifest-Version: 1.0
+Implementation-URL: ../../../../../build/${build.java.platform}/model/openmdx-test-core.openmdx-xmi.zip

@@ -1,0 +1,1714 @@
+/*------------------------------------------------------------------------------
+|  IE BUG FIXES
++ ----------------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------------
+|  general layout
++ ----------------------------------------------------------------------------*/
+
+html, body {
+  padding:0;
+  margin:0;
+  border:0;
+  background:#FFFFFF;
+}
+
+td {
+  padding:0;
+  margin:0;
+  border:0;
+}
+
+/*
+ol, ul {
+  list-style-type:square;
+  list-style-position:outside;
+  margin-left:20px;
+}
+*/
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  color: black;
+	background-color: #DDDDDD;
+}
+
+
+/* define consistent font-size across various browsers */
+*, * td, * ul {
+  font-family: Arial,Verdana,Helvetica,sans-serif;
+  font-size: 10pt; /* default font size */
+}
+
+img {
+  border:0;
+}
+
+.abutton {
+  border:solid 1px #FFFFFF;
+  padding:4px;
+}
+.abutton:hover{
+  color:#000000;
+  background-color:#FFFFFF;
+  border:solid 1px #CCCCCC;
+}
+.wide{
+  width: 100%;
+}
+#inspBreadcrum{
+  white-space: nowrap;
+}
+#inspIcon{
+  padding-top:5px;
+}
+#inspTitle{
+  padding-left: 5px;
+  width: 100%;
+  font-size:20px;
+}
+#inspClose{
+  border: 1px solid #CCCCCC;
+  font-size:20px;
+}
+#opMenu{
+    padding-top: 2px;
+    padding-bottom: 3px;
+    margin-top: 2px;
+    border-top: 1px solid #CCCCCC;
+    border-bottom: 1px solid #CCCCCC;
+}
+#inspector{
+    margin-top:10px;
+}
+#header{
+    width: 100%;
+    background-color: #CCCCCC;
+    border-bottom: 1px solid #CCCCCC;
+}
+#info {
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+    border-collapse: collapse;
+    border-spacing: 0px;
+}
+#headerlayout {
+    width: 100%;
+}
+#headerCellLeft {
+    padding-left: 10px;
+}
+#headerCellSpacerLeft {
+    padding-left: 4px;
+    background-color: white;
+}
+#headerCellMiddle {
+    width: 100%;
+    background-color: white;
+    padding-top: 5px;
+    padding-left: 20px;
+}
+#headerMiddleLayout {
+    border-collapse: collapse;
+    border-spacing: 0px;
+    width: 100%;
+}
+#headerMiddleLayout tr td {
+  border-left: 1px solid #CCCCCC;
+  border-right: 1px solid #CCCCCC;
+  padding-left: 10px;
+}
+#headerMiddleLayout tr td span {
+  padding-left: 3px;
+}
+#headerCellRight {
+    padding-right: 10px;
+}
+#content {
+    padding: 10px 20px 5px 15px;
+}
+#navigation {
+  padding:15px 20px 20px 20px;
+}
+#menuRoot {
+  display:block;
+  margin-top:10px;
+  margin-bottom:20px;
+}
+#nav-calendar{
+  margin-top:13px;
+}
+#timestamp{
+  font-size: 9px;
+  color: #888;
+  background: #fff;
+  font-family: tahoma,verdana,sans-serif;
+}
+#stickyNote{
+  width: 100%;
+  margin-top:30px;
+  background-color:#F4FD48;
+  border:1px solid #CCCCCC;
+}
+.clicked{
+  border: solid 1px green;
+}
+.printButton {
+  width: 16px;
+  margin-top:2px;
+  margin-right:3px;
+  float: right;
+  cursor: pointer;
+  background-image: url('../images/print.gif');
+  background-repeat: no-repeat;
+  background-position: left;
+}
+.uiMode {
+  margin:0px 1px 0px 1px;
+  width:32px;
+  float:right;
+  cursor: pointer;
+}
+#uiMode0 {
+  background-image: url('../images/uiMode0.gif');
+  background-repeat: no-repeat;
+  background-position: left;
+}
+#uiMode1 {
+  background-image: url('../images/uiMode1.gif');
+  background-repeat: no-repeat;
+  background-position: left;
+}
+#uiMode2 {
+  background-image: url('../images/uiMode2.gif');
+  background-repeat: no-repeat;
+  background-position: left;
+}
+
+/*------------------------------------------------------------------------------
+|  simpleLayout
++ ----------------------------------------------------------------------------*/
+#simpleLayout {
+  width:100%;
+  border-collapse: collapse;
+  border-spacing: 0px;
+}
+#slHeaderRow {
+}
+#slHeader {
+  padding:10px 5px 10px 5px;
+  background-color:#CCCCCC;
+  position:relative;
+  z-index:10000;
+}
+#slContentRow {
+}
+#slNavigation {
+  width: 236px;
+  border-right:1px solid #CCCCCC;
+  vertical-align: top;
+  overflow: hidden;
+}
+#slContent {
+  vertical-align:top;
+  width:100%;
+}
+}
+#slContent .wide td {
+  padding-right:0px;
+  _padding-right:20px;
+}
+#slContent td #inspClose {
+  padding-right:0px;
+}
+/*------------------------------------------------------------------------------
+|  yui
++ ----------------------------------------------------------------------------*/
+.yui-navset .yui-nav a {
+  background-color:#EEEEEE;
+}
+.yui-navset .yui-nav .selected a em {
+  background-color:white;
+}
+.yui-navset .yui-nav a:hover, .yui-navset .yui-content {
+  background-color:white;
+}
+.yui-content {
+  padding:1px;
+}
+.loading {
+  background-color:#FFFFFF;
+  position:relative;
+	background-image:url('../images/wait.gif');
+	background-position:5px 10px;
+	background-repeat:no-repeat;
+}
+.loading * {
+	visibility:hidden;
+}
+.wait {
+  background-color:#FFFFFF;
+  position:relative;
+	background-image:url('../images/wait.gif');
+	background-position:10px 5px;
+	background-repeat:no-repeat;
+}
+.loading .gridTable, .loading .gridTableFull,
+.loading .gridTableHeader td, .loading .gridTableHeaderFull td, .loading .gridTableHeaderFullEdit td,
+.loading .gridTableRow td, .loading .gridTableRowFull td, .loading .gridTableRowFullEdit td,
+.loading .filterTable, .loading .lookupTable,
+.loading .gridNavigation,
+.loading .gridSplit, .loading .gridSplit tr td {
+  border:0px none #FFFFFF;
+}
+
+/*------------------------------------------------------------------------------
+|  yui-ext
++ ----------------------------------------------------------------------------*/
+
+.loading-indicator{
+   font-size:8pt;
+   background-image: url('../images/wait.gif');
+   background-repeat: no-repeat;
+   background-position: left;
+   padding-left:20px;
+   margin-top:5px;
+   display:block;
+   height:18px;
+}
+
+.ylayout-panel-north, .ylayout-panel-south, #content .ylayout-panel-center{
+    border:0px none;
+}
+.ytheme-gray .ylayout-panel-north .ylayout-panel-hd {
+    background-color: #CCCCCC;
+    font-size: 1em;
+}
+/*
+#content .ylayout-panel-south{
+    border-top:1px solid #CCCCCC;
+}
+#content .ylayout-panel-center{
+    border-bottom:1px solid #CCCCCC;
+}
+*/
+.ytheme-gray .ylayout-panel {
+    border-top:0px solid #CCCCCC;
+    border-bottom:0px solid #CCCCCC;
+    border-left:0px solid #CCCCCC;
+}
+.ylayout-panel-north, .ylayout-panel-west, .ylayout-slider {
+    overflow: visible; /* fly-out menues */
+  	z-index:9999;
+}
+.ytheme-gray .ylayout-panel-hd{
+    background-image: none;
+    background-color: #FFFFFF;
+    border-bottom:0px solid #CCCCCC;
+}
+
+.ytab-wrap {
+  padding-top:0px;
+  position:relative;
+}
+.ytab-strip-wrap {
+  background-color: white;
+  position:relative;
+}
+/* hide the tab content while loading */
+.tab-content{display:none;}
+.yui-ext-tabbody {border:1px solid #999;border-top:none;}
+.yui-ext-tabitembody {display:none;padding:10px;}
+
+
+/* legacy default.css
+---------------------*/
+
+.browserHints {
+  border-collapse: collapse;
+  border-style: ridge;
+  border-width: 2px;
+}
+.browserHints td {
+  border-style: ridge;
+  border-width: 2px;
+  padding: 1px;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.activeXHints {
+  border-collapse: collapse;
+  border-style: ridge;
+  border-width: 2px;
+}
+.activeXHints td {
+  border-style: ridge;
+  border-width: 2px;
+  padding: 1px;
+  vertical-align: top;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.tablePanel {
+  border-collapse: collapse;
+  border-spacing: 0px;
+  padding: 0px;
+  margin: 0px;
+  width: 100%;
+  vertical-align: absbottom;
+ }
+.tablePanel td {
+  vertical-align: absbottom;
+  padding: 0px 4px 0px 2px;
+}
+.tableInfo {
+  border-collapse: collapse;
+  border-spacing: 0px;
+  padding: 0px;
+  width: 100%;
+ }
+.tablePanelTitle {
+  width: 100%;
+ }
+.tableLayout {
+  border-collapse: collapse;
+  border-spacing: 0px;
+  width: 100%;
+  vertical-align: top;
+ }
+.tableLayout td {
+  vertical-align: top;
+  padding: 0px 1px 0px 1px;
+}
+.tableError {
+  border-collapse: collapse;
+  border-spacing: 0px;
+  padding: 0px;
+  width: 100%;
+ }
+.tableError td {
+ padding: 5px;
+}
+.cellErrorLeft {
+  font-weight: bold;
+  vertical-align: top;
+}
+.cellErrorRight {
+  vertical-align: top;
+}
+.tableLogin {
+  border-collapse: collapse;
+  vertical-align: middle;
+}
+.tableLogin td {
+  padding: 5px;
+  vertical-align: middle;
+}
+td.cellLogin {
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  height: 200px;
+  vertical-align: middle;
+  padding: 5px 50px 5px 50px;
+}
+
+.tableBreadCrum {
+  border-collapse: collapse;
+  width: 100%;
+  border-width: 0px;
+  border-style: solid;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  font-size: smaller;
+}
+.tableBreadCrum td {
+	padding-left: 6px;
+}
+.tableBreadCrum a {
+	font-weight: bold;
+  font-size: smaller;
+}
+a.error {
+  border-style: solid solid solid solid;
+  border-width: 1px 1px 1px 1px;
+  margin-top: 2px;
+  margin-left: 5px;
+  padding: 2px 0.5em 2px 0.5em;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.cellHistory {
+  border-collapse: collapse;
+  vertical-align: top;
+  width: 178px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.cellHistory td {
+  padding-top: 0px;
+  padding-bottom: 1px;
+  font-size: 10px;
+}
+.cellHistory td a {
+  font-size: 10px;
+}
+.historyEntry {
+  width: 175px;
+  vertical-align: bottom;
+  white-space: nowrap;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.cellObject {
+  vertical-align: top;
+  line-height: 20px;
+}
+.cellObject p {
+  margin-left: 0px;
+  margin-top: 10px;
+}
+.objectTitle {
+  border-collapse: collapse;
+  width: 100%;
+  border-width: 0px;
+  border-style: solid;
+  margin-top:7px;
+  margin-bottom:5px;
+  line-height: 1.1em;
+  font-size: larger;
+}
+.objectTitle td {
+  padding: 2px 0px 0px 0px;
+	vertical-align: top;
+	font-weight: bold;
+	font-size: larger;
+}
+.objectTitle div {
+  padding: 0px 0px 1px 0px;
+	font-weight: bold;
+	font-size: larger;
+}
+.attributeTitle {
+	width: 100%;
+	border: solid 1px;
+  line-height: 1.1em;
+	padding-left: 8px;
+	padding-right: 5px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	margin-bottom: 5px;
+}
+.attributeTitle td {
+	vertical-align: middle;
+	font-weight: bold;
+}
+.attributeValue {
+  white-space: normal;
+  word-wrap: normal;
+  width: 100%;
+  vertical-align: middle;
+  overflow: visible;
+}
+
+.cellGrid {
+  line-height: 20px;
+  vertical-align: top;
+  margin-top: 10px;
+  padding: 5px 0px 0px 0px;
+}
+
+a.op {
+  border-width: 1px;
+  border-style: solid;
+  padding: 0px 2px 2px 0px;
+  white-space: nowrap;
+}
+a.ophover {
+  border-width: 1px;
+  border-style: solid;
+  padding: 0px 2px 2px 0px;
+  white-space: nowrap;
+}
+input.op {
+  border-width: 1px;
+  border-style: solid;
+  padding: 0px;
+  white-space: nowrap;
+}
+input.ophover {
+  border-width: 1px;
+  border-style: solid;
+  padding: 0px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+a.new {
+  vertical-align: middle;
+  border-width: 1px;
+  border-style: solid;
+  padding: 0px 2px 2px 0px;
+  white-space: nowrap;
+}
+a.backButton {
+  text-decoration: none;
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px 0px 1px 0px;
+  white-space: nowrap;
+  margin-right: 5px;
+  vertical-align: top;
+}
+a.backButton:hover {
+  text-decoration: none;
+}
+a.noIcon {
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  padding: 2px;
+  margin-left: 1px;
+  white-space: nowrap;
+}
+a.noIcon:hover {
+  cursor: pointer;
+}
+a.noIconhover {
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  padding: 2px;
+  margin-left: 1px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.noIcon {
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  padding: 1px;
+  white-space: nowrap;
+}
+.noIcon:hover {
+  cursor: pointer;
+}
+.noIconhover {
+  border-style: solid;
+  border-width: 1px 1px 1px 1px;
+  padding: 1px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.flatButton {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+input.flatsubmit {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px;
+  white-space: nowrap;
+}
+input.flatsubmit:hover {
+  cursor: pointer;
+}
+input.flatsubmithover {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+input.selflatsubmit {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px;
+  white-space: nowrap;
+}
+input.selflatsubmit:hover {
+  cursor: pointer;
+}
+input.selflatsubmithover {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+input.classsubmit {
+  border-style: solid;
+  border-width: 0px;
+  padding-left: 3px;
+  padding-right: 1px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  margin-left: 0px;
+  margin-right: 2px;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+input.classsubmit:hover {
+  cursor: pointer;
+}
+input.classsubmithover { /* IE :hover workaround */
+  border-style: solid;
+  border-width: 0px;
+  padding-left: 3px;
+  padding-right: 1px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  margin-left: 0px;
+  margin-right: 2px;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.borderedimg {
+  border-style: solid;
+  border-width: 1px;
+  white-space: nowrap;
+  margin-left: 1px;
+}
+.borderedimg:hover {
+  cursor: pointer;
+}
+.borderedimghover {
+  border-style: solid;
+  border-width: 1px;
+  white-space: nowrap;
+  margin-left: 1px;
+  cursor: pointer;
+}
+.buttonimg {
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 1px;
+  white-space: nowrap;
+  margin-left: 1px;
+  margin-right: -1px;
+  width: 12px;
+  font-size: 2px;
+  vertical-align: middle;
+}
+.buttonimg:hover {
+  cursor: pointer;
+}
+.buttonimghover {
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 1px;
+  white-space: nowrap;
+  margin-left: 1px;
+  margin-right: -1px;
+  width: 12px;
+  font-size: 2px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.filterHeader {
+  border-collapse: collapse;
+  overflow: visible;
+  margin-bottom: 1px;
+}
+.filterHeader tr td {
+  border: 0px none #FFFFFF;
+  white-space: nowrap;
+  vertical-align:middle;
+  padding-right:0px;
+  margin-right:0px;
+}
+
+.filterHeader input[type=checkbox] {
+  margin-top:1px;
+  padding-top:0px;
+  border: none none;
+  width: 12px;
+  height:12px;
+  vertical-align:top;
+}
+.filterCellhover {
+  cursor: pointer;
+  margin-top: 0px;
+}
+.textfilter {
+  padding-left:3px;
+  font-size:8pt;
+  font-weight:bold;
+  text-decoration:none
+}
+.imgfilter {
+  border-style: solid;
+  border-width: 0px 1px 1px 0px;
+}
+.imgfilterhover { /* IE :hover workaround */
+  border-style: solid;
+  border-width: 0px 1px 1px 0px;
+  cursor: pointer;
+}
+.selimgfilter {
+  border-style: solid;
+  border-width: 1px 0px 0px 1px;
+}
+.selimgfilterhover { /* IE :hover workaround */
+  border-style: solid;
+  border-width: 1px 0px 0px 1px;
+  cursor: pointer;
+}
+.imgsubmit {
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 0px 1px 1px 0px;
+  white-space: nowrap;
+}
+input.imgsubmit:hover {
+  cursor: pointer;
+}
+input.imgsubmithover { /* IE :hover workaround */
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 0px 1px 1px 0px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+input.selimgsubmit {
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 1px 0px 0px 1px;
+  white-space: nowrap;
+}
+input.selimgsubmit:hover {
+  cursor: pointer;
+}
+input.selimgsubmithover { /* IE :hover workaround */
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 1px 0px 0px 1px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.panel {
+  border-style: solid;
+  border-width: 1px;
+  width: 99%;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 4px;
+  padding-bottom: 0px;
+  margin-top: 0px;
+  margin-bottom: 6px;
+  line-height: normal;
+  overflow: hidden; /*required by Netscape/Mozilla*/
+}
+
+.opPanel {
+  border-style: solid;
+  border-width: 0px 1px 1px 1px;
+  width: 99%;
+  padding-left: 2px;
+  padding-right: 2px;
+  margin-left:1px;
+  margin-right:5px;
+  overflow: visible; /*required by Netscape/Mozilla*/
+  position: absolute;
+  visibility: hidden;
+  height:0px;
+  z-index: 20;
+}
+
+.panelResult {
+  border-style: solid;
+  border-width: 1px;
+  width: 99%;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 5px;
+  padding-bottom: 2px;
+  margin-top: 5px;
+  margin-bottom: 2px;
+  overflow: hidden; /*required by Netscape/Mozilla*/
+  position: relative;
+  z-index: 20;
+}
+.panelJSWarning {
+  border-style: solid;
+  border-width: 3px;
+  width: 100%;
+  font-size: medium;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding: 10px;
+  overflow: hidden; /*required by Netscape/Mozilla*/
+  position: relative;
+  z-index: 20;
+}
+.panelCookieWarning {
+  border-style: solid;
+  border-width: 3px;
+  width: 100%;
+  font-size: medium;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding: 10px;
+  overflow: hidden; /*required by Netscape/Mozilla*/
+  position: relative;
+  z-index: 20;
+}
+.opButton {
+  padding: 5px 1px 2px 0px;
+  margin-bottom: -2px;
+}
+.filterPanel {
+  border-style: none;
+  border-width: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-top: 5px;
+  padding-bottom: 0px;
+  position: relative;
+  overflow: hidden; /*required by Netscape/Mozilla*/
+  z-index: 20;
+}
+
+.gridBlock {
+  margin-top:-5px;
+  line-height: normal;
+  width: 100%;
+  border-style: solid;
+  border-width: 1px;
+  padding-left: 8px;
+  padding-right: 0px;
+  padding-top: 0px;
+  padding-bottom: 5px;
+  overflow: auto;
+}
+
+.gridBlock td {
+  padding-bottom: 5px;
+}
+
+.gridTable {
+  /*
+  table-layout: fixed;
+  */
+  white-space: nowrap;
+}
+.gridTableFull {
+  table-layout: auto;
+  white-space: normal;
+}
+.gridTableFullEdit {
+  table-layout: auto;
+  white-space: normal;
+}
+.gridTable, .gridTableFull, .gridTableFullEdit {
+  text-align: left;
+  border-collapse: collapse;
+  border-top-width: 1px;
+  border-top-style: none;
+  width: 100%;
+  vertical-align: baseline;
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+.gridTableHeader td {
+  white-space: nowrap;
+}
+.gridTableHeaderFull td, .gridTableHeaderFullEdit td {
+  white-space: normal;
+}
+.gridTableHeader, .gridTableHeaderFull, .gridTableHeaderFullEdit {
+  text-align: left;
+  background-image: url('../images/ghbg.png');
+  background-repeat: repeat-x;
+  background-position: left bottom;
+}
+.gridTableHeader td, .gridTableHeaderFull td, .gridTableHeaderFullEdit td {
+  vertical-align: middle;
+  border-style: solid none none none;
+  border-width: 1px;
+  padding:3px 5px 2px 0px;
+}
+.gridTableHeader div, .gridTableHeaderFull div, .gridTableHeaderFullEdit div {
+/* uncomment this to fix the font size
+  font-size: 12px;
+*/
+  border-width: 0px;
+}
+.gridTableRow, .gridTableRow td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gridTableRowFull, .gridTableRowFull td {
+  white-space: normal;
+  overflow: visible;
+}
+.gridTableRowFullEdit, .gridTableRowFullEdit td {
+  white-space: nowrap;
+  overflow: visible;
+}
+.gridTableRow td, .gridTableRowFull td, .gridTableRowFullEdit td {
+/* uncomment this to fix the font size
+  font-size: 8pt;
+*/
+  vertical-align: middle;
+  border-style: solid;
+  border-width: 0px 0px 1px 0px;
+  padding-left: 4px;
+  padding-top: 3px;
+  padding-right: 12px;
+  padding-bottom: 3px;
+}
+.gridAuto {
+  width: 180px;
+}
+.objInfo {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+.gridColTypeCheck, td.gridColTypeCheck {
+  white-space: nowrap;
+  overflow: visible;
+  width: 20px;
+  padding-left: 1px;
+  padding-right: 1px;
+}
+.gridColTypeIcon, td.gridColTypeIcon {
+  width: 17px;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.gridColTypeIconEdit, td.gridColTypeIconEdit {
+  width: 17px;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.gridColTypeIcon-3, td.gridColTypeIcon-3 {
+  /*
+  width: 49px;
+  */
+  white-space: nowrap;
+  overflow: visible;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.gridColTypeIconEdit-3, td.gridColTypeIconEdit-3 {
+  /*
+  width: 49px;
+  */
+  white-space: nowrap;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+.gridColTypeDate, td.gridColTypeDate {
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 15.5em;
+}
+.gridColTypeNormal, td.gridColTypeNormal {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gridColTypeWide, .gridColTypeWide {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 25%;
+}
+.gridColTypeNarrow, td.gridColTypeNarrow {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 15em;
+}
+
+.opFieldGroupName {
+  text-align: left;
+  text-decoration: none;
+  font-size: 9px;
+}
+.opFieldGroup {
+  table-layout: fixed;
+  border-collapse: separate;
+  width: 100%;
+  max-width: 100%;
+  border-style: solid;
+  border-width: 1px;
+  margin-bottom: 2px;
+  empty-cells: hide;
+}
+.fieldGroupName {
+  text-align: left;
+  text-decoration: none;
+  font-size: 9px;
+  border-style: solid;
+  border-width: 1px 0px 0px 0px;
+}
+.fieldGroup {
+  table-layout: fixed;
+  border-spacing: 1px;
+  /*
+  border-collapse: collapse;
+  */
+  width: 99%;
+  /*
+  max-width: 100%;
+  */
+  border-style: solid;
+  border-width: 0px;
+  /*
+  margin-bottom: 2px;
+  */
+  empty-cells: hide;
+}
+.fieldGroup td {
+  padding: 0px 4px 0px 1px;
+}
+.label {
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: top;
+  padding-top: 0.15em;
+  width: 12em;
+  overflow: hidden;
+}
+.nw {
+  white-space: nowrap;
+}
+
+.field {
+  margin:0;
+  padding:0;
+  white-space: nowrap;
+  width: 100%;
+  vertical-align: top;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fieldSpanned {
+  white-space: nowrap;
+  width: 100%;
+  vertical-align: middle;
+  overflow: auto;
+  text-overflow: ellipsis;
+}
+.fieldSpannedFull {
+  padding-left:1px;
+  white-space: normal;
+  width: 100%;
+  font-weight: normal;
+  vertical-align: middle;
+  overflow: visible;
+}
+textarea {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px;
+  margin: 0px -1px 0px 0px;
+  font-weight: bold;
+  width: 100%;
+  word-wrap: normal;
+}
+textarea.stringLocked {
+  width: 100%;
+  margin: 0px -1px 0px 0px;
+  white-space: nowrap;
+  word-wrap: normal;
+}
+textarea.multiString {
+  width: 100%;
+  margin: 0px -1px 0px 0px;
+  word-wrap: normal;
+}
+textarea.multiStringLocked {
+  width: 100%;
+  margin: 0px -1px 0px 0px;
+  word-wrap: normal;
+}
+.valuePicture {
+  text-decoration: none;
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.valueMulti {
+  text-decoration: none;
+  vertical-align: middle;
+  overflow: auto;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.valueString {
+  text-decoration: none;
+  vertical-align: middle;
+  overflow: auto;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.valueL, .valueLG {
+  border-style: solid;
+  padding: 0px 1px 0px 1px;
+  text-align: left;
+  text-decoration: none;
+  vertical-align: middle;
+  /*
+  white-space: nowrap;
+  */
+}
+.valueL {
+  border-width: 1px;
+  margin-right: -1px;
+  font-weight: bold;
+  overflow: hidden;
+}
+.valueLG {
+  border-width: 0px;
+  margin-right: 0px;
+  overflow: visible;
+}
+.valueLLocked {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px 1px 0px 1px;
+  margin-right: -1px;
+  text-align: left;
+  text-decoration: none;
+  font-weight: bold;
+  vertical-align: middle;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.valueR, .valueRG {
+  border-style: solid;
+  padding: 0px 1px 0px 1px;
+  text-align: right;
+  text-decoration: none;
+  vertical-align: middle;
+  overflow: hidden;
+  /*
+  white-space: nowrap;
+  */
+}
+.valueR {
+  border-width: 1px;
+  margin-right: -1px;
+  font-weight: bold;
+}
+.valueRG {
+  border-width: 0px;
+  margin-right: 0px;
+}
+.valueRLocked {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px 1px 0px 1px;
+  margin-right: -1px;
+  text-align: right;
+  text-decoration: none;
+  font-weight: bold;
+  vertical-align: middle;
+  width: 100%;
+  overflow: hidden;
+}
+input.valueL, input.valueR {
+  width: 100%;
+  padding: 1px 0px 1px 0px;
+  /*
+  margin: 0px;
+  */
+  font-size: 1em; /* IE bug - see http://www.aplus.co.yu/css/tip-input-sizing-in-ie/ */
+}
+input.valueLG, input.valueRG {
+  padding: 0px 1px 0px 0px;
+  margin: 0px;
+  vertical-align: top;
+  font-size: 1em; /* IE bug - see http://www.aplus.co.yu/css/tip-input-sizing-in-ie/ */
+}
+select.valueL, select.valueR {
+  width: 100%;
+  padding: 0px;
+  margin-bottom: 1px;
+}
+.valueEmpty {
+}
+.addon {
+  vertical-align: baseline;
+  padding-left: 4px;
+  padding-right: 2px;
+  padding-top: 4px;
+  text-align: left;
+  text-decoration: none;
+  width: 40px;
+  white-space: nowrap;
+  overflow: visible;
+}
+.gap {
+  vertical-align: baseline;
+  padding-left: 4px;
+  padding-right: 2px;
+  padding-top: 4px;
+  text-align: left;
+  text-decoration: none;
+  width: 18px;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+form {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  margin-left: 0px;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 2px;
+  padding-bottom: 0px;
+}
+.menuOpPanelActions {
+  width: 240px;
+}
+.menuOpPanel {
+  border-right: solid 1px #FFFFFF;
+  border-left:  solid 1px #FFFFFF;
+  padding: 4px 0px 0px 2px;
+}
+.menuOpPanel td {
+  white-space:nowrap;
+}
+.menuOpPanelMenus {
+  padding-bottom: 3px;
+}
+.menuOpPanelInfo{
+  width: 50px;
+  padding-right:5px;
+  text-align:right;
+  font-size: 9px;
+  font-weight: bold;
+  color:#888888;
+}
+.filterTable {
+  width: 100%;
+  background-color: #FFFFFF;
+  border-right: solid 1px #FFFFFF;
+  border-left:  solid 1px #FFFFFF;
+  padding-bottom: 2px;
+}
+.filterTable tr td {
+  font-size: 9px;
+  white-space: nowrap;
+}
+.filterInput {
+  width: 239px;
+}
+.filterButtons {
+}
+.lookupTable {
+  position:relative;
+  width: 100%;
+  border-top: 1px solid #CCCCCC;
+}
+.lookupTable tr td {
+  white-space: nowrap;
+}
+.lookupInput {
+  width: 153px;
+}
+.gridNavigation {
+  width: 100%;
+  text-align: left;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid #CCCCCC;
+}
+.gridSplit {
+  table-layout: auto;
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 0px;
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+}
+.gridSplit tr td {
+  border-style: solid;
+  border-width: 0px;
+  margin: 0px;
+  padding: 0px;
+}
+.popUp {
+  border-style: ridge;
+  border-width: 2px;
+  padding: 5px;
+  overflow: visible; /*required by Netscape/Mozilla*/
+  position: absolute;
+}
+.popUpFrame {
+  border-style: none;
+  border-width: 0px;
+  overflow: auto; /*required by Netscape/Mozilla*/
+  position: absolute;
+}
+.popUpTable {
+  width: 390px;
+  border-collapse: collapse;
+}
+.fieldindex {
+  width: 30px;
+}
+.fieldselection {
+  width: 50px;
+}
+.fieldvalue {
+  width: 300px;
+}
+.popUpButton, .popUpButtonhover {
+  cursor: pointer;
+}
+.qualifierPanel {
+  border-style: solid solid solid solid;
+  border-width: 1px;
+  width: 100%;
+  padding-left: 2px;
+  padding-right: 2px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  overflow: hidden; /*required by Netscape/Mozilla*/
+  position: relative;
+  z-index: 20;
+}
+.qualifierText {
+  text-align: left;
+  text-decoration: none;
+  font-size: smaller;
+}
+.qualifier {
+  border-style: solid;
+  border-width: 1px;
+  padding: 0px 1px 0px 1px;
+  text-align: left;
+  text-decoration: none;
+  font-weight: bold;
+  vertical-align: middle;
+  overflow: visible;
+  white-space: nowrap;
+  width: 50%;
+}
+
+.dragable:hover {
+  cursor: pointer;
+}
+.divImgPopUp {
+  border-style: ridge;
+  border-width: 1px;
+  padding: 0px;
+  margin: 0px;
+  overflow: visible; /*required by Netscape/Mozilla*/
+  position: absolute;
+  z-index: 200;
+}
+.popUpImg {
+  border-style: none;
+  border-width: 0px;
+  padding: 0px;
+  margin: 0px;
+}
+.picture {
+  border: none black 0px;
+  overflow: hidden;
+  height: 100%;
+}
+.hh1 {
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  padding: 0px;
+}
+.hh2 {
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 2px;
+  padding: 0px;
+}
+.normal {
+  margin-top: 2px;
+  margin-bottom: 2px;
+  padding: 0px;
+}
+
+.gridMenuIndicator:hover {
+  cursor: pointer;
+  background-image: url('../images/menu_down.gif');
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+.gridSpacerTop {
+  width:100%;
+  margin-top:10px;
+}
+.gridSpacerBottom {
+  width:100%;
+  margin-top:20px;
+}
+.gridCloser {
+  vertical-align:top;
+}
+.imgCloser {
+  cursor:pointer;
+  margin-top: 6px;
+}
+.imgCloser:hover {
+  background-color:#EEEEEE;
+}
+.gridMenu {
+  float:right:
+}
+.gridMenu #nav li {
+  padding-top:0px;
+  margin-top:1px;
+  padding-left:0px;
+  padding-right:0px;
+  margin-left:1px;
+}
+.gridMenu #nav li:hover, .gridMenu #nav li.sfhover {
+	z-index: 100000;
+}
+.gridMenu #nav li ul {
+  margin-top:0px;
+	margin-left:-1px;
+}
+.gridMenu #nav li li {
+  padding-top:1px;
+  padding-right:4px;
+  padding-bottom:1px;
+  padding-left:0px;
+	margin-top: 1px;
+}
+.gridMenu #nav ul li ul {
+  margin-top:0px;
+	margin-left:50px;
+}
+
+.autocompleterMenu {
+  position:absolute;
+}
+.autocompleterMenu #nav li {
+  padding-top:0px;
+  margin-top:1px;
+  padding-left:0px;
+  padding-right:0px;
+  margin-left:1px;
+}
+.autocompleterMenu #nav li:hover, .autocompleterMenu #nav li.sfhover {
+	border-left: none 1px #CCCCCC;
+	z-index: 100000;
+}
+.autocompleterMenu #nav li ul {
+	border-top: solid 1px #AAAAAA;
+  background-color: #FFFFFF;
+  margin-top:0px;
+	margin-left:-1px;
+}
+.autocompleterMenu #nav li li {
+  padding-top:1px;
+  padding-right:4px;
+  padding-bottom:1px;
+  padding-left:0px;
+	margin-top: 1px;
+}
+.autocompleterMenu #nav ul li ul {
+  margin-top:-1em;
+	margin-left:50px;
+}
+LI .selected a span {
+  background-image: url('../images/checkmark.gif');
+  background-repeat: no-repeat;
+  background-position: left;
+}
+.autocompleterInput {
+  padding-right:18px !important; /*moz */
+  padding-right:0px; /*ie*/
+}
+INPUT.valueAC {
+  padding-left:18px;
+  overflow: hidden;
+}
+.lookupButtons .autocomplete {
+  margin-top:0.8em;
+}
+.autocomplete {
+  background-color:white;
+  margin:0px;
+  padding:0px;
+  white-space: nowrap;
+  position: absolute;
+  z-index: 500;
+
+}
+div.autocomplete ul {
+  border:1px solid #888;
+  list-style-type:none;
+  margin:0px;
+  padding:0px;
+}
+div.autocomplete ul li.selected {
+  background-color: #ffb;
+  padding-left:4px;
+  padding-top:2px;
+}
+div.autocomplete ul li {
+  list-style-type:none;
+  display:block;
+  margin:0px 0px 0px 2px;
+  padding:2px 2px 2px 4px;
+  cursor:pointer;
+}
+/*------------------------------------------------------------------------------
+|  simple layout
++ ----------------------------------------------------------------------------*/
+#CENTER{
+  width:100%;
+  margin-right:-30px;
+  position:relative;
+  z-index:1000;
+}
+/*
+.inspTabPanel{
+  padding-bottom:4px;
+}
+.inspTabPanel a{
+  padding:4px 3px 4px 3px;
+  border:solid 1px #CCCCCC;
+  background-color:#DDDDDD;
+  font-size:8pt;
+  font-weight:bold;
+}
+.inspTabPanel a:hover{
+  background-color:#FFFFFF;
+  position:relative;
+  z-index:500;
+}
+.inspTabPanel .selected{
+  background-color:#FFFFFF;
+  padding-bottom:5px;
+  border-bottom:none 1px #FFFFFF;
+}
+*/
+.inspTabPanel{
+  padding-bottom:4px;
+}
+.inspTabPanel a{
+  color:#888888;
+  padding:4px 3px 4px 3px;
+  border:solid 1px #CCCCCC;
+  font-size:8pt;
+  font-weight:bold;
+  background-image: url('../images/ghbg.png');
+  background-repeat: repeat-x;
+  background-position: left bottom;
+}
+.inspTabPanel a:hover{
+  color:black;
+  background-color:#FFFFFF;
+  position:relative;
+  z-index:500;
+}
+.inspTabPanel .selected{
+  color:#444444;
+  background-image: url('../images/ghbgs.png');
+  background-repeat: repeat-x;
+  background-position: left top;
+  background-color:#FFFFFF;
+  padding-bottom:5px;
+  border-bottom:none 1px #FFFFFF;
+}
+
+.inspContent{
+  width:100%;
+}
+.inspContent .selected{
+  display:block;
+  border:solid 1px #CCCCCC;
+  padding:2px;
+}
+.inspContent .hidden{
+  display:none;
+}
+/*
+.gTabPanel{
+  margin-top:25px;
+  padding-bottom:4px;
+}
+.gTabPanel a{
+  padding:4px 3px 4px 3px;
+  border:solid 1px #CCCCCC;
+  background-color:#DDDDDD;
+  font-size:8pt;
+  font-weight:bold;
+}
+.gTabPanel a:hover{
+  background-color:#FFFFFF;
+  position:relative;
+  z-index:500;
+}
+.gTabPanel .selected{
+  color: black;
+  background-color:#FFFFFF;
+  padding-bottom:5px;
+  border-bottom:none 1px #FFFFFF;
+}
+*/
+.gTabPanel{
+  margin-top:25px;
+  padding-bottom:4px;
+}
+.gTabPanel a{
+  color:#888888;
+  padding:4px 3px 4px 3px;
+  border:solid 1px #CCCCCC;
+  font-size:8pt;
+  font-weight:bold;
+  background-image: url('../images/ghbg.png');
+  background-repeat: repeat-x;
+  background-position: left bottom;
+}
+.gTabPanel a:hover{
+  color:black;
+  background-color:#FFFFFF;
+  position:relative;
+  z-index:500;
+}
+.gTabPanel .selected{
+  color:#444444;
+  background-image: url('../images/ghbgs.png');
+  background-repeat: repeat-x;
+  background-position: left top;
+  background-color:#FFFFFF;
+  padding-bottom:5px;
+  border-bottom:none 1px #FFFFFF;
+}
+.gTabPanel .hidden{
+  display:none;
+}
+.gContent{
+  border-top:   solid 1px #CCCCCC;
+  border-right: solid 1px #FFFFFF;
+  border-bottom:solid 1px #CCCCCC;
+  border-left:  solid 0px #FFFFFF;
+  padding:0px 0px 2px 0px;
+}
