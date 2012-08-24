@@ -1,11 +1,11 @@
-ant/build/
-core/build/
-distribution/
-jre-1.5/
-jre-1.6/
-portal/build/
-security/build/
-source-archive/
-test-core/build/
-tomcat/build/
+/ant/build/
+/core/build/
+/distribution/
+/jre-1.5/
+/jre-1.6/
+/portal/build/
+/security/build/
+/source-archive/
+/test-core/build/
+/tomcat/build/
 
